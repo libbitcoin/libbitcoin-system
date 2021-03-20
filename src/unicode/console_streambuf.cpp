@@ -112,7 +112,7 @@ std::wstreambuf::int_type console_streambuf::underflow()
         traits_type::eof() : traits_type::to_int_type(*gptr());
 }
 #else
-std::streamsize console_streambuf::xsgetn(wchar_t*, std::streamsize size)
+std::streamsize console_streambuf::xsgetn(wchar_t*, std::streamsize)
 {
     return 0;
 }

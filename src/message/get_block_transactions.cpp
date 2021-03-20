@@ -113,7 +113,7 @@ bool get_block_transactions::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool get_block_transactions::from_data(uint32_t version,
+bool get_block_transactions::from_data(uint32_t /* version */,
     reader& source)
 {
     reset();
@@ -155,7 +155,7 @@ void get_block_transactions::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void get_block_transactions::to_data(uint32_t version,
+void get_block_transactions::to_data(uint32_t /* version */,
     writer& sink) const
 {
     sink.write_hash(block_hash_);

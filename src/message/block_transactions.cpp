@@ -166,7 +166,7 @@ void block_transactions::to_data(uint32_t /* version */, writer& sink) const
         element.to_data(sink);
 }
 
-size_t block_transactions::serialized_size(uint32_t version) const
+size_t block_transactions::serialized_size(uint32_t /* version */) const
 {
     auto size = hash_size + message::variable_uint_size(transactions_.size());
 

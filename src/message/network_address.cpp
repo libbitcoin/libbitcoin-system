@@ -110,7 +110,7 @@ bool network_address::from_data(uint32_t version,
     return from_data(version, source, with_timestamp);
 }
 
-bool network_address::from_data(uint32_t version, reader& source,
+bool network_address::from_data(uint32_t /* version */, reader& source,
     bool with_timestamp)
 {
     reset();
@@ -150,7 +150,7 @@ void network_address::to_data(uint32_t version,
     to_data(version, sink, with_timestamp);
 }
 
-void network_address::to_data(uint32_t version,
+void network_address::to_data(uint32_t /* version */,
     writer& sink, bool with_timestamp) const
 {
     if (with_timestamp)
@@ -167,7 +167,7 @@ size_t network_address::serialized_size(uint32_t version,
     return network_address::satoshi_fixed_size(version, with_timestamp);
 }
 
-size_t network_address::satoshi_fixed_size(uint32_t version,
+size_t network_address::satoshi_fixed_size(uint32_t /* version */,
     bool with_timestamp)
 {
     size_t result = 26;
