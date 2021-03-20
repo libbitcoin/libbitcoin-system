@@ -243,9 +243,11 @@ std::string to_utf8(const std::wstring& wide)
 size_t to_utf8(char out[], size_t out_bytes, const wchar_t in[],
     size_t in_chars)
 {
-    BITCOIN_ASSERT(in != nullptr);
-    BITCOIN_ASSERT(out != nullptr);
-    BITCOIN_ASSERT(out_bytes >= utf8_max_character_size * in_chars);
+    if (in == nullptr || out == nullptr)
+        throw std::ios_base::failure("null pointer");
+
+    if (out_bytes < utf8_max_character_size * in_chars)
+        throw std::ios_base::failure("insufficient output buffer");
 
     if (in_chars == 0)
         return 0;
@@ -320,7 +322,8 @@ static bool is_utf8_character_sequence(const char sequence[], uint8_t bytes)
 // Determine if the text is terminated by a valid utf8 character.
 static bool is_terminal_utf8_character(const char text[], size_t size)
 {
-    BITCOIN_ASSERT(text != nullptr);
+    if (text == nullptr)
+        throw std::ios_base::failure("null pointer");
 
     // Walk back up to the max length of a utf8 character.
     for (uint8_t length = 1; length <= utf8_max_character_size &&
@@ -341,7 +344,8 @@ static bool is_terminal_utf8_character(const char text[], size_t size)
 // returned offset follows the last byte of a utf8 terminal char if it exists.
 static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 {
-    BITCOIN_ASSERT(text != nullptr);
+    if (text == nullptr)
+        throw std::ios_base::failure("null pointer");
 
     // Walk back up to the max length of a utf8 character.
     for (uint8_t unread = 0; unread < utf8_max_character_size &&
@@ -359,9 +363,11 @@ static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 size_t to_utf16(wchar_t out[], size_t out_chars, const char in[],
     size_t in_bytes, uint8_t& truncated)
 {
-    BITCOIN_ASSERT(in != nullptr);
-    BITCOIN_ASSERT(out != nullptr);
-    BITCOIN_ASSERT(out_chars >= in_bytes);
+    if (in == nullptr || out == nullptr)
+        throw std::ios_base::failure("null pointer");
+
+    if (out_chars < in_bytes)
+        throw std::ios_base::failure("insufficient output buffer");
 
     // Calculate a character break offset of 0..4 bytes.
     truncated = offset_to_terminal_utf8_character(in, in_bytes);
