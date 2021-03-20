@@ -514,3 +514,7 @@ void printer::settings(std::ostream& output)
 
     output << std::endl << setting_table;
 }
+
+printer::~printer()
+{
+}

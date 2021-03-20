@@ -59,7 +59,7 @@ sodium::operator data_slice() const
     return value_;
 }
 
-sodium::operator const bool() const
+sodium::operator bool() const
 {
     return value_ != null_hash;
 }

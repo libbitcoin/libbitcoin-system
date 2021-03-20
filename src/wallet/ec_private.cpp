@@ -147,7 +147,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ec_private::operator const bool() const
+ec_private::operator bool() const
 {
     return valid_;
 }
@@ -186,22 +186,22 @@ const ec_secret& ec_private::secret() const
     return secret_;
 }
 
-const uint16_t ec_private::version() const
+uint16_t ec_private::version() const
 {
     return version_;
 }
 
-const uint8_t ec_private::payment_version() const
+uint8_t ec_private::payment_version() const
 {
     return to_address_prefix(version_);
 }
 
-const uint8_t ec_private::wif_version() const
+uint8_t ec_private::wif_version() const
 {
     return to_wif_prefix(version_);
 }
 
-const bool ec_private::compressed() const
+bool ec_private::compressed() const
 {
     return compress_;
 }

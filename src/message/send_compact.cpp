@@ -56,7 +56,7 @@ send_compact send_compact::factory_from_data(uint32_t version,
     return instance;
 }
 
-size_t send_compact::satoshi_fixed_size(uint32_t version)
+size_t send_compact::satoshi_fixed_size(uint32_t /* version */)
 {
     return 9;
 }
@@ -149,7 +149,7 @@ void send_compact::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void send_compact::to_data(uint32_t version,
+void send_compact::to_data(uint32_t /* version */,
     writer& sink) const
 {
     sink.write_byte(static_cast<uint8_t>(high_bandwidth_mode_));

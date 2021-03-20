@@ -215,7 +215,7 @@ stealth_address stealth_address::from_stealth(const binary& filter,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-stealth_address::operator const bool() const
+stealth_address::operator bool() const
 {
     return valid_;
 }

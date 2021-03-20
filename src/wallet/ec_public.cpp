@@ -125,7 +125,7 @@ ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ec_public::operator const bool() const
+ec_public::operator bool() const
 {
     return valid_;
 }
@@ -157,7 +157,7 @@ const ec_compressed& ec_public::point() const
     return point_;
 }
 
-const bool ec_public::compressed() const
+bool ec_public::compressed() const
 {
     return compress_;
 }

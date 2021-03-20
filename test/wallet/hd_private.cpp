@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__short_seed__expected)
     const auto m0h1 = m0h.derive_private(1);
     const auto m0h12h = m0h1.derive_private(2 + hd_first_hardened_key);
     const auto m0h12h2 = m0h12h.derive_private(2);
-    const auto m0h12h2x = m0h12h2.derive_private(1000000000);
+    ////const auto m0h12h2x = m0h12h2.derive_private(1000000000);
 
     hd_public m_pub = m;
     const auto m0h_pub = m.derive_public(hd_first_hardened_key);
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
     const auto m0xH = m0.derive_private(2147483647 + hd_first_hardened_key);
     const auto m0xH1 = m0xH.derive_private(1);
     const auto m0xH1yH = m0xH1.derive_private(2147483646 + hd_first_hardened_key);
-    const auto m0xH1yH2 = m0xH1yH.derive_private(2);
+    ////const auto m0xH1yH2 = m0xH1yH.derive_private(2);
 
     hd_public m_pub = m;
     const auto m0_pub = m.derive_public(0);

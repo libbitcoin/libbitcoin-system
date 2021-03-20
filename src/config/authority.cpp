@@ -163,7 +163,7 @@ authority::authority(const asio::endpoint& endpoint)
 {
 }
 
-authority::operator const bool() const
+authority::operator bool() const
 {
     return port_ != 0;
 }

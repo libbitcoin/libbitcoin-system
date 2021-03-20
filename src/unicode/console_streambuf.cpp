@@ -43,9 +43,9 @@ namespace libbitcoin {
 // This class/mathod is a no-op on non-windows platforms.
 // When working in Windows console set font to "Lucida Console".
 // This is the factory method to privately instantiate a singleton class.
+#ifdef _MSC_VER
 void console_streambuf::initialize(size_t size)
 {
-#ifdef _MSC_VER
     // Set the console to operate in UTF-8 for this process.
     if (SetConsoleCP(CP_UTF8) == FALSE)
         throw std::ios_base::failure("Failed to set console to utf8.");
@@ -57,19 +57,25 @@ void console_streambuf::initialize(size_t size)
         static console_streambuf buffer(*std::wcin.rdbuf(), size);
         std::wcin.rdbuf(&buffer);
     }
-#endif
 }
-
-console_streambuf::console_streambuf(
-    const std::wstreambuf& stream_buffer, size_t size)
-#ifdef _MSC_VER
-  : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
-    std::wstreambuf(stream_buffer)
 #else
-  : buffer_size_(0), buffer_(nullptr)
-#endif
+void console_streambuf::initialize(size_t)
 {
 }
+#endif
+
+#ifdef _MSC_VER
+console_streambuf::console_streambuf(
+    const std::wstreambuf& stream_buffer, size_t size)
+  : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
+    std::wstreambuf(stream_buffer)
+{
+}
+#else
+console_streambuf::console_streambuf(const std::wstreambuf&, size_t)
+{
+}
+#endif
 
 console_streambuf::~console_streambuf()
 {
@@ -78,12 +84,10 @@ console_streambuf::~console_streambuf()
 #endif
 }
 
+#ifdef _MSC_VER
 std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     std::streamsize size)
 {
-    std::streamsize read_size = 0;
-
-#ifdef _MSC_VER
     DWORD read_bytes;
     const auto result = ReadConsoleW(get_input_handle(), buffer,
         static_cast<DWORD>(size), &read_bytes, nullptr);
@@ -91,15 +95,11 @@ std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     if (result == FALSE)
         throw std::iostream::failure("Failed to read from console.");
 
-    read_size = static_cast<std::streamsize>(read_bytes);
-#endif
-
-    return read_size;
+    return static_cast<std::streamsize>(read_bytes);
 }
 
 std::wstreambuf::int_type console_streambuf::underflow()
 {
-#ifdef _MSC_VER
     if (gptr() == nullptr || gptr() >= egptr())
     {
         const auto length = xsgetn(buffer_, buffer_size_);
@@ -107,11 +107,19 @@ std::wstreambuf::int_type console_streambuf::underflow()
             setg(buffer_, buffer_, &buffer_[length]);
     }
 
-    if (gptr() == nullptr || gptr() >= egptr())
-        return traits_type::eof();
-#endif
+    return (gptr() == nullptr || gptr() >= egptr()) ?
+        traits_type::eof() : traits_type::to_int_type(*gptr());
+}
+#else
+std::streamsize console_streambuf::xsgetn(wchar_t*, std::streamsize)
+{
+    return 0;
+}
 
+std::wstreambuf::int_type console_streambuf::underflow()
+{
     return traits_type::to_int_type(*gptr());
 }
+#endif
 
 } // namespace libbitcoin

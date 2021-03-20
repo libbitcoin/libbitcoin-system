@@ -52,7 +52,7 @@ pong pong::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-size_t pong::satoshi_fixed_size(uint32_t version)
+size_t pong::satoshi_fixed_size(uint32_t /* version */)
 {
     return sizeof(nonce_);
 }
@@ -84,7 +84,7 @@ bool pong::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool pong::from_data(uint32_t version, reader& source)
+bool pong::from_data(uint32_t /* version */, reader& source)
 {
     reset();
 
@@ -115,7 +115,7 @@ void pong::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void pong::to_data(uint32_t version, writer& sink) const
+void pong::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_8_bytes_little_endian(nonce_);
 }

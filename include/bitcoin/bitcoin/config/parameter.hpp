@@ -78,6 +78,10 @@ private:
     };
 
 public:
+    /**
+     * Destructor.
+     */
+    virtual ~parameter();
 
     /**
      * Sentinel - the option is not a positional argument.

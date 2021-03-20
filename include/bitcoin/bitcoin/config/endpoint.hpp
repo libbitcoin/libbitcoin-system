@@ -94,7 +94,7 @@ public:
      * Getter.
      * @return True if the endpoint is initialized.
      */
-    operator const bool() const;
+    operator bool() const;
 
     /**
      * Getter.

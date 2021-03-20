@@ -154,7 +154,7 @@ BC_CONSTEXPR size_t testnet_bip34_freeze = 21111;
 // Regtest (arbitrary) frozen activation heights (frozen_activations).
 BC_CONSTEXPR size_t regtest_bip65_freeze = 1351;
 BC_CONSTEXPR size_t regtest_bip66_freeze = 1251;
-BC_CONSTEXPR size_t regtest_bip34_freeze = 0;
+BC_CONSTEXPR size_t regtest_bip34_freeze = 1;
 
 // Block 514 is the first testnet block after date-based activation.
 // Block 166832 is the first mainnet block after date-based activation.

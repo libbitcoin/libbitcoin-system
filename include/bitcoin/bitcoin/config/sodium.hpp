@@ -69,7 +69,7 @@ public:
      * Getter.
      * @return True if the key is initialized.
      */
-    operator const bool() const;
+    operator bool() const;
 
     /**
      * Overload cast to internal type.

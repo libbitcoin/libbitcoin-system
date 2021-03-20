@@ -53,7 +53,7 @@ public:
         const bitcoin_uri& from);
 
     /// Test whether the URI has been initialized.
-    operator const bool() const;
+    operator bool() const;
 
     /// Get the serialized URI representation.
     std::string encoded() const;

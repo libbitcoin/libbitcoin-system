@@ -59,7 +59,7 @@ bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-bitcoin_uri::operator const bool() const
+bitcoin_uri::operator bool() const
 {
     // An uninitialized URI returns false.
     return !address_.empty() || !query_.empty() || !scheme_.empty();
@@ -220,7 +220,7 @@ bool bitcoin_uri::set_path(const std::string& path)
     return address_.empty() && set_address(path);
 }
 
-bool bitcoin_uri::set_fragment(const std::string& fragment)
+bool bitcoin_uri::set_fragment(const std::string&)
 {
     return false;
 }

@@ -67,7 +67,7 @@ public:
         const stealth_address& of);
 
     /// Cast operators.
-    operator const bool() const;
+    operator bool() const;
     operator const data_chunk() const;
 
     /// Serializer.

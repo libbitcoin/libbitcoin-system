@@ -84,7 +84,7 @@ public:
         const payment_address& of);
 
     /// Cast operators.
-    operator const bool() const;
+    operator bool() const;
     operator const short_hash&() const;
 
     /// Serializer.

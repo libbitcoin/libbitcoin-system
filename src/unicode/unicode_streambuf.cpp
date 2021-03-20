@@ -116,7 +116,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Handle write failure as an EOF.
-        if (written != chars)
+        if (written < 0 || static_cast<uint64_t>(written) != chars)
             return traits_type::eof();
     }
 
@@ -125,14 +125,14 @@ std::streambuf::int_type unicode_streambuf::overflow(
 
     // Reset the pptr to the buffer start, leave pbase and epptr.
     // We could use just pbump for this if it wasn't limited to 'int' width.
-    setp(narrow_, &narrow_[narrow_size_ - 1]);
+    setp(narrow_, &narrow_[narrow_size_ - 1u]);
 
     // Reset pptr just after the fractional character.
     pbump(unwritten);
 
     // Return the overflow byte or EOF sentinel.
     return character;
-};
+}
 
 // Flush our output sequence.
 int unicode_streambuf::sync()

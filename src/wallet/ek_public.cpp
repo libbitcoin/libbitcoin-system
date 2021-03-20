@@ -64,7 +64,7 @@ ek_public ek_public::from_string(const std::string& encoded)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_public::operator const bool() const
+ek_public::operator bool() const
 {
     return valid_;
 }

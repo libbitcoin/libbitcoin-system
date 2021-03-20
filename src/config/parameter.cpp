@@ -79,3 +79,7 @@ unsigned parameter::arguments_limit(int position,
 
     return arguments[position].second;
 }
+
+parameter::~parameter()
+{
+}
