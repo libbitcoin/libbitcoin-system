@@ -368,7 +368,7 @@ bool verify_signature(data_slice point, const hash_digest& hash,
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash)
 {
-    int recovery_id;
+    int recovery_id = 0;
     const auto context = signing.context();
     secp256k1_ecdsa_recoverable_signature signature;
 

@@ -133,17 +133,18 @@ inline bool operation::operator!=(const operation& other) const
 //-----------------------------------------------------------------------------
 
 // TODO: consolidate with message implementation into common math utility.
-static size_t variable_uint_size(uint64_t value)
-{
-    if (value < 0xfd)
-        return 1;
-    else if (value <= 0xffff)
-        return 3;
-    else if (value <= 0xffffffff)
-        return 5;
-    else
-        return 9;
-}
+// Unused local function.
+////static size_t variable_uint_size(uint64_t value)
+////{
+////    if (value < 0xfd)
+////        return 1;
+////    else if (value <= 0xffff)
+////        return 3;
+////    else if (value <= 0xffffffff)
+////        return 5;
+////    else
+////        return 9;
+////}
 
 inline size_t operation::serialized_size() const
 {

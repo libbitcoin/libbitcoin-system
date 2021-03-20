@@ -348,21 +348,29 @@ std::wstring to_utf16(const std::string& narrow)
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
+#ifdef _MSC_VER
 static void set_utf8_stdio(FILE* file)
 {
-#ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
         throw std::runtime_error("Could not set STDIO to utf8 mode.");
-#endif
 }
+#else
+static void set_utf8_stdio(FILE* file)
+{
+}
+#endif
 
+#ifdef _MSC_VER
 static void set_binary_stdio(FILE* file)
 {
-#ifdef _MSC_VER
     if (_setmode(_fileno(file), _O_BINARY) == -1)
         throw std::runtime_error("Could not set STDIO to binary mode.");
-#endif
 }
+#else
+static void set_binary_stdio(FILE*)
+{
+}
+#endif
 
 // Set stdio to use UTF8 translation on Windows.
 void set_utf8_stdio()

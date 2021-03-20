@@ -43,9 +43,9 @@ namespace libbitcoin {
 // This class/mathod is a no-op on non-windows platforms.
 // When working in Windows console set font to "Lucida Console".
 // This is the factory method to privately instantiate a singleton class.
+#ifdef _MSC_VER
 void console_streambuf::initialize(size_t size)
 {
-#ifdef _MSC_VER
     // Set the console to operate in UTF-8 for this process.
     if (SetConsoleCP(CP_UTF8) == FALSE)
         throw std::ios_base::failure("Failed to set console to utf8.");
@@ -57,19 +57,26 @@ void console_streambuf::initialize(size_t size)
         static console_streambuf buffer(*std::wcin.rdbuf(), size);
         std::wcin.rdbuf(&buffer);
     }
-#endif
 }
-
-console_streambuf::console_streambuf(
-    const std::wstreambuf& stream_buffer, size_t size)
-#ifdef _MSC_VER
-  : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
-    std::wstreambuf(stream_buffer)
 #else
-  : buffer_size_(0), buffer_(nullptr)
-#endif
+void console_streambuf::initialize(size_t)
 {
 }
+#endif
+
+#ifdef _MSC_VER
+console_streambuf::console_streambuf(
+    const std::wstreambuf& stream_buffer, size_t size)
+  : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
+    std::wstreambuf(stream_buffer)
+{
+}
+#else
+console_streambuf::console_streambuf(const std::wstreambuf&, size_t)
+  : buffer_size_(0), buffer_(nullptr)
+{
+}
+#endif
 
 console_streambuf::~console_streambuf()
 {

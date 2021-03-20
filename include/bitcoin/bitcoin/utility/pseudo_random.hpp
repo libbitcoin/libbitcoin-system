@@ -41,7 +41,7 @@ class BC_API pseudo_random
         std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
         auto& twister = pseudo_random::get_twister();
 
-        const auto fill = [&distribution, &twister](uint8_t byte)
+        const auto fill = [&distribution, &twister](uint8_t)
         {
             return static_cast<uint8_t>(distribution(twister));
         };

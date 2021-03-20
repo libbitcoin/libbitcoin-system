@@ -224,7 +224,7 @@ bool alert_payload::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert_payload::from_data(uint32_t version, reader& source)
+bool alert_payload::from_data(uint32_t /* version */, reader& source)
 {
     reset();
 

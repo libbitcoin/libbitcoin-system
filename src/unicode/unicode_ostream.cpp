@@ -23,16 +23,19 @@
 #include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
 
 namespace libbitcoin {
-
+    
+#ifdef _MSC_VER
 unicode_ostream::unicode_ostream(std::ostream& narrow_stream,
     std::wostream& wide_stream, size_t size)
-#ifdef _MSC_VER
   : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), size))
-#else
-  : std::ostream(narrow_stream.rdbuf())
-#endif
 {
 }
+#else
+unicode_ostream::unicode_ostream(std::ostream&, std::wostream&, size_t)
+  : std::ostream(narrow_stream.rdbuf())
+{
+}
+#endif
 
 unicode_ostream::~unicode_ostream()
 {
