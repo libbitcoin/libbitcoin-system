@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -25,13 +25,12 @@ Version: @PACKAGE_VERSION@
 #==============================================================================
 # Dependencies that publish package configuration.
 #------------------------------------------------------------------------------
-Requires: @icu_i18n_PKG@ @png_PKG@ @qrencode_PKG@ libsecp256k1 >= 0.1.0.19
 
 # Include directory and any other required compiler flags.
 #------------------------------------------------------------------------------
-Cflags: -I${includedir} @icu@ @png@ @qrencode@ @boost_CPPFLAGS@ @pthread_CPPFLAGS@
+Cflags: -I${includedir} @icu@
 
 # Lib directory, lib and any required that do not publish pkg-config.
 #------------------------------------------------------------------------------
-Libs: -L${libdir} -lbitcoin @boost_LDFLAGS@ @boost_chrono_LIBS@ @boost_date_time_LIBS@ @boost_filesystem_LIBS@ @boost_iostreams_LIBS@ @boost_locale_LIBS@ @boost_log_LIBS@ @boost_program_options_LIBS@ @boost_regex_LIBS@ @boost_system_LIBS@ @boost_thread_LIBS@ @pthread_LIBS@ @rt_LIBS@ @dl_LIBS@
+Libs: -L${libdir}
 

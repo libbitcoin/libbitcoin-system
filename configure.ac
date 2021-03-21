@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -13,7 +13,7 @@
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin], [3.6.0], [eric@voskuil.org])
+AC_INIT([libbitcoin-system], [3.7.0], [eric@voskuil.org])
 
 # Do compilation tests.
 AC_LANG(C++)
@@ -36,6 +36,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AM_PROG_AR
 
 # Initialize libtool.
+LT_PREREQ(2.4.2)
 LT_INIT
 
 # Determine C++ compiler to use.
@@ -58,6 +59,9 @@ PKG_PROG_PKG_CONFIG
 AS_IF([test -n "$PKG_CONFIG"], [],
     [AC_MSG_ERROR([pkg-config is required but was not found.])])
 
+AS_CASE([${enable_static}],
+    [yes], [AC_SUBST([PKG_CONFIG], ["$PKG_CONFIG --static"])],
+    [])
 
 # Declare environment variables that affect the build.
 #------------------------------------------------------------------------------
@@ -116,28 +120,6 @@ AC_ARG_WITH([icu],
 AC_MSG_RESULT([$with_icu])
 AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
 AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
-
-# Implement --with-png and output ${png}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--with-png option])
-AC_ARG_WITH([png],
-    AS_HELP_STRING([--with-png],
-        [Compile with Libpng support. @<:@default=no@:>@]),
-    [with_png=$withval],
-    [with_png=no])
-AC_MSG_RESULT([$with_png])
-AS_CASE([${with_png}], [yes], AC_SUBST([png], [-DWITH_PNG]))
-
-# Implement --with-qrencode and output ${qrencode}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--with-qrencode option])
-AC_ARG_WITH([qrencode],
-    AS_HELP_STRING([--with-qrencode],
-        [Compile with QREncode. @<:@default=no@:>@]),
-    [with_qrencode=$withval],
-    [with_qrencode=no])
-AC_MSG_RESULT([$with_qrencode])
-AS_CASE([${with_qrencode}], [yes], AC_SUBST([qrencode], [-DWITH_QRENCODE]))
 
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
@@ -277,8 +259,7 @@ AS_CASE([${with_icu}], [yes],
     [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 51.2],
         [icu_i18n_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "icu-i18n >= 51.2" 2>/dev/null`"
          icu_i18n_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "icu-i18n >= 51.2" 2>/dev/null`"],
-        [icu_i18n_INCLUDEDIR=""
-         icu_i18n_OTHER_CFLAGS=""])
+        [AC_MSG_ERROR([--with-icu specified but icu-i18n >= 51.2 was not found.])])
      AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 51.2'])
      AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
      AS_IF([test x${icu_i18n_INCLUDEDIR} != "x"],
@@ -309,65 +290,12 @@ AS_CASE([${host_os}],
 
 AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
-# Require png of at least version 1.6.37 and output ${png_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_png}], [yes],
-    [PKG_CHECK_MODULES([png], [libpng >= 1.6.37],
-        [png_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libpng >= 1.6.37" 2>/dev/null`"
-         png_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libpng >= 1.6.37" 2>/dev/null`"],
-        [png_INCLUDEDIR=""
-         png_OTHER_CFLAGS=""])
-     AC_SUBST([png_PKG], ['libpng >= 1.6.37'])
-     AC_SUBST([png_CPPFLAGS], [${png_CFLAGS}])
-     AS_IF([test x${png_INCLUDEDIR} != "x"],
-        [AC_SUBST([png_ISYS_CPPFLAGS], ["-isystem${png_INCLUDEDIR} ${png_OTHER_CFLAGS}"])],
-        [AC_SUBST([png_ISYS_CPPFLAGS], [${png_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([png_CPPFLAGS : ${png_CPPFLAGS}])
-     AC_MSG_NOTICE([png_ISYS_CPPFLAGS : ${png_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([png_OTHER_CFLAGS : ${png_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([png_INCLUDEDIR : ${png_INCLUDEDIR}])
-     AC_MSG_NOTICE([png_LIBS : ${png_LIBS}])],
-    [AC_SUBST([png_PKG], [])])
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([png_BUILD_CPPFLAGS], [${png_ISYS_CPPFLAGS}])],
-    [AC_SUBST([png_BUILD_CPPFLAGS], [${png_CPPFLAGS}])])
-
-AC_MSG_NOTICE([png_BUILD_CPPFLAGS : ${png_BUILD_CPPFLAGS}])
-
-# Require qrencode of at least version 4.1.1 and output ${qrencode_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_qrencode}], [yes],
-    [PKG_CHECK_MODULES([qrencode], [libqrencode >= 4.1.1],
-        [qrencode_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libqrencode >= 4.1.1" 2>/dev/null`"
-         qrencode_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libqrencode >= 4.1.1" 2>/dev/null`"],
-        [qrencode_INCLUDEDIR=""
-         qrencode_OTHER_CFLAGS=""])
-     AC_SUBST([qrencode_PKG], ['libqrencode >= 4.1.1'])
-     AC_SUBST([qrencode_CPPFLAGS], [${qrencode_CFLAGS}])
-     AS_IF([test x${qrencode_INCLUDEDIR} != "x"],
-        [AC_SUBST([qrencode_ISYS_CPPFLAGS], ["-isystem${qrencode_INCLUDEDIR} ${qrencode_OTHER_CFLAGS}"])],
-        [AC_SUBST([qrencode_ISYS_CPPFLAGS], [${qrencode_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([qrencode_CPPFLAGS : ${qrencode_CPPFLAGS}])
-     AC_MSG_NOTICE([qrencode_ISYS_CPPFLAGS : ${qrencode_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([qrencode_OTHER_CFLAGS : ${qrencode_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([qrencode_INCLUDEDIR : ${qrencode_INCLUDEDIR}])
-     AC_MSG_NOTICE([qrencode_LIBS : ${qrencode_LIBS}])],
-    [AC_SUBST([qrencode_PKG], [])])
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([qrencode_BUILD_CPPFLAGS], [${qrencode_ISYS_CPPFLAGS}])],
-    [AC_SUBST([qrencode_BUILD_CPPFLAGS], [${qrencode_CPPFLAGS}])])
-
-AC_MSG_NOTICE([qrencode_BUILD_CPPFLAGS : ${qrencode_BUILD_CPPFLAGS}])
-
 # Require secp256k1 of at least version 0.1.0.19 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.1.0.19],
     [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"
      secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.1.0.19" 2>/dev/null`"],
-    [secp256k1_INCLUDEDIR=""
-     secp256k1_OTHER_CFLAGS=""])
+    [AC_MSG_ERROR([libsecp256k1 >= 0.1.0.19 is required but was not found.])])
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.1.0.19'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
 AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],

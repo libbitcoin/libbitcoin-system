@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- |  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+ |  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |
@@ -230,7 +230,7 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc120.1.57.0.0\build\native\boost_unit_test_framework-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc120.1.57.0.0\build\native\boost_unit_test_framework-vc120.targets'))" />
   </Target>
   <ItemGroup>
-    <ProjectReference Include="..\libbitcoin\libbitcoin.vcxproj">
+    <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
   </ItemGroup>

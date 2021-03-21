@@ -1,39 +1,23 @@
 #!/bin/bash
 ###############################################################################
-#  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
-# Script to build and install libbitcoin.
+# Script to build and install libbitcoin-system.
 #
 # Script options:
 # --with-icu               Compile with International Components for Unicode.
 #                            Since the addition of BIP-39 and later BIP-38
 #                            support, libbitcoin conditionally incorporates ICU
-#                             to provide BIP-38 and BIP-39 passphrase
+#                            to provide BIP-38 and BIP-39 passphrase
 #                            normalization features. Currently
 #                            libbitcoin-explorer is the only other library that
 #                            accesses this feature, so if you do not intend to
 #                            use passphrase normalization this dependency can
 #                            be avoided.
-# --with-png               Compile with QR Code PNG Output Support
-#                            Since the addition of png support, libbitcoin
-#                            conditionally incorporates libpng (which in turn
-#                            requires zlib). Currently libbitcoin-explorer is
-#                            the only other library that accesses this feature,
-#                            so if you do not intend to use png this dependency
-#                            can be avoided.
-# --with-qrencode          Compile with QR Code Support
-#                            Since the addition of qrcode support, libbitcoin
-#                            conditionally incorporates qrencode. Currently
-#                            libbitcoin-explorer is the only other library that
-#                            accesses this feature, so if you do not intend to
-#                            use qrcode this dependency can be avoided.
 # --build-icu              Builds ICU libraries.
-# --build-zlib             Builds ZLib libraries.
-# --build-png              Builds PNG libraries.
-# --build-qrencode         Builds QREncode libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -55,27 +39,12 @@
 #==============================================================================
 # The default build directory.
 #------------------------------------------------------------------------------
-BUILD_DIR="build-libbitcoin"
+BUILD_DIR="build-libbitcoin-system"
 
 # ICU archive.
 #------------------------------------------------------------------------------
 ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
 ICU_ARCHIVE="icu4c-55_2-src.tgz"
-
-# ZLib archive.
-#------------------------------------------------------------------------------
-ZLIB_URL="https://github.com/madler/zlib/archive/v1.2.11.tar.gz"
-ZLIB_ARCHIVE="v1.2.11.tar.gz"
-
-# PNG archive.
-#------------------------------------------------------------------------------
-PNG_URL="https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz"
-PNG_ARCHIVE="libpng-1.6.37.tar.xz"
-
-# QREncode archive.
-#------------------------------------------------------------------------------
-QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2"
-QRENCODE_ARCHIVE="qrencode-4.1.1.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
@@ -98,7 +67,7 @@ configure_options()
     display_message "configure options:"
     for OPTION in "$@"; do
         if [[ $OPTION ]]; then
-            display_message $OPTION
+            display_message "$OPTION"
         fi
     done
 
@@ -115,19 +84,17 @@ create_directory()
 
 display_heading_message()
 {
-    echo
-    echo "********************** $@ **********************"
-    echo
+    printf "\n********************** %s **********************\n" "$@"
 }
 
 display_message()
 {
-    echo "$@"
+    printf "%s\n" "$@"
 }
 
 display_error()
 {
-    >&2 echo "$@"
+    >&2 printf "%s\n" "$@"
 }
 
 initialize_git()
@@ -147,7 +114,7 @@ make_current_directory()
 
     ./autogen.sh
     configure_options "$@"
-    make_jobs $JOBS
+    make_jobs "$JOBS"
     make install
     configure_links
 }
@@ -158,9 +125,10 @@ make_jobs()
     local JOBS=$1
     shift 1
 
+    SEQUENTIAL=1
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j$JOBS "$@"
+        make -j"$JOBS" "$@"
     else
         make "$@"
     fi
@@ -171,12 +139,11 @@ make_tests()
 {
     local JOBS=$1
 
-    # Disable exit on error.
-    set +e
+    disable_exit_on_error
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    make_jobs $JOBS check "VERBOSE=1"
+    make_jobs "$JOBS" check "VERBOSE=1"
     local RESULT=$?
 
     # Test runners emit to the test.log file.
@@ -188,8 +155,7 @@ make_tests()
         exit $RESULT
     fi
 
-    # Reenable exit on error.
-    set -e
+    enable_exit_on_error
 }
 
 pop_directory()
@@ -204,37 +170,31 @@ push_directory()
     pushd "$DIRECTORY" >/dev/null
 }
 
+enable_exit_on_error()
+{
+    set -e
+}
+
+disable_exit_on_error()
+{
+    set +e
+}
+
 display_help()
 {
     display_message "Usage: ./install.sh [OPTION]..."
-    display_message "Manage the installation of libbitcoin."
+    display_message "Manage the installation of libbitcoin-system."
     display_message "Script options:"
     display_message "  --with-icu               Compile with International Components for Unicode."
     display_message "                             Since the addition of BIP-39 and later BIP-38 "
     display_message "                             support, libbitcoin conditionally incorporates ICU "
-    display_message "                              to provide BIP-38 and BIP-39 passphrase "
+    display_message "                             to provide BIP-38 and BIP-39 passphrase "
     display_message "                             normalization features. Currently "
     display_message "                             libbitcoin-explorer is the only other library that "
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
-    display_message "  --with-png               Compile with QR Code PNG Output Support"
-    display_message "                             Since the addition of png support, libbitcoin "
-    display_message "                             conditionally incorporates libpng (which in turn "
-    display_message "                             requires zlib). Currently libbitcoin-explorer is "
-    display_message "                             the only other library that accesses this feature, "
-    display_message "                             so if you do not intend to use png this dependency "
-    display_message "                             can be avoided."
-    display_message "  --with-qrencode          Compile with QR Code Support"
-    display_message "                             Since the addition of qrcode support, libbitcoin "
-    display_message "                             conditionally incorporates qrencode. Currently "
-    display_message "                             libbitcoin-explorer is the only other library that "
-    display_message "                             accesses this feature, so if you do not intend to "
-    display_message "                             use qrcode this dependency can be avoided."
     display_message "  --build-icu              Builds ICU libraries."
-    display_message "  --build-zlib             Builds ZLib libraries."
-    display_message "  --build-png              Builds PNG libraries."
-    display_message "  --build-qrencode         Builds QREncode libraries."
     display_message "  --build-boost            Builds Boost libraries."
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
@@ -246,131 +206,168 @@ display_help()
     display_message "all dependencies."
 }
 
+# Define environment initialization functions
+#==============================================================================
+parse_command_line_options()
+{
+    for OPTION in "$@"; do
+        case $OPTION in
+            # Standard script options.
+            (--help)                DISPLAY_HELP="yes";;
+
+            # Standard build options.
+            (--prefix=*)            PREFIX="${OPTION#*=}";;
+            (--disable-shared)      DISABLE_SHARED="yes";;
+            (--disable-static)      DISABLE_STATIC="yes";;
+
+            # Common project options.
+            (--with-icu)            WITH_ICU="yes";;
+
+            # Custom build options (in the form of --build-<option>).
+            (--build-icu)           BUILD_ICU="yes";;
+            (--build-boost)         BUILD_BOOST="yes";;
+
+            # Unique script options.
+            (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
+        esac
+    done
+}
+
+handle_help_line_option()
+{
+    if [[ $DISPLAY_HELP ]]; then
+        display_help
+        exit 0
+    fi
+}
+
+set_operating_system()
+{
+    OS=$(uname -s)
+}
+
+configure_build_parallelism()
+{
+    if [[ $PARALLEL ]]; then
+        display_message "Using shell-defined PARALLEL value."
+    elif [[ $OS == Linux ]]; then
+        PARALLEL=$(nproc)
+    elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
+        PARALLEL=$(sysctl -n hw.ncpu)
+    else
+        display_error "Unsupported system: $OS"
+        display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
+        display_error ""
+        display_help
+        exit 1
+    fi
+}
+
+set_os_specific_compiler_settings()
+{
+    if [[ $OS == Darwin ]]; then
+        export CC="clang"
+        export CXX="clang++"
+        STDLIB="c++"
+    elif [[ $OS == OpenBSD ]]; then
+        make() { gmake "$@"; }
+        export CC="egcc"
+        export CXX="eg++"
+        STDLIB="estdc++"
+    else # Linux
+        STDLIB="stdc++"
+    fi
+}
+
+link_to_standard_library()
+{
+    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+        export LDLIBS="-l$STDLIB $LDLIBS"
+        export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
+    fi
+}
+
+normalize_static_and_shared_options()
+{
+    if [[ $DISABLE_SHARED ]]; then
+        CONFIGURE_OPTIONS=("$@" "--enable-static")
+    elif [[ $DISABLE_STATIC ]]; then
+        CONFIGURE_OPTIONS=("$@" "--enable-shared")
+    else
+        CONFIGURE_OPTIONS=("$@" "--enable-shared")
+        CONFIGURE_OPTIONS=("$@" "--enable-static")
+    fi
+}
+
+handle_custom_options()
+{
+    # bash doesn't like empty functions.
+    FOO="bar"
+}
+
+remove_build_options()
+{
+    # Purge custom build options so they don't break configure.
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
+}
+
+set_prefix()
+{
+    # Always set a prefix (required on OSX and for lib detection).
+    if [[ ! ($PREFIX) ]]; then
+        PREFIX="/usr/local"
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
+    else
+        # Incorporate the custom libdir into each object, for link time resolution.
+        export LD_RUN_PATH="$PREFIX/lib"
+    fi
+}
+
+set_pkgconfigdir()
+{
+    # Set the prefix-based package config directory.
+    PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
+
+    # Prioritize prefix package config in PKG_CONFIG_PATH search path.
+    export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
+
+    # Set a package config save path that can be passed via our builds.
+    with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+}
+
+set_with_boost_prefix()
+{
+    if [[ $BUILD_BOOST ]]; then
+        # Boost has no pkg-config, m4 searches in the following order:
+        # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
+        # We use --with-boost to prioritize the --prefix path when we build it.
+        # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
+        # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
+        # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
+        with_boost="--with-boost=$PREFIX"
+    fi
+}
+
+
 # Initialize the build environment.
 #==============================================================================
-# Exit this script on the first build error.
-#------------------------------------------------------------------------------
-set -e
-
-# Parse command line options that are handled by this script.
-#------------------------------------------------------------------------------
-for OPTION in "$@"; do
-    case $OPTION in
-        # Standard script options.
-        (--help)                DISPLAY_HELP="yes";;
-
-        # Standard build options.
-        (--prefix=*)            PREFIX="${OPTION#*=}";;
-        (--disable-shared)      DISABLE_SHARED="yes";;
-        (--disable-static)      DISABLE_STATIC="yes";;
-
-        # Common project options.
-        (--with-icu)            WITH_ICU="yes";;
-        (--with-png)            WITH_PNG="yes";;
-        (--with-qrencode)       WITH_QRENCODE="yes";;
-
-        # Custom build options (in the form of --build-<option>).
-        (--build-icu)           BUILD_ICU="yes";;
-        (--build-zlib)          BUILD_ZLIB="yes";;
-        (--build-png)           BUILD_PNG="yes";;
-        (--build-qrencode)      BUILD_QRENCODE="yes";;
-        (--build-zmq)           BUILD_ZMQ="yes";;
-        (--build-boost)         BUILD_BOOST="yes";;
-
-        # Unique script options.
-        (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
-    esac
-done
-
-# Configure build parallelism.
-#------------------------------------------------------------------------------
-SEQUENTIAL=1
-OS=`uname -s`
-if [[ $PARALLEL ]]; then
-    display_message "Using shell-defined PARALLEL value."
-elif [[ $OS == Linux ]]; then
-    PARALLEL=`nproc`
-elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
-    PARALLEL=`sysctl -n hw.ncpu`
-else
-    display_error "Unsupported system: $OS"
-    display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
-    display_error ""
-    display_help
-    exit 1
-fi
-
-# Define operating system specific settings.
-#------------------------------------------------------------------------------
-if [[ $OS == Darwin ]]; then
-    export CC="clang"
-    export CXX="clang++"
-    STDLIB="c++"
-elif [[ $OS == OpenBSD ]]; then
-    make() { gmake "$@"; }
-    export CC="egcc"
-    export CXX="eg++"
-    STDLIB="estdc++"
-else # Linux
-    STDLIB="stdc++"
-fi
-
-# Link to appropriate standard library in non-default scnearios.
-#------------------------------------------------------------------------------
-if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
-    export LDLIBS="-l$STDLIB $LDLIBS"
-    export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
-fi
-
-# Normalize of static and shared options.
-#------------------------------------------------------------------------------
-if [[ $DISABLE_SHARED ]]; then
-    CONFIGURE_OPTIONS=("$@" "--enable-static")
-elif [[ $DISABLE_STATIC ]]; then
-    CONFIGURE_OPTIONS=("$@" "--enable-shared")
-else
-    CONFIGURE_OPTIONS=("$@" "--enable-shared")
-    CONFIGURE_OPTIONS=("$@" "--enable-static")
-fi
-
-# Purge custom build options so they don't break configure.
-#------------------------------------------------------------------------------
-CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
-
-# Always set a prefix (required on OSX and for lib detection).
-#------------------------------------------------------------------------------
-if [[ !($PREFIX) ]]; then
-    PREFIX="/usr/local"
-    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
-else
-    # Incorporate the custom libdir into each object, for runtime resolution.
-    export LD_RUN_PATH="$PREFIX/lib"
-fi
-
-# Incorporate the prefix.
-#------------------------------------------------------------------------------
-# Set the prefix-based package config directory.
-PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
-
-# Prioritize prefix package config in PKG_CONFIG_PATH search path.
-export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
-
-# Set a package config save path that can be passed via our builds.
-with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
-
-if [[ $BUILD_BOOST ]]; then
-    # Boost has no pkg-config, m4 searches in the following order:
-    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
-    # We use --with-boost to prioritize the --prefix path when we build it.
-    # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-    # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
-    # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-    with_boost="--with-boost=$PREFIX"
-fi
+enable_exit_on_error
+parse_command_line_options "$@"
+handle_help_line_option
+handle_custom_options
+set_operating_system
+configure_build_parallelism
+set_os_specific_compiler_settings "$@"
+link_to_standard_library
+normalize_static_and_shared_options "$@"
+remove_build_options
+set_prefix
+set_pkgconfigdir
+set_with_boost_prefix
 
 display_configuration()
 {
-    display_message "libbitcoin installer configuration."
+    display_message "libbitcoin-system installer configuration."
     display_message "--------------------------------------------------------------------"
     display_message "OS                    : $OS"
     display_message "PARALLEL              : $PARALLEL"
@@ -382,12 +379,7 @@ display_configuration()
     display_message "LDFLAGS               : $LDFLAGS"
     display_message "LDLIBS                : $LDLIBS"
     display_message "WITH_ICU              : $WITH_ICU"
-    display_message "WITH_PNG              : $WITH_PNG"
-    display_message "WITH_QRENCODE         : $WITH_QRENCODE"
     display_message "BUILD_ICU             : $BUILD_ICU"
-    display_message "BUILD_ZLIB            : $BUILD_ZLIB"
-    display_message "BUILD_PNG             : $BUILD_PNG"
-    display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
     display_message "BUILD_DIR             : $BUILD_DIR"
     display_message "PREFIX                : $PREFIX"
@@ -435,9 +427,9 @@ SECP256K1_OPTIONS=(
 "--disable-tests" \
 "--enable-module-recovery")
 
-# Define bitcoin options.
+# Define bitcoin-system options.
 #------------------------------------------------------------------------------
-BITCOIN_OPTIONS=(
+BITCOIN_SYSTEM_OPTIONS=(
 "${with_boost}" \
 "${with_pkgconfigdir}")
 
@@ -462,26 +454,6 @@ initialize_icu_packages()
     fi
 }
 
-# Because ZLIB doesn't actually parse its --disable-shared option.
-# Because ZLIB doesn't follow GNU recommentation for unknown arguments.
-patch_zlib_configuration()
-{
-    sed -i.tmp "s/leave 1/shift/" configure
-    sed -i.tmp "s/--static/--static | --disable-shared/" configure
-    sed -i.tmp "/unknown option/d" configure
-    sed -i.tmp "/help for help/d" configure
-
-    # display_message "Hack: ZLIB configuration options modified."
-}
-
-# Because ZLIB can't build shared only.
-clean_zlib_build()
-{
-    if [[ $DISABLE_STATIC ]]; then
-        rm --force "$PREFIX/lib/libz.a"
-    fi
-}
-
 # Standard build from tarball.
 build_from_tarball()
 {
@@ -495,24 +467,17 @@ build_from_tarball()
     shift 7
 
     # For some platforms we need to set ICU pkg-config path.
-    if [[ !($BUILD) ]]; then
-        if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
+    if [[ ! ($BUILD) ]]; then
+        if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
             initialize_icu_packages
         fi
         return
     fi
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_LDFLAGS=$LDFLAGS
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
+        local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
-
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_CPPFLAGS=$CPPFLAGS
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     display_heading_message "Download $ARCHIVE"
@@ -524,39 +489,35 @@ build_from_tarball()
     push_directory "$EXTRACT"
 
     # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
-
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
-        patch_zlib_configuration
-    fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-    configure_options "${CONFIGURATION[@]}"
-    make_jobs $JOBS --silent
-    make install
-    configure_links
-
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
-        clean_zlib_build
+    if [[ $ARCHIVE == "$MBEDTLS_ARCHIVE" ]]; then
+        make -j "$JOBS" lib
+        make DESTDIR=$PREFIX install
+    else
+        configure_options "${CONFIGURATION[@]}"
+        make_jobs "$JOBS" --silent
+        make install
     fi
+
+    configure_links
 
     pop_directory
     pop_directory
 
     # Restore flags to prevent side effects.
     export LDFLAGS=$SAVE_LDFLAGS
-    export CPPFLAGS=$SAVE_LCPPFLAGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
 
     pop_directory
 }
 
-# Because boost ICU detection assumes in incorrect ICU path.
+# Because boost ICU static lib detection assumes in incorrect ICU path.
 circumvent_boost_icu_detection()
 {
     # Boost expects a directory structure for ICU which is incorrect.
@@ -567,8 +528,8 @@ circumvent_boost_icu_detection()
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
 
-    echo $SUCCESS > $REGEX_TEST
-    echo $SUCCESS > $LOCALE_TEST
+    printf "%s" "$SUCCESS" > $REGEX_TEST
+    printf "%s" "$SUCCESS" > $LOCALE_TEST
 
     # display_message "Hack: ICU detection modified, will always indicate found."
 }
@@ -596,33 +557,37 @@ initialize_boost_configuration()
 }
 
 # Because boost doesn't use pkg-config.
+# The hacks below are still required as of boost 1.72.0.
 initialize_boost_icu_configuration()
 {
     BOOST_ICU_ICONV="on"
     BOOST_ICU_POSIX="on"
 
     if [[ $WITH_ICU ]]; then
-        circumvent_boost_icu_detection
-
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV="off"
         BOOST_ICU_POSIX="off"
 
-        # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
-
-        # This is a hack for boost m4 scripts that fail with ICU dependency.
-        # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
-        export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
+        # Work around boost ICU static lib discovery bug.
+        circumvent_boost_icu_detection
 
         # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
+        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
+
+        # Extract ICU libs from package config variables and augment with -ldl.
+        ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
+
+        # This is a hack for boost m4 scripts that fail with ICU dependency.
+        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
     fi
 }
 
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
+    local SAVE_IFS="$IFS"
+    IFS=' '
+
     local URL=$1
     local ARCHIVE=$2
     local COMPRESSION=$3
@@ -631,7 +596,7 @@ build_from_tarball_boost()
     local BUILD=$6
     shift 6
 
-    if [[ !($BUILD) ]]; then
+    if [[ ! ($BUILD) ]]; then
         return
     fi
 
@@ -644,8 +609,8 @@ build_from_tarball_boost()
     push_directory "$EXTRACT"
 
     # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
 
     initialize_boost_configuration
     initialize_boost_icu_configuration
@@ -662,26 +627,24 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : ${ICU_LIBS[@]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
+  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
     display_message "--reconfigure         : [ignore cached configuration]"
     display_message "--prefix              : $PREFIX"
-    display_message "BOOST_OPTIONS         : $@"
+    display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
-
-    # boost_iostreams
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
 
     ./bootstrap.sh \
         "--prefix=$PREFIX" \
         "--with-icu=$ICU_PREFIX"
+
+    # boost_regex:
+    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
+    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
+    # github.com/libbitcoin/libbitcoin-system/issues/1192
+    # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
         "variant=release" \
@@ -694,9 +657,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sICU_PATH=$ICU_PREFIX" \
-        "-sICU_LINK=${ICU_LIBS[@]}" \
-        "-sZLIB_LIBPATH=$PREFIX/lib" \
-        "-sZLIB_INCLUDE=$PREFIX/include" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
@@ -706,6 +666,8 @@ build_from_tarball_boost()
 
     pop_directory
     pop_directory
+
+    IFS="$SAVE_IFS"
 }
 
 # Standard build from github.
@@ -724,14 +686,14 @@ build_from_github()
     display_heading_message "Download $FORK/$BRANCH"
 
     # Clone the repository locally.
-    git clone --depth 1 --branch $BRANCH --single-branch "https://github.com/$FORK"
+    git clone --depth 1 --branch "$BRANCH" --single-branch "https://github.com/$FORK"
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the local repository clone.
     push_directory "$REPO"
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
     pop_directory
     pop_directory
 }
@@ -750,7 +712,7 @@ build_from_local()
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the current directory.
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
 }
 
 # Because Travis alread has downloaded the primary repo.
@@ -765,13 +727,13 @@ build_from_travis()
 
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        make_tests $JOBS
+        build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
+        make_tests "$JOBS"
     else
-        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
+        build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
         push_directory "$BUILD_DIR"
         push_directory "$REPO"
-        make_tests $JOBS
+        make_tests "$JOBS"
         pop_directory
         pop_directory
     fi
@@ -782,25 +744,18 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip source $PARALLEL "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE gzip . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz . $PARALLEL "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 . $PARALLEL "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    build_from_github libbitcoin secp256k1 version7 $PARALLEL ${SECP256K1_OPTIONS[@]} "$@"
-    build_from_travis libbitcoin libbitcoin version3 $PARALLEL ${BITCOIN_OPTIONS[@]} "$@"
+    build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
+    build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+    build_from_github libbitcoin-system secp256k1 version7 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_travis libbitcoin-system libbitcoin-system version3 "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
 
 
 # Build the primary library and all dependencies.
 #==============================================================================
-if [[ $DISPLAY_HELP ]]; then
-    display_help
-else
-    display_configuration
-    create_directory "$BUILD_DIR"
-    push_directory "$BUILD_DIR"
-    initialize_git
-    pop_directory
-    time build_all "${CONFIGURE_OPTIONS[@]}"
-fi
+display_configuration
+create_directory "$BUILD_DIR"
+push_directory "$BUILD_DIR"
+initialize_git
+pop_directory
+time build_all "${CONFIGURE_OPTIONS[@]}"
