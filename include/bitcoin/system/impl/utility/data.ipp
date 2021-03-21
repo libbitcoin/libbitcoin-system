@@ -41,12 +41,12 @@ inline data_chunk to_chunk(uint8_t byte)
 inline data_chunk build_chunk(loaf slices, size_t extra_reserve)
 {
     size_t size = 0;
-    for (const auto slice: slices)
+    for (const auto& slice: slices)
         size += slice.size();
 
     data_chunk out;
     out.reserve(size + extra_reserve);
-    for (const auto slice: slices)
+    for (const auto& slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
 
     return out;
@@ -56,14 +56,14 @@ template <size_t Size>
 bool build_array(byte_array<Size>& out, loaf slices)
 {
     size_t size = 0;
-    for (const auto slice: slices)
+    for (const auto& slice: slices)
         size += slice.size();
 
     if (size > Size)
         return false;
 
     auto position = out.begin();
-    for (const auto slice: slices)
+    for (const auto& slice: slices)
     {
         std::copy(slice.begin(), slice.end(), position);
         position += slice.size();
