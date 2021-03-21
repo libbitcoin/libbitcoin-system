@@ -23,6 +23,7 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <boost/bind/placeholders.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
