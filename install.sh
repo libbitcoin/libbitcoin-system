@@ -74,13 +74,13 @@ PNG_ARCHIVE="libpng-1.6.37.tar.xz"
 
 # QREncode archive.
 #------------------------------------------------------------------------------
-QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.bz2"
-QRENCODE_ARCHIVE="qrencode-3.4.4.tar.bz2"
+QRENCODE_URL="http://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2"
+QRENCODE_ARCHIVE="qrencode-4.1.1.tar.bz2"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_62_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.72.0/boost_1_72_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_72_0.tar.bz2"
 
 
 # Define utility functions.
