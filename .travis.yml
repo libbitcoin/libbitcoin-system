@@ -19,6 +19,7 @@ addons:
 matrix:
     include:
         - os: osx
+          osx_image: xcode12.2
           compiler: clang
           env: LINK=dynamic
         - os: osx
