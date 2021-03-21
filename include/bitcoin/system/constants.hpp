@@ -33,7 +33,7 @@ namespace libbitcoin {
 // This guards assumptions within the codebase.
 static_assert(sizeof(size_t) >= sizeof(uint32_t), "unsupported size_t");
 
-#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
+#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
 // Generic constants.
 //-----------------------------------------------------------------------------
