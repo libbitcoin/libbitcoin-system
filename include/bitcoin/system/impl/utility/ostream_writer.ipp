@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_OSTREAM_WRITER_IPP
-#define LIBBITCOIN_OSTREAM_WRITER_IPP
+#ifndef LIBBITCOIN_SYSTEM_OSTREAM_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_OSTREAM_WRITER_IPP
 
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>

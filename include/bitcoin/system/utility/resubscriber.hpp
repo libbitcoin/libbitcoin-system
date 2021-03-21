@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_RESUBSCRIBER_HPP
-#define LIBBITCOIN_RESUBSCRIBER_HPP
+#ifndef LIBBITCOIN_SYSTEM_RESUBSCRIBER_HPP
+#define LIBBITCOIN_SYSTEM_RESUBSCRIBER_HPP
 
 #include <functional>
 #include <memory>

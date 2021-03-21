@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MACHINE_INTERPRETER_IPP
-#define LIBBITCOIN_MACHINE_INTERPRETER_IPP
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
+#define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
 #include <cstdint>
 #include <utility>

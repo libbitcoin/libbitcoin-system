@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SECP256K1_INITIALIZER_HPP
-#define LIBBITCOIN_SECP256K1_INITIALIZER_HPP
+#ifndef LIBBITCOIN_SYSTEM_SECP256K1_INITIALIZER_HPP
+#define LIBBITCOIN_SYSTEM_SECP256K1_INITIALIZER_HPP
 
 #include <mutex>
 #include <secp256k1.h>

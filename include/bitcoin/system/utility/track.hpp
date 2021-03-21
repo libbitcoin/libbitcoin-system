@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRACK_HPP
-#define LIBBITCOIN_TRACK_HPP
+#ifndef LIBBITCOIN_SYSTEM_TRACK_HPP
+#define LIBBITCOIN_SYSTEM_TRACK_HPP
 
 #include <atomic>
 #include <cstddef>

@@ -15,8 +15,8 @@
 
 // Modification of boost implementation to alter log file rotation naming.
 
-#ifndef LIBBITCOIN_LOG_FILE_COLLECTOR_REPOSITORY_HPP
-#define LIBBITCOIN_LOG_FILE_COLLECTOR_REPOSITORY_HPP
+#ifndef LIBBITCOIN_SYSTEM_LOG_FILE_COLLECTOR_REPOSITORY_HPP
+#define LIBBITCOIN_SYSTEM_LOG_FILE_COLLECTOR_REPOSITORY_HPP
 
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/list_hook.hpp>

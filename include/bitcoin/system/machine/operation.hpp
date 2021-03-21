@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MACHINE_OPERATION_HPP
-#define LIBBITCOIN_MACHINE_OPERATION_HPP
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_OPERATION_HPP
+#define LIBBITCOIN_SYSTEM_MACHINE_OPERATION_HPP
 
 #include <cstddef>
 #include <cstdint>

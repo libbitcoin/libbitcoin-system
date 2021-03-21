@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_LOG_FEATURES_GAUGE_IPP
-#define LIBBITCOIN_LOG_FEATURES_GAUGE_IPP
+#ifndef LIBBITCOIN_SYSTEM_LOG_FEATURES_GAUGE_IPP
+#define LIBBITCOIN_SYSTEM_LOG_FEATURES_GAUGE_IPP
 
 #include <cstdint>
 #include <boost/log/attributes.hpp>
