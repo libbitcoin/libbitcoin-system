@@ -20,8 +20,8 @@
 #define LIBBITCOIN_MINI_KEYS_HPP
 
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace wallet {

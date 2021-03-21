@@ -23,12 +23,12 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/script_pattern.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/machine/script_pattern.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace machine {
@@ -156,6 +156,6 @@ private:
 } // namespace machine
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/machine/operation.ipp>
+#include <bitcoin/system/impl/machine/operation.ipp>
 
 #endif

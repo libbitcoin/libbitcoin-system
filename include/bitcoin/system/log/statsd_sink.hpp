@@ -20,10 +20,10 @@
 #define LIBBITCOIN_LOG_STATSD_SINK_HPP
 
 #include <boost/asio.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/log/rotable_file.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/config/authority.hpp>
+#include <bitcoin/system/log/rotable_file.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace log {

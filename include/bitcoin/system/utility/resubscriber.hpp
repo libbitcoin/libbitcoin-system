@@ -23,11 +23,11 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/enable_shared_from_base.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
-////#include <bitcoin/bitcoin/utility/track.hpp>
+#include <bitcoin/system/utility/dispatcher.hpp>
+#include <bitcoin/system/utility/enable_shared_from_base.hpp>
+#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
+////#include <bitcoin/system/utility/track.hpp>
 
 namespace libbitcoin {
 
@@ -74,6 +74,6 @@ private:
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/resubscriber.ipp>
+#include <bitcoin/system/impl/utility/resubscriber.ipp>
 
 #endif

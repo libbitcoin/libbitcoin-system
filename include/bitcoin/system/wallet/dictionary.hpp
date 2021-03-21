@@ -21,7 +21,7 @@
 
 #include <array>
 #include <vector>
-#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/system/compat.hpp>
 
 namespace libbitcoin {
 namespace wallet {

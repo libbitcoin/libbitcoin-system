@@ -90,6 +90,6 @@ BOOST_PARAMETER_KEYWORD(tag, gauge)
 } // namespace log
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/log/features/gauge.ipp>
+#include <bitcoin/system/impl/log/features/gauge.ipp>
 
 #endif

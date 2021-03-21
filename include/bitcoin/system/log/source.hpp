@@ -23,9 +23,9 @@
 #include <boost/log/attributes/clock.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/sources/severity_channel_logger.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/log/attributes.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/log/attributes.hpp>
+#include <bitcoin/system/log/severity.hpp>
 
 namespace libbitcoin {
 namespace log {

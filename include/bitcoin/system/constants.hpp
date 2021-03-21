@@ -21,12 +21,12 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/config/checkpoint.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/version.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/config/checkpoint.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/message/network_address.hpp>
+#include <bitcoin/system/version.hpp>
 
 namespace libbitcoin {
 

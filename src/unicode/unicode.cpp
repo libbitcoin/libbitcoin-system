@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 #include <cstddef>
 #include <cstring>
@@ -26,14 +26,14 @@
 #include <stdexcept>
 #include <string>
 #include <boost/locale.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
-#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
-#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/unicode/console_streambuf.hpp>
+#include <bitcoin/system/unicode/unicode_istream.hpp>
+#include <bitcoin/system/unicode/unicode_ostream.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 #ifdef _MSC_VER
     #include <fcntl.h>

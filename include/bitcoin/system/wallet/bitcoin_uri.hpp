@@ -24,10 +24,10 @@
 #include <map>
 #include <string>
 #include <boost/optional.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
-#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
+#include <bitcoin/system/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace wallet {

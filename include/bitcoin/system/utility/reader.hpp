@@ -22,9 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 

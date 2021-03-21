@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-system", "libbit
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-system-examples", "libbitcoin-system-examples\libbitcoin-system-examples.vcxproj", "{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-test", "libbitcoin-test\libbitcoin-test.vcxproj", "{51A424A9-2C12-4211-8D40-E49D1534C541}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-system-test", "libbitcoin-system-test\libbitcoin-system-test.vcxproj", "{51A424A9-2C12-4211-8D40-E49D1534C541}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

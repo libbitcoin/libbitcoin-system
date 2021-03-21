@@ -23,11 +23,11 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
-////#include <bitcoin/bitcoin/utility/track.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/dispatcher.hpp>
+#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
+////#include <bitcoin/system/utility/track.hpp>
 
 namespace libbitcoin {
 

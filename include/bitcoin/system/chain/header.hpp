@@ -25,14 +25,14 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/chain/chain_state.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {

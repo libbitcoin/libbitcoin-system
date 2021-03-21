@@ -89,6 +89,6 @@ BOOST_PARAMETER_KEYWORD(tag, rate)
 } // namespace log
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/log/features/rate.ipp>
+#include <bitcoin/system/impl/log/features/rate.ipp>
 
 #endif

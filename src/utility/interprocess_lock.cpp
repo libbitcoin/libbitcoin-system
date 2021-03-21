@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/interprocess_lock.hpp>
+#include <bitcoin/system/utility/interprocess_lock.hpp>
 
 #include <memory>
 #include <string>
 #include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/unicode/file_lock.hpp>
-#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/file_lock.hpp>
+#include <bitcoin/system/unicode/ofstream.hpp>
 
 namespace libbitcoin {
 

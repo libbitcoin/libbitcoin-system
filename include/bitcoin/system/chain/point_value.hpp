@@ -21,8 +21,8 @@
 
 #include <cstdint>
 #include <vector>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace chain {

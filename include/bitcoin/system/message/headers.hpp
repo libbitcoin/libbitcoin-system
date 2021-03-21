@@ -24,14 +24,14 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/header.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
-#include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/message/header.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/message/inventory_vector.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {

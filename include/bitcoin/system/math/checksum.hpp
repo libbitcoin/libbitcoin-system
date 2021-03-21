@@ -23,9 +23,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -103,7 +103,7 @@ BC_API bool verify_checksum(data_slice data);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/math/checksum.ipp>
+#include <bitcoin/system/impl/math/checksum.ipp>
 
 #endif
 

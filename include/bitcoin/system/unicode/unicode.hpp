@@ -22,8 +22,8 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 // Regarding Unicode design for Windows:
 //

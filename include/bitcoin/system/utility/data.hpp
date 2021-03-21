@@ -26,8 +26,8 @@
 #include <iterator>
 #include <queue>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/array_slice.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/array_slice.hpp>
 
 namespace libbitcoin {
 
@@ -153,6 +153,6 @@ byte_array<Size> xor_data(data_slice bytes1, data_slice bytes2, size_t offset1,
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/data.ipp>
+#include <bitcoin/system/impl/utility/data.ipp>
 
 #endif

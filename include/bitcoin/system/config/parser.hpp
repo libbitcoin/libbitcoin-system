@@ -22,7 +22,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 

@@ -20,8 +20,8 @@
 #define LIBBITCOIN_WALLET_URI_READER_HPP
 
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/uri.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/wallet/uri.hpp>
 
 namespace libbitcoin {
 namespace wallet {

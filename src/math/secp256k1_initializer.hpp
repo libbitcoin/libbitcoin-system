@@ -21,7 +21,7 @@
 
 #include <mutex>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 

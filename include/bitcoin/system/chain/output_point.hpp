@@ -22,10 +22,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
-#include <bitcoin/bitcoin/chain/output.hpp>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/chain/output.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace chain {

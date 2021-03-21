@@ -21,7 +21,7 @@
 
 #include <map>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace wallet {

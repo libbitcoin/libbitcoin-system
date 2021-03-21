@@ -21,8 +21,8 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 

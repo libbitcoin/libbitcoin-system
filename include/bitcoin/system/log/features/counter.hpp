@@ -89,6 +89,6 @@ BOOST_PARAMETER_KEYWORD(tag, counter)
 } // namespace log
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/log/features/counter.ipp>
+#include <bitcoin/system/impl/log/features/counter.ipp>
 
 #endif

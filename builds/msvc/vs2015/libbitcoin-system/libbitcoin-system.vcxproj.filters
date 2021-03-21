@@ -13,68 +13,65 @@
     <Filter Include="include\bitcoin">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\bitcoin">
+    <Filter Include="include\bitcoin\system">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\bitcoin\chain">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\config">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\formats">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\formats">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\log">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\log\features">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\machine">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\math">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\impl\utility">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\log">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\log\features">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\machine">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\math">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\message">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\unicode">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\utility">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\bitcoin\wallet">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system">
+    <Filter Include="include\bitcoin\system\chain">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource">
+    <Filter Include="include\bitcoin\system\config">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\formats">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\formats">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\log">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\log\features">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\machine">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\math">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\utility">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\log">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\log\features">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\machine">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\math">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\message">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\unicode">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\utility">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\wallet">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000000}</UniqueIdentifier>
@@ -581,575 +578,569 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\chain_state.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\compact.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\history.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input_point.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output_point.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_iterator.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point_value.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\points_value.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\stealth.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\witness.hpp">
-      <Filter>include\bitcoin\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base16.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base2.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base58.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\base64.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash160.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\hash256.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parser.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\settings.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\sodium.hpp">
-      <Filter>include\bitcoin\bitcoin\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_10.hpp">
-      <Filter>include\bitcoin\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_16.hpp">
-      <Filter>include\bitcoin\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_58.hpp">
-      <Filter>include\bitcoin\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_64.hpp">
-      <Filter>include\bitcoin\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base_85.hpp">
-      <Filter>include\bitcoin\bitcoin\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\handlers.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\attributes.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\counter.hpp">
-      <Filter>include\bitcoin\bitcoin\log\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\gauge.hpp">
-      <Filter>include\bitcoin\bitcoin\log\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\metric.hpp">
-      <Filter>include\bitcoin\bitcoin\log\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\rate.hpp">
-      <Filter>include\bitcoin\bitcoin\log\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\features\timer.hpp">
-      <Filter>include\bitcoin\bitcoin\log\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_char_traits.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_collector_repository.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\file_counter_formatter.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\rotable_file.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\severity.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\sink.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\source.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_sink.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\statsd_source.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\log\udp_client_sink.hpp">
-      <Filter>include\bitcoin\bitcoin\log</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\interpreter.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\number.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\opcode.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\operation.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\program.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\rule_fork.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_pattern.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\script_version.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\machine\sighash_algorithm.hpp">
-      <Filter>include\bitcoin\bitcoin\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\crypto.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\elliptic_curve.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\limits.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\stealth.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp">
-      <Filter>include\bitcoin\bitcoin\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\alert_payload.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\block_transactions.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\compact_block.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\fee_filter.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_add.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_clear.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\filter_load.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_address.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_block_transactions.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_blocks.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_headers.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\headers.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\memory_pool.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\merkle_block.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\messages.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\network_address.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\ping.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\pong.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\prefilled_transaction.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\reject.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\send_compact.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\send_headers.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\transaction.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp">
-      <Filter>include\bitcoin\bitcoin\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\file_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ifstream.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ofstream.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_istream.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_ostream.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_streambuf.hpp">
-      <Filter>include\bitcoin\bitcoin\unicode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\asio.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\atomic.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\color.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\conditional_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_sink.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_source.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\delegates.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deserializer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\enable_shared_from_base.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\exceptions.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\flush_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\interprocess_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\istream_reader.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\monitor.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\noncopyable.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\ostream_writer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pending.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\png.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\prioritized_mutex.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\pseudo_random.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\reader.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\resubscriber.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\scope_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequential_lock.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\socket.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\string.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\track.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\work.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\writer.hpp">
-      <Filter>include\bitcoin\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp">
-      <Filter>include\bitcoin\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ec_private.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ec_public.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_private.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_public.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_token.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\electrum.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\electrum_dictionary.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_private.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_public.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\message.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mini_keys.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mnemonic.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\payment_address.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\qrcode.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\select_outputs.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_receiver.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_sender.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri_reader.hpp">
-      <Filter>include\bitcoin\bitcoin\wallet</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\history.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output_point.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point_iterator.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point_value.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\points_value.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stealth.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compat.h">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compat.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\checkpoint.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\directory.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\endpoint.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash160.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash256.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parameter.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parser.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\settings.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\sodium.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_10.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_16.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_58.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_64.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_85.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\handlers.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\attributes.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\counter.hpp">
+      <Filter>include\bitcoin\system\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\gauge.hpp">
+      <Filter>include\bitcoin\system\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\metric.hpp">
+      <Filter>include\bitcoin\system\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\rate.hpp">
+      <Filter>include\bitcoin\system\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\timer.hpp">
+      <Filter>include\bitcoin\system\log\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\file_char_traits.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\file_collector.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\file_collector_repository.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\file_counter_formatter.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\rotable_file.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\severity.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\sink.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\source.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\statsd_sink.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\statsd_source.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\log\udp_client_sink.hpp">
+      <Filter>include\bitcoin\system\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\opcode.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\operation.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\program.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\rule_fork.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\script_pattern.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\script_version.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\sighash_algorithm.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\checksum.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\crypto.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\uint256.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\address.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert_payload.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block_transactions.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_block.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\fee_filter.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_add.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_clear.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_load.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_address.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_block_transactions.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_blocks.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_data.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_headers.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\header.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\headers.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\heading.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\inventory.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\inventory_vector.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\memory_pool.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\merkle_block.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\messages.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\network_address.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\not_found.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\ping.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\pong.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\prefilled_transaction.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\reject.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\send_compact.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\send_headers.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\transaction.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\verack.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\version.hpp">
+      <Filter>include\bitcoin\system\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\console_streambuf.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\file_lock.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ifstream.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ofstream.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_istream.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_ostream.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_streambuf.hpp">
+      <Filter>include\bitcoin\system\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\array_slice.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\asio.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\binary.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\collection.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\color.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\conditional_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\container_sink.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\container_source.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\data.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deadline.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\decorator.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\delegates.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deserializer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\dispatcher.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\enable_shared_from_base.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\endian.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\exceptions.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\noncopyable.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\ostream_writer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pending.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\png.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\prioritized_mutex.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\pseudo_random.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\reader.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\resubscriber.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\scope_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\sequencer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\sequential_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\serializer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\socket.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\string.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\subscriber.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\synchronizer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\thread.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\threadpool.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\timer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\track.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\work.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\writer.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp">
       <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\bitcoin_uri.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionary.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ec_private.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ec_public.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ek_private.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ek_public.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ek_token.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\electrum.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\electrum_dictionary.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\encrypted_keys.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\hd_private.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\hd_public.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\message.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mini_keys.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonic.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\payment_address.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\qrcode.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_address.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_receiver.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\stealth_sender.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\uri.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\uri_reader.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
       <Filter>src\math\external</Filter>
@@ -1210,80 +1201,80 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_16.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\formats</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\formats\base_16.ipp">
+      <Filter>include\bitcoin\system\impl\formats</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base_58.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\formats</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\formats\base_58.ipp">
+      <Filter>include\bitcoin\system\impl\formats</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\counter.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\log\features</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\counter.ipp">
+      <Filter>include\bitcoin\system\impl\log\features</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\gauge.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\log\features</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\gauge.ipp">
+      <Filter>include\bitcoin\system\impl\log\features</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\metric.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\log\features</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\metric.ipp">
+      <Filter>include\bitcoin\system\impl\log\features</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\rate.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\log\features</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\rate.ipp">
+      <Filter>include\bitcoin\system\impl\log\features</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\log\features\timer.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\log\features</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\timer.ipp">
+      <Filter>include\bitcoin\system\impl\log\features</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\interpreter.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\machine</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\number.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\machine</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\operation.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\machine</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\operation.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\machine\program.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\machine</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\math</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\checksum.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\math</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\array_slice.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\collection.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\deserializer.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\istream_reader.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_reader.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\ostream_writer.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\pending.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\pending.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\resubscriber.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\resubscriber.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serializer.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\subscriber.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\track.ipp">
-      <Filter>include\bitcoin\bitcoin\impl\utility</Filter>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\track.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>

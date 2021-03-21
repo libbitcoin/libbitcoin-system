@@ -21,7 +21,7 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace config {

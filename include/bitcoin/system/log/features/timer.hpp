@@ -90,6 +90,6 @@ BOOST_PARAMETER_KEYWORD(tag, timer)
 } // namespace log
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/log/features/timer.ipp>
+#include <bitcoin/system/impl/log/features/timer.ipp>
 
 #endif

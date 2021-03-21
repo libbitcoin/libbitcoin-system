@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/machine/program.hpp>
+#include <bitcoin/system/machine/program.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <utility>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/machine/interpreter.hpp>
-#include <bitcoin/bitcoin/machine/script_version.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/machine/interpreter.hpp>
+#include <bitcoin/system/machine/script_version.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace machine {

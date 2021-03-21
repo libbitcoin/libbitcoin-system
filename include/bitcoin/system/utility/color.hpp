@@ -20,8 +20,8 @@
 #define LIBBITCOIN_COLOR_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 

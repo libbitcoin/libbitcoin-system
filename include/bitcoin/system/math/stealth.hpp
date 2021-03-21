@@ -20,11 +20,11 @@
 #define LIBBITCOIN_STEALTH_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/utility/binary.hpp>
 
 namespace libbitcoin {
 

@@ -24,15 +24,15 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/delegates.hpp>
-#include <bitcoin/bitcoin/utility/noncopyable.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
-#include <bitcoin/bitcoin/utility/work.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/deadline.hpp>
+#include <bitcoin/system/utility/delegates.hpp>
+#include <bitcoin/system/utility/noncopyable.hpp>
+#include <bitcoin/system/utility/synchronizer.hpp>
+#include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/utility/work.hpp>
 
 namespace libbitcoin {
 

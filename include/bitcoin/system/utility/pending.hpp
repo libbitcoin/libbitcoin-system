@@ -24,9 +24,9 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/noncopyable.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/utility/noncopyable.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
 
@@ -79,6 +79,6 @@ private:
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/pending.ipp>
+#include <bitcoin/system/impl/utility/pending.ipp>
 
 #endif

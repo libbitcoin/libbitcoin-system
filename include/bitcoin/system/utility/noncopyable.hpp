@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_NONCOPYABLE_HPP
 #define LIBBITCOIN_NONCOPYABLE_HPP
 
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 

@@ -22,13 +22,13 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/dictionary.hpp>
 
 namespace libbitcoin {
 namespace wallet {

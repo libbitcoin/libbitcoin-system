@@ -20,12 +20,12 @@
 #define LIBBITCOIN_MACHINE_INTERPRETER_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/machine/opcode.hpp>
-#include <bitcoin/bitcoin/machine/operation.hpp>
-#include <bitcoin/bitcoin/machine/program.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/machine/operation.hpp>
+#include <bitcoin/system/machine/program.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace machine {
@@ -124,6 +124,6 @@ private:
 } // namespace machine
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/machine/interpreter.ipp>
+#include <bitcoin/system/impl/machine/interpreter.ipp>
 
 #endif

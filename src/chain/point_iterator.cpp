@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/point_iterator.hpp>
+#include <bitcoin/system/chain/point_iterator.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -24,11 +24,11 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>
-#include <bitcoin/bitcoin/chain/point.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-////#include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+////#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace chain {

@@ -23,7 +23,7 @@
 #include <system_error>
 #include <unordered_map>
 #include <boost/system/error_code.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 

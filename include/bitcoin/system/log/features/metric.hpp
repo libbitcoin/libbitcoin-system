@@ -106,6 +106,6 @@ BOOST_PARAMETER_KEYWORD(tag, metric)
 } // namespace log
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/log/features/metric.ipp>
+#include <bitcoin/system/impl/log/features/metric.ipp>
 
 #endif

@@ -23,10 +23,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 

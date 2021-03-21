@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_BASE_16_IPP
 #define LIBBITCOIN_BASE_16_IPP
 
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 

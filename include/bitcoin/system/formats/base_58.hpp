@@ -20,8 +20,8 @@
 #define LIBBITCOIN_BASE_58_HPP
 
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -58,7 +58,7 @@ BC_API bool decode_base58(data_chunk& out, const std::string& in);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/formats/base_58.ipp>
+#include <bitcoin/system/impl/formats/base_58.ipp>
 
 #endif
 

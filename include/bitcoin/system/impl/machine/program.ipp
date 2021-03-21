@@ -22,14 +22,14 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/chain/transaction.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/machine/number.hpp>
-#include <bitcoin/bitcoin/machine/operation.hpp>
-#include <bitcoin/bitcoin/machine/script_version.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/machine/number.hpp>
+#include <bitcoin/system/machine/operation.hpp>
+#include <bitcoin/system/machine/script_version.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace machine {

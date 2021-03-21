@@ -20,8 +20,8 @@
 #define LIBBITCOIN_MACHINE_NUMBER_HPP
 
 #include <cstddef>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace machine {
@@ -133,6 +133,6 @@ private:
 } // namespace libbitcoin
 
 
-#include <bitcoin/bitcoin/impl/machine/number.ipp>
+#include <bitcoin/system/impl/machine/number.ipp>
 
 #endif

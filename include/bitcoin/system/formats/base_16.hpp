@@ -20,8 +20,8 @@
 #define LIBBITCOIN_BASE_16_HPP
 
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 
@@ -79,6 +79,6 @@ BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/formats/base_16.ipp>
+#include <bitcoin/system/impl/formats/base_16.ipp>
 
 #endif

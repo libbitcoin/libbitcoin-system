@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SCOPE_LOCK_HPP
 
 #include <memory>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/thread.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {
 

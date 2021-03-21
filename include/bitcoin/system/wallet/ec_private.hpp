@@ -22,12 +22,12 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/checksum.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
 
 namespace libbitcoin {
 namespace wallet {

@@ -20,8 +20,8 @@
 #define LIBBITCOIN_ENDIAN_HPP
 
 #include <istream>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -51,6 +51,6 @@ byte_array<sizeof(Integer)> to_little_endian(Integer value);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/endian.ipp>
+#include <bitcoin/system/impl/utility/endian.ipp>
 
 #endif

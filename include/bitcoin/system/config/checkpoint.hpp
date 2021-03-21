@@ -23,8 +23,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
 
 namespace libbitcoin {
 namespace config {

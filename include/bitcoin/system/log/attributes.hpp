@@ -22,8 +22,8 @@
 #include <string>
 #include <boost/log/attributes/clock.hpp>
 #include <boost/log/expressions/keyword.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/log/severity.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/log/severity.hpp>
 
 namespace libbitcoin {
 namespace log {

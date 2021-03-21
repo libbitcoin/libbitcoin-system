@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 

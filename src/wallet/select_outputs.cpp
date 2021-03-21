@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/select_outputs.hpp>
+#include <bitcoin/system/wallet/select_outputs.hpp>
 
 #include <algorithm>
 #include <cstdint>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/chain/points_value.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/chain/points_value.hpp>
 
 namespace libbitcoin {
 namespace wallet {

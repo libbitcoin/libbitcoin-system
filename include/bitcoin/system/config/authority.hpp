@@ -23,9 +23,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/message/network_address.hpp>
+#include <bitcoin/system/utility/asio.hpp>
 
 namespace libbitcoin {
 namespace config {

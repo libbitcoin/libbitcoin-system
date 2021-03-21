@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/electrum_dictionary.hpp>
+#include <bitcoin/system/wallet/electrum_dictionary.hpp>
 
 namespace libbitcoin {
 namespace wallet {

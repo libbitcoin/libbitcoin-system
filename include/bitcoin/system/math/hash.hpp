@@ -24,10 +24,10 @@
 #include <vector>
 #include <boost/functional/hash_fwd.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 
@@ -185,6 +185,6 @@ struct hash<bc::byte_array<Size>>
 };
 } // namespace boost
 
-#include <bitcoin/bitcoin/impl/math/hash.ipp>
+#include <bitcoin/system/impl/math/hash.ipp>
 
 #endif

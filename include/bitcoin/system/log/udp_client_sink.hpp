@@ -23,8 +23,8 @@
 #include <boost/asio.hpp>
 #include <boost/log/sinks/basic_sink_backend.hpp>
 #include <boost/shared_ptr.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error.hpp>
 
 namespace libbitcoin {
 namespace log {

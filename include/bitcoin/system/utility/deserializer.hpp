@@ -22,11 +22,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-////#include <bitcoin/bitcoin/utility/noncopyable.hpp>
-#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+////#include <bitcoin/system/utility/noncopyable.hpp>
+#include <bitcoin/system/utility/reader.hpp>
 
 namespace libbitcoin {
 
@@ -124,6 +124,6 @@ deserializer<Iterator, false> make_unsafe_deserializer(const Iterator begin);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/deserializer.ipp>
+#include <bitcoin/system/impl/utility/deserializer.ipp>
 
 #endif

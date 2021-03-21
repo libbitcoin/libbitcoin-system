@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/machine/opcode.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
 
 #include <cstdint>
 #include <string>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
 
 namespace libbitcoin {
 namespace machine {

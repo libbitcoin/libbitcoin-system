@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/system/config/endpoint.hpp>
 
 #include <cstdint>
 #include <iostream>
@@ -25,10 +25,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
+#include <bitcoin/system/config/endpoint.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/utility/asio.hpp>
 
 namespace libbitcoin {
 namespace config {

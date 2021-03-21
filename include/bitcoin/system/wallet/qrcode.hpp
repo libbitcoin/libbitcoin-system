@@ -22,9 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 #ifdef WITH_QRENCODE
 #include <qrencode.h>

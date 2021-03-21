@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace chain {

@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <iterator>
 #include <initializer_list>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 

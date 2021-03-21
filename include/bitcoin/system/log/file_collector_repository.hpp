@@ -23,8 +23,8 @@
 #include <boost/intrusive/options.hpp>
 #include <boost/log/detail/singleton.hpp>
 
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/log/file_collector.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/log/file_collector.hpp>
 
 namespace libbitcoin {
 namespace log {

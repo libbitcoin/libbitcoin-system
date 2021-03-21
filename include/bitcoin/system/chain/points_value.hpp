@@ -21,9 +21,9 @@
 
 #include <numeric>
 #include <cstdint>
-#include <bitcoin/bitcoin/chain/point_value.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
+#include <bitcoin/system/chain/point_value.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace chain {

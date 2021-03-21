@@ -21,7 +21,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace log {

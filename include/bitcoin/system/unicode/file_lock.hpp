@@ -25,7 +25,7 @@
 #include <boost/move/move.hpp>
 
 // Includes <windows.h> from bitcoin/unicode.hpp under _MSC_VER.
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 //!\file
 //!Describes a class that wraps file locking capabilities.

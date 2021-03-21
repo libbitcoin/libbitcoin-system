@@ -21,10 +21,10 @@
 
 #include <random>
 #include <cstdint>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/asio.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 

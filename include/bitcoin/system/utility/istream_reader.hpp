@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/system/utility/reader.hpp>
 
 namespace libbitcoin {
 
@@ -98,6 +98,6 @@ private:
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/istream_reader.ipp>
+#include <bitcoin/system/impl/utility/istream_reader.ipp>
 
 #endif
