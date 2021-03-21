@@ -71,6 +71,7 @@ static bool address_salt(ek_salt& salt, const ec_compressed& point,
     return address ? address_salt(salt, address) : false;
 }
 
+// gcc 4.8 complains that this is unused :/.
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
@@ -85,6 +86,7 @@ static bool address_validate(const ek_salt& salt,
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
+// gcc 4.8 complains that this is unused :/.
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
@@ -92,6 +94,7 @@ static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     return address ? address_validate(salt, address) : false;
 }
 
+// gcc 4.8 complains that this is unused :/.
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
@@ -116,6 +119,7 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
     return to_array(sign_byte);
 }
 
+// gcc 4.8 complains that this is unused :/.
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
     return point_sign(single.front(), hash);
@@ -124,6 +128,7 @@ static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 // scrypt_
 // ----------------------------------------------------------------------------
 
+// gcc 4.8 complains that this is unused :/.
 static hash_digest scrypt_token(data_slice data, data_slice salt)
 {
     // Arbitrary scrypt parameters from BIP38.
@@ -136,6 +141,7 @@ static long_hash scrypt_pair(data_slice data, data_slice salt)
     return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
 }
 
+// gcc 4.8 complains that this is unused :/.
 static long_hash scrypt_private(data_slice data, data_slice salt)
 {
     // Arbitrary scrypt parameters from BIP38.
@@ -166,6 +172,7 @@ static one_byte set_flags(bool compressed, bool lot_sequence)
     return set_flags(compressed, lot_sequence, false);
 }
 
+// gcc 4.8 complains that this is unused :/.
 static one_byte set_flags(bool compressed)
 {
     return set_flags(compressed, false);
