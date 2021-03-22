@@ -29,6 +29,7 @@ namespace system {
 /**
  * Class to patch Windows stdin keyboard input, file input is not a problem.
  * This class and members are no-ops when called in non-MSVC++ builds.
+ * When working in Windows console set font to "Lucida Console".
  */
 class BC_API console_streambuf
   : public std::wstreambuf
