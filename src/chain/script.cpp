@@ -1167,7 +1167,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     ops.reserve(points.size() + 3);
     ops.emplace_back(op_m);
 
-    for (const auto point: points)
+    for (const auto& point: points)
     {
         if (!is_public_key(point))
             return {};
@@ -1368,7 +1368,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
     }
 
     // Delete any found values, reversed to prevent iterator invalidation.
-    for (const auto it: reverse(found))
+    for (const auto& it: reverse(found))
         bytes_.erase(it, it + value.size());
 }
 

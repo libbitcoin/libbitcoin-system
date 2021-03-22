@@ -78,6 +78,9 @@ namespace bc = libbitcoin;
 #endif
 
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
+// This arises when including <functional>, which declares std::placeholders.
+// This results in an declared symbol when boost includes use placeholders.
+// So bracket those includes with an undefine and redefine of this symbol.
 #define BOOST_BIND_NO_PLACEHOLDERS
 
 // Define so we can have better visibility of lcov exclusion ranges.
