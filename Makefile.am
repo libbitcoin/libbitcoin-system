@@ -228,7 +228,7 @@ endif WITH_EXAMPLES
 #------------------------------------------------------------------------------
 if WITH_TESTS
 
-TESTS = libbitcoin-system-test_runner.sh
+TESTS = libbitcoin-test_runner.sh
 
 check_PROGRAMS = test/libbitcoin-system-test
 test_libbitcoin_system_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPPFLAGS} ${pthread_BUILD_CPPFLAGS} ${icu_i18n_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
