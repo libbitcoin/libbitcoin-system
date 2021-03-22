@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -51,11 +51,11 @@
 
 // Regarding Unicode in console applications:
 //
-// BC_USE_LIBBITCOIN_MAIN should be declared prior to bc::main() in a console
-// application. This enables Unicode argument and environment processing in
-// Windows. This macro implements main() and forwards to bc::main(), which
-// should be implemented as if it was main() with the expectation that argv
-// is utf8.
+// BC_USE_LIBBITCOIN_MAIN should be declared prior to libbitcoin::main() in a
+// console application. This enables Unicode argument and environment
+// processing in Windows. This macro implements main() and forwards to
+// libbitcoin::main(), which should be implemented as if it was main() with
+// the expectation that argv is utf8.
 //
 // Do not use std::cout|std::cerr|std::cin (aborts on assertion):
 // std::cout << "text";
@@ -78,6 +78,7 @@
 #define BC_LOCALE_UTF8 "en_US.UTF8"
 
 #ifdef _MSC_VER
+    #include <cstdlib>
     #include <locale>
     #include <boost/filesystem.hpp>
     #include <boost/locale.hpp>
@@ -98,13 +99,16 @@
             std::locale::global(locale(BC_LOCALE_UTF8)); \
             boost::filesystem::path::imbue(std::locale()); \
             \
-            auto variables = to_utf8(_wenviron); \
-            environ = reinterpret_cast<char**>(variables.data()); \
+            auto environment = environ; \
+            environ = bc::allocate_environment(_wenviron); \
             \
-            auto arguments = to_utf8(argc, argv); \
-            auto args = reinterpret_cast<char**>(arguments.data()); \
+            auto arguments = bc::allocate_environment(argc, argv); \
+            const auto result = libbitcoin::main(argc, arguments); \
             \
-            return libbitcoin::main(argc, args); \
+            bc::free_environment(arguments); \
+            bc::free_environment(environ); \
+            environ = environment; \
+            return result; \
         }
 #else
     #define BC_USE_LIBBITCOIN_MAIN \
@@ -142,6 +146,7 @@ std::ostream& cerr_stream();
 
 /**
  * Normalize a string value using nfc normalization.
+ * Failure is indicated by empty string return for non-empty value.
  * This function requires the ICU dependency.
  * @param[in]  value  The value to normalize.
  * @return            The normalized value.
@@ -150,6 +155,7 @@ BC_API std::string to_normal_nfc_form(const std::string& value);
 
 /**
  * Normalize a string value using nfkd normalization.
+ * Failure is indicated by empty string return for non-empty value.
  * This function requires the ICU dependency.
  * @param[in]  value  The value to normalize.
  * @return            The normalized value.
@@ -167,23 +173,25 @@ BC_API std::string to_lower(const std::string& value);
 #endif
 
 /**
- * Convert wide environment vector to utf8 environment vector.
- * Caller should assign buffer and set result to environ as:
- * environ = reinterpret_cast<char**>(&buffer[0])
- * @param[in]  environment  The wide environment variables vector.
- * @return                  A buffer holding the narrow version of environment.
+ * Free an environment.
+ * @param[in]  environment  The environment to free.
  */
-BC_API data_chunk to_utf8(wchar_t* environment[]);
+BC_API void free_environment(char* environment[]);
 
 /**
- * Convert wide argument vector to utf8 argument vector.
- * Caller should assign buffer and reinterpret result as:
- * auto args = reinterpret_cast<char**>(&buffer[0])
+ * Convert wide environment to allocated utf8 environment (caller must free).
+ * @param[in]  environment  The wide environment variables buffer.
+ * @return                  A buffer holding the narrow version of environment.
+ */
+BC_API char** allocate_environment(wchar_t* environment[]);
+
+/**
+ * Convert wide arguments to allocated utf8 arguments (caller must free).
  * @param[in]  argc  The number of elements in argv.
  * @param[in]  argv  The wide command line arguments.
  * @return           A buffer holding the narrow version of argv.
  */
-BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);
+BC_API char** allocate_environment(int argc, wchar_t* argv[]);
 
 /**
  * Convert a wide (presumed UTF16) array to wide (UTF8/char).

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -110,6 +110,9 @@ static NORM_FORM to_win32_normal_form(boost::locale::norm_type form)
 // The backend selection is ignored if invalid (in this case on Windows).
 static std::string normal_form(const std::string& value, norm_type form)
 {
+    if (value.empty())
+        return value;
+
 #ifdef _MSC_VER
     // Workaround lack of ICU support in published boost-locale NuGet packages.
     const auto norm = to_win32_normal_form(form);
@@ -186,52 +189,44 @@ std::string to_lower(const std::string& value)
 
 #endif
 
-// Convert wmain environment to utf8 main environment.
-data_chunk to_utf8(wchar_t* environment[])
+void free_environment(char* environment[])
+{
+    if (environment != nullptr)
+    {
+        for (auto index = 0; environment[index] != nullptr; ++index)
+            std::free(environment[index]);
+
+        std::free(environment);
+    }
+}
+
+// Convert wchar_t environment buffer to utf8 environment buffer.
+char** allocate_environment(wchar_t* environment[])
 {
     int count;
     for (count = 0; environment[count] != nullptr; count++);
-    return to_utf8(count, environment);
+    return allocate_environment(count, environment);
 }
 
-// Convert wmain parameters to utf8 main parameters.
-data_chunk to_utf8(int argc, wchar_t* argv[])
+// Convert wchar_t argument buffer to utf8 argument buffer.
+// Caller (or compiler, in case of environment replacement) must free.
+char** allocate_environment(int argc, wchar_t* argv[])
 {
-    const auto arg_count = safe_to_unsigned<size_t>(argc);
+    // Allocate argument pointer array.
+    auto arguments = (char**)std::malloc((argc + 1) * sizeof(char*));
+    arguments[argc] = nullptr;
 
-    // Convert each arg and determine the payload size.
-    size_t payload_size = 0;
-    std::vector<std::string> collection(arg_count + 1);
-
-    for (size_t arg = 0; arg < arg_count; arg++)
+    // Convert each argument, allocate and assign to pointer array.
+    for (auto arg = 0; arg < argc; arg++)
     {
-        collection[arg] = to_utf8(argv[arg]);
-        payload_size += collection[arg].size() + 1;
+        const auto utf8 = to_utf8(argv[arg]);
+        const auto size = utf8.size();
+        arguments[arg] = (char*)std::malloc(size + 1);
+        std::copy_n(utf8.begin(), size, arguments[arg]);
+        arguments[arg][size] = '\0';
     }
 
-    // TODO: unsafe multiplication.
-    // Determine the index size.
-    const auto index_size = safe_add(arg_count, size_t{1}) * sizeof(void*);
-
-    // Allocate the new buffer.
-    const auto buffer_size = safe_add(index_size, payload_size);
-    data_chunk buffer(buffer_size, 0x00);
-    buffer.resize(buffer_size);
-
-    // Set pointers into index and payload buffer sections.
-    auto index = reinterpret_cast<char**>(&buffer[0]);
-    auto arguments = reinterpret_cast<char*>(&buffer[index_size]);
-
-    // Clone the converted collection into the new narrow argv.
-    for (size_t arg = 0; arg < arg_count; arg++)
-    {
-        index[arg] = arguments;
-        const auto size = collection[arg].size();
-        std::copy_n(collection[arg].begin(), size, index[arg]);
-        arguments += safe_add(size, size_t{ 1 });
-    }
-
-    return buffer;
+    return arguments;
 }
 
 // Convert wstring to utf8 string.
@@ -245,9 +240,11 @@ std::string to_utf8(const std::wstring& wide)
 size_t to_utf8(char out[], size_t out_bytes, const wchar_t in[],
     size_t in_chars)
 {
-    BITCOIN_ASSERT(in != nullptr);
-    BITCOIN_ASSERT(out != nullptr);
-    BITCOIN_ASSERT(out_bytes >= utf8_max_character_size * in_chars);
+    if (in == nullptr || out == nullptr)
+        throw std::ios_base::failure("null pointer");
+
+    if (out_bytes < utf8_max_character_size * in_chars)
+        throw std::ios_base::failure("insufficient output buffer");
 
     if (in_chars == 0)
         return 0;
@@ -322,7 +319,8 @@ static bool is_utf8_character_sequence(const char sequence[], uint8_t bytes)
 // Determine if the text is terminated by a valid utf8 character.
 static bool is_terminal_utf8_character(const char text[], size_t size)
 {
-    BITCOIN_ASSERT(text != nullptr);
+    if (text == nullptr)
+        throw std::ios_base::failure("null pointer");
 
     // Walk back up to the max length of a utf8 character.
     for (uint8_t length = 1; length <= utf8_max_character_size &&
@@ -339,11 +337,12 @@ static bool is_terminal_utf8_character(const char text[], size_t size)
 
 // This optimizes character split detection by taking advantage of utf8
 // character recognition so we don't have to convert in full up to 3 times.
-// This does not guaratee that the entire string is valid as utf8, just that a
+// This does not guarantee that the entire string is valid as utf8, just that a
 // returned offset follows the last byte of a utf8 terminal char if it exists.
 static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 {
-    BITCOIN_ASSERT(text != nullptr);
+    if (text == nullptr)
+        throw std::ios_base::failure("null pointer");
 
     // Walk back up to the max length of a utf8 character.
     for (uint8_t unread = 0; unread < utf8_max_character_size &&
@@ -361,9 +360,11 @@ static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 size_t to_utf16(wchar_t out[], size_t out_chars, const char in[],
     size_t in_bytes, uint8_t& truncated)
 {
-    BITCOIN_ASSERT(in != nullptr);
-    BITCOIN_ASSERT(out != nullptr);
-    BITCOIN_ASSERT(out_chars >= in_bytes);
+    if (in == nullptr || out == nullptr)
+        throw std::ios_base::failure("null pointer");
+
+    if (out_chars < in_bytes)
+        throw std::ios_base::failure("insufficient output buffer");
 
     // Calculate a character break offset of 0..4 bytes.
     truncated = offset_to_terminal_utf8_character(in, in_bytes);
@@ -405,27 +406,29 @@ std::wstring to_utf16(const std::string& narrow)
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
 #ifdef _MSC_VER
+
 static void set_utf8_stdio(FILE* file)
 {
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
         throw std::runtime_error("Could not set STDIO to utf8 mode.");
 }
-#else
-static void set_utf8_stdio(FILE*)
-{
-}
-#endif
 
-#ifdef _MSC_VER
 static void set_binary_stdio(FILE* file)
 {
     if (_setmode(_fileno(file), _O_BINARY) == -1)
         throw std::runtime_error("Could not set STDIO to binary mode.");
 }
+
 #else
+
+static void set_utf8_stdio(FILE*)
+{
+}
+
 static void set_binary_stdio(FILE*)
 {
 }
+
 #endif
 
 // Set stdio to use UTF8 translation on Windows.

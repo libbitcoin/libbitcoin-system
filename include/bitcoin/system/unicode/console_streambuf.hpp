@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -28,6 +28,7 @@ namespace libbitcoin {
 /**
  * Class to patch Windows stdin keyboard input, file input is not a problem.
  * This class and members are no-ops when called in non-MSVC++ builds.
+ * When working in Windows console set font to "Lucida Console".
  */
 class BC_API console_streambuf
   : public std::wstreambuf
