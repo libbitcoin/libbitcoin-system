@@ -26,7 +26,9 @@
 #include <vector>
 #include <boost/iostreams/stream.hpp>
 #include <boost/property_tree/ptree.hpp>
+#undef BOOST_BIND_NO_PLACEHOLDERS
 #include <boost/property_tree/json_parser.hpp>
+#define BOOST_BIND_NO_PLACEHOLDERS
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/header.hpp>
