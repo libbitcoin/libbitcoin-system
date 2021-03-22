@@ -515,7 +515,8 @@ code witness::verify(const transaction& tx, uint32_t input_index,
                 return ec;
 
             // A v0 script must succeed with a clean true stack (bip141).
-            return witness.stack_result(true) ? ec : error::stack_false;
+            return witness.stack_result(true) ? error::success :
+                error::stack_false;
         }
 
         // These versions are reserved for future extensions (bip141).
