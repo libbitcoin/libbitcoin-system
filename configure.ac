@@ -253,14 +253,14 @@ AS_CASE([${host_os}],
 
 AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 
-# Require icu-i18n of at least version 51.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
+# Require icu-i18n of at least version 55.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_icu}], [yes],
-    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 51.2],
-        [icu_i18n_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "icu-i18n >= 51.2" 2>/dev/null`"
-         icu_i18n_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "icu-i18n >= 51.2" 2>/dev/null`"],
-        [AC_MSG_ERROR([--with-icu specified but icu-i18n >= 51.2 was not found.])])
-     AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 51.2'])
+    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 55.2],
+        [icu_i18n_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "icu-i18n >= 55.2" 2>/dev/null`"
+         icu_i18n_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "icu-i18n >= 55.2" 2>/dev/null`"],
+        [AC_MSG_ERROR([--with-icu specified but icu-i18n >= 55.2 was not found.])])
+     AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 55.2'])
      AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
      AS_IF([test x${icu_i18n_INCLUDEDIR} != "x"],
         [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], ["-isystem${icu_i18n_INCLUDEDIR} ${icu_i18n_OTHER_CFLAGS}"])],
