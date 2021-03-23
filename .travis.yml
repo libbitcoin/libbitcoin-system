@@ -84,10 +84,10 @@ script:
 
 after_success:
 
-    # Download and unpack lcov > 1.10
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.15.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.15; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
+    # Download and unpack lcov.
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.12; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
 
     # Install coveralls.
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
