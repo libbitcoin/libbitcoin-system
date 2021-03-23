@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/log/udp_client_sink.hpp>
+#include <bitcoin/system/log/udp_client_sink.hpp>
 
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <boost/make_shared.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/system/error.hpp>
 
 namespace libbitcoin {
 namespace log {
@@ -36,7 +36,7 @@ udp_client_sink::udp_client_sink(socket_ptr socket, endpoint_ptr endpoint)
 {
 }
 
-void udp_client_sink::consume(const record_view& record,
+void udp_client_sink::consume(const record_view& /* record */,
     const std::string& message)
 {
     send(message);

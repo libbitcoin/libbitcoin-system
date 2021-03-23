@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/bitcoin_uri.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <map>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_10.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
-#include <bitcoin/bitcoin/wallet/uri.hpp>
-#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
+#include <bitcoin/system/formats/base_10.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
+#include <bitcoin/system/wallet/uri.hpp>
+#include <bitcoin/system/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -59,7 +59,7 @@ bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-bitcoin_uri::operator const bool() const
+bitcoin_uri::operator bool() const
 {
     // An uninitialized URI returns false.
     return !address_.empty() || !query_.empty() || !scheme_.empty();
@@ -220,7 +220,7 @@ bool bitcoin_uri::set_path(const std::string& path)
     return address_.empty() && set_address(path);
 }
 
-bool bitcoin_uri::set_fragment(const std::string& fragment)
+bool bitcoin_uri::set_fragment(const std::string&)
 {
     return false;
 }

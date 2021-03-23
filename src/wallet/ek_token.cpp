@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/ek_token.hpp>
+#include <bitcoin/system/wallet/ek_token.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base_58.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/math/checksum.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -64,7 +64,7 @@ ek_token ek_token::from_string(const std::string& encoded)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_token::operator const bool() const
+ek_token::operator bool() const
 {
     return valid_;
 }

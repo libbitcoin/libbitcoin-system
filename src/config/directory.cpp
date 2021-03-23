@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/directory.hpp>
+#include <bitcoin/system/config/directory.hpp>
 
 #include <string>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 #ifdef _MSC_VER
     #include <shlobj.h>

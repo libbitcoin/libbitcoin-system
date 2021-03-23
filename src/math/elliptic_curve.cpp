@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
 
 #include <algorithm>
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 #include "../math/external/lax_der_parsing.h"
 #include "secp256k1_initializer.hpp"
 
@@ -368,7 +368,7 @@ bool verify_signature(data_slice point, const hash_digest& hash,
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash)
 {
-    int recovery_id;
+    int recovery_id = 0;
     const auto context = signing.context();
     secp256k1_ecdsa_recoverable_signature signature;
 

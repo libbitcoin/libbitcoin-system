@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_16.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/ec_private.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -125,7 +125,7 @@ ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ec_public::operator const bool() const
+ec_public::operator bool() const
 {
     return valid_;
 }
@@ -157,7 +157,7 @@ const ec_compressed& ec_public::point() const
     return point_;
 }
 
-const bool ec_public::compressed() const
+bool ec_public::compressed() const
 {
     return compress_;
 }

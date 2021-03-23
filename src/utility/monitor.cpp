@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/monitor.hpp>
+#include <bitcoin/system/utility/monitor.hpp>
 
 #include <cstddef>
 #include <string>
 #include <utility>
-////#include <bitcoin/bitcoin/log/sources.hpp>
+////#include <bitcoin/system/log/sources.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.

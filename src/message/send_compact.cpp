@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/send_compact.hpp>
+#include <bitcoin/system/message/send_compact.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -56,7 +56,7 @@ send_compact send_compact::factory_from_data(uint32_t version,
     return instance;
 }
 
-size_t send_compact::satoshi_fixed_size(uint32_t version)
+size_t send_compact::satoshi_fixed_size(uint32_t /* version */)
 {
     return 9;
 }
@@ -149,7 +149,7 @@ void send_compact::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void send_compact::to_data(uint32_t version,
+void send_compact::to_data(uint32_t /* version */,
     writer& sink) const
 {
     sink.write_byte(static_cast<uint8_t>(high_bandwidth_mode_));

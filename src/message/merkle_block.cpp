@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/merkle_block.hpp>
+#include <bitcoin/system/message/merkle_block.hpp>
 
-#include <bitcoin/bitcoin/chain/block.hpp>
-#include <bitcoin/bitcoin/chain/header.hpp>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/chain/block.hpp>
+#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -176,7 +176,7 @@ void merkle_block::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void merkle_block::to_data(uint32_t version, writer& sink) const
+void merkle_block::to_data(uint32_t /* version */, writer& sink) const
 {
     header_.to_data(sink);
 
@@ -191,7 +191,7 @@ void merkle_block::to_data(uint32_t version, writer& sink) const
     sink.write_bytes(flags_);
 }
 
-size_t merkle_block::serialized_size(uint32_t version) const
+size_t merkle_block::serialized_size(uint32_t /* version */) const
 {
     return header_.serialized_size() + 4u +
         message::variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +

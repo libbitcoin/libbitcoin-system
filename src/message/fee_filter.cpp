@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/fee_filter.hpp>
+#include <bitcoin/system/message/fee_filter.hpp>
 
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -54,7 +54,7 @@ fee_filter fee_filter::factory_from_data(uint32_t version, reader& source)
     return instance;
 }
 
-size_t fee_filter::satoshi_fixed_size(uint32_t version)
+size_t fee_filter::satoshi_fixed_size(uint32_t /* version */)
 {
     return sizeof(minimum_fee_);
 }
@@ -135,7 +135,7 @@ void fee_filter::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void fee_filter::to_data(uint32_t version, writer& sink) const
+void fee_filter::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_8_bytes_little_endian(minimum_fee_);
 }

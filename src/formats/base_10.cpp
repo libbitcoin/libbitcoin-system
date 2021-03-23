@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base_10.hpp>
+#include <bitcoin/system/formats/base_10.hpp>
 
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
 

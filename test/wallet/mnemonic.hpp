@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 struct mnemonic_result
 {

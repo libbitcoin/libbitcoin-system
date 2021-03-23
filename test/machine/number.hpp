@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include <limits>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 // (-2147483647 - 1)  and (-9223372036854775807 - 1) prevent warnings.
 

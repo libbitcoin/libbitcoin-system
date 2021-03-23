@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/stealth.hpp>
+#include <bitcoin/system/math/stealth.hpp>
 
 #include <algorithm>
 #include <utility>
-#include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/machine/script_pattern.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/machine/script_pattern.hpp>
+#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 

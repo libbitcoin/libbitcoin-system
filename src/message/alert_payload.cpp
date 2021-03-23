@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/alert_payload.hpp>
+#include <bitcoin/system/message/alert_payload.hpp>
 
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -224,7 +224,7 @@ bool alert_payload::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert_payload::from_data(uint32_t version, reader& source)
+bool alert_payload::from_data(uint32_t /* version */, reader& source)
 {
     reset();
 
@@ -274,7 +274,7 @@ void alert_payload::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void alert_payload::to_data(uint32_t version, writer& sink) const
+void alert_payload::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_4_bytes_little_endian(this->version_);
     sink.write_8_bytes_little_endian(relay_until_);
@@ -299,7 +299,7 @@ void alert_payload::to_data(uint32_t version, writer& sink) const
     sink.write_string(reserved_);
 }
 
-size_t alert_payload::serialized_size(uint32_t version) const
+size_t alert_payload::serialized_size(uint32_t /* version */) const
 {
     size_t size = 40u +
         message::variable_uint_size(comment_.size()) + comment_.size() +

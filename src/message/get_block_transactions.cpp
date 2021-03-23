@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/get_block_transactions.hpp>
+#include <bitcoin/system/message/get_block_transactions.hpp>
 
 #include <initializer_list>
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -113,7 +113,7 @@ bool get_block_transactions::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool get_block_transactions::from_data(uint32_t version,
+bool get_block_transactions::from_data(uint32_t /* version */,
     reader& source)
 {
     reset();
@@ -155,7 +155,7 @@ void get_block_transactions::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void get_block_transactions::to_data(uint32_t version,
+void get_block_transactions::to_data(uint32_t /* version */,
     writer& sink) const
 {
     sink.write_hash(block_hash_);
@@ -164,7 +164,7 @@ void get_block_transactions::to_data(uint32_t version,
         sink.write_variable_little_endian(element);
 }
 
-size_t get_block_transactions::serialized_size(uint32_t version) const
+size_t get_block_transactions::serialized_size(uint32_t /* version */) const
 {
     auto size = hash_size + message::variable_uint_size(indexes_.size());
 

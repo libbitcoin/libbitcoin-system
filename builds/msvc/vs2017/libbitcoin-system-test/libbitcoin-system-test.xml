@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="libbitcoin-system-test-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Test Options" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="datagen" DisplayName="datagen" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Option-datagen" DisplayName="Enable Test Data Generation" Description="Enable the Test Data Generation build option" Category="datagen">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+  </Rule>
+</ProjectSchemaDefinitions>

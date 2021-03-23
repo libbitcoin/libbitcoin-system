@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/alert.hpp>
+#include <bitcoin/system/message/alert.hpp>
 
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -105,7 +105,7 @@ bool alert::from_data(uint32_t version, std::istream& stream)
     return from_data(version, source);
 }
 
-bool alert::from_data(uint32_t version, reader& source)
+bool alert::from_data(uint32_t /* version */, reader& source)
 {
     reset();
 
@@ -136,7 +136,7 @@ void alert::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void alert::to_data(uint32_t version, writer& sink) const
+void alert::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_variable_little_endian(payload_.size());
     sink.write_bytes(payload_);
@@ -144,7 +144,7 @@ void alert::to_data(uint32_t version, writer& sink) const
     sink.write_bytes(signature_);
 }
 
-size_t alert::serialized_size(uint32_t version) const
+size_t alert::serialized_size(uint32_t /* version */) const
 {
     return message::variable_uint_size(payload_.size()) + payload_.size() +
         message::variable_uint_size(signature_.size()) + signature_.size();

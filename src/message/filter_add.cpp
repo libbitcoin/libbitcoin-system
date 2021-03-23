@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/filter_add.hpp>
+#include <bitcoin/system/message/filter_add.hpp>
 
-#include <bitcoin/bitcoin/math/limits.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -144,13 +144,13 @@ void filter_add::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_add::to_data(uint32_t version, writer& sink) const
+void filter_add::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_variable_little_endian(data_.size());
     sink.write_bytes(data_);
 }
 
-size_t filter_add::serialized_size(uint32_t version) const
+size_t filter_add::serialized_size(uint32_t /* version */) const
 {
     return message::variable_uint_size(data_.size()) + data_.size();
 }

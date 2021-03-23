@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
 
@@ -98,7 +98,6 @@ BOOST_AUTO_TEST_CASE(checksum__build_checked_array__not_empty__valid)
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__overflow__false)
 {
     data_chunk data = { 0, 0, 0, 0, 0 };
-    auto checksum = data.size();
     byte_array<checksum_size> out;
     const auto result = build_checked_array(out,
     {

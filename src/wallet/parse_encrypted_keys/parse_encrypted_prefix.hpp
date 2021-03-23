@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_HPP
+#ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_HPP
+#define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_HPP
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/encrypted_keys.hpp>
 
 // BIP38
 // Alt-chain implementers should exploit the address hash for [identification].

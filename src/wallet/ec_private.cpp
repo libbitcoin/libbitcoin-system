@@ -16,20 +16,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
 
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/formats/base_58.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/ec_public.hpp>
-#include <bitcoin/bitcoin/wallet/hd_private.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/math/checksum.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -147,7 +147,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ec_private::operator const bool() const
+ec_private::operator bool() const
 {
     return valid_;
 }
@@ -186,22 +186,22 @@ const ec_secret& ec_private::secret() const
     return secret_;
 }
 
-const uint16_t ec_private::version() const
+uint16_t ec_private::version() const
 {
     return version_;
 }
 
-const uint8_t ec_private::payment_version() const
+uint8_t ec_private::payment_version() const
 {
     return to_address_prefix(version_);
 }
 
-const uint8_t ec_private::wif_version() const
+uint8_t ec_private::wif_version() const
 {
     return to_wif_prefix(version_);
 }
 
-const bool ec_private::compressed() const
+bool ec_private::compressed() const
 {
     return compress_;
 }

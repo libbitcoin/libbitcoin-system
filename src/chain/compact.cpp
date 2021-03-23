@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/compact.hpp>
+#include <bitcoin/system/chain/compact.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -35,8 +35,10 @@ static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
 static constexpr uint32_t mantissa_bits = (sizeof(uint32_t) - 1) * 8;
 
 // assertions
+#if !defined(NDEBUG)
 static constexpr uint32_t mantissa_mask = ~mantissa_max;
 static constexpr uint32_t first_byte_mask = 0xffffff00;
+#endif
 
 // Inlines
 //-----------------------------------------------------------------------------

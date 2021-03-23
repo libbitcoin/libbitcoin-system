@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_boost_regex.html
+#      https://www.gnu.org/software/autoconf-archive/ax_boost_regex.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -30,7 +30,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 22
+#serial 23
 
 AC_DEFUN([AX_BOOST_REGEX],
 [
@@ -79,14 +79,14 @@ AC_DEFUN([AX_BOOST_REGEX],
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break],
-                                 [link_regex="no"],[$BOOST_ICU_LIBS])
+                                 [link_regex="no"])
 				done
                 if test "x$link_regex" != "xyes"; then
                 for libextension in `ls $BOOSTLIBDIR/boost_regex*.dll* $BOOSTLIBDIR/boost_regex*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_regex.*\)\.dll.*$;\1;' -e 's;^\(boost_regex.*\)\.a.*$;\1;'` ; do
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break],
-                                 [link_regex="no"],[$BOOST_ICU_LIBS])
+                                 [link_regex="no"])
 				done
                 fi
 
@@ -94,7 +94,7 @@ AC_DEFUN([AX_BOOST_REGEX],
                for ax_lib in $ax_boost_user_regex_lib boost_regex-$ax_boost_user_regex_lib; do
 				      AC_CHECK_LIB($ax_lib, main,
                                    [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break],
-                                   [link_regex="no"],[$BOOST_ICU_LIBS])
+                                   [link_regex="no"])
                done
             fi
             if test "x$ax_lib" = "x"; then

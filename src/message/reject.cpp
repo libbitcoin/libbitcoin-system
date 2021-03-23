@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/reject.hpp>
+#include <bitcoin/system/message/reject.hpp>
 
-#include <bitcoin/bitcoin/message/block.hpp>
-#include <bitcoin/bitcoin/message/messages.hpp>
-#include <bitcoin/bitcoin/message/transaction.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/block.hpp>
+#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/transaction.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -182,7 +182,7 @@ void reject::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void reject::to_data(uint32_t version, writer& sink) const
+void reject::to_data(uint32_t /* version */, writer& sink) const
 {
     sink.write_string(message_);
     sink.write_byte(reason_to_byte(code_));
@@ -195,7 +195,7 @@ void reject::to_data(uint32_t version, writer& sink) const
     }
 }
 
-size_t reject::serialized_size(uint32_t version) const
+size_t reject::serialized_size(uint32_t /* version */) const
 {
     size_t size = 1u + message::variable_uint_size(message_.size()) +
         message_.size() + message::variable_uint_size(reason_.size()) +

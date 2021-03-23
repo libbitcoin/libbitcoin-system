@@ -20,7 +20,7 @@
 
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
 using namespace bc::wallet;
@@ -58,7 +58,7 @@ struct custom_reader
         return true;
     }
 
-    virtual bool set_authority(const std::string& authority)
+    virtual bool set_authority(const std::string& /* authority */)
     {
         // This URI doesn't support an authority component.
         authority_ = true;

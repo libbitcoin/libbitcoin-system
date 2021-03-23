@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/qrcode.hpp>
+#include <bitcoin/system/wallet/qrcode.hpp>
 
 #include <iostream>
 #include <string>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 #ifdef WITH_QRENCODE
 
@@ -65,10 +65,12 @@ bool qr::encode(std::istream& in, uint32_t version, error_recovery_level level,
     const auto qrcode = QRcode_encodeString(qr_string.c_str(), version,
         level, mode, case_sensitive);
 
-    if (qrcode == nullptr)
+    if (qrcode == nullptr || qrcode->width < 0)
         return false;
 
-    if (bc::max_size_t / qrcode->width < qrcode->width)
+    const auto width = static_cast<size_t>(qrcode->width);
+
+    if (bc::max_size_t / width < width)
         return false;
 
     const auto area = qrcode->width * qrcode->width;

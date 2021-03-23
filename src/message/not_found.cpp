@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/not_found.hpp>
+#include <bitcoin/system/message/not_found.hpp>
 
 #include <initializer_list>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
 namespace message {

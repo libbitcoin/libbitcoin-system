@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/filter_clear.hpp>
+#include <bitcoin/system/message/filter_clear.hpp>
 
-#include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -136,7 +136,7 @@ void filter_clear::to_data(uint32_t version, std::ostream& stream) const
     to_data(version, sink);
 }
 
-void filter_clear::to_data(uint32_t version, writer& sink) const
+void filter_clear::to_data(uint32_t /* version */, writer& /* sink */) const
 {
 }
 
@@ -145,7 +145,7 @@ size_t filter_clear::serialized_size(uint32_t version) const
     return filter_clear::satoshi_fixed_size(version);
 }
 
-size_t filter_clear::satoshi_fixed_size(uint32_t version)
+size_t filter_clear::satoshi_fixed_size(uint32_t /* version */)
 {
     return 0;
 }

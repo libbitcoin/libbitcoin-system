@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
 
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(output__script_setter_1__roundtrip__success)
     instance.set_script(value);
     BOOST_REQUIRE(value == instance.script());
     const auto& restricted = instance;
-    BOOST_REQUIRE(value == instance.script());
+    BOOST_REQUIRE(value == restricted.script());
 }
 
 BOOST_AUTO_TEST_CASE(output__script_setter_2__roundtrip__success)
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(output__script_setter_2__roundtrip__success)
     instance.set_script(std::move(dup_value));
     BOOST_REQUIRE(value == instance.script());
     const auto& restricted = instance;
-    BOOST_REQUIRE(value == instance.script());
+    BOOST_REQUIRE(value == restricted.script());
 }
 
 BOOST_AUTO_TEST_CASE(output__operator_assign_equals_1__always__matches_equivalent)

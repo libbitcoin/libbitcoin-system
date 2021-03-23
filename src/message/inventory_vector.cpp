@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/system/message/inventory_vector.hpp>
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/utility/container_sink.hpp>
-#include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream_reader.hpp>
-#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
+#include <bitcoin/system/message/inventory.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -143,7 +143,7 @@ bool inventory_vector::from_data(uint32_t version,
     return from_data(version, source);
 }
 
-bool inventory_vector::from_data(uint32_t version,
+bool inventory_vector::from_data(uint32_t /* version */,
     reader& source)
 {
     reset();
@@ -177,7 +177,7 @@ void inventory_vector::to_data(uint32_t version,
     to_data(version, sink);
 }
 
-void inventory_vector::to_data(uint32_t version,
+void inventory_vector::to_data(uint32_t /* version */,
     writer& sink) const
 {
     const auto raw_type = inventory_vector::to_number(type_);
@@ -190,7 +190,7 @@ size_t inventory_vector::serialized_size(uint32_t version) const
     return inventory_vector::satoshi_fixed_size(version);
 }
 
-size_t inventory_vector::satoshi_fixed_size(uint32_t version)
+size_t inventory_vector::satoshi_fixed_size(uint32_t /* version */)
 {
     return sizeof(hash_) + sizeof(uint32_t);
 }

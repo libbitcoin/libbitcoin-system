@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_boost_locale.html
+#     https://www.gnu.org/software/autoconf-archive/ax_boost_locale.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -29,7 +29,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 1
+#serial 3
 
 AC_DEFUN([AX_BOOST_LOCALE],
 [
@@ -86,14 +86,14 @@ AC_DEFUN([AX_BOOST_LOCALE],
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_LOCALE_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOCALE_LIB) link_locale="yes"; break],
-                                 [link_locale="no"],[$BOOST_ICU_LIBS])
+                                 [link_locale="no"])
 				done
                 if test "x$link_locale" != "xyes"; then
                 for libextension in `ls $BOOSTLIBDIR/boost_locale*.dll* $BOOSTLIBDIR/boost_locale*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_locale.*\)\.dll.*$;\1;' -e 's;^\(boost_locale.*\)\.a.*$;\1;'` ; do
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_LOCALE_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOCALE_LIB) link_locale="yes"; break],
-                                 [link_locale="no"],[$BOOST_ICU_LIBS])
+                                 [link_locale="no"])
 				done
                 fi
 
@@ -101,12 +101,12 @@ AC_DEFUN([AX_BOOST_LOCALE],
                for ax_lib in $ax_boost_user_locale_lib boost_locale-$ax_boost_user_locale_lib; do
 				      AC_CHECK_LIB($ax_lib, exit,
                                    [BOOST_LOCALE_LIB="-l$ax_lib"; AC_SUBST(BOOST_LOCALE_LIB) link_locale="yes"; break],
-                                   [link_locale="no"],[$BOOST_ICU_LIBS])
+                                   [link_locale="no"])
                   done
 
             fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the library!)
+                AC_MSG_ERROR(Could not find a version of the Boost::Locale library!)
             fi
 			if test "x$link_locale" = "xno"; then
 				AC_MSG_ERROR(Could not link against $ax_lib !)
@@ -117,4 +117,3 @@ AC_DEFUN([AX_BOOST_LOCALE],
 	LDFLAGS="$LDFLAGS_SAVED"
 	fi
 ])
-

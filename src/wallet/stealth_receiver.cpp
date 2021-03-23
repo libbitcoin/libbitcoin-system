@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/stealth_receiver.hpp>
+#include <bitcoin/system/wallet/stealth_receiver.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/stealth.hpp>
-#include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/stealth.hpp>
+#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -42,7 +42,7 @@ stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     }
 }
 
-stealth_receiver::operator const bool() const
+stealth_receiver::operator bool() const
 {
     return address_;
 }

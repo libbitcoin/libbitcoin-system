@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <bitcoin/bitcoin/compat.h>
+#include <bitcoin/system/compat.h>
 #include "hmac_sha256.h"
 #include "zeroize.h"
 

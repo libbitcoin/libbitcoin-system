@@ -19,7 +19,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <vector>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/system.hpp>
 
 using namespace bc;
 
