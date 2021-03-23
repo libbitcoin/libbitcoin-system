@@ -63,31 +63,31 @@ before_install:
 install:
 
     # Export CC/CXX to control compiler/version.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then export CC=clang; export CXX=clang++; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-5.0; export CXX=clang++-5.0; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then export CC=gcc; export CXX=g++; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then export CC=clang; export CXX=clang++; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-5.0; export CXX=clang++-5.0; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then export CC=gcc; export CXX=g++; fi
 
     # Download and install packages.
 
 script:
 
     # Download and build libbitcoin-system and all dependencies.
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --disable-static; fi
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --disable-static; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-ndebug --disable-static --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' CXXFLAGS='-Os'; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --disable-static --build-boost --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -s' CXXFLAGS='-Os -s'; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then CC=$CC CXX=$CXX ./install.sh --enable-isystem --with-icu --build-icu --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Og -g --coverage' CXXFLAGS='-Og -g --coverage'; fi
 
 after_success:
 
-    # Download and unpack lcov > 1.10
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.15.tar.gz; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.15; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
+    # Download and unpack lcov.
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xzf lcov-1.12.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then cd lcov-1.12; PREFIX="$TRAVIS_BUILD_DIR/my-prefix" make install; cd ..; fi
 
     # Install coveralls.
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
