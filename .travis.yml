@@ -28,12 +28,6 @@ matrix:
         - os: linux
           compiler: clang
           env: LINK=dynamic
-          addons:
-            apt:
-              sources:
-                - sourceline: 'ppa:h-rayflood/llvm'
-              packages:
-                - clang-5.0
         - os: linux
           compiler: clang
           env: LINK=static
@@ -73,7 +67,7 @@ install:
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then export CC=clang-5.0; export CXX=clang++-5.0; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then export CC=gcc; export CXX=g++; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then export CC=clang-5.0; export CXX=clang++-5.0; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then export CC=clang; export CXX=clang++; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
 
     # Download and install packages.
