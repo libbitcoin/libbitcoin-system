@@ -43,8 +43,8 @@ BUILD_DIR="build-libbitcoin-system"
 
 # ICU archive.
 #------------------------------------------------------------------------------
-ICU_URL="https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.tgz"
-ICU_ARCHIVE="icu4c-68_2-src.tgz"
+ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
+ICU_ARCHIVE="icu4c-55_2-src.tgz"
 
 # Boost archive.
 #------------------------------------------------------------------------------
