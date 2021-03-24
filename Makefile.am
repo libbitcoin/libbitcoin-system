@@ -17,7 +17,7 @@ ACLOCAL_AMFLAGS = -I m4
 # files => ${pkgconfigdir}
 #------------------------------------------------------------------------------
 pkgconfig_DATA = \
-    libbitcoin.pc
+    libbitcoin-system.pc
 
 # files => ${docdir}
 #------------------------------------------------------------------------------
