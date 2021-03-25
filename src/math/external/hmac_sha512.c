@@ -68,14 +68,14 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
     }
 
     SHA512Init(&context->ictx);
-    memset(pad, 0x36, SHA512_BLOCK_LENGTH);
+    fill(pad, SHA512_BLOCK_LENGTH, 0x36);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
     SHA512Update(&context->ictx, pad, SHA512_BLOCK_LENGTH);
     SHA512Init(&context->octx);
-    memset(pad, 0x5c, SHA512_BLOCK_LENGTH);
+    fill(pad, SHA512_BLOCK_LENGTH, 0x5c);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
