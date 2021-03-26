@@ -97,8 +97,7 @@ BC_CONSTEXPR long_hash null_long_hash
 BC_CONSTEXPR short_hash null_short_hash
 {
     {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
 };
 
@@ -145,7 +144,7 @@ BC_API hash_digest sha256_hash(const data_slice& data);
 BC_API data_chunk sha256_hash_chunk(const data_slice& data);
 
 /// Generate a sha256 hash.
-/// This hash function was used in electrum seed stretching (obsoleted).
+/// This hash function is used in electrum seed stretching.
 BC_API hash_digest sha256_hash(const data_slice& first,
     const data_slice& second);
 
@@ -164,7 +163,7 @@ BC_API long_hash hmac_sha512_hash(const data_slice& data,
 BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations);
 
-/// Compute pbkdf2(passphrase, salt, iterations, length) using hmac_sha256 as the PRF.
+/// Generate a pbkdf2 hmac sha256 hash.
 BC_API data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length);
 

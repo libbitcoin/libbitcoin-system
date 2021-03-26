@@ -29,7 +29,7 @@ void fill(void* const buffer, size_t length, uint8_t value)
     SecureZeroMemory(buffer, length);
 #elif defined(HAVE_MEMSET_S)
 */
-#if defined(HAVE_MEMSET_S)
+#ifdef HAVE_MEMSET_S
     if (memset_s(buffer, (rsize_t)length, value, (rsize_t)length) != 0)
         abort();
 #else

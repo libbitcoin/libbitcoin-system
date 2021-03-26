@@ -634,7 +634,7 @@ char** allocate_environment(int argc, wchar_t* argv[])
         if (wcsnlen_s(argv[arg], bc::max_size_t) == bc::max_size_t)
             return nullptr;
 
-        const auto utf8 = bc::to_utf8(argv[arg]);
+        const auto utf8 = to_utf8(argv[arg]);
         const auto size = utf8.size();
 
         // Guard terminator addition.
@@ -677,7 +677,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     // the static path object must be imbued with the utf8 locale or paths will
     // be incorrectly translated.
     boost::locale::generator locale;
-    std::locale::global(locale(bc::utf8_locale_name));
+    std::locale::global(locale(utf8_locale_name));
     boost::filesystem::path::imbue(std::locale());
 
     auto backup = environ;

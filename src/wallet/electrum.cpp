@@ -240,12 +240,13 @@ bool validate_mnemonic(const word_list& mnemonic, const data_chunk& entropy,
     const auto created_mnemonic = create_mnemonic(entropy, lexicon, prefix);
 
     return is_new_seed(mnemonic, get_seed_prefix(prefix)) &&
-        (mnemonic_decode(mnemonic, lexicon) == mnemonic_decode(created_mnemonic, lexicon));
+        (mnemonic_decode(mnemonic, lexicon) == 
+            mnemonic_decode(created_mnemonic, lexicon));
 }
 
 bool validate_mnemonic(const word_list& mnemonic,
     const data_chunk& entropy, const dictionary_list& lexicons,
-    const seed prefix)
+    seed prefix)
 {
     for (const auto& lexicon: lexicons)
         if (validate_mnemonic(mnemonic, entropy, *lexicon, prefix))
