@@ -484,7 +484,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
         if (position == -1)
             return { 1 };
 
-        entropy *= dictionary_size + position;
+        entropy = (entropy * dictionary_size) + position;
     }
 
     return entropy;
@@ -516,8 +516,9 @@ word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
 
     do
     {
-        mnemonic = mnemonic_encode(numeric_entropy++, lexicon);
-        BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == 0);
+        mnemonic = mnemonic_encode(numeric_entropy, lexicon);
+        BITCOIN_ASSERT(mnemonic_decode(mnemonic, lexicon) == numeric_entropy);
+        numeric_entropy++;
     } while (is_old_seed(mnemonic, lexicon) ||
         !is_new_seed(mnemonic, electrum_prefix));
 
@@ -533,18 +534,29 @@ long_hash decode_mnemonic(const word_list& mnemonic,
         hmac_iterations);
 }
 
-bool validate_mnemonic(const word_list& mnemonic, const dictionary& lexicon,
-    seed prefix)
+bool validate_mnemonic(const word_list& mnemonic, const data_chunk& entropy,
+    const dictionary& lexicon, seed prefix)
 {
+    // To validate a specified wordlist given some starting entropy,
+    // we create a new one and ensure that the passed in mnemonic
+    // decodes to the same final entropy as the original mnenmonic.
+    //
+    // Creating a mnemonic is self validating, in that we guarantee
+    // that the entropy used to create it decodes back to that same
+    // entropy value.  Validation ensures that the passed in mnemonic
+    // and entropy is consistent by verifying a match on re-creation.
+    const auto created_mnemonic = create_mnemonic(entropy, lexicon, prefix);
+
     return is_new_seed(mnemonic, get_seed_prefix(prefix)) &&
-        (mnemonic_decode(mnemonic, lexicon) == 0);
+        (mnemonic_decode(mnemonic, lexicon) == mnemonic_decode(created_mnemonic, lexicon));
 }
 
 bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons, const seed prefix)
+    const data_chunk& entropy, const dictionary_list& lexicons,
+    const seed prefix)
 {
     for (const auto& lexicon: lexicons)
-        if (validate_mnemonic(mnemonic, *lexicon, prefix))
+        if (validate_mnemonic(mnemonic, entropy, *lexicon, prefix))
             return true;
 
     return false;

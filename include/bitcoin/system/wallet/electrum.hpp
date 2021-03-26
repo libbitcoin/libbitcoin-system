@@ -86,6 +86,7 @@ BC_API word_list create_mnemonic(const data_chunk& entropy,
  * words must have been created using electrum encoding.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
+    const data_chunk& entropy,
     const dictionary& lexicon,
     seed prefix=electrum::seed::standard);
 
@@ -93,6 +94,7 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
+    const data_chunk& entropy,
     const dictionary_list& lexicons=bc::system::wallet::language::electrum::all,
     seed prefix=electrum::seed::standard);
 
