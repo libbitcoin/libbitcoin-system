@@ -105,14 +105,22 @@ std::ostream& cerr_stream()
 
 static bool is_c_whitespace(char32_t value)
 {
-    // An ascii test would be redundant with the C locale:
+    // C whitespace characters:
     // space(0x20, ' ')
     // form feed(0x0c, '\f')
     // line feed(0x0a, '\n')
     // carriage return (0x0d, '\r')
     // horizontal tab(0x09, '\t')
     // vertical tab(0x0b, '\v')
-    return std::isspace(value, std::locale("C"));
+    constexpr auto ascii_mask = uint32_t{ 0x0000007f };
+
+    if (value > ascii_mask)
+        return false;
+
+    // An ascii test is redundant with the C locale, but not all environments
+    // provide an implementation of isspace(char32_t, locale).
+    const auto byte = static_cast<char>(value & ascii_mask);
+    return std::isspace(byte, std::locale("C"));
 }
 
 static bool is_chinese_japanese_or_korean(char32_t value)
