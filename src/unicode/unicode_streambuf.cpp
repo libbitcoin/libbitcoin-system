@@ -37,15 +37,15 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
     wide_buffer_(wide_buffer)
 {
-    if (wide_size_ > (max_uint64 / utf8_max_character_size))
-        throw std::ios_base::failure(
-            "Wide buffer must be no more than one fourth of max uint64.");
+    if (wide_size_ == 0u || wide_buffer == nullptr ||
+        wide_size_ > (bc::max_size_t / utf8_max_character_size))
+        throw std::ios_base::failure("unicode_streambuf paramters");
 
     // Input buffer is not yet populated, reflect zero length buffer here.
     setg(narrow_, narrow_, narrow_);
 
-    // Output buffer is underexposed by 1 byte to accommodate the overflow byte.
-    setp(narrow_, &narrow_[narrow_size_ - 1]);
+    // Output buffer is underexposed by 1 byte to accomodate the overflow byte.
+    setp(narrow_, &narrow_[narrow_size_ - 1u]);
 }
 
 unicode_streambuf::~unicode_streambuf()
@@ -62,18 +62,22 @@ unicode_streambuf::~unicode_streambuf()
 std::streambuf::int_type unicode_streambuf::underflow()
 {
     // streamsize is signed.
-    BITCOIN_ASSERT(wide_size_ > 0 && wide_size_ <= max_int64);
     const auto size = static_cast<std::streamsize>(wide_size_);
 
-    // Read from the wide input buffer.
-    const auto read = static_cast<size_t>(wide_buffer_->sgetn(wide_, size));
+    // Read from the wide input buffer (non-negative).
+    const auto read = wide_buffer_->sgetn(wide_, size);
 
     // Handle read termination.
     if (read == 0)
         return traits_type::eof();
 
     // Convert utf16 to utf8, returning bytes written.
-    const auto bytes = to_utf8(narrow_, narrow_size_, wide_, read);
+    const auto bytes = to_utf8(narrow_, narrow_size_, wide_,
+        static_cast<size_t>(read));
+
+    // Handle conversion failure.
+    if (bytes == 0u)
+        return traits_type::eof();
 
     // Reset gptr and egptr, eback never changes.
     setg(narrow_, narrow_, &narrow_[bytes]);
@@ -87,7 +91,7 @@ std::streambuf::int_type unicode_streambuf::underflow()
 // MSVC does not support a UTF8 locale and as such streams interpret
 // narrow characters in the default locale. This implementation
 // assumes the stream will treat each byte of a multibyte narrow
-// character as an individual single byte character.
+// chracter as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
     std::streambuf::int_type character)
 {
@@ -103,30 +107,38 @@ std::streambuf::int_type unicode_streambuf::overflow(
     // not written in the conversion. A nonzero value results when the buffer
     // terminates within a utf8 multiple byte character.
     uint8_t unwritten = 0;
+    const auto next = pptr();
+    const auto first = pbase();
+
+    // Handle invalid state as an EOF.
+    if (first > next)
+        return traits_type::eof();
 
     // Get the number of bytes in the buffer to convert.
-    const auto write = pptr() - pbase();
+    const auto write = static_cast<size_t>(next - first);
 
     if (write > 0)
     {
         // Convert utf8 to utf16, returning chars written and bytes unread.
-        const auto chars = to_utf16(wide_, narrow_size_, narrow_, write,
-            unwritten);
+        const auto chars = to_utf16(unwritten, wide_, narrow_size_, narrow_,
+            write);
 
         // Write to the wide output buffer.
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Handle write failure as an EOF.
-        if (written != static_cast<std::streamsize>(chars))
+        if (written != chars)
             return traits_type::eof();
     }
 
+    // write is necessarily no greater than unwritten.
     // Copy the fractional character to the beginning of the buffer.
     memcpy(narrow_, &narrow_[write - unwritten], unwritten);
 
+    // narrow_size_ is necessarily greater than 1 (constructor guard).
     // Reset the pptr to the buffer start, leave pbase and epptr.
     // We could use just pbump for this if it wasn't limited to 'int' width.
-    setp(narrow_, &narrow_[narrow_size_ - 1]);
+    setp(narrow_, &narrow_[narrow_size_ - 1u]);
 
     // Reset pptr just after the fractional character.
     pbump(unwritten);
