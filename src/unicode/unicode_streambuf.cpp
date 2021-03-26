@@ -126,8 +126,12 @@ std::streambuf::int_type unicode_streambuf::overflow(
         // Write to the wide output buffer.
         const auto written = wide_buffer_->sputn(wide_, chars);
 
+        // Guard unsigned cast of 64 bit value.
+        if (chars > (max_uint64 >> 1u))
+            return traits_type::eof();
+
         // Handle write failure as an EOF.
-        if (written != chars)
+        if (written != static_cast<int64_t>(chars))
             return traits_type::eof();
     }
 
