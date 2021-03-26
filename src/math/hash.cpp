@@ -166,8 +166,8 @@ static void handle_script_result(int result)
     }
 }
 
-data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N, uint32_t p,
-    uint32_t r, size_t length)
+data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
+    uint32_t p, uint32_t r, size_t length)
 {
     data_chunk output(length);
     const auto result = crypto_scrypt(data.data(), data.size(), salt.data(),

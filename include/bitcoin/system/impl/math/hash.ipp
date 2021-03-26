@@ -27,8 +27,8 @@ namespace libbitcoin {
 namespace system {
 
 template<size_t Size>
-byte_array<Size> scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
-    uint32_t p, uint32_t r)
+byte_array<Size> scrypt(const data_slice& data, const data_slice& salt,
+    uint64_t N, uint32_t p, uint32_t r)
 {
     const auto out = scrypt(data, salt, N, r, p, Size);
     return to_array<Size>({ out });
