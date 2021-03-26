@@ -631,14 +631,14 @@ char** allocate_environment(int argc, wchar_t* argv[])
     for (auto arg = 0; arg < argc; arg++)
     {
         // Guard overflow of std::wstring assignment.
-        if (wcsnlen_s(argv[arg], bc::max_size_t) == bc::max_size_t)
+        if (wcsnlen_s(argv[arg], max_size_t) == max_size_t)
             return nullptr;
 
         const auto utf8 = to_utf8(argv[arg]);
         const auto size = utf8.size();
 
         // Guard terminator addition.
-        if (size == bc::max_size_t)
+        if (size == max_size_t)
             return nullptr;
 
         arguments[arg] = reinterpret_cast<char*>(std::malloc(size + 1u));
