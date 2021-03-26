@@ -213,8 +213,59 @@ BOOST_AUTO_TEST_CASE(unicode__to_compressed_cjk__cjk_unified_ideograph_both__unc
 BOOST_AUTO_TEST_CASE(unicode__to_compressed_cjk__cjk_unified_ideograph_all__middle_stripped)
 {
     const std::u32string expected{ 0x20, 0x00004e00, 0x00004e00, 0x20 };
-    const std::u32string cjk_unified_ideograph_all{ 0x20, 0x00004e00, 0x20, 0x00004e00, 0x20 };
+    const std::u32string cjk_unified_ideograph_all{ 0x20, 0x00004e00, 0x0c, 0x00004e00, 0x20 };
     const auto utf8 = to_utf8(cjk_unified_ideograph_all);
+    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_compressed_cjk__single_and_double_contained_whitespace__single_stripped)
+{
+    const std::u32string expected
+    {
+        0x20, 0x00004e00, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x00004e00, 0x20
+    };
+    const std::u32string single_and_double_contained
+    {
+        0x20, 0x00004e00, 0x20, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x0c, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x0a, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x0d, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x09, 0x00004e00, 0x20,
+        0x20, 0x00004e00, 0x0b, 0x00004e00, 0x20
+    };
+    const auto utf8 = to_utf8(single_and_double_contained);
+    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_compressed_cjk__alternating_single_contained_whitespace__contained_stripped)
+{
+    const std::u32string expected
+    {
+        0x20, 
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x20
+    };
+    const std::u32string alternating_single_contained
+    {
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20, 0x00004e00, 0x20, 0x00004e00,
+        0x20
+    };
+    const auto utf8 = to_utf8(alternating_single_contained);
     BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
 }
 
