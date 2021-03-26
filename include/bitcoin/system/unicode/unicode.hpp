@@ -229,10 +229,12 @@ BC_API void set_binary_stdin();
  */
 BC_API void set_binary_stdout();
 
+/// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
+uint8_t offset_to_terminal_utf8_character(const char text[], size_t size);
+
 #ifdef _MSC_VER
 
-// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
-uint8_t offset_to_terminal_utf8_character(const char text[], size_t size);
+/// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
 void free_environment(char* environment[]);
 char** allocate_environment(wchar_t* environment[]);
 char** allocate_environment(int argc, wchar_t* argv[]);
