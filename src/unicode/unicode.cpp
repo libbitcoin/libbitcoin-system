@@ -103,13 +103,9 @@ std::ostream& cerr_stream()
 
 #ifdef WITH_ICU
 
-static bool is_ascii(char32_t value)
-{
-    return value <= 0x7f;
-}
-
 static bool is_c_whitespace(char32_t value)
 {
+    // An ascii test would be redundant with the C locale:
     // space(0x20, ' ')
     // form feed(0x0c, '\f')
     // line feed(0x0a, '\n')
@@ -117,12 +113,6 @@ static bool is_c_whitespace(char32_t value)
     // horizontal tab(0x09, '\t')
     // vertical tab(0x0b, '\v')
     return std::isspace(value, std::locale("C"));
-}
-
-static bool is_ascii_whitespace(char32_t value)
-{
-    // The ascii test is redundant with the C locale.
-    return is_ascii(value) && is_c_whitespace(value);
 }
 
 static bool is_chinese_japanese_or_korean(char32_t value)
@@ -246,6 +236,8 @@ static std::string normal_form(const std::string& value, norm_type form)
     return normalize(value, form, locale(utf8_locale_name));
 }
 
+// Python 2 string.lower() is *locale dependent* (invalid).
+// Python 3 string.lower() follows section 3.13 of the Unicode Standard.
 std::string to_lower(const std::string& value)
 {
     if (value.empty())
@@ -315,7 +307,7 @@ std::string to_compressed_cjk_form(const std::string& value)
     // points[size] cannot be between two characters, so skip it.
     for (size_t point = 1; point < points.size() - 1u; point++)
     {
-        if (!(is_ascii_whitespace(points[point]) &&
+        if (!(is_c_whitespace(points[point]) &&
             is_chinese_japanese_or_korean(points[point - 1u]) &&
             is_chinese_japanese_or_korean(points[point + 1u])))
         {
