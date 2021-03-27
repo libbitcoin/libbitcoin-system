@@ -390,20 +390,20 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__null_out__zero)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__null_in__zero)
 {
-    char* out = "";
+    char out[42];
     BOOST_REQUIRE_EQUAL(to_utf8(out, 42, nullptr, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__zero_in__zero)
 {
-    char* out = "";
+    char out[42];
     const wchar_t* in = L"";
     BOOST_REQUIRE_EQUAL(to_utf8(out, 42, in, 0), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__zero_out__zero)
 {
-    char* out = "";
+    char out[42];
     const wchar_t* in = L"";
     BOOST_REQUIRE_EQUAL(to_utf8(out, 0, in, 42), 0u);
 }
@@ -459,14 +459,14 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_out__zero)
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_in__zero)
 {
     uint8_t truncated;
-    wchar_t* out = L"";
+    wchar_t out[42];
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, nullptr, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
 {
     uint8_t truncated;
-    wchar_t* out = L"";
+    wchar_t out[42];
     const char* in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, in, 0), 0u);
 }
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_out__zero)
 {
     uint8_t truncated;
-    wchar_t* out = L"";
+    wchar_t out[42];
     const char* in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 0, in, 42), 0u);
 }
@@ -572,7 +572,9 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
 }
 
-// allocate_environment (vars)
+// allocate_environment (vars) / free_environment
+
+#ifdef _MSC_VER
 
 BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__ascii__expected)
 {
@@ -614,7 +616,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__null_termination__expec
     free_environment(narrow_environment);
 }
 
-// allocate_environment (args)
+// allocate_environment (args) / free_environment
 
 BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__ascii__expected)
 {
@@ -657,5 +659,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__null_termination__expec
     BOOST_REQUIRE_EQUAL(argv_terminator, (char*)nullptr);
     free_environment(narrow_args);
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
