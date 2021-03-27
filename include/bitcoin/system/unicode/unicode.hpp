@@ -235,11 +235,11 @@ uint8_t offset_to_terminal_utf8_character(const char text[], size_t size);
 #ifdef _MSC_VER
 
 /// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
+int call_utf8_main(int argc, wchar_t* argv[],
+    int(*main)(int argc, char* argv[]));
 void free_environment(char* environment[]);
 char** allocate_environment(wchar_t* environment[]);
 char** allocate_environment(int argc, wchar_t* argv[]);
-int call_utf8_main(int argc, wchar_t* argv[],
-    int(*main)(int argc, char* argv[]));
 
 #define BC_USE_LIBBITCOIN_MAIN \
     namespace libbitcoin \
