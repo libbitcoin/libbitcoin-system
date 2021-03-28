@@ -57,10 +57,6 @@ typedef std::vector<utf32_interval> utf32_intervals;
 extern const utf32_intervals chinese_japanese_korean;
 extern const utf32_intervals diacritics;
 
-// Boost/std locale paramters.
-constexpr auto icu_backend_name = "icu";
-constexpr auto utf8_locale_name = "en_US.UTF8";
-
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
 
@@ -221,6 +217,7 @@ static void validate_localization()
     const auto backend_manager = localization_backend_manager::global();
 
     // Not thread safe (call to validate_localization is guarded).
+    constexpr auto icu_backend_name = "icu";
     const auto available_backends = backend_manager.get_all_backends();
     const auto iterator = std::find(available_backends.cbegin(),
         available_backends.cend(), icu_backend_name);
@@ -238,6 +235,8 @@ static std::string normal_form(const std::string& value, norm_type form)
     std::call_once(icu_mutex, validate_localization);
 
     // Thread safe.
+    constexpr auto icu_backend_name = "icu";
+    constexpr auto utf8_locale_name = "en_US.UTF8";
     auto backend_manager = localization_backend_manager::global();
     backend_manager.select(icu_backend_name);
     const generator locale(backend_manager);
@@ -254,6 +253,8 @@ std::string to_lower(const std::string& value)
     std::call_once(icu_mutex, validate_localization);
 
     // Thread safe.
+    constexpr auto icu_backend_name = "icu";
+    constexpr auto utf8_locale_name = "en_US.UTF8";
     auto backend_manager = localization_backend_manager::global();
     backend_manager.select(icu_backend_name);
     const generator locale(backend_manager);
@@ -684,6 +685,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     // must be configured for utf8. When working with boost::filesystem::path
     // the static path object must be imbued with the utf8 locale or paths will
     // be incorrectly translated.
+    constexpr auto utf8_locale_name = "en_US.UTF8";
     boost::locale::generator locale;
     std::locale::global(locale(utf8_locale_name));
     boost::filesystem::path::imbue(std::locale());
