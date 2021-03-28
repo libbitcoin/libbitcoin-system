@@ -29,8 +29,7 @@ namespace system {
 namespace wallet {
 
 /**
- * A valid electrum v1 mnemonic dictionary has exactly this many
- * words.
+ * A valid electrum v1 mnemonic dictionary has exactly this many words.
  */
 static BC_CONSTEXPR size_t dictionary_size_v1 = 1626;
 

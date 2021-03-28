@@ -24,6 +24,7 @@ namespace wallet {
 namespace language {
 namespace electrum {
 
+// This is the only original (old) Elecrum dictionary language.
 const dictionary_v1 en_v1 =
 {
     {
