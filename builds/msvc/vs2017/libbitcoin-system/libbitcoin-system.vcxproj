@@ -278,11 +278,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\ek_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\electrum.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_en.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_es.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_ja.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_pt.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_zh_Hans.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp" />

@@ -19,6 +19,7 @@
 #include "mnemonic.hpp"
 
 #include <boost/test/unit_test.hpp>
+#include <algorithm>
 #include <bitcoin/system.hpp>
 
 using namespace bc::system;
@@ -142,98 +143,90 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__giant)
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 {
-    const auto& english = language::en;
-    const auto& spanish = language::es;
-    size_t intersection = 0;
-    for (const auto es: spanish)
+    const auto intersection = std::any_of(language::en.begin(), language::en.end(),
+        [&](const char* test)
     {
-        std::string test(es);
-        const auto it = std::find(english.begin(), english.end(), test);
-        if (it != std::end(english))
-            intersection++;
-    }
+        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+    });
 
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
+    BOOST_REQUIRE(!intersection);
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_it__no_intersection)
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_en__no_intersection)
 {
-    const auto& english = language::en;
-    const auto& italian = language::it;
-    size_t intersection = 0;
-    for (const auto it: italian)
-    {
-        std::string test(it);
-        const auto iter = std::find(english.begin(), english.end(), test);
-        if (iter != std::end(english))
-            intersection++;
-    }
+    const auto intersection = std::any_of(language::it.begin(), language::it.end(),
+        [&](const char* test)
+        {
+            return std::find(language::en.begin(), language::en.end(), test) != std::end(language::en);
+        });
 
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
+    BOOST_REQUIRE(!intersection);
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_es__no_intersection)
 {
-    const auto& french = language::fr;
-    const auto& spanish = language::es;
-    size_t intersection = 0;
-    for (const auto es: spanish)
+    const auto intersection = std::any_of(language::fr.begin(), language::fr.end(),
+        [&](const char* test)
     {
-        std::string test(es);
-        const auto it = std::find(french.begin(), french.end(), test);
-        if (it != std::end(french))
-            intersection++;
-    }
+        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+    });
 
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
+    BOOST_REQUIRE(!intersection);
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_es__no_intersection)
 {
-    const auto& italian = language::it;
-    const auto& spanish = language::es;
-    size_t intersection = 0;
-    for (const auto es: spanish)
+    const auto intersection = std::any_of(language::it.begin(), language::it.end(),
+        [&](const char* test)
     {
-        std::string test(es);
-        const auto it = std::find(italian.begin(), italian.end(), test);
-        if (it != std::end(italian))
-            intersection++;
-    }
+        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+    });
 
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
+    BOOST_REQUIRE(!intersection);
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_it__no_intersection)
 {
-    const auto& french = language::fr;
-    const auto& italian = language::it;
-    size_t intersection = 0;
-    for (const auto it: italian)
+    const auto intersection = std::any_of(language::fr.begin(), language::fr.end(),
+        [&](const char* test)
     {
-        std::string test(it);
-        const auto iter = std::find(french.begin(), french.end(), test);
-        if (iter != std::end(french))
-            intersection++;
-    }
+        return std::find(language::it.begin(), language::it.end(), test) != std::end(language::it);
+    });
 
-    BOOST_REQUIRE_EQUAL(intersection, 0u);
+    BOOST_REQUIRE(!intersection);
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__intersection)
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_pt__no_intersection)
 {
-    const auto& simplified = language::zh_Hans;
-    const auto& traditional = language::zh_Hant;
-    size_t intersection = 0;
-    for (const auto hant: traditional)
+    const auto intersection = std::any_of(language::cs.begin(), language::cs.end(),
+        [&](const char* test)
     {
-        std::string test(hant);
-        const auto it = std::find(simplified.begin(), simplified.end(), test);
-        if (it != std::end(simplified))
-            intersection++;
-    }
+        return std::find(language::pt.begin(), language::pt.end(), test) != std::end(language::pt);
+    });
 
-    BOOST_REQUIRE_EQUAL(intersection, 1275u);
+    BOOST_REQUIRE(!intersection);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__ko_zh_Hans__no_intersection)
+{
+    const auto intersection = std::any_of(language::ko.begin(), language::ko.end(),
+        [&](const char* test)
+    {
+        return std::find(language::zh_Hans.begin(), language::zh_Hans.end(), test) != std::end(language::zh_Hans);
+    });
+
+    BOOST_REQUIRE(!intersection);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__1275_intersections)
+{
+    const auto intersections = std::count_if(language::zh_Hans.begin(), language::zh_Hans.end(),
+        [&](const char* test)
+    {
+        return std::find(language::zh_Hant.begin(), language::zh_Hant.end(), test) != std::end(language::zh_Hant);
+    });
+
+    BOOST_REQUIRE_EQUAL(intersections, 1275u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

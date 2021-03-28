@@ -29,11 +29,12 @@ namespace wallet {
 
 /**
  * A valid mnemonic dictionary has exactly this many words.
+ * This size applies to both Electrum (>v1) and bip39 word lists.
  */
 static BC_CONSTEXPR size_t dictionary_size = 2048;
 
 /**
- * Dictionary definitions for creating mnemonics.
+ * A dictionary for creating mnemonics.
  * The bip39 spec calls this a "wordlist".
  * This is a POD type, which means the compiler can write it directly
  * to static memory with no run-time overhead.
@@ -41,37 +42,27 @@ static BC_CONSTEXPR size_t dictionary_size = 2048;
 typedef std::array<const char*, dictionary_size> dictionary;
 
 /**
- * A collection of candidate dictionaries for mnemonic metadata.
+ * A collection of dictionaries for mnemonic validation.
  */
 typedef std::vector<const dictionary*> dictionary_list;
 
-namespace language {
-
-// Individual built-in languages:
-extern const dictionary en;
-extern const dictionary es;
-extern const dictionary fr;
-extern const dictionary it;
-extern const dictionary ja;
-extern const dictionary ko;
-extern const dictionary zh_Hans;
-extern const dictionary zh_Hant;
-
-// Word lists from:
-// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const dictionary_list all
+namespace language
 {
-    &en,
-    &es,
-    &fr,
-    &it,
-    &ja,
-    &ko,
-    &zh_Hans,
-    &zh_Hant
-};
+    // Individual bip39 languages:
+    extern const dictionary en;
+    extern const dictionary es;
+    extern const dictionary ja;
+    extern const dictionary it;
+    extern const dictionary fr;
+    extern const dictionary cs;
+    extern const dictionary pt;
+    extern const dictionary ko;
+    extern const dictionary zh_Hans;
+    extern const dictionary zh_Hant;
 
-} // namespace language
+    // All bip39 languages:
+    extern const dictionary_list all;
+}
 
 } // namespace wallet
 } // namespace system

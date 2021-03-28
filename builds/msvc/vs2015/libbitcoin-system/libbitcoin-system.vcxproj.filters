@@ -618,21 +618,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_en.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_es.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_ja.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_pt.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary_zh_Hans.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>

@@ -216,11 +216,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/ek_token.cpp \
     src/wallet/electrum.cpp \
     src/wallet/electrum_dictionary.cpp \
-    src/wallet/electrum_dictionary_en.cpp \
-    src/wallet/electrum_dictionary_es.cpp \
-    src/wallet/electrum_dictionary_ja.cpp \
-    src/wallet/electrum_dictionary_pt.cpp \
-    src/wallet/electrum_dictionary_zh_Hans.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
