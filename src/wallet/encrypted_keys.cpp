@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -71,7 +71,8 @@ static bool address_salt(ek_salt& salt, const ec_compressed& point,
     return address ? address_salt(salt, address) : false;
 }
 
-// gcc 4.8 complains that this is unused :/.
+#ifdef WITH_ICU
+
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
@@ -86,7 +87,6 @@ static bool address_validate(const ek_salt& salt,
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-// gcc 4.8 complains that this is unused :/.
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
@@ -94,13 +94,14 @@ static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     return address ? address_validate(salt, address) : false;
 }
 
-// gcc 4.8 complains that this is unused :/.
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
     payment_address address({ secret, version, compressed });
     return address ? address_validate(salt, address) : false;
 }
+
+#endif
 
 // point_
 // ----------------------------------------------------------------------------
@@ -119,34 +120,43 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
     return to_array(sign_byte);
 }
 
-// gcc 4.8 complains that this is unused :/.
+#ifdef WITH_ICU
+
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
     return point_sign(single.front(), hash);
 }
 
+#endif
+
 // scrypt_
 // ----------------------------------------------------------------------------
 
-// gcc 4.8 complains that this is unused :/.
-static hash_digest scrypt_token(data_slice data, data_slice salt)
+#ifdef WITH_ICU
+
+static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<hash_size>(data, salt, 16384u, 8u, 8u);
 }
 
-static long_hash scrypt_pair(data_slice data, data_slice salt)
+#endif
+
+static long_hash scrypt_pair(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
 }
 
-// gcc 4.8 complains that this is unused :/.
-static long_hash scrypt_private(data_slice data, data_slice salt)
+#ifdef WITH_ICU
+
+static long_hash scrypt_private(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384u, 8u, 8u);
 }
+
+#endif
 
 // set_flags
 // ----------------------------------------------------------------------------
@@ -167,16 +177,19 @@ static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
     return to_array(byte);
 }
 
+#ifdef WITH_ICU
+
 static one_byte set_flags(bool compressed, bool lot_sequence)
 {
     return set_flags(compressed, lot_sequence, false);
 }
 
-// gcc 4.8 complains that this is unused :/.
 static one_byte set_flags(bool compressed)
 {
     return set_flags(compressed, false);
 }
+
+#endif
 
 // create_key_pair
 // ----------------------------------------------------------------------------
@@ -295,7 +308,7 @@ static data_chunk normal(const std::string& passphrase)
 }
 
 static bool create_token(encrypted_token& out_token,
-    const std::string& passphrase, data_slice owner_salt,
+    const std::string& passphrase, const data_slice& owner_salt,
     const ek_entropy& owner_entropy,
     const byte_array<parse_encrypted_token::prefix_size>& prefix)
 {

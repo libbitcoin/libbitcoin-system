@@ -27,8 +27,7 @@ BOOST_AUTO_TEST_SUITE(electrum_tests)
 
 // These test cases were generated using electrum code and verified to
 // match output from:
-//
-// https://github.com/spesmilo/electrum/blob/master/lib/mnemonic.py
+// github.com/spesmilo/electrum/blob/master/lib/mnemonic.py
 
 #ifdef WITH_ICU
 

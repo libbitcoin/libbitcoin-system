@@ -176,7 +176,7 @@ endif()
 # Find icu-i18n
 #------------------------------------------------------------------------------
 if (with-icu)
-    find_package( Icu-I18N 51.2 REQUIRED )
+    find_package( Icu-I18N 55.2 REQUIRED )
 endif()
 
 # Find dl
