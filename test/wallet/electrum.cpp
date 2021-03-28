@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__en_dictionary_prefix__valid)
 {
     data_chunk entropy;
     decode_base16(entropy, "0b0d80f992a51348a89aeb5196fa0bd0d6");
-    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::en, electrum::seed::standard);
+    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::en, electrum::seed_prefix::standard);
     BOOST_REQUIRE(!mnemonic.empty());
     BOOST_REQUIRE_EQUAL(join(mnemonic), "crawl consider laptop bonus stove chase earn battle feed town scatter radio");
     BOOST_REQUIRE(electrum::validate_mnemonic(mnemonic, entropy, language::electrum::en, electrum::seed::standard));
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__zh_Hans_dictionary__witness_pref
 
     data_chunk entropy;
     decode_base16(entropy, "090ff228d676340e9ad295e25d9fef11cb"); // 3083737086352778425940060465574397809099
-    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::zh_Hans, electrum::seed::witness);
+    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::zh_Hans, electrum::seed_prefix::witness);
     BOOST_REQUIRE(!mnemonic.empty());
 
     // Test for seed without passphrase
@@ -162,6 +162,7 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__ja_dictionary_prefix__valid)
 BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__en_dictionary_prefix_witness__valid)
 {
     const auto mnemonic = split("wild father tree among universe such mobile favorite target dynamic credit identify");
+    BOOST_REQUIRE(electrum::validate_mnemonic(mnemonic, language::electrum::en, electrum::seed_prefix::witness));
     const auto seed = electrum::decode_mnemonic(mnemonic);
     BOOST_REQUIRE_EQUAL(encode_base16(seed), "aac2a6302e48577ab4b46f23dbae0774e2e62c796f797d0a1b5faeb528301e3064342dafb79069e7c4c6b8c38ae11d7a973bec0d4f70626f8cc5184a8d0b0756");
 }
@@ -172,6 +173,7 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__en_dictionary_prefix_witness_wit
 {
     const auto mnemonic = split("wild father tree among universe such mobile favorite target dynamic credit identify");
     const auto passphrase = "Did you ever hear the tragedy of Darth Plagueis the Wise?";
+    BOOST_REQUIRE(electrum::validate_mnemonic(mnemonic, language::electrum::en, electrum::seed_prefix::witness));
     const auto seed = electrum::decode_mnemonic(mnemonic, passphrase);
     BOOST_REQUIRE_EQUAL(encode_base16(seed), "4aa29f2aeb0127efb55138ab9e7be83b36750358751906f86c662b21a1ea1370f949e6d1a12fa56d3d93cadda93038c76ac8118597364e46f5156fde6183c82f");
 }
@@ -243,7 +245,7 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__es_dictionary_prefix_standard__v
 {
     data_chunk entropy;
     decode_base16(entropy, "05e669b4270f4e25bce6fc3736170d423c");
-    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::es, electrum::seed::standard);
+    const auto mnemonic = electrum::create_mnemonic(entropy, language::electrum::es, electrum::seed_prefix::standard);
     BOOST_REQUIRE(!mnemonic.empty());
     BOOST_REQUIRE_EQUAL(join(mnemonic), "gráfico codo ámbar insecto verbo cráter celoso entrar tarjeta sala coco frito");
     BOOST_REQUIRE(electrum::validate_mnemonic(mnemonic, entropy, language::electrum::es, electrum::seed::standard));

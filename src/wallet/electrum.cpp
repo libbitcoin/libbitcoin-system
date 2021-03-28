@@ -66,6 +66,7 @@ static const std::string seed_prefix_empty{};
 static const std::string seed_prefix_standard{ "01" };
 static const std::string seed_prefix_witness{ "100" };
 static const std::string seed_prefix_two_factor_authentication{ "101" };
+static const std::string seed_prefix_two_factor_authentication_witness{ "102" };
 
 static size_t special_modulo(int32_t index_distance, size_t lexicon_size)
 {
@@ -183,26 +184,30 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     return entropy;
 }
 
-static std::string get_seed_prefix(seed prefix)
+static std::string get_seed_prefix(seed_prefix prefix)
 {
     switch (prefix)
     {
-        case seed::standard:
+        case seed_prefix::empty:
+            return seed_prefix_empty;
+        case seed_prefix::standard:
             return seed_prefix_standard;
-        case seed::witness:
+        case seed_prefix::witness:
             return seed_prefix_witness;
-        case seed::two_factor_authentication:
+        case seed_prefix::two_factor_authentication:
             return seed_prefix_two_factor_authentication;
+        case seed_prefix::two_factor_authentication_witness:
+            return seed_prefix_two_factor_authentication_witness;
     }
 
     return seed_prefix_empty;
 }
 
 word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
-    seed prefix)
+    seed_prefix prefix)
 {
     word_list mnemonic;
-    const auto electrum_prefix = get_seed_prefix(prefix);
+    const auto electrum_prefix = get_seed_prefix(seed_prefix);
 
     // cpp_int requires hex string for arbitrary precision int construction.
     auto numeric_entropy = cpp_int("0x" + encode_base16(entropy));
@@ -227,18 +232,8 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 }
 
 bool validate_mnemonic(const word_list& mnemonic, const data_chunk& entropy,
-    const dictionary& lexicon, seed prefix)
+    const dictionary& lexicon, seed_prefix prefix)
 {
-    // To validate a specified wordlist given some starting entropy,
-    // we create a new one and ensure that the passed in mnemonic
-    // decodes to the same final entropy as the original mnenmonic.
-    //
-    // Creating a mnemonic is self validating, in that we guarantee
-    // that the entropy used to create it decodes back to that same
-    // entropy value.  Validation ensures that the passed in mnemonic
-    // and entropy is consistent by verifying a match on re-creation.
-    const auto created_mnemonic = create_mnemonic(entropy, lexicon, prefix);
-
     return is_new_seed(mnemonic, get_seed_prefix(prefix)) &&
         (mnemonic_decode(mnemonic, lexicon) == 
             mnemonic_decode(created_mnemonic, lexicon));
@@ -246,7 +241,7 @@ bool validate_mnemonic(const word_list& mnemonic, const data_chunk& entropy,
 
 bool validate_mnemonic(const word_list& mnemonic,
     const data_chunk& entropy, const dictionary_list& lexicons,
-    seed prefix)
+    seed_seed prefix)
 {
     for (const auto& lexicon: lexicons)
         if (validate_mnemonic(mnemonic, entropy, *lexicon, prefix))
