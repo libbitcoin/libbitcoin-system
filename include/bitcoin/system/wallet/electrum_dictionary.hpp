@@ -41,10 +41,10 @@ typedef std::array<const char*, dictionary_size_v1> dictionary_v1;
 namespace language {
 namespace electrum {
 
-extern const dictionary pt;
 extern const dictionary en;
 extern const dictionary es;
 extern const dictionary ja;
+extern const dictionary pt;
 extern const dictionary zh_Hans;
 
 // Word lists (excluding en_v1) from:

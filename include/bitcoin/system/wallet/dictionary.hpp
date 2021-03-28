@@ -51,11 +51,11 @@ namespace language
     // Individual bip39 languages:
     extern const dictionary en;
     extern const dictionary es;
-    extern const dictionary ja;
     extern const dictionary it;
     extern const dictionary fr;
     extern const dictionary cs;
     extern const dictionary pt;
+    extern const dictionary ja;
     extern const dictionary ko;
     extern const dictionary zh_Hans;
     extern const dictionary zh_Hant;
