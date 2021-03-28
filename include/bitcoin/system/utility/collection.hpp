@@ -81,9 +81,9 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
 
 /**
  * Move members of a source list to end of a target list. Source is cleared.
- * @param      <Type>     The type of list member elements.
- * @param[in]  target     The target list.
- * @param[in]  source     The source list
+ * @param      <Type>  The type of list member elements.
+ * @param[in]  target  The target list.
+ * @param[in]  source  The source list
  */
 template <typename Type>
 void move_append(std::vector<Type>& target, std::vector<Type>& source);
