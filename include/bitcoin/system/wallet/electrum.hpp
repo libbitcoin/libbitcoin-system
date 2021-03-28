@@ -54,13 +54,15 @@ namespace electrum {
 typedef boost::multiprecision::checked_cpp_int cpp_int;
 
 /**
- * Valid seed types.
+ * Valid seed prefix types.
  */
-enum class seed : uint8_t
+enum class seed_prefix : uint8_t
 {
+    empty = 0,
     standard = 1,
-    witness = 2,
-    two_factor_authentication = 3
+    witness = 100,
+    two_factor_authentication = 101,
+    two_factor_authentication_witness = 102
 };
 
 /**
@@ -77,7 +79,7 @@ typedef string_list word_list;
  */
 BC_API word_list create_mnemonic(const data_chunk& entropy,
     const dictionary& lexicon=bc::wallet::language::electrum::en,
-    seed prefix=electrum::seed::standard);
+    seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**
  * Checks an electrum mnemonic against a dictionary to determine if
@@ -86,14 +88,14 @@ BC_API word_list create_mnemonic(const data_chunk& entropy,
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary& lexicon,
-    seed prefix=electrum::seed::standard);
+    seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons=bc::wallet::language::electrum::all,
-    seed prefix=electrum::seed::standard);
+    seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**
  * Convert an electrum mnemonic and passphrase to a wallet-generation

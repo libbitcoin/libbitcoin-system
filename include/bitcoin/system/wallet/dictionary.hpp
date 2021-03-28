@@ -28,6 +28,7 @@ namespace wallet {
 
 /**
  * A valid mnemonic dictionary has exactly this many words.
+ * This size applies to both Electrum (>v1) and bip39 word lists.
  */
 static BC_CONSTEXPR size_t dictionary_size = 2048;
 
@@ -40,25 +41,25 @@ static BC_CONSTEXPR size_t dictionary_size = 2048;
 typedef std::array<const char*, dictionary_size> dictionary;
 
 /**
- * A collection of candidate dictionaries for mnemonic validation.
+ * A collection of dictionaries for mnemonic validation.
  */
 typedef std::vector<const dictionary*> dictionary_list;
 
 namespace language
 {
-    // Individual built-in languages:
+    // Individual bip39 languages:
     extern const dictionary en;
     extern const dictionary es;
-    extern const dictionary ja;
     extern const dictionary it;
     extern const dictionary fr;
     extern const dictionary cs;
-    extern const dictionary ru;
-    extern const dictionary uk;
+    extern const dictionary pt;
+    extern const dictionary ja;
+    extern const dictionary ko;
     extern const dictionary zh_Hans;
     extern const dictionary zh_Hant;
 
-    // All built-in languages:
+    // All bip39 languages:
     extern const dictionary_list all;
 }
 

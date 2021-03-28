@@ -65,6 +65,7 @@ static const std::string seed_prefix_empty{};
 static const std::string seed_prefix_standard{ "01" };
 static const std::string seed_prefix_witness{ "100" };
 static const std::string seed_prefix_two_factor_authentication{ "101" };
+static const std::string seed_prefix_two_factor_authentication_witness{ "102" };
 
 static size_t special_modulo(int32_t index_distance, size_t lexicon_size)
 {
@@ -183,23 +184,27 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     return entropy;
 }
 
-static std::string get_seed_prefix(seed prefix)
+static std::string get_seed_prefix(seed_prefix prefix)
 {
     switch (prefix)
     {
-        case seed::standard:
+    case seed_prefix::empty:
+        return seed_prefix_empty;
+        case seed_prefix::standard:
             return seed_prefix_standard;
-        case seed::witness:
+        case seed_prefix::witness:
             return seed_prefix_witness;
-        case seed::two_factor_authentication:
+        case seed_prefix::two_factor_authentication:
             return seed_prefix_two_factor_authentication;
+        case seed_prefix::two_factor_authentication_witness:
+            return seed_prefix_two_factor_authentication_witness;
     }
 
     return seed_prefix_empty;
 }
 
 word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
-    seed prefix)
+    seed_prefix prefix)
 {
     word_list mnemonic;
     const auto electrum_prefix = get_seed_prefix(prefix);
@@ -226,14 +231,14 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 }
 
 bool validate_mnemonic(const word_list& mnemonic, const dictionary& lexicon,
-    seed prefix)
+    seed_prefix prefix)
 {
     return is_new_seed(mnemonic, get_seed_prefix(prefix)) &&
         (mnemonic_decode(mnemonic, lexicon) == 0);
 }
 
 bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons, const seed prefix)
+    const dictionary_list& lexicons, const seed_prefix prefix)
 {
     for (const auto& lexicon: lexicons)
         if (validate_mnemonic(mnemonic, *lexicon, prefix))
