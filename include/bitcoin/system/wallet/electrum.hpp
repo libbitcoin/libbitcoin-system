@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -77,7 +78,7 @@ typedef string_list word_list;
  * later be converted to a seed for use in electrum wallet creation.
  */
 BC_API word_list create_mnemonic(const data_chunk& entropy,
-    const dictionary& lexicon=bc::system::wallet::language::electrum::en,
+    const dictionary& lexicon=language::electrum::en,
     seed prefix=electrum::seed::standard);
 
 /**
@@ -86,8 +87,7 @@ BC_API word_list create_mnemonic(const data_chunk& entropy,
  * words must have been created using electrum encoding.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const data_chunk& entropy,
-    const dictionary& lexicon,
+    const data_chunk& entropy, const dictionary& lexicon,
     seed prefix=electrum::seed::standard);
 
 /**
@@ -95,7 +95,7 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
     const data_chunk& entropy,
-    const dictionary_list& lexicons=bc::system::wallet::language::electrum::all,
+    const dictionary_list& lexicons=wallet::language::electrum::all,
     seed prefix=electrum::seed::standard);
 
 /**

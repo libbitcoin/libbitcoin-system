@@ -20,8 +20,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
-void zeroize(void* const buffer, size_t length)
+void fill(void* const buffer, size_t length, uint8_t value)
 {
 /*
 #ifdef HAVE_SECUREZEROMEMORY
@@ -29,12 +30,17 @@ void zeroize(void* const buffer, size_t length)
 #elif defined(HAVE_MEMSET_S)
 */
 #ifdef HAVE_MEMSET_S
-    if (memset_s(buffer, (rsize_t)length, 0, (rsize_t)length) != 0) 
+    if (memset_s(buffer, (rsize_t)length, value, (rsize_t)length) != 0)
         abort();
 #else
     size_t i;
     volatile uint8_t* vbuffer = (volatile uint8_t*)buffer;
     for (i = 0; i < length; i++)
-        vbuffer[i] = 0;
+        vbuffer[i] = value;
 #endif
+}
+
+void zeroize(void* const buffer, size_t length)
+{
+    fill(buffer, length, 0x00);
 }
