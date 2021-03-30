@@ -53,11 +53,6 @@ base16::operator const data_chunk&() const
     return value_;
 }
 
-base16::operator data_slice() const
-{
-    return value_;
-}
-
 std::istream& operator>>(std::istream& input, base16& argument)
 {
     std::string hexcode;

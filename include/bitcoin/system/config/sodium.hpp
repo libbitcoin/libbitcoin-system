@@ -78,12 +78,6 @@ public:
     operator const hash_digest&() const;
 
     /**
-     * Overload cast to generic data reference.
-     * @return  This object's value cast to generic data.
-     */
-    operator data_slice() const;
-
-    /**
      * Get the key as a base85 encoded (z85) string.
      * @return The encoded key.
      */
