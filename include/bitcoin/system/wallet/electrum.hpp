@@ -79,7 +79,7 @@ typedef string_list word_list;
  * optional dictionary selection, and seed prefix, . The mnemonic can
  * later be converted to a seed for use in electrum wallet creation.
  */
-BC_API word_list create_mnemonic(const data_chunk& entropy,
+BC_API word_list create_mnemonic(const data_slice& entropy,
     const dictionary& lexicon=bc::wallet::language::electrum::en,
     seed_prefix prefix=electrum::seed_prefix::standard);
 

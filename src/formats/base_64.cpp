@@ -37,11 +37,11 @@ std::string encode_base64(const data_slice& unencoded)
 {
     std::string encoded;
     const auto size = unencoded.size();
-    encoded.reserve(((size / 3) + (size % 3 > 0)) * 4);
+    encoded.reserve(((size / 3u) + (size % 3u > 0u)) * 4u);
 
     uint32_t value;
     auto cursor = unencoded.begin();
-    for (size_t position = 0; position < size / 3; position++)
+    for (size_t position = 0; position < size / 3u; position++)
     {
         // Convert to big endian.
         value = (*cursor++) << 16;

@@ -42,23 +42,23 @@ static const auto passphrase_prefix = "mnemonic";
 
 inline uint8_t bip39_shift(size_t bit)
 {
-    return (1 << (byte_bits - (bit % byte_bits) - 1));
+    return (1u << (byte_bits - (bit % byte_bits) - 1u));
 }
 
 bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
 {
     const auto word_count = words.size();
-    if ((word_count % mnemonic_word_multiple) != 0)
+    if ((word_count % mnemonic_word_multiple) != 0u)
         return false;
 
     const auto total_bits = bits_per_word * word_count;
     const auto check_bits = total_bits / (entropy_bit_divisor + 1);
     const auto entropy_bits = total_bits - check_bits;
 
-    BITCOIN_ASSERT((entropy_bits % byte_bits) == 0);
+    BITCOIN_ASSERT((entropy_bits % byte_bits) == 0u);
 
     size_t bit = 0;
-    data_chunk data((total_bits + byte_bits - 1) / byte_bits, 0);
+    data_chunk data((total_bits + byte_bits - 1u) / byte_bits, 0);
 
     for (const auto& word: words)
     {
@@ -66,9 +66,9 @@ bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
         if (position == -1)
             return false;
 
-        for (size_t loop = 0; loop < bits_per_word; loop++, bit++)
+        for (size_t index = 0; index < bits_per_word; index++, bit++)
         {
-            if (position & (1 << (bits_per_word - loop - 1)))
+            if (position & (1u << (bits_per_word - index - 1u)))
             {
                 const auto byte = bit / byte_bits;
                 data[byte] |= bip39_shift(bit);
@@ -83,18 +83,18 @@ bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
 
 word_list create_mnemonic(const data_slice& entropy, const dictionary &lexicon)
 {
-    if ((entropy.size() % mnemonic_seed_multiple) != 0)
+    if ((entropy.size() % mnemonic_seed_multiple) != 0u)
         return {};
 
-    const size_t entropy_bits = (entropy.size() * byte_bits);
-    const size_t check_bits = (entropy_bits / entropy_bit_divisor);
-    const size_t total_bits = (entropy_bits + check_bits);
-    const size_t word_count = (total_bits / bits_per_word);
+    const auto entropy_bits = (entropy.size() * byte_bits);
+    const auto check_bits = (entropy_bits / entropy_bit_divisor);
+    const auto total_bits = (entropy_bits + check_bits);
+    const auto word_count = (total_bits / bits_per_word);
 
-    BITCOIN_ASSERT((total_bits % bits_per_word) == 0);
-    BITCOIN_ASSERT((word_count % mnemonic_word_multiple) == 0);
+    BITCOIN_ASSERT((total_bits % bits_per_word) == 0u);
+    BITCOIN_ASSERT((word_count % mnemonic_word_multiple) == 0u);
 
-    const auto data = build_chunk({entropy, sha256_hash(entropy)});
+    const auto data = build_chunk({ entropy, sha256_hash(entropy) });
 
     size_t bit = 0;
     word_list words;
@@ -102,14 +102,14 @@ word_list create_mnemonic(const data_slice& entropy, const dictionary &lexicon)
     for (size_t word = 0; word < word_count; word++)
     {
         size_t position = 0;
-        for (size_t loop = 0; loop < bits_per_word; loop++)
+        for (size_t index = 0; index < bits_per_word; index++)
         {
-            bit = (word * bits_per_word + loop);
+            bit = (word * bits_per_word + index);
             position <<= 1;
 
             const auto byte = bit / byte_bits;
 
-            if ((data[byte] & bip39_shift(bit)) > 0)
+            if ((data[byte] & bip39_shift(bit)) > 0u)
                 position++;
         }
 
@@ -117,7 +117,7 @@ word_list create_mnemonic(const data_slice& entropy, const dictionary &lexicon)
         words.push_back(lexicon[position]);
     }
 
-    BITCOIN_ASSERT(words.size() == ((bit + 1) / bits_per_word));
+    BITCOIN_ASSERT(words.size() == ((bit + 1u) / bits_per_word));
     return words;
 }
 

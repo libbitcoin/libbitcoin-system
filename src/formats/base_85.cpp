@@ -92,22 +92,22 @@ static uint8_t decoder[96] =
 bool encode_base85(std::string& out, const data_slice& in)
 {
     const auto size = in.size();
-    if (size % 4 != 0)
+    if (size % 4u != 0u)
         return false;
 
-    const size_t encoded_size = size * 5 / 4;
+    const auto encoded_size = size * 5u / 4u;
     std::string encoded;
-    encoded.reserve(encoded_size + 1);
+    encoded.reserve(encoded_size + 1u);
     size_t byte_index = 0;
     uint32_t accumulator = 0;
 
     for (const uint8_t unencoded_byte: in)
     {
-        accumulator = accumulator * 256 + unencoded_byte;
-        if (++byte_index % 4 == 0)
+        accumulator = accumulator * 256u + unencoded_byte;
+        if (++byte_index % 4u == 0u)
         {
-            for (uint32_t divise = 85 * 85 * 85 * 85; divise > 0; divise /= 85)
-                encoded.push_back(encoder[accumulator / divise % 85]);
+            for (uint32_t divise = 85 * 85 * 85 * 85; divise > 0u; divise /= 85u)
+                encoded.push_back(encoder[accumulator / divise % 85u]);
 
             accumulator = 0;
         }
@@ -121,11 +121,11 @@ bool encode_base85(std::string& out, const data_slice& in)
 // Accepts only strings bounded to 5 characters.
 bool decode_base85(data_chunk& out, const std::string& in)
 {
-    const size_t length = in.size();
-    if (length % 5 != 0)
+    const auto length = in.size();
+    if (length % 5u != 0u)
         return false;
 
-    const size_t decoded_size = length * 4 / 5;
+    const auto decoded_size = length * 4u / 5u;
     data_chunk decoded;
     decoded.reserve(decoded_size);
     size_t char_index = 0;
@@ -133,15 +133,15 @@ bool decode_base85(data_chunk& out, const std::string& in)
 
     for (const uint8_t encoded_character: in)
     {
-        const auto position = encoded_character - 32;
-        if (position < 0 || position > 96)
+        const auto position = encoded_character - 32u;
+        if (position < 0u || position > 96u)
             return false;
 
-        accumulator = accumulator * 85 + decoder[position];
-        if (++char_index % 5 == 0)
+        accumulator = accumulator * 85u + decoder[position];
+        if (++char_index % 5u == 0u)
         {
-            for (uint32_t divise = 256 * 256 * 256; divise > 0; divise /= 256)
-                decoded.push_back(accumulator / divise % 256);
+            for (uint32_t divise = 256 * 256 * 256; divise > 0u; divise /= 256u)
+                decoded.push_back(accumulator / divise % 256u);
 
             accumulator = 0;
         }

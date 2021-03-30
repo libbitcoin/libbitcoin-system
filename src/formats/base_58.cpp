@@ -57,9 +57,9 @@ size_t count_leading_zeros(const data_slice& unencoded)
 {
     // Skip and count leading '1's.
     size_t leading_zeros = 0;
-    for (const uint8_t byte: unencoded)
+    for (const auto byte: unencoded)
     {
-        if (byte != 0)
+        if (byte != 0u)
             break;
 
         ++leading_zeros;
@@ -73,12 +73,12 @@ void pack_value(data_chunk& indexes, size_t carry)
     // Apply "b58 = b58 * 256 + ch".
     for (auto it = indexes.rbegin(); it != indexes.rend(); ++it)
     {
-        carry += 256 * (*it);
-        *it = carry % 58;
-        carry /= 58;
+        carry += 256u * (*it);
+        *it = carry % 58u;
+        carry /= 58u;
     }
 
-    BITCOIN_ASSERT(carry == 0);
+    BITCOIN_ASSERT(carry == 0u);
 }
 
 std::string encode_base58(const data_slice& unencoded)
@@ -87,7 +87,7 @@ std::string encode_base58(const data_slice& unencoded)
 
     // size = log(256) / log(58), rounded up.
     const size_t number_nonzero = unencoded.size() - leading_zeros;
-    const size_t indexes_size = number_nonzero * 138 / 100 + 1;
+    const size_t indexes_size = number_nonzero * 138u / 100u + 1u;
 
     // Allocate enough space in big-endian base58 representation.
     data_chunk indexes(indexes_size);
@@ -111,10 +111,7 @@ std::string encode_base58(const data_slice& unencoded)
 
     // Set actual main bytes.
     for (auto it = first_nonzero; it != indexes.end(); ++it)
-    {
-        const size_t index = *it;
-        encoded += base58_chars[index];
-    }
+        encoded += base58_chars[*it];
 
     return encoded;
 }
@@ -123,7 +120,7 @@ size_t count_leading_zeros(const std::string& encoded)
 {
     // Skip and count leading '1's.
     size_t leading_zeros = 0;
-    for (const uint8_t digit: encoded)
+    for (const auto digit: encoded)
     {
         if (digit != base58_chars[0])
             break;
@@ -152,7 +149,7 @@ bool decode_base58(data_chunk& out, const std::string& in)
     const auto leading_zeros = count_leading_zeros(in);
 
     // log(58) / log(256), rounded up.
-    const size_t data_size = in.size() * 733 / 1000 + 1;
+    const size_t data_size = in.size() * 733u / 1000u + 1u;
 
     // Allocate enough space in big-endian base256 representation.
     data_chunk data(data_size);
@@ -188,8 +185,8 @@ bool decode_base58_private(uint8_t* out, size_t out_size, const char* in)
     if (!decode_base58(buffer, in) || buffer.size() != out_size)
         return false;
 
-    for (size_t i = 0; i < out_size; ++i)
-        out[i] = buffer[i];
+    for (size_t index = 0; index < out_size; ++index)
+        out[index] = buffer[index];
 
     return true;
 }

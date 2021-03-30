@@ -169,7 +169,6 @@ public:
     static bool is_commitment_pattern(const operation::list& ops);
     static bool is_witness_program_pattern(const operation::list& ops);
 
-
     /// Common output patterns (psh and pwsh are also consensus).
     static bool is_pay_null_data_pattern(const operation::list& ops);
     static bool is_pay_multisig_pattern(const operation::list& ops);

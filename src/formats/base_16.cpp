@@ -61,10 +61,10 @@ static unsigned from_hex(char character)
 bool decode_base16(data_chunk& out, const std::string& in)
 {
     // This prevents a last odd character from being ignored:
-    if (in.size() % 2 != 0)
+    if (in.size() % 2u != 0u)
         return false;
 
-    data_chunk result(in.size() / 2);
+    data_chunk result(in.size() / 2u);
     if (!decode_base16_private(result.data(), result.size(), in.data()))
         return false;
 
@@ -81,7 +81,7 @@ std::string encode_hash(hash_digest hash)
 
 bool decode_hash(hash_digest& out, const std::string& in)
 {
-    if (in.size() != 2 * hash_size)
+    if (in.size() != 2u * hash_size)
         return false;
 
     hash_digest result;
@@ -93,7 +93,7 @@ bool decode_hash(hash_digest& out, const std::string& in)
     return true;
 }
 
-hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
+hash_digest hash_literal(const char (&string)[2u * hash_size + 1u])
 {
     hash_digest out;
     DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
@@ -106,13 +106,13 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 // For support of template implementation only, do not call directly.
 bool decode_base16_private(uint8_t* out, size_t size, const char* in)
 {
-    if (!std::all_of(in, in + 2 * size, is_base16))
+    if (!std::all_of(in, in + 2u * size, is_base16))
         return false;
 
     for (size_t index = 0; index < size; ++index)
     {
-        out[index] = (from_hex(in[0]) << 4) + from_hex(in[1]);
-        in += 2;
+        out[index] = (from_hex(in[0]) << 4u) + from_hex(in[1]);
+        in += 2u;
     }
 
     return true;
