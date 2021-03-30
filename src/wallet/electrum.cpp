@@ -203,7 +203,7 @@ static std::string get_seed_prefix(seed_prefix prefix)
     return seed_prefix_empty;
 }
 
-word_list create_mnemonic(const data_chunk& entropy, const dictionary& lexicon,
+word_list create_mnemonic(const data_slice& entropy, const dictionary& lexicon,
     seed_prefix prefix)
 {
     word_list mnemonic;

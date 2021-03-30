@@ -26,39 +26,43 @@
 
 namespace libbitcoin {
 
-std::string encode_base16(data_slice data)
+std::string encode_base16(const data_slice& data)
 {
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int val: data)
-        ss << std::setw(2) << val;
-    return ss.str();
+    std::stringstream stream;
+    stream << std::hex << std::setfill('0');
+
+    for (int value: data)
+        stream << std::setw(2) << value;
+
+    return stream.str();
 }
 
-bool is_base16(const char c)
+bool is_base16(const char value)
 {
     return
-        ('0' <= c && c <= '9') ||
-        ('A' <= c && c <= 'F') ||
-        ('a' <= c && c <= 'f');
+        ('0' <= value && value <= '9') ||
+        ('A' <= value && value <= 'F') ||
+        ('a' <= value && value <= 'f');
 }
 
-static unsigned from_hex(const char c)
+static unsigned from_hex(const char value)
 {
-    if ('A' <= c && c <= 'F')
-        return 10 + c - 'A';
-    if ('a' <= c && c <= 'f')
-        return 10 + c - 'a';
-    return c - '0';
+    if ('A' <= value && value <= 'F')
+        return 10 + value - 'A';
+
+    if ('a' <= value && value <= 'f')
+        return 10 + value - 'a';
+
+    return value - '0';
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
 {
     // This prevents a last odd character from being ignored:
-    if (in.size() % 2 != 0)
+    if (in.size() % 2u != 0u)
         return false;
 
-    data_chunk result(in.size() / 2);
+    data_chunk result(in.size() / 2u);
     if (!decode_base16_private(result.data(), result.size(), in.data()))
         return false;
 
@@ -75,7 +79,7 @@ std::string encode_hash(hash_digest hash)
 
 bool decode_hash(hash_digest& out, const std::string& in)
 {
-    if (in.size() != 2 * hash_size)
+    if (in.size() != 2u * hash_size)
         return false;
 
     hash_digest result;
@@ -87,7 +91,7 @@ bool decode_hash(hash_digest& out, const std::string& in)
     return true;
 }
 
-hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
+hash_digest hash_literal(const char (&string)[2u * hash_size + 1u])
 {
     hash_digest out;
     DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
@@ -100,13 +104,13 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 // For support of template implementation only, do not call directly.
 bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 {
-    if (!std::all_of(in, in + 2 * out_size, is_base16))
+    if (!std::all_of(in, in + 2u * out_size, is_base16))
         return false;
 
     for (size_t i = 0; i < out_size; ++i)
     {
-        out[i] = (from_hex(in[0]) << 4) + from_hex(in[1]);
-        in += 2;
+        out[i] = (from_hex(in[0]) << 4u) + from_hex(in[1]);
+        in += 2u;
     }
 
     return true;

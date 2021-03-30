@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_LOG_STATSD_SINK_HPP
 #define LIBBITCOIN_SYSTEM_LOG_STATSD_SINK_HPP
 
-#include <boost/asio.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/log/rotable_file.hpp>
