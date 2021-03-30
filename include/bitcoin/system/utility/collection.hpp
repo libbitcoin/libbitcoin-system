@@ -29,13 +29,14 @@ namespace libbitcoin {
 namespace system {
 
 /**
- * Copy data elements to a new vector of a compatible element type.
- * @param      <Element> The target vector element type.
- * @param[in]  source    The collection of elements to cast.
- * @returns              A new collection with copyed elements.
+ * Cast vector/enumerable elements into a new vector.
+ * @param      <Source>  The source element type.
+ * @param      <Target>  The target element type.
+ * @param[in]  source    The enumeration of Source elements to cast.
+ * @returns              A new enumeration with elements cast to Target.
  */
-template <typename Element>
-std::vector<Element> to_vector(const data_slice& source);
+template <typename Source, typename Target>
+std::vector<Target> cast(const std::vector<Source>& source);
 
 /**
  * Determine if a collection contains the specified element.

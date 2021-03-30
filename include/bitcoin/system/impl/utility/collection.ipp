@@ -31,10 +31,10 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename Element>
-std::vector<Element> to_vector(const data_slice& source)
+template <typename Source, typename Target>
+std::vector<Target> cast(const std::vector<Source>& source)
 {
-    std::vector<Element> target(source.size());
+    std::vector<Target> target(source.size());
     target.assign(source.begin(), source.end());
     return target;
 }
