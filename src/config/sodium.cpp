@@ -54,6 +54,11 @@ sodium::operator const hash_digest&() const
     return value_;
 }
 
+sodium::operator data_slice() const
+{
+    return value_;
+}
+
 sodium::operator bool() const
 {
     return value_ != null_hash;
