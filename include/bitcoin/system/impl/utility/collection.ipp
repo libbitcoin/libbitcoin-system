@@ -26,18 +26,27 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <typename Source, typename Target>
-std::vector<Target> cast(const std::vector<Source>& source)
+template <typename Element>
+std::vector<Element> to_vector(const data_slice& source)
 {
-    std::vector<Target> target(source.size());
+    std::vector<Element> target(source.size());
     target.assign(source.begin(), source.end());
     return target;
+}
+
+template <typename Container, typename Element>
+bool contains(const Container& list, const Element& value)
+{
+    return std::any_of(list.begin(), list.end(),
+        [&value](const Element& element)
+        {
+            return element == value;
+        });
 }
 
 template <typename Element>
@@ -52,32 +61,25 @@ std::vector<Element>& distinct(std::vector<Element>& list)
 template <typename Pair, typename Key>
 int find_pair_position(const std::vector<Pair>& list, const Key& key)
 {
-    const auto predicate = [&](const Pair& pair)
-    {
-        return pair.first == key;
-    };
+    const auto position = std::find_if(list.begin(), list.end(),
+        [&key](const Pair& pair)
+        {
+            return pair.first == key;
+        });
 
-    auto it = std::find_if(list.begin(), list.end(), predicate);
-
-    if (it == list.end())
-        return -1;
-
-    // Unsafe for use with lists greater than max_int32 in size.
-    BITCOIN_ASSERT(list.size() <= max_int32);
-    return static_cast<int>(distance(list.begin(), it));
+    // TODO: guard cast.
+    return position == list.end() ? -1 : 
+        static_cast<int>(std::distance(list.begin(), position));
 }
 
 template <typename Element, typename Container>
 int find_position(const Container& list, const Element& value)
 {
-    const auto it = std::find(std::begin(list), std::end(list), value);
+    const auto position = std::find(std::begin(list), std::end(list), value);
 
-    if (it == std::end(list))
-        return -1;
-
-    // Unsafe for use with lists greater than max_int32 in size.
-    BITCOIN_ASSERT(list.size() <= max_int32);
-    return static_cast<int>(std::distance(list.begin(), it));
+    // TODO: guard cast.
+    return position == std::end(list) ? -1 :
+        static_cast<int>(std::distance(std::begin(list), position));
 }
 
 template <typename Type, typename Predicate>
@@ -106,17 +108,18 @@ Element pop(std::vector<Element>& stack)
     return element;
 }
 
-////template <typename Collection>
-////Collection reverse(const Collection& list)
-////{
-////    Collection out(list.size());
-////    std::reverse_copy(list.begin(), list.end(), out.begin());
-////    return out;
-////}
+template <typename Collection>
+Collection reverse(const Collection& source)
+{
+    Collection out(std::size(source));
+    std::reverse_copy(std::begin(source), std::end(source), std::begin(out));
+    return out;
+}
 
 } // namespace system
 } // namespace libbitcoin
 
+// TODO: clean up std namespace.
 namespace std {
 
 template <class Type>

@@ -160,22 +160,22 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 // Conversion to WIF loses payment address version info.
 std::string ec_private::encoded() const
 {
-    if (!secret_)
-        return {};
+    const auto prefix = to_array(wif_version());
 
     if (compressed())
     {
-        wif_compressed wif;
-        const auto prefix = to_array(wif_version());
-        const auto compressed = to_array(compressed_sentinel);
-        build_checked_array(wif, { prefix, *secret_, compressed });
-        return encode_base58(wif);
+        return encode_base58(build_checked_array<wif_compressed_size>(
+        {
+            prefix, *secret_, to_array(compressed_sentinel)
+        }));
     }
-
-    wif_uncompressed wif;
-    const auto prefix = to_array(wif_version());
-    build_checked_array(wif, { prefix, *secret_ });
-    return encode_base58(wif);
+    else
+    {
+        return encode_base58(build_checked_array<wif_uncompressed_size>(
+        {
+            prefix, *secret_
+        }));
+    }
 }
 
 // Accessors.

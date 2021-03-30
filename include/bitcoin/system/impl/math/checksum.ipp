@@ -30,39 +30,34 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Size>
-bool build_checked_array(byte_array<Size>& out,
+byte_array<Size> build_checked_array(
     const std::initializer_list<data_slice>& slices)
 {
-    return build_array(out, slices) && insert_checksum(out);
+    auto out = build_array<Size>(slices);
+    insert_checksum(out);
+    return out;
 }
 
 template<size_t Size>
-bool insert_checksum(byte_array<Size>& out)
+void insert_checksum(byte_array<Size>& out)
 {
-    if (out.size() < checksum_size)
-        return false;
-
-    data_chunk body(out.begin(), out.end() - checksum_size);
-    const auto checksum = to_little_endian(bitcoin_checksum(body));
+    static_assert(Size >= checksum_size, "insert_checksum out too small");
+    data_chunk payload(out.begin(), out.end() - checksum_size);
+    const auto checksum = to_little_endian(bitcoin_checksum(payload));
     std::copy_n(checksum.begin(), checksum_size, out.end() - checksum_size);
-    return true;
 }
 
-// std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Size>
-bool unwrap(uint8_t& out_version,
-    std::array<uint8_t, UNWRAP_SIZE(Size)>& out_payload,
-    const std::array<uint8_t, Size>& wrapped)
+bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
+    const byte_array<Size>& wrapped)
 {
     uint32_t unused;
     return unwrap(out_version, out_payload, unused, wrapped);
 }
 
-// std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Size>
-bool unwrap(uint8_t& out_version,
-    std::array<uint8_t, UNWRAP_SIZE(Size)>& out_payload,
-    uint32_t& out_checksum, const std::array<uint8_t, Size>& wrapped)
+bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
+    uint32_t& out_checksum, const byte_array<Size>& wrapped)
 {
     if (!verify_checksum(wrapped))
         return false;
@@ -76,11 +71,10 @@ bool unwrap(uint8_t& out_version,
 
 // std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Size>
-std::array<uint8_t, WRAP_SIZE(Size)> wrap(uint8_t version,
-    const std::array<uint8_t, Size>& payload)
+byte_array<WRAP_SIZE(Size)> wrap(uint8_t version,
+    const byte_array<Size>& payload)
 {
-    byte_array<WRAP_SIZE(Size)> out;
-    build_array(out, { to_array(version), payload });
+    auto out = build_array<WRAP_SIZE(Size)>({ to_array(version), payload });
     insert_checksum(out);
     return out;
 }

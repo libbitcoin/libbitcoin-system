@@ -33,43 +33,53 @@ inline one_byte to_array(uint8_t byte)
     return byte_array<1>{ { byte } };
 }
 
-inline data_chunk to_chunk(uint8_t byte)
+template <size_t Size>
+byte_array<Size> to_array(const data_slice& bytes)
 {
-    return data_chunk{ byte };
-}
-
-inline data_chunk build_chunk(loaf slices, size_t extra_reserve)
-{
-    size_t size = 0;
-    for (const auto& slice: slices)
-        size += slice.size();
-
-    data_chunk out;
-    out.reserve(size + extra_reserve);
-    for (const auto& slice: slices)
-        out.insert(out.end(), slice.begin(), slice.end());
-
-    return out;
+    return build_array<Size>({ bytes });
 }
 
 template <size_t Size>
-bool build_array(byte_array<Size>& out, loaf slices)
+byte_array<Size> build_array(const loaf& slices)
+{
+    byte_array<Size> out;
+    auto position = out.begin();
+    for (const auto& slice: slices)
+    {
+        const auto unfilled = std::distance(position, out.end());
+        const auto remain = static_cast<size_t>(unfilled < 0 ? 0 : unfilled);
+        const auto size = std::min(remain, slice.size());
+
+        std::copy(slice.begin(), slice.begin() + size, position);
+        position += size;
+    }
+
+    // Pad any unfilled remainder of the array with zeros.
+    std::fill(position, out.end(), 0x00);
+    return out;
+}
+
+template <typename Source>
+data_chunk to_chunk(const Source& bytes)
+{
+    return data_chunk(std::begin(bytes), std::end(bytes));
+}
+
+inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
 {
     size_t size = 0;
     for (const auto& slice: slices)
         size += slice.size();
 
-    if (size > Size)
-        return false;
-
-    auto position = out.begin();
+    const auto reserved = size + extra_reserve;
+    data_chunk out;
+    out.reserve(reserved);
     for (const auto& slice: slices)
-    {
-        std::copy(slice.begin(), slice.end(), position);
-        position += slice.size();
-    }
+        out.insert(out.end(), slice.begin(), slice.end());
 
-    return true;
+    // Pad any unfilled remainder of the array with zeros.
+    std::fill(&out[size], &out[reserved], 0x00);
+    return out;
 }
 
 template <class Target, class Extension>
@@ -80,7 +90,7 @@ void extend_data(Target& bytes, const Extension& other)
 
 // std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Start, size_t End, size_t Size>
-byte_array<End - Start> slice(const std::array<uint8_t, Size>& bytes)
+byte_array<End - Start> slice(const byte_array<Size>& bytes)
 {
     static_assert(End <= Size, "Slice end must not exceed array size.");
     byte_array<End - Start> out;
@@ -89,50 +99,29 @@ byte_array<End - Start> slice(const std::array<uint8_t, Size>& bytes)
 }
 
 template <size_t Left, size_t Right>
-byte_array<Left + Right> splice(const std::array<uint8_t, Left>& left,
-    const std::array<uint8_t, Right>& right)
+byte_array<Left + Right> splice(const byte_array<Left>& left,
+    const byte_array<Right>& right)
 {
-    byte_array<Left + Right> out;
-    /* safe to ignore */ build_array<Left + Right>(out, { left, right });
-    return out;
+    return build_array<Left + Right>({ left, right });
 }
 
 template <size_t Left, size_t Middle, size_t Right>
-byte_array<Left + Middle + Right> splice(const std::array<uint8_t, Left>& left,
-    const std::array<uint8_t, Middle>& middle,
-    const std::array<uint8_t, Right>& right)
+byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
+    const byte_array<Middle>& middle, const byte_array<Right>& right)
 {
-    byte_array<Left + Middle + Right> out;
-    /* safe to ignore */ build_array(out, { left, middle, right });
-    return out;
+    return build_array<Left + Middle + Right>({ left, middle, right });
 }
 
 template <size_t Size>
-byte_array_parts<Size / 2> split(const byte_array<Size>& bytes)
+byte_array_parts<Size / 2u> split(const byte_array<Size>& bytes)
 {
-    static_assert(Size != 0, "Split requires a non-zero parameter.");
-    static_assert(Size % 2 == 0, "Split requires an even length parameter.");
-    static const size_t half = Size / 2;
+    static_assert(Size != 0u, "Split requires a non-zero parameter.");
+    static_assert(Size % 2u == 0u, "Split requires an even length parameter.");
+    static const auto half = Size / 2u;
     byte_array_parts<half> out;
     std::copy_n(std::begin(bytes), half, out.left.begin());
     std::copy_n(std::begin(bytes) + half, half, out.right.begin());
     return out;
-}
-
-// unsafe
-template <size_t Size>
-byte_array<Size> to_array(const data_slice& bytes)
-{
-    byte_array<Size> out;
-    DEBUG_ONLY(const auto result =) build_array(out, { bytes });
-    BITCOIN_ASSERT(result);
-    return out;
-}
-
-template <typename Source>
-data_chunk to_chunk(const Source& bytes)
-{
-    return data_chunk(std::begin(bytes), std::end(bytes));
 }
 
 template <typename Source>
@@ -140,37 +129,30 @@ bool starts_with(const typename Source::const_iterator& begin,
     const typename Source::const_iterator& end, const Source& value)
 {
     const auto length = std::distance(begin, end);
-    return length >= 0 && static_cast<size_t>(length) >= value.size() &&
+    return length >= 0 && static_cast<uint64_t>(length) >= value.size() &&
         std::equal(value.begin(), value.end(), begin);
 }
 
-// unsafe
-template <size_t Size>
-byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2)
+template <size_t Size, size_t Size1, size_t Size2>
+byte_array<Size> xor_data(const byte_array<Size1>& bytes1,
+    const byte_array<Size2>& bytes2)
 {
-    return xor_data<Size>(bytes1, bytes2, 0);
+    return xor_offset<Size, 0u, 0u>(bytes1, bytes2);
 }
 
-// unsafe
-template <size_t Size>
-byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
-    size_t offset)
+template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2>
+byte_array<Size> xor_offset(const byte_array<Size1>& bytes1,
+    const byte_array<Size2>& bytes2)
 {
-    return xor_data<Size>(bytes1, bytes2, offset, offset);
-}
+    static_assert(Size + Offset1 <= Size1, "xor_data Size + Offset1 > Size1");
+    static_assert(Size + Offset2 <= Size2, "xor_data Size + Offset2 > Size2");
 
-// unsafe
-template <size_t Size>
-byte_array<Size> xor_data(const data_slice& bytes1, const data_slice& bytes2,
-    size_t offset1, size_t offset2)
-{
-    BITCOIN_ASSERT(offset1 + Size <= bytes1.size());
-    BITCOIN_ASSERT(offset2 + Size <= bytes2.size());
+    byte_array<Size> out;
     const auto& data1 = bytes1.data();
     const auto& data2 = bytes2.data();
-    byte_array<Size> out;
+
     for (size_t index = 0; index < Size; index++)
-        out[index] = data1[index + offset1] ^ data2[index + offset2];
+        out[index] = data1[index + Offset1] ^ data2[index + Offset2];
 
     return out;
 }

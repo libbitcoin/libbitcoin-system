@@ -200,8 +200,7 @@ const ec_compressed& hd_public::point() const
 
 hd_key hd_public::to_hd_key() const
 {
-    hd_key out;
-    build_checked_array(out,
+    return build_checked_array<hd_key_size>(
     {
         to_big_endian(to_prefix(lineage_.prefixes)),
         to_array(lineage_.depth),
@@ -210,8 +209,6 @@ hd_key hd_public::to_hd_key() const
         chain_,
         point_
     });
-
-    return out;
 }
 
 hd_public hd_public::derive_public(uint32_t index) const

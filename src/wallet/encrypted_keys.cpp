@@ -138,7 +138,7 @@ static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<hash_size>(data, salt, 16384u, 8u, 8u);
+    return scrypt<hash_size>(data, salt, 16384, 8, 8);
 }
 
 #endif
@@ -146,7 +146,7 @@ static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
 static long_hash scrypt_pair(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 1024u, 1u, 1u);
+    return scrypt<long_hash_size>(data, salt, 1024, 1, 1);
 }
 
 #ifdef WITH_ICU
@@ -154,7 +154,7 @@ static long_hash scrypt_pair(const data_slice& data, const data_slice& salt)
 static long_hash scrypt_private(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 16384u, 8u, 8u);
+    return scrypt<long_hash_size>(data, salt, 16384, 8, 8);
 }
 
 #endif
@@ -207,11 +207,10 @@ static void create_private_key(encrypted_private& out_private,
     const auto combined = splice(slice<quarter, half>(encrypt1),
         slice<half, half + quarter>(seed));
 
-    auto encrypt2 = xor_data<half>(combined, derived1, 0, half);
+    auto encrypt2 = xor_offset<half, 0, half>(combined, derived1);
     aes256_encrypt(derived2, encrypt2);
     const auto quarter1 = slice<0, quarter>(encrypt1);
-
-    build_checked_array(out_private,
+    out_private = build_checked_array<ek_private_decoded_size>(
     {
         prefix,
         flags,
@@ -237,11 +236,11 @@ static bool create_public_key(encrypted_public& out_public,
     auto encrypted1 = xor_data<half>(hash, derived1);
     aes256_encrypt(derived2, encrypted1);
 
-    auto encrypted2 = xor_data<half>(hash, derived1, half);
+    auto encrypted2 = xor_offset<half, half, half>(hash, derived1);
     aes256_encrypt(derived2, encrypted2);
 
     const auto sign = point_sign(point.front(), derived2);
-    return build_checked_array(out_public,
+    out_public = build_checked_array<encrypted_public_decoded_size>(
     {
         prefix,
         flags,
@@ -251,6 +250,8 @@ static bool create_public_key(encrypted_public& out_public,
         encrypted1,
         encrypted2
     });
+
+    return true;
 }
 
 // There is no scenario requiring a public key, we support it for completeness.
@@ -326,12 +327,14 @@ static bool create_token(encrypted_token& out_token,
     if (!secret_to_public(point, factor))
         return false;
 
-    return build_checked_array(out_token,
+    out_token = build_checked_array<encrypted_token_decoded_size>(
     {
         prefix,
         owner_entropy,
         point
     });
+
+    return true;
 }
 
 // The salt here is owner-supplied random bits, not the address hash.
@@ -377,10 +380,10 @@ bool encrypt(encrypted_private& out_private, const ec_secret& secret,
     auto encrypted1 = xor_data<half>(secret, derived.left);
     aes256_encrypt(derived.right, encrypted1);
 
-    auto encrypted2 = xor_data<half>(secret, derived.left, half);
+    auto encrypted2 = xor_offset<half, half, half>(secret, derived.left);
     aes256_encrypt(derived.right, encrypted2);
 
-    return build_checked_array(out_private,
+    out_private = build_checked_array<ek_private_decoded_size>(
     {
         prefix,
         set_flags(compressed),
@@ -388,6 +391,8 @@ bool encrypt(encrypted_private& out_private, const ec_secret& secret,
         encrypted1,
         encrypted2
     });
+
+    return true;
 }
 
 // decrypt private_key
@@ -412,7 +417,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     auto encrypt2 = parse.data2();
 
     aes256_decrypt(derived.right, encrypt2);
-    const auto decrypt2 = xor_data<half>(encrypt2, derived.left, 0, half);
+    const auto decrypt2 = xor_offset<half, 0, half>(encrypt2, derived.left);
     auto part = split(decrypt2);
     auto extended = splice(encrypt1, part.left);
 
@@ -504,7 +509,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     const auto decrypt1 = xor_data<half>(encrypt.left, derived.left);
 
     aes256_decrypt(derived.right, encrypt.right);
-    const auto decrypt2 = xor_data<half>(encrypt.right, derived.left, 0, half);
+    const auto decrypt2 = xor_offset<half, 0, half>(encrypt.right, derived.left);
 
     const auto sign_byte = point_sign(parse.sign(), derived.right);
     auto product = splice(sign_byte, decrypt1, decrypt2);

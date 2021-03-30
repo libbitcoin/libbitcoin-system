@@ -153,7 +153,7 @@ bool reject::from_data(uint32_t version, reader& source)
         const auto bytes = source.read_bytes();
 
         if (bytes.size() == hash_size)
-            build_array(data_, { bytes });
+            data_ = to_array<hash_size>(bytes);
     }
 
     if (version < reject::version_minimum)

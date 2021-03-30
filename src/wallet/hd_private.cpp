@@ -218,8 +218,7 @@ hd_key hd_private::to_hd_key() const
 {
     static constexpr uint8_t private_key_padding = 0x00;
 
-    hd_key out;
-    build_checked_array(out,
+    return build_checked_array<hd_key_size>(
     {
         to_big_endian(to_prefix(lineage_.prefixes)),
         to_array(lineage_.depth),
@@ -229,8 +228,6 @@ hd_key hd_private::to_hd_key() const
         to_array(private_key_padding),
         secret_
     });
-
-    return out;
 }
 
 hd_public hd_private::to_public() const

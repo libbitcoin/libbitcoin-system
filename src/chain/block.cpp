@@ -592,16 +592,16 @@ hash_digest block::generate_merkle_root(bool witness) const
     auto merkle = to_hashes(witness);
 
     // Initial capacity is half of the original list (clear doesn't reset).
-    update.reserve((merkle.size() + 1) / 2);
+    update.reserve((merkle.size() + 1u) / 2u);
 
-    while (merkle.size() > 1)
+    while (merkle.size() > 1u)
     {
         // If number of hashes is odd, duplicate last hash in the list.
-        if (merkle.size() % 2 != 0)
+        if (merkle.size() % 2u != 0u)
             merkle.push_back(merkle.back());
 
-        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
-            update.push_back(bitcoin_hash(build_chunk({ it[0], it[1] })));
+        for (auto it = merkle.begin(); it != merkle.end(); it += 2u)
+            update.push_back(bitcoin_hash(splice(it[0], it[1])));
 
         std::swap(merkle, update);
         update.clear();
@@ -719,7 +719,7 @@ bool block::is_valid_witness_commitment() const
         for (const auto& output: reverse(coinbase.outputs()))
             if (output.extract_committed_hash(committed))
                 return committed == bitcoin_hash(
-                    build_chunk({ generate_merkle_root(true), reserved }));
+                    splice(generate_merkle_root(true), reserved));
 
     // If no txs in block are segregated the commitment is optional (bip141).
     return !is_segregated();

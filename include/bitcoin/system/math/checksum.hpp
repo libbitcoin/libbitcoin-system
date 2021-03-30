@@ -32,23 +32,23 @@ namespace system {
 
 static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
 
-#define WRAP_SIZE(payload_size) (payload_size + checksum_size + 1)
-#define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1)
+#define WRAP_SIZE(payload_size) (payload_size + checksum_size + 1u)
+#define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1u)
 
 /**
  * Concatenate several data slices into a single fixed size array and append a
  * checksum.
  */
 template <size_t Size>
-bool build_checked_array(byte_array<Size>& out,
+byte_array<Size> build_checked_array(
     const std::initializer_list<data_slice>& slices);
 
 /**
  * Appends a four-byte checksum into the end of an array.
- * Returns false if the array is too small to contain the checksum.
+ * Array must be longer than bc::checksum_size.
  */
 template<size_t Size>
-bool insert_checksum(byte_array<Size>& out);
+void insert_checksum(byte_array<Size>& out);
 
 /**
  * Unwrap a wrapped payload.
@@ -59,7 +59,7 @@ bool insert_checksum(byte_array<Size>& out);
  */
 template <size_t Size>
 bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
-    const std::array<uint8_t, Size>& wrapped);
+    byte_array<Size>& wrapped);
 
 /**
  * Unwrap a wrapped payload and return the checksum.
@@ -72,7 +72,7 @@ bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
 template <size_t Size>
 bool unwrap(uint8_t& out_version,
     byte_array<UNWRAP_SIZE(Size)>& out_payload, uint32_t& out_checksum,
-    const std::array<uint8_t, Size>& wrapped);
+    byte_array<Size>& wrapped);
 
 /**
  * Wrap arbitrary data.
@@ -81,8 +81,7 @@ bool unwrap(uint8_t& out_version,
  * @return              The wrapped data.
  */
 template <size_t Size>
-std::array<uint8_t, WRAP_SIZE(Size)> wrap(uint8_t version,
-    const std::array<uint8_t, Size>& payload);
+byte_array<WRAP_SIZE(Size)> wrap(uint8_t version, byte_array<Size>& payload);
 
 /**
  * Appends a four-byte checksum of a data chunk to itself.

@@ -25,13 +25,38 @@ using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(collection_tests)
 
-typedef std::vector<uint8_t> collection;
+// to_vector
+
+BOOST_AUTO_TEST_CASE(collection__to_vector__empty__same)
+{
+    data_chunk parameter;
+    const auto result = to_vector<uint8_t>(parameter);
+    BOOST_REQUIRE(parameter.empty());
+    BOOST_REQUIRE(result.empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__to_vector__one_element__same)
+{
+    data_chunk parameter{ 42 };
+    const auto result = to_vector<uint8_t>(parameter);
+    BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
+}
+
+BOOST_AUTO_TEST_CASE(collection__to_vector__distinct_types__same)
+{
+    data_chunk parameter{ 42, 24 };
+    const auto result = to_vector<char>(parameter);
+    BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
+    BOOST_REQUIRE_EQUAL(result[1], parameter[1]);
+}
 
 // distinct
 
 BOOST_AUTO_TEST_CASE(collection__distinct__empty__same)
 {
-    collection parameter;
+    data_chunk parameter;
     const auto& result = distinct(parameter);
     BOOST_REQUIRE(parameter.empty());
     BOOST_REQUIRE(&result == &parameter);
@@ -40,7 +65,7 @@ BOOST_AUTO_TEST_CASE(collection__distinct__empty__same)
 BOOST_AUTO_TEST_CASE(collection__distinct__single__match)
 {
     const uint8_t expected = 42;
-    collection set{ expected };
+    data_chunk set{ expected };
     const auto& result = distinct(set);
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
     BOOST_REQUIRE_EQUAL(result[0], expected);
@@ -48,7 +73,7 @@ BOOST_AUTO_TEST_CASE(collection__distinct__single__match)
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__sorted)
 {
-    collection set{ 0, 2, 4, 6, 8 };
+    data_chunk set{ 0, 2, 4, 6, 8 };
     const auto& result = distinct(set);
     BOOST_REQUIRE_EQUAL(result.size(), 5u);
     BOOST_REQUIRE_EQUAL(result[0], 0u);
@@ -60,7 +85,7 @@ BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__sorted)
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
 {
-    collection set{ 2, 0, 8, 6, 4 };
+    data_chunk set{ 2, 0, 8, 6, 4 };
     const auto& result = distinct(set);
     BOOST_REQUIRE_EQUAL(result.size(), 5u);
     BOOST_REQUIRE_EQUAL(result[0], 0u);
@@ -72,7 +97,7 @@ BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted_duplicates__sorted_distinct)
 {
-    collection set{ 2, 0, 0, 8, 6, 4 };
+    data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const auto& result = distinct(set);
     BOOST_REQUIRE_EQUAL(result.size(), 5u);
     BOOST_REQUIRE_EQUAL(result[0], 0u);
@@ -86,8 +111,8 @@ BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted_duplicates__sorted_
 
 BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__both_empty)
 {
-    collection source;
-    collection target;
+    data_chunk source;
+    data_chunk target;
     move_append(target, source);
     BOOST_REQUIRE_EQUAL(source.size(), 0u);
     BOOST_REQUIRE_EQUAL(target.size(), 0u);
@@ -95,8 +120,8 @@ BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__both_empty)
 
 BOOST_AUTO_TEST_CASE(collection__move_append__source_empty__both_unchanged)
 {
-    collection source;
-    collection target{ 0, 2, 4, 6, 8 };
+    data_chunk source;
+    data_chunk target{ 0, 2, 4, 6, 8 };
     const auto expected = target.size();
     move_append(target, source);
     BOOST_REQUIRE_EQUAL(source.size(), 0u);
@@ -110,8 +135,8 @@ BOOST_AUTO_TEST_CASE(collection__move_append__source_empty__both_unchanged)
 
 BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__swapped_values)
 {
-    collection source{ 0, 2, 4, 6, 8 };
-    collection target;
+    data_chunk source{ 0, 2, 4, 6, 8 };
+    data_chunk target;
     const auto expected = source.size();
     move_append(target, source);
     BOOST_REQUIRE_EQUAL(source.size(), 0u);
@@ -125,8 +150,8 @@ BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__swapped_values)
 
 BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__moved_in_order)
 {
-    collection source{ 10, 12, 14, 16, 18 };
-    collection target{ 0, 2, 4, 6, 8 };
+    data_chunk source{ 10, 12, 14, 16, 18 };
+    data_chunk target{ 0, 2, 4, 6, 8 };
     const auto expected = source.size() + source.size();
     move_append(target, source);
     BOOST_REQUIRE_EQUAL(source.size(), 0u);
@@ -146,7 +171,7 @@ BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__moved_in_order)
 BOOST_AUTO_TEST_CASE(collection__pop__single__empty_and_returns_expected)
 {
     const uint8_t expected = 42u;
-    collection stack{ expected };
+    data_chunk stack{ expected };
     const auto value = pop(stack);
     BOOST_REQUIRE(stack.empty());
     BOOST_REQUIRE_EQUAL(value, expected);
@@ -155,7 +180,7 @@ BOOST_AUTO_TEST_CASE(collection__pop__single__empty_and_returns_expected)
 BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_and_returns_expected)
 {
     const uint8_t expected = 42u;
-    collection stack{ 0, 1, 2, 3, expected };
+    data_chunk stack{ 0, 1, 2, 3, expected };
     const auto value = pop(stack);
     BOOST_REQUIRE_EQUAL(stack.size(), 4u);
     BOOST_REQUIRE_EQUAL(stack[0], 0u);

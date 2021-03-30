@@ -23,25 +23,36 @@
 #include <iostream>
 #include <vector>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /**
- * Cast vector/enumerable elements into a new vector.
- * @param      <Source>  The source element type.
- * @param      <Target>  The target element type.
- * @param[in]  source    The enumeration of Source elements to cast.
- * @returns              A new enumeration with elements cast to Target.
+ * Copy data elements to a new vector of a compatible element type.
+ * @param      <Element> The target vector element type.
+ * @param[in]  source    The collection of elements to cast.
+ * @returns              A new collection with copyed elements.
  */
-template <typename Source, typename Target>
-std::vector<Target> cast(const std::vector<Source>& source);
+template <typename Element>
+std::vector<Element> to_vector(const data_slice& source);
+
+/**
+ * Determine if a collection contains the specified element.
+ * @param      <Container>  The type of list.
+ * @param      <Element>    The type of list member elements.
+ * @param[in]  list         The list to search.
+ * @param[in]  value        The value of the element to find.
+ * @return                  True if contained, otherwise false.
+ */
+template <typename Container, typename Element>
+bool contains(const Container& list, const Element& value);
 
 /**
  * Obtain the sorted distinct elements of the list.
- * @param           <Element>  The list element type.
- * @param[in, out]  list       The list.
- * @return                     The sorted list reduced to distinct elements.
+ * @param      <Element>  The list element type.
+ * @param[in]  list       The list.
+ * @return                The sorted list reduced to its distinct elements.
  */
 template <typename Element>
 std::vector<Element>& distinct(std::vector<Element>& list);
@@ -49,19 +60,21 @@ std::vector<Element>& distinct(std::vector<Element>& list);
 /**
  * Find the position of a pair in an ordered list.
  * @param      <Pair>  The type of list member elements.
+ * @param      <Key>   The type of list member element keys.
  * @param[in]  list    The list to search.
  * @param[in]  key     The key to the element to find.
- * @return             The position or -1 if not found.
+ * @return             The position or negative if not found.
  */
 template <typename Pair, typename Key>
-int find_pair_position(const std::vector<Pair>& list, const Key& key);
+int find_pair_position(const std::vector<const Pair>& list, Key& key);
 
 /**
- * Find the position of an element in an ordered list.
- * @param      <Element>  The type of list member elements.
- * @param[in]  list       The list to search.
- * @param[in]  value      The value of the element to find.
- * @return                The position or -1 if not found.
+ * Find the position of an element in an ordered collection.
+ * @param      <Container>  The type of collection.
+ * @param      <Element>    The type of collection member elements.
+ * @param[in]  list         The list to search.
+ * @param[in]  value        The value of the element to find.
+ * @return                  The position or negative if not found.
  */
 template <typename Element, typename Container>
 int find_position(const Container& list, const Element& value);
@@ -69,7 +82,7 @@ int find_position(const Container& list, const Element& value);
 /**
  * Facilitate a list insertion sort by inserting into a sorted position.
  * @param      <Type>       The type of list member elements.
- * @param      <Predicate>  The sort predicate function signature.
+ * @param      <Predicate>  The type of the predicate.
  * @param[in]  list         The list to modify.
  * @param[in]  element      The element to insert.
  * @param[in]  predicate    The sort predicate.
@@ -80,7 +93,8 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     const Type& element, Predicate predicate);
 
 /**
- * Move members of a source list to end of a target list. Source is cleared.
+ * Move members of a source list to end of a target list. Source members
+ * are undefined upon return.
  * @param      <Type>  The type of list member elements.
  * @param[in]  target  The target list.
  * @param[in]  source  The source list
@@ -95,6 +109,14 @@ void move_append(std::vector<Type>& target, std::vector<Type>& source);
  */
 template <typename Element>
 Element pop(std::vector<Element>& stack);
+
+/**
+ * Create a reversed copy of a collection.
+ * @param      <Collection>  The type of the collection to reverse.
+ * @param[in]  source        The collection to reverse.
+ */
+template <typename Collection>
+Collection reverse(const Collection& source);
 
 } // namespace system
 } // namespace libbitcoin
