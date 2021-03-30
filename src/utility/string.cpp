@@ -21,9 +21,16 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+std::string to_string(const data_slice& source)
+{
+    std::string out(source.begin(), source.end());
+    return out;
+}
 
 std::string join(const string_list& words, const std::string& delimiter)
 {

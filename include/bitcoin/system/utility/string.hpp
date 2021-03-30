@@ -32,6 +32,13 @@ namespace system {
 typedef std::vector<std::string> string_list;
 
 /**
+ * Copy data elements to a new string.
+ * @param[in]  source  The collection of elements to cast.
+ * @returns            A new string with copyed elements.
+ */
+BC_API std::string to_string(const data_slice& source);
+
+/**
  * Convert a text string to the specified type.
  * @param      <Value>    The converted type.
  * @param[out] out_value  The parsed value.
