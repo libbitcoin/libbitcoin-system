@@ -28,135 +28,129 @@ BOOST_AUTO_TEST_SUITE(checksum_tests)
 
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__size__increased_by_checksum_size)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
-    const auto data_size = data.size();
+    data_chunk data{ 0, 0, 0, 0, 0 };
     append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data.size(), data_size + checksum_size);
+    BOOST_REQUIRE_EQUAL(data.size(), 5u + checksum_size);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__empty__valid)
 {
-    data_chunk data = {};
-    auto checksum = data.size();
-    append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x5du);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0xf6u);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0xe0u);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0xe2u);
+    data_chunk out;
+    append_checksum(out);
+    BOOST_REQUIRE_EQUAL(out[0], 0x5du);
+    BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
+    BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__not_empty__valid)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
-    auto checksum = data.size();
-    append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x79u);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x01u);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0xafu);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x93u);
+    data_chunk out{ 0, 0, 0, 0, 0 };
+    append_checksum(out);
+    BOOST_REQUIRE_EQUAL(out[0], 0u);
+    BOOST_REQUIRE_EQUAL(out[1], 0u);
+    BOOST_REQUIRE_EQUAL(out[2], 0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0u);
+    BOOST_REQUIRE_EQUAL(out[4], 0u);
+    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
+    BOOST_REQUIRE_EQUAL(out[6], 0x01u);
+    BOOST_REQUIRE_EQUAL(out[7], 0xafu);
+    BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bitcoin_checksum__always__valid)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
+    data_chunk data{ 0, 0, 0, 0, 0 };
     const auto result = bitcoin_checksum(data);
     BOOST_REQUIRE_EQUAL(result, 0x93af0179u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__empty__valid)
 {
-    data_chunk data = {};
-    auto checksum = data.size();
-    byte_array<checksum_size> out;
-    const auto result = build_checked_array(out,
+    byte_array<0> data;
+    const auto out = build_checked_array<checksum_size>(
     {
         data
     });
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x5du);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xf6u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xe0u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xe2u);
+    BOOST_REQUIRE_EQUAL(out[0], 0x5du);
+    BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
+    BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__not_empty__valid)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
-    auto checksum = data.size();
-    byte_array<checksum_size + 5> out;
-    const auto result = build_checked_array(out,
+    byte_array<5> data{ { 0, 0, 0, 0, 0 } };
+    const auto out = build_checked_array<5 + checksum_size>(
     {
         data
     });
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x79u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x01u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xafu);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x93u);
-}
-
-BOOST_AUTO_TEST_CASE(checksum__build_checked_array__overflow__false)
-{
-    data_chunk data = { 0, 0, 0, 0, 0 };
-    byte_array<checksum_size> out;
-    const auto result = build_checked_array(out,
-    {
-        data
-    });
-    BOOST_REQUIRE(!result);
+    BOOST_REQUIRE_EQUAL(out[0], 0u);
+    BOOST_REQUIRE_EQUAL(out[1], 0u);
+    BOOST_REQUIRE_EQUAL(out[2], 0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0u);
+    BOOST_REQUIRE_EQUAL(out[4], 0u);
+    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
+    BOOST_REQUIRE_EQUAL(out[6], 0x01u);
+    BOOST_REQUIRE_EQUAL(out[7], 0xafu);
+    BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum__empty__valid)
 {
-    data_chunk data = {};
-    auto checksum = data.size();
-    byte_array<checksum_size> out;
-    BOOST_REQUIRE(insert_checksum(out));
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x5du);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xf6u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xe0u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xe2u);
+    byte_array<0> data;
+    auto out = build_checked_array<checksum_size>(
+    {
+        data
+    });
+    insert_checksum(out);
+    BOOST_REQUIRE_EQUAL(out[0], 0x5du);
+    BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
+    BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__valid)
 {
-    byte_array<checksum_size + 5> out{ { 0, 0, 0, 0, 0 } };
-    auto checksum = out.size() - checksum_size;
-    BOOST_REQUIRE(insert_checksum(out));
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x79u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x01u);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0xafu);
-    BOOST_REQUIRE_EQUAL(out[checksum++], 0x93u);
-}
-
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum__underflow__false)
-{
-    byte_array<checksum_size - 1> out;
-    BOOST_REQUIRE(!insert_checksum(out));
+    byte_array<5> data{ { 0, 0, 0, 0, 0 } };
+    auto out = build_checked_array<5 + checksum_size>(
+    {
+        data
+    });
+    insert_checksum(out);
+    BOOST_REQUIRE_EQUAL(out[0], 0u);
+    BOOST_REQUIRE_EQUAL(out[1], 0u);
+    BOOST_REQUIRE_EQUAL(out[2], 0u);
+    BOOST_REQUIRE_EQUAL(out[3], 0u);
+    BOOST_REQUIRE_EQUAL(out[4], 0u);
+    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
+    BOOST_REQUIRE_EQUAL(out[6], 0x01u);
+    BOOST_REQUIRE_EQUAL(out[7], 0xafu);
+    BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum__underflow__false)
 {
-    const data_chunk data = { 0, 0, 0 };
+    static const data_chunk data{ 0, 0, 0 };
     BOOST_REQUIRE(!verify_checksum(data));
 }
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum__not_set__false)
 {
-    const data_chunk data = { 0, 0, 0, 0, 0 };
+    static const data_chunk data{ 0, 0, 0, 0, 0 };
     BOOST_REQUIRE(!verify_checksum(data));
 }
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum__added__true)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
+    data_chunk data{ 0, 0, 0, 0, 0 };
     append_checksum(data);
     BOOST_REQUIRE(verify_checksum(data));
 }
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum__invalidated__false)
 {
-    data_chunk data = { 0, 0, 0, 0, 0 };
+    data_chunk data{ 0, 0, 0, 0, 0 };
     const auto data_size = data.size();
     append_checksum(data);
     data[data_size] = 42;
