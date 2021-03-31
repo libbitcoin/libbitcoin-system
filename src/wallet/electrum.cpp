@@ -188,8 +188,8 @@ static std::string get_seed_prefix(seed_prefix prefix)
 {
     switch (prefix)
     {
-    case seed_prefix::empty:
-        return seed_prefix_empty;
+        case seed_prefix::empty:
+            return seed_prefix_empty;
         case seed_prefix::standard:
             return seed_prefix_standard;
         case seed_prefix::witness:
