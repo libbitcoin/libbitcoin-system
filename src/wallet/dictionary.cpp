@@ -19,6 +19,7 @@
 #include <bitcoin/system/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace system {
 namespace wallet {
 namespace language {
 
@@ -20590,4 +20591,5 @@ const dictionary_list all
 
 } // namespace language
 } // namespace wallet
+} // namespace system
 } // namespace libbitcoin

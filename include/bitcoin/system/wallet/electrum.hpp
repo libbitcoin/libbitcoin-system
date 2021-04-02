@@ -80,7 +80,7 @@ typedef string_list word_list;
  * later be converted to a seed for use in electrum wallet creation.
  */
 BC_API word_list create_mnemonic(const data_slice& entropy,
-    const dictionary& lexicon=bc::wallet::language::electrum::en,
+    const dictionary& lexicon=language::electrum::en,
     seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**
@@ -89,14 +89,15 @@ BC_API word_list create_mnemonic(const data_slice& entropy,
  * words must have been created using electrum encoding.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary& lexicon,
+    const data_chunk& entropy, const dictionary& lexicon,
     seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons=bc::wallet::language::electrum::all,
+    const data_chunk& entropy, 
+    const dictionary_list& lexicons=language::electrum::all,
     seed_prefix prefix=electrum::seed_prefix::standard);
 
 /**

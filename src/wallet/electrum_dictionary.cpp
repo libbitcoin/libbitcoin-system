@@ -1660,10 +1660,10 @@ const dictionary_v1 en_v1
 };
 
 // These dictionaries are identical to corresponding BIP39 word lists.
-const dictionary& en = libbitcoin::wallet::language::en;
-const dictionary& es = libbitcoin::wallet::language::es;
-const dictionary& ja = libbitcoin::wallet::language::ja;
-const dictionary& zh_Hans = libbitcoin::wallet::language::zh_Hans;
+const dictionary& en = language::en;
+const dictionary& es = language::es;
+const dictionary& ja = language::ja;
+const dictionary& zh_Hans = language::zh_Hans;
 
 // Word lists (excluding en_v1) from:
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
