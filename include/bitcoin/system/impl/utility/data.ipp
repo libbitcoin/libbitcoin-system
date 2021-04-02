@@ -62,7 +62,7 @@ byte_array<Size> build_array(const loaf& slices)
 template <typename Source>
 data_chunk to_chunk(const Source& bytes)
 {
-    return data_chunk(std::begin(bytes), std::end(bytes));
+    return data_chunk(bytes.begin(), bytes.end());
 }
 
 inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)

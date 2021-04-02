@@ -62,7 +62,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 // The public key must have a sign value of 0x02 (i.e. must be even y-valued).
 bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 {
-    static const auto magic = to_chunk("Stealth seed");
+    static const auto magic = to_chunk(std::string("Stealth seed"));
     auto nonced_seed = build_chunk({ to_array(0), seed });
     ec_compressed point;
 

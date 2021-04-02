@@ -113,7 +113,7 @@ hd_private::hd_private(const ec_secret& secret,
 hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
 {
     // This is a magic constant from BIP32.
-    static const auto magic = to_chunk("Bitcoin seed");
+    static const auto magic = to_chunk(std::string("Bitcoin seed"));
 
     const auto intermediate = split(hmac_sha512_hash(seed, magic));
 
