@@ -253,17 +253,16 @@ witness_address::operator bool() const
 std::string witness_address::encoded() const
 {
     const size_t conversion_offset = 0;
+    const auto hash = witness_hash_ == null_hash ? to_chunk(hash_) : 
+        to_chunk(witness_hash_);
 
     base32 bech32;
     bech32.prefix = prefix_;
     bech32.payload = build_chunk(
     {
-        to_chunk(witness_version_),
-        witness_hash_ == null_hash ?
-            convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
-                true, to_chunk(hash_), conversion_offset) :
-            convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
-                true, to_chunk(witness_hash_), conversion_offset)
+        data_chunk{ witness_version_ },
+        convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
+            true, hash, conversion_offset)
     });
 
     return encode_base32(bech32);
