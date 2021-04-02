@@ -111,7 +111,7 @@ std::vector<std::string> printer::columnize(const std::string& paragraph,
     {
         if (!fragment.empty() && (word.length() + fragment.length() < width))
         {
-            fragment += BC_SENTENCE_DELIMITER + word;
+            fragment += " " + word;
             continue;
         }
 

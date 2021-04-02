@@ -27,8 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-#define BC_SENTENCE_DELIMITER " "
-
 /**
  * Cast vector/enumerable elements into a new vector.
  * @param      <Source>  The source element type.
