@@ -44,7 +44,6 @@ namespace electrum {
 extern const dictionary en;
 extern const dictionary es;
 extern const dictionary ja;
-extern const dictionary pt;
 extern const dictionary zh_Hans;
 
 // Word lists (excluding en_v1) from:

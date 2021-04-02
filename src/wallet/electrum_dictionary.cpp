@@ -1659,14 +1659,9 @@ const dictionary_v1 en_v1 =
     }
 };
 
-// TODO: verify the correct Electrum Portuguese word list.
-// * The Electrum repo Portuguese dictionary is too short (invalid)??
-// github.com/spesmilo/electrum/blob/master/electrum/wordlist/portuguese.txt
-
 // These dictionaries are identical (*) to corresponding BIP39 word lists.
 const dictionary en = libbitcoin::wallet::language::en;
 const dictionary es = libbitcoin::wallet::language::es;
-const dictionary pt = libbitcoin::wallet::language::pt;
 const dictionary ja = libbitcoin::wallet::language::ja;
 const dictionary zh_Hans = libbitcoin::wallet::language::zh_Hans;
 
@@ -1676,7 +1671,6 @@ const dictionary_list all =
 {
     &en,
     &es,
-    &pt,
     &ja,
     &zh_Hans
 };
