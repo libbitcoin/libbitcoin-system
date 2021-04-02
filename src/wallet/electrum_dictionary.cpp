@@ -27,7 +27,7 @@ namespace language {
 namespace electrum {
 
 // The original ("old") Electrum dictionary language.
-const dictionary_v1 en_v1 =
+const dictionary_v1 en_v1
 {
     {
         "like",
@@ -1659,20 +1659,20 @@ const dictionary_v1 en_v1 =
     }
 };
 
-// These dictionaries are identical (*) to corresponding BIP39 word lists.
-const dictionary en = libbitcoin::wallet::language::en;
-const dictionary es = libbitcoin::wallet::language::es;
-const dictionary ja = libbitcoin::wallet::language::ja;
-const dictionary zh_Hans = libbitcoin::wallet::language::zh_Hans;
+// These dictionaries are identical to corresponding BIP39 word lists.
+const dictionary& en = libbitcoin::wallet::language::en;
+const dictionary& es = libbitcoin::wallet::language::es;
+const dictionary& ja = libbitcoin::wallet::language::ja;
+const dictionary& zh_Hans = libbitcoin::wallet::language::zh_Hans;
 
 // Word lists (excluding en_v1) from:
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
-const dictionary_list all =
+const dictionary_list all
 {
-    &en,
-    &es,
-    &ja,
-    &zh_Hans
+    en,
+    es,
+    ja,
+    zh_Hans
 };
 
 } // namespace electrum

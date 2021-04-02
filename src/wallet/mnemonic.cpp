@@ -125,7 +125,7 @@ bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons)
 {
     for (const auto& lexicon: lexicons)
-        if (validate_mnemonic(mnemonic, *lexicon))
+        if (validate_mnemonic(mnemonic, lexicon))
             return true;
 
     return false;

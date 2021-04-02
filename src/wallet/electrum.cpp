@@ -178,7 +178,7 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
         if (position == -1)
             return { 1 };
 
-        entropy = (entropy * dictionary_size) + position;
+        entropy = (entropy * lexicon_size) + position;
     }
 
     return entropy;
@@ -244,7 +244,7 @@ bool validate_mnemonic(const word_list& mnemonic,
     seed_seed prefix)
 {
     for (const auto& lexicon: lexicons)
-        if (validate_mnemonic(mnemonic, entropy, *lexicon, prefix))
+        if (validate_mnemonic(mnemonic, entropy, lexicon, prefix))
             return true;
 
     return false;

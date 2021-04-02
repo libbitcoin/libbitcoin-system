@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_WALLET_DICTIONARY_HPP
 
 #include <array>
+#include <functional>
 #include <vector>
 #include <bitcoin/system/compat.hpp>
 
@@ -44,24 +45,24 @@ typedef std::array<const char*, dictionary_size> dictionary;
 /**
  * A collection of dictionaries for mnemonic validation.
  */
-typedef std::vector<const dictionary*> dictionary_list;
+typedef std::vector<std::reference_wrapper<const dictionary>> dictionary_list;
 
 namespace language
 {
-    // Individual bip39 languages:
-    extern const dictionary en;
-    extern const dictionary es;
-    extern const dictionary it;
-    extern const dictionary fr;
-    extern const dictionary cs;
-    extern const dictionary pt;
-    extern const dictionary ja;
-    extern const dictionary ko;
-    extern const dictionary zh_Hans;
-    extern const dictionary zh_Hant;
+// Individual bip39 languages:
+extern const dictionary en;
+extern const dictionary es;
+extern const dictionary it;
+extern const dictionary fr;
+extern const dictionary cs;
+extern const dictionary pt;
+extern const dictionary ja;
+extern const dictionary ko;
+extern const dictionary zh_Hans;
+extern const dictionary zh_Hant;
 
-    // All bip39 languages:
-    extern const dictionary_list all;
+// All bip39 languages:
+extern const dictionary_list all;
 }
 
 } // namespace wallet
