@@ -44,15 +44,6 @@ BOOST_AUTO_TEST_CASE(collection__cast__one_element__same)
     BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast__distinct_types__same)
-{
-    data_chunk parameter{ 42, 24 };
-    const auto result = cast<char, uint8_t>(parameter);
-    BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
-    BOOST_REQUIRE_EQUAL(result[1], parameter[1]);
-}
-
 // distinct
 
 BOOST_AUTO_TEST_CASE(collection__distinct__empty__same)

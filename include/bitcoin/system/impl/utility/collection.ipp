@@ -111,7 +111,7 @@ Element pop(std::vector<Element>& stack)
 template <typename Collection>
 Collection reverse(const Collection& source)
 {
-    Collection out(std::size(source));
+    Collection out(source.size());
     std::reverse_copy(std::begin(source), std::end(source), std::begin(out));
     return out;
 }
