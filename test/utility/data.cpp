@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(data__build_array__under_capacity__expected_zeroed)
     BOOST_REQUIRE_EQUAL(result.size(), 3u);
     BOOST_REQUIRE_EQUAL(result[0], 24);
     BOOST_REQUIRE_EQUAL(result[1], 42);
-    BOOST_REQUIRE_EQUAL(result[3], 0);
+    BOOST_REQUIRE_EQUAL(result[2], 0);
 }
 
 BOOST_AUTO_TEST_CASE(data__build_array__overflow__truncated_values)
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(data__starts_with__matched_arrays__true)
 
 BOOST_AUTO_TEST_CASE(data__xor_data1__empty__empty)
 {
-    static const byte_array<0> source;
+    static const byte_array<1> source{ { 0x0 } };
     const auto result = xor_data<0>(source, source);
     BOOST_REQUIRE_EQUAL(result.size(), 0u);
 }
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__distinct__ones)
 
 BOOST_AUTO_TEST_CASE(data__xor_offset__empty__empty)
 {
-    static const byte_array<1> source;
+    static const byte_array<1> source{ { 0x0 } };
     const auto result = xor_offset<0, 0, 0>(source, source);
     BOOST_REQUIRE_EQUAL(result.size(), 0u);
 }
