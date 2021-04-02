@@ -241,7 +241,7 @@ bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons, const seed_prefix prefix)
 {
     for (const auto& lexicon: lexicons)
-        if (validate_mnemonic(mnemonic, *lexicon, prefix))
+        if (validate_mnemonic(mnemonic, lexicon, prefix))
             return true;
 
     return false;
