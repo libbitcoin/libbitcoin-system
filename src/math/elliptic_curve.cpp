@@ -215,7 +215,7 @@ bool verify(const ec_uncompressed& point)
 // Detect public keys
 // ----------------------------------------------------------------------------
 
-bool is_compressed_key(data_slice point)
+bool is_compressed_key(const data_slice& point)
 {
     const auto size = point.size();
     if (size != ec_compressed_size)
@@ -225,7 +225,7 @@ bool is_compressed_key(data_slice point)
     return first == compressed_even || first == compressed_odd;
 }
 
-bool is_uncompressed_key(data_slice point)
+bool is_uncompressed_key(const data_slice& point)
 {
     const auto size = point.size();
     if (size != ec_uncompressed_size)
@@ -235,7 +235,7 @@ bool is_uncompressed_key(data_slice point)
     return first == uncompressed;
 }
 
-bool is_public_key(data_slice point)
+bool is_public_key(const data_slice& point)
 {
     return is_compressed_key(point) || is_uncompressed_key(point);
 }
@@ -340,7 +340,7 @@ bool verify_signature(const ec_uncompressed& point, const hash_digest& hash,
         verify_signature(context, pubkey, hash, signature);
 }
 
-bool verify_signature(data_slice point, const hash_digest& hash,
+bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature)
 {
     // Copy to avoid exposing external types.

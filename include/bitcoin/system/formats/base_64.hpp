@@ -29,7 +29,7 @@ namespace libbitcoin {
  * Encode data as base64.
  * @return the base64 encoded string.
  */
-BC_API std::string encode_base64(data_slice unencoded);
+BC_API std::string encode_base64(const data_slice& unencoded);
 
 /**
  * Attempt to decode base64 data.

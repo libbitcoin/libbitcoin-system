@@ -23,7 +23,7 @@ namespace wallet {
 namespace language {
 
 // english
-const dictionary en =
+const dictionary en
 {
     {
         "abandon",
@@ -2078,7 +2078,7 @@ const dictionary en =
 };
 
 // spanish
-const dictionary es =
+const dictionary es
 {
     {
         "ábaco",
@@ -4133,7 +4133,7 @@ const dictionary es =
 };
 
 // italian
-const dictionary it =
+const dictionary it
 {
     {
         "abaco",
@@ -6188,7 +6188,7 @@ const dictionary it =
 };
 
 // french
-const dictionary fr =
+const dictionary fr
 {
     {
         "abaisser",
@@ -8243,7 +8243,7 @@ const dictionary fr =
 };
 
 // czech
-const dictionary cs =
+const dictionary cs
 {
     {
         "abdikace",
@@ -10298,7 +10298,7 @@ const dictionary cs =
 };
 
 // portuguese
-const dictionary pt =
+const dictionary pt
 {
     {
         "abacate",
@@ -12353,7 +12353,7 @@ const dictionary pt =
 };
 
 // japonese
-const dictionary ja =
+const dictionary ja
 {
     {
         "あいこくしん",
@@ -14408,7 +14408,7 @@ const dictionary ja =
 };
 
 // korean
-const dictionary ko =
+const dictionary ko
 {
     {
         "가격",
@@ -16463,7 +16463,7 @@ const dictionary ko =
 };
 
 // chinese (simplified)
-const dictionary zh_Hans =
+const dictionary zh_Hans
 {
     {
         "的",
@@ -18518,7 +18518,7 @@ const dictionary zh_Hans =
 };
 
 // chinese (traditional)
-const dictionary zh_Hant =
+const dictionary zh_Hant
 {
     {
         "的",
@@ -20574,18 +20574,18 @@ const dictionary zh_Hant =
 
 // Word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const dictionary_list all =
+const dictionary_list all
 {
-    &en,
-    &es,
-    &it,
-    &fr,
-    &cs,
-    &pt,
-    &ja,
-    &ko,
-    &zh_Hans,
-    &zh_Hant
+    en,
+    es,
+    it,
+    fr,
+    cs,
+    pt,
+    ja,
+    ko,
+    zh_Hans,
+    zh_Hant
 };
 
 } // namespace language

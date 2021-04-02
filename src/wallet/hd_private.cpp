@@ -109,7 +109,7 @@ hd_private::hd_private(const ec_secret& secret,
 // Factories.
 // ----------------------------------------------------------------------------
 
-hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
+hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
 {
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
@@ -217,8 +217,7 @@ hd_key hd_private::to_hd_key() const
 {
     static constexpr uint8_t private_key_padding = 0x00;
 
-    hd_key out;
-    build_checked_array(out,
+    return build_checked_array<hd_key_size>(
     {
         to_big_endian(to_prefix(lineage_.prefixes)),
         to_array(lineage_.depth),
@@ -228,8 +227,6 @@ hd_key hd_private::to_hd_key() const
         to_array(private_key_padding),
         secret_
     });
-
-    return out;
 }
 
 hd_public hd_private::to_public() const
