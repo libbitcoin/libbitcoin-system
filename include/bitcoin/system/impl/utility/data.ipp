@@ -77,8 +77,8 @@ inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
     for (const auto& slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
 
-    // Pad any unfilled remainder of the array with zeros.
-    std::fill(&out[size], &out[reserved], 0x00);
+    // Pad any unfilled remainder of the vector with zeros.
+    out.insert(out.end(), reserved - size, 0x00);
     return out;
 }
 
