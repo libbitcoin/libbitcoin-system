@@ -170,17 +170,23 @@ BOOST_AUTO_TEST_CASE(data__build_chunk__three_arrays__expected_size_and_value)
 
 // build_chunk(,)
 
-BOOST_AUTO_TEST_CASE(data__build_chunk__extra_reserve__expected_size_and_capacity)
+BOOST_AUTO_TEST_CASE(data__build_chunk__extra_reserve__expected_size_zeroed)
 {
     const auto result = build_chunk(
     {
-        byte_array<2>{ { 0, 0 } },
+        byte_array<2>{ { 1, 1 } },
         byte_array<1>{ { 42 } },
-        byte_array<3>{ { 0, 0, 0 } }
-    }, 42);
-    BOOST_REQUIRE_EQUAL(result.size(), 2u + 1u + 3u);
+        byte_array<3>{ { 1, 1, 1 } }
+    }, 2);
+    BOOST_REQUIRE_EQUAL(result[0], 1u);
+    BOOST_REQUIRE_EQUAL(result[1], 1u);
     BOOST_REQUIRE_EQUAL(result[2], 42u);
-    BOOST_REQUIRE_EQUAL(result.capacity(), 2u + 1u + 3u + 42u);
+    BOOST_REQUIRE_EQUAL(result[3], 1u);
+    BOOST_REQUIRE_EQUAL(result[4], 1u);
+    BOOST_REQUIRE_EQUAL(result[5], 1u);
+    BOOST_REQUIRE_EQUAL(result[6], 0u);
+    BOOST_REQUIRE_EQUAL(result[7], 0u);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u + 1u + 3u + 2u);
 }
 
 // extend_data
