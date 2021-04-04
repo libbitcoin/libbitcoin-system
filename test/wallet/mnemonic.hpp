@@ -223,7 +223,7 @@ const mnemonic_result_list mnemonic_bx_to_seed_vectors
             "previo,humilde,actuar,jarabe,tabique,ahorro,tope,pulpo,anís,señal,lavar,bahía",
             "博 肉 地 危 惜 多 陪 荒 因 患 伊 基",
             "e72505021b97e15171fe09e996898888579c4196c445d7629762c5b09586e3fb3d68380120b8d8a6ed6f9a73306dab7bf54127f3a610ede2a2d5b4e59916ac73",
-            bc::wallet::language::en
+            bc::wallet::language::es
         }
     }
 };
