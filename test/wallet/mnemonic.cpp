@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__bx)
     for (const auto& vector: mnemonic_bx_to_seed_vectors)
     {
         const auto words = split(vector.mnemonic, ",");
-        BOOST_REQUIRE(validate_mnemonic(words));
+        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
         const auto seed = decode_mnemonic(words, vector.passphrase);
         BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
     }
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__bx)
         const auto mnemonic = create_mnemonic(entropy, vector.language);
         BOOST_REQUIRE(mnemonic.size() > 0);
         BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-        BOOST_REQUIRE(validate_mnemonic(mnemonic));
+        BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
     }
 }
 
