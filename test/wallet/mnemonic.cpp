@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vectors__success)
         data_chunk entropy;
         decode_base16(entropy, vector.entropy);
         const auto mnemonic = create_mnemonic(entropy, vector.language);
-        BOOST_REQUIRE_GT(mnemonic.size(), 0u);
+        BOOST_REQUIRE(!mnemonic.empty());
         BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__ko_zh_Hans__no_intersection)
     BOOST_REQUIRE(!intersects(language::ko, language::zh_Hans));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__1275_intersections)
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_zh_Hant__1275_intersections)
 {
     BOOST_REQUIRE_EQUAL(intersection(language::zh_Hans, language::zh_Hant), 1275);
 }
