@@ -290,10 +290,9 @@ const mnemonic_result_list mnemonic_no_passphrase
 };
 
 // Implements all Japanese test vectors provided from:
-// https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
-//
+// github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
 // Originally referenced from:
-// https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Test_vectors
+// github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Test_vectors
 const mnemonic_result_list mnemonic_japanese_vectors
 {
     {
@@ -487,22 +486,6 @@ const mnemonic_result_list mnemonic_japanese_vectors
         "346b7321d8c04f6f37b49fdf062a2fddc8e1bf8f1d33171b65074531ec546d1d3469974beccb1a09263440fc92e1042580a557fdce314e27ee4eabb25fa5e5fe",
         bc::system::wallet::language::ja
     }
-};
-
-typedef std::vector<std::string> string_list;
-
-const string_list invalid_mnemonic_tests
-{
-    // Spelling error:
-    "abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,aboot",
-
-    // Bad lengths:
-    "one",
-    "one,two",
-    "abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon",
-
-    // Bad checksum:
-    "abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,one",
 };
 
 #endif
