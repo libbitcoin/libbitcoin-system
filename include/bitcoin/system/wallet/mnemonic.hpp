@@ -55,7 +55,7 @@ public:
     /// Constructors.
     mnemonic();
     mnemonic(const mnemonic& other);
-    mnemonic(const std::string& sentence);
+    mnemonic(const std::string& sentence, reference lexicon=reference::none);
     mnemonic(const data_slice& entropy, reference lexicon=reference::en);
     mnemonic(const string_list& words, reference lexicon=reference::none);
 

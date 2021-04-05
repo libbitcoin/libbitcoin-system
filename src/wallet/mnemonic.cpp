@@ -147,8 +147,8 @@ mnemonic::mnemonic(const mnemonic& other)
 {
 }
 
-mnemonic::mnemonic(const std::string& sentence)
-  : mnemonic(split(sentence))
+mnemonic::mnemonic(const std::string& sentence, reference lexicon)
+  : mnemonic(split(sentence), lexicon)
 {
 }
 
