@@ -28,27 +28,40 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * A valid mnemonic dictionary has exactly this many words.
- * This size applies to both Electrum (>v1) and bip39 word lists.
- */
+// A valid mnemonic dictionary has exactly this many words.
+// This size applies to both Electrum (>v1) and bip39 word lists.
 static BC_CONSTEXPR size_t dictionary_size = 2048;
 
-/**
- * A dictionary for creating mnemonics.
- * The bip39 spec calls this a "wordlist".
- * This is a POD type, which means the compiler can write it directly
- * to static memory with no run-time overhead.
- */
-typedef std::array<const char*, dictionary_size> dictionary;
+// Dictionary names.
+enum class reference
+{
+    en,
+    es,
+    it,
+    fr,
+    cs,
+    pt,
+    ja,
+    ko,
+    zh_Hans,
+    zh_Hant,
+    none
+};
 
-/**
- * A collection of dictionaries for mnemonic validation.
- */
+// A dictionary (bip39 wordlist) for creating mnemonics.
+// The compiler can write the char* array (POD type) directly to static memory.
+typedef struct
+{
+    reference name;
+    std::array<const char*, dictionary_size> words;
+} dictionary;
+
+// A collection of dictionaries.
 typedef std::vector<std::reference_wrapper<const dictionary>> dictionary_list;
 
 namespace language
 {
+
 // Individual bip39 languages:
 extern const dictionary en;
 extern const dictionary es;
@@ -61,7 +74,7 @@ extern const dictionary ko;
 extern const dictionary zh_Hans;
 extern const dictionary zh_Hant;
 
-// All bip39 languages:
+// A collection of all bip39 languages:
 extern const dictionary_list all;
 }
 
