@@ -82,8 +82,7 @@ public:
     bool operator!=(const hd_public& other) const;
     hd_public& operator=(const hd_public& other);
     friend std::istream& operator>>(std::istream& in, hd_public& to);
-    friend std::ostream& operator<<(std::ostream& out,
-        const hd_public& of);
+    friend std::ostream& operator<<(std::ostream& out, const hd_public& of);
 
     /// Cast operators.
     operator bool() const;
