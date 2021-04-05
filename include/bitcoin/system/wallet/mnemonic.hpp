@@ -21,11 +21,9 @@
 
 #include <cstddef>
 #include <string>
-#include <vector>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
@@ -34,59 +32,73 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * A valid mnemonic word count is evenly divisible by this number.
- */
-static BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
+/// A wallet mnemonic, as defined by BIP39.
+class BC_API mnemonic
+{
+public:
+    static const size_t word_multiple;
+    static const size_t word_minimum;
+    static const size_t word_maximum;
 
-/**
- * A valid seed byte count is evenly divisible by this number.
- */
-static BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
+    static const size_t entropy_multiple;
+    static const size_t entropy_minumum;
+    static const size_t entropy_maximum;
 
-/**
- * Represents a mnemonic word list.
- */
-typedef string_list word_list;
-
-/**
- * Create a new mnenomic (list of words) from provided entropy and a dictionary
- * selection. The mnemonic can later be converted to a seed for use in wallet
- * creation. Entropy byte count must be evenly divisible by 4.
- */
-BC_API word_list create_mnemonic(const data_slice& entropy,
-    const dictionary &lexicon=language::en);
-
-
-/**
- * Checks that a mnemonic is valid in at least one of the provided languages.
- */
-BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary_list& lexicons=language::all);
-
-/**
- * Checks a mnemonic against a dictionary to determine if the
- * words are spelled correctly and the checksum matches.
- * The words must have been created using mnemonic encoding.
- */
-BC_API bool validate_mnemonic(const word_list& mnemonic,
-    const dictionary &lexicon);
-
-/**
- * Convert a mnemonic with no passphrase to a wallet-generation seed.
- */
-BC_API long_hash decode_mnemonic(const word_list& mnemonic);
+    static const dictionary& to_dictionary(reference lexicon);
+    static reference to_reference(const string_list& words);
 
 #ifdef WITH_ICU
-
-/**
- * Convert a mnemonic and passphrase to a wallet-generation seed.
- * Any passphrase can be used and will change the resulting seed.
- */
-BC_API long_hash decode_mnemonic(const word_list& mnemonic,
-    const std::string& passphrase);
-
+    static long_hash to_seed(const string_list& words,
+        const std::string& passphrase="");
 #endif
+
+    /// Constructors.
+    mnemonic();
+    mnemonic(const mnemonic& other);
+    mnemonic(const std::string& sentence);
+    mnemonic(const data_slice& entropy, reference lexicon=reference::en);
+    mnemonic(const string_list& words, reference lexicon=reference::none);
+
+    /// Operators.
+    bool operator<(const mnemonic& other) const;
+    bool operator==(const mnemonic& other) const;
+    bool operator!=(const mnemonic& other) const;
+    mnemonic& operator=(const mnemonic& other);
+    friend std::istream& operator>>(std::istream& in, mnemonic& to);
+    friend std::ostream& operator<<(std::ostream& out, const mnemonic& of);
+
+    /// Cast operators.
+    operator bool() const;
+    operator reference() const;
+    operator const data_chunk&() const;
+
+    /// Serializer.
+    std::string sentence() const;
+
+    /// Accessors.
+    const data_chunk& entropy() const;
+    const string_list& words() const;
+    reference lexicon() const;
+
+    /// Methods.
+#ifdef WITH_ICU
+    long_hash to_seed(const std::string& passphrase="") const;
+#endif
+
+private:
+    static mnemonic from_entropy(const data_slice& entropy,
+        reference lexicon);
+    static mnemonic from_words(const string_list& words,
+        reference language);
+
+    mnemonic(const data_chunk& entropy, const string_list& words,
+        reference lexicon);
+
+    /// These should be const, apart from the need to implement assignment.
+    data_chunk entropy_;
+    string_list words_;
+    reference lexicon_;
+};
 
 } // namespace wallet
 } // namespace system
