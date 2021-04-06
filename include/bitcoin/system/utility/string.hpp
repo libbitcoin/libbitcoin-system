@@ -81,15 +81,23 @@ BC_API std::string join(const string_list& words,
     const std::string& delimiter=" ");
 
 /**
- * Split a list of strings into a string vector string, in order, white space
- * delimited.
- * @param[in]  sentence   The string to split.
- * @param[in]  delimiter  The delimeter, defaults to " ".
- * @param[in]  trim       Trim the sentence for whitespace, defaults to true.
- * @return                The list of resulting strings.
+ * Split a sentence on one character into string vector, compresses multiples.
+ * @param[in]  sentence    The string to split.
+ * @param[in]  delimiters  The set of independent delimeters, defaults to " ".
+ * @param[in]  trim        Trim the sentence for whitespace, defaults to true.
+ * @return                 The list of resulting strings.
  */
 BC_API string_list split(const std::string& sentence,
-    const std::string& delimiter=" ", bool trim=true);
+    const std::string& delimiters=" ", bool trim=true);
+
+/**
+ * Split a sentence on a phrase into string vector.
+ * @param[in]  sentence    The string to split.
+ * @param[in]  delimiters  The splitting phrase, defaults to " ".
+ * @return                 The list of resulting strings.
+ */
+BC_API string_list split_phrase(const std::string& sentence,
+    const std::string& phrase);
 
 } // namespace system
 } // namespace libbitcoin

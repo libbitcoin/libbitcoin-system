@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string_regex.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
@@ -39,12 +40,12 @@ std::string join(const string_list& words, const std::string& delimiter)
 
 // Note that use of token_compress_on may cause unexpected results when
 // working with CSV-style lists that accept empty elements.
-string_list split(const std::string& sentence, const std::string& delimiter,
+string_list split(const std::string& sentence, const std::string& delimiters,
     bool trim)
 {
     string_list words;
     const auto compress = boost::token_compress_on;
-    const auto delimit = boost::is_any_of(delimiter);
+    const auto delimit = boost::is_any_of(delimiters);
 
     if (trim)
     {
@@ -55,6 +56,15 @@ string_list split(const std::string& sentence, const std::string& delimiter,
         boost::split(words, sentence, delimit, compress);
 
     return words;
+}
+
+// Note that use of token_compress_on may cause unexpected results when
+// working with CSV-style lists that accept empty elements.
+string_list split_phrase(const std::string& sentence,
+    const std::string& phrase)
+{
+    string_list words;
+    return boost::algorithm::split_regex(words, sentence, boost::regex(phrase));
 }
 
 } // namespace system
