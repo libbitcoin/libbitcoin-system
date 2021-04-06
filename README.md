@@ -49,7 +49,7 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin with recommended [build options](#build-notes-for-linux--macos):
+Finally install libbitcoin with recommended build options:
 ```sh
 $ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
@@ -90,7 +90,7 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin with recommended [build options](#build-notes-for-linux--macos):
+Finally install libbitcoin with recommended build options:
 ```sh
 $ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
@@ -110,7 +110,7 @@ Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob
 $ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
 $ chmod +x install.sh
 ```
-Finally install libbitcoin with default [build options](#build-notes-for-linux--macos):
+Finally install libbitcoin with recommended build options:
 ```sh
 $ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 ```
@@ -145,7 +145,7 @@ $ ./install.sh --with-icu --build-icu --build-boost --disable-shared
 
 #### Building ICU and/or Boost
 
-The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
+The installer can download and install these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
 ```sh
 $ ./install.sh --prefix=/home/me/myprefix --with-icu --build-icu --build-boost --disable-shared
 ```
