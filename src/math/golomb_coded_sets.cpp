@@ -45,7 +45,7 @@ static void golomb_encode(bit_writer& sink, uint64_t value,
         sink.write_bit(true);
 
     sink.write_bit(false);
-    sink.write_variable_bits_big_endian(value, modulo_exponent);
+    sink.write_bits(value, modulo_exponent);
 }
 
 static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
@@ -54,7 +54,7 @@ static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
     while (source.read_bit())
         quotient++;
 
-    uint64_t remainder = source.read_variable_bits_big_endian(modulo_exponent);
+    const auto remainder = source.read_bits(modulo_exponent);
     return ((quotient << modulo_exponent) + remainder);
 }
 
@@ -71,7 +71,7 @@ static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     uint64_t set_size, uint64_t target_false_positive_rate, const siphash_key& key)
 {
-    auto bound = safe_multiply(target_false_positive_rate, set_size);
+    const auto bound = safe_multiply(target_false_positive_rate, set_size);
 
     std::vector<uint64_t> hashes;
     hashes.reserve(items.size());

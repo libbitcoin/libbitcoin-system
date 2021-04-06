@@ -135,17 +135,15 @@ void ostream_bit_writer::write_variable_big_endian(uint64_t value)
     }
 }
 
-void ostream_bit_writer::write_variable_bits_big_endian(uint64_t value,
-    uint8_t least_significant_bits)
+void ostream_bit_writer::write_bits(uint64_t value, uint8_t bits)
 {
-    // TODO: should be an exception
-    auto remaining_bits = std::min(static_cast<uint64_t>(least_significant_bits),
+    auto remaining_bits = std::min(static_cast<uint64_t>(bits),
         static_cast<uint64_t>(byte_bits * sizeof(uint64_t)));
 
     while (remaining_bits > byte_bits)
     {
-        uint8_t current = ((value >> (remaining_bits - byte_bits))
-            & low_byte_mask_64);
+        uint8_t current = ((value >> (remaining_bits - byte_bits)) &
+            low_byte_mask_64);
 
         write_byte(current);
         remaining_bits -= byte_bits;

@@ -55,8 +55,9 @@ public:
     bool is_exhausted() const;
     void invalidate();
 
-    /// Read bit.
+    /// Read bits.
     bool read_bit();
+    uint64_t read_bits(uint8_t bits);
 
     /// Read hashes.
     hash_digest read_hash();
@@ -68,7 +69,6 @@ public:
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
     uint64_t read_variable_big_endian();
-    uint64_t read_variable_bits_big_endian(uint8_t least_significant_bits);
     size_t read_size_big_endian();
 
     /// Read little endian integers.

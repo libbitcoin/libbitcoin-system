@@ -132,11 +132,9 @@ uint64_t istream_bit_reader::read_variable_big_endian()
     }
 }
 
-uint64_t istream_bit_reader::read_variable_bits_big_endian(
-    uint8_t least_significant_bits)
+uint64_t istream_bit_reader::read_bits(uint8_t bits)
 {
-    auto remaining_bits = std::min(uint64_bits,
-        static_cast<uint64_t>(least_significant_bits));
+    auto remaining_bits = std::min(uint64_bits, static_cast<uint64_t>(bits));
 
     if (remaining_bits == 0)
     {

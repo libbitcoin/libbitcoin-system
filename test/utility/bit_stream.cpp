@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_bits_and_8_bytes_big_endian)
     BOOST_REQUIRE_EQUAL(expected_numeric, result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian)
+BOOST_AUTO_TEST_CASE(roundtrip_bits_big_endian)
 {
     const uint64_t expected = 0x000000aaaaaaaa;
     const uint8_t bits = 32;
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian)
         data_sink stream(buffer);
         ostream_writer writer(stream);
         ostream_bit_writer sink(writer);
-        sink.write_variable_bits_big_endian(expected, bits);
+        sink.write_bits(expected, bits);
         BOOST_REQUIRE((bool)sink);
         BOOST_REQUIRE_EQUAL(false, !sink);
     }
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian)
         data_source stream(buffer);
         istream_reader reader(stream);
         istream_bit_reader source(reader);
-        result = source.read_variable_bits_big_endian(bits);
+        result = source.read_bits(bits);
         BOOST_REQUIRE((bool)source);
         BOOST_REQUIRE_EQUAL(false, !source);
         BOOST_REQUIRE(stream);
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian)
     BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian_misaligned)
+BOOST_AUTO_TEST_CASE(roundtrip_bits_big_endian_misaligned)
 {
     const uint64_t expected = 0x000000aaaaaaaa;
     const uint8_t bits = 32;
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian_misaligned)
         ostream_writer writer(stream);
         ostream_bit_writer sink(writer);
         sink.write_bit(false);
-        sink.write_variable_bits_big_endian(expected, bits);
+        sink.write_bits(expected, bits);
         BOOST_REQUIRE((bool)sink);
         BOOST_REQUIRE_EQUAL(false, !sink);
     }
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_bits_big_endian_misaligned)
         istream_reader reader(stream);
         istream_bit_reader source(reader);
         BOOST_REQUIRE_EQUAL(false, source.read_bit());
-        result = source.read_variable_bits_big_endian(bits);
+        result = source.read_bits(bits);
         BOOST_REQUIRE((bool)source);
         BOOST_REQUIRE_EQUAL(false, !source);
         BOOST_REQUIRE(stream);
