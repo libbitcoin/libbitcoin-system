@@ -14,7 +14,7 @@ All files in this repository fall under the license specified in [COPYING](COPYI
 
 **About Libbitcoin**
 
-The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin](https://github.com/libbitcoin/libbitcoin) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
+The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the base [libbitcoin-system](https://github.com/libbitcoin/libbitcoin-system) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
 
 ## Installation
 
@@ -127,7 +127,7 @@ The build script clones, builds and installs two unpackaged repositories, namely
 - [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
 - [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
 
-The script builds from the head of their `version4` and `version3` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
+The script builds from the head of their `version7` and `version3` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
 
 #### Build Options
 
@@ -143,28 +143,16 @@ Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0
 $ ./install.sh --with-icu --build-icu --build-boost --disable-shared
 ```
 
-#### Compiling with QR Code Support
-
-Since the addition of [qrcode](https://github.com/evoskuil/libbitcoin/blob/master/src/wallet/qrcode.cpp) support, libbitcoin conditionally incorporates `qrencode`. This requires compiling with the `--with-qrencode` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use qrcode this dependency can be avoided.
-```sh
-$ ./install.sh --with-qrencode --build-qrencode --build-boost --disable-shared
-```
-
-Since the addition of [png](https://github.com/evoskuil/libbitcoin/blob/master/src/utility/png.cpp) support, libbitcoin conditionally incorporates `libpng` (which in turn requires `zlib`). This requires compiling with the `--with-png` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use png this dependency can be avoided.
-```sh
-$ ./install.sh --with-png --build-png --build-boost --disable-shared
-```
-
-#### Building ICU, ZLib, PNG, QREncode and/or Boost
+#### Building ICU and/or Boost
 
 The installer can download and install any or all of these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
 ```sh
-$ ./install.sh --prefix=/home/me/myprefix --with-icu --with-png --with-qrencode --build-icu --build-zlib --build-png --build-qrencode --build-boost --disable-shared
+$ ./install.sh --prefix=/home/me/myprefix --with-icu --build-icu --build-boost --disable-shared
 ```
 
 ### Windows
 
-Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packages exist for dependencies with the exceptions of the optional ZLib, PNG, and QREncode (required for QR code functionality). ICU is integrated into Windows and therefore not required as an additional dependency when using ICU features.
+Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packages exist for all dependencies. ICU is integrated into Windows and therefore not required as an additional dependency when using ICU features.
 
 > The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
 
@@ -217,7 +205,7 @@ The libbitcoin dynamic (DLL) build configurations do not compile, as the exports
 
 The secp256k1 and libzmq package above are maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired these can be built locally, in the same manner as libbitcoin.
 
-* [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version5/builds/msvc)
+* [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version7/builds/msvc)
 * [zeromq/libzmq](https://github.com/zeromq/libzmq/tree/master/builds/msvc)
 
 This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml` and `libzmq.import.props`, which references `libzmq.import.xml`.
