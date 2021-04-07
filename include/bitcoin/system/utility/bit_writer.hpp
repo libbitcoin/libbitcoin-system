@@ -25,6 +25,12 @@
 #include <cstdint>
 #include <bitcoin/system/utility/writer.hpp>
 
+// The bit writer operates from high to low order bits.
+// It reads and writes high bits first both in the operand and the buffer.
+// The bit order is independent of the byte order (big vs. little endian).
+// We refer to this as a "high endian" bit stream writer.
+// Both big and little byte orderings are supported by the bit writer.
+
 namespace libbitcoin {
 namespace system {
 
