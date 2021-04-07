@@ -58,9 +58,7 @@ string_list split(const std::string& sentence, const std::string& delimiters,
     return words;
 }
 
-// Note that use of token_compress_on may cause unexpected results when
-// working with CSV-style lists that accept empty elements.
-string_list split_phrase(const std::string& sentence,
+string_list split_regex(const std::string& sentence,
     const std::string& phrase)
 {
     string_list words;

@@ -91,12 +91,12 @@ BC_API string_list split(const std::string& sentence,
     const std::string& delimiters=" ", bool trim=true);
 
 /**
- * Split a sentence on a phrase into string vector.
+ * Split a sentence on a regular expression into a string vector.
  * @param[in]  sentence    The string to split.
  * @param[in]  delimiters  The splitting phrase, defaults to " ".
  * @return                 The list of resulting strings.
  */
-BC_API string_list split_phrase(const std::string& sentence,
+BC_API string_list split_regex(const std::string& sentence,
     const std::string& phrase);
 
 } // namespace system
