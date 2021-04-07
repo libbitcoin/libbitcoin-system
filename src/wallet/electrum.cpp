@@ -120,9 +120,9 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
 
 static bool is_old_seed(const word_list& mnemonic, const dictionary& lexicon)
 {
-    // Cannot be an old seed if it's not the en dictionary.
-    if (lexicon != language::electrum::en)
-        return false;
+    ////// Cannot be an old seed if it's not the en dictionary.
+    ////if (lexicon != language::electrum::en)
+    ////    return false;
 
     const auto seed = old_mnemonic_decode(mnemonic);
 
@@ -154,12 +154,12 @@ static bool is_new_seed(const word_list& mnemonic, const std::string& prefix)
 static word_list mnemonic_encode(cpp_int entropy, const dictionary& lexicon)
 {
     word_list mnemonic;
-    const auto lexicon_size = lexicon.size();
+    const auto lexicon_size = lexicon.words.size();
 
     while (entropy != 0)
     {
         const auto index = static_cast<size_t>(entropy % lexicon_size);
-        mnemonic.push_back(lexicon[index]);
+        mnemonic.push_back(lexicon.words[index]);
         entropy /= lexicon_size;
     }
 
@@ -170,11 +170,11 @@ static cpp_int mnemonic_decode(const word_list& mnemonic,
     const dictionary& lexicon)
 {
     cpp_int entropy = 0;
-    const auto lexicon_size = lexicon.size();
+    const auto lexicon_size = lexicon.words.size();
 
     for (const auto& word: boost::adaptors::reverse(mnemonic))
     {
-        const auto position = find_position(lexicon, word);
+        const auto position = find_position(lexicon.words, word);
         if (position == -1)
             return { 1 };
 
