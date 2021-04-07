@@ -56,7 +56,6 @@ namespace chain {
 using namespace bc::system::machine;
 using namespace boost::adaptors;
 
-// bit.ly/2cPazSa
 static const auto one_hash = hash_literal(
     "0000000000000000000000000000000000000000000000000000000000000001");
 
