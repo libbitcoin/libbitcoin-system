@@ -19,35 +19,55 @@
 #ifndef LIBBITCOIN_SYSTEM_BASE_16_IPP
 #define LIBBITCOIN_SYSTEM_BASE_16_IPP
 
+#include <algorithm>
 #include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// For template implementation only, do not call directly.
-BC_API bool decode_base16_private(uint8_t* out, size_t size, const char* in);
-
 template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string& in)
 {
-    if (in.size() != 2 * Size)
+    data_chunk data(Size);
+    const auto result = decode_base16(data, in);
+    std::copy(data.begin(), data.end(), out.begin());
+    return result;
+}
+
+template <size_t Size>
+std::string encode_hash(const byte_array<Size>& hash)
+{
+    auto reversed = hash;
+    std::reverse(reversed.begin(), reversed.end());
+    return encode_base16(reversed);
+}
+
+template <size_t Size>
+bool decode_hash(byte_array<Size>& out, const std::string& in)
+{
+    data_chunk decoded;
+    if (!decode_base16(decoded, in.data()))
         return false;
 
-    byte_array<Size> result;
-    if (!decode_base16_private(result.data(), result.size(), in.data()))
-        return false;
-
-    out = result;
+    std::reverse_copy(decoded.begin(), decoded.end(), out.begin());
     return true;
 }
 
 template <size_t Size>
-byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
+byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
 {
-    byte_array<(Size - 1) / 2> out;
-    DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
-        out.size(), string);
-    BITCOIN_ASSERT(success);
+    byte_array<(Size - 1u) / 2u> out;
+    DEBUG_ONLY(const auto result =) decode_base16(out, string);
+    BITCOIN_ASSERT_MSG(result, "invalid base16 literal");
+    return out;
+}
+
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size])
+{
+    byte_array<(Size - 1u) / 2u> out;
+    DEBUG_ONLY(const auto result =) decode_hash(out, string);
+    BITCOIN_ASSERT_MSG(result, "invalid hash literal");
     return out;
 }
 

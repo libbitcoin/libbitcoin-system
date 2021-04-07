@@ -19,9 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_BASE_16_HPP
 #define LIBBITCOIN_SYSTEM_BASE_16_HPP
 
+#include <cstddef>
 #include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,7 +33,7 @@ namespace system {
  * The C standard library function `isxdigit` depends on the current locale,
  * and does not necessarily match the base16 encoding.
  */
-bool is_base16(char character);
+BC_API bool is_base16(char character);
 
 /**
  * Convert data into a user-readable hex string.
@@ -52,31 +54,37 @@ template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string& in);
 
 /**
- * Converts a hex string literal to a data array.
- * This would be better as a C++11 user-defined literal,
- * but MSVC doesn't support those.
+ * Converts a bitcoin_hash to a string.
+ * The bitcoin hash format is base16 with the bytes reversed.
+ * This format is generally used only for display formatting.
  */
 template <size_t Size>
-byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size]);
+std::string encode_hash(const byte_array<Size>& hash);
 
 /**
- * Converts a bitcoin_hash to a string.
- * The bitcoin_hash format is like base16, but with the bytes reversed.
- */
-BC_API std::string encode_hash(hash_digest hash);
-
-/**
- * Convert a string into a bitcoin_hash.
- * The bitcoin_hash format is like base16, but with the bytes reversed.
+ * Convert a string into a bitcoin hash.
+ * The bitcoin hash format is base16 with the bytes reversed.
+ * This format is generally used only for display formatting.
  * @return false if the input is malformed.
  */
-BC_API bool decode_hash(hash_digest& out, const std::string& in);
+template <size_t Size>
+bool decode_hash(byte_array<Size>& out, const std::string& in);
 
 /**
- * Convert a hex string literal into a bitcoin_hash.
- * The bitcoin_hash format is like base16, but with the bytes reversed.
+ * UNSAFE: used primarly for test cases.
+ * Converts a hex string literal to a data array.
  */
-BC_API hash_digest hash_literal(const char (&string)[2 * hash_size + 1]);
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
+
+/**
+ * UNSAFE: used primarly for test cases.
+ * Convert a hex string literal into a bitcoin hash.
+ * The bitcoin hash format is base16 with the bytes reversed.
+ * This format is generally used only for display formatting.
+ */
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size]);
 
 } // namespace system
 } // namespace libbitcoin

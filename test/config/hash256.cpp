@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
-#include <boost/program_options.hpp>
+
 #include <bitcoin/system.hpp>
+#include "../overloads.hpp"
 
 using namespace bc::system;
 using namespace bc::system::config;
@@ -30,9 +31,7 @@ BOOST_AUTO_TEST_SUITE(hash256__construct)
 BOOST_AUTO_TEST_CASE(hash256__construct__default__null_hash)
 {
     const hash256 uninitialized_hash;
-    const auto expectation = encode_hash(null_hash);
-    const auto result = encode_hash(uninitialized_hash);
-    BOOST_REQUIRE_EQUAL(expectation, result);
+    BOOST_REQUIRE_EQUAL((const hash_digest&)uninitialized_hash, null_hash);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
