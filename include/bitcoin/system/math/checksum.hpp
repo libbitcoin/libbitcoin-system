@@ -36,6 +36,21 @@ static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
 #define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1u)
 
 /**
+ * Obtain the integer log2 of a given value.
+ * @param[in] value   The value from which to derive the log.
+ * @return            The log2(value), or zero if value is zero.
+ */
+inline size_t log2(size_t value)
+{
+    if (value == 0u)
+        return 0u;
+
+    size_t power = 0;
+    while (((value >>= 1u)) > 0u) ++power;
+    return power;
+}
+
+/**
  * Concatenate several data slices into a single fixed size array and append a
  * checksum.
  */

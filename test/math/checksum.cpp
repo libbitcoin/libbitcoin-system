@@ -19,12 +19,61 @@
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/system.hpp>
 
+using namespace bc;
 using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(checksum_tests)
 
 // TODO: add append_checksum<> tests.
 // TODO: add build_checked_array<> tests.
+
+BOOST_AUTO_TEST_CASE(checksum__log2__0__0)
+{
+    BOOST_REQUIRE_EQUAL(system::log2(0), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__log2__maximums__sizeof_maximum_minus_one)
+{
+    BOOST_REQUIRE_EQUAL(system::log2(max_uint8), sizeof(uint8_t) * byte_bits - 1u);
+    BOOST_REQUIRE_EQUAL(system::log2(max_uint16), sizeof(uint16_t) * byte_bits - 1u);
+    BOOST_REQUIRE_EQUAL(system::log2(max_uint32), sizeof(uint32_t) * byte_bits - 1u);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__log2__powers_of_2__expected)
+{
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 0), 0u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 1), 1u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 2), 2u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 3), 3u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 4), 4u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 5), 5u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 6), 6u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 7), 7u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 8), 8u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 9), 9u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 10), 10u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 11), 11u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 12), 12u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 13), 13u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 14), 14u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 15), 15u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 16), 16u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 17), 17u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 18), 18u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 19), 19u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 20), 20u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 21), 21u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 22), 22u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 23), 23u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 24), 24u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 25), 25u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 26), 26u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 27), 27u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 28), 28u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 29), 29u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 30), 30u);
+    BOOST_REQUIRE_EQUAL(system::log2(1u << 31), 31u);
+}
 
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__size__increased_by_checksum_size)
 {
