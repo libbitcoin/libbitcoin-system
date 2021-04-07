@@ -24,7 +24,28 @@
 namespace std {
 
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::hash_digest& hash)
+    const bc::system::mini_hash& hash)
+{
+    stream << bc::system::encode_hash(hash);
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream,
+const bc::system::short_hash& hash)
+{
+    stream << bc::system::encode_hash(hash);
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream,
+const bc::system::hash_digest& hash)
+{
+    stream << bc::system::encode_hash(hash);
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream,
+    const bc::system::long_hash& hash)
 {
     stream << bc::system::encode_hash(hash);
     return stream;
