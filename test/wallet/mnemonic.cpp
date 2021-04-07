@@ -27,236 +27,145 @@ using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
-// decode_mnemonic
-
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__no_passphrase_vectors__success)
+BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__trezor_vectors__success)
 {
-    for (const auto& vector: mnemonic_no_passphrase)
+    for (const auto& vector: mnemonic_trezor_en_vectors)
     {
-        const auto words = split(vector.mnemonic, ",");
-        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
-        const auto seed = decode_mnemonic(words);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-    }
-}
+        data_chunk entropy;
+        BOOST_REQUIRE(decode_base16(entropy, vector.entropy));
+        mnemonic instance(entropy);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lexicon() == reference::en);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.words(), split(vector.mnemonic));
+        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
 
 #ifdef WITH_ICU
-
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__trezor_vectors__success)
-{
-    for (const auto& vector: mnemonic_trezor_vectors)
-    {
-        const auto words = split(vector.mnemonic, ",");
-        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
-        const auto seed = decode_mnemonic(words, vector.passphrase);
+        const auto seed = instance.to_seed(vector.passphrase);
         BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__japanese_vectors__success)
-{
-    for (const auto& vector: mnemonic_japanese_vectors)
-    {
-        const auto words = split(vector.mnemonic, ",");
-        BOOST_REQUIRE(!words.empty());
-        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
-        const auto seed = decode_mnemonic(words, vector.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__to_seed_vector0__success)
-{
-    const auto vector = mnemonic_to_seed_vectors[0];
-    const auto words = split(vector.mnemonic, ",");
-    BOOST_REQUIRE(validate_mnemonic(words, vector.language));
-    const auto seed = decode_mnemonic(words, vector.passphrase);
-    BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-}
-
-
-BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__to_seed_vector1__success)
-{
-    const auto vector = mnemonic_to_seed_vectors[1];
-    const auto words = split(vector.mnemonic, ",");
-    BOOST_REQUIRE(validate_mnemonic(words, vector.language));
-    const auto seed = decode_mnemonic(words, vector.passphrase);
-    BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-}
-
-// create_mnemonic
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__trezor_vectors__success)
-{
-    for (const mnemonic_result& vector: mnemonic_trezor_vectors)
-    {
-        data_chunk entropy;
-        decode_base16(entropy, vector.entropy);
-        const auto mnemonic = create_mnemonic(entropy, vector.language);
-        BOOST_REQUIRE(!mnemonic.empty());
-        BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-        BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-    }
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__japanese_vectors__success)
-{
-    for (const mnemonic_result& vector: mnemonic_japanese_vectors)
-    {
-        BOOST_REQUIRE(vector.entropy.size() % 2 == 0);
-        data_chunk entropy;
-        decode_base16(entropy, vector.entropy);
-        const auto mnemonic = create_mnemonic(entropy, vector.language);
-        BOOST_REQUIRE(!mnemonic.empty());
-        BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-        BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-    }
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector0__success)
-{
-    const auto vector = mnemonic_create_vectors[0];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector1__success)
-{
-    const auto vector = mnemonic_create_vectors[1];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector2__success)
-{
-    const auto vector = mnemonic_create_vectors[2];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector3__success)
-{
-    const auto vector = mnemonic_create_vectors[3];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector4__success)
-{
-    const auto vector = mnemonic_create_vectors[4];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__vector5__success)
-{
-    const auto vector = mnemonic_create_vectors[5];
-    data_chunk entropy;
-    decode_base16(entropy, vector.entropy);
-    const auto mnemonic = create_mnemonic(entropy, vector.language);
-    BOOST_REQUIRE(!mnemonic.empty());
-    BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, vector.language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__4_byte_entropy_es__success)
-{
-    const data_chunk entropy(4, 0xa9);
-    const auto language = wallet::language::es;
-    const auto mnemonic = create_mnemonic(entropy, language);
-    BOOST_REQUIRE_EQUAL(mnemonic.size(), 3u);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic, language));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__1024_byte_entropy_ja__success)
-{
-    const data_chunk entropy(1024, 0xa9);
-    const auto language = wallet::language::ja;
-    const auto mnemonic = create_mnemonic(entropy);
-    BOOST_REQUIRE_EQUAL(mnemonic.size(), 768u);
-    BOOST_REQUIRE(validate_mnemonic(mnemonic));
-}
-
-// validate_mnemonic
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__misspelled_en__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon aboot"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__length_one_en__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("one"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__length_two_en__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("one two"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__length_eleven_en__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__bad_checksum_en__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__incorrect_langauge__false)
-{
-    BOOST_REQUIRE(!validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"), wallet::language::zh_Hant));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__correct_langauge__true)
-{
-    BOOST_REQUIRE(validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"), wallet::language::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__any_langauge__true)
-{
-    BOOST_REQUIRE(validate_mnemonic(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent")));
-}
-
+        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
 #endif
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__japanese_vectors__success)
+{
+    for (const auto& vector: mnemonic_bip39jp_jp_vectors)
+    {
+        data_chunk entropy;
+        BOOST_REQUIRE(decode_base16(entropy, vector.entropy));
+        mnemonic instance(entropy, reference::ja);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lexicon() == reference::ja);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.words(), split_regex(vector.mnemonic, mnemonic::ideographic_space));
+        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
+
+#ifdef WITH_ICU
+        const auto seed = instance.to_seed(vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
+#endif
+    }
+}
+
+// construct2
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__trezor_vectors__success)
+{
+    for (const auto& vector: mnemonic_trezor_en_vectors)
+    {
+        mnemonic instance(vector.mnemonic);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lexicon() == reference::en);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.words(), split(vector.mnemonic));
+        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
+
+#ifdef WITH_ICU
+        const auto seed = instance.to_seed(vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
+#endif
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__japanese_vectors__success)
+{
+    for (const auto& vector: mnemonic_bip39jp_jp_vectors)
+    {
+        mnemonic instance(vector.mnemonic, reference::ja);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lexicon() == reference::ja);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.words(), split_regex(vector.mnemonic, mnemonic::ideographic_space));
+        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
+
+#ifdef WITH_ICU
+        const auto seed = instance.to_seed(vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
+#endif
+    }
+}
+// construct (pathological) 
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__misspelled_en__false)
+{
+    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon aboot", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_one_en__false)
+{
+    BOOST_REQUIRE(!mnemonic("one", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_two_en__false)
+{
+    BOOST_REQUIRE(!mnemonic("one two", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_eleven_en__false)
+{
+    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__bad_checksum_en__false)
+{
+    ////BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__incorrect_langauge__false)
+{
+    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::zh_Hant));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__correct_langauge__true)
+{
+    ////BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct1__any_langauge__true)
+{
+    ////BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"));
+}
 
 // dictionary intersections
 
 static ptrdiff_t intersection(const dictionary& left, const dictionary& right)
 {
-    return std::count_if(left.begin(), left.end(),
+    return std::count_if(left.words.begin(), left.words.end(),
         [&](const char* test)
     {
-        return std::find(right.begin(), right.end(), test) != right.end();
+        return std::find(right.words.begin(), right.words.end(), test) != right.words.end();
     });
 }
 
 static bool intersects(const dictionary& left, const dictionary& right)
 {
-    return std::any_of(left.begin(), left.end(), [&](const char* test)
+    return std::any_of(left.words.begin(), left.words.end(), [&](const char* test)
     {
-        return std::find(right.begin(), right.end(), test) != right.end();
+        return std::find(right.words.begin(), right.words.end(), test) != right.words.end();
     });
 }
 

@@ -18,18 +18,26 @@
  */
 #include <bitcoin/system/wallet/mnemonic.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <iostream>
+#include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/binary.hpp>
 #include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/istream_bit_reader.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/ostream_bit_writer.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 
@@ -37,39 +45,117 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// BIP-39 private constants.
-static constexpr size_t bits_per_word = 11;
-static constexpr size_t entropy_bit_divisor = 32;
+// Words are encoded in 11 bits and therefore are not byte aligned.
+// As a consequence bit ordering matters. Bits are serialized to entropy bytes
+// in big-endian order. This can be observed in the reference implementation:
+// github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
+
+// public constants
+// ----------------------------------------------------------------------------
+
+// Supports 128 to 256 bits of entropy.
+const size_t mnemonic::entropy_multiple = 4;
+const size_t mnemonic::entropy_minumum = 4u * entropy_multiple;
+const size_t mnemonic::entropy_maximum = 8u * entropy_multiple;
+
+// Supports 12 to 24 words (128 to 256 bits) of entropy.
+const size_t mnemonic::word_multiple = 3;
+const size_t mnemonic::word_minimum = 4u * word_multiple;
+const size_t mnemonic::word_maximum = 8u * word_multiple;
+
+// BIP39 requires japanese mnemonic sentences join by an ideographic space.
+const std::string mnemonic::ideographic_space = "\xe3\x80\x80";
+
+// local constants
+// ----------------------------------------------------------------------------
+
 static constexpr size_t hmac_iterations = 2048;
 static const auto passphrase_prefix = "mnemonic";
+static const auto ascii_space = "\x20";
 
-// BIP-39 public limits.
-const size_t mnemonic::word_multiple = 3;
-const size_t mnemonic::word_minimum = 12;
-const size_t mnemonic::word_maximum = 24;
-const size_t mnemonic::entropy_multiple = 4;
-const size_t mnemonic::entropy_minumum = 16;
-const size_t mnemonic::entropy_maximum = 32;
+// 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
+static const size_t index_bits = system::log2(dictionary_size);
 
-inline uint8_t bip39_shift(size_t bit)
+// static protected
+// ----------------------------------------------------------------------------
+
+std::string mnemonic::join(const string_list& words, reference lexicon)
 {
-    return static_cast<uint8_t>(1u << (byte_bits - (bit % byte_bits) - 1u));
+    return system::join(words, lexicon == reference::ja ?
+        ideographic_space : ascii_space);
 }
 
-// Valid entropy sizes: 16, 20, 24, 28, 32.
-static bool is_valid_entropy_size(size_t size)
+string_list mnemonic::split(const std::string& sentence, reference lexicon)
 {
-    return ((size % mnemonic::entropy_multiple) == 0u &&
-        size >= mnemonic::entropy_minumum &&
-        size <= mnemonic::entropy_maximum);
+    return lexicon == reference::ja ?
+        split_regex(sentence, ideographic_space) :
+        system::split(sentence, ascii_space);
 }
 
-// Valid word counts: 12, 15, 18, 21, 24.
-static bool is_valid_word_count(size_t count)
+uint8_t mnemonic::checksum_byte(const data_slice& entropy)
 {
-    return ((count % mnemonic::word_multiple) == 0u &&
-        count >= mnemonic::word_minimum &&
-        count <= mnemonic::word_maximum);
+    // The high order bits of the first sha256_hash byte are the checksum.
+    // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).
+    const auto mask_bits = byte_bits - checksum_bits(entropy);
+    const auto checksum_mask = max_uint8 << mask_bits;
+    return sha256_hash(entropy).front() & checksum_mask;
+}
+
+// Some of these are trivial, but included for symmetry.
+
+size_t mnemonic::checksum_bits(const data_slice& entropy)
+{
+    return entropy_size(entropy) / entropy_multiple;
+}
+
+size_t mnemonic::checksum_bits(const string_list& words)
+{
+    return word_count(words) / word_multiple;
+}
+
+size_t mnemonic::entropy_bits(const data_slice& entropy)
+{
+    return entropy_size(entropy) * byte_bits;
+}
+
+size_t mnemonic::entropy_bits(const string_list& words)
+{
+    return word_count(words) * index_bits - checksum_bits(words);
+}
+
+size_t mnemonic::entropy_size(const data_slice& entropy)
+{
+    return entropy.size();
+}
+
+size_t mnemonic::entropy_size(const string_list& words)
+{
+    return entropy_bits(words) / byte_bits;
+}
+
+size_t mnemonic::word_count(const data_slice& entropy)
+{
+    return (entropy_bits(entropy) + checksum_bits(entropy)) / index_bits;
+}
+
+size_t mnemonic::word_count(const string_list& words)
+{
+    return words.size();
+}
+
+// public
+// ----------------------------------------------------------------------------
+
+bool mnemonic::is_valid_entropy_size(size_t size)
+{
+    return ((size % entropy_multiple) == 0u &&
+        size >= entropy_minumum && size <= entropy_maximum);
+}
+
+bool mnemonic::is_valid_word_count(size_t count)
+{
+    return ((count % word_multiple) == 0u &&
+        count >= word_minimum && count <= word_maximum);
 }
 
 const dictionary& mnemonic::to_dictionary(reference lexicon)
@@ -121,15 +207,17 @@ reference mnemonic::to_reference(const string_list& words)
 
 #ifdef WITH_ICU
 
-// DOES normalize the word list.
-// DOES NOT ensure the word list is in any dictionary.
-long_hash mnemonic::to_seed(const string_list& words,
+// DOES normalize the words.
+// DOES NOT ensure the words are in any dictionary.
+data_chunk mnemonic::to_seed(const string_list& words,
     const std::string& passphrase)
 {
-    const auto sentence = to_normal_nfkd_form(join(words));
+    const auto sentence = to_normal_nfkd_form(system::join(words));
     const auto salt = to_normal_nfkd_form(passphrase_prefix + passphrase);
-    return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence), to_chunk(salt),
-        hmac_iterations);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence),
+        to_chunk(salt), hmac_iterations);
+
+    return to_chunk(seed);
 }
 
 #endif
@@ -138,7 +226,7 @@ long_hash mnemonic::to_seed(const string_list& words,
 // ----------------------------------------------------------------------------
 
 mnemonic::mnemonic()
-  : mnemonic(data_chunk{})
+  : entropy_(), words_(), lexicon_(reference::none)
 {
 }
 
@@ -148,11 +236,11 @@ mnemonic::mnemonic(const mnemonic& other)
 }
 
 mnemonic::mnemonic(const std::string& sentence, reference lexicon)
-  : mnemonic(split(sentence), lexicon)
+  : mnemonic(split(sentence, lexicon), lexicon)
 {
 }
 
-mnemonic::mnemonic(const data_slice& entropy, reference lexicon)
+mnemonic::mnemonic(const data_chunk& entropy, reference lexicon)
   : mnemonic(from_entropy(entropy, lexicon))
 {
 }
@@ -169,46 +257,42 @@ mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// Factories.
+// Factories (private).
 // ----------------------------------------------------------------------------
 
 // DOES NOT normalize the mapped dictionary words.
-mnemonic mnemonic::from_entropy(const data_slice& entropy, reference lexicon)
+mnemonic mnemonic::from_entropy(const data_chunk& entropy, reference lexicon)
 {
+    // Valid entropy values (16, 20, 24, 28, or 32 bytes).
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
-    const auto entropy_bits = (entropy.size() * byte_bits);
-    const auto check_bits = (entropy_bits / entropy_bit_divisor);
-    const auto total_bits = (entropy_bits + check_bits);
-    const auto word_count = (total_bits / bits_per_word);
-    BITCOIN_ASSERT((total_bits % bits_per_word) == 0u);
-    BITCOIN_ASSERT((word_count % mnemonic_word_multiple) == 0u);
-
-    size_t bit = 0;
-    string_list words;
-    const auto& dictionary = to_dictionary(lexicon);
-    const auto data = build_chunk({ entropy, sha256_hash(entropy) });
-
-    for (size_t word = 0; word < word_count; word++)
+    // Read eleven bits into an index (0..2047).
+    const auto read_index = [](istream_bit_reader& reader)
     {
-        size_t position = 0;
-        for (size_t index = 0; index < bits_per_word; index++)
-        {
-            bit = (word * bits_per_word + index);
-            position <<= 1;
+        // Guard: 11 bits cannot exceed size_t and 11 does not exceed uint8_t.
+        return static_cast<size_t>(reader.read_bits(
+            static_cast<uint8_t>(index_bits)));
+    };
 
-            if ((data[bit / byte_bits] & bip39_shift(bit)) > 0u)
-                position++;
-        }
+    string_list words(word_count(entropy));
+    const auto& dictionary = to_dictionary(lexicon);
+    const auto buffer = build_chunk(
+    {
+        entropy,
+        data_chunk{ checksum_byte(entropy) }
+    });
 
-        BITCOIN_ASSERT(position < dictionary_size);
-        words.push_back(dictionary.words[position]);
-    }
+    // Word indexes are not byte aligned, high-to-low bit reader required.
+    data_source source(buffer);
+    istream_reader byte_reader(source);
+    istream_bit_reader bit_reader(byte_reader);
 
-    BITCOIN_ASSERT(words.size() == ((bit + 1u) / bits_per_word));
-    return { {entropy.begin(), entropy.end() }, words, lexicon
-};
+    // Select words from the dictionary (words.size() * index_bits are read).
+    for (auto word = words.begin(); word != words.end(); ++word)
+        *word = dictionary.words[read_index(bit_reader)];
+
+    return { entropy, words, lexicon };
 }
 
 // DOES NOT normalize the specified words.
@@ -216,41 +300,52 @@ mnemonic mnemonic::from_entropy(const data_slice& entropy, reference lexicon)
 // DOES NOT support un-validatable word lists (use to_seed).
 mnemonic mnemonic::from_words(const string_list& words, reference lexicon)
 {
+    // Valid word counts (12, 15, 18, 21, or 24 words).
     if (!is_valid_word_count(words.size()))
         return {};
 
-    // Locate the one dictionary of all given words.
-    const auto actual_lexicon = to_reference(words);
+    // Write an index into eleven bits (0..2047).
+    const auto write_index = [](ostream_bit_writer& writer, int index)
+    {
+        // Index must be valid (positive) since the language is validated.
+        // Guard: 2047 cannot exceed size_t and 11 does not exceed uint8_t.
+        writer.write_bits(static_cast<size_t>(index),
+            static_cast<uint8_t>(index_bits));
+    };
 
-    // Words are not from a supported dictionary or do not match specification.
-    if (actual_lexicon == reference::none ||
-        (actual_lexicon != lexicon && lexicon != reference::none))
+    // Locate the one dictionary of all given words.
+    const auto words_lexicon = to_reference(words);
+
+    // Words must be from a supported dictionary and match specifaction.
+    if (words_lexicon == reference::none ||
+        (words_lexicon != lexicon && lexicon != reference::none))
         return {};
 
-    // Words are from a supported dictionary.
-    const auto& dictionary = to_dictionary(actual_lexicon);
+    // Words are verified to be from a supported dictionary.
+    const auto& dictionary = to_dictionary(words_lexicon);
 
-    const auto total_bits = bits_per_word * words.size();
-    const auto check_bits = total_bits / (entropy_bit_divisor + 1u);
-    const auto entropy_bits = total_bits - check_bits;
-    BITCOIN_ASSERT((entropy_bits % byte_bits) == 0u);
+    // Reserve buffer to include entropy and checksum, always one byte.
+    data_chunk buffer;
+    buffer.reserve(entropy_size(words) + 1u);
 
-    size_t bit = 0;
-    data_chunk entropy((total_bits + byte_bits - 1u) / byte_bits, 0);
+    // Word indexes are not byte aligned, high-to-low bit writer required.
+    data_sink sink(buffer);
+    ostream_writer byte_writer(sink);
+    ostream_bit_writer bit_writer(byte_writer);
 
+    // Convert word indexes to entropy (words.size() * index_bits are written).
     for (const auto& word: words)
-    {
-        // Position must be valid since the language is validated.
-        const auto position = find_position(dictionary.words, word);
-        BITCOIN_ASSERT(position >= 0 && position < dictionary_size);
+        write_index(bit_writer, find_position(dictionary.words, word));
 
-        for (size_t index = 0; index < bits_per_word; index++, bit++)
-            if ((position & (1u << (bits_per_word - index - 1u))) != 0)
-                entropy[bit / byte_bits] |= bip39_shift(bit);
-    }
+    bit_writer.flush();
+    sink.flush();
 
-    entropy.resize(entropy_bits / byte_bits);
-    return { entropy, words, actual_lexicon };
+    // Entropy is always byte aligned, checksum is zero-padded in last byte.
+    const data_chunk entropy{ buffer.begin(), std::prev(buffer.end()) };
+    if (buffer.back() != checksum_byte(entropy))
+        return {};
+
+    return { entropy, words, words_lexicon };
 }
 
 // Cast operators.
@@ -261,24 +356,12 @@ mnemonic::operator bool() const
     return is_valid_entropy_size(entropy_.size());
 }
 
-mnemonic::operator reference() const
-{
-    return lexicon_;
-}
-
-mnemonic::operator const data_chunk&() const
-{
-    return entropy_;
-}
-
 // Serializer.
 // ----------------------------------------------------------------------------
 
 std::string mnemonic::sentence() const
 {
-    // A valid Japanese word list is joined by ideographic spaces, others ASCII.
-    return join(words(), (lexicon_ == reference::ja) ? "\0xE3\0x80\0x80" :
-        "\0x20");
+    return join(words(), lexicon_);
 }
 
 // Accessors.
@@ -304,7 +387,7 @@ reference mnemonic::lexicon() const
 
 #ifdef WITH_ICU
 
-long_hash mnemonic::to_seed(const std::string& passphrase) const
+data_chunk mnemonic::to_seed(const std::string& passphrase) const
 {
     // Words are generated from seed, so always from a supported dictionary.
     return to_seed(words(), passphrase);
