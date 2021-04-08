@@ -66,21 +66,50 @@ using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(bit_stream_tests)
 
-// is_exhausted (bool())
-
-BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__empty_stream__valid_true)
+BOOST_AUTO_TEST_CASE(istream_bit_reader__bool__uninitialized_stream__false)
 {
     std::stringstream stream;
     istream_reader reader(stream);
     istream_bit_reader bit_reader(reader);
-    BOOST_REQUIRE(bit_reader.is_exhausted());
-    BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE(bit_reader);
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__non_empty_stream__valid_false)
+BOOST_AUTO_TEST_CASE(istream_bit_reader__bool__initialized_empty_stream__true)
+{
+    std::stringstream stream("");
+    istream_reader reader(stream);
+    istream_bit_reader bit_reader(reader);
+    BOOST_REQUIRE(bit_reader);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(stream);
+}
+
+// is_exhausted
+
+BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__empty_stream__true)
+{
+    std::stringstream stream;
+    istream_reader reader(stream);
+    istream_bit_reader bit_reader(reader);
+
+    // The stream is initially valid.
+    BOOST_REQUIRE(bit_reader);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(stream);
+
+    // These calls are const but affect the contained stream reference.
+    BOOST_REQUIRE(bit_reader.is_exhausted());
+    BOOST_REQUIRE(reader.is_exhausted());
+
+    // The exhaustion checks invalidate the stream.
+    BOOST_REQUIRE(!bit_reader);
+    BOOST_REQUIRE(!reader);
+    BOOST_REQUIRE(!stream);
+}
+
+BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__non_empty_stream__false)
 {
     std::stringstream stream("abc");
     istream_reader reader(stream);
@@ -92,7 +121,7 @@ BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__non_empty_stream__valid_f
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_past_end__invalid_true)
+BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_past_end__true)
 {
     std::stringstream stream;
     istream_reader reader(stream);
@@ -105,13 +134,15 @@ BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_past_end__invalid_tr
     BOOST_REQUIRE(!stream);
 }
 
-BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_bit_from_one_byte__reader_exhausted_false)
+BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_bit_from_one_byte__false)
 {
     std::stringstream stream("a");
     istream_reader reader(stream);
     istream_bit_reader bit_reader(reader);
     bit_reader.read_bit();
     BOOST_REQUIRE(!bit_reader.is_exhausted());
+
+    // The reader is exhausted, but the bit reader is not.
     BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE(bit_reader);
     BOOST_REQUIRE(reader);
