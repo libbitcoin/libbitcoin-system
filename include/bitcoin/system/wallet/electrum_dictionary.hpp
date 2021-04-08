@@ -28,14 +28,10 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * A valid electrum v1 mnemonic dictionary has exactly this many words.
- */
-static BC_CONSTEXPR size_t dictionary_size_v1 = 1626;
+// An Electrum v1 mnemonic dictionary has exactly this many words.
+ static BC_CONSTEXPR size_t dictionary_size_v1 = 1626;
 
-/**
- * Dictionary for creating "old" electrum mnemonics.
- */
+// Dictionary for creating "old" Electrum mnemonics.
 typedef std::array<const char*, dictionary_size_v1> dictionary_v1;
 
 namespace language {
@@ -50,12 +46,11 @@ extern const dictionary& zh_Hans;
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
 extern const dictionary_list all;
 
-// Electrum v1 dictionary required for v2 compatibility
+// Electrum v1 dictionary required for v2 compatibility.
 extern const dictionary_v1 en_v1;
 
 } // namespace electrum
 } // namespace language
-
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

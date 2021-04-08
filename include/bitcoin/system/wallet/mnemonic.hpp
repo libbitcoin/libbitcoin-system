@@ -73,8 +73,8 @@ public:
     /// The instance should be tested for validity when using these.
     mnemonic(const mnemonic& other);
     mnemonic(const std::string& sentence, reference lexicon=reference::none);
-    mnemonic(const data_chunk& entropy, reference lexicon=reference::en);
     mnemonic(const string_list& words, reference lexicon=reference::none);
+    mnemonic(const data_chunk& entropy, reference lexicon=reference::en);
 
     /// This constructor guarantees instance validity.
     template <size_t Size, std::enable_if_t<Size % entropy_multiple == 0u &&
@@ -116,6 +116,11 @@ protected:
     /// All other langauges are split and trimmed on ASCII whitespace.
     static string_list split(const std::string& sentence, reference lexicon);
 
+#ifdef WITH_ICU
+    /// This only applies nfkd form.
+    static std::string normalize_text(const std::string& text);
+#endif
+
     /// Derive the checksum byte from entropy, stored in high order bits.
     static uint8_t checksum_byte(const data_slice& entropy);
 
@@ -147,7 +152,7 @@ private:
     static mnemonic from_entropy(const data_chunk& entropy,
         reference lexicon);
     static mnemonic from_words(const string_list& words,
-        reference language);
+        reference lexicon);
 
     mnemonic();
     mnemonic(const data_chunk& entropy, const string_list& words,

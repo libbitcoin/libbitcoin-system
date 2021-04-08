@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_WALLET_DICTIONARY_HPP
 
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <vector>
 #include <bitcoin/system/compat.hpp>
@@ -28,12 +29,12 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// A valid mnemonic dictionary has exactly this many words.
-// This size applies to both Electrum (>v1) and bip39 word lists.
+// A BIP39 mnemonic dictionary has exactly this many words.
+// This size applies to both Electrum (>v1) and BIP39 word lists.
 static BC_CONSTEXPR size_t dictionary_size = 2048;
 
 // Dictionary names.
-enum class reference
+typedef enum class reference
 {
     en,
     es,
@@ -46,9 +47,9 @@ enum class reference
     zh_Hans,
     zh_Hant,
     none
-};
+} reference;
 
-// A dictionary (bip39 wordlist) for creating mnemonics.
+// A dictionary (BIP39 wordlist) for creating mnemonics.
 // The compiler can write the char* array (POD type) directly to static memory.
 typedef struct
 {
@@ -59,10 +60,9 @@ typedef struct
 // A collection of dictionaries.
 typedef std::vector<std::reference_wrapper<const dictionary>> dictionary_list;
 
-namespace language
-{
+namespace language {
 
-// Individual bip39 languages:
+// Individual BIP39 languages:
 extern const dictionary en;
 extern const dictionary es;
 extern const dictionary it;
@@ -74,10 +74,10 @@ extern const dictionary ko;
 extern const dictionary zh_Hans;
 extern const dictionary zh_Hant;
 
-// A collection of all bip39 languages:
+// A collection of all BIP39 languages:
 extern const dictionary_list all;
-}
 
+} // namespace language
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

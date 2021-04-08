@@ -92,6 +92,15 @@ string_list mnemonic::split(const std::string& sentence, reference lexicon)
         system::split(sentence, ascii_space);
 }
 
+#ifdef WITH_ICU
+
+std::string mnemonic::normalize_text(const std::string& text)
+{
+    return to_normal_nfkd_form(text);
+}
+
+#endif
+
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
 {
     // The high order bits of the first sha256_hash byte are the checksum.
@@ -207,16 +216,14 @@ reference mnemonic::to_reference(const string_list& words)
 
 #ifdef WITH_ICU
 
-// DOES normalize the words.
+// DOES normalize the words and passphrase.
 // DOES NOT ensure the words are in any dictionary.
 data_chunk mnemonic::to_seed(const string_list& words,
     const std::string& passphrase)
 {
-    const auto sentence = to_normal_nfkd_form(system::join(words));
-    const auto salt = to_normal_nfkd_form(passphrase_prefix + passphrase);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence),
-        to_chunk(salt), hmac_iterations);
-
+    const auto sentence = to_chunk(normalize_text(system::join(words)));
+    const auto salt = to_chunk(passphrase_prefix + normalize_text(passphrase));
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     return to_chunk(seed);
 }
 
@@ -240,13 +247,13 @@ mnemonic::mnemonic(const std::string& sentence, reference lexicon)
 {
 }
 
-mnemonic::mnemonic(const data_chunk& entropy, reference lexicon)
-  : mnemonic(from_entropy(entropy, lexicon))
+mnemonic::mnemonic(const string_list& words, reference lexicon)
+  : mnemonic(from_words(words, lexicon))
 {
 }
 
-mnemonic::mnemonic(const string_list& words, reference lexicon)
-  : mnemonic(from_words(words, lexicon))
+mnemonic::mnemonic(const data_chunk& entropy, reference lexicon)
+  : mnemonic(from_entropy(entropy, lexicon))
 {
 }
 
