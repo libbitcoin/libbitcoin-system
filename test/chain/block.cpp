@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
 {
-    const data_chunk data = to_chunk(base16_literal(
+    const auto data = to_chunk(base16_literal(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_zero_transactions__
 BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_multiple_transactions__matches_historic_data)
 {
     // encodes the 100,000 block data.
-    const data_chunk raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_literal(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"

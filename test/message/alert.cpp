@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert instance(payload, signature);
 
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert value(payload, signature);
     message::alert instance(value);
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_5__always__equals_params)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert value(payload, signature);
     message::alert instance(std::move(value));
@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE(alert__factory_3__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert instance(payload, signature);
     BOOST_REQUIRE(payload == instance.payload());
@@ -225,8 +225,8 @@ BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__payload_accessor_2__always__returns_initialized)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     const message::alert instance(payload, signature);
     BOOST_REQUIRE(payload == instance.payload());
@@ -253,8 +253,8 @@ BOOST_AUTO_TEST_CASE(alert__payload_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__signature_accessor_1__always__returns_initialized)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert instance(payload, signature);
     BOOST_REQUIRE(signature == instance.signature());
@@ -262,8 +262,8 @@ BOOST_AUTO_TEST_CASE(alert__signature_accessor_1__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__signature_accessor_2__always__returns_initialized)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     const message::alert instance(payload, signature);
     BOOST_REQUIRE(signature == instance.signature());
@@ -290,8 +290,8 @@ BOOST_AUTO_TEST_CASE(alert__signature_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
 {
-    const data_chunk payload = to_chunk(base16_literal("0123456789abcdef"));
-    const data_chunk signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
+    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
 
     message::alert value(payload, signature);
 

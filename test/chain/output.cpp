@@ -21,7 +21,7 @@
 
 using namespace bc::system;
 
-data_chunk valid_raw_output = to_chunk(base16_literal("20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
+const auto valid_raw_output = to_chunk(base16_literal("20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
 
 BOOST_AUTO_TEST_SUITE(output_tests)
 

@@ -22,7 +22,7 @@
 using namespace bc::system;
 using namespace bc::system::machine;
 
-data_chunk valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
+const auto valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
 
 BOOST_AUTO_TEST_SUITE(operation_tests)
 

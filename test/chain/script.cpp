@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
 
 BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 {
-    auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     auto instance = script::factory(istream, false);
     BOOST_REQUIRE(instance.is_valid());
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 
 BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 {
-    auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     istream_reader source(istream);
     const auto instance = script::factory(source, false);

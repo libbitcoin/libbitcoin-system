@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(instance.is_valid());
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_3__always__equals_params)
     const uint8_t filter_type = 16u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest dup_hash = block_hash;
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
     data_chunk dup_filter = filter;
 
     message::compact_filter instance(filter_type, std::move(dup_hash), std::move(dup_filter));
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_4__always__equals_params)
 {
     const uint8_t filter_type = 16u;
     const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
+    const auto filter = to_chunk(base16_literal("fedcba9876543210"));
 
     message::compact_filter value(filter_type, block_hash, filter);
     message::compact_filter instance(value);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_5__always__equals_params)
 {
     const uint8_t filter_type = 16u;
     const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const data_chunk filter = to_chunk(base16_literal("fedcba9876543210"));
+    const auto filter = to_chunk(base16_literal("fedcba9876543210"));
 
     message::compact_filter value(filter_type, block_hash, filter);
     message::compact_filter instance(std::move(value));
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_type_accessor__always__returns_initi
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_init
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(block_hash == instance.block_hash());
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_init
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     const message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(block_hash == instance.block_hash());
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initiali
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(filter == instance.filter());
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__returns_initiali
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     const message::compact_filter instance(filter_type, block_hash, filter);
     BOOST_REQUIRE(filter == instance.filter());
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__returns_initiali
 
 BOOST_AUTO_TEST_CASE(compact_filter__filter_setter_1__roundtrip__success)
 {
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter instance;
     BOOST_REQUIRE(filter != instance.filter());
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter__filter_setter_2__roundtrip__success)
 {
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
     data_chunk dup = filter;
 
     message::compact_filter instance;
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_assign_equals__always__matches_equ
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const data_chunk filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
 
     message::compact_filter value(filter_type, block_hash, filter);
     BOOST_REQUIRE(value.is_valid());

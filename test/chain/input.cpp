@@ -23,7 +23,7 @@ using namespace bc;
 using namespace bc::system;
 using namespace bc::system::chain;
 
-data_chunk valid_raw_input = to_chunk(base16_literal(
+const auto valid_raw_input = to_chunk(base16_literal(
     "54b755c39207d443fd96a8d12c94446a1c6f66e39c95e894c23418d7501f681b01000"
     "0006b48304502203267910f55f2297360198fff57a3631be850965344370f732950b4"
     "7795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915"
