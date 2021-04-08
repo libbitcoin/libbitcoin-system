@@ -28,17 +28,6 @@
 namespace libbitcoin {
 namespace system {
 
-std::string encode_base16(const data_slice& data)
-{
-    std::stringstream out;
-    out << std::hex << std::setfill('0');
-
-    for (const uint16_t value: data)
-        out << std::setw(2) << value;
-
-    return out.str();
-}
-
 bool is_base16(char character)
 {
     return
@@ -47,73 +36,49 @@ bool is_base16(char character)
         ('a' <= character && character <= 'f');
 }
 
-static unsigned from_hex(char character)
+std::string encode_base16(const data_slice& data)
 {
-    if ('A' <= character && character <= 'F')
-        return 10 + character - 'A';
+    std::string out;
+    out.reserve(data.size() * 2u);
 
-    if ('a' <= character && character <= 'f')
-        return 10 + character - 'a';
+    const auto to_hex = [](uint8_t offset)
+    {
+        const char base = (0x0 <= offset && offset <= 0x9) ? '0' : 'a';
+        return std::string(1, base + offset);
+    };
 
-    return character - '0';
+    for (const auto byte: data)
+        out += to_hex(byte >> 4) + to_hex(byte & 0x0f);
+
+    return out;
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
 {
-    // This prevents a last odd character from being ignored:
+    // Prevents a last odd character from being ignored.
     if (in.size() % 2u != 0u)
         return false;
 
-    data_chunk result(in.size() / 2u);
-    if (!decode_base16_private(result.data(), result.size(), in.data()))
+    if (!std::all_of(in.begin(), in.end(), is_base16))
         return false;
 
-    out = result;
-    return true;
-}
-
-// Bitcoin hash format (these are all reversed):
-std::string encode_hash(hash_digest hash)
-{
-    std::reverse(hash.begin(), hash.end());
-    return encode_base16(hash);
-}
-
-bool decode_hash(hash_digest& out, const std::string& in)
-{
-    if (in.size() != 2u * hash_size)
-        return false;
-
-    hash_digest result;
-    if (!decode_base16_private(result.data(), result.size(), in.data()))
-        return false;
-
-    // Reverse:
-    std::reverse_copy(result.begin(), result.end(), out.begin());
-    return true;
-}
-
-hash_digest hash_literal(const char (&string)[2u * hash_size + 1u])
-{
-    hash_digest out;
-    DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
-        out.size(), string);
-    BITCOIN_ASSERT(success);
-    std::reverse(out.begin(), out.end());
-    return out;
-}
-
-// For support of template implementation only, do not call directly.
-bool decode_base16_private(uint8_t* out, size_t size, const char* in)
-{
-    if (!std::all_of(in, in + 2u * size, is_base16))
-        return false;
-
-    for (size_t index = 0; index < size; ++index)
+    const auto from_hex = [](char character)
     {
-        out[index] = (from_hex(in[0]) << 4u) + from_hex(in[1]);
-        in += 2u;
-    }
+        if ('A' <= character && character <= 'F')
+            return 10u + character - 'A';
+
+        if ('a' <= character && character <= 'f')
+            return 10u + character - 'a';
+
+        return 0u + character - '0';
+    };
+
+    out.clear();
+    out.reserve(in.size() / 2u);
+    auto to = out.begin();
+
+    for (auto from = in.begin(); from != in.end(); std::advance(from, 2))
+        *to++ = (from_hex(in[0]) << 4u) | from_hex(in[1]);
 
     return true;
 }
