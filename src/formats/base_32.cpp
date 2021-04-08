@@ -200,10 +200,10 @@ bool verify(const base32& value)
 //-----------------------------------------------------------------------------
 
 // TODO: add guard against invalid input.
-// There is no guard in the BIP for invalid sizes or prefix characters here,
+// There is no guard in the BIPfor invalid sizes or prefix characters here,
 // and as a result it is possible to encode a value that cannot be decoded.
 // TODO: guard against uppercase prefix.
-// An uppercase prefix is valid but the BIP reference code does not normalize
+// An uppercase prefix is valid but the BIPreference code does not normalize
 // it. The result is invalid encoded value due to mixed case. There is no tool
 // to produce uppercase encodings, though the values may be simply mapped.
 std::string encode_base32(const base32& unencoded)

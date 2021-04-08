@@ -25,7 +25,7 @@ using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(witness_address_tests)
 
-// BIP 173 test constants.
+// BIP173 test constants.
 #define MAINNET_WITNESS_PUBKEY_HASH_ADDRESS "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
 #define TESTNET_WITNESS_PUBKEY_HASH_ADDRESS "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
 #define TESTNET_WITNESS_PUBKEY_HASH_ADDRESS2 "tb1qr47dd36u96r0fjle36hdygdnp0v6pwfgqe6jxg"
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(witness_address_tests)
 #define TESTNET_WITNESS_SCRIPT_HASH_ADDRESS "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"
 #define TESTNET_WITNESS_SCRIPT_HASH_SCRIPT "[0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798] checksig"
 
-// BIP 173 witness address vectors
+// BIP173 witness address vectors
 // github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#test-vectors
 struct test_address
 {

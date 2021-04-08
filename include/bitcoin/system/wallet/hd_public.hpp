@@ -56,7 +56,7 @@ struct BC_API hd_lineage
 
 class hd_private;
 
-/// An extended public key, as defined by BIP 32.
+/// An extended public key, as defined by BIP32.
 class BC_API hd_public
 {
 public:

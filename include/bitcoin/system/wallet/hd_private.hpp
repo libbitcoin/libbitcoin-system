@@ -33,7 +33,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// An extended private key, as defined by BIP 32.
+/// An extended private key, as defined by BIP32.
 class BC_API hd_private
   : public hd_public
 {

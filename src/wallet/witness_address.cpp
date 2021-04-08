@@ -139,11 +139,11 @@ witness_address::witness_address(const hash_digest& hash, address_format format,
 witness_address witness_address::from_string(const std::string& address,
     address_format format, const std::string& prefix)
 {
-    // BIP 141 constants
+    // BIP141 constants
     static constexpr size_t witness_program_min_size = 2;
     static constexpr size_t witness_program_max_size = 40;
 
-    // BIP 173 witness version 0 constants
+    // BIP173 witness version 0 constants
     static constexpr size_t witness_pubkey_hash_size = 42;
     static constexpr size_t witness_script_hash_size = 62;
     static constexpr size_t bech32_address_min_size = 14;
@@ -153,7 +153,7 @@ witness_address witness_address::from_string(const std::string& address,
     static constexpr size_t bech32_address_modulo_invalid_2 = 3;
     static constexpr size_t bech32_address_modulo_invalid_3 = 5;
 
-    // Attempt to decode BIP 173 address format.
+    // Attempt to decode BIP173 address format.
     base32 bech32_decoded;
     if (!decode_base32(bech32_decoded, address))
         return {};
