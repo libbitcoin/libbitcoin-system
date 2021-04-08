@@ -34,9 +34,6 @@ std::ostream& operator<<(std::ostream& stream,
 }
 
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::hash_digest& hash);
-
-std::ostream& operator<<(std::ostream& stream,
     const bc::system::data_chunk& data);
 
 } // namespace std
