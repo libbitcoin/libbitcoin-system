@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <type_traits>
 #include <bitcoin/system/utility/bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 
@@ -43,10 +44,12 @@ public:
     template <size_t Size>
     byte_array<Size> read_reverse();
 
-    template <typename Integer>
+    template <typename Integer, typename =
+        std::enable_if<std::is_unsigned<Integer>::value>>
     Integer read_big_endian();
 
-    template <typename Integer>
+    template <typename Integer, typename =
+        std::enable_if<std::is_unsigned<Integer>::value>>
     Integer read_little_endian();
 
     /// Context.
@@ -99,11 +102,8 @@ public:
     void skip(size_t size);
 
 protected:
-    // The buffer is faulted or at eof.
-    bool empty() const;
-
-    // guarded buffer population
-    void feed();
+    // Guarded buffer population.
+    bool feed();
 
 private:
     uint8_t buffer_;

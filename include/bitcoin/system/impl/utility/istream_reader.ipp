@@ -45,13 +45,13 @@ byte_array<Size> istream_reader::read_reverse()
     return out;
 }
 
-template <typename Integer>
+template <typename Integer, typename>
 Integer istream_reader::read_big_endian()
 {
     return from_big_endian_stream_unsafe<Integer>(stream_);
 }
 
-template <typename Integer>
+template <typename Integer, typename>
 Integer istream_reader::read_little_endian()
 {
     return from_little_endian_stream_unsafe<Integer>(stream_);

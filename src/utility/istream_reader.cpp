@@ -45,7 +45,12 @@ bool istream_reader::operator!() const
 
 bool istream_reader::is_exhausted() const
 {
-    return !stream_ || empty();
+    // This will invalidate an empty stream. stream.peek is non-const but this
+    // compiles because the stream_ member is a reference. The behavior can be
+    // unexpected as the state of the stream, reader and bit reader can change
+    // as a result of the peek, which reads and then restores a byte to the
+    // stream. In the case of an empty stream, this invalidates the stream.
+    return !stream_ || stream_.peek() == std::istream::traits_type::eof();
 }
 
 void istream_reader::invalidate()
@@ -178,15 +183,14 @@ size_t istream_reader::read_size_little_endian()
 
 uint8_t istream_reader::peek_byte()
 {
+    // This is non-const and invalidates the stream if empty.
     return stream_.peek();
 }
 
 uint8_t istream_reader::read_byte()
 {
-    //// return read_bytes(1)[0];
     return stream_.get();
 }
-
 
 data_chunk istream_reader::read_bytes()
 {
@@ -228,7 +232,7 @@ std::string istream_reader::read_string(size_t size)
     auto terminated = false;
 
     // Read all size characters, pushing all non-null (may be many).
-    for (size_t index = 0; index < size && !empty(); ++index)
+    for (size_t index = 0; index < size && !is_exhausted(); ++index)
     {
         const auto character = read_byte();
         terminated |= (character == string_terminator);
@@ -249,13 +253,6 @@ void istream_reader::skip(size_t size)
     // Seek the relative size offset from the current position.
     ////stream_.seekg(size, std::ios_base::cur);
     read_bytes(size);
-}
-
-// private
-
-bool istream_reader::empty() const
-{
-    return stream_.peek() == std::istream::traits_type::eof();
 }
 
 } // namespace system

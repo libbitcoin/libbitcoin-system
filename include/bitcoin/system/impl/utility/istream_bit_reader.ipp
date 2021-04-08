@@ -28,9 +28,6 @@
 namespace libbitcoin {
 namespace system {
 
-#define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
-    "The endian functions only work on unsigned types")
-
 template <size_t Size>
 byte_array<Size> istream_bit_reader::read_forward()
 {
@@ -44,37 +41,35 @@ byte_array<Size> istream_bit_reader::read_reverse()
 {
     byte_array<Size> out;
 
-    for (size_t index = 0; index < Size; index++)
-        out[Size - (index + 1)] = read_byte();
+    for (size_t index = 0; index < Size; ++index)
+        out[Size - (index + 1u)] = read_byte();
 
     return out;
 }
 
-template <typename Integer>
+template <typename Integer, typename>
 Integer istream_bit_reader::read_big_endian()
 {
-    VERIFY_UNSIGNED(Integer);
     Integer out = 0;
 
-    for (size_t index = sizeof(Integer); (index > 0) && !empty(); index--)
+    for (size_t index = sizeof(Integer); index > 0u && !is_exhausted(); --index)
     {
-        uint8_t value = read_byte();
-        out |= static_cast<Integer>(value) << (8 * (index - 1));
+        auto value = read_byte();
+        out |= static_cast<Integer>(value) << (8u * (index - 1u));
     }
 
     return out;
 }
 
-template <typename Integer>
+template <typename Integer, typename>
 Integer istream_bit_reader::read_little_endian()
 {
-    VERIFY_UNSIGNED(Integer);
     Integer out = 0;
 
-    for (size_t index = 0; (index < sizeof(Integer)) && !empty(); index++)
+    for (size_t index = 0; index < sizeof(Integer) && !is_exhausted(); ++index)
     {
-        uint8_t value = read_byte();
-        out |= static_cast<Integer>(value) << (8 * index);
+        auto value = read_byte();
+        out |= static_cast<Integer>(value) << (8u * index);
     }
 
     return out;

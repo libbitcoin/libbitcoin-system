@@ -24,6 +24,7 @@
 
 #include <cstddef>
 #include <ostream>
+#include <type_traits>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/utility/bit_writer.hpp>
 
@@ -44,10 +45,12 @@ public:
     template <size_t Size>
     void write_reverse(const byte_array<Size>& value);
 
-    template <typename Integer>
+    template <typename Integer, typename =
+        std::enable_if<std::is_unsigned<Integer>::value>>
     void write_big_endian(Integer value);
 
-    template <typename Integer>
+    template <typename Integer, typename =
+        std::enable_if<std::is_unsigned<Integer>::value>>
     void write_little_endian(Integer value);
 
     /// Context.

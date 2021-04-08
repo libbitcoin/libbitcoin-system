@@ -44,7 +44,7 @@ istream_bit_reader::istream_bit_reader(reader& reader)
 {
 }
 
-void istream_bit_reader::feed()
+bool istream_bit_reader::feed()
 {
     if (offset_ == byte_bits)
     {
@@ -53,6 +53,8 @@ void istream_bit_reader::feed()
         if (reader_)
             offset_ = 0;
     }
+
+    return offset_ != byte_bits;
 }
 
 // Context.
@@ -70,7 +72,7 @@ bool istream_bit_reader::operator!() const
 
 bool istream_bit_reader::is_exhausted() const
 {
-    return reader_.is_exhausted() && (offset_ == byte_bits);
+    return (offset_ == byte_bits) && reader_.is_exhausted();
 }
 
 void istream_bit_reader::invalidate()
@@ -230,8 +232,8 @@ size_t istream_bit_reader::read_size_little_endian()
 
 bool istream_bit_reader::read_bit()
 {
-    feed();
-    return ((buffer_ << offset_++) & bit_mask) != 0;
+    // Returns false on read past end.
+    return feed() && ((buffer_ << offset_++) & bit_mask) != 0;
 }
 
 // Bytes.
@@ -337,7 +339,7 @@ std::string istream_bit_reader::read_string(size_t size)
     auto terminated = false;
 
     // Read all size characters, pushing all non-null (may be many).
-    for (size_t index = 0; index < size && !empty(); ++index)
+    for (size_t index = 0; index < size && !is_exhausted(); ++index)
     {
         const auto character = read_byte();
         terminated |= (character == string_terminator);
@@ -355,13 +357,6 @@ std::string istream_bit_reader::read_string(size_t size)
 void istream_bit_reader::skip(size_t size)
 {
     read_bytes(size);
-}
-
-// protected
-
-bool istream_bit_reader::empty() const
-{
-    return (offset_ == byte_bits) && (reader_.peek_byte() == unsigned_eof);
 }
 
 } // namespace system
