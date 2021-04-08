@@ -37,8 +37,8 @@ namespace wallet {
 
 using namespace bc::system::machine;
 
-// BIP 173 prefix constants.
-// https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#segwit-address-format
+// BIP173 prefix constants.
+// github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#segwit-address-format
 const std::string witness_address::mainnet_prefix = "bc";
 const std::string witness_address::testnet_prefix = "tb";
 
