@@ -20,65 +20,78 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <iomanip>
-#include <sstream>
-#include <boost/algorithm/string.hpp>
+#include <functional>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+inline bool is_between(uint8_t value, uint8_t low, uint8_t high)
+{
+    return low <= value && value <= high;
+}
+
 bool is_base16(char character)
 {
     return
-        ('0' <= character && character <= '9') ||
-        ('A' <= character && character <= 'F') ||
-        ('a' <= character && character <= 'f');
+        (is_between(character, '0', '9')) ||
+        (is_between(character, 'a', 'f')) ||
+        (is_between(character, 'A', 'F'));
 }
 
 std::string encode_base16(const data_slice& data)
 {
-    std::string out;
-    out.reserve(data.size() * 2u);
-
-    const auto to_hex = [](uint8_t offset)
+    const auto to_base16_digit = [](char digit)
     {
-        const char base = (0x0 <= offset && offset <= 0x9) ? '0' : 'a';
-        return std::string(1, base + offset);
+        return (is_between(digit, 0, 9) ? '0': 'a' - 10u) + digit;
     };
 
+    std::string out;
+    out.resize(data.size() * 2u);
+    auto digit = out.begin();
+
     for (const auto byte: data)
-        out += to_hex(byte >> 4) + to_hex(byte & 0x0f);
+    {
+        *digit++ = to_base16_digit(byte >> 4);
+        *digit++ = to_base16_digit(byte & 0x0f);
+    }
 
     return out;
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
 {
-    // Prevents a last odd character from being ignored.
     if (in.size() % 2u != 0u)
         return false;
 
     if (!std::all_of(in.begin(), in.end(), is_base16))
         return false;
 
-    const auto from_hex = [](char character)
+    const auto from_base16 = [](char high, char low)
     {
-        if ('A' <= character && character <= 'F')
-            return 10u + character - 'A';
+        const auto from_base16_digit = [](char character)
+        {
+            if (is_between(character, 'A', 'F'))
+                return character - 'A' + 10u;
 
-        if ('a' <= character && character <= 'f')
-            return 10u + character - 'a';
+            if (is_between(character, 'a', 'f'))
+                return character - 'a' + 10u;
 
-        return 0u + character - '0';
+            return character - '0' + 0u;
+        };
+
+        return (from_base16_digit(high) << 4u) | from_base16_digit(low);
     };
 
-    out.clear();
-    out.reserve(in.size() / 2u);
-    auto to = out.begin();
+    out.resize(in.size() / 2u);
+    auto data = out.begin();
 
-    for (auto from = in.begin(); from != in.end(); std::advance(from, 2))
-        *to++ = (from_hex(in[0]) << 4u) | from_hex(in[1]);
+    for (auto digit = in.begin(); digit != in.end();)
+    {
+        const auto hi = *digit++;
+        const auto lo = *digit++;
+        *data++ = from_base16(hi, lo);
+    }
 
     return true;
 }

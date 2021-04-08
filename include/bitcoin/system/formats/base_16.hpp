@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_BASE_16_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -71,17 +72,17 @@ template <size_t Size>
 bool decode_hash(byte_array<Size>& out, const std::string& in);
 
 /**
- * UNSAFE: used primarly for test cases.
  * Converts a hex string literal to a data array.
+ * Zeroized array returned in case of invalid or odd count of hex characters.
  */
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
 
 /**
- * UNSAFE: used primarly for test cases.
  * Convert a hex string literal into a bitcoin hash.
  * The bitcoin hash format is base16 with the bytes reversed.
  * This format is generally used only for display formatting.
+ * Zeroized array returned in case of invalid or odd count of hex characters.
  */
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size]);

@@ -29,36 +29,43 @@ template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string& in)
 {
     data_chunk data(Size);
-    const auto result = decode_base16(data, in);
-    std::copy(data.begin(), data.end(), out.begin());
-    return result;
+    if (decode_base16(data, in) && data.size() == Size)
+    {
+        std::copy(data.begin(), data.end(), out.begin());
+        return true;
+    }
+
+    return false;
 }
 
 template <size_t Size>
 std::string encode_hash(const byte_array<Size>& hash)
 {
-    auto reversed = hash;
-    std::reverse(reversed.begin(), reversed.end());
-    return encode_base16(reversed);
+    byte_array<Size> data;
+    std::reverse_copy(hash.begin(), hash.end(), data.begin());
+    return encode_base16(data);
 }
 
 template <size_t Size>
 bool decode_hash(byte_array<Size>& out, const std::string& in)
 {
-    data_chunk decoded;
-    if (!decode_base16(decoded, in.data()))
-        return false;
+    data_chunk data(Size);
+    if (decode_base16(data, in.data()) && data.size() == Size)
+    {
+        std::reverse_copy(data.begin(), data.end(), out.begin());
+        return true;
+    }
 
-    std::reverse_copy(decoded.begin(), decoded.end(), out.begin());
-    return true;
+    return false;
 }
 
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
 {
     byte_array<(Size - 1u) / 2u> out;
-    DEBUG_ONLY(const auto result =) decode_base16(out, string);
-    BITCOIN_ASSERT_MSG(result, "invalid base16 literal");
+    if (!decode_base16(out, string))
+        out.fill(0);
+
     return out;
 }
 
@@ -66,8 +73,9 @@ template <size_t Size>
 byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size])
 {
     byte_array<(Size - 1u) / 2u> out;
-    DEBUG_ONLY(const auto result =) decode_hash(out, string);
-    BITCOIN_ASSERT_MSG(result, "invalid hash literal");
+    if (!decode_hash(out, string))
+        out.fill(0);
+
     return out;
 }
 
