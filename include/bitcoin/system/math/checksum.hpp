@@ -36,18 +36,32 @@ static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
 #define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1u)
 
 /**
- * Obtain the integer log2 of a given value.
+ * Obtain the integer base 2 logarithm of a given value.
  * @param[in] value   The value from which to derive the log.
  * @return            The log2(value), or zero if value is zero.
  */
-inline size_t log2(size_t value)
+template <typename Integer>
+Integer log2(Integer value)
 {
     if (value == 0u)
         return 0u;
 
-    size_t power = 0;
-    while (((value >>= 1u)) > 0u) ++power;
+    Integer power = 0;
+    while (((value >>= 1u)) > 0u) { ++power; };
     return power;
+}
+
+/**
+ * Obtain the integer base 2 power for a given exponent.
+ * @param[in] value  The exponent from which to derive the result.
+ * @return           The pow2(exponent), or zero if exponent > sizeof(Integer).
+ */
+template <typename Integer>
+Integer pow2(size_t exponent)
+{
+    Integer value = 1;
+    while (exponent-- != 0u) { value <<= 1u; };
+    return value;
 }
 
 /**

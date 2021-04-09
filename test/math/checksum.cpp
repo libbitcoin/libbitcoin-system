@@ -75,6 +75,30 @@ BOOST_AUTO_TEST_CASE(checksum__log2__powers_of_2__expected)
     BOOST_REQUIRE_EQUAL(system::log2(1u << 31), 31u);
 }
 
+// pow2
+
+BOOST_AUTO_TEST_CASE(checksum__pow2__0__1)
+{
+    BOOST_REQUIRE_EQUAL(system::pow2<uint8_t>(0), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__pow2__1__2)
+{
+    BOOST_REQUIRE_EQUAL(system::pow2<uint16_t>(1), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__pow2__15__0x8000)
+{
+    BOOST_REQUIRE_EQUAL(system::pow2<uint16_t>(15), 0x8000);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__pow2__overflow__0)
+{
+    BOOST_REQUIRE_EQUAL(system::pow2<uint16_t>(16), 0u);
+}
+
+// append_checksum
+
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__size__increased_by_checksum_size)
 {
     data_chunk data{ 0, 0, 0, 0, 0 };
@@ -107,12 +131,16 @@ BOOST_AUTO_TEST_CASE(checksum__append_checksum__not_empty__valid)
     BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
+// bitcoin_checksum
+
 BOOST_AUTO_TEST_CASE(checksum__bitcoin_checksum__always__valid)
 {
     data_chunk data{ 0, 0, 0, 0, 0 };
     const auto result = bitcoin_checksum(data);
     BOOST_REQUIRE_EQUAL(result, 0x93af0179u);
 }
+
+// build_checked_array
 
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__empty__valid)
 {
@@ -144,6 +172,8 @@ BOOST_AUTO_TEST_CASE(checksum__build_checked_array__not_empty__valid)
     BOOST_REQUIRE_EQUAL(out[7], 0xafu);
     BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
+
+// insert_checksum
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum__empty__valid)
 {
@@ -177,6 +207,8 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__valid)
     BOOST_REQUIRE_EQUAL(out[7], 0xafu);
     BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
+
+// verify_checksum
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum__underflow__false)
 {
