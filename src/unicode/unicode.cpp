@@ -71,7 +71,7 @@ static std::once_flag io_mutex;
 // Ensure validate_localization is called only once.
 static std::once_flag icu_mutex;
 
-#endif
+#endif // WITH_ICU
 
 // Static initializer for bc::system::cin.
 std::istream& cin_stream()
@@ -205,7 +205,7 @@ std::string to_lower(const std::string& value)
     return result ? to_utf8(wide) : std::string{};
 }
 
-#else
+#else // _MSC_VER
 
 // One time verifier of the localization backend manager.
 // Guard against backend_manager.select(BC_LOCALE_BACKEND) silent failure.
@@ -312,8 +312,8 @@ std::string to_compressed_cjk_form(const std::string& value)
     std::u32string result{ points.front() };
 
     // Remove whitespaces between CJK.
-    // points[0] cannot be between two characters, so skip it.
-    // points[size] cannot be between two characters, so skip it.
+    // points.front() cannot be between two characters, so skip it.
+    // points.back() cannot be between two characters, so skip it.
     for (size_t point = 1; point < points.size() - 1u; point++)
     {
         if (!(is_c_whitespace(points[point]) &&
@@ -475,7 +475,7 @@ static void set_binary_stdio(FILE* file)
         throw std::runtime_error("Could not set STDIO to binary mode.");
 }
 
-#else
+#else // _MSC_VER
 
 static void set_utf8_stdio(FILE*)
 {
@@ -485,7 +485,7 @@ static void set_binary_stdio(FILE*)
 {
 }
 
-#endif
+#endif // _MSC_VER
 
 // Set stdio to use UTF8 translation on Windows.
 void set_utf8_stdio()
@@ -715,7 +715,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     return result;
 }
 
-#endif
+#endif // _MSC_VER
 
 // Based on Electrum source, which references:
 // asahi-net.or.jp/~ax2s-kmtn/ref/unicode/e_asia.html
