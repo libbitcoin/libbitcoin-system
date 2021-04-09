@@ -39,7 +39,7 @@ class BC_API mnemonic
 public:
     /// Limits on entropy size.
     static const size_t entropy_multiple;
-    static const size_t entropy_minumum;
+    static const size_t entropy_minimum;
     static const size_t entropy_maximum;
 
     /// Limits on word count.
@@ -60,10 +60,11 @@ public:
     static const dictionary& to_dictionary(reference lexicon);
 
     /// Obtain a reference to the dictionary containing all of the words.
-    static reference to_reference(const string_list& words);
+    static reference to_reference(const string_list& words,
+        reference lexicon=reference::none);
 
 #ifdef WITH_ICU
-    /// Seed creation requires a Unicode build (for text normalization).
+    /// Create a seed from any list of words and passphrase.
     static data_chunk to_seed(const string_list& words,
         const std::string& passphrase="");
 #endif
@@ -78,7 +79,7 @@ public:
 
     /// This constructor guarantees instance validity.
     template <size_t Size, std::enable_if_t<Size % entropy_multiple == 0u &&
-        Size >= entropy_minumum && Size <= entropy_maximum, size_t>>
+        Size >= entropy_minimum && Size <= entropy_maximum, size_t>>
     mnemonic(const byte_array<Size>& entropy, reference lexicon=reference::en)
       : mnemonic(from_entropy(entropy, lexicon))
     {
@@ -103,8 +104,10 @@ public:
     const string_list& words() const;
     reference lexicon() const;
 
+    /// Methods.
+
 #ifdef WITH_ICU
-    /// Seed creation requires a Unicode build (for text normalization).
+    /// Create a seed from member entropy and any passphrase.
     data_chunk to_seed(const std::string& passphrase="") const;
 #endif
 
@@ -118,7 +121,7 @@ protected:
 
 #ifdef WITH_ICU
     /// This only applies nfkd form.
-    static std::string normalize_text(const std::string& text);
+    static std::string normalize(const std::string& text);
 #endif
 
     /// Derive the checksum byte from entropy, stored in high order bits.

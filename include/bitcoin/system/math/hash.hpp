@@ -59,6 +59,7 @@ typedef std::vector<mini_hash> mini_hash_list;
 // Alias for boost big integer types.
 typedef boost::multiprecision::uint128_t uint128_t;
 typedef boost::multiprecision::uint256_t uint256_t;
+typedef boost::multiprecision::uint512_t uint512_t;
 
 // Null-valued common bitcoin hashes.
 

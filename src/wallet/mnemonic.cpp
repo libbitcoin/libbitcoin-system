@@ -55,7 +55,7 @@ namespace wallet {
 
 // Supports 128 to 256 bits of entropy.
 const size_t mnemonic::entropy_multiple = 4;
-const size_t mnemonic::entropy_minumum = 4u * entropy_multiple;
+const size_t mnemonic::entropy_minimum = 4u * entropy_multiple;
 const size_t mnemonic::entropy_maximum = 8u * entropy_multiple;
 
 // Supports 12 to 24 words (128 to 256 bits) of entropy.
@@ -91,15 +91,6 @@ string_list mnemonic::split(const std::string& sentence, reference lexicon)
         split_regex(sentence, ideographic_space) :
         system::split(sentence, ascii_space);
 }
-
-#ifdef WITH_ICU
-
-std::string mnemonic::normalize_text(const std::string& text)
-{
-    return to_normal_nfkd_form(text);
-}
-
-#endif
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
 {
@@ -158,7 +149,7 @@ size_t mnemonic::word_count(const string_list& words)
 bool mnemonic::is_valid_entropy_size(size_t size)
 {
     return ((size % entropy_multiple) == 0u &&
-        size >= entropy_minumum && size <= entropy_maximum);
+        size >= entropy_minimum && size <= entropy_maximum);
 }
 
 bool mnemonic::is_valid_word_count(size_t count)
@@ -198,36 +189,49 @@ const dictionary& mnemonic::to_dictionary(reference lexicon)
     }
 }
 
-reference mnemonic::to_reference(const string_list& words)
+// BIP39 expects prenormalized dictionaries.
+// The binary search presumes that all dictionaries are lexically sorted.
+reference mnemonic::to_reference(const string_list& words, reference lexicon)
 {
-    for (const dictionary& dictionary: language::all)
+    const auto contained = [&](const dictionary& dictionary)
     {
         const auto in_dictionary = [&](const std::string& word)
         {
             return contains(dictionary.words, word);
         };
 
-        if (std::all_of(words.begin(), words.end(), in_dictionary))
+        return std::all_of(words.begin(), words.end(), in_dictionary);
+    };
+
+    if (lexicon != reference::none)
+        return contained(to_dictionary(lexicon)) ? lexicon : reference::none;
+
+    for (const dictionary& dictionary: language::all)
+        if (contained(dictionary))
             return dictionary.name;
-    }
 
     return reference::none;
 }
 
 #ifdef WITH_ICU
 
+std::string mnemonic::normalize(const std::string& text)
+{
+    return to_normal_nfkd_form(text);
+}
+
 // DOES normalize the words and passphrase.
 // DOES NOT ensure the words are in any dictionary.
 data_chunk mnemonic::to_seed(const string_list& words,
     const std::string& passphrase)
 {
-    const auto sentence = to_chunk(normalize_text(system::join(words)));
-    const auto salt = to_chunk(passphrase_prefix + normalize_text(passphrase));
+    const auto sentence = to_chunk(normalize(system::join(words)));
+    const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     return to_chunk(seed);
 }
 
-#endif
+#endif // WITH_ICU
 
 // mnemonic
 // ----------------------------------------------------------------------------
@@ -321,19 +325,16 @@ mnemonic mnemonic::from_words(const string_list& words, reference lexicon)
     };
 
     // Locate the one dictionary of all given words.
-    const auto words_lexicon = to_reference(words);
+    const auto words_lexicon = to_reference(words, lexicon);
 
-    // Words must be from a supported dictionary and match specifaction.
-    if (words_lexicon == reference::none ||
-        (words_lexicon != lexicon && lexicon != reference::none))
+    // Words must be from a supported dictionary and match if specified.
+    if (words_lexicon == reference::none)
         return {};
-
-    // Words are verified to be from a supported dictionary.
-    const auto& dictionary = to_dictionary(words_lexicon);
 
     // Reserve buffer to include entropy and checksum, always one byte.
     data_chunk buffer;
     buffer.reserve(entropy_size(words) + 1u);
+    const auto& dictionary = to_dictionary(words_lexicon);
 
     // Word indexes are not byte aligned, high-to-low bit writer required.
     data_sink sink(buffer);
@@ -347,11 +348,13 @@ mnemonic mnemonic::from_words(const string_list& words, reference lexicon)
     bit_writer.flush();
     sink.flush();
 
-    // Entropy is always byte aligned, checksum is zero-padded in last byte.
     const data_chunk entropy{ buffer.begin(), std::prev(buffer.end()) };
+
+    // Checksum is zero-padded in last byte
     if (buffer.back() != checksum_byte(entropy))
         return {};
 
+    // Entropy is always byte aligned.
     return { entropy, words, words_lexicon };
 }
 
@@ -400,7 +403,7 @@ data_chunk mnemonic::to_seed(const std::string& passphrase) const
     return to_seed(words(), passphrase);
 }
 
-#endif
+#endif // WITH_ICU
 
 // Operators.
 // ----------------------------------------------------------------------------

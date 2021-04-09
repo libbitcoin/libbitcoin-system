@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__japanese_vectors__success)
 #endif
     }
 }
+
 // construct (pathological) 
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct1__misspelled_en__false)
@@ -132,7 +133,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_eleven_en__false)
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct1__bad_checksum_en__false)
 {
-    ////BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one", reference::en));
+    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one", reference::en));
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct1__incorrect_langauge__false)
@@ -142,12 +143,12 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct1__incorrect_langauge__false)
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct1__correct_langauge__true)
 {
-    ////BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::en));
+    BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::en));
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct1__any_langauge__true)
 {
-    ////BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"));
+    BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"));
 }
 
 // dictionary intersections
