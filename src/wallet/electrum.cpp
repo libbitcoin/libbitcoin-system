@@ -92,7 +92,7 @@ static data_chunk old_mnemonic_decode(const word_list& mnemonic)
     ostream_writer sink(ostream);
 
     for (size_t index = 0;
-        index < mnemonic.size() / mnemonic_word_multiple;
+        index < mnemonic.size();
         index += mnemonic_word_multiple)
     {
         const auto one = find_position(lexicon, mnemonic[index + 0u]);
