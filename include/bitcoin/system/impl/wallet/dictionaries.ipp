@@ -103,7 +103,7 @@ template<size_t Count, size_t Size>
 language dictionaries<Count, Size>::contains(const std::string& word,
     language identifier) const
 {
-    if (language != language::none)
+    if (identifier != language::none)
     {
         const auto it = to_dictionary(identifier);
         return it != dictionaries_.end() && it->contains(word) ?

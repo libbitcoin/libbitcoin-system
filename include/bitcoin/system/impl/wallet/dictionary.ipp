@@ -87,7 +87,7 @@ language dictionary<Size>::identifier() const
 template <size_t Size>
 std::string dictionary<Size>::name() const
 {
-    return to_name(language_);
+    return to_name(identifier_);
 }
 
 // Search.
