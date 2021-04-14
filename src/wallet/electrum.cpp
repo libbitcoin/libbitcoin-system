@@ -46,24 +46,18 @@ namespace wallet {
 
 // TODO: implement WITH_ICU
 
-// TODO: implement, verify and provide Electrum reference URL.
+// TODO: provide Electrum reference URL.
 // Words are encoded in 11 bits and therefore are not byte aligned.
 // As a consequence bit ordering matters. Bits are serialized to entropy bytes
 // in big-endian order.
 
 // local constants
 // ----------------------------------------------------------------------------
-
+static const auto seed_version = to_chunk("Seed version");
 static const auto passphrase_prefix = "electrum";
 static const auto ascii_space = "\x20";
 constexpr size_t hmac_iterations = 2048;
 constexpr size_t grind_limit = 0xffff;
-
-// TODO: create string to data_chunk.
-static const data_chunk seed_version
-{
-    'S', 'e', 'e', 'd', 'v', 'e', 'r', 's', 'i', 'o', 'n'
-};
 
 // Seed prefixes.
 static const auto version_old = "";

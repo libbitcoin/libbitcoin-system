@@ -98,11 +98,18 @@ BC_API string_list split_regex(const std::string& sentence,
     const std::string& phrase);
 
 /**
- * Copy data elements to a new string.
- * @param[in]  source  The collection of elements to cast.
- * @returns            A new string with copyed elements.
+ * Copy bytes to a new string.
+ * @param[in]  source  The iterable collection of bytes to copy.
+ * @returns            A new string with copied bytes.
  */
 BC_API std::string to_string(const data_slice& source);
+
+/**
+ * Copy character array into a new data chunk.
+ * @param[in]  source  The character array to copy.
+ * @returns            A new string with copied characters.
+ */
+BC_API data_chunk to_chunk(const char source[]);
 
 } // namespace system
 } // namespace libbitcoin

@@ -65,5 +65,11 @@ std::string to_string(const data_slice& source)
     return out;
 }
 
+data_chunk to_chunk(const char source[])
+{
+    std::string iterable = source;
+    return to_chunk(iterable);
+}
+
 } // namespace system
 } // namespace libbitcoin
