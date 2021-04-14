@@ -106,4 +106,4 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hant_en__no_intersection)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif DISABLED_TESTS
+#endif // DISABLED_TESTS
