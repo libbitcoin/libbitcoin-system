@@ -26,6 +26,83 @@ using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(collection_tests)
 
+// binary_search
+
+const auto not_found = -1;
+
+// Collection must be iterable and members implement lexical compare (<, >).
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__empty__not_found)
+{
+    const std::string empty = "";
+    const auto value = 'a';
+    BOOST_REQUIRE_EQUAL(binary_search(empty, value), not_found);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__one_element_unmatched__not_found)
+{
+    const std::string single = "a";
+    const auto value = 'b';
+    BOOST_REQUIRE_EQUAL(binary_search(single, value), not_found);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__one_element_match__0)
+{
+    const std::string single = "a";
+    const auto value = 'a';
+    BOOST_REQUIRE_EQUAL(binary_search(single, value), 0);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__two_elements_match_first__0)
+{
+    const std::string sorted = "ab";
+    const auto value = 'a';
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 0);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__two_elements_match_second__1)
+{
+    const std::string sorted = "ab";
+    const auto value = 'b';
+    auto result = binary_search(sorted, value);
+    BOOST_REQUIRE_EQUAL(result, 1);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__three_elements_match_second__1)
+{
+    const std::string sorted = "abc";
+    const auto value = 'b';
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 1);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__three_various_elements__unmatched__not_found)
+{
+    const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const std::string value = "bcd";
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), not_found);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__three_various_elements__matched__found)
+{
+    const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const std::string value = "cfdd";
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 2);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__unlucky)
+{
+    const string_list unsorted{ { "z", "y", "x" } };
+    const std::string value = "z";
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__lucky)
+{
+    const data_chunk unsorted{ { 'z', 'a', 'x' } };
+    const auto value = 'x';
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), 2);
+}
+
 // cast
 
 BOOST_AUTO_TEST_CASE(collection__cast__empty__same)

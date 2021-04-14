@@ -29,6 +29,18 @@ namespace libbitcoin {
 namespace system {
 
 /**
+ * Find the position of an element in a *lexically sorted* collection.
+ * @param      <Container>  The type of collection.
+ * @param      <Element>    The type of collection member elements.
+ * @param[in]  list         The iterable list of comparable elements to search.
+ * @param[in]  value        The value of the element to find.
+ * @return                  The position or negative if not found.
+ *                          Negative if list size > max_int32.
+ */
+template <typename Element, typename Container>
+int binary_search(const Container& list, const Element& value);
+
+/**
  * Cast vector/enumerable elements into a new vector.
  * @param      <Source>  The source element type.
  * @param      <Target>  The target element type.

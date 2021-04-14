@@ -26,10 +26,38 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+template <typename Element, typename Container>
+int binary_search(const Container& list, const Element& value)
+{
+    // Guard right cast.
+    if (list.size() > static_cast<size_t>(max_int32))
+        return -1;
+
+    int left = 0;
+    int right = static_cast<int>(list.size()) - 1;
+
+    while (left <= right)
+    {
+        int middle = (left + right) / 2;
+        const auto& element = list[middle];
+
+        if (element < value)
+            left = middle + 1;
+        else if (element > value)
+            right = middle - 1;
+        else
+            return middle;
+    }
+
+    return -1;
+}
 
 template <typename Source, typename Target>
 std::vector<Target> cast(const std::vector<Source>& source)
