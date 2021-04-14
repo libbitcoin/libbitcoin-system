@@ -78,7 +78,8 @@ public:
     /// Returns true if the resulting seed has the given prefix.
     static bool is_version(const string_list& words, seed_prefix prefix);
 
-    /// Create a seed from *any* words and passphrase (normalized).
+    /// Create a seed from a valid number of *any* words and passphrase.
+    /// If invalid or WITH_ICU not defined this returns a zeroized hash.
     static long_hash to_seed(const string_list& words,
         const std::string& passphrase);
 
@@ -97,6 +98,7 @@ public:
         language lexicon=language::en);
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
+    /// If invalid or WITH_ICU not defined this returns a zeroized hash.
     long_hash to_seed(const std::string& passphrase="") const;
 
 protected:

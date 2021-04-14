@@ -41,8 +41,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// TODO: implement WITH_ICU
-
 // Words are encoded in 11 bits and therefore are not byte aligned.
 // As a consequence bit ordering matters. Bits are serialized to entropy bytes
 // in big-endian order. This can be observed in the reference implementation:
@@ -163,7 +161,14 @@ size_t mnemonic::word_count(const data_slice& entropy)
 
 std::string mnemonic::normalize(const std::string& text)
 {
+    // This allows an attempt to pre-normalize the mnemonic text and is only
+    // applied to word and prefix matching. Seed generation requires WITH_ICU
+    // for nfkd nomalization and lower casing and fails without it.
+#ifdef WITH_ICU
     return to_normal_nfkd_form(text);
+#else
+    return text;
+#endif
 }
 
 string_list mnemonic::normalize(const string_list& words)
@@ -208,12 +213,17 @@ bool mnemonic::is_valid_dictionary(language language)
 long_hash mnemonic::to_seed(const string_list& words,
     const std::string& passphrase)
 {
+#ifndef WITH_ICU
+    return null_long_hash;
+#else
     if (!is_valid_word_count(words.size()))
         return null_long_hash;
 
+    // ***Normalization is critical here.***
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+#endif
 }
 
 // construction
@@ -293,6 +303,7 @@ mnemonic mnemonic::from_words(const string_list& words, language language)
     if (!is_valid_word_count(words.size()))
         return {};
 
+    // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
     const auto lexicon = dictionaries_.contains(words, language);
 

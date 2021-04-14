@@ -44,8 +44,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// TODO: implement WITH_ICU
-
 // TODO: provide Electrum reference URL.
 // Words are encoded in 11 bits and therefore are not byte aligned.
 // As a consequence bit ordering matters. Bits are serialized to entropy bytes
@@ -241,8 +239,15 @@ size_t electrum::usable_size(const data_slice& entropy)
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
 std::string electrum::normalize(const std::string& text)
 {
+    // This allows an attempt to pre-normalize the mnemonic text and is only
+    // applied to word and prefix matching. Seed generation requires WITH_ICU
+    // for nfkd nomalization and lower casing and fails without it.
+#ifndef WITH_ICU
+    auto seed = text;
+#else
     auto seed = to_normal_nfkd_form(text);
     seed = to_lower(seed);
+#endif
     seed = to_unaccented_form(seed);
     seed = system::join(system::split(seed));
     return to_compressed_cjk_form(seed);
@@ -294,6 +299,7 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
         if (words.size() != 12u && words.size() < 20u)
             return false;
 
+    // Normalize is non-critical here, denormalized should not procude version.
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
     return starts_with(seed, to_version(prefix));
@@ -302,12 +308,17 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
 long_hash electrum::to_seed(const string_list& words,
     const std::string& passphrase)
 {
+#ifndef WITH_ICU
+    return null_long_hash;
+#else
     if (!is_valid_word_count(words.size()))
         return null_long_hash;
 
+    // ***Normalization is critical here.***
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+#endif
 }
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
@@ -405,6 +416,7 @@ electrum electrum::from_words(const string_list& words, language language)
     if (!is_valid_word_count(words.size()))
         return {};
 
+    // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
     const auto lexicon = dictionaries_.contains(words, language);
 

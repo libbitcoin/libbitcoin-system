@@ -78,7 +78,8 @@ public:
     /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
     static bool is_valid_dictionary(language language);
 
-    /// Create a seed from any list of words and passphrase.
+    /// Create a seed from a valid number of *any* words and passphrase.
+    /// If invalid or WITH_ICU not defined this returns a zeroized hash.
     static long_hash to_seed(const string_list& words,
         const std::string& passphrase="");
 
@@ -120,6 +121,7 @@ public:
     language lingo() const;
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
+    /// If invalid or WITH_ICU not defined this returns a zeroized hash.
     long_hash to_seed(const std::string& passphrase="") const;
 
 protected:
