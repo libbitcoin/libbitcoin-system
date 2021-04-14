@@ -51,9 +51,9 @@ language dictionary<Size>::to_identifier(std::string& name)
 }
 
 template<size_t Size>
-const std::string& dictionary<Size>::to_name(language identifier)
+std::string dictionary<Size>::to_name(language identifier)
 {
-    switch (language)
+    switch (identifier)
     {
         case language::en: return "en";
         case language::es: return "es";
@@ -79,13 +79,13 @@ dictionary<Size>::dictionary(language identifier, const words& words)
 }
 
 template <size_t Size>
-const language dictionary<Size>::identifier() const
+language dictionary<Size>::identifier() const
 {
     return language_;
 }
 
 template <size_t Size>
-const std::string& dictionary<Size>::name() const
+std::string dictionary<Size>::name() const
 {
     return to_name(language_);
 }

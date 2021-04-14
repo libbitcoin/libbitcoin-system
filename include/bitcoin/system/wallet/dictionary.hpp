@@ -62,16 +62,16 @@ public:
     static language to_identifier(std::string& name);
 
     /// The name of the specified dictionary, empty string if not found.
-    static const std::string& to_name(language identifier);
+    static std::string to_name(language identifier);
 
     /// Constructor.
     dictionary(language language, const words& words);
 
     /// The language identifier of the dictionary.
-    const language identifier() const;
+    language identifier() const;
 
     /// The language name of the dictionary.
-    const std::string& name() const;
+    std::string name() const;
 
     /// Search.
 
