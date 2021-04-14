@@ -123,6 +123,8 @@ BC_API std::string to_normal_nfkd_form(const std::string& value);
  */
 BC_API std::string to_lower(const std::string& value);
 
+#endif // WITH_ICU
+
 /**
  * Remove accent characters (diacritics).
  * This function requires the ICU dependency.
@@ -138,8 +140,6 @@ std::string to_unaccented_form(const std::string& value);
  * @return            The scrubbed value.
  */
 std::string to_compressed_cjk_form(const std::string& value);
-
-#endif // WITH_ICU
 
 /**
  * Convert a wide (UTF16/wchar_t) array to narrow (UTF8/char).

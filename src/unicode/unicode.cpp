@@ -97,8 +97,6 @@ std::ostream& cerr_stream()
     return error;
 }
 
-#ifdef WITH_ICU
-
 static bool is_c_whitespace(char32_t value)
 {
     // C whitespace characters:
@@ -128,6 +126,8 @@ static bool is_chinese_japanese_or_korean(char32_t value)
         return interval.first <= value && value <= interval.second;
     });
 }
+
+#ifdef WITH_ICU
 
 #ifdef _MSC_VER
 
@@ -275,6 +275,8 @@ std::string to_normal_nfkd_form(const std::string& value)
     return normal_form(value, norm_type::norm_nfkd);
 }
 
+#endif // WITH_ICU
+
 // Remove accent characters (diacritics).
 std::string to_unaccented_form(const std::string& value)
 {
@@ -328,8 +330,6 @@ std::string to_compressed_cjk_form(const std::string& value)
     result += points.back();
     return to_utf8(result);
 }
-
-#endif // WITH_ICU
 
 // Convert utf16 wchar_t buffer to utf8 char buffer.
 // This is used in wmain for conversion of wide args and environ on Windows.
