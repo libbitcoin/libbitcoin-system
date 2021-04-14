@@ -179,7 +179,7 @@ bool decode_base58(data_chunk& out, const std::string& in)
 }
 
 // For support of template implementation only, do not call directly.
-bool decode_base58_private(uint8_t* out, size_t out_size, const char* in)
+bool decode_base58_private(uint8_t* out, size_t out_size, const char in[])
 {
     data_chunk buffer;
     if (!decode_base58(buffer, in) || buffer.size() != out_size)

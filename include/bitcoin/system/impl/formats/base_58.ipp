@@ -27,7 +27,7 @@ namespace system {
 
 // For support of template implementation only, do not call directly.
 BC_API bool decode_base58_private(uint8_t* out, size_t out_size,
-    const char* in);
+    const char in[]);
 
 template <size_t Size>
 bool decode_base58(byte_array<Size>& out, const std::string& in)

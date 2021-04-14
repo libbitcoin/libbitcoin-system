@@ -445,14 +445,14 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__non_ascii__test)
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_truncated__zero)
 {
     uint8_t truncated;
-    const char* in = "";
+    const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_out__zero)
 {
     uint8_t truncated;
-    const char* in = "";
+    const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
@@ -467,7 +467,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
 {
     uint8_t truncated;
     wchar_t out[42];
-    const char* in = "";
+    const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, in, 0), 0u);
 }
 
@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_out__zero)
 {
     uint8_t truncated;
     wchar_t out[42];
-    const char* in = "";
+    const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 0, in, 42), 0u);
 }
 

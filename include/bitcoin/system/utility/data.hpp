@@ -72,6 +72,7 @@ byte_array<Size> build_array(const loaf& slices);
 
 /**
  * Create a data chunk from an iterable object.
+ * This supports std::string conversion from signed char to uint8_t;
  */
 template <typename Source>
 data_chunk to_chunk(const Source& bytes);
