@@ -133,8 +133,8 @@ bool decode_base85(data_chunk& out, const std::string& in)
 
     for (const uint8_t encoded_character: in)
     {
-        const auto position = encoded_character - 32u;
-        if (position < 0u || position > 96u)
+        const int position = encoded_character - 32;
+        if (position < 0 || position > 96)
             return false;
 
         accumulator = accumulator * 85u + decoder[position];
