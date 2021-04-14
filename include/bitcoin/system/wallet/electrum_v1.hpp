@@ -38,10 +38,11 @@ class BC_API electrum_v1
 {
 public:
     typedef wallet::dictionary<1626> dictionary;
-    typedef wallet::dictionaries<1, dictionary::size()> dictionaries;
+    typedef wallet::dictionaries<2, dictionary::size()> dictionaries;
 
     /// Publish Electrum v1 word lists.
     static const dictionary::words en;
+    static const dictionary::words pt;
 
     /// Supports 128 or 256 bits of entropy.
     static constexpr size_t entropy_multiple = 4;
