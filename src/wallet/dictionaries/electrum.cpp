@@ -16,43 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_ELECTRUM_DICTIONARY_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_ELECTRUM_DICTIONARY_HPP
+#include <bitcoin/system/wallet/electrum.hpp>
 
-#include <array>
-#include <vector>
-#include <bitcoin/system/compat.hpp>
-#include <bitcoin/system/wallet/dictionary.hpp>
+#include <bitcoin/system/wallet/mnemonic.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// An Electrum v1 mnemonic dictionary has exactly this many words.
- static BC_CONSTEXPR size_t dictionary_size_v1 = 1626;
-
-// Dictionary for creating "old" Electrum mnemonics.
-typedef std::array<const char*, dictionary_size_v1> dictionary_v1;
-
-namespace language {
-namespace electrum {
-
-extern const dictionary& en;
-extern const dictionary& es;
-extern const dictionary& ja;
-extern const dictionary& zh_Hans;
-
-// Word lists (excluding en_v1) from:
+// Electrum v2 word lists from:
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
-extern const dictionary_list all;
+const electrum::dictionaries dictionaries_
+{
+    {
+        electrum::dictionary{ language::en, electrum::en },
+        electrum::dictionary{ language::es, electrum::es },
+        electrum::dictionary{ language::ja, electrum::ja },
+        electrum::dictionary{ language::zh_Hans, electrum::zh_Hans }
+    }
+};
 
-// Electrum v1 dictionary required for v2 compatibility.
-extern const dictionary_v1 en_v1;
+// Electrum word lists are all references to mnemonic (BIP39) word lists.
+const electrum::dictionary::words& en = mnemonic::en;
+const electrum::dictionary::words& es = mnemonic::es;
+const electrum::dictionary::words& ja = mnemonic::ja;
+const electrum::dictionary::words& zh_Hans = mnemonic::zh_Hans;
 
-} // namespace electrum
-} // namespace language
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin
-
-#endif

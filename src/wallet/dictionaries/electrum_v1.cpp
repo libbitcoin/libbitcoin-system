@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/wallet/electrum_dictionary.hpp>
-
-#include <bitcoin/system/wallet/dictionary.hpp>
+#include <bitcoin/system/wallet/electrum_v1.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
-namespace language {
-namespace electrum {
 
-// The original ("old") Electrum dictionary language.
-const dictionary_v1 en_v1
+// Electrum v2 word lists from:
+// github.com/spesmilo/electrum/blob/master/electrum/old_mnemonic.py
+const electrum_v1::dictionaries dictionaries_
+{
+    {
+        electrum_v1::dictionary{ language::en, electrum_v1::en }
+    }
+};
+
+const electrum_v1::dictionary::words electrum_v1::en
 {
     {
         "like",
@@ -1659,24 +1663,6 @@ const dictionary_v1 en_v1
     }
 };
 
-// These dictionaries are identical to corresponding BIP39 word lists.
-const dictionary& en = language::en;
-const dictionary& es = language::es;
-const dictionary& ja = language::ja;
-const dictionary& zh_Hans = language::zh_Hans;
-
-// Word lists (excluding en_v1) from:
-// github.com/spesmilo/electrum/tree/master/electrum/wordlist
-const dictionary_list all
-{
-    en,
-    es,
-    ja,
-    zh_Hans
-};
-
-} // namespace electrum
-} // namespace language
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

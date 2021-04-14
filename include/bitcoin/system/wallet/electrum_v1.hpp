@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_MNEMONIC_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_MNEMONIC_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_ELECTRUM_V1_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_ELECTRUM_V1_HPP
 
 #include <cstddef>
 #include <string>
@@ -32,75 +32,71 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-#define MNEMONIC_ENTROPY_SIZE(size) \
-size % entropy_multiple == 0u && \
-size >= entropy_minimum && \
-size <= entropy_maximum, size_t
+#define ELECTRUM_V1_ENTROPY_SIZE(size) \
+size == entropy_minimum || \
+size == entropy_maximum, size_t
 
-/// A wallet mnemonic, as defined by BIP39.
-class BC_API mnemonic
+/// A wallet mnemonic, as defined by the first Electrum implementation.
+class BC_API electrum_v1
 {
 public:
-    typedef wallet::dictionary<2048> dictionary;
-    typedef wallet::dictionaries<10, dictionary::size()> dictionaries;
+    typedef wallet::dictionary<1626> dictionary;
+    typedef wallet::dictionaries<1, dictionary::size()> dictionaries;
 
-    /// Publish BIP39 word lists.
+    /// Publish Electrum v1 word lists.
     static const dictionary::words en;
-    static const dictionary::words es;
-    static const dictionary::words it;
-    static const dictionary::words fr;
-    static const dictionary::words cs;
-    static const dictionary::words pt;
-    static const dictionary::words ja;
-    static const dictionary::words ko;
-    static const dictionary::words zh_Hans;
-    static const dictionary::words zh_Hant;
 
-    /// Supports 128 to 256 bits of entropy, in multiples of 32.
+    /// Supports 128 or 256 bits of entropy.
     static constexpr size_t entropy_multiple = 4;
     static constexpr size_t entropy_minimum = 4u * entropy_multiple;
     static constexpr size_t entropy_maximum = 8u * entropy_multiple;
 
-    /// Supports 12 to 24 words (128 to 256 bits), in multiples of 3.
+    /// Supports 12 or 24 words (128 or 256 bits) of entropy.
     static constexpr size_t word_multiple = 3;
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
-    /// Valid entropy values (16, 20, 24, 28, or 32 bytes).
-    static bool is_valid_entropy_size(size_t size);
-
-    /// Valid word counts (12, 15, 18, 21, or 24 words).
-    static bool is_valid_word_count(size_t count);
-
-    /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
+    /// Valid dictionaries (en).
     static bool is_valid_dictionary(language language);
 
-    /// Create a seed from any list of words and passphrase.
+    /// Valid entropy values (16 or 32 bytes).
+    static bool is_valid_entropy_size(size_t size);
+
+    /// Valid word counts (12 or 24 words).
+    static bool is_valid_word_count(size_t count);
+
+    /// If words are invalid the result is empty.
+    /// The seed is the entropy and words and seed round-trip.
     static data_chunk to_seed(const string_list& words,
-        const std::string& passphrase="");
+        language language=language::none);
+
+    /// If entropy is invalid the result is empty.
+    /// The entropy is the seed and words and seed round-trip.
+    static string_list to_seed(const data_chunk& entropy,
+        language language=language::none);
 
     /// The instance should be tested for validity when using these.
-    mnemonic(const mnemonic& other);
-    mnemonic(const std::string& sentence, language language=language::none);
-    mnemonic(const string_list& words, language language=language::none);
-    mnemonic(const data_chunk& entropy, language language=language::en);
+    electrum_v1(const electrum_v1& other);
+    electrum_v1(const std::string& sentence, language language=language::none);
+    electrum_v1(const string_list& words, language language=language::none);
+    electrum_v1(const data_chunk& entropy, language language=language::en);
 
     /// This constructor guarantees instance validity.
-    template <size_t Size, std::enable_if_t<MNEMONIC_ENTROPY_SIZE(Size)>>
-    mnemonic(const byte_array<Size>& entropy, language language=language::en)
-      : mnemonic(from_entropy(entropy, language))
+    template <size_t Size, std::enable_if_t<ELECTRUM_V1_ENTROPY_SIZE(Size)>>
+    electrum_v1(const byte_array<Size>& entropy, language language)
+      : electrum_v1(from_entropy(entropy, language))
     {
     }
 
     /// Lexical compares of mnemonic sentences.
-    bool operator<(const mnemonic& other) const;
-    bool operator==(const mnemonic& other) const;
-    bool operator!=(const mnemonic& other) const;
-    mnemonic& operator=(const mnemonic& other);
+    bool operator<(const electrum_v1& other) const;
+    bool operator==(const electrum_v1& other) const;
+    bool operator!=(const electrum_v1& other) const;
+    electrum_v1& operator=(const electrum_v1& other);
 
     /// Deserialize/serialize a mnemonic sentence.
-    friend std::istream& operator>>(std::istream& in, mnemonic& to);
-    friend std::ostream& operator<<(std::ostream& out, const mnemonic& of);
+    friend std::istream& operator>>(std::istream& in, electrum_v1& to);
+    friend std::ostream& operator<<(std::ostream& out, const electrum_v1& of);
 
     /// True if the object is a valid mnemonic.
     operator bool() const;
@@ -118,40 +114,31 @@ public:
     /// The dictionary language of the mnemonic.
     language lingo() const;
 
-    /// The seed derived from mnemonic entropy and an optional passphrase.
-    data_chunk to_seed(const std::string& passphrase="") const;
+    /// This method exists for consistency, the seed is the entropy.
+    data_chunk to_seed() const;
 
 protected:
-    // Constructors.
-    mnemonic();
-    mnemonic(const data_chunk& entropy, const string_list& words,
+    /// Constructors.
+    electrum_v1();
+    electrum_v1(const data_chunk& entropy, const string_list& words,
         language language);
 
-    /// Derive the checksum byte from entropy, stored in high order bits.
-    static uint8_t checksum_byte(const data_slice& entropy);
-
-    /// Map entropy to checksum bit count (4, 5, 6, 7, or 8 bits).
-    static size_t checksum_bits(const data_slice& entropy);
-
-    /// Map words to checksum bit count (4, 5, 6, 7, or 8 bits).
-    static size_t checksum_bits(const string_list& words);
-
-    /// Map entropy to entropy bit count (128, 160, 192, 224, or 256 bits).
+    /// Map entropy to entropy bit count (128 or 256 bits).
     static size_t entropy_bits(const data_slice& entropy);
 
-    /// Map words to entropy bit count (128, 160, 192, 224, or 256 bits).
+    /// Map words to entropy bit count (128 or 256 bits).
     static size_t entropy_bits(const string_list& words);
 
-    /// Map words to entropy size (16, 20, 24, 28, or 32 bytes).
+    /// Map words to entropy size (16 or 32 bytes).
     static size_t entropy_size(const string_list& words);
 
-    /// Map entropy size to word count (12, 15, 18, 21, or 24 words).
+    /// Map entropy size to word count (12 or 24 words).
     static size_t word_count(const data_slice& entropy);
 
-    /// Applies the nfkd form only.
+    /// Compresses whitespace only.
     static std::string normalize(const std::string& text);
 
-    /// Applies the nfkd form only.
+    /// Compresses whitespace only.
     static string_list normalize(const string_list& words);
 
     /// All languages except reference::ja are joined by an ASCII space.
@@ -162,12 +149,12 @@ protected:
     static string_list split(const std::string& sentence, language language);
 
 private:
-    static string_list encode(const data_chunk& entropy, language language);
     static data_chunk decode(const string_list& words, language language);
-    static mnemonic from_entropy(const data_chunk& entropy, language language);
-    static mnemonic from_words(const string_list& words, language language);
+    static string_list encode(const data_chunk& entropy, language language);
+    static electrum_v1 from_entropy(const data_chunk& entropy, language language);
+    static electrum_v1 from_words(const string_list& words, language language);
 
-    // All Electrum v1 dictionaries, from <dictionaries/mnemonic.cpp>.
+    // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.
     static const dictionaries dictionaries_;
 
     // These should be const, apart from the need to implement assignment.
@@ -176,9 +163,7 @@ private:
     language language_;
 };
 
-
-
-#undef MNEMONIC_ENTROPY_SIZE
+#undef ELECTRUM_V1_ENTROPY_SIZE
 
 } // namespace wallet
 } // namespace system
