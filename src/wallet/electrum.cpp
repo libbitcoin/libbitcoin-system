@@ -53,7 +53,6 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 static const auto seed_version = to_chunk("Seed version");
 static const auto passphrase_prefix = "electrum";
-static const auto ascii_space = "\x20";
 constexpr size_t hmac_iterations = 2048;
 constexpr size_t grind_limit = 0xffff;
 
