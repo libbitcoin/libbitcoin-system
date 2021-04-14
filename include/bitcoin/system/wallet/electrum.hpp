@@ -25,6 +25,7 @@
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/wallet/dictionaries.hpp>
@@ -78,7 +79,7 @@ public:
     static bool is_version(const string_list& words, seed_prefix prefix);
 
     /// Create a seed from *any* words and passphrase (normalized).
-    static data_chunk to_seed(const string_list& words,
+    static long_hash to_seed(const string_list& words,
         const std::string& passphrase);
 
     /// Obtain the enumerated prefix corresponding to the words.
@@ -96,7 +97,7 @@ public:
         language lexicon=language::en);
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    data_chunk to_seed(const std::string& passphrase="") const;
+    long_hash to_seed(const std::string& passphrase="") const;
 
 protected:
     /// Constructors.

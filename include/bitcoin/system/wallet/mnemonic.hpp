@@ -23,6 +23,7 @@
 #include <string>
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
@@ -78,7 +79,7 @@ public:
     static bool is_valid_dictionary(language language);
 
     /// Create a seed from any list of words and passphrase.
-    static data_chunk to_seed(const string_list& words,
+    static long_hash to_seed(const string_list& words,
         const std::string& passphrase="");
 
     /// The instance should be tested for validity after construction.
@@ -119,7 +120,7 @@ public:
     language lingo() const;
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    data_chunk to_seed(const std::string& passphrase="") const;
+    long_hash to_seed(const std::string& passphrase="") const;
 
 protected:
     // Constructors.

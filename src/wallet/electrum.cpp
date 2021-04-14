@@ -305,13 +305,15 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
     return starts_with(seed, to_version(prefix));
 }
 
-data_chunk electrum::to_seed(const string_list& words,
+long_hash electrum::to_seed(const string_list& words,
     const std::string& passphrase)
 {
+    if (!is_valid_word_count(words.size()))
+        return null_long_hash;
+
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
-    return to_chunk(seed);
+    return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
 }
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
@@ -425,7 +427,7 @@ electrum electrum::from_words(const string_list& words, language language)
 // public methods
 // ----------------------------------------------------------------------------
 
-data_chunk electrum::to_seed(const std::string& passphrase) const
+long_hash electrum::to_seed(const std::string& passphrase) const
 {
     // Words are generated from seed, so always from a supported dictionary.
     return to_seed(electrum_v1::words(), passphrase);
