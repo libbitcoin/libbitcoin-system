@@ -242,6 +242,31 @@ mnemonic::mnemonic(const data_chunk& entropy, language language)
 {
 }
 
+mnemonic::mnemonic(const entropy16& entropy, language language)
+  : mnemonic(from_entropy(to_chunk(entropy), language))
+{
+}
+
+mnemonic::mnemonic(const entropy20& entropy, language language)
+  : mnemonic(from_entropy(to_chunk(entropy), language))
+{
+}
+
+mnemonic::mnemonic(const entropy24& entropy, language language)
+  : mnemonic(from_entropy(to_chunk(entropy), language))
+{
+}
+
+mnemonic::mnemonic(const entropy28& entropy, language language)
+  : mnemonic(from_entropy(to_chunk(entropy), language))
+{
+}
+
+mnemonic::mnemonic(const entropy32& entropy, language language)
+  : mnemonic(from_entropy(to_chunk(entropy), language))
+{
+}
+
 // protected
 mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
     language language)

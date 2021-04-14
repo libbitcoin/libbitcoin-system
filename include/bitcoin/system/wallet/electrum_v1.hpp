@@ -32,10 +32,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-#define ELECTRUM_V1_ENTROPY_SIZE(size) \
-size == entropy_minimum || \
-size == entropy_maximum, size_t
-
+/// TODO: determine if there is an Electrum v1 seed algorithm.
 /// A wallet mnemonic, as defined by the first Electrum implementation.
 class BC_API electrum_v1
 {
@@ -56,6 +53,10 @@ public:
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
+    /// The two arrays of entropy sizes supported by Electrum v1.
+    typedef byte_array<entropy_minimum> minimum_entropy;
+    typedef byte_array<entropy_maximum> maximum_entropy;
+
     /// Valid dictionaries (en).
     static bool is_valid_dictionary(language language);
 
@@ -65,28 +66,15 @@ public:
     /// Valid word counts (12 or 24 words).
     static bool is_valid_word_count(size_t count);
 
-    /// If words are invalid the result is empty.
-    /// The seed is the entropy and words and seed round-trip.
-    static data_chunk to_seed(const string_list& words,
-        language language=language::none);
-
-    /// If entropy is invalid the result is empty.
-    /// The entropy is the seed and words and seed round-trip.
-    static string_list to_seed(const data_chunk& entropy,
-        language language=language::none);
-
     /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
     electrum_v1(const std::string& sentence, language language=language::none);
     electrum_v1(const string_list& words, language language=language::none);
     electrum_v1(const data_chunk& entropy, language language=language::en);
 
-    /// This constructor guarantees instance validity.
-    template <size_t Size, std::enable_if_t<ELECTRUM_V1_ENTROPY_SIZE(Size)>>
-    electrum_v1(const byte_array<Size>& entropy, language language)
-      : electrum_v1(from_entropy(entropy, language))
-    {
-    }
+    /// These constructors guarantee instance validity.
+    electrum_v1(const minimum_entropy& entropy, language language=language::en);
+    electrum_v1(const maximum_entropy& entropy, language language=language::en);
 
     /// Lexical compares of mnemonic sentences.
     bool operator<(const electrum_v1& other) const;
@@ -105,17 +93,14 @@ public:
     /// Japanese mnemonics are joined by an ideographic space (BIP39).
     std::string sentence() const;
 
-    /// The entropy of the mnemonic (not to be confused with the seed).
+    /// The entropy of the mnemonic, or empty if invalid.
     const data_chunk& entropy() const;
 
-    /// The individual words of the mnemonic.
+    /// The individual words of the mnemonic, or empty if invalid.
     const string_list& words() const;
 
-    /// The dictionary language of the mnemonic.
+    /// The dictionary language of the mnemonic, or none if invalid.
     language lingo() const;
-
-    /// This method exists for consistency, the seed is the entropy.
-    data_chunk to_seed() const;
 
 protected:
     /// Constructors.

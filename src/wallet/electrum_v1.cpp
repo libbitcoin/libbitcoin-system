@@ -168,16 +168,6 @@ bool electrum_v1::is_valid_word_count(size_t count)
     return count == word_minimum || count == word_maximum;
 }
 
-data_chunk electrum_v1::to_seed(const string_list& words, language language)
-{
-    return from_words(words, language::none).entropy();
-}
-
-string_list electrum_v1::to_seed(const data_chunk& entropy, language language)
-{
-    return from_entropy(entropy, language::none).words();
-}
-
 // construction
 // ----------------------------------------------------------------------------
 
@@ -206,6 +196,16 @@ electrum_v1::electrum_v1(const data_chunk& entropy, language language)
 {
 }
 
+electrum_v1::electrum_v1(const minimum_entropy& entropy, language language)
+  : electrum_v1(from_entropy(to_chunk(entropy), language))
+{
+}
+
+electrum_v1::electrum_v1(const maximum_entropy& entropy, language language)
+  : electrum_v1(from_entropy(to_chunk(entropy), language))
+{
+}
+
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
     language language)
@@ -213,6 +213,7 @@ electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
 {
 }
 
+// private
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
     language language)
 {
@@ -226,7 +227,7 @@ electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
     return encode(entropy, language);
 }
 
-
+// private
 electrum_v1 electrum_v1::from_words(const string_list& words, language language)
 {
     if (!is_valid_word_count(words.size()))
@@ -266,11 +267,6 @@ const string_list& electrum_v1::words() const
 language electrum_v1::lingo() const
 {
     return language_;
-}
-
-data_chunk electrum_v1::to_seed() const
-{
-    return entropy_;
 }
 
 // operators

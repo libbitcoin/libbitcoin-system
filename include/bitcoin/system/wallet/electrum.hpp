@@ -87,7 +87,7 @@ public:
     /// Obtain the prefix version corresponding to the enumeration.
     static std::string to_version(seed_prefix prefix);
 
-    /// The instance should always be tested for validity.
+    /// The instance should be tested for validity after construction.
     electrum(const electrum& other);
     electrum(const std::string& sentence, language language=language::none);
     electrum(const string_list& words, language language=language::none);

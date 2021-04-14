@@ -32,11 +32,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-#define MNEMONIC_ENTROPY_SIZE(size) \
-size % entropy_multiple == 0u && \
-size >= entropy_minimum && \
-size <= entropy_maximum, size_t
-
 /// A wallet mnemonic, as defined by BIP39.
 class BC_API mnemonic
 {
@@ -66,6 +61,13 @@ public:
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
+    /// The entropy sizes supported by Electrum v1.
+    typedef byte_array<4u * entropy_multiple> entropy16;
+    typedef byte_array<5u * entropy_multiple> entropy20;
+    typedef byte_array<6u * entropy_multiple> entropy24;
+    typedef byte_array<7u * entropy_multiple> entropy28;
+    typedef byte_array<8u * entropy_multiple> entropy32;
+
     /// Valid entropy values (16, 20, 24, 28, or 32 bytes).
     static bool is_valid_entropy_size(size_t size);
 
@@ -79,18 +81,16 @@ public:
     static data_chunk to_seed(const string_list& words,
         const std::string& passphrase="");
 
-    /// The instance should be tested for validity when using these.
+    /// The instance should be tested for validity after construction.
     mnemonic(const mnemonic& other);
     mnemonic(const std::string& sentence, language language=language::none);
     mnemonic(const string_list& words, language language=language::none);
     mnemonic(const data_chunk& entropy, language language=language::en);
-
-    /// This constructor guarantees instance validity.
-    template <size_t Size, std::enable_if_t<MNEMONIC_ENTROPY_SIZE(Size)>>
-    mnemonic(const byte_array<Size>& entropy, language language=language::en)
-      : mnemonic(from_entropy(entropy, language))
-    {
-    }
+    mnemonic(const entropy16& entropy, language language=language::en);
+    mnemonic(const entropy20& entropy, language language=language::en);
+    mnemonic(const entropy24& entropy, language language=language::en);
+    mnemonic(const entropy28& entropy, language language=language::en);
+    mnemonic(const entropy32& entropy, language language=language::en);
 
     /// Lexical compares of mnemonic sentences.
     bool operator<(const mnemonic& other) const;
@@ -175,10 +175,6 @@ private:
     string_list words_;
     language language_;
 };
-
-
-
-#undef MNEMONIC_ENTROPY_SIZE
 
 } // namespace wallet
 } // namespace system
