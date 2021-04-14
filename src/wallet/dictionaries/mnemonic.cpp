@@ -22,8 +22,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// BIP39 word lists from:
-// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 const mnemonic::dictionaries dictionaries_
 {
     {
@@ -39,6 +37,9 @@ const mnemonic::dictionaries dictionaries_
         mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
     }
 };
+
+// BIP39 word lists from:
+// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 
 const mnemonic::dictionary::words mnemonic::en
 {
