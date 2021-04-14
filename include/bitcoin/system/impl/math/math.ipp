@@ -33,13 +33,13 @@ Integer absolute(Integer value)
 template <typename Factor1, typename Factor2>
 bool negative(Factor1 factor1, Factor2 factor2)
 {
-    return factor1 < 0 != factor2 < 0;
+    return (factor1 < 0) != (factor2 < 0);
 }
 
 template <typename Dividend, typename Divisor>
 bool remainder(Dividend dividend, Divisor divisor)
 {
-    return dividend % divisor != 0;
+    return (dividend % divisor) != 0;
 }
 
 template <typename Integer>
