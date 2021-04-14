@@ -28,6 +28,12 @@ namespace wallet {
 // The portuguese wordlist at the site site below is Electrum v1.
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
 
+// Electrum v2 word lists are all identical to mnemonic (BIP39) word lists.
+const electrum::dictionary::words& en = mnemonic::en;
+const electrum::dictionary::words& es = mnemonic::es;
+const electrum::dictionary::words& ja = mnemonic::ja;
+const electrum::dictionary::words& zh_Hans = mnemonic::zh_Hans;
+
 const electrum::dictionaries dictionaries_
 {
     {
@@ -37,12 +43,6 @@ const electrum::dictionaries dictionaries_
         electrum::dictionary{ language::zh_Hans, electrum::zh_Hans }
     }
 };
-
-// Electrum v2 word lists are all identical to mnemonic (BIP39) word lists.
-const electrum::dictionary::words& en = mnemonic::en;
-const electrum::dictionary::words& es = mnemonic::es;
-const electrum::dictionary::words& ja = mnemonic::ja;
-const electrum::dictionary::words& zh_Hans = mnemonic::zh_Hans;
 
 } // namespace wallet
 } // namespace system

@@ -22,14 +22,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const electrum_v1::dictionaries dictionaries_
-{
-    {
-        electrum_v1::dictionary{ language::en, electrum_v1::en },
-        electrum_v1::dictionary{ language::pt, electrum_v1::pt }
-    }
-};
-
 // github.com/spesmilo/electrum/blob/master/electrum/old_mnemonic.py
 const electrum_v1::dictionary::words electrum_v1::en
 {
@@ -3293,6 +3285,14 @@ const electrum_v1::dictionary::words electrum_v1::pt
     "zeloso",
     "zenite",
     "zumbi"
+    }
+};
+
+const electrum_v1::dictionaries dictionaries_
+{
+    {
+        electrum_v1::dictionary{ language::en, electrum_v1::en },
+        electrum_v1::dictionary{ language::pt, electrum_v1::pt }
     }
 };
 
