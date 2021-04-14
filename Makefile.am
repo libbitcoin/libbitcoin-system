@@ -201,14 +201,13 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/tiff.cpp \
     src/utility/work.cpp \
     src/wallet/bitcoin_uri.cpp \
-    src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
     src/wallet/ec_public.cpp \
     src/wallet/ek_private.cpp \
     src/wallet/ek_public.cpp \
     src/wallet/ek_token.cpp \
     src/wallet/electrum.cpp \
-    src/wallet/electrum_dictionary.cpp \
+    src/wallet/electrum_v1.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
@@ -223,6 +222,9 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/stealth_sender.cpp \
     src/wallet/uri.cpp \
     src/wallet/witness_address.cpp \
+    src/wallet/dictionaries/electrum.cpp \
+    src/wallet/dictionaries/electrum_v1.cpp \
+    src/wallet/dictionaries/mnemonic.cpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
     src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
     src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
@@ -324,6 +326,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/limits.cpp \
+    test/math/math.cpp \
     test/math/ring_signature.cpp \
     test/math/siphash.cpp \
     test/math/siphash.hpp \
@@ -385,9 +388,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/thread.cpp \
     test/utility/tiff.cpp \
     test/wallet/bitcoin_uri.cpp \
+    test/wallet/dictionary.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
     test/wallet/electrum.cpp \
+    test/wallet/electrum.hpp \
+    test/wallet/electrum_v1.cpp \
+    test/wallet/electrum_v1.hpp \
     test/wallet/encrypted_keys.cpp \
     test/wallet/hd_private.cpp \
     test/wallet/hd_public.cpp \
@@ -402,7 +409,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/stealth_sender.cpp \
     test/wallet/uri.cpp \
     test/wallet/uri_reader.cpp \
-    test/wallet/witness_address.cpp
+    test/wallet/witness_address.cpp \
+    test/wallet/dictionary/electrum.cpp \
+    test/wallet/dictionary/electrum_v1.cpp \
+    test/wallet/dictionary/mnemonic.cpp
 
 endif WITH_TESTS
 
@@ -501,7 +511,8 @@ include_bitcoin_system_impl_machine_HEADERS = \
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/checksum.ipp \
-    include/bitcoin/system/impl/math/hash.ipp
+    include/bitcoin/system/impl/math/hash.ipp \
+    include/bitcoin/system/impl/math/math.ipp
 
 include_bitcoin_system_impl_utilitydir = ${includedir}/bitcoin/system/impl/utility
 include_bitcoin_system_impl_utility_HEADERS = \
@@ -521,6 +532,11 @@ include_bitcoin_system_impl_utility_HEADERS = \
     include/bitcoin/system/impl/utility/string.ipp \
     include/bitcoin/system/impl/utility/subscriber.ipp \
     include/bitcoin/system/impl/utility/track.ipp
+
+include_bitcoin_system_impl_walletdir = ${includedir}/bitcoin/system/impl/wallet
+include_bitcoin_system_impl_wallet_HEADERS = \
+    include/bitcoin/system/impl/wallet/dictionaries.ipp \
+    include/bitcoin/system/impl/wallet/dictionary.ipp
 
 include_bitcoin_system_logdir = ${includedir}/bitcoin/system/log
 include_bitcoin_system_log_HEADERS = \
@@ -567,6 +583,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/golomb_coded_sets.hpp \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
+    include/bitcoin/system/math/math.hpp \
     include/bitcoin/system/math/ring_signature.hpp \
     include/bitcoin/system/math/siphash.hpp \
     include/bitcoin/system/math/stealth.hpp
@@ -682,6 +699,7 @@ include_bitcoin_system_utility_HEADERS = \
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/bitcoin_uri.hpp \
+    include/bitcoin/system/wallet/dictionaries.hpp \
     include/bitcoin/system/wallet/dictionary.hpp \
     include/bitcoin/system/wallet/ec_private.hpp \
     include/bitcoin/system/wallet/ec_public.hpp \
@@ -689,7 +707,7 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/ek_public.hpp \
     include/bitcoin/system/wallet/ek_token.hpp \
     include/bitcoin/system/wallet/electrum.hpp \
-    include/bitcoin/system/wallet/electrum_dictionary.hpp \
+    include/bitcoin/system/wallet/electrum_v1.hpp \
     include/bitcoin/system/wallet/encrypted_keys.hpp \
     include/bitcoin/system/wallet/hd_private.hpp \
     include/bitcoin/system/wallet/hd_public.hpp \

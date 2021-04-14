@@ -37,6 +37,9 @@
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\wallet\dictionary">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
@@ -160,6 +163,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\math.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
@@ -348,6 +354,18 @@
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum.cpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum_v1.cpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionary\mnemonic.cpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -355,6 +373,9 @@
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\electrum_v1.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp">
@@ -415,6 +436,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\overloads.hpp">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp">
+      <Filter>src\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp">
+      <Filter>src\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>

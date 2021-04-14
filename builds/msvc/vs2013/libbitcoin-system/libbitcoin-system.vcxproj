@@ -266,20 +266,34 @@
     <ClCompile Include="..\..\..\..\src\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\work.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\dictionaries\electrum.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_dictionaries_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\dictionaries\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_dictionaries_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\dictionaries\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_dictionaries_mnemonic.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ek_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ek_token.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\electrum_dictionary.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\electrum.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mini_keys.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_mnemonic.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp" />
@@ -389,6 +403,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\stealth.hpp" />
@@ -494,6 +509,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\bitcoin_uri.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionaries.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ec_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ec_public.hpp" />
@@ -501,7 +517,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ek_public.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ek_token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\electrum.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\electrum_dictionary.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\encrypted_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\hd_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\hd_public.hpp" />
@@ -561,6 +577,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\math.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp" />
@@ -577,6 +594,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\string.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\subscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\track.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\dictionaries.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\dictionary.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.ipp" />
     <None Include="packages.config" />

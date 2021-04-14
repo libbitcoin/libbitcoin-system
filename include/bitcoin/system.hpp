@@ -102,6 +102,7 @@
 #include <bitcoin/system/math/golomb_coded_sets.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/math/ring_signature.hpp>
 #include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
@@ -205,6 +206,7 @@
 #include <bitcoin/system/utility/work.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 #include <bitcoin/system/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/dictionaries.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
@@ -212,7 +214,7 @@
 #include <bitcoin/system/wallet/ek_public.hpp>
 #include <bitcoin/system/wallet/ek_token.hpp>
 #include <bitcoin/system/wallet/electrum.hpp>
-#include <bitcoin/system/wallet/electrum_dictionary.hpp>
+#include <bitcoin/system/wallet/electrum_v1.hpp>
 #include <bitcoin/system/wallet/encrypted_keys.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
 #include <bitcoin/system/wallet/hd_public.hpp>
