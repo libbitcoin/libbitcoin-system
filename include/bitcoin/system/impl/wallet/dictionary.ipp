@@ -74,14 +74,14 @@ std::string dictionary<Size>::to_name(language identifier)
 
 template<size_t Size>
 dictionary<Size>::dictionary(language identifier, const words& words)
-  : language_(identifier), words_(words)
+  : identifier_(identifier), words_(words)
 {
 }
 
 template <size_t Size>
 language dictionary<Size>::identifier() const
 {
-    return language_;
+    return identifier_;
 }
 
 template <size_t Size>
