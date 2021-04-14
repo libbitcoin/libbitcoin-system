@@ -31,9 +31,6 @@ namespace libbitcoin {
 namespace system {
 
 BC_CONSTEXPR uint8_t bit_mask = 0x80;
-BC_CONSTEXPR uint8_t unsigned_eof = static_cast<uint8_t>(
-    std::istream::traits_type::eof());
-
 BC_CONSTEXPR uint64_t low_bit_mask_64 = 0x01;
 BC_CONSTEXPR uint64_t uint64_bits =
     static_cast<uint64_t>(byte_bits) *
