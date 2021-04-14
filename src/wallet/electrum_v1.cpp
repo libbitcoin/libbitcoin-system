@@ -50,7 +50,7 @@ constexpr auto ascii_space = "\x20";
 // ----------------------------------------------------------------------------
 
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1669
-string_list electrum_v1::encode(const data_chunk& entropy, language language)
+string_list electrum_v1::encode(const data_chunk& entropy, language identifier)
 {
     string_list words;
     words.reserve(word_count(entropy));
@@ -67,16 +67,16 @@ string_list electrum_v1::encode(const data_chunk& entropy, language language)
         const auto two = (value / size1 + one) % size1;
         const auto tri = (value / size2 + two) % size1;
 
-        words.push_back(dictionaries_.at(one, language));
-        words.push_back(dictionaries_.at(two, language));
-        words.push_back(dictionaries_.at(tri, language));
+        words.push_back(dictionaries_.at(one, identifier));
+        words.push_back(dictionaries_.at(two, identifier));
+        words.push_back(dictionaries_.at(tri, identifier));
     }
 
     return words;
 }
 
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1682
-data_chunk electrum_v1::decode(const string_list& words, language language)
+data_chunk electrum_v1::decode(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
@@ -86,9 +86,9 @@ data_chunk electrum_v1::decode(const string_list& words, language language)
     // Word count and dictionary membership must have been validated.
     for (auto word = words.begin(); word != words.end();)
     {
-        const auto one = dictionaries_.index(*word++, language);
-        const auto two = dictionaries_.index(*word++, language);
-        const auto tri = dictionaries_.index(*word++, language);
+        const auto one = dictionaries_.index(*word++, identifier);
+        const auto two = dictionaries_.index(*word++, identifier);
+        const auto tri = dictionaries_.index(*word++, identifier);
 
         const auto value =
             floored_modulo(one - 0x0, size1) * size0 +
@@ -137,15 +137,15 @@ string_list electrum_v1::normalize(const string_list& words)
     return system::split(system::join(words));
 }
 
-std::string electrum_v1::join(const string_list& words, language language)
+std::string electrum_v1::join(const string_list& words, language identifier)
 {
-    return system::join(words, language == language::ja ?
+    return system::join(words, identifier == language::ja ?
         ideographic_space : ascii_space);
 }
 
-string_list electrum_v1::split(const std::string& sentence, language language)
+string_list electrum_v1::split(const std::string& sentence, language identifier)
 {
-    return language == language::ja ?
+    return identifier == language::ja ?
         split_regex(sentence, ideographic_space) :
         system::split(sentence, ascii_space);
 }
@@ -153,9 +153,9 @@ string_list electrum_v1::split(const std::string& sentence, language language)
 // public static
 // ----------------------------------------------------------------------------
 
-bool electrum_v1::is_valid_dictionary(language language)
+bool electrum_v1::is_valid_dictionary(language identifier)
 {
-    return dictionaries_.exists(language);
+    return dictionaries_.exists(identifier);
 }
 
 bool electrum_v1::is_valid_entropy_size(size_t size)
@@ -172,74 +172,76 @@ bool electrum_v1::is_valid_word_count(size_t count)
 // ----------------------------------------------------------------------------
 
 electrum_v1::electrum_v1()
-  : entropy_(), words_(), language_(language::none)
+  : entropy_(), words_(), identifier_(language::none)
 {
 }
 
 electrum_v1::electrum_v1(const electrum_v1& other)
-  : entropy_(other.entropy_), words_(other.words_), language_(other.language_)
+  : entropy_(other.entropy_), words_(other.words_),
+    identifier_(other.identifier_)
 {
 }
 
-electrum_v1::electrum_v1(const std::string& sentence, language language)
-  : electrum_v1(split(sentence, language), language)
+electrum_v1::electrum_v1(const std::string& sentence, language identifier)
+  : electrum_v1(split(sentence, identifier), identifier)
 {
 }
 
-electrum_v1::electrum_v1(const string_list& words, language language)
-  : electrum_v1(from_words(words, language))
+electrum_v1::electrum_v1(const string_list& words, language identifier)
+  : electrum_v1(from_words(words, identifier))
 {
 }
 
-electrum_v1::electrum_v1(const data_chunk& entropy, language language)
-  : electrum_v1(from_entropy(entropy, language))
+electrum_v1::electrum_v1(const data_chunk& entropy, language identifier)
+  : electrum_v1(from_entropy(entropy, identifier))
 {
 }
 
-electrum_v1::electrum_v1(const minimum_entropy& entropy, language language)
-  : electrum_v1(from_entropy(to_chunk(entropy), language))
+electrum_v1::electrum_v1(const minimum_entropy& entropy, language identifier)
+  : electrum_v1(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
-electrum_v1::electrum_v1(const maximum_entropy& entropy, language language)
-  : electrum_v1(from_entropy(to_chunk(entropy), language))
+electrum_v1::electrum_v1(const maximum_entropy& entropy, language identifier)
+  : electrum_v1(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
-    language language)
-  : entropy_(entropy), words_(words), language_(language)
+    language identifier)
+  : entropy_(entropy), words_(words), identifier_(identifier)
 {
 }
 
 // private
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
-    language language)
+    language identifier)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
-    if (!dictionaries_.exists(language))
+    if (!dictionaries_.exists(identifier))
         return {};
 
     // Save original entropy and derived words.
-    return encode(entropy, language);
+    return encode(entropy, identifier);
 }
 
 // private
-electrum_v1 electrum_v1::from_words(const string_list& words, language language)
+electrum_v1 electrum_v1::from_words(const string_list& words,
+    language identifier)
 {
     if (!is_valid_word_count(words.size()))
         return {};
 
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(tokens, language);
+    const auto lexicon = dictionaries_.contains(tokens, identifier);
 
     if (lexicon == language::none)
         return {};
 
-    if (language != language::none && lexicon != language)
+    if (identifier != language::none && lexicon != identifier)
         return {};
 
     // Save normalized words and derived entropy, original words are discarded.
@@ -251,7 +253,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words, language language)
 
 std::string electrum_v1::sentence() const
 {
-    return join(words(), language_);
+    return join(words(), lingo());
 }
 
 const data_chunk& electrum_v1::entropy() const
@@ -266,7 +268,7 @@ const string_list& electrum_v1::words() const
 
 language electrum_v1::lingo() const
 {
-    return language_;
+    return identifier_;
 }
 
 // operators
@@ -276,7 +278,7 @@ electrum_v1& electrum_v1::operator=(const electrum_v1& other)
 {
     entropy_ = other.entropy_;
     words_ = other.words_;
-    language_ = other.language_;
+    identifier_ = other.identifier_;
     return *this;
 }
 
@@ -288,7 +290,7 @@ bool electrum_v1::operator<(const electrum_v1& other) const
 bool electrum_v1::operator==(const electrum_v1& other) const
 {
     // Words and entropy are equivalent (one is a cache of the other).
-    return entropy_ == other.entropy_ && language_ == other.language_;
+    return entropy_ == other.entropy_ && identifier_ == other.identifier_;
 }
 
 bool electrum_v1::operator!=(const electrum_v1& other) const

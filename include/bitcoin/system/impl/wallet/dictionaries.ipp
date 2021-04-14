@@ -44,9 +44,9 @@ dictionaries<Count, Size>::dictionaries(const list& dictionaries)
 }
 
 template<size_t Count, size_t Size>
-bool dictionaries<Count, Size>::exists(language language) const
+bool dictionaries<Count, Size>::exists(language identifier) const
 {
-    return to_dictionary(language) != dictionaries_.end();
+    return to_dictionary(identifier) != dictionaries_.end();
 }
 
 template<size_t Count, size_t Size>
@@ -57,9 +57,9 @@ language dictionaries<Count, Size>::to_identifier(const std::string& name) const
 }
 
 template<size_t Count, size_t Size>
-const std::string& dictionaries<Count, Size>::to_name(language language) const
+const std::string& dictionaries<Count, Size>::to_name(language identifier) const
 {
-    const auto it = to_dictionary(language);
+    const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->name() : "";
 }
 
@@ -67,47 +67,47 @@ const std::string& dictionaries<Count, Size>::to_name(language language) const
 // ----------------------------------------------------------------------------
 
 template<size_t Count, size_t Size>
-std::string dictionaries<Count, Size>::at(size_t index, language language) const
+std::string dictionaries<Count, Size>::at(size_t index, language identifier) const
 {
-    const auto it = to_dictionary(language);
+    const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->at(index) : "";
 }
 
 template<size_t Count, size_t Size>
 string_list dictionaries<Count, Size>::at(const search& indexes,
-    language language) const
+    language identifier) const
 {
-    const auto it = to_dictionary(language);
+    const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->at(indexes) : string_list{};
 }
 
 template<size_t Count, size_t Size>
 int32_t dictionaries<Count, Size>::index(const std::string& word,
-    language language) const
+    language identifier) const
 {
-    const auto it = to_dictionary(language);
+    const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->index(word) : missing;
 }
 
 template<size_t Count, size_t Size>
 typename dictionaries<Count, Size>::result
 dictionaries<Count, Size>::index(const string_list& words,
-    language language) const
+    language identifier) const
 {
-    const auto it = to_dictionary(language);
+    const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->index(words) :
         result{ { missing } };
 }
 
 template<size_t Count, size_t Size>
 language dictionaries<Count, Size>::contains(const std::string& word,
-    language language) const
+    language identifier) const
 {
     if (language != language::none)
     {
-        const auto it = to_dictionary(language);
+        const auto it = to_dictionary(identifier);
         return it != dictionaries_.end() && it->contains(word) ?
-            language : language::none;
+            identifier : language::none;
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
@@ -121,13 +121,13 @@ language dictionaries<Count, Size>::contains(const std::string& word,
 
 template<size_t Count, size_t Size>
 language dictionaries<Count, Size>::contains(const string_list& words,
-    language language) const
+    language identifier) const
 {
-    if (language != language::none)
+    if (identifier != language::none)
     {
-        const auto it = to_dictionary(language);
+        const auto it = to_dictionary(identifier);
         return it != dictionaries_.end() && it->contains(words) ?
-            language : language::none;
+            identifier : language::none;
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
@@ -144,12 +144,12 @@ language dictionaries<Count, Size>::contains(const string_list& words,
 
 template<size_t Count, size_t Size>
 typename dictionaries<Count, Size>::list::const_iterator
-dictionaries<Count, Size>::to_dictionary(language language) const
+dictionaries<Count, Size>::to_dictionary(language identifier) const
 {
     return std::find_if(dictionaries_.begin(), dictionaries_.end(),
         [&](const dictionary<Size>& dictionary)
         {
-            return dictionary.identifier() == language;
+            return dictionary.identifier() == identifier;
         });
 }
 

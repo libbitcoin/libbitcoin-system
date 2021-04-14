@@ -67,7 +67,7 @@ public:
     static constexpr size_t strength_maximum = 506;
 
     /// Valid dictionaries (en, es, ja, and zh_Hans).
-    static bool is_valid_dictionary(language language);
+    static bool is_valid_dictionary(language identifier);
 
     /// Valid entropy values (17 to 64 bytes).
     static bool is_valid_entropy_size(size_t size);
@@ -91,8 +91,8 @@ public:
 
     /// The instance should be tested for validity after construction.
     electrum(const electrum& other);
-    electrum(const std::string& sentence, language language=language::none);
-    electrum(const string_list& words, language language=language::none);
+    electrum(const std::string& sentence, language identifier=language::none);
+    electrum(const string_list& words, language identifier=language::none);
     electrum(const data_chunk& entropy,
         seed_prefix prefix=seed_prefix::standard,
         language lexicon=language::en);
@@ -105,7 +105,7 @@ protected:
     /// Constructors.
     electrum();
     electrum(const data_chunk& entropy, const string_list& words,
-        language language, seed_prefix prefix);
+        language identifier, seed_prefix prefix);
 
     /// Map entropy to entropy bit count (132 to 506 bits).
     static size_t entropy_bits(const data_slice& entropy);
@@ -143,13 +143,13 @@ protected:
 private:
     typedef struct { data_chunk entropy; string_list words; } result;
     static result grind(const data_chunk& entropy, seed_prefix prefix,
-        language language, size_t limit);
+        language identifier, size_t limit);
 
-    static string_list encode(const data_chunk& entropy, language language);
-    static data_chunk decode(const string_list& words, language language);
+    static string_list encode(const data_chunk& entropy, language identifier);
+    static data_chunk decode(const string_list& words, language identifier);
     static electrum from_entropy(const data_chunk& entropy, seed_prefix prefix,
-        language language);
-    static electrum from_words(const string_list& words, language language);
+        language identifier);
+    static electrum from_words(const string_list& words, language identifier);
 
     // All Electrum dictionaries, from <dictionaries/electrum.cpp>.
     static const dictionaries dictionaries_;

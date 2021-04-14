@@ -71,7 +71,7 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
-string_list electrum::encode(const data_chunk& entropy, language language)
+string_list electrum::encode(const data_chunk& entropy, language identifier)
 {
     string_list words;
 
@@ -104,10 +104,10 @@ string_list electrum::encode(const data_chunk& entropy, language language)
     for (auto& index: indexes)
         index = read_index(bit_reader);
 
-    return dictionaries_.at(indexes, language);
+    return dictionaries_.at(indexes, identifier);
 }
 
-data_chunk electrum::decode(const string_list& words, language language)
+data_chunk electrum::decode(const string_list& words, language identifier)
 {
     // We can use the bit writer here (same as BIP39).
     // BIP39 entropy is extended by a checksum byte, so length is equivalent.
@@ -129,7 +129,7 @@ data_chunk electrum::decode(const string_list& words, language language)
     // Reserve buffer to include entropy and checksum, always one byte.
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
-    const auto indexes = dictionaries_.index(words, language);
+    const auto indexes = dictionaries_.index(words, identifier);
 
     // Word indexes are not byte aligned, high-to-low bit writer required.
     data_sink sink(entropy);
@@ -160,7 +160,7 @@ data_chunk electrum::decode(const string_list& words, language language)
 // discarding any prng value that is below 2^(strength-11).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L190-L205
 electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
-    language language, size_t limit)
+    language identifier, size_t limit)
 {
     string_list words;
     data_chunk hash(entropy);
@@ -173,10 +173,10 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
         hash = to_chunk(hmac_sha512_hash(hash, salt));
         hash.resize(size);
 
-        words = encode(hash, language);
+        words = encode(hash, identifier);
 
         // Avoid collisions with Electrum v1 and BIP39 mnemonics.
-        if (electrum_v1(words, language) || mnemonic(words))
+        if (electrum_v1(words, identifier) || mnemonic(words))
             continue;
 
         if (is_version(words, prefix))
@@ -261,9 +261,9 @@ string_list electrum::normalize(const string_list& words)
 // public static
 // ----------------------------------------------------------------------------
 
-bool electrum::is_valid_dictionary(language language)
+bool electrum::is_valid_dictionary(language identifier)
 {
-    return dictionaries_.exists(language);
+    return dictionaries_.exists(identifier);
 }
 
 bool electrum::is_valid_entropy_size(size_t size)
@@ -369,65 +369,65 @@ electrum::electrum(const electrum& other)
 {
 }
 
-electrum::electrum(const std::string& sentence, language language)
-  : electrum(split(sentence, language), language)
+electrum::electrum(const std::string& sentence, language identifier)
+  : electrum(split(sentence, identifier), identifier)
 {
 }
 
-electrum::electrum(const string_list& words, language language)
-  : electrum(from_words(words, language))
+electrum::electrum(const string_list& words, language identifier)
+  : electrum(from_words(words, identifier))
 {
 }
 
 electrum::electrum(const data_chunk& entropy, seed_prefix prefix,
-    language language)
-  : electrum(from_entropy(entropy, prefix, language))
+    language identifier)
+  : electrum(from_entropy(entropy, prefix, identifier))
 {
 }
 
 // protected
 electrum::electrum(const data_chunk& entropy, const string_list& words,
-    language language, seed_prefix prefix)
-  : electrum_v1(entropy, words, language), prefix_(prefix)
+    language identifier, seed_prefix prefix)
+  : electrum_v1(entropy, words, identifier), prefix_(prefix)
 {
 }
 
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
-    language language)
+    language identifier)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
-    if (!dictionaries_.exists(language))
+    if (!dictionaries_.exists(identifier))
         return {};
 
-    const auto result = grind(entropy, prefix, language, grind_limit);
+    const auto result = grind(entropy, prefix, identifier, grind_limit);
 
     // Not your lucky day.
     if (result.words.empty())
         return {};
 
     // Save found entropy and words, originals are discarded.
-    return { result.entropy, result.words, language, to_prefix(result.words) };
+    return { result.entropy, result.words, identifier, to_prefix(result.words) };
 }
 
-electrum electrum::from_words(const string_list& words, language language)
+electrum electrum::from_words(const string_list& words, language identifier)
 {
     if (!is_valid_word_count(words.size()))
         return {};
 
     // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(words, language);
+    const auto lexicon = dictionaries_.contains(words, identifier);
 
     if (lexicon == language::none)
         return {};
 
-    if (language != language::none && lexicon != language)
+    if (identifier != language::none && lexicon != identifier)
         return {};
 
     // Save normalized words and derived entropy, original words are discarded.
-    return { decode(tokens, language), tokens, lexicon, to_prefix(tokens) };
+    return { decode(tokens, identifier), tokens, lexicon, to_prefix(tokens) };
 }
 
 // public methods

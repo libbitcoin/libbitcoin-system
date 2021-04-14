@@ -65,7 +65,7 @@ public:
     static std::string to_name(language identifier);
 
     /// Constructor.
-    dictionary(language language, const words& words);
+    dictionary(language identifier, const words& words);
 
     /// The language identifier of the dictionary.
     language identifier() const;
@@ -95,7 +95,7 @@ public:
 
 private:
     // This dictionary creates only this one word of state.
-    const language language_;
+    const language identifier_;
 
     // Arrays of words are declared statically and held by reference here.
     // The array type is POD, so no words are copied into the array. Only

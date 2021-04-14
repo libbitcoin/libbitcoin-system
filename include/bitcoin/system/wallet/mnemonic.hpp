@@ -76,7 +76,7 @@ public:
     static bool is_valid_word_count(size_t count);
 
     /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
-    static bool is_valid_dictionary(language language);
+    static bool is_valid_dictionary(language identifier);
 
     /// Create a seed from a valid number of *any* words and passphrase.
     /// If invalid or WITH_ICU not defined this returns a zeroized hash.
@@ -85,14 +85,14 @@ public:
 
     /// The instance should be tested for validity after construction.
     mnemonic(const mnemonic& other);
-    mnemonic(const std::string& sentence, language language=language::none);
-    mnemonic(const string_list& words, language language=language::none);
-    mnemonic(const data_chunk& entropy, language language=language::en);
-    mnemonic(const entropy16& entropy, language language=language::en);
-    mnemonic(const entropy20& entropy, language language=language::en);
-    mnemonic(const entropy24& entropy, language language=language::en);
-    mnemonic(const entropy28& entropy, language language=language::en);
-    mnemonic(const entropy32& entropy, language language=language::en);
+    mnemonic(const std::string& sentence, language identifier=language::none);
+    mnemonic(const string_list& words, language identifier=language::none);
+    mnemonic(const data_chunk& entropy, language identifier=language::en);
+    mnemonic(const entropy16& entropy, language identifier=language::en);
+    mnemonic(const entropy20& entropy, language identifier=language::en);
+    mnemonic(const entropy24& entropy, language identifier=language::en);
+    mnemonic(const entropy28& entropy, language identifier=language::en);
+    mnemonic(const entropy32& entropy, language identifier=language::en);
 
     /// Lexical compares of mnemonic sentences.
     bool operator<(const mnemonic& other) const;
@@ -128,7 +128,7 @@ protected:
     // Constructors.
     mnemonic();
     mnemonic(const data_chunk& entropy, const string_list& words,
-        language language);
+        language identifier);
 
     /// Derive the checksum byte from entropy, stored in high order bits.
     static uint8_t checksum_byte(const data_slice& entropy);
@@ -158,17 +158,17 @@ protected:
     static string_list normalize(const string_list& words);
 
     /// All languages except reference::ja are joined by an ASCII space.
-    static std::string join(const string_list& words, language language);
+    static std::string join(const string_list& words, language identifier);
 
     /// There is no trimming or token compression for reference::ja.
     /// All other languages are split and trimmed on ASCII whitespace.
-    static string_list split(const std::string& sentence, language language);
+    static string_list split(const std::string& sentence, language identifier);
 
 private:
-    static string_list encode(const data_chunk& entropy, language language);
-    static data_chunk decode(const string_list& words, language language);
-    static mnemonic from_entropy(const data_chunk& entropy, language language);
-    static mnemonic from_words(const string_list& words, language language);
+    static string_list encode(const data_chunk& entropy, language identifier);
+    static data_chunk decode(const string_list& words, language identifier);
+    static mnemonic from_entropy(const data_chunk& entropy, language identifier);
+    static mnemonic from_words(const string_list& words, language identifier);
 
     // All Electrum v1 dictionaries, from <dictionaries/mnemonic.cpp>.
     static const dictionaries dictionaries_;
@@ -176,7 +176,7 @@ private:
     // These should be const, apart from the need to implement assignment.
     data_chunk entropy_;
     string_list words_;
-    language language_;
+    language identifier_;
 };
 
 } // namespace wallet

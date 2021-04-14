@@ -61,7 +61,7 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
-string_list mnemonic::encode(const data_chunk& entropy, language language)
+string_list mnemonic::encode(const data_chunk& entropy, language identifier)
 {
     // Read eleven bits into an index (0..2047).
     const auto read_index = [](istream_bit_reader& reader)
@@ -82,10 +82,10 @@ string_list mnemonic::encode(const data_chunk& entropy, language language)
     for (auto& index: indexes)
         index = read_index(bit_reader);
 
-    return dictionaries_.at(indexes, language);
+    return dictionaries_.at(indexes, identifier);
 }
 
-data_chunk mnemonic::decode(const string_list& words, language language)
+data_chunk mnemonic::decode(const string_list& words, language identifier)
 {
     // Write an index into eleven bits (0..2047).
     const auto write_index = [](ostream_bit_writer& writer, int32_t index)
@@ -96,7 +96,7 @@ data_chunk mnemonic::decode(const string_list& words, language language)
     // Reserve buffer to include entropy and checksum, always one byte.
     data_chunk buffer;
     buffer.reserve(entropy_size(words) + 1u);
-    const auto indexes = dictionaries_.index(words, language);
+    const auto indexes = dictionaries_.index(words, identifier);
 
     // Word indexes are not byte aligned, high-to-low bit writer required.
     data_sink sink(buffer);
@@ -177,15 +177,15 @@ string_list mnemonic::normalize(const string_list& words)
 }
 
 // BIP39 requires japanese mnemonic sentences join by an ideographic space.
-std::string mnemonic::join(const string_list& words, language language)
+std::string mnemonic::join(const string_list& words, language identifier)
 {
-    return system::join(words, language == language::ja ?
+    return system::join(words, identifier == language::ja ?
         ideographic_space : ascii_space);
 }
 
-string_list mnemonic::split(const std::string& sentence, language language)
+string_list mnemonic::split(const std::string& sentence, language identifier)
 {
-    return language == language::ja ?
+    return identifier == language::ja ?
         split_regex(sentence, ideographic_space) :
         system::split(sentence, ascii_space);
 }
@@ -205,9 +205,9 @@ bool mnemonic::is_valid_word_count(size_t count)
         count >= word_minimum && count <= word_maximum);
 }
 
-bool mnemonic::is_valid_dictionary(language language)
+bool mnemonic::is_valid_dictionary(language identifier)
 {
-    return dictionaries_.exists(language);
+    return dictionaries_.exists(identifier);
 }
 
 long_hash mnemonic::to_seed(const string_list& words,
@@ -230,90 +230,92 @@ long_hash mnemonic::to_seed(const string_list& words,
 // ----------------------------------------------------------------------------
 
 mnemonic::mnemonic()
-  : entropy_(), words_(), language_(language::none)
+  : entropy_(), words_(), identifier_(language::none)
 {
 }
 
 mnemonic::mnemonic(const mnemonic& other)
-  : entropy_(other.entropy_), words_(other.words_), language_(other.language_)
+  : entropy_(other.entropy_), words_(other.words_),
+    identifier_(other.identifier_)
 {
 }
 
-mnemonic::mnemonic(const std::string& sentence, language language)
-  : mnemonic(split(sentence, language), language)
+mnemonic::mnemonic(const std::string& sentence, language identifier)
+  : mnemonic(split(sentence, identifier), identifier)
 {
 }
 
-mnemonic::mnemonic(const string_list& words, language language)
-  : mnemonic(from_words(words, language))
+mnemonic::mnemonic(const string_list& words, language identifier)
+  : mnemonic(from_words(words, identifier))
 {
 }
 
-mnemonic::mnemonic(const data_chunk& entropy, language language)
-  : mnemonic(from_entropy(entropy, language))
+mnemonic::mnemonic(const data_chunk& entropy, language identifier)
+  : mnemonic(from_entropy(entropy, identifier))
 {
 }
 
-mnemonic::mnemonic(const entropy16& entropy, language language)
-  : mnemonic(from_entropy(to_chunk(entropy), language))
+mnemonic::mnemonic(const entropy16& entropy, language identifier)
+  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
-mnemonic::mnemonic(const entropy20& entropy, language language)
-  : mnemonic(from_entropy(to_chunk(entropy), language))
+mnemonic::mnemonic(const entropy20& entropy, language identifier)
+  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
-mnemonic::mnemonic(const entropy24& entropy, language language)
-  : mnemonic(from_entropy(to_chunk(entropy), language))
+mnemonic::mnemonic(const entropy24& entropy, language identifier)
+  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
-mnemonic::mnemonic(const entropy28& entropy, language language)
-  : mnemonic(from_entropy(to_chunk(entropy), language))
+mnemonic::mnemonic(const entropy28& entropy, language identifier)
+  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
-mnemonic::mnemonic(const entropy32& entropy, language language)
-  : mnemonic(from_entropy(to_chunk(entropy), language))
+mnemonic::mnemonic(const entropy32& entropy, language identifier)
+  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
 // protected
 mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
-    language language)
-  : entropy_(entropy), words_(words), language_(language)
+    language identifier)
+  : entropy_(entropy), words_(words), identifier_(identifier)
 {
 }
 
-mnemonic mnemonic::from_entropy(const data_chunk& entropy, language language)
+mnemonic mnemonic::from_entropy(const data_chunk& entropy,
+    language identifier)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
-    if (!dictionaries_.exists(language))
+    if (!dictionaries_.exists(identifier))
         return {};
 
     // Save original entropy and derived words.
-    return { entropy, encode(entropy, language), language };
+    return { entropy, encode(entropy, identifier), identifier };
 }
 
-mnemonic mnemonic::from_words(const string_list& words, language language)
+mnemonic mnemonic::from_words(const string_list& words, language identifier)
 {
     if (!is_valid_word_count(words.size()))
         return {};
 
     // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(words, language);
+    const auto lexicon = dictionaries_.contains(words, identifier);
 
     if (lexicon == language::none)
         return {};
 
-    if (language != language::none && lexicon != language)
+    if (identifier != language::none && lexicon != identifier)
         return {};
 
-    const auto entropy = decode(tokens, language);
+    const auto entropy = decode(tokens, identifier);
 
     // Checksum verification failed.
     if (entropy.empty())
@@ -328,7 +330,7 @@ mnemonic mnemonic::from_words(const string_list& words, language language)
 
 std::string mnemonic::sentence() const
 {
-    return join(words(), language_);
+    return join(words(), lingo());
 }
 
 const data_chunk& mnemonic::entropy() const
@@ -343,7 +345,7 @@ const string_list& mnemonic::words() const
 
 language mnemonic::lingo() const
 {
-    return language_;
+    return identifier_;
 }
 
 long_hash mnemonic::to_seed(const std::string& passphrase) const
@@ -359,7 +361,7 @@ mnemonic& mnemonic::operator=(const mnemonic& other)
 {
     entropy_ = other.entropy_;
     words_ = other.words_;
-    language_ = other.language_;
+    identifier_ = other.identifier_;
     return *this;
 }
 
@@ -371,7 +373,7 @@ bool mnemonic::operator<(const mnemonic& other) const
 bool mnemonic::operator==(const mnemonic& other) const
 {
     // Words and entropy are equivalent (one is a cache of the other).
-    return entropy_ == other.entropy_ && language_ == other.language_;
+    return entropy_ == other.entropy_ && identifier_ == other.identifier_;
 }
 
 bool mnemonic::operator!=(const mnemonic& other) const

@@ -59,7 +59,7 @@ public:
     typedef byte_array<entropy_maximum> maximum_entropy;
 
     /// Valid dictionaries (en).
-    static bool is_valid_dictionary(language language);
+    static bool is_valid_dictionary(language identifier);
 
     /// Valid entropy values (16 or 32 bytes).
     static bool is_valid_entropy_size(size_t size);
@@ -69,13 +69,13 @@ public:
 
     /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
-    electrum_v1(const std::string& sentence, language language=language::none);
-    electrum_v1(const string_list& words, language language=language::none);
-    electrum_v1(const data_chunk& entropy, language language=language::en);
+    electrum_v1(const std::string& sentence, language identifier=language::none);
+    electrum_v1(const string_list& words, language identifier=language::none);
+    electrum_v1(const data_chunk& entropy, language identifier=language::en);
 
     /// These constructors guarantee instance validity.
-    electrum_v1(const minimum_entropy& entropy, language language=language::en);
-    electrum_v1(const maximum_entropy& entropy, language language=language::en);
+    electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
+    electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
 
     /// Lexical compares of mnemonic sentences.
     bool operator<(const electrum_v1& other) const;
@@ -107,7 +107,7 @@ protected:
     /// Constructors.
     electrum_v1();
     electrum_v1(const data_chunk& entropy, const string_list& words,
-        language language);
+        language identifier);
 
     /// Map entropy to entropy bit count (128 or 256 bits).
     static size_t entropy_bits(const data_slice& entropy);
@@ -128,17 +128,17 @@ protected:
     static string_list normalize(const string_list& words);
 
     /// All languages except reference::ja are joined by an ASCII space.
-    static std::string join(const string_list& words, language language);
+    static std::string join(const string_list& words, language identifier);
 
     /// There is no trimming or token compression for reference::ja.
     /// All other languages are split and trimmed on ASCII whitespace.
-    static string_list split(const std::string& sentence, language language);
+    static string_list split(const std::string& sentence, language identifier);
 
 private:
-    static data_chunk decode(const string_list& words, language language);
-    static string_list encode(const data_chunk& entropy, language language);
-    static electrum_v1 from_entropy(const data_chunk& entropy, language language);
-    static electrum_v1 from_words(const string_list& words, language language);
+    static data_chunk decode(const string_list& words, language identifier);
+    static string_list encode(const data_chunk& entropy, language identifier);
+    static electrum_v1 from_entropy(const data_chunk& entropy, language identifier);
+    static electrum_v1 from_words(const string_list& words, language identifier);
 
     // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.
     static const dictionaries dictionaries_;
@@ -146,7 +146,7 @@ private:
     // These should be const, apart from the need to implement assignment.
     data_chunk entropy_;
     string_list words_;
-    language language_;
+    language identifier_;
 };
 
 #undef ELECTRUM_V1_ENTROPY_SIZE
