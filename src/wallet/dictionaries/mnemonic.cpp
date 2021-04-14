@@ -22,6 +22,22 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
+const mnemonic::dictionaries dictionaries_
+{
+    {
+        mnemonic::dictionary{ language::en, mnemonic::en },
+        mnemonic::dictionary{ language::es, mnemonic::es },
+        mnemonic::dictionary{ language::it, mnemonic::it },
+        mnemonic::dictionary{ language::fr, mnemonic::fr },
+        mnemonic::dictionary{ language::cs, mnemonic::cs },
+        mnemonic::dictionary{ language::pt, mnemonic::pt },
+        mnemonic::dictionary{ language::ja, mnemonic::ja },
+        mnemonic::dictionary{ language::ko, mnemonic::ko },
+        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
+        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
+    }
+};
+
 // BIP39 word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 
@@ -20562,22 +20578,6 @@ const mnemonic::dictionary::words mnemonic::zh_Hant
         "怨",
         "矮",
         "歇"
-    }
-};
-
-const mnemonic::dictionaries dictionaries_
-{
-    {
-        mnemonic::dictionary{ language::en, mnemonic::en },
-        mnemonic::dictionary{ language::es, mnemonic::es },
-        mnemonic::dictionary{ language::it, mnemonic::it },
-        mnemonic::dictionary{ language::fr, mnemonic::fr },
-        mnemonic::dictionary{ language::cs, mnemonic::cs },
-        mnemonic::dictionary{ language::pt, mnemonic::pt },
-        mnemonic::dictionary{ language::ja, mnemonic::ja },
-        mnemonic::dictionary{ language::ko, mnemonic::ko },
-        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
-        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
     }
 };
 
