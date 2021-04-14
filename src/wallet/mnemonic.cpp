@@ -210,12 +210,11 @@ bool mnemonic::is_valid_dictionary(language identifier)
     return dictionaries_.exists(identifier);
 }
 
+#ifdef WITH_ICU
+
 long_hash mnemonic::to_seed(const string_list& words,
     const std::string& passphrase)
 {
-#ifndef WITH_ICU
-    return null_long_hash;
-#else
     if (!is_valid_word_count(words.size()))
         return null_long_hash;
 
@@ -223,8 +222,16 @@ long_hash mnemonic::to_seed(const string_list& words,
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
-#endif
 }
+
+#else
+
+long_hash mnemonic::to_seed(const string_list&, const std::string&)
+{
+    return null_long_hash;
+}
+
+#endif
 
 // construction
 // ----------------------------------------------------------------------------
