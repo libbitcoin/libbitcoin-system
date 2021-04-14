@@ -31,12 +31,10 @@ namespace system {
 
 typedef std::vector<std::string> string_list;
 
-/**
- * Copy data elements to a new string.
- * @param[in]  source  The collection of elements to cast.
- * @returns            A new string with copyed elements.
- */
-BC_API std::string to_string(const data_slice& source);
+inline bool starts_with(const std::string& value, const std::string& prefix)
+{
+    return value.substr(0, prefix.length()) == prefix;
+}
 
 /**
  * Convert a text string to the specified type.
@@ -98,6 +96,13 @@ BC_API string_list split(const std::string& sentence,
  */
 BC_API string_list split_regex(const std::string& sentence,
     const std::string& phrase);
+
+/**
+ * Copy data elements to a new string.
+ * @param[in]  source  The collection of elements to cast.
+ * @returns            A new string with copyed elements.
+ */
+BC_API std::string to_string(const data_slice& source);
 
 } // namespace system
 } // namespace libbitcoin

@@ -26,6 +26,7 @@
 #include <iterator>
 #include <queue>
 #include <vector>
+////#include <boost/multiprecision/cpp_int/import_export.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/array_slice.hpp>
 
@@ -81,6 +82,31 @@ data_chunk to_chunk(const Source& bytes);
  * @param  extra_reserve  Pad result with this size, filled with 0x00.
  */
 inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve=0);
+
+// ENDIANNESS: export_bits and import_bits use natural byte order, so these
+// must be modified to be endianess-explicit. They should be added to the
+// serializer classes as to/from big/little endian template overrides.
+// Bytes can be masked and shifted out, and added and shifted in.
+template <typename CppInt>
+static data_chunk to_data(const CppInt& value)
+{
+    data_chunk data(electrum::entropy_maximum);
+    ////boost::multiprecision::export_bits(value, std::back_inserter(data),
+    ////    byte_bits);
+    return data;
+}
+
+// ENDIANNESS: export_bits and import_bits use natural byte order, so these
+// must be modified to be endianess-explicit. They should be added to the
+// serializer classes as to/from big/little endian template overrides.
+// Bytes can be masked and shifted out, and added and shifted in.
+template <typename CppInt>
+CppInt from_data(const data_slice& data)
+{
+    CppInt value;
+    ////boost::multiprecision::import_bits(value, data.begin(), data.end());
+    return value;
+}
 
 /**
  * Extend iterable target by appending extension.

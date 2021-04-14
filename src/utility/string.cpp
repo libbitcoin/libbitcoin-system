@@ -27,12 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-std::string to_string(const data_slice& source)
-{
-    std::string out(source.begin(), source.end());
-    return out;
-}
-
 std::string join(const string_list& words, const std::string& delimiter)
 {
     return boost::join(words, delimiter);
@@ -63,6 +57,12 @@ string_list split_regex(const std::string& sentence,
 {
     string_list words;
     return boost::algorithm::split_regex(words, sentence, boost::regex(phrase));
+}
+
+std::string to_string(const data_slice& source)
+{
+    std::string out(source.begin(), source.end());
+    return out;
 }
 
 } // namespace system
