@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,21 +20,17 @@
 #define LIBBITCOIN_SYSTEM_WALLET_DICTIONARY_HPP
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
-#include <functional>
+#include <string>
 #include <vector>
-#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// A BIP39 mnemonic dictionary has exactly this many words.
-// This size applies to both Electrum (>v1) and BIP39 word lists.
-static BC_CONSTEXPR size_t dictionary_size = 2048;
-
-// Dictionary names.
-typedef enum class reference
+typedef enum class language
 {
     en,
     es,
@@ -47,39 +43,71 @@ typedef enum class reference
     zh_Hans,
     zh_Hant,
     none
-} reference;
+} language;
 
-// A dictionary (BIP39 wordlist) for creating mnemonics.
-// The compiler can write the char* array (POD type) directly to static memory.
-typedef struct
+// Search container for a dictionary of lexically-sorted words.
+// POD dictionary wrapper with O(log2) search and O(1) index.
+template<size_t Size>
+class dictionary
 {
-    reference name;
-    std::array<const char*, dictionary_size> words;
-} dictionary;
+public:
+    typedef std::vector<size_t> search;
+    typedef std::vector<int32_t> result;
+    typedef std::array<const char*, Size> words;
 
-// A collection of dictionaries.
-typedef std::vector<std::reference_wrapper<const dictionary>> dictionary_list;
+    /// The number of words in the dictionary.
+    static constexpr size_t size() { return Size; };
 
-namespace language {
+    /// The language id of the dictionary name, language::none if not found.
+    static language to_identifier(std::string& name);
 
-// Individual BIP39 languages:
-extern const dictionary en;
-extern const dictionary es;
-extern const dictionary it;
-extern const dictionary fr;
-extern const dictionary cs;
-extern const dictionary pt;
-extern const dictionary ja;
-extern const dictionary ko;
-extern const dictionary zh_Hans;
-extern const dictionary zh_Hant;
+    /// The name of the specified dictionary, empty string if not found.
+    static const std::string& to_name(language identifier);
 
-// A collection of all BIP39 languages:
-extern const dictionary_list all;
+    /// Constructor.
+    dictionary(language language, const words& words);
 
-} // namespace language
+    /// The language identifier of the dictionary.
+    const language identifier() const;
+
+    /// The language name of the dictionary.
+    const std::string& name() const;
+
+    /// Search.
+
+    /// Empty string if index > Size.
+    std::string at(size_t index) const;
+
+    /// Empty string for any index > Size.
+    string_list at(const search& indexes) const;
+
+    /// -1 if word is not found.
+    int32_t index(const std::string& word) const;
+
+    /// -1 for any word that is not found.
+    result index(const string_list& words) const;
+
+    /// True if the word is in the dictionary.
+    bool contains(const std::string& word) const;
+
+    /// True if all words are in the dictionary.
+    bool contains(const string_list& words) const;
+
+private:
+    // This dictionary creates only this one word of state.
+    const language language_;
+
+    // Arrays of words are declared statically and held by reference here.
+    // The array type is POD, so no words are copied into the array. Only
+    // This wrapper dictionary object is created for each word list, for
+    // each dictionaries object constructed by various mnemonic classes.
+    const words& words_;
+};
+
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/wallet/dictionary.ipp>
 
 #endif
