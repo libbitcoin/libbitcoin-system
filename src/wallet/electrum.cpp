@@ -71,7 +71,7 @@ static const auto version_none = "none";
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
 static const auto index_bits = static_cast<uint8_t>(
-    system::log2(mnemonic::dictionary::size()));
+    system::log2(electrum::dictionary::size()));
 
 // private static
 // ----------------------------------------------------------------------------
@@ -294,7 +294,7 @@ bool electrum::is_valid_dictionary(language identifier)
 
 // Electrum has no explicit minimum or maximum strengths.
 // Upper bounds here are based on use of a 512 bit hash function
-// and transportation of entropy in byte vectors.
+// in grind() and transportation of entropy in byte vectors.
 // A 64 byte seed (512 / 11) is 46 words (6 unused bits).
 // This limits strength to 506 bits (BIP39 is 256).
 // Lower bounds here are based on seed strength.
