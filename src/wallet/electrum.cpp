@@ -194,19 +194,22 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
     const auto salt = to_chunk(to_version(prefix));
 
     // This just grinds away until exhausted or prefix found.
+    // On the first iteration the usable entropy is unchnaged.
+    // On the first iteration one entropy byte may be discarded.
+    // On subsequent iterations size will be reduced from 512 bytes.
+    // This allows the entropy to round trip after it is sufficient.
+
     while (limit-- != 0u)
     {
-        hash = to_chunk(hmac_sha512_hash(hash, salt));
         hash.resize(size);
-
         words = encode(hash, identifier);
 
         // Avoid collisions with Electrum v1 and BIP39 mnemonics.
-        if (electrum_v1(words, identifier) || mnemonic(words))
-            continue;
+        if (!electrum_v1(words, identifier) && !mnemonic(words) &&
+            is_version(words, prefix))
+                return { hash, words };
 
-        if (is_version(words, prefix))
-            return { hash, words };
+        hash = to_chunk(hmac_sha512_hash(hash, salt));
     }
 
     return {};
