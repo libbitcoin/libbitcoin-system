@@ -47,10 +47,13 @@ namespace wallet {
 // local constants
 // ----------------------------------------------------------------------------
 static const auto seed_version = to_chunk("Seed version");
-static const auto passphrase_prefix = "electrum";
-constexpr size_t hmac_iterations = 2048;
 constexpr size_t grind_limit = 0xffff;
 constexpr size_t minimum_two_factor_authentication_words = 20;
+
+#ifdef WITH_ICU
+constexpr auto passphrase_prefix = "electrum";
+constexpr size_t hmac_iterations = 2048;
+#endif
 
 // Seed prefixes.
 // The values for old, bip39 and none are not actual prefixes but included
