@@ -56,7 +56,7 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
-const mnemonic::dictionaries dictionaries_
+const mnemonic::dictionaries mnemonic::dictionaries_
 {
     {
         mnemonic::dictionary{ language::en, mnemonic_en },

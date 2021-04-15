@@ -72,7 +72,7 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
-const electrum::dictionaries dictionaries_
+const electrum::dictionaries electrum::dictionaries_
 {
     {
         electrum::dictionary{ language::en, electrum_en },
