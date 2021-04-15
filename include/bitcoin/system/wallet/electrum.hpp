@@ -75,7 +75,7 @@ public:
     static constexpr size_t strength_minimum = 132;
     static constexpr size_t strength_maximum = 506;
 
-    /// Valid dictionaries (en, es, ja, and zh_Hans).
+    /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
     static bool is_valid_dictionary(language identifier);
 
     /// Valid entropy values (17 to 64 bytes).
