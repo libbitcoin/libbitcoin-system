@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -31,6 +30,7 @@
 #include <bitcoin/system/wallet/dictionaries.hpp>
 #include <bitcoin/system/wallet/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -90,8 +90,8 @@ public:
 
     /// Create a seed from a valid number of *any* words and passphrase.
     /// If invalid or WITH_ICU not defined this returns a zeroized hash.
-    static long_hash to_seed(const string_list& words,
-        const std::string& passphrase);
+    static hd_private to_seed(const string_list& words,
+        const std::string& passphrase, uint64_t chain=hd_private::mainnet);
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
@@ -111,7 +111,8 @@ public:
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
     /// If invalid or WITH_ICU not defined this returns a zeroized hash.
-    long_hash to_seed(const std::string& passphrase="") const;
+    hd_private to_seed(const std::string& passphrase="",
+        uint64_t chain=hd_private::mainnet) const;
 
 protected:
     /// Constructors.

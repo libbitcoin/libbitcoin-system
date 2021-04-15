@@ -36,6 +36,7 @@
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -228,21 +229,25 @@ bool mnemonic::is_valid_dictionary(language identifier)
 
 #ifdef WITH_ICU
 
-long_hash mnemonic::to_seed(const string_list& words,
-    const std::string& passphrase)
+hd_private mnemonic::to_seed(const string_list& words,
+    const std::string& passphrase, uint64_t chain)
 {
     if (!is_valid_word_count(words.size()))
-        return null_long_hash;
+        return {};
 
     // ***Normalization is critical here.***
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
-    return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto part = system::split(seed);
+
+    // The object will be false if the secret (left) does not ec verify.
+    return hd_private(part.left, part.right, chain);
 }
 #else
-long_hash mnemonic::to_seed(const string_list&, const std::string&)
+hd_private mnemonic::to_seed(const string_list&, const std::string&)
 {
-    return null_long_hash;
+    return {};
 }
 
 #endif
@@ -344,10 +349,11 @@ language mnemonic::lingo() const
     return identifier_;
 }
 
-long_hash mnemonic::to_seed(const std::string& passphrase) const
+hd_private mnemonic::to_seed(const std::string& passphrase,
+    uint64_t chain) const
 {
     // Words are generated from seed, so always from a supported dictionary.
-    return to_seed(words(), passphrase);
+    return to_seed(words(), passphrase, chain);
 }
 
 // Operators.

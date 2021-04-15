@@ -38,6 +38,7 @@
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
 #include <bitcoin/system/wallet/electrum_v1.hpp>
+#include <bitcoin/system/wallet/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>
 
 namespace libbitcoin {
@@ -355,21 +356,25 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
 
 #ifdef WITH_ICU
 
-long_hash electrum::to_seed(const string_list& words,
-    const std::string& passphrase)
+hd_private electrum::to_seed(const string_list& words,
+    const std::string& passphrase, uint64_t chain)
 {
     if (!is_valid_word_count(words.size()))
-        return null_long_hash;
+        return {};
 
     // ***Normalization is critical here.***
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
-    return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto part = system::split(seed);
+
+    // The object will be false if the secret (left) does not ec verify.
+    return hd_private(part.left, part.right, chain);
 }
 #else
-long_hash electrum::to_seed(const string_list&, const std::string&)
+hd_private electrum::to_seed(const string_list&, const std::string&)
 {
-    return null_long_hash;
+    return {};
 }
 
 #endif
@@ -513,10 +518,11 @@ electrum electrum::from_words(const string_list& words, language identifier)
 // public methods
 // ----------------------------------------------------------------------------
 
-long_hash electrum::to_seed(const std::string& passphrase) const
+hd_private electrum::to_seed(const std::string& passphrase,
+    uint64_t chain) const
 {
     // Words are generated from seed, so always from a supported dictionary.
-    return to_seed(electrum_v1::words(), passphrase);
+    return to_seed(electrum_v1::words(), passphrase, chain);
 }
 
 } // namespace wallet
