@@ -400,7 +400,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
     // In a non-ICU build these are likely to produce "none" if the specified
     // words have not been prenormalized. However a collision on the version
     // bits of the resulting hash is certainly possible. So we exclude the
-    // possibility of a mismatch by returning 'none'
+    // possibility of a mismatch by returning 'none'.
 
 #ifdef WITH_ICU
     if (is_version(words, seed_prefix::standard))
