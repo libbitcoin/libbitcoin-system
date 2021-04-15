@@ -176,6 +176,12 @@ bool electrum_v1::is_valid_word_count(size_t count)
     return count == word_minimum || count == word_maximum;
 }
 
+language electrum_v1::contained_by(const string_list& words,
+    language identifier)
+{
+    return dictionaries_.contains(words, identifier);
+}
+
 // construction
 // ----------------------------------------------------------------------------
 
@@ -244,7 +250,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
         return {};
 
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(tokens, identifier);
+    const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)
         return {};

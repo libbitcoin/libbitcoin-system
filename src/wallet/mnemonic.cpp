@@ -210,6 +210,11 @@ string_list mnemonic::split(const std::string& sentence, language identifier)
 // public static
 // ----------------------------------------------------------------------------
 
+bool mnemonic::is_valid_dictionary(language identifier)
+{
+    return dictionaries_.exists(identifier);
+}
+
 bool mnemonic::is_valid_entropy_size(size_t size)
 {
     return ((size % entropy_multiple) == 0u &&
@@ -222,9 +227,9 @@ bool mnemonic::is_valid_word_count(size_t count)
         count >= word_minimum && count <= word_maximum);
 }
 
-bool mnemonic::is_valid_dictionary(language identifier)
+language mnemonic::contained_by(const string_list& words, language identifier)
 {
-    return dictionaries_.exists(identifier);
+    return dictionaries_.contains(words, identifier);
 }
 
 #ifdef WITH_ICU
@@ -308,7 +313,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
 
     // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(words, identifier);
+    const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)
         return {};

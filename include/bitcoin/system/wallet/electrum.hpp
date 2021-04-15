@@ -88,6 +88,9 @@ public:
     /// Returns true if the seed of the words has the given prefix.
     static bool is_version(const string_list& words, seed_prefix prefix);
 
+    /// The dictionary, limited by identifier, that contains all words.
+    static language contained_by(const string_list& words, language identifier);
+
     /// Create a seed from a valid number of *any* words and passphrase.
     /// If invalid or WITH_ICU not defined this returns a zeroized hash.
     static hd_private to_seed(const string_list& words,

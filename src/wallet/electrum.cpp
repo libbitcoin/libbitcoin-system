@@ -354,6 +354,11 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
     return starts_with(seed, to_version(prefix));
 }
 
+language electrum::contained_by(const string_list& words, language identifier)
+{
+    return dictionaries_.contains(words, identifier);
+}
+
 #ifdef WITH_ICU
 
 hd_private electrum::to_seed(const string_list& words,
@@ -503,7 +508,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
 
     // Normalize is non-critical here, denormalized words will be rejected.
     const auto tokens = normalize(words);
-    const auto lexicon = dictionaries_.contains(words, identifier);
+    const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)
         return {};

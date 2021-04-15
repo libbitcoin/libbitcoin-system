@@ -63,14 +63,17 @@ public:
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
+    /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
+    static bool is_valid_dictionary(language identifier);
+
     /// Valid entropy values (16, 20, 24, 28, or 32 bytes).
     static bool is_valid_entropy_size(size_t size);
 
     /// Valid word counts (12, 15, 18, 21, or 24 words).
     static bool is_valid_word_count(size_t count);
 
-    /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
-    static bool is_valid_dictionary(language identifier);
+    /// The dictionary, limited by identifier, that contains all words.
+    static language contained_by(const string_list& words, language identifier);
 
     /// Create a seed from a valid number of *any* words and passphrase.
     /// If invalid or WITH_ICU not defined this returns a zeroized hash.

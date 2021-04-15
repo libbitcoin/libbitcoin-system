@@ -57,7 +57,7 @@ public:
     typedef byte_array<entropy_minimum> minimum_entropy;
     typedef byte_array<entropy_maximum> maximum_entropy;
 
-    /// Valid dictionaries (en).
+    /// Valid dictionaries (en, pt).
     static bool is_valid_dictionary(language identifier);
 
     /// Valid entropy values (16 or 32 bytes).
@@ -65,6 +65,9 @@ public:
 
     /// Valid word counts (12 or 24 words).
     static bool is_valid_word_count(size_t count);
+
+    /// The dictionary, limited by identifier, that contains all words.
+    static language contained_by(const string_list& words, language identifier);
 
     /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
