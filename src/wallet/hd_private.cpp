@@ -36,6 +36,7 @@
 #include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/serializer.hpp>
+#include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 
@@ -101,6 +102,14 @@ hd_private::hd_private(const std::string& encoded, uint64_t prefixes)
 }
 
 hd_private::hd_private(const ec_secret& secret,
+    const hd_chain_code& chain_code, uint64_t prefixes)
+  : hd_public(from_new(secret, chain_code, prefixes)),
+    secret_(secret)
+{
+}
+
+// private
+hd_private::hd_private(const ec_secret& secret,
     const hd_chain_code& chain_code, const hd_lineage& lineage)
   : hd_public(from_secret(secret, chain_code, lineage)),
     secret_(secret)
@@ -110,18 +119,14 @@ hd_private::hd_private(const ec_secret& secret,
 // Factories.
 // ----------------------------------------------------------------------------
 
-hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
+hd_private hd_private::from_new(const ec_secret& secret,
+    const hd_chain_code& chain_code, uint64_t prefixes)
 {
-    // This is a magic constant from BIP32.
-    static const auto magic = to_chunk(std::string("Bitcoin seed"));
-
-    const auto intermediate = split(hmac_sha512_hash(seed, magic));
-
     // The key is invalid if parse256(IL) >= n or 0:
-    if (!verify(intermediate.left))
+    if (!verify(secret))
         return {};
 
-    const auto master = hd_lineage
+    const hd_lineage master
     {
         prefixes,
         0x00,
@@ -129,7 +134,16 @@ hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
         0x00000000
     };
 
-    return hd_private(intermediate.left, intermediate.right, master);
+    return hd_private(secret, chain_code, master);
+}
+
+hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
+{
+    // This is a magic constant from BIP32.
+    static const auto magic = to_chunk("Bitcoin seed");
+    const auto intermediate = split(hmac_sha512_hash(seed, magic));
+
+    return hd_private(intermediate.left, intermediate.right, prefixes);
 }
 
 hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)

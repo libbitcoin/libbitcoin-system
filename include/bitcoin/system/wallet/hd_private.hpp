@@ -62,6 +62,8 @@ public:
     hd_private(const std::string& encoded);
     hd_private(const std::string& encoded, uint64_t prefixes);
     hd_private(const std::string& encoded, uint32_t public_prefix);
+    hd_private(const ec_secret& secret, const hd_chain_code& chain_code,
+        uint64_t prefixes=mainnet);
 
     /// Operators.
     bool operator<(const hd_private& other) const;
@@ -95,6 +97,8 @@ private:
     static hd_private from_seed(const data_slice& seed, uint64_t prefixes);
     static hd_private from_key(const hd_key& decoded, uint32_t prefix);
     static hd_private from_key(const hd_key& decoded, uint64_t public_prefix);
+    static hd_private from_new(const ec_secret& secret,
+        const hd_chain_code& chain_code, uint64_t prefixes);
     static hd_private from_string(const std::string& encoded,
         uint32_t public_prefix);
     static hd_private from_string(const std::string& encoded,
