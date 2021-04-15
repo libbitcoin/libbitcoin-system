@@ -24,15 +24,22 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// TODO: consider adding all BIP39 word lists to Electrum.
-// The portuguese wordlist at the site site below is Electrum v1.
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
+// The portuguese wordlist in the Electrum v1 repo is for Electrum v2.
+// The Electrum v1 repo includes en, es, ja, and zh_Hant only.
+// This list has been extended to include all BIP39 word lists.
 
-// Electrum v2 word lists are all identical to mnemonic (BIP39) word lists.
+// Electrum v2 word lists are currently identical to BIP39 word lists.
 const electrum::dictionary::words& electrum::en = mnemonic::en;
 const electrum::dictionary::words& electrum::es = mnemonic::es;
+const electrum::dictionary::words& electrum::it = mnemonic::it;
+const electrum::dictionary::words& electrum::fr = mnemonic::fr;
+const electrum::dictionary::words& electrum::cs = mnemonic::cs;
+const electrum::dictionary::words& electrum::pt = mnemonic::pt;
 const electrum::dictionary::words& electrum::ja = mnemonic::ja;
+const electrum::dictionary::words& electrum::ko = mnemonic::ko;
 const electrum::dictionary::words& electrum::zh_Hans = mnemonic::zh_Hans;
+const electrum::dictionary::words& electrum::zh_Hant = mnemonic::zh_Hant;
 
 } // namespace wallet
 } // namespace system

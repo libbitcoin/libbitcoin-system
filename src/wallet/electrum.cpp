@@ -80,8 +80,14 @@ const electrum::dictionaries electrum::dictionaries_
     {
         electrum::dictionary{ language::en, electrum::en },
         electrum::dictionary{ language::es, electrum::es },
+        electrum::dictionary{ language::it, electrum::it },
+        electrum::dictionary{ language::fr, electrum::fr },
+        electrum::dictionary{ language::cs, electrum::cs },
+        electrum::dictionary{ language::pt, electrum::pt },
         electrum::dictionary{ language::ja, electrum::ja },
-        electrum::dictionary{ language::zh_Hans, electrum::zh_Hans }
+        electrum::dictionary{ language::ko, electrum::ko },
+        electrum::dictionary{ language::zh_Hans, electrum::zh_Hans },
+        electrum::dictionary{ language::zh_Hant, electrum::zh_Hant }
     }
 };
 

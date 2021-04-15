@@ -56,13 +56,19 @@ public:
     };
 
     typedef wallet::dictionary<2048> dictionary;
-    typedef wallet::dictionaries<4, dictionary::size()> dictionaries;
+    typedef wallet::dictionaries<10, dictionary::size()> dictionaries;
 
-    /// Publish Electrum word lists (subset of BIP39 word lists).
+    /// Publish Electrum word lists (same as BIP39 word lists).
     static const dictionary::words& en;
     static const dictionary::words& es;
+    static const dictionary::words& it;
+    static const dictionary::words& fr;
+    static const dictionary::words& cs;
+    static const dictionary::words& pt;
     static const dictionary::words& ja;
+    static const dictionary::words& ko;
     static const dictionary::words& zh_Hans;
+    static const dictionary::words& zh_Hant;
 
     // Supports 132 to 506 bits of entropy (12 to 46 words).
     // Entropy byte limits are rounded up to 17 to 64 bytes.
