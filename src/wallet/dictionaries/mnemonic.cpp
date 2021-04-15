@@ -22,26 +22,10 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const mnemonic::dictionaries dictionaries_
-{
-    {
-        mnemonic::dictionary{ language::en, mnemonic::en },
-        mnemonic::dictionary{ language::es, mnemonic::es },
-        mnemonic::dictionary{ language::it, mnemonic::it },
-        mnemonic::dictionary{ language::fr, mnemonic::fr },
-        mnemonic::dictionary{ language::cs, mnemonic::cs },
-        mnemonic::dictionary{ language::pt, mnemonic::pt },
-        mnemonic::dictionary{ language::ja, mnemonic::ja },
-        mnemonic::dictionary{ language::ko, mnemonic::ko },
-        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
-        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
-    }
-};
-
 // BIP39 word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 
-const mnemonic::dictionary::words mnemonic::en
+const mnemonic::dictionary::words mnemonic_en
 {
     {
         "abandon",
@@ -2095,7 +2079,7 @@ const mnemonic::dictionary::words mnemonic::en
     }
 };
 
-const mnemonic::dictionary::words mnemonic::es
+const mnemonic::dictionary::words mnemonic_es
 {
     {
         "ábaco",
@@ -4149,7 +4133,7 @@ const mnemonic::dictionary::words mnemonic::es
     }
 };
 
-const mnemonic::dictionary::words mnemonic::it
+const mnemonic::dictionary::words mnemonic_it
 {
     {
         "abaco",
@@ -6203,7 +6187,7 @@ const mnemonic::dictionary::words mnemonic::it
     }
 };
 
-const mnemonic::dictionary::words mnemonic::fr
+const mnemonic::dictionary::words mnemonic_fr
 {
     {
         "abaisser",
@@ -8257,7 +8241,7 @@ const mnemonic::dictionary::words mnemonic::fr
     }
 };
 
-const mnemonic::dictionary::words mnemonic::cs
+const mnemonic::dictionary::words mnemonic_cs
 {
     {
         "abdikace",
@@ -10311,7 +10295,7 @@ const mnemonic::dictionary::words mnemonic::cs
     }
 };
 
-const mnemonic::dictionary::words mnemonic::pt
+const mnemonic::dictionary::words mnemonic_pt
 {
     {
         "abacate",
@@ -12365,7 +12349,7 @@ const mnemonic::dictionary::words mnemonic::pt
     }
 };
 
-const mnemonic::dictionary::words mnemonic::ja
+const mnemonic::dictionary::words mnemonic_ja
 {
     {
         "あいこくしん",
@@ -14419,7 +14403,7 @@ const mnemonic::dictionary::words mnemonic::ja
     }
 };
 
-const mnemonic::dictionary::words mnemonic::ko
+const mnemonic::dictionary::words mnemonic_ko
 {
     {
         "가격",
@@ -16473,7 +16457,7 @@ const mnemonic::dictionary::words mnemonic::ko
     }
 };
 
-const mnemonic::dictionary::words mnemonic::zh_Hans
+const mnemonic::dictionary::words mnemonic_zh_Hans
 {
     {
         "的",
@@ -18527,7 +18511,7 @@ const mnemonic::dictionary::words mnemonic::zh_Hans
     }
 };
 
-const mnemonic::dictionary::words mnemonic::zh_Hant
+const mnemonic::dictionary::words mnemonic_zh_Hant
 {
     {
         "的",

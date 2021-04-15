@@ -61,6 +61,22 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
+const mnemonic::dictionaries dictionaries_
+{
+    {
+        mnemonic::dictionary{ language::en, mnemonic_en },
+        mnemonic::dictionary{ language::es, mnemonic_es },
+        mnemonic::dictionary{ language::it, mnemonic_it },
+        mnemonic::dictionary{ language::fr, mnemonic_fr },
+        mnemonic::dictionary{ language::cs, mnemonic_cs },
+        mnemonic::dictionary{ language::pt, mnemonic_pt },
+        mnemonic::dictionary{ language::ja, mnemonic_ja },
+        mnemonic::dictionary{ language::ko, mnemonic_ko },
+        mnemonic::dictionary{ language::zh_Hans, mnemonic_zh_Hans },
+        mnemonic::dictionary{ language::zh_Hant, mnemonic_zh_Hant }
+    }
+};
+
 string_list mnemonic::encode(const data_chunk& entropy, language identifier)
 {
     // Read eleven bits into an index (0..2047).

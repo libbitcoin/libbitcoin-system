@@ -49,6 +49,14 @@ constexpr auto ascii_space = "\x20";
 // private static
 // ----------------------------------------------------------------------------
 
+const electrum_v1::dictionaries dictionaries_
+{
+    {
+        electrum_v1::dictionary{ language::en, electrum_v1_en },
+        electrum_v1::dictionary{ language::pt, electrum_v1_pt }
+    }
+};
+
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1669
 string_list electrum_v1::encode(const data_chunk& entropy, language identifier)
 {

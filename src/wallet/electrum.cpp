@@ -70,6 +70,16 @@ static const auto index_bits = static_cast<uint8_t>(
 // private static
 // ----------------------------------------------------------------------------
 
+const electrum::dictionaries dictionaries_
+{
+    {
+        electrum::dictionary{ language::en, electrum_en },
+        electrum::dictionary{ language::es, electrum_es },
+        electrum::dictionary{ language::ja, electrum_ja },
+        electrum::dictionary{ language::zh_Hans, electrum_zh_Hans }
+    }
+};
+
 string_list electrum::encode(const data_chunk& entropy, language identifier)
 {
     string_list words;

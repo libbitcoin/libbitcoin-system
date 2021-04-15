@@ -55,12 +55,6 @@ public:
     typedef wallet::dictionary<2048> dictionary;
     typedef wallet::dictionaries<4, dictionary::size()> dictionaries;
 
-    /// Publish Electrum word lists (references to BIP39 word lists).
-    static const dictionary::words& en;
-    static const dictionary::words& es;
-    static const dictionary::words& ja;
-    static const dictionary::words& zh_Hans;
-
     // Supports 132 to 506 bits of entropy (12 to 46 words).
     // Entropy byte limits are rounded up to 17 to 64 bytes.
     static constexpr size_t strength_minimum = 132;
@@ -151,11 +145,17 @@ private:
         language identifier);
     static electrum from_words(const string_list& words, language identifier);
 
-    // All Electrum dictionaries, from <dictionaries/electrum.cpp>.
+    // All Electrum dictionaries, subset of <dictionaries/mnemonic.cpp>.
     static const dictionaries dictionaries_;
 
     seed_prefix prefix_;
 };
+
+/// Publish Electrum word lists (subset of BIP39 word lists).
+extern const electrum::dictionary::words& electrum_en;
+extern const electrum::dictionary::words& electrum_es;
+extern const electrum::dictionary::words& electrum_ja;
+extern const electrum::dictionary::words& electrum_zh_Hans;
 
 } // namespace wallet
 } // namespace system
