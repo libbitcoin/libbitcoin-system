@@ -41,11 +41,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// Words are encoded in 11 bits and therefore are not byte aligned.
-// As a consequence bit ordering matters. Bits are serialized to entropy bytes
-// in big-endian order. This can be observed in the reference implementation:
-// github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
-
 // local constants
 // ----------------------------------------------------------------------------
 
@@ -76,6 +71,11 @@ const mnemonic::dictionaries dictionaries_
         mnemonic::dictionary{ language::zh_Hant, mnemonic_zh_Hant }
     }
 };
+
+// Words are encoded in 11 bits and therefore are not byte aligned.
+// As a consequence bit ordering matters. Bits are serialized to entropy bytes
+// in big-endian order. This can be observed in the reference implementation:
+// github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
 
 string_list mnemonic::encode(const data_chunk& entropy, language identifier)
 {
@@ -275,31 +275,6 @@ mnemonic::mnemonic(const string_list& words, language identifier)
 
 mnemonic::mnemonic(const data_chunk& entropy, language identifier)
   : mnemonic(from_entropy(entropy, identifier))
-{
-}
-
-mnemonic::mnemonic(const entropy16& entropy, language identifier)
-  : mnemonic(from_entropy(to_chunk(entropy), identifier))
-{
-}
-
-mnemonic::mnemonic(const entropy20& entropy, language identifier)
-  : mnemonic(from_entropy(to_chunk(entropy), identifier))
-{
-}
-
-mnemonic::mnemonic(const entropy24& entropy, language identifier)
-  : mnemonic(from_entropy(to_chunk(entropy), identifier))
-{
-}
-
-mnemonic::mnemonic(const entropy28& entropy, language identifier)
-  : mnemonic(from_entropy(to_chunk(entropy), identifier))
-{
-}
-
-mnemonic::mnemonic(const entropy32& entropy, language identifier)
-  : mnemonic(from_entropy(to_chunk(entropy), identifier))
 {
 }
 

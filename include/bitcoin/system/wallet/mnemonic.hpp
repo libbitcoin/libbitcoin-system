@@ -50,13 +50,6 @@ public:
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
-    /// The entropy sizes supported by Electrum v1.
-    typedef byte_array<4u * entropy_multiple> entropy16;
-    typedef byte_array<5u * entropy_multiple> entropy20;
-    typedef byte_array<6u * entropy_multiple> entropy24;
-    typedef byte_array<7u * entropy_multiple> entropy28;
-    typedef byte_array<8u * entropy_multiple> entropy32;
-
     /// Valid entropy values (16, 20, 24, 28, or 32 bytes).
     static bool is_valid_entropy_size(size_t size);
 
@@ -76,11 +69,6 @@ public:
     mnemonic(const std::string& sentence, language identifier=language::none);
     mnemonic(const string_list& words, language identifier=language::none);
     mnemonic(const data_chunk& entropy, language identifier=language::en);
-    mnemonic(const entropy16& entropy, language identifier=language::en);
-    mnemonic(const entropy20& entropy, language identifier=language::en);
-    mnemonic(const entropy24& entropy, language identifier=language::en);
-    mnemonic(const entropy28& entropy, language identifier=language::en);
-    mnemonic(const entropy32& entropy, language identifier=language::en);
 
     /// Lexical compares of mnemonic sentences.
     bool operator<(const mnemonic& other) const;
