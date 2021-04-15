@@ -372,7 +372,7 @@ hd_private electrum::to_seed(const string_list& words,
     return hd_private(part.left, part.right, chain);
 }
 #else
-hd_private electrum::to_seed(const string_list&, const std::string&)
+hd_private electrum::to_seed(const string_list&, const std::string&, uint64_t)
 {
     return {};
 }
