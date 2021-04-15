@@ -59,16 +59,16 @@ static const auto index_bits = static_cast<uint8_t>(
 const mnemonic::dictionaries mnemonic::dictionaries_
 {
     {
-        mnemonic::dictionary{ language::en, mnemonic_en },
-        mnemonic::dictionary{ language::es, mnemonic_es },
-        mnemonic::dictionary{ language::it, mnemonic_it },
-        mnemonic::dictionary{ language::fr, mnemonic_fr },
-        mnemonic::dictionary{ language::cs, mnemonic_cs },
-        mnemonic::dictionary{ language::pt, mnemonic_pt },
-        mnemonic::dictionary{ language::ja, mnemonic_ja },
-        mnemonic::dictionary{ language::ko, mnemonic_ko },
-        mnemonic::dictionary{ language::zh_Hans, mnemonic_zh_Hans },
-        mnemonic::dictionary{ language::zh_Hant, mnemonic_zh_Hant }
+        mnemonic::dictionary{ language::en, mnemonic::en },
+        mnemonic::dictionary{ language::es, mnemonic::es },
+        mnemonic::dictionary{ language::it, mnemonic::it },
+        mnemonic::dictionary{ language::fr, mnemonic::fr },
+        mnemonic::dictionary{ language::cs, mnemonic::cs },
+        mnemonic::dictionary{ language::pt, mnemonic::pt },
+        mnemonic::dictionary{ language::ja, mnemonic::ja },
+        mnemonic::dictionary{ language::ko, mnemonic::ko },
+        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
+        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
     }
 };
 

@@ -23,7 +23,7 @@ namespace system {
 namespace wallet {
 
 // github.com/spesmilo/electrum/blob/master/electrum/old_mnemonic.py
-const electrum_v1::dictionary::words electrum_v1_en
+const electrum_v1::dictionary::words electrum_v1::en
 {
     {
         "like",
@@ -1656,7 +1656,7 @@ const electrum_v1::dictionary::words electrum_v1_en
 };
 
 // github.com/spesmilo/electrum/blob/master/electrum/wordlist/portuguese.txt
-const electrum_v1::dictionary::words electrum_v1_pt
+const electrum_v1::dictionary::words electrum_v1::pt
 {
     {
     "abaular",

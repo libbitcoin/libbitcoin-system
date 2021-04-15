@@ -40,6 +40,10 @@ public:
     typedef wallet::dictionary<1626> dictionary;
     typedef wallet::dictionaries<2, dictionary::size()> dictionaries;
 
+    /// Publish Electrum v1 word lists.
+    static const dictionary::words en;
+    static const dictionary::words pt;
+
     /// Supports 128 or 256 bits of entropy.
     static constexpr size_t entropy_multiple = 4;
     static constexpr size_t entropy_minimum = 4u * entropy_multiple;
@@ -144,10 +148,6 @@ private:
     string_list words_;
     language identifier_;
 };
-
-/// Publish Electrum v1 word lists.
-extern const electrum_v1::dictionary::words electrum_v1_en;
-extern const electrum_v1::dictionary::words electrum_v1_pt;
 
 } // namespace wallet
 } // namespace system

@@ -52,8 +52,8 @@ constexpr auto ascii_space = "\x20";
 const electrum_v1::dictionaries electrum_v1::dictionaries_
 {
     {
-        electrum_v1::dictionary{ language::en, electrum_v1_en },
-        electrum_v1::dictionary{ language::pt, electrum_v1_pt }
+        electrum_v1::dictionary{ language::en, electrum_v1::en },
+        electrum_v1::dictionary{ language::pt, electrum_v1::pt }
     }
 };
 

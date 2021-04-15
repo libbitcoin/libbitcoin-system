@@ -29,10 +29,10 @@ namespace wallet {
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
 
 // Electrum v2 word lists are all identical to mnemonic (BIP39) word lists.
-const electrum::dictionary::words& electrum_en = mnemonic_en;
-const electrum::dictionary::words& electrum_es = mnemonic_es;
-const electrum::dictionary::words& electrum_ja = mnemonic_ja;
-const electrum::dictionary::words& electrum_zh_Hans = mnemonic_zh_Hans;
+const electrum::dictionary::words& electrum::en = mnemonic::en;
+const electrum::dictionary::words& electrum::es = mnemonic::es;
+const electrum::dictionary::words& electrum::ja = mnemonic::ja;
+const electrum::dictionary::words& electrum::zh_Hans = mnemonic::zh_Hans;
 
 } // namespace wallet
 } // namespace system

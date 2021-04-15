@@ -40,6 +40,18 @@ public:
     typedef wallet::dictionary<2048> dictionary;
     typedef wallet::dictionaries<10, dictionary::size()> dictionaries;
 
+    /// Publish BIP39 word lists.
+    static const dictionary::words en;
+    static const dictionary::words es;
+    static const dictionary::words it;
+    static const dictionary::words fr;
+    static const dictionary::words cs;
+    static const dictionary::words pt;
+    static const dictionary::words ja;
+    static const dictionary::words ko;
+    static const dictionary::words zh_Hans;
+    static const dictionary::words zh_Hant;
+
     /// Supports 128 to 256 bits of entropy, in multiples of 32.
     static constexpr size_t entropy_multiple = 4;
     static constexpr size_t entropy_minimum = 4u * entropy_multiple;
@@ -154,18 +166,6 @@ private:
     string_list words_;
     language identifier_;
 };
-
-/// Publish BIP39 word lists.
-extern const mnemonic::dictionary::words mnemonic_en;
-extern const mnemonic::dictionary::words mnemonic_es;
-extern const mnemonic::dictionary::words mnemonic_it;
-extern const mnemonic::dictionary::words mnemonic_fr;
-extern const mnemonic::dictionary::words mnemonic_cs;
-extern const mnemonic::dictionary::words mnemonic_pt;
-extern const mnemonic::dictionary::words mnemonic_ja;
-extern const mnemonic::dictionary::words mnemonic_ko;
-extern const mnemonic::dictionary::words mnemonic_zh_Hans;
-extern const mnemonic::dictionary::words mnemonic_zh_Hant;
 
 } // namespace wallet
 } // namespace system

@@ -75,10 +75,10 @@ static const auto index_bits = static_cast<uint8_t>(
 const electrum::dictionaries electrum::dictionaries_
 {
     {
-        electrum::dictionary{ language::en, electrum_en },
-        electrum::dictionary{ language::es, electrum_es },
-        electrum::dictionary{ language::ja, electrum_ja },
-        electrum::dictionary{ language::zh_Hans, electrum_zh_Hans }
+        electrum::dictionary{ language::en, electrum::en },
+        electrum::dictionary{ language::es, electrum::es },
+        electrum::dictionary{ language::ja, electrum::ja },
+        electrum::dictionary{ language::zh_Hans, electrum::zh_Hans }
     }
 };
 

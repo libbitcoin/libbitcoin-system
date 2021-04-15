@@ -25,7 +25,7 @@ namespace wallet {
 // BIP39 word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 
-const mnemonic::dictionary::words mnemonic_en
+const mnemonic::dictionary::words mnemonic::en
 {
     {
         "abandon",
@@ -2079,7 +2079,7 @@ const mnemonic::dictionary::words mnemonic_en
     }
 };
 
-const mnemonic::dictionary::words mnemonic_es
+const mnemonic::dictionary::words mnemonic::es
 {
     {
         "ábaco",
@@ -4133,7 +4133,7 @@ const mnemonic::dictionary::words mnemonic_es
     }
 };
 
-const mnemonic::dictionary::words mnemonic_it
+const mnemonic::dictionary::words mnemonic::it
 {
     {
         "abaco",
@@ -6187,7 +6187,7 @@ const mnemonic::dictionary::words mnemonic_it
     }
 };
 
-const mnemonic::dictionary::words mnemonic_fr
+const mnemonic::dictionary::words mnemonic::fr
 {
     {
         "abaisser",
@@ -8241,7 +8241,7 @@ const mnemonic::dictionary::words mnemonic_fr
     }
 };
 
-const mnemonic::dictionary::words mnemonic_cs
+const mnemonic::dictionary::words mnemonic::cs
 {
     {
         "abdikace",
@@ -10295,7 +10295,7 @@ const mnemonic::dictionary::words mnemonic_cs
     }
 };
 
-const mnemonic::dictionary::words mnemonic_pt
+const mnemonic::dictionary::words mnemonic::pt
 {
     {
         "abacate",
@@ -12349,7 +12349,7 @@ const mnemonic::dictionary::words mnemonic_pt
     }
 };
 
-const mnemonic::dictionary::words mnemonic_ja
+const mnemonic::dictionary::words mnemonic::ja
 {
     {
         "あいこくしん",
@@ -14403,7 +14403,7 @@ const mnemonic::dictionary::words mnemonic_ja
     }
 };
 
-const mnemonic::dictionary::words mnemonic_ko
+const mnemonic::dictionary::words mnemonic::ko
 {
     {
         "가격",
@@ -16457,7 +16457,7 @@ const mnemonic::dictionary::words mnemonic_ko
     }
 };
 
-const mnemonic::dictionary::words mnemonic_zh_Hans
+const mnemonic::dictionary::words mnemonic::zh_Hans
 {
     {
         "的",
@@ -18511,7 +18511,7 @@ const mnemonic::dictionary::words mnemonic_zh_Hans
     }
 };
 
-const mnemonic::dictionary::words mnemonic_zh_Hant
+const mnemonic::dictionary::words mnemonic::zh_Hant
 {
     {
         "的",
