@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_SUITE(electrum_tests)
 #ifdef DISABLED_TESTS
 
 // TODO: move the vectors to electrum.hpp.
+// TODO: compute the overlap between Electrum_v1 and Electrum dictionaries.
 
 // These test cases were generated using electrum code and verified to
 // match output from:

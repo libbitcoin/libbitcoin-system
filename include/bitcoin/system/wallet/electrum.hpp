@@ -41,10 +41,13 @@ class BC_API electrum
   : public electrum_v1
 {
 public:
-    /// Seed prefix types (unique to Electrum v2).
+    /// Seed prefix types.
+    /// The values for old, bip39 and none are not actual prefixes but 
+    /// here for consistency when handling electrum exceptional conditions.
     enum class seed_prefix: uint8_t
     {
         old,
+        bip39,
         standard,
         witness,
         two_factor_authentication,
@@ -69,7 +72,8 @@ public:
     /// Valid word counts (12 to 46 words).
     static bool is_valid_word_count(size_t count);
 
-    /// Returns true if the resulting seed has the given prefix.
+    /// Returns false if prefix is 'old', 'bip39' or 'none'.
+    /// Returns true if the seed of the words has the given prefix.
     static bool is_version(const string_list& words, seed_prefix prefix);
 
     /// Create a seed from a valid number of *any* words and passphrase.
@@ -78,9 +82,11 @@ public:
         const std::string& passphrase);
 
     /// Obtain the enumerated prefix corresponding to the words.
+    /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
+    /// A prefix other than 'none' implies the word represent a valid seed.
     static seed_prefix to_prefix(const string_list& words);
 
-    /// Obtain the prefix version corresponding to the enumeration.
+    /// Obtain the version corresponding to the enumeration value.
     static std::string to_version(seed_prefix prefix);
 
     /// The instance should be tested for validity after construction.
@@ -139,6 +145,8 @@ private:
     static result grind(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit);
 
+    static bool is_valid_seed_prefix(seed_prefix prefix);
+    static bool is_valid_two_factor_authentication_size(size_t count);
     static string_list encode(const data_chunk& entropy, language identifier);
     static data_chunk decode(const string_list& words, language identifier);
     static electrum from_entropy(const data_chunk& entropy, seed_prefix prefix,

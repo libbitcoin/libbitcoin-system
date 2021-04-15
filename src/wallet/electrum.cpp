@@ -44,24 +44,26 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// TODO: provide Electrum reference URL.
-// Words are encoded in 11 bits and therefore are not byte aligned.
-// As a consequence bit ordering matters. Bits are serialized to entropy bytes
-// in big-endian order.
-
 // local constants
 // ----------------------------------------------------------------------------
 static const auto seed_version = to_chunk("Seed version");
 static const auto passphrase_prefix = "electrum";
 constexpr size_t hmac_iterations = 2048;
 constexpr size_t grind_limit = 0xffff;
+constexpr size_t minimum_two_factor_authentication_words = 20;
 
 // Seed prefixes.
-static const auto version_old = "";
+// The values for old, bip39 and none are not actual prefixes but included
+// here for consistency when handling electrum exceptional conditions.
+// The values are selected such that they contain invalid hexidecimal
+// characters and therefore cannot match an actual seed prefix.
+static const auto version_old = "old";
+static const auto version_bip39 = "bip39";
 static const auto version_standard = "01";
 static const auto version_witness = "100";
 static const auto version_two_factor_authentication = "101";
 static const auto version_two_factor_authentication_witness = "102";
+static const auto version_none = "none";
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
 static const auto index_bits = static_cast<uint8_t>(
@@ -79,6 +81,11 @@ const electrum::dictionaries dictionaries_
         electrum::dictionary{ language::zh_Hans, electrum_zh_Hans }
     }
 };
+
+// Words are encoded in 11 bits and therefore are not byte aligned.
+// As a consequence bit ordering matters. Bits are serialized to entropy bytes
+// in big-endian order.
+// TODO: provide Electrum reference URL.
 
 string_list electrum::encode(const data_chunk& entropy, language identifier)
 {
@@ -275,19 +282,18 @@ bool electrum::is_valid_dictionary(language identifier)
     return dictionaries_.exists(identifier);
 }
 
+// Electrum has no explicit minimum or maximum strengths.
+// Upper bounds here are based on use of a 512 bit hash function
+// and transportation of entropy in byte vectors.
+// A 64 byte seed (512 / 11) is 46 words (6 unused bits).
+// This limits strength to 506 bits (BIP39 is 256).
+// Lower bounds here are based on seed strength.
+// A 132 bit (exactly 12 word) seed is the Electrum default.
+// A 128 bit seed is the BIP39 minium, but this 11 Electrum words.
+// So our limits are 132 to 506 bits (12 to 46) words.
+
 bool electrum::is_valid_entropy_size(size_t size)
 {
-    // Electrum has no explicit minimum or maximum strengths.
-    //
-    // Upper bounds here are based on use of a 512 bit hash function
-    // and transportation of entropy in byte vectors.
-    // A 64 byte seed (512 / 11) is 46 words (6 unused bits).
-    // This limits strength to 506 bits (BIP39 is 256).
-    //
-    // Lower bounds here are based on seed strength.
-    // A 132 bit (exactly 12 word) seed is the Electrum default.
-    // A 128 bit seed is the BIP39 minium, but this 11 Electrum words.
-    // So our limits are 132 to 506 bits (12 to 46) words.
     return size >= entropy_size(strength_minimum) &&
         size <= entropy_size(strength_maximum);
 }
@@ -298,17 +304,41 @@ bool electrum::is_valid_word_count(size_t count)
         count <= word_count(strength_maximum);
 }
 
-bool electrum::is_version(const string_list& words, seed_prefix prefix)
+bool electrum::is_valid_seed_prefix(seed_prefix prefix)
+{
+    switch (prefix)
+    {
+        case seed_prefix::standard:
+        case seed_prefix::witness:
+        case seed_prefix::two_factor_authentication:
+        case seed_prefix::two_factor_authentication_witness:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool electrum::is_valid_two_factor_authentication_size(size_t count)
 {
     // In Electrum 2.7, there was a breaking change in key derivation for
     // two_factor_authentication. Unfortunately the seed prefix was reused,
     // and now we can only distinguish them based on number of words. :(
     // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L258
-    if (prefix == seed_prefix::two_factor_authentication)
-        if (words.size() != 12u && words.size() < 20u)
-            return false;
+    return count == word_count(strength_minimum) ||
+        count >= minimum_two_factor_authentication_words;
+}
 
-    // Normalize is non-critical here, denormalized should not procude version.
+bool electrum::is_version(const string_list& words, seed_prefix prefix)
+{
+    if (!is_valid_seed_prefix(prefix))
+        return false;
+
+    // HACK: see comment in is_valid_two_factor_authentication_size.
+    if (prefix == seed_prefix::two_factor_authentication &&
+        !is_valid_two_factor_authentication_size(words.size()))
+        return false;
+
+    // Normalize is non-critical here, denormalized should not produce version.
     const auto sentence = to_chunk(normalize(system::join(words)));
     const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
     return starts_with(seed, to_version(prefix));
@@ -327,9 +357,7 @@ long_hash electrum::to_seed(const string_list& words,
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
 }
-
 #else
-
 long_hash electrum::to_seed(const string_list&, const std::string&)
 {
     return null_long_hash;
@@ -339,8 +367,28 @@ long_hash electrum::to_seed(const string_list&, const std::string&)
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
 {
+    // Electrum rejects seed creation wha a seed would conflict with v1.
+    // So if it validates under electrum v1 it cannot be a v2 seed.
+    // This is possible given dictionary overlap and 12 or 24 words.
+    // Any set of 12 or 24 words in the v1 dictionary will validate.
+    // TODO: compute random words collision probability from word overlap.
     if (electrum_v1(words))
         return seed_prefix::old;
+
+    // Electrum rejects seed creation if it conflicts with bip39.
+    // So if it validates under bip39/mnemonic it cannot be a v2 seed.
+    // Possible given shared dictionaries and 12, 15, 18, 21, or 24 words.
+    // But a bip39/mnemonic seed (words) incorporates a checksum, so unlikely.
+    // TODO: compute random words bip39 checksum collision probability.
+    if (mnemonic(words))
+        return seed_prefix::bip39;
+
+    // In a non-ICU build these are likely to produce "none" if the specified
+    // words have not been prenormalized. However a collision on the version
+    // bits of the resulting hash is certainly possible. So we exclude the
+    // possibility of a mismatch by returning 'none'
+
+#ifdef WITH_ICU
     if (is_version(words, seed_prefix::standard))
         return seed_prefix::standard;
     if (is_version(words, seed_prefix::witness))
@@ -349,6 +397,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
         return seed_prefix::two_factor_authentication;
     if (is_version(words, seed_prefix::two_factor_authentication_witness))
         return seed_prefix::two_factor_authentication_witness;
+#endif
 
     return seed_prefix::none;
 }
@@ -357,6 +406,10 @@ std::string electrum::to_version(seed_prefix prefix)
 {
     switch (prefix)
     {
+        case seed_prefix::old:
+            return version_old;
+        case seed_prefix::bip39:
+            return version_bip39;
         case seed_prefix::standard:
             return version_standard;
         case seed_prefix::witness:
@@ -365,10 +418,9 @@ std::string electrum::to_version(seed_prefix prefix)
             return version_two_factor_authentication;
         case seed_prefix::two_factor_authentication_witness:
             return version_two_factor_authentication_witness;
-        case seed_prefix::old:
         case seed_prefix::none:
         default:
-            return version_old;
+            return version_none;
     }
 }
 
@@ -411,6 +463,9 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     language identifier)
 {
+    if (!is_valid_seed_prefix(prefix))
+        return {};
+
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 

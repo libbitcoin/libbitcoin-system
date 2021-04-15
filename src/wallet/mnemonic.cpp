@@ -239,9 +239,7 @@ long_hash mnemonic::to_seed(const string_list& words,
     const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
     return pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
 }
-
 #else
-
 long_hash mnemonic::to_seed(const string_list&, const std::string&)
 {
     return null_long_hash;
