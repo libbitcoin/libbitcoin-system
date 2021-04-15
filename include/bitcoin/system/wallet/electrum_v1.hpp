@@ -21,7 +21,6 @@
 
 #include <cstddef>
 #include <string>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
