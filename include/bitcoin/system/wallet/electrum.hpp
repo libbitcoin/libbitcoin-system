@@ -95,7 +95,7 @@ public:
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
-    /// A prefix other than 'none' implies the word represent a valid seed.
+    /// A prefix other than 'none' implies the words represent a valid seed.
     static seed_prefix to_prefix(const string_list& words);
 
     /// Obtain the version corresponding to the enumeration value.
