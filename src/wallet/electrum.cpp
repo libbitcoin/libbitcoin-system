@@ -209,6 +209,7 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
             is_version(words, prefix))
                 return { hash, words };
 
+        // This replaces Electrums prng with determinism, salt is arbitary.
         hash = to_chunk(hmac_sha512_hash(hash, salt));
     }
 
