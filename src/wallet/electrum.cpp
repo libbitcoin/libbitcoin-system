@@ -191,7 +191,6 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
     string_list words;
     data_chunk hash(entropy);
     const auto size = usable_size(entropy);
-    const auto salt = to_chunk(to_version(prefix));
 
     // This just grinds away until exhausted or prefix found.
     // On the first iteration the usable entropy is unchnaged.
@@ -209,8 +208,8 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
             is_version(words, prefix))
                 return { hash, words };
 
-        // This replaces Electrums prng with determinism, salt is arbitary.
-        hash = to_chunk(hmac_sha512_hash(hash, salt));
+        // This replaces Electrums prng with determinism.
+        hash = to_chunk(sha512_hash(hash));
     }
 
     return {};
