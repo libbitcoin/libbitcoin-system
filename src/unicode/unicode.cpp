@@ -44,6 +44,12 @@
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
+#ifdef WITH_ICU
+    #define ICU_ONLY(expression) expression
+#else
+    #define ICU_ONLY(expression) expression
+#endif
+
 namespace libbitcoin {
 namespace system {
 
@@ -66,12 +72,8 @@ constexpr size_t utf8_max_character_size = 4;
 // Ensure console_streambuf::initialize is called only once.
 static std::once_flag io_mutex;
 
-#ifdef WITH_ICU
-
 // Ensure validate_localization is called only once.
-static std::once_flag icu_mutex;
-
-#endif // WITH_ICU
+ICU_ONLY(static std::once_flag icu_mutex;)
 
 // Static initializer for bc::system::cin.
 std::istream& cin_stream()
@@ -122,9 +124,9 @@ static bool is_chinese_japanese_or_korean(char32_t value)
     return std::any_of(chinese_japanese_korean.begin(),
         chinese_japanese_korean.end(),
         [value](const utf32_interval& interval)
-    {
-        return interval.first <= value && value <= interval.second;
-    });
+        {
+            return interval.first <= value && value <= interval.second;
+        });
 }
 
 #ifdef WITH_ICU
