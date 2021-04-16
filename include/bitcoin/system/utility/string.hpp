@@ -31,11 +31,6 @@ namespace system {
 
 typedef std::vector<std::string> string_list;
 
-inline bool starts_with(const std::string& value, const std::string& prefix)
-{
-    return value.substr(0, prefix.length()) == prefix;
-}
-
 /**
  * Convert a text string to the specified type.
  * @param      <Value>    The converted type.
@@ -70,6 +65,16 @@ template <typename Value>
 std::string serialize(const Value& out_value, const std::string& fallback="");
 
 /**
+ * Return true if all chars in the string are < 0x80 (ASCII).
+ */
+BC_API bool is_ascii(const std::string& text);
+
+/**
+ * Lower case each byte in the string. Caller must ensure text is ASCII.
+ */
+BC_API std::string ascii_to_lower(const std::string& text);
+
+/**
  * Join a list of strings into a single string, in order.
  * @param[in]  words      The list of strings to join.
  * @param[in]  delimiter  The delimiter, defaults to " ".
@@ -96,6 +101,11 @@ BC_API string_list split(const std::string& sentence,
  */
 BC_API string_list split_regex(const std::string& sentence,
     const std::string& phrase);
+
+/**
+ * Return true if value starts with the prefix.
+ */
+BC_API bool starts_with(const std::string& value, const std::string& prefix);
 
 /**
  * Copy bytes to a new string.

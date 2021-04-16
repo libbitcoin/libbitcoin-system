@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/utility/string.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
@@ -26,6 +27,32 @@
 
 namespace libbitcoin {
 namespace system {
+
+std::string ascii_to_lower(const std::string& text)
+{
+    const auto to_lower = [](char character)
+    {
+        return 'A' <= character && character <= 'Z' ?
+            character + ('a' - 'A') : character;
+    };
+
+    std::string lower = text;
+    std::transform(text.begin(), text.end(), lower.begin(),
+        [&](auto character)
+        {
+            return to_lower(character);
+        });
+
+    return lower;
+}
+
+bool is_ascii(const std::string& text)
+{
+    return std::all_of(text.begin(), text.end(), [](char character)
+    {
+        return character < 0x80;
+    });
+}
 
 std::string join(const string_list& words, const std::string& delimiter)
 {
@@ -57,6 +84,11 @@ string_list split_regex(const std::string& sentence,
 {
     string_list words;
     return boost::algorithm::split_regex(words, sentence, boost::regex(phrase));
+}
+
+bool starts_with(const std::string& value, const std::string& prefix)
+{
+    return value.substr(0, prefix.length()) == prefix;
 }
 
 std::string to_string(const data_slice& source)
