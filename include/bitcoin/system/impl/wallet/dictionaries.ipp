@@ -26,6 +26,7 @@
 #include <string>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -67,7 +68,8 @@ const std::string& dictionaries<Count, Size>::to_name(language identifier) const
 // ----------------------------------------------------------------------------
 
 template<size_t Count, size_t Size>
-std::string dictionaries<Count, Size>::at(size_t index, language identifier) const
+std::string dictionaries<Count, Size>::at(size_t index,
+    language identifier) const
 {
     const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->at(index) : "";
@@ -111,7 +113,7 @@ language dictionaries<Count, Size>::contains(const std::string& word,
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const dictionary<Size>& dictionary)
+        [&](const auto& dictionary)
         {
             return dictionary.contains(word);
         });
@@ -131,7 +133,7 @@ language dictionaries<Count, Size>::contains(const string_list& words,
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const dictionary<Size>& dictionary)
+        [&](const auto& dictionary)
         {
             return dictionary.contains(words);
         });
@@ -147,7 +149,7 @@ typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(language identifier) const
 {
     return std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const dictionary<Size>& dictionary)
+        [&](const auto& dictionary)
         {
             return dictionary.identifier() == identifier;
         });

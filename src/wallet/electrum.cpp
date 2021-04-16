@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include <boost/program_options.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -37,8 +36,10 @@
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
+#include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/electrum_v1.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>
 
 namespace libbitcoin {
@@ -47,14 +48,13 @@ namespace wallet {
 
 // local constants
 // ----------------------------------------------------------------------------
-static const auto seed_version = to_chunk("Seed version");
-constexpr size_t grind_limit = 0xffff;
-constexpr size_t minimum_two_factor_authentication_words = 20;
 
-#ifdef WITH_ICU
 constexpr auto passphrase_prefix = "electrum";
 constexpr size_t hmac_iterations = 2048;
-#endif
+
+constexpr size_t grind_limit = 0xffff;
+constexpr size_t minimum_two_factor_authentication_words = 20;
+static const auto seed_version = to_chunk("Seed version");
 
 // Seed prefixes.
 // The values for old, bip39 and none are not actual prefixes but included
@@ -97,7 +97,7 @@ const electrum::dictionaries electrum::dictionaries_
 // in big-endian order.
 // TODO: provide Electrum reference URL.
 
-string_list electrum::encode(const data_chunk& entropy, language identifier)
+string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
     string_list words;
 
@@ -133,7 +133,7 @@ string_list electrum::encode(const data_chunk& entropy, language identifier)
     return dictionaries_.at(indexes, identifier);
 }
 
-data_chunk electrum::decode(const string_list& words, language identifier)
+data_chunk electrum::decoder(const string_list& words, language identifier)
 {
     // We can use the bit writer here (same as BIP39).
     // BIP39 entropy is extended by a checksum byte, so length is equivalent.
@@ -185,7 +185,7 @@ data_chunk electrum::decode(const string_list& words, language identifier)
 // The Electrum prng minimum value technique sacrifices 11 bits of entropy by
 // discarding any prng value that is below 2^(strength-11).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L190-L205
-electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
+electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix,
     language identifier, size_t limit)
 {
     string_list words;
@@ -201,18 +201,79 @@ electrum::result electrum::grind(const data_chunk& entropy, seed_prefix prefix,
     while (limit-- != 0u)
     {
         hash.resize(size);
-        words = encode(hash, identifier);
+        words = encoder(hash, identifier);
 
         // Avoid collisions with Electrum v1 and BIP39 mnemonics.
         if (!electrum_v1(words, identifier) && !mnemonic(words) &&
             is_version(words, prefix))
                 return { hash, words };
 
-        // This replaces Electrums prng with determinism.
+        // This replaces Electrum's prng with determinism.
         hash = to_chunk(sha512_hash(hash));
     }
 
     return {};
+}
+
+bool electrum::normalized(const string_list& words)
+{
+    return contained_by(words) != language::none;
+}
+
+// Electrum uses the same normalization function for words and passphrases.
+// There is no entropy impact on lower casing seed words, but by lowering the
+// passphrase there is a material entropy loss. This is presumably an oversight
+// arising from reuse of the normalization function.
+// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
+std::string electrum::normalizer(const std::string& text)
+{
+#ifdef WITH_ICU
+    auto seed = to_normal_nfkd_form(text);
+    seed = to_lower(seed);
+    seed = to_unaccented_form(seed);
+    seed = system::join(system::split(seed));
+    return to_compressed_cjk_form(seed);
+#else
+    return ascii_to_lower(text);
+#endif
+}
+
+hd_private electrum::seeder(const string_list& words,
+    const std::string& passphrase, uint64_t chain)
+{
+    // Words are in normal form, even without ICU.
+    const auto sentence = to_chunk(system::join(words));
+
+    // Passphrase is limited to ascii lower case (normal) if without ICU.
+    const auto salt = to_chunk(passphrase_prefix + normalizer(passphrase));
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto part = system::split(seed);
+
+    // The object will be false if the secret (left) does not ec verify.
+    return hd_private(part.left, part.right, chain);
+}
+
+electrum::seed_prefix electrum::prefixer(const string_list& words)
+{
+    // Words are in normal form, even without ICU.
+    if (is_version(words, seed_prefix::standard))
+        return seed_prefix::standard;
+    if (is_version(words, seed_prefix::witness))
+        return seed_prefix::witness;
+    if (is_version(words, seed_prefix::two_factor_authentication))
+        return seed_prefix::two_factor_authentication;
+    if (is_version(words, seed_prefix::two_factor_authentication_witness))
+        return seed_prefix::two_factor_authentication_witness;
+
+    return seed_prefix::none;
+}
+
+bool electrum::validator(const string_list& words, seed_prefix prefix)
+{
+    // Words are in normal form, even without ICU.
+    const auto sentence = to_chunk(normalizer(system::join(words)));
+    const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
+    return starts_with(seed, to_version(prefix));
 }
 
 // protected static
@@ -265,30 +326,13 @@ size_t electrum::usable_size(const data_slice& entropy)
     return entropy.size() - (unused_byte(entropy) ? 1u : 0u);
 }
 
-// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
-std::string electrum::normalize(const std::string& text)
-{
-    // This allows an attempt to pre-normalize the mnemonic text and is only
-    // applied to word and prefix matching. Seed generation requires WITH_ICU
-    // for nfkd nomalization and lower casing and fails without it.
-#ifndef WITH_ICU
-    auto seed = text;
-#else
-    auto seed = to_normal_nfkd_form(text);
-    seed = to_lower(seed);
-#endif
-    seed = to_unaccented_form(seed);
-    seed = system::join(system::split(seed));
-    return to_compressed_cjk_form(seed);
-}
-
-string_list electrum::normalize(const string_list& words)
-{
-    return system::split(normalize(system::join(words)));
-}
-
 // public static
 // ----------------------------------------------------------------------------
+
+language electrum::contained_by(const string_list& words, language identifier)
+{
+    return dictionaries_.contains(words, identifier);
+}
 
 bool electrum::is_valid_dictionary(language identifier)
 {
@@ -351,41 +395,11 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
         !is_valid_two_factor_authentication_size(words.size()))
         return false;
 
-    // Normalize is non-critical here, denormalized should not produce version.
-    const auto sentence = to_chunk(normalize(system::join(words)));
-    const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
-    return starts_with(seed, to_version(prefix));
+    if (!with_icu() && !normalized(words))
+        return false;
+
+    return validator(words, prefix);
 }
-
-language electrum::contained_by(const string_list& words, language identifier)
-{
-    return dictionaries_.contains(words, identifier);
-}
-
-#ifdef WITH_ICU
-
-hd_private electrum::to_seed(const string_list& words,
-    const std::string& passphrase, uint64_t chain)
-{
-    if (!is_valid_word_count(words.size()))
-        return {};
-
-    // ***Normalization is critical here.***
-    const auto sentence = to_chunk(normalize(system::join(words)));
-    const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
-    const auto part = system::split(seed);
-
-    // The object will be false if the secret (left) does not ec verify.
-    return hd_private(part.left, part.right, chain);
-}
-#else
-hd_private electrum::to_seed(const string_list&, const std::string&, uint64_t)
-{
-    return {};
-}
-
-#endif
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
 {
@@ -405,23 +419,14 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
     if (mnemonic(words))
         return seed_prefix::bip39;
 
-    // In a non-ICU build these are likely to produce "none" if the specified
+    // In a non-ICU build these are likely to produce 'none' if the specified
     // words have not been prenormalized. However a collision on the version
     // bits of the resulting hash is certainly possible. So we exclude the
-    // possibility of a mismatch by returning 'none'.
+    // possibility of a mismatch by requiring prenormalized words.
+    if (!with_icu() && !normalized(words))
+        return seed_prefix::none;
 
-#ifdef WITH_ICU
-    if (is_version(words, seed_prefix::standard))
-        return seed_prefix::standard;
-    if (is_version(words, seed_prefix::witness))
-        return seed_prefix::witness;
-    if (is_version(words, seed_prefix::two_factor_authentication))
-        return seed_prefix::two_factor_authentication;
-    if (is_version(words, seed_prefix::two_factor_authentication_witness))
-        return seed_prefix::two_factor_authentication_witness;
-#endif
-
-    return seed_prefix::none;
+    return prefixer(words);
 }
 
 std::string electrum::to_version(seed_prefix prefix)
@@ -485,23 +490,23 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     language identifier)
 {
-    if (!is_valid_seed_prefix(prefix))
-        return {};
-
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
     if (!dictionaries_.exists(identifier))
         return {};
 
-    const auto result = grind(entropy, prefix, identifier, grind_limit);
+    if (!is_valid_seed_prefix(prefix))
+        return {};
+
+    const auto result = grinder(entropy, prefix, identifier, grind_limit);
 
     // Not your lucky day.
     if (result.words.empty())
         return {};
 
-    // Save found entropy and words, originals are discarded.
-    return { result.entropy, result.words, identifier, to_prefix(result.words) };
+    // Save found entropy and normal words, originals are discarded.
+    return { result.entropy, result.words, identifier, prefixer(result.words) };
 }
 
 electrum electrum::from_words(const string_list& words, language identifier)
@@ -509,8 +514,10 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    // Normalize is non-critical here, denormalized words will be rejected.
-    const auto tokens = normalize(words);
+    if (!with_icu() && !normalized(words))
+        return {};
+
+    const auto tokens = system::split(normalizer(system::join(words)));
     const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)
@@ -520,17 +527,42 @@ electrum electrum::from_words(const string_list& words, language identifier)
         return {};
 
     // Save normalized words and derived entropy, original words are discarded.
-    return { decode(tokens, identifier), tokens, lexicon, to_prefix(tokens) };
+    return { decoder(tokens, identifier), tokens, lexicon, prefixer(tokens) };
 }
 
-// public methods
+// public
 // ----------------------------------------------------------------------------
 
 hd_private electrum::to_seed(const std::string& passphrase,
     uint64_t chain) const
 {
-    // Words are generated from seed, so always from a supported dictionary.
-    return to_seed(electrum_v1::words(), passphrase, chain);
+    // Preclude derivation from an invalid object state.
+    if (!(*this))
+        return {};
+
+    // Passphrase normalization is necessary, however ASCII is normal.
+    if (!with_icu() && !is_ascii(passphrase))
+        return {};
+
+    return seeder(words(), passphrase, chain);
+}
+
+// operators
+// ------------------------------------------------------------------------
+
+std::istream& operator>>(std::istream& in, electrum& to)
+{
+    std::string value;
+    in >> value;
+    to = electrum(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
+    return in;
 }
 
 } // namespace wallet

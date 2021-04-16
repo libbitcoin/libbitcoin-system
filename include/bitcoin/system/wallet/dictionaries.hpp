@@ -26,6 +26,7 @@
 #include <string>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -58,22 +59,23 @@ public:
 
     /// Search.
 
-    /// Empty string if index > Size, or specified language does not exist.
+    /// The word corresponding to the index in the specified language.
+    /// Empty string if language does not exist.
     std::string at(size_t index, language identifier) const;
 
     /// Empty string for any index > Size.
     /// The word corresponding to each index in the specified language.
     /// The words are returned in the same order as the indexes list.
-    /// Empty list if language does not exist, or language::none is specified.
+    /// Empty list if language does not exist.
     string_list at(const search& indexes, language identifier) const;
 
-    /// -1 if word is not found in the specified language, or language::none.
+    /// -1 if word is not found in the specified language.
     int32_t index(const std::string& word, language identifier) const;
 
     /// -1 for any word that is not found in the specified language.
     /// The word index for each word that is found in the specified language.
     /// The word indexes are returned in the same order as the words list.
-    /// All -1 if the language does not exist, or language::none is specified.
+    /// All -1 if the language does not exist.
     result index(const string_list& words, language identifier) const;
 
     /// The language that contains the specified word, or language::none.

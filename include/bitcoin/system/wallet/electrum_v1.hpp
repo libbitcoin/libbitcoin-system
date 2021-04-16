@@ -26,6 +26,8 @@
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/wallet/dictionaries.hpp>
+#include <bitcoin/system/wallet/language.hpp>
+#include <bitcoin/system/wallet/languages.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,6 +36,7 @@ namespace wallet {
 /// TODO: determine if there is an Electrum v1 seed algorithm.
 /// A wallet mnemonic, as defined by the first Electrum implementation.
 class BC_API electrum_v1
+  : public languages
 {
 public:
     typedef wallet::dictionary<1626> dictionary;
@@ -57,6 +60,11 @@ public:
     typedef byte_array<entropy_minimum> minimum_entropy;
     typedef byte_array<entropy_maximum> maximum_entropy;
 
+    /// The dictionary, limited by identifier, that contains all words.
+    /// If 'none' is specified all dictionaries are searched.
+    static language contained_by(const string_list& words,
+        language identifier = language::none);
+
     /// Valid dictionaries (en, pt).
     static bool is_valid_dictionary(language identifier);
 
@@ -65,9 +73,6 @@ public:
 
     /// Valid word counts (12 or 24 words).
     static bool is_valid_word_count(size_t count);
-
-    /// The dictionary, limited by identifier, that contains all words.
-    static language contained_by(const string_list& words, language identifier);
 
     /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
@@ -79,38 +84,10 @@ public:
     electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
     electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
 
-    /// Lexical compares of mnemonic sentences.
-    bool operator<(const electrum_v1& other) const;
-    bool operator==(const electrum_v1& other) const;
-    bool operator!=(const electrum_v1& other) const;
-    electrum_v1& operator=(const electrum_v1& other);
-
-    /// Deserialize/serialize a mnemonic sentence.
-    friend std::istream& operator>>(std::istream& in, electrum_v1& to);
+    /// Deserialize an electrum_v1 sentence.
     friend std::ostream& operator<<(std::ostream& out, const electrum_v1& of);
 
-    /// True if the object is a valid mnemonic.
-    operator bool() const;
-
-    /// The mnemonic sentence.
-    /// Japanese mnemonics are joined by an ideographic space (BIP39).
-    std::string sentence() const;
-
-    /// The entropy of the mnemonic, or empty if invalid.
-    const data_chunk& entropy() const;
-
-    /// The individual words of the mnemonic, or empty if invalid.
-    const string_list& words() const;
-
-    /// The dictionary language of the mnemonic, or none if invalid.
-    language lingo() const;
-
 protected:
-    /// Constructors.
-    electrum_v1();
-    electrum_v1(const data_chunk& entropy, const string_list& words,
-        language identifier);
-
     /// Map entropy to entropy bit count (128 or 256 bits).
     static size_t entropy_bits(const data_slice& entropy);
 
@@ -123,32 +100,20 @@ protected:
     /// Map entropy size to word count (12 or 24 words).
     static size_t word_count(const data_slice& entropy);
 
-    /// Compresses whitespace only.
-    static std::string normalize(const std::string& text);
-
-    /// Compresses whitespace only.
-    static string_list normalize(const string_list& words);
-
-    /// All languages except reference::ja are joined by an ASCII space.
-    static std::string join(const string_list& words, language identifier);
-
-    /// There is no trimming or token compression for reference::ja.
-    /// All other languages are split and trimmed on ASCII whitespace.
-    static string_list split(const std::string& sentence, language identifier);
+    /// Constructors.
+    electrum_v1();
+    electrum_v1(const data_chunk& entropy, const string_list& words,
+        language identifier);
 
 private:
-    static data_chunk decode(const string_list& words, language identifier);
-    static string_list encode(const data_chunk& entropy, language identifier);
-    static electrum_v1 from_entropy(const data_chunk& entropy, language identifier);
-    static electrum_v1 from_words(const string_list& words, language identifier);
+    static data_chunk decoder(const string_list& words, language identifier);
+    static string_list encoder(const data_chunk& entropy, language identifier);
+
+    electrum_v1 from_entropy(const data_chunk& entropy, language identifier) const;
+    electrum_v1 from_words(const string_list& words, language identifier) const;
 
     // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.
     static const dictionaries dictionaries_;
-
-    // These should be const, apart from the need to implement assignment.
-    data_chunk entropy_;
-    string_list words_;
-    language identifier_;
 };
 
 } // namespace wallet

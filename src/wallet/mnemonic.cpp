@@ -26,7 +26,6 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
@@ -37,6 +36,7 @@
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -45,8 +45,6 @@ namespace wallet {
 // local constants
 // ----------------------------------------------------------------------------
 
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
 constexpr auto passphrase_prefix = "mnemonic";
 constexpr size_t hmac_iterations = 2048;
 
@@ -78,7 +76,7 @@ const mnemonic::dictionaries mnemonic::dictionaries_
 // in big-endian order. This can be observed in the reference implementation:
 // github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
 
-string_list mnemonic::encode(const data_chunk& entropy, language identifier)
+string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
     // Read eleven bits into an index (0..2047).
     const auto read_index = [](istream_bit_reader& reader)
@@ -102,7 +100,7 @@ string_list mnemonic::encode(const data_chunk& entropy, language identifier)
     return dictionaries_.at(indexes, identifier);
 }
 
-data_chunk mnemonic::decode(const string_list& words, language identifier)
+data_chunk mnemonic::decoder(const string_list& words, language identifier)
 {
     // Write an index into eleven bits (0..2047).
     const auto write_index = [](ostream_bit_writer& writer, int32_t index)
@@ -132,6 +130,35 @@ data_chunk mnemonic::decode(const string_list& words, language identifier)
 
     // Checksum is in high order bits of last buffer byte, zero-padded.
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
+}
+
+bool mnemonic::normalized(const string_list& words)
+{
+    return contained_by(words) != language::none;
+}
+
+std::string mnemonic::normalizer(const std::string& text)
+{
+#ifdef WITH_ICU
+    return to_normal_nfkd_form(text);
+#else
+    return text;
+#endif
+}
+
+hd_private mnemonic::seeder(const string_list& words,
+    const std::string& passphrase, uint64_t chain)
+{
+    // Words are in normal form, even without ICU.
+    const auto sentence = to_chunk(system::join(words));
+
+    // Passphrase is limited to ascii (normal) if without ICU.
+    const auto salt = to_chunk(passphrase_prefix + normalizer(passphrase));
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    const auto part = system::split(seed);
+
+    // The object will be false if the secret (left) does not ec verify.
+    return hd_private(part.left, part.right, chain);
 }
 
 // protected static
@@ -176,39 +203,13 @@ size_t mnemonic::word_count(const data_slice& entropy)
     return (entropy_bits(entropy) + checksum_bits(entropy)) / index_bits;
 }
 
-std::string mnemonic::normalize(const std::string& text)
-{
-    // This allows an attempt to pre-normalize the mnemonic text and is only
-    // applied to word and prefix matching. Seed generation requires WITH_ICU
-    // for nfkd nomalization and lower casing and fails without it.
-#ifdef WITH_ICU
-    return to_normal_nfkd_form(text);
-#else
-    return text;
-#endif
-}
-
-string_list mnemonic::normalize(const string_list& words)
-{
-    return system::split(normalize(system::join(words)));
-}
-
-// BIP39 requires japanese mnemonic sentences join by an ideographic space.
-std::string mnemonic::join(const string_list& words, language identifier)
-{
-    return system::join(words, identifier == language::ja ?
-        ideographic_space : ascii_space);
-}
-
-string_list mnemonic::split(const std::string& sentence, language identifier)
-{
-    return identifier == language::ja ?
-        split_regex(sentence, ideographic_space) :
-        system::split(sentence, ascii_space);
-}
-
 // public static
 // ----------------------------------------------------------------------------
+
+language mnemonic::contained_by(const string_list& words, language identifier)
+{
+    return dictionaries_.contains(words, identifier);
+}
 
 bool mnemonic::is_valid_dictionary(language identifier)
 {
@@ -227,47 +228,17 @@ bool mnemonic::is_valid_word_count(size_t count)
         count >= word_minimum && count <= word_maximum);
 }
 
-language mnemonic::contained_by(const string_list& words, language identifier)
-{
-    return dictionaries_.contains(words, identifier);
-}
-
-#ifdef WITH_ICU
-
-hd_private mnemonic::to_seed(const string_list& words,
-    const std::string& passphrase, uint64_t chain)
-{
-    if (!is_valid_word_count(words.size()))
-        return {};
-
-    // ***Normalization is critical here.***
-    const auto sentence = to_chunk(normalize(system::join(words)));
-    const auto salt = to_chunk(passphrase_prefix + normalize(passphrase));
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
-    const auto part = system::split(seed);
-
-    // The object will be false if the secret (left) does not ec verify.
-    return hd_private(part.left, part.right, chain);
-}
-#else
-hd_private mnemonic::to_seed(const string_list&, const std::string&, uint64_t)
-{
-    return {};
-}
-
-#endif
-
 // construction
 // ----------------------------------------------------------------------------
 
+// protected
 mnemonic::mnemonic()
-  : entropy_(), words_(), identifier_(language::none)
+  : languages()
 {
 }
 
 mnemonic::mnemonic(const mnemonic& other)
-  : entropy_(other.entropy_), words_(other.words_),
-    identifier_(other.identifier_)
+  : languages(other)
 {
 }
 
@@ -289,12 +260,14 @@ mnemonic::mnemonic(const data_chunk& entropy, language identifier)
 // protected
 mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
     language identifier)
-  : entropy_(entropy), words_(words), identifier_(identifier)
+  : languages(entropy, words, identifier)
 {
 }
 
-mnemonic mnemonic::from_entropy(const data_chunk& entropy,
-    language identifier)
+// private methods
+// ----------------------------------------------------------------------------
+
+mnemonic mnemonic::from_entropy(const data_chunk& entropy, language identifier)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
@@ -302,8 +275,8 @@ mnemonic mnemonic::from_entropy(const data_chunk& entropy,
     if (!dictionaries_.exists(identifier))
         return {};
 
-    // Save original entropy and derived words.
-    return { entropy, encode(entropy, identifier), identifier };
+    // Save original entropy and derived normal words.
+    return { entropy, encoder(entropy, identifier), identifier };
 }
 
 mnemonic mnemonic::from_words(const string_list& words, language identifier)
@@ -311,8 +284,8 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    // Normalize is non-critical here, denormalized words will be rejected.
-    const auto tokens = normalize(words);
+    // Normalize is non-critical here, unnormalized words will be rejected.
+    const auto tokens = system::split(normalizer(system::join(words)));
     const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)
@@ -321,7 +294,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    const auto entropy = decode(tokens, identifier);
+    const auto entropy = decoder(tokens, identifier);
 
     // Checksum verification failed.
     if (entropy.empty())
@@ -331,62 +304,25 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     return { entropy, tokens, lexicon };
 }
 
-// public methods
+// public
 // ----------------------------------------------------------------------------
-
-std::string mnemonic::sentence() const
-{
-    return join(words(), lingo());
-}
-
-const data_chunk& mnemonic::entropy() const
-{
-    return entropy_;
-}
-
-const string_list& mnemonic::words() const
-{
-    return words_;
-}
-
-language mnemonic::lingo() const
-{
-    return identifier_;
-}
 
 hd_private mnemonic::to_seed(const std::string& passphrase,
     uint64_t chain) const
 {
-    // Words are generated from seed, so always from a supported dictionary.
-    return to_seed(words(), passphrase, chain);
+    // Preclude derivation from an invalid object state.
+    if (!(*this))
+        return {};
+
+    // Passphrase normalization is necessary, however ASCII is normal.
+    if (!with_icu() && !is_ascii(passphrase))
+        return {};
+
+    return seeder(words(), passphrase, chain);
 }
 
-// Operators.
-// ----------------------------------------------------------------------------
-
-mnemonic& mnemonic::operator=(const mnemonic& other)
-{
-    entropy_ = other.entropy_;
-    words_ = other.words_;
-    identifier_ = other.identifier_;
-    return *this;
-}
-
-bool mnemonic::operator<(const mnemonic& other) const
-{
-    return sentence() < other.sentence();
-}
-
-bool mnemonic::operator==(const mnemonic& other) const
-{
-    // Words and entropy are equivalent (one is a cache of the other).
-    return entropy_ == other.entropy_ && identifier_ == other.identifier_;
-}
-
-bool mnemonic::operator!=(const mnemonic& other) const
-{
-    return !(*this == other);
-}
+// operators
+// ------------------------------------------------------------------------
 
 std::istream& operator>>(std::istream& in, mnemonic& to)
 {
@@ -401,17 +337,6 @@ std::istream& operator>>(std::istream& in, mnemonic& to)
     }
 
     return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const mnemonic& of)
-{
-    out << of.sentence();
-    return out;
-}
-
-mnemonic::operator bool() const
-{
-    return is_valid_entropy_size(entropy_.size());
 }
 
 } // namespace wallet

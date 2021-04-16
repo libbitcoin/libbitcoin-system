@@ -25,25 +25,11 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
-
-typedef enum class language
-{
-    en,
-    es,
-    it,
-    fr,
-    cs,
-    pt,
-    ja,
-    ko,
-    zh_Hans,
-    zh_Hant,
-    none
-} language;
 
 // Search container for a dictionary of lexically-sorted words.
 // POD dictionary wrapper with O(log2) search and O(1) index.
@@ -57,12 +43,6 @@ public:
 
     /// The number of words in the dictionary.
     static constexpr size_t size() { return Size; };
-
-    /// The language id of the dictionary name, language::none if not found.
-    static language to_identifier(std::string& name);
-
-    /// The name of the specified dictionary, empty string if not found.
-    static std::string to_name(language identifier);
 
     /// Constructor.
     dictionary(language identifier, const words& words);

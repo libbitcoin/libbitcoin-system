@@ -32,6 +32,7 @@
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
 #include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -43,8 +44,6 @@ namespace wallet {
 constexpr auto size0 = uint32_t{ 1u };
 constexpr auto size1 = static_cast<int32_t>(electrum_v1::dictionary::size());
 constexpr auto size2 = size1 * size1;
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
 
 // private static
 // ----------------------------------------------------------------------------
@@ -58,7 +57,7 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
 };
 
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1669
-string_list electrum_v1::encode(const data_chunk& entropy, language identifier)
+string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 {
     string_list words;
     words.reserve(word_count(entropy));
@@ -84,7 +83,7 @@ string_list electrum_v1::encode(const data_chunk& entropy, language identifier)
 }
 
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1682
-data_chunk electrum_v1::decode(const string_list& words, language identifier)
+data_chunk electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
@@ -135,31 +134,14 @@ size_t electrum_v1::word_count(const data_slice& entropy)
     return entropy_bits(entropy) / sizeof(uint32_t);
 }
 
-std::string electrum_v1::normalize(const std::string& text)
-{
-    return system::join(system::split(text));
-}
-
-string_list electrum_v1::normalize(const string_list& words)
-{
-    return system::split(system::join(words));
-}
-
-std::string electrum_v1::join(const string_list& words, language identifier)
-{
-    return system::join(words, identifier == language::ja ?
-        ideographic_space : ascii_space);
-}
-
-string_list electrum_v1::split(const std::string& sentence, language identifier)
-{
-    return identifier == language::ja ?
-        split_regex(sentence, ideographic_space) :
-        system::split(sentence, ascii_space);
-}
-
 // public static
 // ----------------------------------------------------------------------------
+
+language electrum_v1::contained_by(const string_list& words,
+    language identifier)
+{
+    return dictionaries_.contains(words, identifier);
+}
 
 bool electrum_v1::is_valid_dictionary(language identifier)
 {
@@ -176,23 +158,17 @@ bool electrum_v1::is_valid_word_count(size_t count)
     return count == word_minimum || count == word_maximum;
 }
 
-language electrum_v1::contained_by(const string_list& words,
-    language identifier)
-{
-    return dictionaries_.contains(words, identifier);
-}
-
 // construction
 // ----------------------------------------------------------------------------
 
+// protected
 electrum_v1::electrum_v1()
-  : entropy_(), words_(), identifier_(language::none)
+  : languages()
 {
 }
 
 electrum_v1::electrum_v1(const electrum_v1& other)
-  : entropy_(other.entropy_), words_(other.words_),
-    identifier_(other.identifier_)
+  : languages(other)
 {
 }
 
@@ -224,13 +200,15 @@ electrum_v1::electrum_v1(const maximum_entropy& entropy, language identifier)
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
     language identifier)
-  : entropy_(entropy), words_(words), identifier_(identifier)
+  : languages(entropy, words, identifier)
 {
 }
 
-// private
+// private methods
+// ----------------------------------------------------------------------------
+
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
-    language identifier)
+    language identifier) const
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
@@ -239,17 +217,16 @@ electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
         return {};
 
     // Save original entropy and derived words.
-    return encode(entropy, identifier);
+    return encoder(entropy, identifier);
 }
 
-// private
 electrum_v1 electrum_v1::from_words(const string_list& words,
-    language identifier)
+    language identifier) const
 {
     if (!is_valid_word_count(words.size()))
         return {};
 
-    const auto tokens = normalize(words);
+    const auto tokens = system::split(system::join(words));
     const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)
@@ -259,58 +236,11 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
         return {};
 
     // Save normalized words and derived entropy, original words are discarded.
-    return decode(tokens, lexicon);
-}
-
-// public methods
-// ----------------------------------------------------------------------------
-
-std::string electrum_v1::sentence() const
-{
-    return join(words(), lingo());
-}
-
-const data_chunk& electrum_v1::entropy() const
-{
-    return entropy_;
-}
-
-const string_list& electrum_v1::words() const
-{
-    return words_;
-}
-
-language electrum_v1::lingo() const
-{
-    return identifier_;
+    return decoder(tokens, lexicon);
 }
 
 // operators
-// ----------------------------------------------------------------------------
-
-electrum_v1& electrum_v1::operator=(const electrum_v1& other)
-{
-    entropy_ = other.entropy_;
-    words_ = other.words_;
-    identifier_ = other.identifier_;
-    return *this;
-}
-
-bool electrum_v1::operator<(const electrum_v1& other) const
-{
-    return sentence() < other.sentence();
-}
-
-bool electrum_v1::operator==(const electrum_v1& other) const
-{
-    // Words and entropy are equivalent (one is a cache of the other).
-    return entropy_ == other.entropy_ && identifier_ == other.identifier_;
-}
-
-bool electrum_v1::operator!=(const electrum_v1& other) const
-{
-    return !(*this == other);
-}
+// ------------------------------------------------------------------------
 
 std::istream& operator>>(std::istream& in, electrum_v1& to)
 {
@@ -325,17 +255,6 @@ std::istream& operator>>(std::istream& in, electrum_v1& to)
     }
 
     return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const electrum_v1& of)
-{
-    out << of.sentence();
-    return out;
-}
-
-electrum_v1::operator bool() const
-{
-    return !entropy_.empty();
 }
 
 } // namespace wallet

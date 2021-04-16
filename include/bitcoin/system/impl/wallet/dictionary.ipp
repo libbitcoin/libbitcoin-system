@@ -23,8 +23,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <type_traits>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/wallet/language.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -33,41 +35,6 @@ namespace wallet {
 // en.cppreference.com/w/cpp/named_req/PODType
 // Ensure that dictionary word lists remain POD types.
 static_assert(std::is_pod<dictionary<1>::words>(), "performance");
-
-template<size_t Size>
-language dictionary<Size>::to_identifier(std::string& name)
-{
-    if (name == to_name(language::en)) return language::en;
-    if (name == to_name(language::es)) return language::es;
-    if (name == to_name(language::it)) return language::it;
-    if (name == to_name(language::fr)) return language::fr;
-    if (name == to_name(language::cs)) return language::cs;
-    if (name == to_name(language::pt)) return language::pt;
-    if (name == to_name(language::ja)) return language::ja;
-    if (name == to_name(language::ko)) return language::ko;
-    if (name == to_name(language::zh_Hans)) return language::zh_Hans;
-    if (name == to_name(language::zh_Hant)) return language::zh_Hant;
-    return language::none;
-}
-
-template<size_t Size>
-std::string dictionary<Size>::to_name(language identifier)
-{
-    switch (identifier)
-    {
-        case language::en: return "en";
-        case language::es: return "es";
-        case language::it: return "it";
-        case language::fr: return "fr";
-        case language::cs: return "cs";
-        case language::pt: return "pt";
-        case language::ja: return "ja";
-        case language::ko: return "ko";
-        case language::zh_Hans: return "zh_Hans";
-        case language::zh_Hant: return "zh_Hant";
-        case language::none: return "";
-    }
-}
 
 // Constructor.
 // ----------------------------------------------------------------------------
@@ -106,7 +73,7 @@ string_list dictionary<Size>::at(const search& indexes) const
 
     // std::transform can be parallel but maintains order.
     std::transform(indexes.begin(), indexes.end(), out.begin(),
-        [&](size_t index)
+        [&](auto index)
         {
             // index is signed because we reuse indexes data type. 
             return at(index);
@@ -131,7 +98,7 @@ dictionary<Size>::index(const string_list& words) const
 
     // std::transform can be parallel but maintains order.
     std::transform(words.begin(), words.end(), out.begin(),
-        [&](const std::string& word)
+        [&](const auto& word)
         {
             return index(word);
         });
@@ -150,7 +117,7 @@ bool dictionary<Size>::contains(const string_list& words) const
 {
     // std::all_of can be parallel and order doesn't matter.
     return std::all_of(words.begin(), words.end(),
-        [&](const std::string& word)
+        [&](const auto& word)
         {
             return contains(word);
         });
