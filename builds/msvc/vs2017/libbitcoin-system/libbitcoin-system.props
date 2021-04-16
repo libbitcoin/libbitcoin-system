@@ -22,7 +22,7 @@
       <!-- WITH_ICU always defined in Visual Studio builds. -->
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
       <!-- WIN32_LEAN_AND_MEAN avoids inclusion of certain headers, winsock.h conflicts with boost and protocol use of winsock2.h. -->
-      <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WITH_ICUXXX;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

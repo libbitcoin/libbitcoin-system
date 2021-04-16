@@ -618,6 +618,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\languages.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -1302,6 +1305,12 @@
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\hd_public.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\language.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\languages.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\message.hpp">

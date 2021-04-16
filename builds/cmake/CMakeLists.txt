@@ -452,6 +452,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/wallet/encrypted_keys.cpp"
     "../../src/wallet/hd_private.cpp"
     "../../src/wallet/hd_public.cpp"
+    "../../src/wallet/languages.cpp"
     "../../src/wallet/message.cpp"
     "../../src/wallet/mini_keys.cpp"
     "../../src/wallet/mnemonic.cpp"

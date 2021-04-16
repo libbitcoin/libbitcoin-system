@@ -218,6 +218,8 @@
 #include <bitcoin/system/wallet/encrypted_keys.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
 #include <bitcoin/system/wallet/hd_public.hpp>
+#include <bitcoin/system/wallet/language.hpp>
+#include <bitcoin/system/wallet/languages.hpp>
 #include <bitcoin/system/wallet/message.hpp>
 #include <bitcoin/system/wallet/mini_keys.hpp>
 #include <bitcoin/system/wallet/mnemonic.hpp>

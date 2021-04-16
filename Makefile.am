@@ -211,6 +211,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
+    src/wallet/languages.cpp \
     src/wallet/message.cpp \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
@@ -711,6 +712,8 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/encrypted_keys.hpp \
     include/bitcoin/system/wallet/hd_private.hpp \
     include/bitcoin/system/wallet/hd_public.hpp \
+    include/bitcoin/system/wallet/language.hpp \
+    include/bitcoin/system/wallet/languages.hpp \
     include/bitcoin/system/wallet/message.hpp \
     include/bitcoin/system/wallet/mini_keys.hpp \
     include/bitcoin/system/wallet/mnemonic.hpp \
