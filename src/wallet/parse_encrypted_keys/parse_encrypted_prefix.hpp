@@ -54,8 +54,6 @@ protected:
     static constexpr uint8_t magic_size = Size - 1;
 
 private:
-    bool verify_magic() const;
-
     const byte_array<Size> prefix_;
     bool valid_;
 };
