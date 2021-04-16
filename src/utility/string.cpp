@@ -30,15 +30,14 @@ namespace system {
 
 std::string ascii_to_lower(const std::string& text)
 {
-    const auto to_lower = [](char character)
+    const auto to_lower = [](char value)
     {
-        return 'A' <= character && character <= 'Z' ?
-            character + ('a' - 'A') : character;
+        return 'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value;
     };
 
     std::string lower = text;
     std::transform(text.begin(), text.end(), lower.begin(),
-        [&](auto character)
+        [&](char character)
         {
             return to_lower(character);
         });

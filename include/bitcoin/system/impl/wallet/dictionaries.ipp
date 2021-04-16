@@ -113,7 +113,7 @@ language dictionaries<Count, Size>::contains(const std::string& word,
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const auto& dictionary)
+        [&](const dictionary<Size>& dictionary)
         {
             return dictionary.contains(word);
         });
@@ -133,7 +133,7 @@ language dictionaries<Count, Size>::contains(const string_list& words,
     }
 
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const auto& dictionary)
+        [&](const dictionary<Size>& dictionary)
         {
             return dictionary.contains(words);
         });
@@ -149,7 +149,7 @@ typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(language identifier) const
 {
     return std::find_if(dictionaries_.begin(), dictionaries_.end(),
-        [&](const auto& dictionary)
+        [&](const dictionary<Size>& dictionary)
         {
             return dictionary.identifier() == identifier;
         });

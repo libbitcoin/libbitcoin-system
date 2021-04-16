@@ -94,7 +94,7 @@ public:
 protected:
     languages();
     languages(const languages& other);
-    languages::languages(const data_chunk& entropy, const string_list& words,
+    languages(const data_chunk& entropy, const string_list& words,
         language identifier);
 
     // These should be const, apart from the need to implement assignment.

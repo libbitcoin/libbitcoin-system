@@ -73,7 +73,7 @@ string_list dictionary<Size>::at(const search& indexes) const
 
     // std::transform can be parallel but maintains order.
     std::transform(indexes.begin(), indexes.end(), out.begin(),
-        [&](auto index)
+        [&](size_t index)
         {
             // index is signed because we reuse indexes data type. 
             return at(index);
@@ -98,7 +98,7 @@ dictionary<Size>::index(const string_list& words) const
 
     // std::transform can be parallel but maintains order.
     std::transform(words.begin(), words.end(), out.begin(),
-        [&](const auto& word)
+        [&](const std::string& word)
         {
             return index(word);
         });
@@ -117,7 +117,7 @@ bool dictionary<Size>::contains(const string_list& words) const
 {
     // std::all_of can be parallel and order doesn't matter.
     return std::all_of(words.begin(), words.end(),
-        [&](const auto& word)
+        [&](const std::string& word)
         {
             return contains(word);
         });
