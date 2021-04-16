@@ -244,7 +244,7 @@ hd_private electrum::seeder(const string_list& words,
     // Words are in normal form, even without ICU.
     const auto sentence = to_chunk(system::join(words));
 
-    // Passphrase is limited to ascii lower case (normal) if without ICU.
+    // Passphrase is limited to ascii (normal) if without ICU.
     const auto salt = to_chunk(passphrase_prefix + normalizer(passphrase));
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     const auto part = system::split(seed);
