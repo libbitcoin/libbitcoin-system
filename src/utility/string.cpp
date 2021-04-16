@@ -30,14 +30,14 @@ namespace system {
 
 std::string ascii_to_lower(const std::string& text)
 {
-    const auto to_lower = [](char value)
+    const auto to_lower = [](uint8_t value)
     {
         return 'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value;
     };
 
     std::string lower = text;
     std::transform(text.begin(), text.end(), lower.begin(),
-        [&](char character)
+        [&](uint8_t character)
         {
             return to_lower(character);
         });
@@ -47,7 +47,7 @@ std::string ascii_to_lower(const std::string& text)
 
 bool is_ascii(const std::string& text)
 {
-    return std::all_of(text.begin(), text.end(), [](char character)
+    return std::all_of(text.begin(), text.end(), [](uint8_t character)
     {
         return character < 0x80;
     });

@@ -32,13 +32,16 @@ namespace wallet {
 // local definitions
 // ----------------------------------------------------------------------------
 
+typedef std::map<language, std::string> language_map;
+
 constexpr auto ideographic_space = "\xe3\x80\x80";
 constexpr auto ascii_space = "\x20";
 
 // All languages, dictionary-independent.
 // Dictionaries are collections of words in one of these langauges.
 // There can be multiple dictionaries for a given language identifier.
-static const std::map<language, std::string> map
+
+static const language_map map
 {
     { language::en, "en" },
     { language::es, "es" },
@@ -52,13 +55,14 @@ static const std::map<language, std::string> map
     { language::zh_Hant, "zh_Hant" }
 };
 
+
 // static methods
 // ----------------------------------------------------------------------------
 
 language languages::from_name(const std::string& name)
 {
     const auto it = std::find_if(map.begin(), map.end(),
-        [&](const auto& pair)
+        [&](const language_map::value_type& pair)
         {
             return pair.second == name;
         });
@@ -69,7 +73,7 @@ language languages::from_name(const std::string& name)
 std::string languages::to_name(language identifier)
 {
     const auto it = std::find_if(map.begin(), map.end(),
-        [&](const auto& pair)
+        [&](const language_map::value_type& pair)
         {
             return pair.first == identifier;
         });
