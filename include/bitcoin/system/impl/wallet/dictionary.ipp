@@ -27,6 +27,7 @@
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/language.hpp>
+#include <bitcoin/system/wallet/languages.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -54,7 +55,7 @@ language dictionary<Size>::identifier() const
 template <size_t Size>
 std::string dictionary<Size>::name() const
 {
-    return to_name(identifier_);
+    return languages::to_name(identifier_);
 }
 
 // Search.

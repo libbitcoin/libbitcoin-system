@@ -23,8 +23,6 @@
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
-#include <bitcoin/system/wallet/dictionary.hpp>
-#include <bitcoin/system/wallet/dictionaries.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
 #include <bitcoin/system/wallet/language.hpp>
 
