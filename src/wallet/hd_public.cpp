@@ -299,7 +299,7 @@ std::ostream& operator<<(std::ostream& out, const hd_public& of)
 // hd_lineage
 // ----------------------------------------------------------------------------
 
-bool hd_lineage::operator == (const hd_lineage& other) const
+bool hd_lineage::operator==(const hd_lineage& other) const
 {
     return prefixes == other.prefixes && depth == other.depth &&
         parent_fingerprint == other.parent_fingerprint &&
