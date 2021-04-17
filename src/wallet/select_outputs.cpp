@@ -47,7 +47,7 @@ void select_outputs::greedy(points_value& out, const points_value& unspent,
     }
 
     // Copy the points list for safe manipulation.
-    auto copy = unspent.points;
+    auto points = unspent.points;
 
     const auto below = [minimum_value](const point_value& point)
     {
@@ -65,30 +65,28 @@ void select_outputs::greedy(points_value& out, const points_value& unspent,
     };
 
     // Reorder list between values that exceed minimum and those that do not.
-    const auto sufficient = std::partition(copy.begin(), copy.end(), below);
+    const auto sufficient = std::partition(points.begin(), points.end(), below);
 
     // If there are values large enough, return the smallest (of the largest).
-    const auto minimum = std::min_element(sufficient, copy.end(), lesser);
+    const auto minimum = std::min_element(sufficient, points.end(), lesser);
 
-    if (minimum != copy.end())
+    if (minimum != points.end())
     {
         out.points.push_back(*minimum);
         return;
     }
 
     // Sort all by descending value in order to use the fewest inputs possible.
-    std::sort(copy.begin(), copy.end(), greater);
+    std::sort(points.begin(), points.end(), greater);
 
     // This is naive, will not necessarily find the smallest combination.
-    for (auto point = copy.begin(); point != copy.end(); ++point)
+    for (const auto& point: points)
     {
-        out.points.push_back(*point);
+        out.points.push_back(point);
 
         if (out.value() >= minimum_value)
             return;
     }
-
-    BITCOIN_ASSERT_MSG(false, "unreachable code reached");
 }
 
 void select_outputs::individual(points_value& out, const points_value& unspent,
@@ -102,32 +100,29 @@ void select_outputs::individual(points_value& out, const points_value& unspent,
         if (point.value() >= minimum_value)
             out.points.push_back(point);
 
+    out.points.shrink_to_fit();
+
     const auto lesser = [](const point_value& left, const point_value& right)
     {
         return left.value() < right.value();
     };
 
     // Return in ascending order by value.
-    out.points.shrink_to_fit();
     std::sort(out.points.begin(), out.points.end(), lesser);
 }
 
 void select_outputs::select(points_value& out, const points_value& unspent,
     uint64_t minimum_value, algorithm option)
 {
-    switch(option)
+    switch (option)
     {
         case algorithm::individual:
-        {
             individual(out, unspent, minimum_value);
             break;
-        }
         case algorithm::greedy:
         default:
-        {
             greedy(out, unspent, minimum_value);
             break;
-        }
     }
 }
 
