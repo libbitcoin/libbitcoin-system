@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__from_data__insufficient_bytes__fail
     const auto raw = to_chunk(base16_literal(
         "0b"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"
-        "01cf1a02915dc0137cae81ea04161dbebc0d7ec44"));
+        "01cf1a02915dc0137cae81ea04161dbebc0d7ec4"));
 
     message::compact_filter_headers instance;
     BOOST_REQUIRE_EQUAL(false, instance.from_data(

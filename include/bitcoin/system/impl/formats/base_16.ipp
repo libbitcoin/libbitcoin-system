@@ -62,6 +62,8 @@ bool decode_hash(byte_array<Size>& out, const std::string& in)
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
 {
+    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
+
     byte_array<(Size - 1u) / 2u> out;
     if (!decode_base16(out, string))
         out.fill(0);
@@ -72,6 +74,8 @@ byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size])
 {
+    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
+
     byte_array<(Size - 1u) / 2u> out;
     if (!decode_hash(out, string))
         out.fill(0);

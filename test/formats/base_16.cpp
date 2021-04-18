@@ -424,12 +424,6 @@ BOOST_AUTO_TEST_CASE(base16__base16_literal__empty__empty)
     BOOST_REQUIRE_EQUAL(base16_literal(""), expected);
 }
 
-BOOST_AUTO_TEST_CASE(base16__base16_literal__odd_character_count__zeroized)
-{
-    const byte_array<3> expected{ 0x00, 0x00, 0x00 };
-    BOOST_REQUIRE_EQUAL(base16_literal("424242a"), expected);
-}
-
 BOOST_AUTO_TEST_CASE(base16__base16_literal__invalid_character__zeroized)
 {
     const byte_array<3> expected{ 0x00, 0x00, 0x00 };
@@ -470,12 +464,6 @@ BOOST_AUTO_TEST_CASE(base16__hash_literal__empty__empty)
 {
     const byte_array<0> expected{};
     BOOST_REQUIRE_EQUAL(hash_literal(""), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base16__hash_literal__odd_character_count__zeroized)
-{
-    const byte_array<3> expected{ 0x00, 0x00, 0x00 };
-    BOOST_REQUIRE_EQUAL(hash_literal("424242a"), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base16__hash_literal__invalid_character__zeroized)

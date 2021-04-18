@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_bytes__f
 {
     const auto raw = to_chunk(base16_literal(
         "0b"
-        "01cf1a02915dc0137cae81ea04161dbebc0d7ec44"));
+        "01cf1a02915dc0137cae81ea04161dbebc0d7ec4"));
 
     message::compact_filter_checkpoint instance;
     BOOST_REQUIRE_EQUAL(false, instance.from_data(message::compact_filter_checkpoint::version_minimum, raw));
