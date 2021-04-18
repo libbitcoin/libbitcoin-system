@@ -37,7 +37,7 @@ namespace system {
  * For example A and E and X. We can summarize this operation as:
  * (A or B or C) and (D or E or F) and (X or Y)
  */
-typedef std::vector<point_list> key_rings;
+typedef std::vector<compressed_list> key_rings;
 
 /**
  * A borromean ring signature.

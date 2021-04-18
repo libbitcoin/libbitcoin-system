@@ -19,6 +19,7 @@
 #include <bitcoin/system/math/ec_point.hpp>
 
 #include <cstdint>
+#include <utility>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -27,59 +28,71 @@
 namespace libbitcoin {
 namespace system {
 
-// TODO: use binary value.
-#define LITERAL_G \
-"0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
-
-const ec_point ec_point::G = base16_literal(LITERAL_G);
+// TODO: move to elliptic_curve
 const uint8_t ec_point::invalid = 0x00;
 const uint8_t ec_point::compressed_even = 0x02;
 const uint8_t ec_point::compressed_odd = 0x03;
 const uint8_t ec_point::uncompressed = 0x04;
+const ec_point ec_point::generator{ ec_compressed_generator };
 
-// First point byte is used as validity sentinel.
-////static_assert(null_compressed_point[0] == ec_point::invalid, "bad sentinel");
-
-ec_point::ec_point()
-  : point_(null_compressed_point)
+// private
+bool ec_point::is_valid() const
 {
+    return point_.front() != invalid;
 }
 
-ec_point::ec_point(const ec_compressed& point)
-  : point_(point)
-{
-}
-
-// Operators.
+// construction
 // ----------------------------------------------------------------------------
 
-ec_point ec_point::operator-() const
+ec_point::ec_point()
+  : point_(null_ec_compressed)
 {
-    if (!(*this))
-        return *this;
-
-    auto negation = *this;
-    if (!ec_negate(negation.point_))
-        return {};
-
-    return negation;
 }
 
-ec_point& ec_point::operator+=(const ec_point& point)
+ec_point::ec_point(ec_point&& point)
+  : point_(std::move(point.point_))
 {
-    if (!(*this))
+}
+
+ec_point::ec_point(const ec_point& point)
+  : point_(point.point_)
+{
+}
+
+ec_point::ec_point(ec_compressed&& compressed)
+  : point_(std::move(compressed))
+{
+}
+
+ec_point::ec_point(const ec_compressed& compressed)
+  : point_(compressed)
+{
+}
+
+// assignment operators
+// ----------------------------------------------------------------------------
+
+ec_point& ec_point::operator=(ec_point&& point)
+{
+    if (&point == this)
         return *this;
 
-    *this = *this + point;
+    point_ = std::move(point.point_);
     return *this;
 }
 
-ec_point& ec_point::operator-=(const ec_point& point)
+ec_point& ec_point::operator=(const ec_point& point)
 {
-    if (!(*this))
+    if (&point == this)
         return *this;
 
-    *this = *this - point;
+    point_ = point.point_;
+    return *this;
+}
+
+ec_point& ec_point::operator=(ec_compressed&& compressed)
+{
+    point_ = std::move(compressed);
     return *this;
 }
 
@@ -89,55 +102,130 @@ ec_point& ec_point::operator=(const ec_compressed& compressed)
     return *this;
 }
 
-ec_point operator+(ec_point left, const ec_point& right)
+// arithmetic assignment operators
+// ----------------------------------------------------------------------------
+
+ec_point& ec_point::operator+=(const ec_point& point)
+{
+    if (!is_valid())
+        return *this;
+
+    // 1 copy and 2 constructions
+    // One contruction could be removed at the cost of code repetition.
+    *this = (*this + point);
+    return *this;
+}
+
+ec_point& ec_point::operator-=(const ec_point& point)
+{
+    if (!is_valid())
+        return *this;
+
+    // 2 copies and 3 constructions
+    // One contruction could be removed at the cost of code repetition.
+    *this = (*this - point);
+    return *this;
+}
+
+ec_point& ec_point::operator*=(const ec_scalar& point)
+{
+    if (!is_valid())
+        return *this;
+
+    // 1 copy and 2 constructions
+    // One contruction could be removed at the cost of code repetition.
+    *this = (*this * point);
+    return *this;
+}
+
+// unary operators (const)
+// ----------------------------------------------------------------------------
+
+ec_point ec_point::operator-() const
+{
+    if (!is_valid())
+        return {};
+
+    // 1 copy and 1 construction
+    auto out = point_;
+    if (!ec_negate(out))
+        return {};
+    
+    return ec_point{ out };
+}
+
+// binary math operators (const)
+// ----------------------------------------------------------------------------
+
+ec_point operator+(const ec_point& left, const ec_point& right)
 {
     if (!left || !right)
         return {};
 
-    if (!ec_sum(left.point_, { left.point_, right.point_ }))
+    // 1 copy and 1 construction
+    ec_compressed out = left.point();
+    if (!ec_add(out, right.point()))
         return {};
-
-    return left;
+    
+    return ec_point{ out };
 }
 
-ec_point operator-(ec_point left, const ec_point& right)
+ec_point operator-(const ec_point& left, const ec_point& right)
 {
     if (!left || !right)
         return {};
 
-    const auto negative_right = -right;
-    if (!negative_right)
-        return {};
-
-    return left + negative_right;
+    // 2 copies and 2 constructions
+    return left + -right;
 }
 
-ec_point operator*(ec_point left, const ec_scalar& right)
+ec_point operator*(const ec_point& left, const ec_scalar& right)
 {
     if (!left || !right)
         return {};
 
-    if (!ec_multiply(left.point_, right.secret()))
+    // 1 copy and 1 construction
+    auto out = left.point();
+    if (!ec_multiply(out, right.secret()))
         return {};
-
-    return left;
+    
+    return ec_point{ out };
 }
 
-ec_point operator*(const ec_scalar& left, ec_point right)
+ec_point operator*(const ec_scalar& left, const ec_point& right)
 {
+    // 1 copy and 1 construction
     return right * left;
 }
 
-ec_point::operator bool() const
+// comparison operators (const)
+// ----------------------------------------------------------------------------
+
+bool operator==(const ec_point& left, const ec_point& right)
 {
-    // First point byte is used as validity sentinel.
-    return point_[0] != invalid;
+    return left.point() == right.point();
 }
 
-ec_point::operator ec_compressed() const
+bool operator!=(const ec_point& left, const ec_point& right)
+{
+    return !(left == right);
+}
+
+// cast operators
+// ----------------------------------------------------------------------------
+
+ec_point::operator bool() const
+{
+    return is_valid();
+}
+
+ec_point::operator const ec_compressed&() const
 {
     return point_;
 }
+
+// properties
+// ----------------------------------------------------------------------------
 
 const ec_compressed& ec_point::point() const
 {

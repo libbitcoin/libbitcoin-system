@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
@@ -40,12 +41,12 @@ typedef std::vector<ec_secret> secret_list;
 /// Compressed public key:
 static BC_CONSTEXPR size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
-
-typedef std::vector<ec_compressed> point_list;
+typedef std::vector<ec_compressed> compressed_list;
 
 /// Uncompressed public key:
 static BC_CONSTEXPR size_t ec_uncompressed_size = 65;
 typedef byte_array<ec_uncompressed_size> ec_uncompressed;
+typedef std::vector<ec_uncompressed> uncompressed_list;
 
 // Parsed ECDSA signature:
 static BC_CONSTEXPR size_t ec_signature_size = 64;
@@ -60,38 +61,52 @@ static BC_CONSTEXPR size_t min_endorsement_size = 9;
 static BC_CONSTEXPR size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
-/// Recoverable ecdsa signature for message signing:
+// secg.org/sec2-v2.pdf
+static const ec_compressed ec_compressed_generator = base16_literal("02"
+    "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+
+// secg.org/sec2-v2.pdf
+static const ec_uncompressed ec_uncompressed_generator = base16_literal("04"
+    "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+    "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
+
+static const ec_compressed null_ec_compressed = base16_literal("00"
+    "0000000000000000000000000000000000000000000000000000000000000000");
+
+static const ec_uncompressed null_ec_uncompressed = base16_literal("00"
+    "0000000000000000000000000000000000000000000000000000000000000000"
+    "0000000000000000000000000000000000000000000000000000000000000000");
+
+/// Recoverable ecdsa signature for message signing.
 struct BC_API recoverable_signature
 {
     ec_signature signature;
     uint8_t recovery_id;
 };
 
-static BC_CONSTEXPR ec_compressed null_compressed_point =
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-static BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-// Add and multiply EC values
+// Add EC values
 // ----------------------------------------------------------------------------
 
-/// Compute the sum a += G*b, where G is the curve's generator point.
+/// Compute the sum a += G * b.
 BC_API bool ec_add(ec_compressed& point, const ec_secret& scalar);
 
-/// Compute the sum a += G*b, where G is the curve's generator point.
+/// Compute the sum a += G * b.
 BC_API bool ec_add(ec_uncompressed& point, const ec_secret& scalar);
 
-/// Compute the sum a = (a + b) % n, where n is the curve order.
+/// Compute the sum a = (a + b) % n.
 BC_API bool ec_add(ec_secret& left, const ec_secret& right);
+
+/// Compute the sum a += b.
+BC_API bool ec_add(ec_compressed& left, const ec_compressed& right);
+
+/// Compute the sum a += b.
+BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right);
+
+/// Compute the sum of compressed point values.
+BC_API bool ec_sum(ec_compressed& out, const compressed_list& values);
+
+// Multiply EC values
+// ----------------------------------------------------------------------------
 
 /// Compute the product point *= secret.
 BC_API bool ec_multiply(ec_compressed& point, const ec_secret& scalar);
@@ -99,62 +114,65 @@ BC_API bool ec_multiply(ec_compressed& point, const ec_secret& scalar);
 /// Compute the product point *= secret.
 BC_API bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar);
 
-/// Compute the product a = (a * b) % n, where n is the curve order.
+/// Compute the product a = (a * b) % n.
 BC_API bool ec_multiply(ec_secret& left, const ec_secret& right);
 
-/// Negate a scalar.
+// Negate EC values
+// ----------------------------------------------------------------------------
+
+/// Negate scalar.
 BC_API bool ec_negate(ec_secret& scalar);
 
-/// Invert a point (flip on Y axis).
+/// Invert point (flip on Y axis).
 BC_API bool ec_negate(ec_compressed& point);
 
-/// Compute the addition of EC curve points.
-BC_API bool ec_sum(ec_compressed& result, const point_list& values);
+/// Invert point (flip on Y axis).
+BC_API bool ec_negate(ec_uncompressed& point);
 
 // Convert keys
 // ----------------------------------------------------------------------------
 
-/// Convert an uncompressed public point to compressed.
+/// Convert uncompressed point to compressed.
 BC_API bool compress(ec_compressed& out, const ec_uncompressed& point);
 
-/// Convert a compressed public point to decompressed.
+/// Convert compressed point to decompressed.
 BC_API bool decompress(ec_uncompressed& out, const ec_compressed& point);
 
-/// Convert a secret to a compressed public point.
+/// Convert secret to a compressed point.
 BC_API bool secret_to_public(ec_compressed& out, const ec_secret& secret);
 
-/// Convert a secret parameter to an uncompressed public point.
+/// Convert secret to an uncompressed point.
 BC_API bool secret_to_public(ec_uncompressed& out, const ec_secret& secret);
 
 // Verify keys
 // ----------------------------------------------------------------------------
 
-/// Verify a secret.
+/// Verify secret.
 BC_API bool verify(const ec_secret& secret);
 
-/// Verify a point.
+/// Verify point.
 BC_API bool verify(const ec_compressed& point);
 
-/// Verify a point.
+/// Verify point.
 BC_API bool verify(const ec_uncompressed& point);
 
 // Detect public keys
 // ----------------------------------------------------------------------------
 
 /// Determine if the compressed public key is even (y-valued).
-bool is_even_key(const ec_compressed& point);
+BC_API bool is_even_key(const ec_compressed& point);
 
 /// Fast detection of compressed public key structure.
-bool is_compressed_key(const data_slice& point);
+BC_API bool is_compressed_key(const data_slice& point);
 
 /// Fast detection of uncompressed public key structure.
-bool is_uncompressed_key(const data_slice& point);
+BC_API bool is_uncompressed_key(const data_slice& point);
 
 /// Fast detection of compressed or uncompressed public key structure.
-bool is_public_key(const data_slice& point);
+BC_API bool is_public_key(const data_slice& point);
 
 /// Fast detection of endorsement structure (DER with signature hash type).
-bool is_endorsement(const endorsement& endorsement);
+BC_API bool is_endorsement(const endorsement& endorsement);
 
 // DER parse/encode
 // ----------------------------------------------------------------------------

@@ -18,135 +18,158 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/system.hpp>
+#include "../overloads.hpp"
 
 using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
 
-// Scenario 1
-#define SECRET1 "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536"
-#define COMPRESSED1 "0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731"
-#define UNCOMPRESSED1 "0409ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc7327318c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9"
+// These vectors use hash encoding for sighash values.
 
-// Scenario 2
-#define COMPRESSED2 "03bc88a1bd6ebac38e9a9ed58eda735352ad10650e235499b7318315cc26c9b55b"
-#define SIGHASH2 "ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f"
-#define SIGNATURE2 "3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d"
+// scenario 1
+const ec_secret secret1{ base16_literal("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536") };
+const ec_compressed compressed1{ base16_literal("0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731") };
+const ec_uncompressed uncompressed1{ base16_literal("0409ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc7327318c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9") };
 
-// Scenario 3
-#define SECRET3 "ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333"
-#define SIGHASH3 "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0"
-#define EC_SIGNATURE3 "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037"
-#define DER_SIGNATURE3 "3044022057d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe324802203750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92"
+// scenario 2
+const ec_compressed compressed2{ base16_literal("03bc88a1bd6ebac38e9a9ed58eda735352ad10650e235499b7318315cc26c9b55b") };
+const hash_digest sighash2{ hash_literal("ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f") };
+const der_signature der_signature2{ to_chunk(base16_literal("3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d")) };
 
-// EC_SUM
-#define GENERATOR_POINT_MULT_4 "02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+// scenario 3
+const ec_secret secret3{ base16_literal( "33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce") };
+const hash_digest sighash3{ hash_literal("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0") };
+const ec_signature signature3{ base16_literal("4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037") };
+const der_signature der_signature3{ to_chunk(base16_literal("3044022057d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe324802203750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92")) };
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__positive__test)
+// generator
+const ec_secret one{ base16_literal("0000000000000000000000000000000000000000000000000000000000000001") };
+const ec_compressed generator_point_times_4{ base16_literal("02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13") };
+
+// constants
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__generator__expected)
 {
-    ec_compressed point;
-    BOOST_REQUIRE(secret_to_public(point, base16_literal(SECRET1)));
-    BOOST_REQUIRE_EQUAL(encode_base16(point), COMPRESSED1);
+    ec_compressed generator;
+    BOOST_REQUIRE(secret_to_public(generator, one));
+    BOOST_REQUIRE_EQUAL(generator, ec_compressed_generator);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__decompress__positive__test)
+// conversion
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__compress__round_trip__expected)
 {
     ec_uncompressed uncompressed;
-    BOOST_REQUIRE(decompress(uncompressed, base16_literal(COMPRESSED1)));
-    BOOST_REQUIRE_EQUAL(encode_base16(uncompressed), UNCOMPRESSED1);
+    BOOST_REQUIRE(decompress(uncompressed, compressed1));
+
+    ec_compressed compressed;
+    BOOST_REQUIRE(compress(compressed, uncompressed));
+    BOOST_REQUIRE_EQUAL(compressed, compressed1);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__decompress__positive__expected)
 {
-    ec_signature signature;
-    const auto secret = hash_literal(SECRET3);
-    const hash_digest sighash = hash_literal(SIGHASH3);
-    BOOST_REQUIRE(sign(signature, secret, sighash));
-
-    const auto result = encode_base16(signature);
-    BOOST_REQUIRE_EQUAL(result, EC_SIGNATURE3);
+    ec_uncompressed point;
+    BOOST_REQUIRE(decompress(point, compressed1));
+    BOOST_REQUIRE_EQUAL(point, uncompressed1);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__encode_signature__positive__test)
-{
-    der_signature out;
-    const auto signature = base16_literal(EC_SIGNATURE3);
-    BOOST_REQUIRE(encode_signature(out, signature));
-
-    const auto result = encode_base16(out);
-    BOOST_REQUIRE_EQUAL(result, DER_SIGNATURE3);
-}
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__compressed_positive__expected)
 {
     ec_compressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BOOST_REQUIRE_EQUAL(point, compressed1);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__uncompressed_positive__expected)
+{
+    ec_uncompressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BOOST_REQUIRE_EQUAL(point, uncompressed1);
+}
+
+// signature
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__expected)
+{
     ec_signature signature;
-    const data_chunk data{ 'd', 'a', 't', 'a' };
-    const auto hash = bitcoin_hash(data);
-    const auto secret = hash_literal(SECRET1);
-    BOOST_REQUIRE(secret_to_public(point, secret));
-    BOOST_REQUIRE(sign(signature, secret, hash));
+    BOOST_REQUIRE(sign(signature, secret3, sighash3));
+    BOOST_REQUIRE_EQUAL(signature, signature3);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__encode_signature__positive__expected)
+{
+    der_signature signature;
+    BOOST_REQUIRE(encode_signature(signature, signature3));
+    BOOST_REQUIRE_EQUAL(signature, der_signature3);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__expected)
+{
+    ec_compressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret1));
+
+    const auto hash = bitcoin_hash(to_chunk("data"));
+
+    ec_signature signature;
+    BOOST_REQUIRE(sign(signature, secret1, hash));
     BOOST_REQUIRE(verify_signature(point, hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_negative__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_negative__expected)
 {
     ec_compressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret1));
+
+    auto hash = bitcoin_hash(to_chunk("data"));
+
     ec_signature signature;
-    const data_chunk data{ 'd', 'a', 't', 'a' };
-    auto hash = bitcoin_hash(data);
-    const auto secret = base16_literal(SECRET1);
-    BOOST_REQUIRE(secret_to_public(point, secret));
-    BOOST_REQUIRE(sign(signature, secret, hash));
+    BOOST_REQUIRE(sign(signature, secret1, hash));
 
     // Invalidate the positive test.
     hash[0] = 0;
+
     BOOST_REQUIRE(!verify_signature(point, hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__positive__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__positive__expected)
 {
     ec_signature signature;
-    static const auto strict = false;
-    const auto sighash = hash_literal(SIGHASH2);
-    const auto point = base16_literal(COMPRESSED2);
-    der_signature distinguished;
-    BOOST_REQUIRE(decode_base16(distinguished, SIGNATURE2));
-    BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
-    BOOST_REQUIRE(verify_signature(point, sighash, signature));
+    BOOST_REQUIRE(parse_signature(signature, der_signature2, false));
+    BOOST_REQUIRE(verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__negative__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__negative__expected)
 {
     ec_signature signature;
-    static const auto strict = false;
-    const auto sighash = hash_literal(SIGHASH2);
-    const auto point = base16_literal(COMPRESSED2);
-    der_signature distinguished;
-    BOOST_REQUIRE(decode_base16(distinguished, SIGNATURE2));
-    BOOST_REQUIRE(parse_signature(signature, distinguished, strict));
+    BOOST_REQUIRE(parse_signature(signature, der_signature2, false));
 
     // Invalidate the positive test.
     signature[10] = 110;
-    BOOST_REQUIRE(!verify_signature(point, sighash, signature));
+    BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__test)
+// addition
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
 {
+    const auto sum = base16_literal("0404040000000000000000000000000000000000000000000000000000000000");
+
     ec_secret secret1{ { 1, 2, 3 } };
-    const ec_secret secret2{ { 3, 2, 1 } };
     ec_compressed public1;
     BOOST_REQUIRE(secret_to_public(public1, secret1));
+
+    const ec_secret secret2{ { 3, 2, 1 } };
     BOOST_REQUIRE(ec_add(secret1, secret2));
-    BOOST_REQUIRE_EQUAL(encode_base16(secret1), "0404040000000000000000000000000000000000000000000000000000000000");
+    BOOST_REQUIRE_EQUAL(secret1, sum);
 
     ec_compressed public2;
     BOOST_REQUIRE(secret_to_public(public2, secret1));
     BOOST_REQUIRE(ec_add(public1, secret2));
-    BOOST_REQUIRE(std::equal(public1.begin(), public1.end(), public2.begin()));
+    BOOST_REQUIRE_EQUAL(public1, public2);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__expected)
 {
     // = n - 1
     auto secret1 = base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
@@ -158,7 +181,24 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__test)
     BOOST_REQUIRE(!ec_add(public1, secret2));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply_test)
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum__expected)
+{
+    const compressed_list points
+    {
+        ec_compressed_generator,
+        ec_compressed_generator,
+        ec_compressed_generator,
+        ec_compressed_generator
+    };
+
+    ec_compressed out;
+    BOOST_REQUIRE(ec_sum(out, points));
+    BOOST_REQUIRE_EQUAL(out, generator_point_times_4);
+}
+
+// multiplication
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply__expected)
 {
     ec_secret secret1{ {0} };
     ec_secret secret2{ {0} };
@@ -172,27 +212,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply_test)
 
     ec_compressed public2;
     BOOST_REQUIRE(secret_to_public(public2, secret1));
-    BOOST_REQUIRE(std::equal(public1.begin(), public1.end(), public2.begin()));
-}
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum_test)
-{
-    static const auto one_hash = hash_literal("0100000000000000000000000000000000000000000000000000000000000000");
-
-    ec_compressed generator_point;
-    BOOST_REQUIRE(secret_to_public(generator_point, one_hash));
-
-    point_list points
-    {
-        generator_point,
-        generator_point,
-        generator_point,
-        generator_point
-    };
-
-    ec_compressed output;
-    BOOST_REQUIRE(ec_sum(output, points));
-    BOOST_REQUIRE_EQUAL(encode_base16(output), GENERATOR_POINT_MULT_4);
+    BOOST_REQUIRE_EQUAL(public1, public2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

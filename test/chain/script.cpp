@@ -21,6 +21,7 @@
 #include <sstream>
 #include <bitcoin/system.hpp>
 #include "script.hpp"
+#include "../overloads.hpp"
 
 using namespace bc::system;
 using namespace bc::system::chain;
@@ -133,15 +134,14 @@ std::string test_name(const script_test& test)
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+BOOST_AUTO_TEST_CASE(script__one__literal__expected)
+{
+    static const ec_secret big_endian_one{ { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+    BOOST_REQUIRE_EQUAL(script::one, big_endian_one);
+}
+
 // Serialization tests.
 //------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(script__one_hash__literal__same)
-{
-    static const auto hash_one = hash_literal("0000000000000000000000000000000000000000000000000000000000000001");
-    static const hash_digest one_hash{ { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
-    BOOST_REQUIRE(one_hash == hash_one);
-}
 
 BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_invalid_op_codes__success)
 {
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data__roundtrips)
     BOOST_REQUIRE(out_script.from_data(normal_output_script, false));
 
     const auto roundtrip = out_script.to_data(false);
-    BOOST_REQUIRE(roundtrip == normal_output_script);
+    BOOST_REQUIRE_EQUAL(roundtrip, normal_output_script);
 }
 
 BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
     BOOST_REQUIRE(weird.from_data(weird_raw_script, false));
 
     const auto roundtrip_result = weird.to_data(false);
-    BOOST_REQUIRE(roundtrip_result == weird_raw_script);
+    BOOST_REQUIRE_EQUAL(roundtrip_result, weird_raw_script);
 }
 
 BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
@@ -258,9 +258,9 @@ BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
     const auto& ops = instance.operations();
     BOOST_REQUIRE_EQUAL(ops.size(), 6u);
     BOOST_REQUIRE(ops[0] == opcode::push_positive_2);
-    BOOST_REQUIRE(ops[1].to_string(rule_fork::no_rules) == "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
-    BOOST_REQUIRE(ops[2].to_string(rule_fork::no_rules) == "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
-    BOOST_REQUIRE(ops[3].to_string(rule_fork::no_rules) == "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
+    BOOST_REQUIRE_EQUAL(ops[1].to_string(rule_fork::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
+    BOOST_REQUIRE_EQUAL(ops[2].to_string(rule_fork::no_rules), "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
+    BOOST_REQUIRE_EQUAL(ops[3].to_string(rule_fork::no_rules), "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
     BOOST_REQUIRE(ops[4] == opcode::push_positive_3);
     BOOST_REQUIRE(ops[5] == opcode::checkmultisig);
 }

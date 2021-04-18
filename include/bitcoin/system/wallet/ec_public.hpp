@@ -23,9 +23,9 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/ec_point.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
@@ -42,6 +42,7 @@ class BC_API ec_public
 {
 public:
     static const uint8_t mainnet_p2kh;
+    static const uint8_t testnet_p2kh;
 
     /// Constructors.
     ec_public();

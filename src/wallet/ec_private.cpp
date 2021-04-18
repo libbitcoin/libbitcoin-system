@@ -102,7 +102,7 @@ bool ec_private::is_wif(const data_slice& decoded)
         return false;
 
     return (size == wif_uncompressed_size) ||
-        decoded.data()[1 + ec_secret_size] == compressed_sentinel;
+        decoded.data()[1u + ec_secret_size] == compressed_sentinel;
 }
 
 // Factories.
@@ -115,8 +115,10 @@ ec_private ec_private::from_seed(const data_chunk& seed,
     const hd_private key(seed);
 
     // The key is invalid if parse256(IL) >= n or 0:
-    return key ? ec_private(key.secret(), address_version, true) :
-        ec_private();
+    if (!key)
+        return {};
+
+    return { key.secret(), address_version, true };
 }
 
 ec_private ec_private::from_string(const std::string& wif,
@@ -126,10 +128,10 @@ ec_private ec_private::from_string(const std::string& wif,
     if (!decode_base58(decoded, wif) || !is_wif(decoded))
         return {};
 
-    const auto compressed = decoded.size() == wif_compressed_size;
-    return compressed ?
-        ec_private(to_array<wif_compressed_size>(decoded), address_version) :
-        ec_private(to_array<wif_uncompressed_size>(decoded), address_version);
+    if (decoded.size() == wif_compressed_size)
+        return { to_array<wif_compressed_size>(decoded), address_version };
+
+    return { to_array<wif_uncompressed_size>(decoded), address_version };
 }
 
 ec_private ec_private::from_compressed(const wif_compressed& wif,
@@ -139,8 +141,8 @@ ec_private ec_private::from_compressed(const wif_compressed& wif,
         return {};
 
     const auto version = to_version(address_version, wif.front());
-    const auto secret = slice<1, ec_secret_size + 1>(wif);
-    return ec_private(secret, version, true);
+    const auto secret = slice<1u, ec_secret_size + 1u>(wif);
+    return { secret, version, true };
 }
 
 ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
@@ -150,8 +152,8 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
         return {};
 
     const auto version = to_version(address_version, wif.front());
-    const auto secret = slice<1, ec_secret_size + 1>(wif);
-    return ec_private(secret, version, false);
+    const auto secret = slice<1u, ec_secret_size + 1u>(wif);
+    return { secret, version, false };
 }
 
 // Serializer.
@@ -166,14 +168,14 @@ std::string ec_private::encoded() const
     {
         return encode_base58(build_checked_array<wif_compressed_size>(
         {
-            prefix, *secret_, to_array(compressed_sentinel)
+            prefix, secret(), to_array(compressed_sentinel)
         }));
     }
     else
     {
         return encode_base58(build_checked_array<wif_uncompressed_size>(
         {
-            prefix, *secret_
+            prefix, secret()
         }));
     }
 }
@@ -188,7 +190,7 @@ uint16_t ec_private::version() const
 
 uint8_t ec_private::payment_version() const
 {
-    return to_address_prefix(version_);
+    return to_p2kh_prefix(version_);
 }
 
 uint8_t ec_private::wif_version() const
@@ -208,14 +210,19 @@ bool ec_private::compressed() const
 // In the case of failure the key is always compressed (ec_compressed_null).
 ec_public ec_private::to_public() const
 {
+    if (!(*this))
+        return {};
+
     ec_compressed point;
-    return secret_ && secret_to_public(point, *secret_) ?
-        ec_public(point, compressed()) : ec_public();
+    if (!secret_to_public(point, secret()))
+        return {};
+
+    return { point, compressed() };
 }
 
 payment_address ec_private::to_payment_address() const
 {
-    return payment_address(*this);
+    return { *this };
 }
 
 // Operators.
@@ -234,7 +241,9 @@ bool ec_private::operator<(const ec_private& other) const
 
 bool ec_private::operator==(const ec_private& other) const
 {
-    return compress_ == other.compress_ && version_ == other.version_ &&
+    return
+        compress_ == other.compress_ &&
+        version_ == other.version_ &&
         *static_cast<const ec_scalar*>(this) == other;
 }
 

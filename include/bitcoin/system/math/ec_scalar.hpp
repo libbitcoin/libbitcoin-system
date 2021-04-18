@@ -26,29 +26,31 @@
 
 namespace libbitcoin {
 namespace system {
-
+    
+/// ec_scalar is initialized to zero.
+/// Failed operations return zero.
+/// The bool operator reflects the zero state (validity).
+/// Does not implement string serialization.
 class BC_API ec_scalar
 {
 public:
-    static const ec_scalar zero;
-
     /// Constructors.
     ec_scalar();
-    ec_scalar(const ec_secret& secret);
-    ec_scalar(const ec_scalar& scalar);
     ec_scalar(ec_scalar&& scalar);
-    ec_scalar(uint64_t value);
+    ec_scalar(const ec_scalar& scalar);
+    ec_scalar(ec_secret&& secret);
+    ec_scalar(const ec_secret& secret);
+    ec_scalar(int64_t value);
 
     /// Operators.
-    ec_scalar& operator=(const ec_secret& secret);
     ec_scalar& operator=(const ec_scalar& scalar);
     ec_scalar& operator=(ec_scalar&& scalar);
-    ec_scalar& operator=(uint64_t value);
-
-    ec_scalar operator-();
+    ec_scalar& operator=(const ec_secret& secret);
+    ec_scalar& operator=(ec_secret&& secret);
     ec_scalar& operator+=(const ec_scalar& scalar);
     ec_scalar& operator-=(const ec_scalar& scalar);
     ec_scalar& operator*=(const ec_scalar& scalar);
+    ec_scalar operator-() const;
 
     /// Cast operators.
     operator bool() const;
@@ -57,14 +59,18 @@ public:
     /// Accessors.
     const ec_secret& secret() const;
 
-protected:
-    friend ec_scalar operator+(const ec_scalar& left, const ec_scalar& right);
-    friend ec_scalar operator-(const ec_scalar& left, const ec_scalar& right);
-    friend ec_scalar operator*(const ec_scalar& left, const ec_scalar& right);
+private:
+    static ec_scalar from_int64(int64_t value);
+    bool is_zero() const;
 
-    std::shared_ptr<ec_secret> secret_;
+    // This should be const, apart from the need to implement assignment.
+    ec_secret secret_;
 };
 
+bool operator==(int64_t left, const ec_scalar& right);
+bool operator!=(int64_t left, const ec_scalar& right);
+bool operator==(const ec_scalar& left, int64_t right);
+bool operator!=(const ec_scalar& left, int64_t right);
 bool operator==(const ec_scalar& left, const ec_scalar& right);
 bool operator!=(const ec_scalar& left, const ec_scalar& right);
 ec_scalar operator+(const ec_scalar& left, const ec_scalar& right);

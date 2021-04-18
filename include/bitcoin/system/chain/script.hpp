@@ -53,6 +53,9 @@ public:
     typedef machine::script_version script_version;
     typedef std::vector<script> list;
 
+    /// Consensus sentinel.
+    static const hash_digest one;
+
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -189,7 +192,7 @@ public:
     static operation::list to_pay_key_hash_pattern(const short_hash& hash);
     static operation::list to_pay_script_hash_pattern(const short_hash& hash);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,
-        const point_list& points);
+        const compressed_list& points);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points);
     static operation::list to_pay_witness_key_hash_pattern(

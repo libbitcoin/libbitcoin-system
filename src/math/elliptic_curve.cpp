@@ -66,6 +66,7 @@ bool serialize(const secp256k1_context* context, byte_array<Size>& out,
     return size == Size;
 }
 
+// parse, add, serialize
 template <size_t Size>
 bool ec_add(const secp256k1_context* context, byte_array<Size>& in_out,
     const ec_secret& secret)
@@ -76,6 +77,7 @@ bool ec_add(const secp256k1_context* context, byte_array<Size>& in_out,
         serialize(context, in_out, pubkey);
 }
 
+// parse, multiply, serialize
 template <size_t Size>
 bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
     const ec_secret& secret)
@@ -86,6 +88,7 @@ bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
         serialize(context, in_out, pubkey);
 }
 
+// parse, negate, serialize
 template <size_t Size>
 bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
 {
@@ -95,6 +98,7 @@ bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
         serialize(context, in_out, pubkey);
 }
 
+// create, serialize (secrets are normal)
 template <size_t Size>
 bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
     const ec_secret& secret)
@@ -104,6 +108,8 @@ bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
         serialize(context, out, pubkey);
 }
 
+
+// parse, recover, serialize
 template <size_t Size>
 bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
     const recoverable_signature& recoverable, const hash_digest& hash)
@@ -118,6 +124,7 @@ bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
             serialize(context, out, pubkey);
 }
 
+// normalize, verify (parse???) 
 bool verify_signature(const secp256k1_context* context,
     const secp256k1_pubkey point, const hash_digest& hash,
     const ec_signature& signature)
@@ -133,7 +140,7 @@ bool verify_signature(const secp256k1_context* context,
     return secp256k1_ecdsa_verify(context, &normal, hash.data(), &point) == 1;
 }
 
-// Add and multiply EC values
+// Add EC values
 // ----------------------------------------------------------------------------
 
 bool ec_add(ec_compressed& point, const ec_secret& scalar)
@@ -148,12 +155,48 @@ bool ec_add(ec_uncompressed& point, const ec_secret& scalar)
     return ec_add(context, point, scalar);
 }
 
+// secrets are normal
 bool ec_add(ec_secret& left, const ec_secret& right)
 {
     const auto context = verification.context();
-    return secp256k1_ec_privkey_tweak_add(context, left.data(),
+    return secp256k1_ec_seckey_tweak_add(context, left.data(),
         right.data()) == 1;
 }
+
+bool ec_add(ec_compressed& left, const ec_compressed& right)
+{
+    return ec_sum(left, { left, right });
+}
+
+bool ec_add(ec_compressed& left, const ec_uncompressed& right)
+{
+    ec_compressed out;
+    return compress(out, right) && ec_add(left, out);
+}
+
+// combine, serialize (parse???)
+bool ec_sum(ec_compressed& out, const compressed_list& points)
+{
+    if (points.empty())
+        return false;
+
+    secp256k1_pubkey pubkey;
+    ptr_vector<secp256k1_pubkey> keys(points.size());
+    const auto context = verification.context();
+
+    for (const auto& point: points)
+    {
+        keys.push_back(new secp256k1_pubkey);
+        if (!parse(context, keys.back(), point))
+            return false;
+    }
+
+    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.c_array(),
+        points.size()) == 1 && serialize(context, out, pubkey);
+}
+
+// Multiply EC values
+// ----------------------------------------------------------------------------
 
 bool ec_multiply(ec_compressed& point, const ec_secret& scalar)
 {
@@ -167,17 +210,22 @@ bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar)
     return ec_multiply(context, point, scalar);
 }
 
+// secrets are normal
 bool ec_multiply(ec_secret& left, const ec_secret& right)
 {
     const auto context = verification.context();
-    return secp256k1_ec_privkey_tweak_mul(context, left.data(),
+    return secp256k1_ec_seckey_tweak_mul(context, left.data(),
         right.data()) == 1;
 }
 
+// Negate EC values
+// ----------------------------------------------------------------------------
+
+// secrets are normal
 bool ec_negate(ec_secret& scalar)
 {
     const auto context = verification.context();
-    return secp256k1_ec_privkey_negate(context, scalar.data()) == 1;
+    return secp256k1_ec_seckey_negate(context, scalar.data()) == 1;
 }
 
 bool ec_negate(ec_compressed& point)
@@ -186,21 +234,10 @@ bool ec_negate(ec_compressed& point)
     return ec_negate(context, point);
 }
 
-bool ec_sum(ec_compressed& result, const point_list& points)
+bool ec_negate(ec_uncompressed& point)
 {
-    secp256k1_pubkey pubkey;
-    ptr_vector<secp256k1_pubkey> keys(points.size());
     const auto context = verification.context();
-
-    for (const auto& point: points)
-    {
-        keys.push_back(new secp256k1_pubkey);
-        if (!parse(context, keys.back(), point))
-            return false;
-    }
-
-    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.c_array(),
-        points.size()) == 1 && serialize(context, result, pubkey);
+    return ec_negate(context, point);
 }
 
 // Convert keys
@@ -352,6 +389,7 @@ bool encode_signature(der_signature& out, const ec_signature& signature)
 // EC sign/verify
 // ----------------------------------------------------------------------------
 
+// create (serialize???) (secrets are normal)
 bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
 {
     secp256k1_ecdsa_signature signature;
@@ -365,6 +403,7 @@ bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
     return true;
 }
 
+// parse<>, verify<>
 bool verify_signature(const ec_compressed& point, const hash_digest& hash,
     const ec_signature& signature)
 {
@@ -374,6 +413,7 @@ bool verify_signature(const ec_compressed& point, const hash_digest& hash,
         verify_signature(context, pubkey, hash, signature);
 }
 
+// parse<>, verify<>
 bool verify_signature(const ec_uncompressed& point, const hash_digest& hash,
     const ec_signature& signature)
 {
@@ -383,18 +423,19 @@ bool verify_signature(const ec_uncompressed& point, const hash_digest& hash,
         verify_signature(context, pubkey, hash, signature);
 }
 
+// normalize, verify (signature parse???)
 bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature)
 {
     // Copy to avoid exposing external types.
-    secp256k1_ecdsa_signature parsed;
-    std::copy_n(signature.begin(), ec_signature_size, std::begin(parsed.data));
+    secp256k1_ecdsa_signature copy;
+    std::copy_n(signature.begin(), ec_signature_size, std::begin(copy.data));
 
     // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
     // bitcoin does not have such a limitation, so we always normalize.
     secp256k1_ecdsa_signature normal;
     const auto context = verification.context();
-    secp256k1_ecdsa_signature_normalize(context, &normal, &parsed);
+    secp256k1_ecdsa_signature_normalize(context, &normal, &copy);
 
     // This uses a data slice and calls secp256k1_ec_pubkey_parse() in place of
     // parse() so that we can support the der_verify data_chunk optimization.
@@ -408,6 +449,7 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
 // Recoverable sign/recover
 // ----------------------------------------------------------------------------
 
+// sign, serialize (secrets are normal)
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash)
 {

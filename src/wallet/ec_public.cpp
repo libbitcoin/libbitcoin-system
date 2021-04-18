@@ -34,6 +34,7 @@ namespace system {
 namespace wallet {
 
 const uint8_t ec_public::mainnet_p2kh = 0x00;
+const uint8_t ec_public::testnet_p2kh = 0x6f;
 
 ec_public::ec_public()
   : ec_public(ec_point{})
@@ -89,18 +90,18 @@ bool ec_public::is_point(const data_slice& decoded)
 ec_public ec_public::from_private(const ec_private& secret)
 {
     if (!secret)
-        return ec_public();
+        return {};
 
-    return ec_public(secret.to_public());
+    return { secret.to_public() };
 }
 
 ec_public ec_public::from_string(const std::string& base16)
 {
     data_chunk decoded;
     if (!decode_base16(decoded, base16))
-        return ec_public();
+        return {};
 
-    return ec_public(decoded);
+    return { decoded };
 }
 
 ec_public ec_public::from_data(const data_chunk& decoded)
@@ -109,11 +110,13 @@ ec_public ec_public::from_data(const data_chunk& decoded)
         return {};
 
     if (is_compressed_key(decoded))
-        return ec_public(to_array<ec_compressed_size>(decoded), true);
+        return ec_public{ to_array<ec_compressed_size>(decoded), true };
 
     ec_compressed compressed;
-    return system::compress(compressed, to_array<ec_uncompressed_size>(decoded)) ?
-        ec_public(compressed, false) : ec_public();
+    if (!system::compress(compressed, to_array<ec_uncompressed_size>(decoded)))
+         return {};
+
+    return { compressed, false };
 }
 
 ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
@@ -122,8 +125,10 @@ ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
         return {};
 
     ec_compressed compressed;
-    return system::compress(compressed, point) ?
-        ec_public(compressed, compress) : ec_public();
+    if (!system::compress(compressed, point))
+        return {};
+
+    return { compressed, compress };
 }
 
 // Serializer.
@@ -132,7 +137,7 @@ ec_public ec_public::from_point(const ec_uncompressed& point, bool compress)
 std::string ec_public::encoded() const
 {
     if (compressed())
-        return encode_base16(point_);
+        return encode_base16(point());
 
     // If the point is valid it should always decompress, but if not, is null.
     ec_uncompressed uncompressed;
@@ -159,7 +164,7 @@ bool ec_public::to_data(data_chunk& out) const
     if (compressed())
     {
         out.resize(ec_compressed_size);
-        std::copy_n(point_.begin(), ec_compressed_size, out.begin());
+        std::copy_n(point().begin(), ec_compressed_size, out.begin());
         return true;
     }
 
@@ -179,12 +184,12 @@ bool ec_public::to_uncompressed(ec_uncompressed& out) const
     if (!(*this))
         return false;
 
-    return decompress(out, to_array<ec_compressed_size>(point_));
+    return decompress(out, to_array<ec_compressed_size>(point()));
 }
 
 payment_address ec_public::to_payment_address(uint8_t version) const
 {
-    return payment_address(*this, version);
+    return { *this, version };
 }
 
 // Operators.
@@ -203,7 +208,7 @@ bool ec_public::operator<(const ec_public& other) const
 
 bool ec_public::operator==(const ec_public& other) const
 {
-    return compress_ == other.compress_ && point_ == other.point_;
+    return compress_ == other.compress_ && point() == other.point();
 }
 
 bool ec_public::operator!=(const ec_public& other) const

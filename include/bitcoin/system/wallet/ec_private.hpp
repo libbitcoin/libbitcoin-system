@@ -22,12 +22,13 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <bitcoin/system/compat.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 
 namespace libbitcoin {
@@ -50,32 +51,35 @@ class BC_API ec_private
 public:
     static const uint8_t compressed_sentinel;
 
+    static const uint8_t mainnet_wif;
+    static const uint8_t mainnet_p2kh;
+
+    static const uint8_t testnet_wif;
+    static const uint8_t testnet_p2kh;
+
     // WIF carries a compression flag for payment address generation but
     // assumes a mapping to payment address version. This is insufficient
     // as a parameterized mapping is required, so we use the same technique as
     // with hd keys, merging the two necessary values into one version.
-    static const uint8_t mainnet_wif;
-    static const uint8_t mainnet_p2kh;
     static const uint16_t mainnet;
-
-    static const uint8_t testnet_wif;
-    static const uint8_t testnet_p2kh;
     static const uint16_t testnet;
 
-    static uint8_t to_address_prefix(uint16_t version)
+    static uint8_t to_p2kh_prefix(uint16_t version)
     {
-        return version & 0x00FF;
+        // Recover p2kh prefix.
+        return version & 0x00ff;
     }
 
     static uint8_t to_wif_prefix(uint16_t version)
     {
+        // Recover wif prefix.
         return version >> 8;
     }
 
-    // Unfortunately can't use this below to define mainnet (MSVC).
-    static uint16_t to_version(uint8_t address, uint8_t wif)
+    static uint16_t to_version(uint8_t p2kh, uint8_t wif)
     {
-        return uint16_t(wif) << 8 | address;
+        // Combine prefixes.
+        return uint16_t(wif) << 8 | p2kh;
     }
 
     /// Constructors.

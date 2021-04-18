@@ -40,15 +40,15 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const uint32_t hd_public::mainnet = 76067358;
-const uint32_t hd_public::testnet = 70617039;
+const uint32_t hd_public::mainnet = 0x0488b21e;
+const uint32_t hd_public::testnet = 0x043587cf;
 
 // hd_public
 // ----------------------------------------------------------------------------
 
 hd_public::hd_public()
   : valid_(false), chain_(null_hash), lineage_({0, 0, 0, 0}),
-    point_(null_compressed_point)
+    point_(null_ec_compressed)
 {
 }
 

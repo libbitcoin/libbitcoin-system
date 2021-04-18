@@ -27,45 +27,56 @@
 namespace libbitcoin {
 namespace system {
 
+/// ec_point is initialized to an invalid state.
+/// Failed operations return an invalid state.
+/// The bool operator reflects the validity state.
+/// Does not implement string serialization.
 class BC_API ec_point
 {
 public:
-    static const ec_point G;
     static const uint8_t invalid;
     static const uint8_t compressed_even;
     static const uint8_t compressed_odd;
     static const uint8_t uncompressed;
+    static const ec_point generator;
 
     /// Constructors.
     ec_point();
-    ec_point(const ec_compressed& point);
+    ec_point(ec_point&& point);
+    ec_point(const ec_point& point);
+    ec_point(ec_compressed&& compressed);
+    ec_point(const ec_compressed& compressed);
 
     /// Operators.
-    // TODO: add equality and inequality operators.
-    ec_point operator-() const;
+    ec_point& operator=(ec_point&& point);
+    ec_point& operator=(const ec_point& point);
+    ec_point& operator=(ec_compressed&& compressed);
+    ec_point& operator=(const ec_compressed& compressed);
     ec_point& operator+=(const ec_point& point);
     ec_point& operator-=(const ec_point& point);
-    ec_point& operator=(const ec_compressed& compressed);
-    friend ec_point operator+(ec_point left, const ec_point& right);
-    friend ec_point operator-(ec_point left, const ec_point& right);
-    friend ec_point operator*(ec_point left, const ec_scalar& right);
+    ec_point& operator*=(const ec_scalar& scalar);
+    ec_point operator-() const;
 
     /// Cast operators.
     operator bool() const;
-    operator ec_compressed() const;
+    operator const ec_compressed&() const;
 
     /// Accessors.
     const ec_compressed& point() const;
 
-protected:
+private:
+    bool is_valid() const;
+
     // This should be const, apart from the need to implement assignment.
     ec_compressed point_;
 };
 
-ec_point operator+(ec_point left, const ec_point& right);
-ec_point operator-(ec_point left, const ec_point& right);
-ec_point operator*(ec_point left, const ec_scalar& right);
-ec_point operator*(const ec_scalar& left, ec_point right);
+bool operator==(const ec_point& left, const ec_point& right);
+bool operator!=(const ec_point& left, const ec_point& right);
+ec_point operator+(const ec_point& left, const ec_point& right);
+ec_point operator-(const ec_point& left, const ec_point& right);
+ec_point operator*(const ec_point& left, const ec_scalar& right);
+ec_point operator*(const ec_scalar& left, const ec_point& right);
 
 } // namespace system
 } // namespace libbitcoin

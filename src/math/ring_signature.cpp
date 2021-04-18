@@ -65,10 +65,10 @@ static bool generate_keys_map(secret_keys_map& out, const secret_list& secrets)
 
 // Make a list of public keys for which we have the corresponding secret key
 // in a single ring of public keys.
-static const point_list known_keys_in_ring(const secret_keys_map& secret_keys,
-    const point_list& ring)
+static const compressed_list known_keys_in_ring(
+    const secret_keys_map& secret_keys, const compressed_list& ring)
 {
-    point_list known_ring;
+    compressed_list known_ring;
 
     for (const auto& key: ring)
         if (secret_keys.find(key) != secret_keys.end())
@@ -120,7 +120,7 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
     BITCOIN_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    const auto empty = [](const point_list& ring)
+    const auto empty = [](const compressed_list& ring)
     {
         return ring.empty();
     };
@@ -136,14 +136,14 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
 static ec_point calculate_R(const ec_scalar& s, const ec_scalar& e,
     const ec_point& P)
 {
-    return s * ec_point::G + e * P;
+    return s * ec_point::generator + e * P;
 }
 
-static ec_point calculate_last_R_signing(const point_list& ring,
+static ec_point calculate_last_R_signing(const compressed_list& ring,
     uint32_t i, const hash_digest& digest, const ring_signature& signature,
     const uint32_t known_key_index, const secret_list& salts)
 {
-    auto R_i_j = salts[i] * ec_point::G;
+    auto R_i_j = salts[i] * ec_point::generator;
     if (!R_i_j)
         return ec_point();
 
@@ -153,17 +153,18 @@ static ec_point calculate_last_R_signing(const point_list& ring,
         BITCOIN_ASSERT(j < signature.proofs[i].size());
         const ec_scalar s = signature.proofs[i][j];
         if (!s)
-            return ec_point();
+            return {};
 
         // Calculate e and R until the end of this ring.
         const auto e_i_j = borromean_hash(digest, R_i_j.point(), i, j);
         if (!e_i_j)
-            return ec_point();
+            return {};
 
         R_i_j = calculate_R(s, e_i_j, ring[j]);
         if (!R_i_j)
-            return ec_point();
+            return {};
     }
+
     return R_i_j;
 }
 
@@ -183,8 +184,9 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
         const auto known_key_index = known_key_indexes[i];
 
         // Calculate the last R value.
-        const auto last_R = calculate_last_R_signing(
-            ring, i, digest, out, known_key_index, salts);
+        const auto last_R = calculate_last_R_signing(ring, i, digest, out,
+            known_key_index, salts);
+
         if (!last_R)
             return false;
 
@@ -198,7 +200,7 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
 }
 
 static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
-    const ring_signature& signature, const point_list& ring,
+    const ring_signature& signature, const compressed_list& ring,
     const hash_digest& digest, const uint32_t i,
     const uint32_t known_key_index)
 {
@@ -208,7 +210,7 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
     // Loop until index of known key.
     for (uint32_t j = 0; j < known_key_index; ++j)
     {
-        const ec_scalar s = signature.proofs[i][j];
+        const ec_scalar s{ signature.proofs[i][j] };
         if (!s)
             return false;
 
@@ -265,7 +267,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
     return true;
 }
 
-static ec_point calculate_last_R_verify(const point_list& ring,
+static ec_point calculate_last_R_verify(const compressed_list& ring,
     ec_scalar e_i_j, uint32_t i, const hash_digest& digest,
     const ring_signature& signature)
 {
@@ -278,18 +280,19 @@ static ec_point calculate_last_R_verify(const point_list& ring,
         const ec_scalar s = signature.proofs[i][j];
 
         if (!s || !e_i_j)
-            return ec_point();
+            return {};
 
         // Calculate R and e values until the end.
         R_i_j = calculate_R(s, e_i_j, ring[j]);
         if (!R_i_j)
-            return ec_point();
+            return {};
 
         // Calculate the next e value.
         e_i_j = borromean_hash(digest, R_i_j.point(), i, j + 1u);
         if (!e_i_j)
-            return ec_point();
+            return {};
     }
+
     return R_i_j;
 }
 
@@ -298,7 +301,7 @@ static ec_point calculate_last_R_verify(const point_list& ring,
 
 hash_digest digest(const data_slice& message, const key_rings& rings)
 {
-    const auto sum = [](size_t size, const point_list& ring)
+    const auto sum = [](size_t size, const compressed_list& ring)
     {
         return size + ring.size() * ec_compressed_size;
     };
@@ -309,6 +312,7 @@ hash_digest digest(const data_slice& message, const key_rings& rings)
     data_chunk data;
     data.reserve(size);
     extend_data(data, message);
+
     for (const auto& ring: rings)
         for (const auto& key: ring)
             extend_data(data, key);
@@ -349,12 +353,11 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     const ring_signature& signature)
 {
     // Guard against overflow.
-    if (rings.size() >= max_uint32)
+    if (rings.size() >= max_uint32 || signature.proofs.size() != rings.size())
         return false;
 
     data_chunk e0_data;
     e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
-    BITCOIN_ASSERT(signature.proofs.size() == rings.size());
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {

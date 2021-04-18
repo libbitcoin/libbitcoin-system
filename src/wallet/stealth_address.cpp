@@ -63,7 +63,7 @@ const size_t stealth_address::min_filter_bits = 1 * byte_bits;
 const size_t stealth_address::max_filter_bits = sizeof(uint32_t) * byte_bits;
 
 stealth_address::stealth_address()
-  : valid_(false), version_(0), scan_key_(null_compressed_point),
+  : valid_(false), version_(0), scan_key_(null_ec_compressed),
     spend_keys_(), signatures_(0), filter_()
 {
 }
@@ -86,7 +86,7 @@ stealth_address::stealth_address(const data_chunk& decoded)
 }
 
 stealth_address::stealth_address(const binary& filter,
-    const ec_compressed& scan_key, const point_list& spend_keys,
+    const ec_compressed& scan_key, const compressed_list& spend_keys,
     uint8_t signatures, uint8_t version)
   : stealth_address(from_stealth(filter, scan_key, spend_keys, signatures,
         version))
@@ -94,7 +94,7 @@ stealth_address::stealth_address(const binary& filter,
 }
 
 stealth_address::stealth_address(uint8_t version, const binary& filter,
-    const ec_compressed& scan_key, const point_list& spend_keys,
+    const ec_compressed& scan_key, const compressed_list& spend_keys,
     uint8_t signatures)
   : valid_(true), filter_(filter), scan_key_(scan_key),
     spend_keys_(spend_keys), signatures_(signatures), version_(version)
@@ -146,7 +146,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
         return {};
 
     // We don't explicitly save 'reuse', instead we add to spend_keys_.
-    point_list spend_keys;
+    compressed_list spend_keys;
     if (options == reuse_key_flag)
         spend_keys.push_back(scan_key);
 
@@ -186,7 +186,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
 // This corrects signature and spend_keys.
 stealth_address stealth_address::from_stealth(const binary& filter,
-    const ec_compressed& scan_key, const point_list& spend_keys,
+    const ec_compressed& scan_key, const compressed_list& spend_keys,
     uint8_t signatures, uint8_t version)
 {
     // Ensure there is at least one spend key.
@@ -257,7 +257,7 @@ uint8_t stealth_address::signatures() const
     return signatures_;
 }
 
-const point_list& stealth_address::spend_keys() const
+const compressed_list& stealth_address::spend_keys() const
 {
     return spend_keys_;
 }

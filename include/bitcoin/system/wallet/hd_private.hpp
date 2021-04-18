@@ -43,12 +43,14 @@ public:
 
     static uint32_t to_prefix(uint64_t prefixes)
     {
+        // Recover private prefix.
         return prefixes >> 32;
     }
 
     static uint64_t to_prefixes(uint32_t private_prefix,
         uint32_t public_prefix)
     {
+        // Combine prefixes.
         return uint64_t(private_prefix) << 32 | public_prefix;
     }
 

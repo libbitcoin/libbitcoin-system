@@ -56,7 +56,7 @@ namespace chain {
 using namespace bc::system::machine;
 using namespace boost::adaptors;
 
-static const auto one_hash = hash_literal(
+const hash_digest script::one = hash_literal(
     "0000000000000000000000000000000000000000000000000000000000000001");
 
 // Constructors.
@@ -647,10 +647,10 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     const auto sighash = to_sighash_enum(sighash_type);
 
     //*************************************************************************
-    // CONSENSUS: wacky satoshi behavior (continuing with null hash).
+    // CONSENSUS: wacky satoshi behavior (continuing with one hash).
     //*************************************************************************
     if (is_index_overflow(tx, input_index, sighash))
-        return one_hash;
+        return script::one;
 
     //*************************************************************************
     // CONSENSUS: more wacky satoshi behavior.
@@ -1127,7 +1127,7 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
 
 // TODO: limit to 20 for consistency with op_check_multisig.
 operation::list script::to_pay_multisig_pattern(uint8_t signatures,
-    const point_list& points)
+    const compressed_list& points)
 {
     data_stack chunks;
     chunks.reserve(points.size());
