@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__script_testnet__valid_expected)
 
 // construct payment:
 
-BOOST_AUTO_TEST_CASE(payment_address__construct__payment__valid_expected)
+BOOST_AUTO_TEST_CASE(payment_address__construct__copy_payment__valid_expected)
 {
     payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
@@ -227,16 +227,16 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__payment__valid_expected)
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__construct__payment_testnet__valid_expected)
+BOOST_AUTO_TEST_CASE(payment_address__construct__move_payment_testnet__valid_expected)
 {
     payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT_TESTNET));
-    const payment_address address(pay);
+    const payment_address address(std::move(pay));
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT_TESTNET);
 }
 
-// construct copy:
+// construct self:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
 {
@@ -244,6 +244,16 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
     const payment_address address(pay);
     const payment_address copy(address);
+    BOOST_REQUIRE(copy);
+    BOOST_REQUIRE_EQUAL(copy.encoded(), ADDRESS_SCRIPT);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__move__valid_expected)
+{
+    payment::value_type pay;
+    BOOST_REQUIRE(decode_base16(pay, PAYMENT));
+    payment_address address(pay);
+    const payment_address copy(std::move(address));
     BOOST_REQUIRE(copy);
     BOOST_REQUIRE_EQUAL(copy.encoded(), ADDRESS_SCRIPT);
 }
