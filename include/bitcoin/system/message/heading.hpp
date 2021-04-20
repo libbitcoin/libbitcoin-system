@@ -84,28 +84,22 @@ public:
     static heading factory(reader& source);
 
     heading();
-    heading(uint32_t magic, const std::string& command, uint32_t payload_size,
-        uint32_t checksum);
-    heading(uint32_t magic, std::string&& command, uint32_t payload_size,
-        uint32_t checksum);
+    heading(uint32_t magic, const std::string& command,
+        const data_chunk& payload);
     heading(const heading& other);
     heading(heading&& other);
 
     uint32_t magic() const;
     void set_magic(uint32_t value);
 
-    std::string& command();
     const std::string& command() const;
     void set_command(const std::string& value);
     void set_command(std::string&& value);
 
     uint32_t payload_size() const;
-    void set_payload_size(uint32_t value);
-
-    uint32_t checksum() const;
-    void set_checksum(uint32_t value);
 
     message_type type() const;
+    bool verify_checksum(const data_slice& body) const;
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -122,6 +116,10 @@ public:
 
     bool operator==(const heading& other) const;
     bool operator!=(const heading& other) const;
+
+protected:
+    heading(uint32_t magic, const std::string& command, uint32_t payload_size,
+        uint32_t checksum);
 
 private:
     uint32_t magic_;

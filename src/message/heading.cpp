@@ -89,15 +89,18 @@ heading::heading()
 }
 
 heading::heading(uint32_t magic, const std::string& command,
-    uint32_t payload_size, uint32_t checksum)
-  : magic_(magic), command_(command), payload_size_(payload_size),
-    checksum_(checksum)
+    const data_chunk& payload)
+  : heading(magic, command, static_cast<uint32_t>(payload.size()),
+      network_checksum(payload))
 {
+    if (payload.size() > max_uint32)
+        reset();
 }
 
-heading::heading(uint32_t magic, std::string&& command, uint32_t payload_size,
-    uint32_t checksum)
-  : magic_(magic), command_(std::move(command)), payload_size_(payload_size),
+// protected
+heading::heading(uint32_t magic, const std::string& command,
+    uint32_t payload_size, uint32_t checksum)
+  : magic_(magic), command_(command), payload_size_(payload_size),
     checksum_(checksum)
 {
 }
@@ -265,11 +268,6 @@ void heading::set_magic(uint32_t value)
     magic_ = value;
 }
 
-std::string& heading::command()
-{
-    return command_;
-}
-
 const std::string& heading::command() const
 {
     return command_;
@@ -290,19 +288,9 @@ uint32_t heading::payload_size() const
     return payload_size_;
 }
 
-void heading::set_payload_size(uint32_t value)
+bool heading::verify_checksum(const data_slice& body) const
 {
-    payload_size_ = value;
-}
-
-uint32_t heading::checksum() const
-{
-    return checksum_;
-}
-
-void heading::set_checksum(uint32_t value)
-{
-    checksum_ = value;
+    return network_checksum(body) == checksum_;
 }
 
 heading& heading::operator=(heading&& other)

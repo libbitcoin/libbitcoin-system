@@ -20,10 +20,18 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace message {
+
+// The little-endian encoding is a private data format.
+uint32_t network_checksum(const data_slice& data)
+{
+    return from_little_endian_unsafe<uint32_t>(bitcoin_hash(data).begin());
+}
 
 size_t variable_uint_size(uint64_t value)
 {
