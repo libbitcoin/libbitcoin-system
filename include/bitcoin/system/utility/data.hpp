@@ -79,15 +79,21 @@ data_chunk to_chunk(const Source& bytes);
 
 /**
  * Concatenate several data slices into a single data_chunk.
- * @param  extra_reserve  Pad result with this size, filled with 0x00.
+ * @param  extra_reserve  Reserve but do not allocate these additional bytes.
  */
 inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve=0);
 
 /**
- * Extend iterable target by appending extension.
+ * Extend insertable target by copying extension.
  */
 template <class Target, class Extension>
-void extend_data(Target& target, const Extension& extension);
+Target& extend_data(Target& target, const Extension& extension);
+
+/**
+ * Extend insertable target by moving extension.
+ */
+template <class Target, class Extension>
+Target& extend_data(Target& target, Extension&& extension);
 
 /**
  * Extract a subarray from start position with length end minus start.
@@ -123,16 +129,16 @@ bool starts_with(const typename Source::const_iterator& begin,
     const typename Source::const_iterator& end, const Source& value);
 
 /**
- * Perform an exclusive or (xor) across two buffers to the length specified.
- * Return the resulting buffer.
+ * Perform an exclusive or (xor) on two arrays to specified length.
+ * Return the resulting array.
  */
 template <size_t Size, size_t Size1, size_t Size2>
 byte_array<Size> xor_data(const byte_array<Size1>& bytes1,
     const byte_array<Size2>& bytes2);
 
 /**
- * Perform an exclusive or (xor) across two buffers to the length specified.
- * Return the resulting buffer.
+ * Perform an exclusive or (xor) on two arrays at specified offsets and length.
+ * Return the resulting array.
  */
 template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1,
     size_t Size2>

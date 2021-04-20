@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <initializer_list>
+#include <utility>
 #include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -65,6 +65,7 @@ data_chunk to_chunk(const Source& bytes)
     return data_chunk(bytes.begin(), bytes.end());
 }
 
+// TODO: move this to cpp file (only reason for inline here).
 inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
 {
     size_t size = 0;
@@ -77,15 +78,26 @@ inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
     for (const auto& slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
 
-    // Pad any unfilled remainder of the vector with zeros.
-    out.insert(out.end(), reserved - size, 0x00);
     return out;
 }
 
 template <class Target, class Extension>
-void extend_data(Target& bytes, const Extension& other)
+Target& extend_data(Target& target, const Extension& extension)
 {
-    bytes.insert(std::end(bytes), std::begin(other), std::end(other));
+    target.insert(std::end(target), std::begin(extension),
+        std::end(extension));
+
+    return target;
+}
+
+template <class Target, class Extension>
+Target& extend_data(Target& target, Extension&& extension)
+{
+    target.insert(std::end(target),
+        std::make_move_iterator(std::begin(extension)),
+        std::make_move_iterator(std::end(extension)));
+
+    return target;
 }
 
 // std::array<> is used in place of byte_array<> to enable Size deduction.
@@ -94,7 +106,7 @@ byte_array<End - Start> slice(const byte_array<Size>& bytes)
 {
     static_assert(End <= Size, "Slice end must not exceed array size.");
     byte_array<End - Start> out;
-    std::copy(std::begin(bytes) + Start, std::begin(bytes) + End, out.begin());
+    std::copy(bytes.begin() + Start, bytes.begin() + End, out.begin());
     return out;
 }
 
