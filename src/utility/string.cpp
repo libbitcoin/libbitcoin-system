@@ -87,7 +87,8 @@ string_list split_regex(const std::string& sentence,
 
 bool starts_with(const std::string& value, const std::string& prefix)
 {
-    return value.substr(0, prefix.length()) == prefix;
+    return prefix.length() <= value.length() &&
+        (value.substr(0, prefix.length()) == prefix);
 }
 
 std::string to_string(const data_slice& source)
