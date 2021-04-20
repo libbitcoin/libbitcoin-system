@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(point__checksum__all_ones__returns_all_ones)
     BOOST_REQUIRE_EQUAL(instance.checksum(), 0xffffffffffffffff);
 }
 
-BOOST_AUTO_TEST_CASE(point__checksum__all_zeroes__returns_all_zeroes)
+BOOST_AUTO_TEST_CASE(point__checksum__all_zeroes__returns_all_zeros)
 {
     static const auto tx_hash = hash_literal("0000000000000000000000000000000000000000000000000000000000000000");
     chain::point instance(tx_hash, 0x00000000);

@@ -110,8 +110,6 @@ ec_point& ec_point::operator+=(const ec_point& point)
     if (!is_valid())
         return *this;
 
-    // 1 copy and 2 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this + point);
     return *this;
 }
@@ -121,8 +119,6 @@ ec_point& ec_point::operator-=(const ec_point& point)
     if (!is_valid())
         return *this;
 
-    // 2 copies and 3 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this - point);
     return *this;
 }
@@ -132,8 +128,6 @@ ec_point& ec_point::operator*=(const ec_scalar& point)
     if (!is_valid())
         return *this;
 
-    // 1 copy and 2 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this * point);
     return *this;
 }
@@ -146,7 +140,6 @@ ec_point ec_point::operator-() const
     if (!is_valid())
         return {};
 
-    // 1 copy and 1 construction
     auto out = point_;
     if (!ec_negate(out))
         return {};
@@ -162,7 +155,6 @@ ec_point operator+(const ec_point& left, const ec_point& right)
     if (!left || !right)
         return {};
 
-    // 1 copy and 1 construction
     ec_compressed out = left.point();
     if (!ec_add(out, right.point()))
         return {};
@@ -175,7 +167,6 @@ ec_point operator-(const ec_point& left, const ec_point& right)
     if (!left || !right)
         return {};
 
-    // 2 copies and 2 constructions
     return left + -right;
 }
 
@@ -184,7 +175,6 @@ ec_point operator*(const ec_point& left, const ec_scalar& right)
     if (!left || !right)
         return {};
 
-    // 1 copy and 1 construction
     auto out = left.point();
     if (!ec_multiply(out, right.secret()))
         return {};
@@ -194,7 +184,6 @@ ec_point operator*(const ec_point& left, const ec_scalar& right)
 
 ec_point operator*(const ec_scalar& left, const ec_point& right)
 {
-    // 1 copy and 1 construction
     return right * left;
 }
 
