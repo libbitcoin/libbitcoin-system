@@ -691,6 +691,7 @@ if (with-tests)
         "../../test/utility/thread.cpp"
         "../../test/utility/tiff.cpp"
         "../../test/wallet/bitcoin_uri.cpp"
+        "../../test/wallet/checked.cpp"
         "../../test/wallet/dictionary.cpp"
         "../../test/wallet/ec_private.cpp"
         "../../test/wallet/ec_public.cpp"

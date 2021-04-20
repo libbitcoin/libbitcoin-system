@@ -507,6 +507,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\bitcoin_uri.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionaries.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\ec_private.hpp" />
@@ -594,6 +595,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\string.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\subscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\track.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\dictionary.ipp" />
     <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />

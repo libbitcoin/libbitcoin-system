@@ -206,6 +206,7 @@
 #include <bitcoin/system/utility/work.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 #include <bitcoin/system/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/checked.hpp>
 #include <bitcoin/system/wallet/dictionaries.hpp>
 #include <bitcoin/system/wallet/dictionary.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>

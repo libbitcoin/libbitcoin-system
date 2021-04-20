@@ -389,6 +389,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/thread.cpp \
     test/utility/tiff.cpp \
     test/wallet/bitcoin_uri.cpp \
+    test/wallet/checked.cpp \
     test/wallet/dictionary.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
@@ -536,6 +537,7 @@ include_bitcoin_system_impl_utility_HEADERS = \
 
 include_bitcoin_system_impl_walletdir = ${includedir}/bitcoin/system/impl/wallet
 include_bitcoin_system_impl_wallet_HEADERS = \
+    include/bitcoin/system/impl/wallet/checked.ipp \
     include/bitcoin/system/impl/wallet/dictionaries.ipp \
     include/bitcoin/system/impl/wallet/dictionary.ipp
 
@@ -700,6 +702,7 @@ include_bitcoin_system_utility_HEADERS = \
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/bitcoin_uri.hpp \
+    include/bitcoin/system/wallet/checked.hpp \
     include/bitcoin/system/wallet/dictionaries.hpp \
     include/bitcoin/system/wallet/dictionary.hpp \
     include/bitcoin/system/wallet/ec_private.hpp \

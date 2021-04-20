@@ -1277,6 +1277,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\bitcoin_uri.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\checked.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\dictionaries.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
@@ -1533,6 +1536,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\track.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\checked.ipp">
+      <Filter>include\bitcoin\system\impl\wallet</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\dictionaries.ipp">
       <Filter>include\bitcoin\system\impl\wallet</Filter>
