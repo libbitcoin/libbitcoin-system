@@ -34,6 +34,7 @@
 #include <bitcoin/system/message/compact_filter_checkpoint.hpp>
 #include <bitcoin/system/message/compact_filter_headers.hpp>
 #include <bitcoin/system/wallet/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 
 namespace pt = boost::property_tree;
@@ -41,12 +42,7 @@ namespace pt = boost::property_tree;
 namespace libbitcoin {
 namespace system {
 
-class base2;
-class wrapper;
-
-/**
- * A tuple to represent settings and serialized values.
- */
+/// A tuple to represent settings and serialized values.
 typedef std::map<std::string, std::string> settings_list;
 
 /**
@@ -177,7 +173,8 @@ BC_API pt::ptree property_tree(const chain::points_value& values, bool json);
  * @param[in]  json         Use json array formatting.
  * @return                  A property list.
  */
-BC_API pt::ptree property_list(const config::transaction& transaction, bool json);
+BC_API pt::ptree property_list(const config::transaction& transaction,
+    bool json);
 
 /**
  * Generate a property tree for a transaction.
@@ -185,7 +182,8 @@ BC_API pt::ptree property_list(const config::transaction& transaction, bool json
  * @param[in]  json         Use json array formatting.
  * @return                  A property tree.
  */
-BC_API pt::ptree property_tree(const config::transaction& transaction, bool json);
+BC_API pt::ptree property_tree(const config::transaction& transaction,
+    bool json);
 
 /**
  * Generate a property tree for a set of transactions.
@@ -193,22 +191,22 @@ BC_API pt::ptree property_tree(const config::transaction& transaction, bool json
  * @param[in]  json          Use json array formatting.
  * @return                   A property tree.
  */
-BC_API pt::ptree property_tree(const std::vector<config::transaction>& transactions,
-    bool json);
+BC_API pt::ptree property_tree(
+    const std::vector<config::transaction>& transactions, bool json);
 
 /**
- * Generate a property list for a wrapper.
- * @param[in]  wrapper  The wrapper instance.
+ * Generate a property list for a payment.
+ * @param[in]  payment  The payment instance.
  * @return              A property list.
  */
-BC_API pt::ptree property_list(const wallet::wrapped_data& wrapper);
+BC_API pt::ptree property_list(const wallet::payment& payment);
 
 /**
- * Generate a property tree for a wrapper.
- * @param[in]  wrapper  The wrapper instance.
+ * Generate a property tree for a payment.
+ * @param[in]  payment  The payment instance.
  * @return              A property tree.
  */
-BC_API pt::ptree property_tree(const wallet::wrapped_data& wrapper);
+BC_API pt::ptree property_tree(const wallet::payment& payment);
 
 /**
  * Create a property list for the fetch-tx-index command.
@@ -284,22 +282,6 @@ BC_API pt::ptree property_tree(const std::error_code& code, uint32_t sequence);
 BC_API pt::ptree property_tree(uint64_t height, uint32_t sequence);
 
 /**
- * Create a property tree from a json-string.
- * @param[in]  json   A string containing json data.
- * @param[out] out    A new property tree containing the json equivalent
- *                    fields on success.
- * @returns           True on success. False on error.
- */
-BC_API bool property_tree(pt::ptree& out, const std::string& json);
-
-/**
- * Create a property tree for a parsed bitcoin uri.
- * @param[in]  uri   The parsed uri.
- * @returns          A new property tree containing the settings.
- */
-BC_API pt::ptree property_tree(const wallet::bitcoin_uri& uri);
-
-/**
  * Generate a property list for a stealth address.
  * @param[in]  stealth_address  The stealth address.
  * @param[in]  json             Use json array formatting.
@@ -320,20 +302,16 @@ BC_API pt::ptree property_tree(const wallet::stealth_address& stealth,
 /**
  * Generate a property list for a compact_filter.
  * @param[in]  filter  The compact filter.
- * @param[in]  json    Use json array formatting.
  * @return             A property list.
  */
-BC_API pt::ptree property_list(const message::compact_filter& filter,
-    bool json);
+BC_API pt::ptree property_list(const message::compact_filter& filter);
 
 /**
  * Generate a property tree for a compact_filter.
  * @param[in]  filter  The compact filter.
- * @param[in]  json    Use json array formatting.
  * @return             A property tree.
  */
-BC_API pt::ptree property_tree(const message::compact_filter& filter,
-    bool json);
+BC_API pt::ptree property_tree(const message::compact_filter& filter);
 
 /**
  * Generate a property list for a compact_filter_checkpoint.
@@ -356,7 +334,6 @@ BC_API pt::ptree property_tree(
 /**
  * Generate a property list for a compact_filter_headers.
  * @param[in]  headers  The compact filter headers.
- * @param[in]  json     Use json array formatting.
  * @return              A property list.
  */
 BC_API pt::ptree property_list(const message::compact_filter_headers& headers,
@@ -370,6 +347,22 @@ BC_API pt::ptree property_list(const message::compact_filter_headers& headers,
  */
 BC_API pt::ptree property_tree(const message::compact_filter_headers& headers,
     bool json);
+
+/**
+ * Create a property tree for a parsed bitcoin uri.
+ * @param[in]  uri   The parsed uri.
+ * @returns          A new property tree containing the settings.
+ */
+BC_API pt::ptree property_tree(const wallet::bitcoin_uri& uri);
+
+/**
+ * Create a property tree from a json-string.
+ * @param[in]  json   A string containing json data.
+ * @param[out] out    A new property tree containing the json equivalent
+ *                    fields on success.
+ * @returns           True on success. False on error.
+ */
+BC_API bool property_tree(pt::ptree& out, const std::string& json);
 
 } // namespace system
 } // namespace libbitcoin

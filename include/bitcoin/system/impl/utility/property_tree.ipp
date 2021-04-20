@@ -29,17 +29,20 @@ namespace config {
 void inline add_child(pt::ptree& out_list, const std::string& name,
     const pt::ptree& element, bool json)
 {
-    if (json)
-    {
-        // HACK: work around invalid assertions in boost::property_tree.
-        // It is sufficient to call push_back as long as the name is empty.
-        out_list.push_back({ "", element });
-        ////out_list.add_child("", element);
-    }
-    else
-    {
-        out_list.add_child(name, element);
-    }
+    ////if (json)
+    ////{
+    ////    // HACK: work around invalid assertions in boost::property_tree.
+    ////    // It is sufficient to call push_back as long as the name is empty.
+    ////    out_list.push_back({ "", element });
+    ////    ////out_list.add_child("", element);
+    ////}
+    ////else
+    ////{
+    ////    out_list.add_child(name, element);
+    ////}
+
+    // TODO: checking to see if boost hack still required.
+    out_list.add_child(json ? "" : name, element);
 }
 
 /**

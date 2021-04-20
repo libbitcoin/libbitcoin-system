@@ -36,6 +36,7 @@
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -252,7 +253,8 @@ ptree property_tree(const config::transaction& transaction, bool json)
     return tree;
 }
 
-ptree property_tree(const std::vector<config::transaction>& transactions, bool json)
+ptree property_tree(const std::vector<config::transaction>& transactions,
+    bool json)
 {
     ptree tree;
     tree.add_child("transactions", property_tree_list_of_lists("transaction",
@@ -260,21 +262,25 @@ ptree property_tree(const std::vector<config::transaction>& transactions, bool j
     return tree;
 }
 
-// wrapper
+// payment
 
-ptree property_list(const wallet::wrapped_data& wrapper)
+ptree property_list(const payment& payment)
 {
+    // checksum format has been changed to base16 because integer encoding is
+    // ambiguous with respect to endianness. Byte order in base16 is always
+    // big-endian with the exception of hashes, which are little-endian.
+
     ptree tree;
-    tree.put("checksum", wrapper.checksum);
-    tree.put("payload", base16(wrapper.payload));
-    tree.put("version", wrapper.version);
+    tree.put("checksum", base16(payment.checksum()));
+    tree.put("payload", base16(payment.payload()));
+    tree.put("version", payment.prefix().front());
     return tree;
 }
 
-ptree property_tree(const wallet::wrapped_data& wrapper)
+ptree property_tree(const payment& payment)
 {
     ptree tree;
-    tree.add_child("wrapper", property_list(wrapper));
+    tree.add_child("wrapper", property_list(payment));
     return tree;
 }
 
@@ -364,22 +370,6 @@ ptree property_tree(const std::error_code& code, uint32_t sequence)
     return tree;
 }
 
-// safe json input parsing
-
-bool property_tree(ptree& out, const std::string& json)
-{
-    try
-    {
-        stream<array_source> json_stream(json.c_str(), json.size());
-        read_json(json_stream, out);
-        return true;
-    }
-    catch (const std::exception&)
-    {
-        return false;
-    }
-}
-
 // stealth_address
 
 ptree property_list(const stealth_address& stealth, bool json)
@@ -390,8 +380,7 @@ ptree property_list(const stealth_address& stealth, bool json)
     // So instead we emit the reused key as one of the spend keys.
     // This means that it is typical to see the same key in scan and spend.
 
-    const auto spends = cast<ec_compressed, ec_public>(
-        stealth.spend_keys());
+    const auto spends = cast<ec_compressed, ec_public>(stealth.spend_keys());
     const auto spends_values = property_value_list("public_key", spends, json);
 
     ptree tree;
@@ -408,6 +397,69 @@ ptree property_tree(const stealth_address& stealth, bool json)
 {
     ptree tree;
     tree.add_child("stealth_address", property_list(stealth, json));
+    return tree;
+}
+
+// compact_filter
+
+ptree property_list(const message::compact_filter& filter)
+{
+    ptree tree;
+    tree.put("block", hash256(filter.block_hash()));
+    tree.put("filter", base16(filter.filter()));
+    tree.put("type", filter.filter_type());
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter& filter)
+{
+    ptree tree;
+    tree.add_child("compact_filter", property_list(filter));
+    return tree;
+}
+
+// compact_filter_checkpoint
+
+ptree property_list(const message::compact_filter_checkpoint& checkpoint,
+    bool json)
+{
+    ptree tree;
+    tree.put("stop_hash", hash256(checkpoint.stop_hash()));
+    tree.put("type", checkpoint.filter_type());
+    tree.add_child("headers", property_list(checkpoint.filter_headers(),
+        json));
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter_checkpoint& checkpoint,
+    bool json)
+{
+    ptree tree;
+    tree.add_child("compact_filter_checkpoint", property_list(checkpoint, json));
+    return tree;
+}
+
+// compact_filter_headers
+
+ptree property_list(const message::compact_filter_headers& headers, bool json)
+{
+    ptree tree;
+    tree.put("stop_hash", hash256(headers.stop_hash()));
+    tree.put("type", headers.filter_type());
+    tree.put("previous_header", hash256(headers.previous_filter_header()));
+
+    tree.add_child("filter_hashes", property_list(headers.filter_hashes(),
+        json));
+
+    return tree;
+}
+
+ptree property_tree(const message::compact_filter_headers& headers, bool json)
+{
+    ptree tree;
+    tree.add_child("compact_filter_headers", property_list(headers, json));
     return tree;
 }
 
@@ -439,68 +491,20 @@ ptree property_tree(const bitcoin_uri& uri)
     return tree;
 }
 
-// compact_filter
+// safe json input parsing
 
-ptree property_list(const message::compact_filter& filter, bool )
+bool property_tree(ptree& out, const std::string& json)
 {
-    ptree tree;
-    tree.put("filter_type", filter.filter_type());
-    tree.put("block_hash", hash256(filter.block_hash()));
-    tree.put("filter", base16(filter.filter()));
-
-    return tree;
-}
-
-ptree property_tree(const message::compact_filter& filter, bool json)
-{
-    ptree tree;
-    tree.add_child("compact_filter", property_list(filter, json));
-    return tree;
-}
-
-// compact_filter_checkpoint
-
-ptree property_list(const message::compact_filter_checkpoint& checkpoint,
-    bool json)
-{
-    ptree tree;
-    tree.put("filter_type", checkpoint.filter_type());
-    tree.put("stop_hash", hash256(checkpoint.stop_hash()));
-    tree.add_child("filter_headers", property_list(
-        checkpoint.filter_headers(), json));
-
-    return tree;
-}
-
-ptree property_tree(const message::compact_filter_checkpoint& checkpoint,
-    bool json)
-{
-    ptree tree;
-    tree.add_child("compact_filter_checkpoint", property_list(checkpoint, json));
-    return tree;
-}
-
-// compact_filter_headers
-
-ptree property_list(const message::compact_filter_headers& headers, bool json)
-{
-    ptree tree;
-    tree.put("filter_type", headers.filter_type());
-    tree.put("stop_hash", hash256(headers.stop_hash()));
-    tree.put("previous_filter_header", hash256(
-        headers.previous_filter_header()));
-
-    tree.add_child("filter_hashes", property_list(headers.filter_hashes(),
-        json));
-
-    return tree;
-}
-
-ptree property_tree(const message::compact_filter_headers& headers, bool json)
-{
-    ptree tree;
-    tree.add_child("compact_filter_headers", property_list(headers, json));
-    return tree;
+    try
+    {
+        stream<array_source> json_stream(json.c_str(), json.size());
+        read_json(json_stream, out);
+        return true;
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
 }
 
 } // namespace system
