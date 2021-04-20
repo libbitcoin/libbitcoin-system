@@ -110,8 +110,8 @@ void SHA256_(const uint8_t* input, size_t length,
 
 void SHA256Init(SHA256CTX* context)
 {
-    context->count[0] = context->count[1] = 0;
-
+    context->count[0] = 0;
+    context->count[1] = 0;
     context->state[0] = 0x6A09E667;
     context->state[1] = 0xBB67AE85;
     context->state[2] = 0x3C6EF372;
@@ -269,8 +269,9 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
         state[i] += S[i];
     }
 
-    zeroize((void*)W, sizeof W);
-    zeroize((void*)S, sizeof S);
-    zeroize((void*)&t0, sizeof t0);
-    zeroize((void*)&t1, sizeof t1);
+    // This is unnecessary, as these are locals going out of scope.
+    ////zeroize((void*)W, sizeof W);
+    ////zeroize((void*)S, sizeof S);
+    ////zeroize((void*)&t0, sizeof t0);
+    ////zeroize((void*)&t1, sizeof t1);
 }
