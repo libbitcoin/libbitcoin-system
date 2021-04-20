@@ -24,7 +24,7 @@
 namespace std {
 
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::data_chunk& data)
+    const bc::system::data_chunk& data) noexcept
 {
     stream << bc::system::encode_base16(data);
     return stream;

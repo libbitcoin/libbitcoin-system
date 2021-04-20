@@ -27,14 +27,14 @@ namespace std {
 
 template <size_t Size>
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::byte_array<Size>& bytes)
+    const bc::system::byte_array<Size>& bytes) noexcept
 {
     stream << bc::system::encode_base16(bytes);
     return stream;
 }
 
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::data_chunk& data);
+    const bc::system::data_chunk& data) noexcept;
 
 } // namespace std
 
