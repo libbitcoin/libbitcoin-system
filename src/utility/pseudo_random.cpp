@@ -33,28 +33,7 @@ using namespace bc::system::asio;
 using namespace std::chrono;
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
-// Values may be truly random depending on the underlying device.
-
-uint64_t pseudo_random()
-{
-    return pseudo_random::next();
-}
-
-uint64_t pseudo_random(uint64_t begin, uint64_t end)
-{
-    return pseudo_random::next(begin, end);
-}
-
-void pseudo_random_fill(data_chunk& out)
-{
-    return pseudo_random::fill<data_chunk>(out);
-}
-
-static uint32_t get_clock_seed()
-{
-    const auto now = high_resolution_clock::now();
-    return static_cast<uint32_t>(now.time_since_epoch().count());
-}
+// Values may or may not be truly random depending on the underlying device.
 
 std::mt19937& pseudo_random::get_twister()
 {
@@ -66,6 +45,13 @@ std::mt19937& pseudo_random::get_twister()
 
     // Maintain thread static state space.
     static boost::thread_specific_ptr<std::mt19937> twister(deleter);
+
+    // Use the clock for seeding.
+    const auto get_clock_seed = []()
+    {
+        const auto now = high_resolution_clock::now();
+        return static_cast<uint32_t>(now.time_since_epoch().count());
+    };
 
     // This is thread safe because the instance is thread static.
     if (twister.get() == nullptr)
@@ -86,12 +72,6 @@ uint64_t pseudo_random::next(uint64_t begin, uint64_t end)
 {
     std::uniform_int_distribution<uint64_t> distribution(begin, end);
     return distribution(get_twister());
-}
-
-asio::duration pseudo_randomize(const asio::duration& expiration,
-    uint8_t ratio)
-{
-    return pseudo_random::duration(expiration, ratio);
 }
 
 // Randomly select a time duration in the range:

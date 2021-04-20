@@ -23,61 +23,61 @@ using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(pseudo_random_tests)
 
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__zero_duration__maximum)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__zero_duration__maximum)
 {
     const int max_seconds = 0;
     const asio::seconds maximum(max_seconds);
-    const auto result = pseudo_randomize(maximum, 1);
+    const auto result = pseudo_random::duration(maximum, 1);
     BOOST_REQUIRE(result == maximum);
 }
 
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__subminute_default_percent__expected)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__subminute_default_percent__expected)
 {
     const int max_seconds = 42;
     const asio::seconds maximum(max_seconds);
     const asio::seconds minimum(max_seconds - max_seconds / 2);
-    const auto result = pseudo_randomize(maximum);
+    const auto result = pseudo_random::duration(maximum);
     BOOST_REQUIRE(result <= maximum);
     BOOST_REQUIRE(result >= minimum);
 }
 
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__subminute_ratio_0__maximum)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__subminute_ratio_0__maximum)
 {
     const int max_seconds = 42;
     const asio::seconds maximum(max_seconds);
-    const auto result = pseudo_randomize(maximum, 0);
+    const auto result = pseudo_random::duration(maximum, 0);
     BOOST_REQUIRE(result == maximum);
 }
 
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__subminute_ratio_1__expected)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__subminute_ratio_1__expected)
 {
     const uint8_t ratio = 1;
     const int max_seconds = 42;
     const asio::seconds maximum(max_seconds);
     const asio::seconds minimum(max_seconds - max_seconds / ratio);
-    const auto result = pseudo_randomize(maximum, ratio);
+    const auto result = pseudo_random::duration(maximum, ratio);
     BOOST_REQUIRE(result <= maximum);
     BOOST_REQUIRE(result >= minimum);
 }
 
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__subminute_default_ratio__expected)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__subminute_default_ratio__expected)
 {
     const int max_seconds = 42;
     const asio::seconds maximum(max_seconds);
     const asio::seconds minimum(max_seconds - max_seconds / 2);
-    const auto result = pseudo_randomize(maximum);
+    const auto result = pseudo_random::duration(maximum);
     BOOST_REQUIRE(result <= maximum);
     BOOST_REQUIRE(result >= minimum);
 }
 
 // Use same (ms) resolution as function to prevent test rounding difference.
-BOOST_AUTO_TEST_CASE(pseudo_random__pseudo_randomize__superminute_ratio_255__expected)
+BOOST_AUTO_TEST_CASE(pseudo_random__duration__superminute_ratio_255__expected)
 {
     const uint8_t ratio = 255;
     const int max_seconds = 420;
     const asio::milliseconds maximum(max_seconds);
     const asio::milliseconds minimum(max_seconds - max_seconds / ratio);
-    const auto result = pseudo_randomize(maximum, ratio);
+    const auto result = pseudo_random::duration(maximum, ratio);
     BOOST_REQUIRE(result <= maximum);
     BOOST_REQUIRE(result >= minimum);
 }

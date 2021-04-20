@@ -36,7 +36,7 @@ class BC_API pseudo_random
      * Fill a container with randomness using the default random engine.
      */
     template<class Container>
-    static void fill(Container& out)
+    static Container& fill(Container& out)
     {
         // uniform_int_distribution is undefined for sizes < 16 bits.
         std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
@@ -84,37 +84,6 @@ class BC_API pseudo_random
   private:
     static std::mt19937& get_twister();
 };
-
-/**
- * DEPRECATED (use class pseudo_random)
- * Generate a pseudo random number within the domain.
- * @return  The 64 bit number.
- */
-BC_API uint64_t pseudo_random();
-
-/**
- * DEPRECATED (use class pseudo_random)
- * Generate a pseudo random number within [begin, end].
- * @return  The 64 bit number.
- */
-BC_API uint64_t pseudo_random(uint64_t begin, uint64_t end);
-
-/**
- * DEPRECATED (use class pseudo_random)
- * Fill a buffer with randomness using the default random engine.
- */
-BC_API void pseudo_random_fill(data_chunk& out);
-
-/**
- * DEPRECATED (use class pseudo_random)
- * Convert a time duration to a value in the range [max/ratio, max].
- * @param[in]  maximum  The maximum value to return.
- * @param[in]  ratio    The determinant of the minimum duration as the inverse
- *                      portion of the maximum duration.
- * @return              The randomized duration.
- */
-BC_API asio::duration pseudo_randomize(const asio::duration& maximum,
-    uint8_t ratio=2);
 
 } // namespace system
 } // namespace libbitcoin
