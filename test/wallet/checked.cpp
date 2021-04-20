@@ -43,10 +43,10 @@ const mini_hash test_mini_hash = hash_literal("000102030405");
 const short_hash test_short_hash = hash_literal("0908070605040302010009080706050403020100");
 const long_hash test_long_hash = hash_literal("09080706050403020100090807060504030201000908070605040302010009080706050403020100090807060504030201000908070605040302010003020100");
 
-const auto zero_valid_value = insert_checksum<zero_checked::size, 0>({ zero_prefix,  test_zero_hash });
-const auto mini_valid_value = insert_checksum<mini_checked::size, 2>({ mini_prefix,  test_mini_hash });
-const auto short_valid_value = insert_checksum<short_checked::size, 4>({ short_prefix, test_short_hash });
-const auto long_valid_value = insert_checksum<long_checked::size, 8>({ long_prefix,  test_long_hash });
+const auto zero_valid_value = insert_checksum<zero_checked::value_size, 0>({ zero_prefix,  test_zero_hash });
+const auto mini_valid_value = insert_checksum<mini_checked::value_size, 2>({ mini_prefix,  test_mini_hash });
+const auto short_valid_value = insert_checksum<short_checked::value_size, 4>({ short_prefix, test_short_hash });
+const auto long_valid_value = insert_checksum<long_checked::value_size, 8>({ long_prefix,  test_long_hash });
 
 BOOST_AUTO_TEST_CASE(checked__default_construct__zero__valid)
 {

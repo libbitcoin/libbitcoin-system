@@ -100,7 +100,7 @@ payment_address::payment_address(const short_hash& hash, uint8_t version)
 
 bool payment_address::is_address(const data_slice& decoded)
 {
-    return (decoded.size() == payment::size) && verify_checksum(decoded);
+    return (decoded.size() == payment::value_size) && verify_checksum(decoded);
 }
 
 // Factories.
@@ -112,7 +112,7 @@ payment_address payment_address::from_string(const std::string& address)
     if (!decode_base58(decoded, address) || !is_address(decoded))
         return {};
 
-    return { to_array<payment::size>(decoded) };
+    return { to_array<payment::value_size>(decoded) };
 }
 
 payment_address payment_address::from_payment(const payment& decoded)
@@ -170,8 +170,7 @@ payment_address::operator const short_hash&() const
 
 std::string payment_address::encoded() const
 {
-    // This sucks that we can't rely on cast operator.
-    return encode_base58(to_payment().value());
+    return encode_base58(to_payment());
 }
 
 // Accessors.

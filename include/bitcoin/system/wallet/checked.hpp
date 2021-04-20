@@ -36,14 +36,15 @@ namespace wallet {
 /// cost over a simple array, while simplifying parsing and checksumming.
 template <size_t Prefix, size_t Payload, size_t Checksum = checksum_default>
 class checked
+  : public data_slice
 {
 public:
-    static constexpr size_t size = (Prefix + Payload + Checksum);
+    static constexpr size_t value_size = (Prefix + Payload + Checksum);
 
     typedef byte_array<Prefix> prefix_type;
     typedef byte_array<Payload> payload_type;
     typedef byte_array<Checksum> checksum_type;
-    typedef byte_array<size> value_type;
+    typedef byte_array<value_size> value_type;
 
     /// Constructors.
 
@@ -63,7 +64,6 @@ public:
 
     operator bool() const;
     operator data_chunk() const;
-    operator data_slice() const;
     operator const value_type&() const;
 
     /// Properties.

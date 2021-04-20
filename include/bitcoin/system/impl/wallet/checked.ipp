@@ -34,21 +34,21 @@ namespace wallet {
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked()
-  : value_()
+  : data_slice(value_), value_()
 {
     // This is an invalid instance (unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(checked&& other)
-  : value_(std::move(other.value_))
+  : data_slice(value_), value_(std::move(other.value_))
 {
     // This may be an invalid instance.
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const checked& other)
-  : value_(other.value_)
+  : data_slice(value_), value_(other.value_)
 {
     // This may be an invalid instance.
 }
@@ -63,14 +63,14 @@ checked<Prefix, Payload, Checksum>::checked(const prefix_type& prefix,
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(value_type&& value)
-  : value_(std::move(value))
+  : data_slice(value_), value_(std::move(value))
 {
     // This may be an invalid instance (if value is unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const value_type& value)
-  : value_(value)
+  : data_slice(value_), value_(value)
 {
     // This may be an invalid instance (if value is unchecked).
 }
@@ -82,7 +82,7 @@ checked<Prefix, Payload, Checksum>::from_payload(const prefix_type& version,
     const payload_type& payload)
 {
     // Accessing the Checksum parameter requires explicitly specifying both.
-    return insert_checksum<size, Checksum>({ version, payload });
+    return insert_checksum<value_size, Checksum>({ version, payload });
 }
 
 // operators
@@ -116,17 +116,11 @@ template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::operator bool() const
 {
     // Accessing the Checksum parameter requires explicitly specifying both.
-    return verify_checksum<size, Checksum>(value_);
+    return verify_checksum<value_size, Checksum>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::operator data_chunk() const
-{
-    return to_chunk(value_);
-}
-
-template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::operator data_slice() const
 {
     return to_chunk(value_);
 }
@@ -159,7 +153,7 @@ template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::checksum_type
 checked<Prefix, Payload, Checksum>::checksum() const
 {
-    return slice<Prefix + Payload, size>(value_);
+    return slice<Prefix + Payload, value_size>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
