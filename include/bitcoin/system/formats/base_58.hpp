@@ -38,8 +38,7 @@ bool decode_base58(byte_array<Size>& out, const std::string& in);
 
 /**
  * Converts a base58 string literal to a data array.
- * This would be better as a C++11 user-defined literal,
- * but MSVC doesn't support those.
+ * TODO: en.cppreference.com/w/cpp/language/user_literal
  * TODO: determine if the sizing function is always accurate.
  */
 template <size_t Size>

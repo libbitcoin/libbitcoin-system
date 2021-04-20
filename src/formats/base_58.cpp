@@ -99,7 +99,7 @@ std::string encode_base58(const data_slice& unencoded)
         pack_value(indexes, *it);
     }
 
-    // Skip leading zeroes in base58 result.
+    // Skip leading zeros in base58 result.
     auto first_nonzero = search_first_nonzero(indexes);
 
     // Translate the result into a string.
@@ -164,7 +164,7 @@ bool decode_base58(data_chunk& out, const std::string& in)
         unpack_char(data, carry);
     }
 
-    // Skip leading zeroes in data.
+    // Skip leading zeros in data.
     auto first_nonzero = search_first_nonzero(data);
 
     // Copy result into output vector.

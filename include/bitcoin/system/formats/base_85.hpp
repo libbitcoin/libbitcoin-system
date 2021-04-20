@@ -38,6 +38,8 @@ BC_API bool encode_base85(std::string& out, const data_slice& in);
  */
 BC_API bool decode_base85(data_chunk& out, const std::string& in);
 
+// TODO: en.cppreference.com/w/cpp/language/user_literal
+
 } // namespace system
 } // namespace libbitcoin
 

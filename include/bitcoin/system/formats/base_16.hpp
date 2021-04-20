@@ -74,6 +74,7 @@ bool decode_hash(byte_array<Size>& out, const std::string& in);
 /**
  * Converts a hex string literal to a data array.
  * Zeroized array returned in case of invalid or odd count of hex characters.
+ * TODO: en.cppreference.com/w/cpp/language/user_literal
  */
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
@@ -83,6 +84,7 @@ byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
  * The bitcoin hash format is base16 with the bytes reversed.
  * This format is generally used only for display formatting.
  * Zeroized array returned in case of invalid or odd count of hex characters.
+ * TODO: en.cppreference.com/w/cpp/language/user_literal
  */
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size]);

@@ -51,6 +51,8 @@ BC_API bool decode_base10(uint64_t& out, const std::string& amount,
 BC_API std::string encode_base10(uint64_t amount,
     uint8_t decimal_places=0);
 
+// TODO: en.cppreference.com/w/cpp/language/user_literal
+
 } // namespace system
 } // namespace libbitcoin
 
