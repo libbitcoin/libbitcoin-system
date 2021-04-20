@@ -42,6 +42,7 @@ static constexpr uint8_t options_size = sizeof(uint8_t);
 static constexpr uint8_t number_keys_size = sizeof(uint8_t);
 static constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 static constexpr uint8_t filter_length_size = sizeof(uint8_t);
+static constexpr uint8_t checksum_size = sizeof(uint32_t);
 static constexpr uint8_t max_spend_key_count = max_uint8;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format

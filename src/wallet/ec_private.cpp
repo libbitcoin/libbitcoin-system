@@ -166,14 +166,14 @@ std::string ec_private::encoded() const
 
     if (compressed())
     {
-        return encode_base58(build_checked_array<wif_compressed_size>(
+        return encode_base58(insert_checksum<wif_compressed_size>(
         {
             prefix, secret(), to_array(compressed_sentinel)
         }));
     }
     else
     {
-        return encode_base58(build_checked_array<wif_uncompressed_size>(
+        return encode_base58(insert_checksum<wif_uncompressed_size>(
         {
             prefix, secret()
         }));
@@ -190,7 +190,7 @@ uint16_t ec_private::version() const
 
 uint8_t ec_private::payment_version() const
 {
-    return to_p2kh_prefix(version_);
+    return to_address_prefix(version_);
 }
 
 uint8_t ec_private::wif_version() const
@@ -242,9 +242,8 @@ bool ec_private::operator<(const ec_private& other) const
 bool ec_private::operator==(const ec_private& other) const
 {
     return
-        compress_ == other.compress_ &&
-        version_ == other.version_ &&
-        *static_cast<const ec_scalar*>(this) == other;
+        compress_ == other.compress_ && version_ == other.version_ &&
+        secret() == other.secret();
 }
 
 bool ec_private::operator!=(const ec_private& other) const

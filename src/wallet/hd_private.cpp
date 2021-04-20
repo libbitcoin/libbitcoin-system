@@ -140,7 +140,7 @@ hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
     static const auto magic = to_chunk("Bitcoin seed");
     const auto intermediate = split(hmac_sha512_hash(seed, magic));
 
-    return hd_private(intermediate.left, intermediate.right, prefixes);
+    return hd_private(intermediate.first, intermediate.second, prefixes);
 }
 
 hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
@@ -229,7 +229,7 @@ hd_key hd_private::to_hd_key() const
 {
     static constexpr uint8_t private_key_padding = 0x00;
 
-    return build_checked_array<hd_key_size>(
+    return insert_checksum<hd_key_size>(
     {
         to_big_endian(to_prefix(lineage_.prefixes)),
         to_array(lineage_.depth),
@@ -259,7 +259,7 @@ hd_private hd_private::derive_private(uint32_t index) const
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;
-    if (!ec_add(child, intermediate.left))
+    if (!ec_add(child, intermediate.first))
         return {};
 
     if (lineage_.depth == max_uint8)
@@ -273,7 +273,7 @@ hd_private hd_private::derive_private(uint32_t index) const
         index
     };
 
-    return hd_private(child, intermediate.right, lineage);
+    return hd_private(child, intermediate.second, lineage);
 }
 
 hd_public hd_private::derive_public(uint32_t index) const

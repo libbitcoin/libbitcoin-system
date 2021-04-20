@@ -24,14 +24,15 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/wallet/checked.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 
@@ -39,8 +40,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-static BC_CONSTEXPR size_t payment_size = 1u + short_hash_size + checksum_size;
-typedef byte_array<payment_size> payment;
+typedef checked<1, short_hash_size, 4> payment;
 
 /// A class for working with non-stealth payment addresses.
 class BC_API payment_address
@@ -118,14 +118,6 @@ protected:
     bool valid_;
     uint8_t version_;
     short_hash hash_;
-};
-
-/// The pre-encoded structure of a payment address or other similar data.
-struct BC_API wrapped_data
-{
-    uint8_t version;
-    data_chunk payload;
-    uint32_t checksum;
 };
 
 } // namespace wallet

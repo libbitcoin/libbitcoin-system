@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
@@ -99,7 +100,7 @@ payment_address::payment_address(const short_hash& hash, uint8_t version)
 
 bool payment_address::is_address(const data_slice& decoded)
 {
-    return (decoded.size() == payment_size) && verify_checksum(decoded);
+    return (decoded.size() == payment::size) && verify_checksum(decoded);
 }
 
 // Factories.
@@ -107,20 +108,19 @@ bool payment_address::is_address(const data_slice& decoded)
 
 payment_address payment_address::from_string(const std::string& address)
 {
-    payment decoded;
+    data_chunk decoded;
     if (!decode_base58(decoded, address) || !is_address(decoded))
         return {};
 
-    return { decoded };
+    return { to_array<payment::size>(decoded) };
 }
 
 payment_address payment_address::from_payment(const payment& decoded)
 {
-    if (!is_address(decoded))
+    if (!decoded)
         return {};
 
-    const auto hash = slice<1, short_hash_size + 1>(decoded);
-    return { hash, decoded.front() };
+    return { decoded.payload(), decoded.prefix()[0] };
 }
 
 payment_address payment_address::from_private(const ec_private& secret)
@@ -170,7 +170,8 @@ payment_address::operator const short_hash&() const
 
 std::string payment_address::encoded() const
 {
-    return encode_base58(wrap(version_, hash_));
+    // This sucks that we can't rely on cast operator.
+    return encode_base58(to_payment().value());
 }
 
 // Accessors.
@@ -207,7 +208,7 @@ chain::script payment_address::output_script() const
 
 payment payment_address::to_payment() const
 {
-    return wrap(version_, hash_);
+    return { to_array(version_), hash_ };
 }
 
 // Operators.

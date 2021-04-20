@@ -210,7 +210,7 @@ static void create_private_key(encrypted_private& out_private,
     auto encrypt2 = xor_offset<half, 0, half>(combined, derived1);
     aes256_encrypt(derived2, encrypt2);
     const auto quarter1 = slice<0, quarter>(encrypt1);
-    out_private = build_checked_array<ek_private_decoded_size>(
+    out_private = insert_checksum<ek_private_decoded_size>(
     {
         prefix,
         flags,
@@ -240,7 +240,7 @@ static bool create_public_key(encrypted_public& out_public,
     aes256_encrypt(derived2, encrypted2);
 
     const auto sign = point_sign(point.front(), derived2);
-    out_public = build_checked_array<encrypted_public_decoded_size>(
+    out_public = insert_checksum<encrypted_public_decoded_size>(
     {
         prefix,
         flags,
@@ -279,11 +279,11 @@ bool create_key_pair(encrypted_private& out_private,
     const auto flags = set_flags(compressed, parse.lot_sequence(), true);
 
     if (!create_public_key(out_public, flags, salt, parse.entropy(),
-        derived.left, derived.right, factor, version))
+        derived.first, derived.second, factor, version))
         return false;
 
-    create_private_key(out_private, flags, salt, parse.entropy(), derived.left,
-        derived.right, seed, version);
+    create_private_key(out_private, flags, salt, parse.entropy(), derived.first,
+        derived.second, seed, version);
 
     out_point = point_copy;
     return true;
@@ -327,7 +327,7 @@ static bool create_token(encrypted_token& out_token,
     if (!secret_to_public(point, factor))
         return false;
 
-    out_token = build_checked_array<encrypted_token_decoded_size>(
+    out_token = insert_checksum<encrypted_token_decoded_size>(
     {
         prefix,
         owner_entropy,
@@ -377,13 +377,13 @@ bool encrypt(encrypted_private& out_private, const ec_secret& secret,
     const auto prefix = parse_encrypted_private::prefix_factory(version,
         false);
 
-    auto encrypted1 = xor_data<half>(secret, derived.left);
-    aes256_encrypt(derived.right, encrypted1);
+    auto encrypted1 = xor_data<half>(secret, derived.first);
+    aes256_encrypt(derived.second, encrypted1);
 
-    auto encrypted2 = xor_offset<half, half, half>(secret, derived.left);
-    aes256_encrypt(derived.right, encrypted2);
+    auto encrypted2 = xor_offset<half, half, half>(secret, derived.first);
+    aes256_encrypt(derived.second, encrypted2);
 
-    out_private = build_checked_array<ek_private_decoded_size>(
+    out_private = insert_checksum<ek_private_decoded_size>(
     {
         prefix,
         set_flags(compressed),
@@ -416,14 +416,14 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     auto encrypt1 = parse.data1();
     auto encrypt2 = parse.data2();
 
-    aes256_decrypt(derived.right, encrypt2);
-    const auto decrypt2 = xor_offset<half, 0, half>(encrypt2, derived.left);
+    aes256_decrypt(derived.second, encrypt2);
+    const auto decrypt2 = xor_offset<half, 0, half>(encrypt2, derived.first);
     auto part = split(decrypt2);
-    auto extended = splice(encrypt1, part.left);
+    auto extended = splice(encrypt1, part.first);
 
-    aes256_decrypt(derived.right, extended);
-    const auto decrypt1 = xor_data<half>(extended, derived.left);
-    const auto factor = bitcoin_hash(splice(decrypt1, part.right));
+    aes256_decrypt(derived.second, extended);
+    const auto decrypt1 = xor_data<half>(extended, derived.first);
+    const auto factor = bitcoin_hash(splice(decrypt1, part.second));
     if (!ec_multiply(secret, factor))
         return false;
 
@@ -444,11 +444,11 @@ static bool decrypt_secret(ec_secret& out_secret,
     const auto derived = split(scrypt_private(normal(passphrase),
         parse.salt()));
 
-    aes256_decrypt(derived.right, encrypt1);
-    aes256_decrypt(derived.right, encrypt2);
+    aes256_decrypt(derived.second, encrypt1);
+    aes256_decrypt(derived.second, encrypt2);
 
     const auto encrypted = splice(encrypt1, encrypt2);
-    const auto secret = xor_data<hash_size>(encrypted, derived.left);
+    const auto secret = xor_data<hash_size>(encrypted, derived.first);
 
     const auto compressed = parse.compressed();
     const auto address_version = parse.address_version();
@@ -505,13 +505,13 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     auto derived = split(scrypt_pair(point, salt_entropy));
     auto encrypt = split(parse.data());
 
-    aes256_decrypt(derived.right, encrypt.left);
-    const auto decrypt1 = xor_data<half>(encrypt.left, derived.left);
+    aes256_decrypt(derived.second, encrypt.first);
+    const auto decrypt1 = xor_data<half>(encrypt.first, derived.first);
 
-    aes256_decrypt(derived.right, encrypt.right);
-    const auto decrypt2 = xor_offset<half, 0, half>(encrypt.right, derived.left);
+    aes256_decrypt(derived.second, encrypt.second);
+    const auto decrypt2 = xor_offset<half, 0, half>(encrypt.second, derived.first);
 
-    const auto sign_byte = point_sign(parse.sign(), derived.right);
+    const auto sign_byte = point_sign(parse.sign(), derived.second);
     auto product = splice(sign_byte, decrypt1, decrypt2);
     if (!ec_multiply(product, factor))
         return false;

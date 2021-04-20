@@ -125,14 +125,14 @@ byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
 }
 
 template <size_t Size>
-byte_array_parts<Size / 2u> split(const byte_array<Size>& bytes)
+split_parts<Size / 2u> split(const byte_array<Size>& bytes)
 {
     static_assert(Size != 0u, "Split requires a non-zero parameter.");
     static_assert(Size % 2u == 0u, "Split requires an even length parameter.");
     static const auto half = Size / 2u;
-    byte_array_parts<half> out;
-    std::copy_n(std::begin(bytes), half, out.left.begin());
-    std::copy_n(std::begin(bytes) + half, half, out.right.begin());
+    split_parts<half> out;
+    std::copy_n(bytes.begin(), half, out.first.begin());
+    std::copy_n(std::next(bytes.begin(), half), half, out.second.begin());
     return out;
 }
 

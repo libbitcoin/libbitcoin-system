@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,63 +20,65 @@
 #define LIBBITCOIN_SYSTEM_CHECKSUM_IPP
 
 #include <algorithm>
-#include <cstddef>
-#include <initializer_list>
+#include <cstdint>
+#include <utility>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <size_t Size>
-byte_array<Size> build_checked_array(
-    const std::initializer_list<data_slice>& slices)
+template <size_t Size, size_t Checksum>
+byte_array<Size> insert_checksum(const loaf& slices)
 {
     auto out = build_array<Size>(slices);
-    insert_checksum(out);
+    insert_checksum<Size, Checksum>(out);
     return out;
 }
 
-template<size_t Size>
-void insert_checksum(byte_array<Size>& out)
+template <size_t Size, size_t Checksum>
+void insert_checksum(byte_array<Size>& data)
 {
-    static_assert(Size >= checksum_size, "insert_checksum out too small");
-    data_chunk payload(out.begin(), out.end() - checksum_size);
-    const auto checksum = to_little_endian(bitcoin_checksum(payload));
-    std::copy_n(checksum.begin(), checksum_size, out.end() - checksum_size);
+    static_assert(Checksum <= Size, "insufficient size");
+    static_assert(Checksum <= hash_size, "excessive checksum");
+
+    // Obtain the payload iterators.
+    const auto payload_begin = data.begin();
+    const auto payload_end = std::prev(data.end(), Checksum);
+
+    // Compute the bitcoin hash.
+    const auto payload = data_chunk{ payload_begin, payload_end };
+    const auto payload_hash = bitcoin_hash(payload);
+
+    // Obtain the hash checksum iterators.
+    const auto check_begin = payload_hash.begin();
+    const auto check_end = std::next(check_begin, Checksum);
+
+    // Append the checksum from the first hash bytes to after the payload. 
+    std::copy(check_begin, check_end, payload_end);
 }
 
-template <size_t Size>
-bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
-    const byte_array<Size>& wrapped)
+template <size_t Size, size_t Checksum>
+bool verify_checksum(const byte_array<Size>& data)
 {
-    uint32_t unused;
-    return unwrap(out_version, out_payload, unused, wrapped);
-}
+    static_assert(Checksum <= Size, "insufficient size");
+    static_assert(Checksum <= hash_size, "excessive checksum");
 
-template <size_t Size>
-bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
-    uint32_t& out_checksum, const byte_array<Size>& wrapped)
-{
-    if (!verify_checksum(wrapped))
-        return false;
+    // Obtain the payload iterators.
+    const auto payload_begin = data.begin();
+    const auto payload_end = std::prev(data.end(), Checksum);
 
-    out_version = slice<0, 1>(wrapped)[0];
-    out_payload = slice<1, Size - checksum_size>(wrapped);
-    const auto bytes = slice<Size - checksum_size, Size>(wrapped);
-    out_checksum = from_little_endian_unsafe<uint32_t>(bytes.begin());
-    return true;
-}
+    // Compute the bitcoin hash.
+    const auto payload = data_chunk{ payload_begin, payload_end };
+    const auto payload_hash = bitcoin_hash(payload);
 
-// std::array<> is used in place of byte_array<> to enable Size deduction.
-template <size_t Size>
-byte_array<WRAP_SIZE(Size)> wrap(uint8_t version,
-    const byte_array<Size>& payload)
-{
-    auto out = build_array<WRAP_SIZE(Size)>({ to_array(version), payload });
-    insert_checksum(out);
-    return out;
+    // Obtain the hash checksum iterators.
+    const auto check_begin = payload_hash.begin();
+    const auto check_end = std::next(check_begin, Checksum);
+
+    // Compare the checksum from the first hash bytes to those in the payload.
+    return std::equal(check_begin, check_end, payload_end);
 }
 
 } // namespace system

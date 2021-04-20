@@ -200,7 +200,7 @@ const ec_compressed& hd_public::point() const
 
 hd_key hd_public::to_hd_key() const
 {
-    return build_checked_array<hd_key_size>(
+    return insert_checksum<hd_key_size>(
     {
         to_big_endian(to_prefix(lineage_.prefixes)),
         to_array(lineage_.depth),
@@ -221,7 +221,7 @@ hd_public hd_public::derive_public(uint32_t index) const
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     auto child = point_;
-    if (!ec_add(child, intermediate.left))
+    if (!ec_add(child, intermediate.first))
         return {};
 
     if (lineage_.depth == max_uint8)
@@ -235,7 +235,7 @@ hd_public hd_public::derive_public(uint32_t index) const
         index
     };
 
-    return hd_public(child, intermediate.right, lineage);
+    return hd_public(child, intermediate.second, lineage);
 }
 
 // Helpers.

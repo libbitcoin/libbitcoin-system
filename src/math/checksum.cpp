@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,35 +19,52 @@
 #include <bitcoin/system/math/checksum.hpp>
 
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/endian.hpp>
-#include <bitcoin/system/utility/deserializer.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-void append_checksum(data_chunk& data)
-{
-    const auto checksum = bitcoin_checksum(data);
-    extend_data(data, to_little_endian(checksum));
-}
+// checksum encoding is a private data format, do not expose.
+// Endianness is arbitrary here. All that is required is consistency.
+typedef uint32_t checksum;
 
-uint32_t bitcoin_checksum(const data_slice& data)
+static checksum bitcoin_checksum(const data_slice& data)
 {
     const auto hash = bitcoin_hash(data);
-    return from_little_endian_unsafe<uint32_t>(hash.begin());
+
+    // Read first four bytes from the bitcoin hash of the data.
+    return from_little_endian_unsafe<checksum>(hash.begin());
+}
+
+data_chunk append_checksum(const loaf& slices)
+{
+    auto out = build_chunk(slices, checksum_default);
+    append_checksum(out);
+    return out;
+}
+
+void append_checksum(data_chunk& data)
+{
+    const auto check = bitcoin_checksum(data);
+
+    // Append the checksum to the stretched data chunk.
+    extend_data(data, to_little_endian<checksum>(check));
+    BITCOIN_ASSERT(verify_checksum(data));
 }
 
 bool verify_checksum(const data_slice& data)
 {
-    if (data.size() < checksum_size)
+    if (data.size() < sizeof(checksum))
         return false;
 
-    // TODO: create a bitcoin_checksum overload that can accept begin/end.
-    const auto checksum_begin = data.end() - checksum_size;
-    auto checksum = from_little_endian_unsafe<uint32_t>(checksum_begin);
-    return bitcoin_checksum({ data.begin(), checksum_begin }) == checksum;
+    // Read the appended checksum from the end of the buffer.
+    const auto position = std::prev(data.end(), sizeof(checksum));
+    const auto check = from_little_endian<checksum>(position, data.end());
+
+    // Compare the appended checksum to the checksum of the payload.
+    return check == bitcoin_checksum({ data.begin(), position });
 }
 
 } // namespace system
 } // namespace libbitcoin
-

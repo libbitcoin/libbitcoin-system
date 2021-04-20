@@ -156,19 +156,21 @@ BOOST_AUTO_TEST_CASE(ec_scalar__secret__int64__expected)
 
 // assignment
 
-BOOST_AUTO_TEST_CASE(ec_scalar__copy_assignment__self__expected)
-{
-    ec_scalar value(positive42);
-    value = value;
-    BOOST_REQUIRE_EQUAL(value, positive42);
-}
+// Whiney compiler.
+////BOOST_AUTO_TEST_CASE(ec_scalar__copy_assignment__self__expected)
+////{
+////    ec_scalar value(positive42);
+////    value = value;
+////    BOOST_REQUIRE_EQUAL(value, positive42);
+////}
 
-BOOST_AUTO_TEST_CASE(ec_scalar__move_assignment__self__expected)
-{
-    ec_scalar value(positive42);
-    value = std::move(value);
-    BOOST_REQUIRE_EQUAL(value, positive42);
-}
+// Whiney compiler.
+////BOOST_AUTO_TEST_CASE(ec_scalar__move_assignment__self__expected)
+////{
+////    ec_scalar value(positive42);
+////    value = std::move(value);
+////    BOOST_REQUIRE_EQUAL(value, positive42);
+////}
 
 BOOST_AUTO_TEST_CASE(ec_scalar__copy_scalar_assignment__positive__expected)
 {
@@ -456,7 +458,6 @@ BOOST_AUTO_TEST_CASE(ec_scalar__product__secret1a_secret1b__product1)
 {
     const ec_scalar x{ secret1a };
     const ec_scalar y{ secret1b };
-    const auto sum = x * y;
     BOOST_REQUIRE_EQUAL((x * y), product1);
 }
 

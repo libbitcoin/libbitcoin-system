@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,86 +19,46 @@
 #ifndef LIBBITCOIN_SYSTEM_CHECKSUM_HPP
 #define LIBBITCOIN_SYSTEM_CHECKSUM_HPP
 
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
-#include <initializer_list>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
+static const size_t checksum_default = sizeof(uint32_t);
 
-#define WRAP_SIZE(payload_size) (payload_size + checksum_size + 1u)
-#define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1u)
+/// These utilities are used for bitcoin payment addresses and other standards
+/// that leverage the same technique. A bitcoin checksum is the leading bytes
+/// of a double sha256 hash of any data. Bitcoin checksums are appended to the
+/// data, typically later ascii encoded. Bitcoin standards typically use a four
+/// byte checksum, though any length up to min(Size, 256) is allowed here.
 
-/**
- * Concatenate several data slices into a single fixed size array and append a
- * checksum.
- */
-template <size_t Size>
-byte_array<Size> build_checked_array(
-    const std::initializer_list<data_slice>& slices);
+// arrays
+/// Accessing Checksum (length) parameter requires explicitly specifying both.
 
-/**
- * Appends a four-byte checksum into the end of an array.
- * Array must be longer than bc::checksum_size.
- */
-template<size_t Size>
-void insert_checksum(byte_array<Size>& out);
+/// Append the bitcoin checksum of slices to end of new Size array.
+/// Underfill is padded with 0x00, excess is truncated.
+template <size_t Size, size_t Checksum = checksum_default>
+byte_array<Size> insert_checksum(const loaf& slices);
 
-/**
- * Unwrap a wrapped payload.
- * @param[out] out_version   The version byte of the wrapped data.
- * @param[out] out_payload   The payload of the wrapped data.
- * @param[in]  wrapped       The wrapped data to unwrap.
- * @return                   True if input checksum validates.
- */
-template <size_t Size>
-bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
-    byte_array<Size>& wrapped);
+/// Append bitcoin checksum of preceding data to end of existing Size array.
+template <size_t Size, size_t Checksum = checksum_default>
+void insert_checksum(byte_array<Size>& data);
 
-/**
- * Unwrap a wrapped payload and return the checksum.
- * @param[out] out_version   The version byte of the wrapped data.
- * @param[out] out_payload   The payload of the wrapped data.
- * @param[out] out_checksum  The validated checksum of the wrapped data.
- * @param[in]  wrapped       The wrapped data to unwrap.
- * @return                   True if input checksum validates.
- */
-template <size_t Size>
-bool unwrap(uint8_t& out_version,
-    byte_array<UNWRAP_SIZE(Size)>& out_payload, uint32_t& out_checksum,
-    byte_array<Size>& wrapped);
+/// Verify the last bytes are a bitcoin checksum of the preceding bytes.
+template <size_t Size, size_t Checksum = checksum_default>
+bool verify_checksum(const byte_array<Size>& data);
 
-/**
- * Wrap arbitrary data.
- * @param[in]  version  The version byte for the wrapped data.
- * @param[out] payload  The payload to wrap.
- * @return              The wrapped data.
- */
-template <size_t Size>
-byte_array<WRAP_SIZE(Size)> wrap(uint8_t version, byte_array<Size>& payload);
+// chunks
 
-/**
- * Appends a four-byte checksum of a data chunk to itself.
- */
+/// Append slices and a four byte bitcoin checksum.
+BC_API data_chunk append_checksum(const loaf& slices);
+
+/// Append a four byte bitcoin checksum of data to itself.
 BC_API void append_checksum(data_chunk& data);
 
-/**
- * Generate a bitcoin hash checksum. Last 4 bytes of sha256(sha256(data))
- *
- * int(sha256(sha256(data))[-4:])
- */
-BC_API uint32_t bitcoin_checksum(const data_slice& data);
-
-/**
- * Verifies the last four bytes of a data chunk are a valid checksum of the
- * earlier bytes. This is typically used to verify base58 data.
- */
+/// Verify the last four bytes are a bitcoin checksum of the preceding bytes.
 BC_API bool verify_checksum(const data_slice& data);
 
 } // namespace system
@@ -107,4 +67,3 @@ BC_API bool verify_checksum(const data_slice& data);
 #include <bitcoin/system/impl/math/checksum.ipp>
 
 #endif
-

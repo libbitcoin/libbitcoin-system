@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__script_testnet__valid_expected)
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__payment__valid_expected)
 {
-    payment pay;
+    payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
     const payment_address address(pay);
     BOOST_REQUIRE(address);
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__payment__valid_expected)
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__payment_testnet__valid_expected)
 {
-    payment pay;
+    payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT_TESTNET));
     const payment_address address(pay);
     BOOST_REQUIRE(address);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__payment_testnet__valid_expected
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
 {
-    payment pay;
+    payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
     const payment_address address(pay);
     const payment_address copy(address);

@@ -64,9 +64,9 @@ public:
     static const uint16_t mainnet;
     static const uint16_t testnet;
 
-    static uint8_t to_p2kh_prefix(uint16_t version)
+    static uint8_t to_address_prefix(uint16_t version)
     {
-        // Recover p2kh prefix.
+        // Recover address prefix.
         return version & 0x00ff;
     }
 
@@ -76,10 +76,10 @@ public:
         return version >> 8;
     }
 
-    static uint16_t to_version(uint8_t p2kh, uint8_t wif)
+    static uint16_t to_version(uint8_t address, uint8_t wif)
     {
         // Combine prefixes.
-        return uint16_t(wif) << 8 | p2kh;
+        return uint16_t(wif) << 8 | address;
     }
 
     /// Constructors.

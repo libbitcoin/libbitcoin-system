@@ -29,13 +29,6 @@
 namespace libbitcoin {
 namespace system {
 
-// private
-bool ec_scalar::is_zero() const
-{
-    // Use reverse comparison, typically only 1 byte if non-zero.
-    return (*this) == null_hash;
-}
-
 // construction
 // ----------------------------------------------------------------------------
 
@@ -109,8 +102,8 @@ ec_scalar ec_scalar::from_int64(int64_t value)
     if (value == 0)
         return {};
 
-    // ec_secret numeric byte serialization is big-endian.
-    ec_secret secret{ null_hash };
+    // ec_secret numeric-byte serialization is big-endian.
+    ec_secret secret = null_hash;
     auto word_start = std::prev(secret.end(), sizeof(int64_t));
     auto serial = make_unsafe_serializer(word_start);
     serial.write_8_bytes_big_endian(static_cast<uint64_t>(absolute(value)));
@@ -123,24 +116,18 @@ ec_scalar ec_scalar::from_int64(int64_t value)
 
 ec_scalar& ec_scalar::operator+=(const ec_scalar& scalar)
 {
-    // 1 copy and 2 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this + scalar);
     return *this;
 }
 
 ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar)
 {
-    // 2 copies and 3 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this - scalar);
     return *this;
 }
 
 ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar)
 {
-    // 1 copy and 2 constructions
-    // One contruction could be removed at the cost of code repetition.
     *this = (*this * scalar);
     return *this;
 }
@@ -150,7 +137,6 @@ ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar)
 
 ec_scalar ec_scalar::operator-() const
 {
-    // 1 copy and 1 construction
     auto out = secret_;
     if (!ec_negate(out))
         return {};
@@ -163,7 +149,6 @@ ec_scalar ec_scalar::operator-() const
 
 ec_scalar operator+(const ec_scalar& left, const ec_scalar& right)
 {
-    // 1 copy and 1 construction
     ec_secret out = left.secret();
     if (!ec_add(out, right.secret()))
         return {};
@@ -173,13 +158,11 @@ ec_scalar operator+(const ec_scalar& left, const ec_scalar& right)
 
 ec_scalar operator-(const ec_scalar& left, const ec_scalar& right)
 {
-    // 2 copies and 2 constructions
     return left + -right;
 }
 
 ec_scalar operator*(const ec_scalar& left, const ec_scalar& right)
 {
-    // 1 copy and 1 construction
     auto out = left.secret();
     if (!ec_multiply(out, right.secret()))
         return {};
@@ -189,9 +172,6 @@ ec_scalar operator*(const ec_scalar& left, const ec_scalar& right)
 
 // comparison operators
 // ----------------------------------------------------------------------------
-
-// Any invalid results in equality (zero == zero).
-// Object must be tested for validity after any operation.
 
 bool operator==(int64_t left, const ec_scalar& right)
 {
@@ -231,7 +211,8 @@ bool operator!=(const ec_scalar& left, const ec_scalar& right)
 
 ec_scalar::operator bool() const
 {
-    return !is_zero();
+    // Use reverse comparison, typically only 1 byte compare if non-zero.
+    return !((*this) == null_hash);
 }
 
 ec_scalar::operator const ec_secret&() const

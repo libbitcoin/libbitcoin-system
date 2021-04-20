@@ -306,10 +306,10 @@ BOOST_AUTO_TEST_CASE(data__split__two_bytes__expected)
     };
 
     const auto result = split(source);
-    BOOST_REQUIRE_EQUAL(result.left.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result.left[0], 42u);
-    BOOST_REQUIRE_EQUAL(result.right.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result.right[0], 24u);
+    BOOST_REQUIRE_EQUAL(result.first.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result.first[0], 42u);
+    BOOST_REQUIRE_EQUAL(result.second.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result.second[0], 24u);
 }
 
 BOOST_AUTO_TEST_CASE(data__split__long_hash__expected)
@@ -324,10 +324,10 @@ BOOST_AUTO_TEST_CASE(data__split__long_hash__expected)
         }
     };
     const auto result = split(source);
-    BOOST_REQUIRE_EQUAL(result.left.size(), 32u);
-    BOOST_REQUIRE_EQUAL(result.left[0], 5u);
-    BOOST_REQUIRE_EQUAL(result.right.size(), 32u);
-    BOOST_REQUIRE_EQUAL(result.right[0], 9u);
+    BOOST_REQUIRE_EQUAL(result.first.size(), 32u);
+    BOOST_REQUIRE_EQUAL(result.first[0], 5u);
+    BOOST_REQUIRE_EQUAL(result.second.size(), 32u);
+    BOOST_REQUIRE_EQUAL(result.second[0], 9u);
 }
 
 // starts_with

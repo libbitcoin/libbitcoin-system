@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <queue>
+#include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/array_slice.hpp>
@@ -37,11 +38,7 @@ template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
 
 template <size_t Size>
-struct byte_array_parts
-{
-    byte_array<Size> left;
-    byte_array<Size> right;
-};
+using split_parts = std::pair<byte_array<Size>, byte_array<Size>>;
 
 // Define arbitrary byte storage types.
 typedef byte_array<1> one_byte;
@@ -105,7 +102,7 @@ byte_array<End - Start> slice(const byte_array<Size>& bytes);
  * Break an evenly-sized array array into two equal length parts.
  */
 template <size_t Size>
-byte_array_parts<Size / 2u> split(const byte_array<Size>& bytes);
+split_parts<Size / 2u> split(const byte_array<Size>& bytes);
 
 /**
  * Concatenate two arrays into a new array.

@@ -61,7 +61,6 @@ public:
 
 private:
     static ec_scalar from_int64(int64_t value);
-    bool is_zero() const;
 
     // This should be const, apart from the need to implement assignment.
     ec_secret secret_;

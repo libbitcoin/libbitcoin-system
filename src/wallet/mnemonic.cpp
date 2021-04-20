@@ -158,7 +158,7 @@ hd_private mnemonic::seeder(const string_list& words,
     const auto part = system::split(seed);
 
     // The object will be false if the secret (left) does not ec verify.
-    return hd_private(part.left, part.right, chain);
+    return hd_private(part.first, part.second, chain);
 }
 
 // protected static
