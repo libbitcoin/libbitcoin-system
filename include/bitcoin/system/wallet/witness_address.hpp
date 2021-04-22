@@ -19,65 +19,92 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_WITNESS_ADDRESS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_WITNESS_ADDRESS_HPP
 
+#include <iostream>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
+#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/utility/data.hpp>
+////#include <bitcoin/system/wallet/bech32.hpp>
+#include <bitcoin/system/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/ec_public.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A class for working with standard witness payment addresses.
+/// A class for working with witness payment addresses.
+/// For non-witness addresses, see payment_address
 class BC_API witness_address
-  : public payment_address
 {
   public:
-    enum class address_format: uint8_t
+    enum class program_type
     {
-        witness_pubkey_hash,
-        witness_script_hash
+        version_0_p2kh,
+        version_0_p2sh,
+        unknown,
+        invalid
     };
-
-    static const std::string mainnet_prefix;
-    static const std::string testnet_prefix;
 
     typedef std::vector<witness_address> list;
     typedef std::shared_ptr<witness_address> ptr;
+
+    /// BIP173 prefix.
+    static const std::string mainnet;
+    static const std::string testnet;
+
+    /// BIP173 constants.
+    static const char prefix_minimum_character;
+    static const char prefix_maximum_character;
+    static const size_t prefix_minimum_length;
+    static const size_t address_maximum_length;
+    static const size_t checksum_length;
+
+    /// BIP141 constants.
+    static const size_t program_minimum_size;
+    static const size_t program_maximum_size;
+    static const size_t version_0_p2kh_program_size;
+    static const size_t version_0_p2sh_program_size;
+
+    // TODO: script address extraction, see payment_address.
+
+    /// Helpers.
+    static bool is_valid_prefix(const std::string& prefix);
+    static bool split_address(std::string& out_prefix,
+        std::string& out_encoded, const std::string& address);
+    static program_type to_program_type(uint8_t version,
+        const data_slice& program);
 
     /// Constructors.
     witness_address();
     witness_address(witness_address&& other);
     witness_address(const witness_address& other);
-    witness_address(const std::string& address,
-        address_format format=address_format::witness_pubkey_hash);
-    witness_address(short_hash&& hash,
-        address_format format=address_format::witness_pubkey_hash,
-        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
-    witness_address(const short_hash& hash,
-        address_format format=address_format::witness_pubkey_hash,
-        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
-    witness_address(hash_digest&& hash,
-        address_format format=address_format::witness_pubkey_hash,
-        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
-    witness_address(const hash_digest& hash,
-        address_format format=address_format::witness_pubkey_hash,
-        uint8_t witness_version=0, const std::string& prefix=mainnet_prefix);
-    witness_address(const chain::script& script,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
+    witness_address(const std::string& address);
+
+    // version_0_p2kh
+    witness_address(const short_hash& public_key_hash,
+        const std::string& prefix=mainnet);
     witness_address(const ec_private& secret,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
+        const std::string& prefix=mainnet);
     witness_address(const ec_public& point,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
+        const std::string& prefix=mainnet);
+
+    // version_0_p2sh
+    witness_address(const hash_digest& script_hash,
+        const std::string& prefix=mainnet);
+    witness_address(const chain::script& script,
+        const std::string& prefix=mainnet);
 
     /// Operators.
-    bool operator<(const witness_address& other) const;
-    bool operator==(const witness_address& other) const;
-    bool operator!=(const witness_address& other) const;
+    witness_address& operator=(witness_address&& other);
     witness_address& operator=(const witness_address& other);
-    friend std::istream& operator>>(std::istream& in,
-        witness_address& to);
+    bool operator<(const witness_address& other) const;
+
+    friend std::istream& operator>>(std::istream& in, witness_address& to);
     friend std::ostream& operator<<(std::ostream& out,
         const witness_address& of);
 
@@ -87,55 +114,48 @@ class BC_API witness_address
     /// Serializer.
     std::string encoded() const;
 
-    /// Accessors.
-    uint8_t witness_version() const;
-    const hash_digest& witness_hash() const;
+    /// Properties.
+    const std::string& prefix() const;
+    const data_chunk& program() const;
+    uint8_t version() const;
+    program_type identifier() const;
     chain::script output_script() const;
 
-protected:
-    /// Protected for unit testing.
-    static data_chunk convert_bits(uint32_t from_bits, uint32_t to_bits,
-        bool pad, const data_chunk& in, size_t in_offset);
-
 private:
-    /// Factories.
-    static witness_address from_string(const std::string& address,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
-    static witness_address from_script(const chain::script& script,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
-    static witness_address from_private(const ec_private& secret,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
-    static witness_address from_public(const ec_public& point,
-        address_format format=address_format::witness_pubkey_hash,
-        const std::string& prefix=mainnet_prefix);
+    template <size_t Size>
+    witness_address(const byte_array<Size>& program, program_type identifier,
+        const std::string& prefix, uint8_t version)
+      : witness_address(to_chunk(program), identifier, prefix, version)
+    {
+    }
 
+    witness_address(data_chunk&& program, program_type identifier,
+        const std::string& prefix, uint8_t version);
+
+    // Factories.
+    static witness_address from_address(const std::string& address);
+
+    static witness_address from_short(const short_hash& hash,
+        const std::string& prefix);
+    static witness_address from_public(const ec_public& point,
+        const std::string& prefix);
+
+    static witness_address from_long(const hash_digest& hash,
+        const std::string& prefix);
+    static witness_address from_script(const chain::script& script,
+        const std::string& prefix);
+
+    data_chunk program_;
     std::string prefix_;
-    address_format format_;
-    uint8_t witness_version_;
-    hash_digest witness_hash_;
+    program_type identifier_;
+    uint8_t version_;
 };
+
+bool operator==(const witness_address& left, const witness_address& right);
+bool operator!=(const witness_address& left, const witness_address& right);
 
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin
-
-// Allow witness_address to be in indexed in std::*map classes.
-namespace std
-{
-template <>
-struct hash<bc::system::wallet::witness_address>
-{
-    size_t operator()(const bc::system::wallet::witness_address& address) const
-    {
-        return address.witness_hash() == bc::system::null_hash ?
-            std::hash<bc::system::short_hash>()(address.hash()) :
-            std::hash<bc::system::hash_digest>()(address.witness_hash());
-    }
-};
-
-} // namespace std
 
 #endif

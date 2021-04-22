@@ -23,11 +23,13 @@
 #include <string>
 #include <utility>
 #include <boost/program_options.hpp>
+#include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
-#include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 
@@ -37,205 +39,245 @@ namespace wallet {
 
 using namespace bc::system::machine;
 
-// BIP173 prefix constants.
-// github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#segwit-address-format
-const std::string witness_address::mainnet_prefix = "bc";
-const std::string witness_address::testnet_prefix = "tb";
+constexpr char separator = '1';
+constexpr uint8_t version_0 = 0;
+constexpr uint8_t version_maximum = 16;
+constexpr uint8_t version_invalid = max_uint8;
 
-const size_t bech32_contracted_bit_size = 5;
-const size_t bech32_expanded_bit_size = 8;
+// The prefix is factored into the checksum but not the base32 encoding.
+const std::string witness_address::mainnet = "bc";
+const std::string witness_address::testnet = "tb";
 
+const char witness_address::prefix_minimum_character = 33;
+const char witness_address::prefix_maximum_character = 126;
+const size_t witness_address::prefix_minimum_length = 1;
+const size_t witness_address::address_maximum_length = 90;
+const size_t witness_address::program_minimum_size = 2;
+const size_t witness_address::program_maximum_size = 40;
+const size_t witness_address::version_0_p2kh_program_size = 20;
+const size_t witness_address::version_0_p2sh_program_size = 32;
+const size_t witness_address::checksum_length = 6;
+
+// Contructors.
+// ----------------------------------------------------------------------------
+
+// invalid
 witness_address::witness_address()
-  : payment_address(),
-    witness_version_(0),
-    witness_hash_(null_hash)
+  : program_(),
+    prefix_(),
+    identifier_(program_type::invalid),
+    version_(version_invalid)
 {
 }
 
+// move
 witness_address::witness_address(witness_address&& other)
-  : payment_address(other),
+  : program_(std::move(other.program_)),
     prefix_(other.prefix_),
-    format_(other.format_),
-    witness_version_(other.witness_version_),
-    witness_hash_(std::move(other.witness_hash_))
+    identifier_(other.identifier_),
+    version_(other.version_)
 {
 }
 
+// copy
 witness_address::witness_address(const witness_address& other)
-  : payment_address(other),
+  : program_(other.program_),
     prefix_(other.prefix_),
-    format_(other.format_),
-    witness_hash_(other.witness_hash_)
+    identifier_(other.identifier_),
+    version_(other.version_)
 {
 }
 
-witness_address::witness_address(const std::string& address,
-    address_format format)
-  : witness_address(from_string(address, format))
+// fully specified by address
+witness_address::witness_address(const std::string& address)
+  : witness_address(from_address(address))
 {
 }
 
-witness_address::witness_address(const ec_private& secret,
-    address_format format, const std::string& prefix)
-  : witness_address(from_private(secret, format, prefix))
-{
-}
-
-witness_address::witness_address(const ec_public& point, address_format format,
+// version_0_p2kh
+witness_address::witness_address(const short_hash& public_key_hash,
     const std::string& prefix)
-  : witness_address(from_public(point, format, prefix))
+  : witness_address(from_short(public_key_hash, prefix))
 {
 }
 
+// version_0_p2kh
+witness_address::witness_address(const ec_private& secret,
+    const std::string& prefix)
+  : witness_address(from_public(secret, prefix))
+{
+}
+
+// version_0_p2kh
+witness_address::witness_address(const ec_public& point,
+    const std::string& prefix)
+  : witness_address(from_public(point, prefix))
+{
+}
+
+// version_0_p2sh
+witness_address::witness_address(const hash_digest& script_hash,
+    const std::string& prefix)
+  : witness_address(from_long(script_hash, prefix))
+{
+}
+
+// version_0_p2sh
 witness_address::witness_address(const chain::script& script,
-    address_format format, const std::string& prefix)
-  : witness_address(from_script(script, format, prefix))
+    const std::string& prefix)
+  : witness_address(from_script(script, prefix))
 {
 }
 
-witness_address::witness_address(short_hash&& hash, address_format format,
-    uint8_t witness_version, const std::string& prefix)
-  : payment_address(std::move(hash)),
+// private
+witness_address::witness_address(data_chunk&& program, program_type identifier,
+    const std::string& prefix, uint8_t version)
+  : program_(std::move(program)),
     prefix_(prefix),
-    format_(format),
-    witness_version_(witness_version),
-    witness_hash_(null_hash)
+    identifier_(identifier),
+    version_(version)
 {
 }
 
-witness_address::witness_address(const short_hash& hash, address_format format,
-    uint8_t witness_version, const std::string& prefix)
-  : payment_address(hash),
-    prefix_(prefix),
-    format_(format),
-    witness_version_(witness_version),
-    witness_hash_(null_hash)
+// Helpers.
+// ----------------------------------------------------------------------------
+
+// Lower case required for creation but not validation.
+bool witness_address::is_valid_prefix(const std::string& prefix)
 {
+    if (is_ascii_mixed_case(prefix))
+        return false;
+
+    if (prefix.length() < prefix_minimum_length)
+        return false;
+
+    if (prefix.length() > (address_maximum_length - checksum_length - 1u))
+        return false;
+
+    return (std::any_of(prefix.begin(), prefix.end(), [](const char character)
+    {
+        return character < prefix_minimum_character ||
+            character > prefix_maximum_character;
+    }));
 }
 
-witness_address::witness_address(hash_digest&& hash, address_format format,
-    uint8_t witness_version, const std::string& prefix)
-  : payment_address(null_short_hash),
-    prefix_(prefix),
-    format_(format),
-    witness_version_(witness_version),
-    witness_hash_(std::move(hash))
+// Split the prefix from the payload and validate sizes.
+bool witness_address::split_address(std::string& out_prefix,
+    std::string& out_encoded, const std::string& address)
 {
+    if (address.length() > address_maximum_length)
+        return false;
+
+    if (is_ascii_mixed_case(address))
+        return false;
+
+    const auto split = address.rfind(separator);
+
+    if (split == address.npos)
+        return false;
+
+    out_prefix = address.substr(0, split - 1);
+    out_encoded = address.substr(split + 1);
+
+    if (!is_valid_prefix(out_prefix))
+        return false;
+
+    return out_encoded.length() > checksum_length;
 }
 
-witness_address::witness_address(const hash_digest& hash, address_format format,
-    uint8_t witness_version, const std::string& prefix)
-  : payment_address(null_short_hash),
-    prefix_(prefix),
-    format_(format),
-    witness_version_(witness_version),
-    witness_hash_(hash)
+witness_address::program_type witness_address::to_program_type(uint8_t version,
+    const data_slice& program)
 {
+    if (version > version_maximum)
+        return program_type::invalid;
+
+    const auto size = program.size();
+
+    if (version == version_0)
+    {
+        if (size == version_0_p2kh_program_size)
+            return program_type::version_0_p2kh;
+
+        if (size == version_0_p2sh_program_size)
+            return program_type::version_0_p2sh;
+    }
+
+    return (size < program_minimum_size) || (size > program_maximum_size) ?
+        program_type::invalid : program_type::unknown;
 }
 
 // Factories.
 // ----------------------------------------------------------------------------
-// static
-witness_address witness_address::from_string(const std::string& address,
-    address_format format, const std::string& prefix)
+
+// fully specified by address
+witness_address witness_address::from_address(const std::string& address)
 {
-    // BIP141 constants
-    static constexpr size_t witness_program_min_size = 2;
-    static constexpr size_t witness_program_max_size = 40;
-
-    // BIP173 witness version 0 constants
-    static constexpr size_t witness_pubkey_hash_size = 42;
-    static constexpr size_t witness_script_hash_size = 62;
-    static constexpr size_t bech32_address_min_size = 14;
-    static constexpr size_t bech32_address_max_size = 74;
-    static constexpr size_t bech32_address_size_modulo = 8;
-    static constexpr size_t bech32_address_modulo_invalid_1 = 0;
-    static constexpr size_t bech32_address_modulo_invalid_2 = 3;
-    static constexpr size_t bech32_address_modulo_invalid_3 = 5;
-
-    // Attempt to decode BIP173 address format.
-    base32 bech32_decoded;
-    if (!decode_base32(bech32_decoded, address))
+    std::string prefix;
+    std::string encoded;
+    if (!split_address(prefix, encoded, address))
         return {};
 
-    const uint8_t witness_version = bech32_decoded.payload.front();
-
-    // Checks specific to witness version 0.
-    if (witness_version == 0 && (address.size() < witness_pubkey_hash_size ||
-        address.size() > witness_script_hash_size))
+    data_chunk program;
+    if (!decode_base32(program, encoded))
         return {};
 
-    // Verify witness version is valid (only version 0 is
-    // currently supported).
-    if (witness_version != 0)
+    uint8_t version;
+    if (!bech32_verify_checked(version, program, prefix))
         return {};
 
-    // Verify additional properties (BIP173 decoding).
-    if (address.size() < bech32_address_min_size ||
-        address.size() > bech32_address_max_size)
+    const auto identifier = to_program_type(version, program);
+
+    if (identifier == program_type::invalid ||
+        identifier == program_type::unknown)
         return {};
 
-    const auto address_mod = address.size() % bech32_address_size_modulo;
-    if (address_mod == bech32_address_modulo_invalid_1 ||
-        address_mod == bech32_address_modulo_invalid_2 ||
-        address_mod == bech32_address_modulo_invalid_3)
-        return {};
-
-    const auto converted = convert_bits(bech32_contracted_bit_size,
-        bech32_expanded_bit_size, false, bech32_decoded.payload, 1);
-    if (converted.size() < witness_program_min_size ||
-        converted.size() > witness_program_max_size)
-        return {};
-
-    if (converted.size() == hash_size)
-    {
-        auto hash = to_array<hash_size>(converted);
-        return { std::move(hash), format, witness_version, prefix };
-    }
-
-    BITCOIN_ASSERT(converted.size() == short_hash_size);
-    auto hash = to_array<short_hash_size>(converted);
-    return { std::move(hash), format, witness_version, prefix };
+    return { std::move(program), identifier, prefix, version };
 }
 
-// static
-witness_address witness_address::from_private(const ec_private& secret,
-    address_format format, const std::string& prefix)
+// version_0_p2kh
+witness_address witness_address::from_short(const short_hash& hash,
+    const std::string& prefix)
 {
-    return secret ? witness_address(secret.to_public(), format, prefix) : 
-        witness_address{};
+    // Constructed addresses must have lower case prefixes.
+    if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
+        return {};
+
+    return { hash, program_type::version_0_p2kh, prefix, version_0 };
 }
 
-// static
+// version_0_p2kh
 witness_address witness_address::from_public(const ec_public& point,
-    address_format format, const std::string& prefix)
+    const std::string& prefix)
 {
-    if (!point)
-        return {};
+    // point.point() is always a compressed public key, as required.
 
-    data_chunk data;
-    if (!point.to_data(data))
-        return {};
-
-    // Witness version.
-    const uint8_t version = 0;
-
-    return format == address_format::witness_pubkey_hash ?
-        witness_address(bitcoin_short_hash(data), format, version, prefix) :
-        witness_address(bitcoin_hash(data), format, version, prefix);
+    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
+    // If the version byte is 0, and the witness program is 20 bytes it is
+    // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
+    // The HASH160 of the public key must match the 20-byte witness program.
+    return from_short(bitcoin_short_hash(point.point()), prefix);
 }
 
-// static
-witness_address witness_address::from_script(const chain::script& script,
-    address_format format, const std::string& prefix)
+// version_0_p2sh
+witness_address witness_address::from_long(const hash_digest& hash,
+    const std::string& prefix)
 {
-    // Witness version.
-    const uint8_t version = 0;
-    const auto key = script.to_payments_key();
+    // Constructed addresses must have lower case prefixes.
+    if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
+        return {};
 
-    return format == address_format::witness_pubkey_hash ?
-        witness_address(ripemd160_hash(key), format, version, prefix) :
-        witness_address(key, format, version, prefix);
+    return { hash, program_type::version_0_p2sh, prefix, version_0 };
+}
+
+// version_0_p2sh
+witness_address witness_address::from_script(const chain::script& script,
+    const std::string& prefix)
+{
+    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
+    // If the version byte is 0, and the witness program is 32 bytes it is
+    // It is interpreted as a pay-to-witness-script-hash (P2WSH) program.
+    // SHA256 of the witnessScript must match the 32-byte witness program.
+    return from_long(script.to_payments_key(), prefix);
 }
 
 // Cast operators.
@@ -243,62 +285,76 @@ witness_address witness_address::from_script(const chain::script& script,
 
 witness_address::operator bool() const
 {
-    return valid_;
+    return identifier_ != program_type::invalid;
 }
 
 // Serializer.
 // ----------------------------------------------------------------------------
 
-// Returns the bech32 encoded witness address.
 std::string witness_address::encoded() const
 {
-    const size_t conversion_offset = 0;
-    const auto hash = witness_hash_ == null_hash ? to_chunk(hash_) : 
-        to_chunk(witness_hash_);
-
-    base32 bech32;
-    bech32.prefix = prefix_;
-    bech32.payload = build_chunk(
-    {
-        data_chunk{ witness_version_ },
-        convert_bits(bech32_expanded_bit_size, bech32_contracted_bit_size,
-            true, hash, conversion_offset)
-    });
-
-    return encode_base32(bech32);
+    const auto checked = bech32_build_checked(version_, program_, prefix_);
+    return prefix_ + separator + encode_base32(checked);
 }
 
-// Accessors.
+// Properties.
 // ----------------------------------------------------------------------------
 
-uint8_t witness_address::witness_version() const
+const std::string& witness_address::prefix() const
 {
-    return witness_version_;
+    return prefix_;
 }
 
-const hash_digest& witness_address::witness_hash() const
+// Version is simple numeric [0-16], not an opcode represenation.
+uint8_t witness_address::version() const
 {
-    return witness_hash_;
+    return version_;
+}
+
+const data_chunk& witness_address::program() const
+{
+    return program_;
+}
+
+witness_address::program_type witness_address::identifier() const
+{
+    return identifier_;
 }
 
 chain::script witness_address::output_script() const
 {
-    return format_ == address_format::witness_pubkey_hash ?
-        chain::script::to_pay_witness_key_hash_pattern(hash_) :
-        chain::script::to_pay_witness_script_hash_pattern(witness_hash_);
+    switch (identifier_)
+    {
+        case program_type::version_0_p2kh:
+            return chain::script::to_pay_witness_key_hash_pattern(
+                to_array<short_hash_size>(program_));
+        case program_type::version_0_p2sh:
+            return chain::script::to_pay_witness_script_hash_pattern(
+                to_array<hash_size>(program_));
+        case program_type::invalid:
+        default:
+            return {};
+    }
 }
 
 // Operators.
 // ----------------------------------------------------------------------------
 
+witness_address& witness_address::operator=(witness_address&& other)
+{
+    program_ = std::move(other.program_);
+    prefix_ = other.prefix_;
+    identifier_ = other.identifier_;
+    version_ = other.version_;
+    return *this;
+}
+
 witness_address& witness_address::operator=(const witness_address& other)
 {
-    valid_ = other.valid_;
-    hash_ = other.hash_;
+    program_ = other.program_;
     prefix_ = other.prefix_;
-    format_ = other.format_;
-    witness_version_ = other.witness_version_;
-    witness_hash_ = other.witness_hash_;
+    identifier_ = other.identifier_;
+    version_ = other.version_;
     return *this;
 }
 
@@ -307,20 +363,14 @@ bool witness_address::operator<(const witness_address& other) const
     return encoded() < other.encoded();
 }
 
-bool witness_address::operator==(const witness_address& other) const
+bool operator==(const witness_address& left, const witness_address& right)
 {
-    return valid_ == other.valid_
-        && version_ == other.version_
-        && prefix_ == other.prefix_
-        && format_ == other.format_
-        && witness_version_ == other.witness_version_
-        && hash_ == other.hash_
-        && witness_hash_ == other.witness_hash_;
+    return left.encoded() == right.encoded();
 }
 
-bool witness_address::operator!=(const witness_address& other) const
+bool operator!=(const witness_address& left, const witness_address& right)
 {
-    return !(*this == other);
+    return !(left == right);
 }
 
 std::istream& operator>>(std::istream& in, witness_address& to)
@@ -341,43 +391,6 @@ std::istream& operator>>(std::istream& in, witness_address& to)
 std::ostream& operator<<(std::ostream& out, const witness_address& of)
 {
     out << of.encoded();
-    return out;
-}
-
-// static
-data_chunk witness_address::convert_bits(uint32_t from_bits, uint32_t to_bits,
-    bool pad, const data_chunk& in, size_t in_offset)
-{
-    const uint32_t maximum = (1 << to_bits) - 1;
-    const uint32_t maximum_accumulator = (1 << (from_bits + to_bits - 1)) - 1;
-
-    size_t offset = 0;
-    uint32_t bit_count = 0;
-    uint32_t accumulator = 0;
-
-    data_chunk out;
-    for (const auto value: in)
-    {
-        if (offset++ < in_offset)
-            continue;
-
-        accumulator = ((accumulator << from_bits) | value);
-        accumulator &= maximum_accumulator;
-
-        bit_count += from_bits;
-        while (bit_count >= to_bits)
-        {
-            bit_count -= to_bits;
-            out.push_back((accumulator >> bit_count) & maximum);
-        }
-    }
-
-    if (pad && bit_count > 0)
-        out.push_back((accumulator << (to_bits - bit_count)) & maximum);
-    else if (!pad && (bit_count >= from_bits ||
-        ((accumulator << (to_bits - bit_count)) & maximum)))
-        return {};
-
     return out;
 }
 

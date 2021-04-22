@@ -21,22 +21,16 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
-#include <sstream>
+#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-static constexpr uint8_t checksum_size = 6;
-static constexpr uint8_t prefix_min_size = 1;
-static constexpr uint8_t combined_max_size = 90;
-static constexpr uint8_t bit_group_size = 5;
-static constexpr uint8_t bit_group_mask = 31;
-static constexpr uint8_t null = 255;
-static constexpr uint8_t separator = '1';
-static const char encode_table[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-static const uint8_t decode_table[] =
+    
+constexpr uint8_t null = 0xff;
+constexpr char encode_map[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+constexpr uint8_t decode_map[] =
 {
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
@@ -56,199 +50,118 @@ static const uint8_t decode_table[] =
     6,    4,    2,    null, null, null, null, null
 };
 
-// Expand the prefix for checksum computation.
-data_chunk expand(const std::string& prefix)
+std::string encode_base32(const data_slice& data)
 {
-    data_chunk result(2u * prefix.size() + 1u, 0x00);
-    auto iterator = result.begin();
+    const auto expanded = base32_expand(data);
 
-    for (const auto character: prefix)
-        *iterator++ = static_cast<uint8_t>(character) >> bit_group_size;
+    ////// This should never fail as we just created it.
+    ////// 31 is the last index of the 32 element encode_map.
+    ////BITCOIN_ASSERT(std::all_of(expanded.begin(), expanded.end(),
+    ////    [](uint8_t byte) { return byte < 32; }));
 
-    // Current position is initialized to 0x00 so skip it.
-    ++iterator;
+    size_t index = 0;
+    std::string out(data.size(), '\0');
 
-    for (const auto character: prefix)
-        *iterator++ = static_cast<uint8_t>(character) & bit_group_mask;
+    // The map is 32 elements, all expanded byte indexes are valid.
+    for (const auto byte: expanded)
+        out[index++] = encode_map[byte];
 
-    return result;
+    return out;
 }
 
-// Do the checksum math.
-uint32_t polymod(const data_chunk& values)
+data_chunk decode_base32(const std::string& data)
 {
-    // Polynomials in the bech32 implementation are represented by
-    // simple integers. Generally 30-bit integers are used, where each
-    // bit corresponds to one coefficient of the polynomial.
-    static const uint32_t bech32_generator_polynomials[] =
+    if (is_ascii_mixed_case(data))
+        return {};
+
+    size_t index = 0;
+    data_chunk expanded(data.size());
+
+    // The map is 256 elements, all char indexes are valid.
+    for (const auto character: ascii_to_lower(data))
+        if (((expanded[index++] = decode_map[character])) == null)
+            return {};
+
+    ////// This should never fail since the expansion was successful.
+    ////BITCOIN_ASSERT(base32_compress(expanded).empty() == in.empty());
+
+    return base32_compress(expanded);
+}
+
+// compression/expansion
+// ----------------------------------------------------------------------------
+
+static bool transform(data_chunk& out, const data_slice& data,
+    uint32_t from_bits, uint32_t to_bits, bool pad)
+{
+    uint32_t bits = 0;
+    uint32_t accumulator = 0;
+    const uint32_t max_value = (1 << to_bits) - 1;
+    const uint32_t max_accumulator = (1 << (from_bits + to_bits - 1)) - 1;
+
+    for (const auto value: data)
     {
-        0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
-    };
+        accumulator = ((accumulator << from_bits) | value) & max_accumulator;
+        bits += from_bits;
 
-    // Mask for low 25 bits.
-    static const uint32_t checksum_mask = 0x1ffffff;
-
-    uint32_t checksum = 1;
-    for (const auto value: values)
-    {
-        const auto shift = (checksum >> 25u);
-        checksum = (checksum & checksum_mask) << bit_group_size ^ value;
-
-        for (size_t index = 0; index < bit_group_size; ++index)
-            checksum ^= (((shift >> index) & 1u) != 0 ?
-                bech32_generator_polynomials[index] : 0);
+        while (bits >= to_bits)
+        {
+            bits -= to_bits;
+            out.push_back((accumulator >> bits) & max_value);
+        }
     }
 
-    return checksum;
-}
-
-// Compute the checksum.
-data_chunk checksum(const base32& value)
-{
-    static const data_chunk empty_checksum(checksum_size, 0x00);
-    const auto expanded = build_chunk(
+    if (pad)
     {
-        expand(value.prefix),
-        value.payload,
-        empty_checksum
-    });
-
-    data_chunk checksum(checksum_size);
-    const auto modified = polymod(expanded) ^ 1u;
-
-    for (size_t index = 0; index < checksum_size; ++index)
-        checksum[index] = (modified >> bit_group_size * (bit_group_size -
-            index)) & bit_group_mask;
-
-    return checksum;
-}
-
-// Normalize and validate input characters.
-static bool normalize(data_chunk& out, const std::string& in)
-{
-    out.clear();
-    out.reserve(in.length());
-    auto uppercase = false;
-    auto lowercase = false;
-
-    for (auto character: in)
+        if (bits > 0)
+        {
+            out.push_back((accumulator << (to_bits - bits)) & max_value);
+            return true;
+        }
+    }
+    else
     {
-        if (character >= 'A' && character <= 'Z')
+        if (bits >= from_bits || ((accumulator << (to_bits - bits)) & max_value))
         {
-            uppercase = true;
-            character += ('a' - 'A');
-        }
-        else if (character >= 'a' && character <= 'z')
-        {
-            lowercase = true;
-        }
-        else if (character < '!' || character > '~')
-        {
+            ////// Expansion may never fail as any data is encodable.
+            ////BITCOIN_ASSERT(from_bits < to_bits);
+            out.clear();
             return false;
         }
-
-        out.push_back(static_cast<uint8_t>(character));
     }
 
-    // Must not accept mixed case strings.
-    return !(uppercase && lowercase);
-}
-
-// Split the prefix from the payload and validate sizes.
-static bool split(base32& out, const data_chunk& in)
-{
-    static const auto separator_size = sizeof(separator);
-    static const auto payload_min_size = checksum_size;
-    static const auto prefix_max_size = combined_max_size - separator_size -
-        payload_min_size;
-
-    if (in.size() > combined_max_size)
-        return false;
-
-    // Find the last instance of the separator byte.
-    const auto reverse = std::find(in.rbegin(), in.rend(), separator);
-
-    if (reverse == in.rend())
-        return false;
-
-    // Convert separator iterator from reverse to forward (min distance is 1).
-    const auto offset = std::distance(reverse, in.rend()) - 1u;
-
-    // Clang 3.4 cannot handle iterator variable here, so this is a bit ugly.
-    out.prefix = { in.begin(), std::next(in.begin(), offset) };
-    out.payload = { std::next(in.begin(), offset + 1u), in.end() };
-
-    return
-        out.prefix.size() >= prefix_min_size &&
-        out.prefix.size() <= prefix_max_size &&
-        out.payload.size() >= payload_min_size;
-}
-
-// Verify the checksummed payload.
-bool verify(const base32& value)
-{
-    const auto expanded = build_chunk(
-    {
-        expand(value.prefix),
-        value.payload
-    });
-
-    return polymod(expanded) == 1u;
-}
-
-// public
-//-----------------------------------------------------------------------------
-
-// TODO: add guard against invalid input.
-// There is no guard in the BIPfor invalid sizes or prefix characters here,
-// and as a result it is possible to encode a value that cannot be decoded.
-// TODO: guard against uppercase prefix.
-// An uppercase prefix is valid but the BIPreference code does not normalize
-// it. The result is invalid encoded value due to mixed case. There is no tool
-// to produce uppercase encodings, though the values may be simply mapped.
-std::string encode_base32(const base32& unencoded)
-{
-    std::stringstream encoded;
-
-    // Copy the prefix and add the separator.
-    encoded << unencoded.prefix << separator;
-
-    // Encode and add the payload.
-    for (const auto value: unencoded.payload)
-        encoded << encode_table[value];
-
-    // Compute, encode and add the checksum.
-    for (const auto value: checksum(unencoded))
-        encoded << encode_table[value];
-
-    return encoded.str();
-}
-
-bool decode_base32(base32& out, const std::string& in)
-{
-    data_chunk normal;
-
-    // Normalize and validate input characters.
-    if (!normalize(normal, in))
-        return false;
-
-    // Set prefix and payload with checksum.
-    if (!split(out, normal))
-        return false;
-
-    // Decode payload/checksum in place.
-    for (auto it = out.payload.begin(); it != out.payload.end(); ++it)
-        if (((*it = decode_table[*it])) == null)
-            return false;
-
-    // Verify checksummed payload.
-    if (!verify(out))
-        return false;
-
-    // Truncate checksum from payload (underflow guarded by split call).
-    out.payload.resize(out.payload.size() - checksum_size);
-    out.payload.shrink_to_fit();
     return true;
+}
+
+static bool transform(data_chunk& out, const data_slice& data, bool compress)
+{
+    const auto pad = !compress;
+    const auto bits = [](bool compress) { return compress ? 5 : 8; };
+    return transform(out, data, bits(compress), bits(!compress), pad);
+}
+
+// Failure cannot happen for expansion as any data is encodable.
+data_chunk base32_expand(const data_slice& data)
+{
+    data_chunk out;
+
+    // The boolean return is a consequence of symmetrical conversion.
+    /* bool */ transform(out, data, false);
+
+    return out;
+}
+
+// Expanded data may be invalid, returns empty.
+data_chunk base32_compress(const data_slice& expanded)
+{
+    data_chunk out;
+
+    // Pass the failure as an empty result (for non-empty input).
+    // This allows caller who generates expansion to flow the return.
+    if (!transform(out, expanded, true))
+        out.clear();
+
+    return out;
 }
 
 } // namespace system

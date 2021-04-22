@@ -227,15 +227,6 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__copy_payment__valid_expected)
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__construct__move_payment_testnet__valid_expected)
-{
-    payment::value_type pay;
-    BOOST_REQUIRE(decode_base16(pay, PAYMENT_TESTNET));
-    const payment_address address(std::move(pay));
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT_TESTNET);
-}
-
 // construct self:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
@@ -258,29 +249,29 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__move__valid_expected)
     BOOST_REQUIRE_EQUAL(copy.encoded(), ADDRESS_SCRIPT);
 }
 
-// version property:
+// prefix property:
 
-BOOST_AUTO_TEST_CASE(payment_address__version__default__mainnet)
+BOOST_AUTO_TEST_CASE(payment_address__prefix__default__mainnet)
 {
     const payment_address address(ec_public(COMPRESSED));
-    BOOST_REQUIRE_EQUAL(address.version(), payment_address::mainnet_p2kh);
+    BOOST_REQUIRE_EQUAL(address.prefix(), payment_address::mainnet_p2kh);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__version__testnet__testnet)
+BOOST_AUTO_TEST_CASE(payment_address__prefix__testnet__testnet)
 {
     const uint8_t testnet = 0x6f;
     const payment_address address(ec_public(COMPRESSED), testnet);
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.version(), testnet);
+    BOOST_REQUIRE_EQUAL(address.prefix(), testnet);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__version__script__valid_mainnet_p2sh)
+BOOST_AUTO_TEST_CASE(payment_address__prefix__script__valid_mainnet_p2sh)
 {
     script ops;
     BOOST_REQUIRE(ops.from_string(SCRIPT));
     const payment_address address(ops);
     BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.version(), payment_address::mainnet_p2sh);
+    BOOST_REQUIRE_EQUAL(address.prefix(), payment_address::mainnet_p2sh);
 }
 
 // hash property:

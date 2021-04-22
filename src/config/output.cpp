@@ -93,7 +93,7 @@ std::istream& operator>>(std::istream& input, output& argument)
     const wallet::payment_address payment(target);
     if (payment)
     {
-        argument.version_ = payment.version();
+        argument.version_ = payment.prefix();
         argument.pay_to_hash_ = payment.hash();
         return input;
     }

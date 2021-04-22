@@ -19,17 +19,14 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_PAYMENT_ADDRESS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_PAYMENT_ADDRESS_HPP
 
-#include <algorithm>
+
 #include <iostream>
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/wallet/checked.hpp>
@@ -42,7 +39,8 @@ namespace wallet {
 
 typedef checked<1, short_hash_size, 4> payment;
 
-/// A class for working with non-stealth payment addresses.
+/// A class for working with non-witness payment addresses.
+/// For witness addresses, see payment_witness.
 class BC_API payment_address
 {
 public:
@@ -55,70 +53,63 @@ public:
     typedef std::vector<payment_address> list;
     typedef std::shared_ptr<payment_address> ptr;
 
-    /// Extract a payment address list from an input or output script.
+    /// Extract a payment address from an input or output script.
     static list extract(const chain::script& script,
-        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+        uint8_t p2kh_prefix=mainnet_p2kh, uint8_t p2sh_prefix=mainnet_p2sh);
     static list extract_input(const chain::script& script,
-        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
-    static list extract_output(const chain::script& script,
-        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+        uint8_t p2kh_prefix=mainnet_p2kh, uint8_t p2sh_prefix=mainnet_p2sh);
+    static payment_address extract_output(const chain::script& script,
+        uint8_t p2kh_prefix=mainnet_p2kh, uint8_t p2sh_prefix=mainnet_p2sh);
 
     /// Constructors.
     payment_address();
     payment_address(payment_address&& other);
     payment_address(const payment_address& other);
+    payment_address(payment&& decoded);
     payment_address(const payment& decoded);
-    payment_address(const ec_private& secret);
+
     payment_address(const std::string& address);
-    payment_address(short_hash&& hash, uint8_t version=mainnet_p2kh);
-    payment_address(const short_hash& hash, uint8_t version=mainnet_p2kh);
-    payment_address(const ec_public& point, uint8_t version=mainnet_p2kh);
-    payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
+    payment_address(const ec_private& secret);
+    payment_address(const ec_public& point, uint8_t prefix=mainnet_p2kh);
+    payment_address(const short_hash& hash, uint8_t prefix=mainnet_p2kh);
+    payment_address(const chain::script& script, uint8_t prefix=mainnet_p2sh);
 
     /// Operators.
-    bool operator<(const payment_address& other) const;
-    bool operator==(const payment_address& other) const;
-    bool operator!=(const payment_address& other) const;
+    payment_address& operator=(payment_address&& other);
     payment_address& operator=(const payment_address& other);
+    bool operator<(const payment_address& other) const;
     friend std::istream& operator>>(std::istream& in, payment_address& to);
     friend std::ostream& operator<<(std::ostream& out,
         const payment_address& of);
 
     /// Cast operators.
     operator bool() const;
-    operator const short_hash&() const;
 
     /// Serializer.
     std::string encoded() const;
 
-    /// Accessors.
-    uint8_t version() const;
-    const short_hash& hash() const;
+    /// Properties.
+    uint8_t prefix() const;
+    short_hash hash() const;
     chain::script output_script() const;
 
     /// Methods.
-    payment to_payment() const;
+    const payment& to_payment() const;
 
 private:
-    /// Validators.
-    static bool is_address(const data_slice& decoded);
-
-    /// Factories.
+    // Factories.
     static payment_address from_string(const std::string& address);
-    static payment_address from_payment(const payment& decoded);
     static payment_address from_private(const ec_private& secret);
-    static payment_address from_public(const ec_public& point, uint8_t version);
+    static payment_address from_public(const ec_public& point, uint8_t prefix);
     static payment_address from_script(const chain::script& script,
-        uint8_t version);
+        uint8_t prefix);
 
-protected:
-
-    /// Members.
-    /// These should be const, apart from the need to implement assignment.
-    bool valid_;
-    uint8_t version_;
-    short_hash hash_;
+    // This should be const, apart from the need to implement assignment.
+    payment payment_;
 };
+
+bool operator==(const payment_address& left, const payment_address& right);
+bool operator!=(const payment_address& left, const payment_address& right);
 
 } // namespace wallet
 } // namespace system

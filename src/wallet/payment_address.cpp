@@ -45,23 +45,27 @@ const uint8_t payment_address::testnet_p2kh = 0x6f;
 const uint8_t payment_address::testnet_p2sh = 0xc4;
 
 payment_address::payment_address()
-  : valid_(false), version_(0), hash_(null_short_hash)
+  : payment_()
 {
 }
 
 payment_address::payment_address(payment_address&& other)
-  : valid_(other.valid_), version_(other.version_),
-    hash_(std::move(other.hash_))
+  : payment_(std::move(other.payment_))
 {
 }
 
 payment_address::payment_address(const payment_address& other)
-  : valid_(other.valid_), version_(other.version_), hash_(other.hash_)
+  : payment_(other.payment_)
+{
+}
+
+payment_address::payment_address(payment&& decoded)
+  : payment_(std::move(decoded))
 {
 }
 
 payment_address::payment_address(const payment& decoded)
-  : payment_address(from_payment(decoded))
+  : payment_(decoded)
 {
 }
 
@@ -75,32 +79,19 @@ payment_address::payment_address(const ec_private& secret)
 {
 }
 
-payment_address::payment_address(const ec_public& point, uint8_t version)
-  : payment_address(from_public(point, version))
+payment_address::payment_address(const ec_public& point, uint8_t prefix)
+  : payment_address(from_public(point, prefix))
 {
 }
 
-payment_address::payment_address(const chain::script& script, uint8_t version)
-  : payment_address(from_script(script, version))
+payment_address::payment_address(const chain::script& script, uint8_t prefix)
+  : payment_address(from_script(script, prefix))
 {
 }
 
-payment_address::payment_address(short_hash&& hash, uint8_t version)
-  : valid_(true), version_(version), hash_(std::move(hash))
+payment_address::payment_address(const short_hash& hash, uint8_t prefix)
+  : payment_(to_array(prefix), hash)
 {
-}
-
-payment_address::payment_address(const short_hash& hash, uint8_t version)
-  : valid_(true), version_(version), hash_(hash)
-{
-}
-
-// Validators.
-// ----------------------------------------------------------------------------
-
-bool payment_address::is_address(const data_slice& decoded)
-{
-    return (decoded.size() == payment::value_size) && verify_checksum(decoded);
 }
 
 // Factories.
@@ -108,19 +99,20 @@ bool payment_address::is_address(const data_slice& decoded)
 
 payment_address payment_address::from_string(const std::string& address)
 {
+    // TODO: make array versions of encoders/decoders.
+
     data_chunk decoded;
-    if (!decode_base58(decoded, address) || !is_address(decoded))
+    if (!decode_base58(decoded, address) || 
+        decoded.size() != payment::value_size)
         return {};
 
-    return { to_array<payment::value_size>(decoded) };
-}
+    payment value(to_array<payment::value_size>(decoded));
 
-payment_address payment_address::from_payment(const payment& decoded)
-{
-    if (!decoded)
+    // Validate checksum.
+    if (!value)
         return {};
 
-    return { decoded.payload(), decoded.prefix()[0] };
+    return { std::move(value) };
 }
 
 payment_address payment_address::from_private(const ec_private& secret)
@@ -132,7 +124,7 @@ payment_address payment_address::from_private(const ec_private& secret)
 }
 
 payment_address payment_address::from_public(const ec_public& point,
-    uint8_t version)
+    uint8_t prefix)
 {
     if (!point)
         return {};
@@ -141,15 +133,15 @@ payment_address payment_address::from_public(const ec_public& point,
     if (!point.to_data(data))
         return {};
 
-    return { bitcoin_short_hash(data), version };
+    return { bitcoin_short_hash(data), prefix };
 }
 
 payment_address payment_address::from_script(const chain::script& script,
-    uint8_t version)
+    uint8_t prefix)
 {
     // Working around VC++ CTP compiler break here.
     const auto data = script.to_data(false);
-    return { bitcoin_short_hash(data), version };
+    return { bitcoin_short_hash(data), prefix };
 }
 
 // Cast operators.
@@ -157,12 +149,7 @@ payment_address payment_address::from_script(const chain::script& script,
 
 payment_address::operator bool() const
 {
-    return valid_;
-}
-
-payment_address::operator const short_hash&() const
-{
-    return hash_;
+    return payment_;
 }
 
 // Serializer.
@@ -170,33 +157,33 @@ payment_address::operator const short_hash&() const
 
 std::string payment_address::encoded() const
 {
-    return encode_base58(to_payment());
+    return encode_base58(payment_);
 }
 
-// Accessors.
+// Properties.
 // ----------------------------------------------------------------------------
 
-uint8_t payment_address::version() const
+uint8_t payment_address::prefix() const
 {
-    return version_;
+    return payment_.prefix().front();
 }
 
-const short_hash& payment_address::hash() const
+short_hash payment_address::hash() const
 {
-    return hash_;
+    return payment_.payload();
 }
 
 chain::script payment_address::output_script() const
 {
-    switch (version_)
+    switch (prefix())
     {
-        case 0:
-        case 111:
-            return chain::script::to_pay_key_hash_pattern(hash_);
+        case mainnet_p2kh:
+        case testnet_p2kh:
+            return chain::script::to_pay_key_hash_pattern(hash());
 
-        case 5:
-        case 196:
-            return chain::script::to_pay_script_hash_pattern(hash_);
+        case mainnet_p2sh:
+        case testnet_p2sh:
+            return chain::script::to_pay_script_hash_pattern(hash());
     }
 
     return {};
@@ -205,19 +192,23 @@ chain::script payment_address::output_script() const
 // Methods.
 // ----------------------------------------------------------------------------
 
-payment payment_address::to_payment() const
+const payment& payment_address::to_payment() const
 {
-    return { to_array(version_), hash_ };
+    return payment_;
 }
 
 // Operators.
 // ----------------------------------------------------------------------------
 
+payment_address& payment_address::operator=(payment_address&& other)
+{
+    payment_ = std::move(other.payment_);
+    return *this;
+}
+
 payment_address& payment_address::operator=(const payment_address& other)
 {
-    valid_ = other.valid_;
-    version_ = other.version_;
-    hash_ = other.hash_;
+    payment_ = other.payment_;
     return *this;
 }
 
@@ -226,15 +217,14 @@ bool payment_address::operator<(const payment_address& other) const
     return encoded() < other.encoded();
 }
 
-bool payment_address::operator==(const payment_address& other) const
+bool operator==(const payment_address& left, const payment_address& right)
 {
-    return valid_ == other.valid_ && version_ == other.version_ &&
-        hash_ == other.hash_;
+    return left.to_payment() == right.to_payment();
 }
 
-bool payment_address::operator!=(const payment_address& other) const
+bool operator!=(const payment_address& left, const payment_address& right)
 {
-    return !(*this == other);
+    return !(left == right);
 }
 
 std::istream& operator>>(std::istream& in, payment_address& to)
@@ -263,16 +253,19 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of)
 
 // Context free input extraction is provably ambiguous (see extract_input).
 payment_address::list payment_address::extract(const chain::script& script,
-    uint8_t p2kh_version, uint8_t p2sh_version)
+    uint8_t p2kh_prefix, uint8_t p2sh_prefix)
 {
-    const auto input = extract_input(script, p2kh_version, p2sh_version);
-    return input.empty() ? extract_output(script, p2kh_version, p2sh_version) :
-        input;
+    const auto input = extract_input(script, p2kh_prefix, p2sh_prefix);
+
+    if (!input.empty())
+        return input;
+
+    return { extract_output(script, p2kh_prefix, p2sh_prefix) };
 }
 
 // Context free input extraction is provably ambiguous. See inline comments.
 payment_address::list payment_address::extract_input(
-    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
+    const chain::script& script, uint8_t p2kh_prefix, uint8_t p2sh_prefix)
 {
     // A sign_key_hash result always implies sign_script_hash as well.
     const auto pattern = script.input_pattern();
@@ -286,15 +279,15 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { ec_public{ script[1].data() }, p2kh_version }////,
-                ////{ bitcoin_short_hash(script.back().data()), p2sh_version }
+                { ec_public{ script[1].data() }, p2kh_prefix }
+                ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
         case script_pattern::sign_script_hash:
         {
             return
             {
-                { bitcoin_short_hash(script.back().data()), p2sh_version }
+                { bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
 
@@ -320,44 +313,39 @@ payment_address::list payment_address::extract_input(
 }
 
 // A server should use this against the prevout instead of using extract_input.
-payment_address::list payment_address::extract_output(
-    const chain::script& script, uint8_t p2kh_version, uint8_t p2sh_version)
+payment_address payment_address::extract_output(
+    const chain::script& script, uint8_t p2kh_prefix, uint8_t p2sh_prefix)
 {
     const auto pattern = script.output_pattern();
 
     switch (pattern)
     {
         case script_pattern::pay_key_hash:
-        {
             return
             {
-                { to_array<short_hash_size>(script[2].data()), p2kh_version }
+                to_array<short_hash_size>(script[2].data()),
+                p2kh_prefix
             };
-        }
         case script_pattern::pay_script_hash:
-        {
             return
-            {
-                { to_array<short_hash_size>(script[1].data()), p2sh_version }
+            { 
+                to_array<short_hash_size>(script[1].data()),
+                p2sh_prefix
             };
-        }
         case script_pattern::pay_public_key:
-        {
             return
             {
                 // pay_public_key is not p2kh but we conflate for tracking.
-                { ec_public{ script[0].data() }, p2kh_version }
+                ec_public{ script[0].data() },
+                p2kh_prefix
             };
-        }
 
         // Bare multisig and null data do not associate a payment address.
         case script_pattern::pay_multisig:
         case script_pattern::pay_null_data:
         case script_pattern::non_standard:
         default:
-        {
             return {};
-        }
     }
 }
 

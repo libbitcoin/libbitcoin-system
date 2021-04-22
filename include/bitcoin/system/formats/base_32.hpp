@@ -26,27 +26,31 @@
 namespace libbitcoin {
 namespace system {
 
-/**
- * TODO: implement as config class, see wrapped_data.
- * The structure for bitcoin base32 encoding.
- */
-struct BC_API base32
-{
-    std::string prefix;
-    data_chunk payload;
-};
+/// Base32 encoding conforms to "bech32" requirements but isolates the encoding
+/// facility from the checksum facility. In this way it behaves in the same
+/// manner as other data-string transforms, such as base 16, 58, 64 and 85.
+/// This approach also brings address manipulation in line with expectations.
+/// A witness address may be checksummed and encoded like a payment addresses.
 
 /**
- * Encode data as base32.
- * @return the base32 encoded string.
- */
-BC_API std::string encode_base32(const base32& unencoded);
+* Convert a byte vector to a base32 string.
+* Do not include the prefix:separator when encoding a witness address.
+* @return the base32 encoded string.
+*/
+BC_API std::string encode_base32(const data_slice& data);
 
 /**
- * Decode base32 data.
- * @return false if the input is not a valid base32 encoded string.
+ * Convert a base32 string to a byte vector.
+ * Do not include the prefix:separator when decoding a witness address.
+ * @return false if the input is malformed.
  */
-BC_API bool decode_base32(base32& out, const std::string& in);
+BC_API bool decode_base32(data_chunk& out, const std::string& in);
+
+/**
+ * These aren't the functions you're looking for.
+ */
+BC_API data_chunk base32_expand(const data_slice& data);
+BC_API data_chunk base32_compress(const data_slice& expanded);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 
@@ -54,4 +58,3 @@ BC_API bool decode_base32(base32& out, const std::string& in);
 } // namespace libbitcoin
 
 #endif
-

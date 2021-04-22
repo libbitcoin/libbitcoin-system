@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(checksum_tests)
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum__empty__expected)
 {
-    byte_array<checksum_default> data;
+    byte_array<checksum_default_size> data;
     insert_checksum(data);
     BOOST_REQUIRE_EQUAL(data[0], 0x5du);
     BOOST_REQUIRE_EQUAL(data[1], 0xf6u);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum__empty__expected)
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__expected)
 {
-    byte_array<5 + checksum_default> data{ 0, 0, 0, 0, 0 };
+    byte_array<5 + checksum_default_size> data{ 0, 0, 0, 0, 0 };
     insert_checksum(data);
     BOOST_REQUIRE_EQUAL(data[0], 0u);
     BOOST_REQUIRE_EQUAL(data[1], 0u);
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__expected)
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__empty__expected)
 {
     byte_array<0> data;
-    const auto out = insert_checksum<checksum_default>({ { data } });
+    const auto out = insert_checksum<checksum_default_size>({ { data } });
     BOOST_REQUIRE_EQUAL(out[0], 0x5du);
     BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
     BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__empty__expected)
 
 BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__not_empty__expected)
 {
-    byte_array<5 + checksum_default> data{ { 0, 0, 0, 0, 0 } };
-    const auto out = insert_checksum<5 + checksum_default>({ { data } });
+    byte_array<5 + checksum_default_size> data{ { 0, 0, 0, 0, 0 } };
+    const auto out = insert_checksum<5 + checksum_default_size>({ { data } });
     BOOST_REQUIRE_EQUAL(out[0], 0u);
     BOOST_REQUIRE_EQUAL(out[1], 0u);
     BOOST_REQUIRE_EQUAL(out[2], 0u);
@@ -154,14 +154,14 @@ BOOST_AUTO_TEST_CASE(checksum__append_checksum_loaf__zeros__expected)
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum_array__round_trip__true)
 {
-    byte_array<3 + checksum_default> data{ 0, 0, 0 };
+    byte_array<3 + checksum_default_size> data{ 0, 0, 0 };
     insert_checksum(data);
     BOOST_REQUIRE(verify_checksum(data));
 }
 
 BOOST_AUTO_TEST_CASE(checksum__verify_checksum_array__invalidated__false)
 {
-    byte_array<5 + checksum_default> data{ 0, 0, 0, 0, 0 };
+    byte_array<5 + checksum_default_size> data{ 0, 0, 0, 0, 0 };
     insert_checksum(data);
     data[0] = 42;
     BOOST_REQUIRE(!verify_checksum(data));
