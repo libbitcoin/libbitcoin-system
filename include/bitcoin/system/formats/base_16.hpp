@@ -37,25 +37,25 @@ namespace system {
 BC_API bool is_base16(char character);
 
 /**
- * Convert data into a user-readable hex string.
+ * Convert a byte vector to a hexidecimal string.
  */
 BC_API std::string encode_base16(const data_slice& data);
 
 /**
- * Convert a hex string into bytes.
+ * Convert a hexidecimal string to a byte vector.
  * @return false if the input is malformed.
  */
 BC_API bool decode_base16(data_chunk& out, const std::string& in);
 
 /**
- * Converts a hex string to a number of bytes.
+ * Convert a hexidecimal string to a byte array.
  * @return false if the input is malformed, or the wrong length.
  */
 template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string& in);
 
 /**
- * Converts a bitcoin_hash to a string.
+ * Convert a byte array to a reversed byte order hexidecimal string.
  * The bitcoin hash format is base16 with the bytes reversed.
  * This format is generally used only for display formatting.
  */
@@ -63,7 +63,7 @@ template <size_t Size>
 std::string encode_hash(const byte_array<Size>& hash);
 
 /**
- * Convert a string into a bitcoin hash.
+ * Convert a reversed byte order hexidecimal string to a byte array.
  * The bitcoin hash format is base16 with the bytes reversed.
  * This format is generally used only for display formatting.
  * @return false if the input is malformed.
@@ -72,7 +72,7 @@ template <size_t Size>
 bool decode_hash(byte_array<Size>& out, const std::string& in);
 
 /**
- * Converts a hex string literal to a data array.
+ * Convert a hexidecimal string literal to a byte array.
  * Zeroized array returned in case of invalid or odd count of hex characters.
  * TODO: en.cppreference.com/w/cpp/language/user_literal
  */
@@ -80,7 +80,7 @@ template <size_t Size>
 byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
 
 /**
- * Convert a hex string literal into a bitcoin hash.
+ * Convert a reversed byte order hexidecimal string literal to a byte array.
  * The bitcoin hash format is base16 with the bytes reversed.
  * This format is generally used only for display formatting.
  * Zeroized array returned in case of invalid or odd count of hex characters.
