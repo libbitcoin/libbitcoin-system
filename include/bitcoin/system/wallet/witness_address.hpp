@@ -74,8 +74,9 @@ class BC_API witness_address
 
     /// Helpers.
     static bool is_valid_prefix(const std::string& prefix);
-    static bool split_address(std::string& out_prefix,
-        std::string& out_encoded, const std::string& address);
+    static bool parse_address(std::string& out_prefix,
+        uint8_t& out_version, data_chunk& out_program,
+        const std::string& address);
     static program_type to_program_type(uint8_t version,
         const data_slice& program);
 

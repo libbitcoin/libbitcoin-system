@@ -84,8 +84,8 @@ BC_API data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
     const std::string& prefix);
 
 /// Verify the bech32 checksum and extract version and payload.
-BC_API bool bech32_verify_checked(uint8_t& out_version, data_chunk& in_out_data,
-    const std::string& prefix);
+BC_API bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
+    const data_chunk& data, const std::string& prefix);
 
 } // namespace system
 } // namespace libbitcoin

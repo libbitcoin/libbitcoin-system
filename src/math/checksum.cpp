@@ -155,20 +155,23 @@ data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
     return base32_compress(expanded);
 }
 
-bool bech32_verify_checked(uint8_t& out_version, data_chunk& in_out_data,
-    const std::string& prefix)
+bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
+    const data_chunk& data, const std::string& prefix)
 {
-    if (in_out_data.empty() || prefix.empty())
+    if (data.empty() || prefix.empty())
         return false;
 
     auto expanded = bech32_expand_prefix(prefix);
-    const auto expanded_data = base32_expand(in_out_data);
+    const auto expanded_data = base32_expand(data);
     extend_data(expanded, expanded_data);
 
     // Strip version from expanded data and return with compressed program.
     out_version = expanded_data.front();
-    data_chunk program{ std::next(expanded_data.begin()), expanded_data.end() };
-    in_out_data = base32_compress(program);
+    out_program = base32_compress(data_chunk
+    { 
+        std::next(expanded_data.begin()),
+        expanded_data.end()
+    });
 
     return bech32_polymod(expanded) == constant(out_version > 0u);
 }

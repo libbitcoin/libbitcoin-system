@@ -151,7 +151,8 @@ bool witness_address::is_valid_prefix(const std::string& prefix)
     if (prefix.length() < prefix_minimum_length)
         return false;
 
-    if (prefix.length() > (address_maximum_length - checksum_length - 1u))
+    // One separator and one version byte are required.
+    if (prefix.length() > (address_maximum_length - checksum_length - 2))
         return false;
 
     return (std::any_of(prefix.begin(), prefix.end(), [](const char character)
@@ -161,9 +162,12 @@ bool witness_address::is_valid_prefix(const std::string& prefix)
     }));
 }
 
-// Split the prefix from the payload and validate sizes.
-bool witness_address::split_address(std::string& out_prefix,
-    std::string& out_encoded, const std::string& address)
+// Enforces only address structural conformance, all future versions are valid.
+// Version is exactly 1 char but encoded into other program and checksum data.
+// Limits: [[prefix:1-][separator:1]([version:1][program:0-][checksum:6])]:-90.
+bool witness_address::parse_address(std::string& out_prefix,
+    uint8_t& out_version, data_chunk& out_program,
+    const std::string& address)
 {
     if (address.length() > address_maximum_length)
         return false;
@@ -172,17 +176,25 @@ bool witness_address::split_address(std::string& out_prefix,
         return false;
 
     const auto split = address.rfind(separator);
-
     if (split == address.npos)
         return false;
 
+    // Split the parts and discard the separator character.
     out_prefix = address.substr(0, split - 1);
-    out_encoded = address.substr(split + 1);
+    const auto payload = address.substr(split + 1);
 
     if (!is_valid_prefix(out_prefix))
         return false;
 
-    return out_encoded.length() > checksum_length;
+    // The payload must contain at least the checksum and version byte.
+    if (payload.length() < checksum_length + 1)
+        return false;
+
+    data_chunk data;
+    if (!decode_base32(data, payload))
+        return false;
+
+    return bech32_verify_checked(out_version, out_program, data, out_prefix);
 }
 
 witness_address::program_type witness_address::to_program_type(uint8_t version,
@@ -191,19 +203,25 @@ witness_address::program_type witness_address::to_program_type(uint8_t version,
     if (version > version_maximum)
         return program_type::invalid;
 
-    const auto size = program.size();
-
-    if (version == version_0)
+    switch (version)
     {
-        if (size == version_0_p2kh_program_size)
-            return program_type::version_0_p2kh;
-
-        if (size == version_0_p2sh_program_size)
-            return program_type::version_0_p2sh;
+        case version_0:
+        {
+            switch (program.size())
+            {
+                case version_0_p2kh_program_size:
+                    return program_type::version_0_p2kh;
+                case version_0_p2sh_program_size:
+                    return program_type::version_0_p2sh;
+                default:
+                    return program_type::invalid;
+            }
+        }
+        default:
+        {
+            return program_type::unknown;
+        }
     }
-
-    return (size < program_minimum_size) || (size > program_maximum_size) ?
-        program_type::invalid : program_type::unknown;
 }
 
 // Factories.
@@ -213,22 +231,15 @@ witness_address::program_type witness_address::to_program_type(uint8_t version,
 witness_address witness_address::from_address(const std::string& address)
 {
     std::string prefix;
-    std::string encoded;
-    if (!split_address(prefix, encoded, address))
-        return {};
-
-    data_chunk program;
-    if (!decode_base32(program, encoded))
-        return {};
-
     uint8_t version;
-    if (!bech32_verify_checked(version, program, prefix))
+    data_chunk program;
+    if (!parse_address(prefix, version, program, address))
         return {};
 
     const auto identifier = to_program_type(version, program);
 
-    if (identifier == program_type::invalid ||
-        identifier == program_type::unknown)
+    // Unknown programs are valid but output_script will return empty.
+    if (identifier == program_type::invalid)
         return {};
 
     return { std::move(program), identifier, prefix, version };
@@ -285,6 +296,8 @@ witness_address witness_address::from_script(const chain::script& script,
 
 witness_address::operator bool() const
 {
+    // The program may be unknown, in which case output_script returns empty.
+    // Yet all other properties are valid and conformant, so unknown is valid.
     return identifier_ != program_type::invalid;
 }
 
@@ -321,6 +334,7 @@ witness_address::program_type witness_address::identifier() const
     return identifier_;
 }
 
+// Return constructed output script for known program types.
 chain::script witness_address::output_script() const
 {
     switch (identifier_)
@@ -331,6 +345,7 @@ chain::script witness_address::output_script() const
         case program_type::version_0_p2sh:
             return chain::script::to_pay_witness_script_hash_pattern(
                 to_array<hash_size>(program_));
+        case program_type::unknown:
         case program_type::invalid:
         default:
             return {};
