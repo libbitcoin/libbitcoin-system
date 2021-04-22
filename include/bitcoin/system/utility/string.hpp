@@ -32,6 +32,16 @@ namespace system {
 typedef std::vector<std::string> string_list;
 
 /**
+ * Cast a char to a byte.
+ * @param[in]  character  The character to cast.
+ * @returns               The byte.
+ */
+inline uint8_t to_byte(char character)
+{
+    return static_cast<uint8_t>(character);
+}
+
+/**
  * Convert a text string to the specified type.
  * @param      <Value>    The converted type.
  * @param[out] out_value  The parsed value.
@@ -65,14 +75,19 @@ template <typename Value>
 std::string serialize(const Value& out_value, const std::string& fallback="");
 
 /**
- * Return true if all chars in the string are < 0x80 (ASCII).
+ * Lower case each byte in the string. Caller must ensure text is ASCII.
+ */
+BC_API std::string ascii_to_lower(const std::string& text);
+
+/**
+ * True if all chars in the string are < 0x80 (ASCII).
  */
 BC_API bool is_ascii(const std::string& text);
 
 /**
- * Lower case each byte in the string. Caller must ensure text is ASCII.
+ * True if there is a mix of ASCII upper and lower case letters.
  */
-BC_API std::string ascii_to_lower(const std::string& text);
+BC_API bool is_ascii_mixed_case(const std::string& text);
 
 /**
  * Join a list of strings into a single string, in order.

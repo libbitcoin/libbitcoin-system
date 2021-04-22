@@ -53,6 +53,19 @@ bool is_ascii(const std::string& text)
     });
 }
 
+bool is_ascii_mixed_case(const std::string& text)
+{
+    auto lower = false;
+    auto upper = false;
+
+    return std::none_of(text.begin(), text.end(), [&](uint8_t character)
+    {
+        lower |= ('a' <= character && character <= 'z');
+        upper |= ('A' <= character && character <= 'Z');
+        return !(lower && upper);
+    });
+}
+
 std::string join(const string_list& words, const std::string& delimiter)
 {
     return boost::join(words, delimiter);
