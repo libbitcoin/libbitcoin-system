@@ -70,17 +70,15 @@ BC_API bool verify_checksum(const data_slice& data);
 /// decode_base32 can be fed directly to bech32_verify_checked(data) and
 /// the output of bech32_build_checked can be fed directly to encode_base32.
 
-/// Manipulating bech32 version, prefix and checksum directly is supported by
-/// the base32_expand and base32_compact functions, as bech32 maps data to this
-/// intermediate encoding (between base32 and native encodings).
-
 /// Combine witness version, program and checksum.
 /// The result may be passed to encode_base32 when creating a witness address.
+/// For implementation details see wallet::witness_address.
 BC_API data_chunk bech32_build_checked(uint8_t version,
     const data_chunk& program, const std::string& prefix);
 
 /// Verify the bech32 checksum and extract witness version and program.
 /// The data parameter may obtained from a witness address using decode_base32.
+/// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
     data_chunk& out_program, const data_chunk& data,
     const std::string& prefix);

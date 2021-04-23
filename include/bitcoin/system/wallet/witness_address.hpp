@@ -29,7 +29,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
-////#include <bitcoin/system/wallet/bech32.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 
