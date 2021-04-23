@@ -26,31 +26,37 @@
 namespace libbitcoin {
 namespace system {
 
-/// Base32 encoding conforms to "bech32" requirements but isolates the encoding
-/// facility from the checksum facility. In this way it behaves in the same
-/// manner as other data-string transforms, such as base 16, 58, 64 and 85.
-/// This approach also brings address manipulation in line with expectations.
-/// A witness address may be checksummed and encoded like a payment addresses.
-
 /**
-* Convert a byte vector to a base32 string.
-* Do not include the prefix:separator when encoding a witness address.
+* Convert bytes to a base32 string.
 * @return the base32 encoded string.
 */
-BC_API std::string encode_base32(const data_slice& data);
+BC_API std::string encode_base32(const data_chunk& data);
 
 /**
  * Convert a base32 string to a byte vector.
- * Do not include the prefix:separator when decoding a witness address.
- * @return false if the input is malformed.
+ * The input is invalid if mixed case, any character is not from base32
+ * character set, or expanded.size % 8 != 0.
+ * @return false if invalid input.
  */
 BC_API bool decode_base32(data_chunk& out, const std::string& in);
 
 /**
- * These aren't the functions you're looking for.
+ * Expand any data (8 bit bytes) to a vector of 5 bit bytes.
+ * @return the expanded data. This is an internal intermediate base32 encoding
+ * step, exposed only because it is required to implement the bech32 checksum
+ * fuctions. If you are working with addresses you probably don't need it.
  */
-BC_API data_chunk base32_expand(const data_slice& data);
-BC_API data_chunk base32_compress(const data_slice& expanded);
+BC_API data_chunk base32_expand(const data_chunk& data);
+
+/**
+ * Compact bytes with 5 bit values to vector of 8 bit bytes.
+ * The input is invalid if any byte has a value greater than (2^5)-1 or if
+ * expanded.size % 8 != 0. This is an internal intermediate base32 encoding
+ * step, exposed only because it is required to implement the bech32 checksum
+ * fuctions. If you are working with addresses you probably don't need it.
+ * @return false if invalid input.
+ */
+BC_API bool base32_compact(data_chunk& out, const data_chunk& expanded);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

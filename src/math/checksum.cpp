@@ -32,7 +32,6 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 // checksum encoding is a private data format, do not expose.
-// Endianness is arbitrary here. All that is required is consistency.
 typedef uint32_t checksum;
 
 static checksum bitcoin_checksum(const data_slice& data)
@@ -68,8 +67,7 @@ bool verify_checksum(const data_slice& data)
 // bech32 checksum.
 // ----------------------------------------------------------------------------
 
-// TODO: bech32::checksum
-// TODO: bech32::checksum_size
+// bech32_checksum encoding is a private data format, do not expose.
 using bech32_checksum = byte_array<6>;
 constexpr auto null_extension = bech32_checksum{ 0 };
 
@@ -84,7 +82,7 @@ static data_chunk bech32_expand_prefix(const std::string& prefix)
     {
         const auto c = prefix[i];
 
-        out[i           ] = c >> 5;
+        out[i] = c >> 5;
         out[i + size + 1] = c & 31;
     }
 
@@ -152,7 +150,12 @@ data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
     // Strip extension, append checksum and recompress.
     expanded.resize(expanded.size() - null_extension.size());
     extend_data(expanded, bech32_expand_checksum(polymod));
-    return base32_compress(expanded);
+
+    data_chunk out;
+
+    // Cannot fail because we created the expansion.
+    /* bool */ base32_compact(out, expanded);
+    return out;
 }
 
 bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
@@ -167,7 +170,9 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
 
     // Strip version from expanded data and return with compressed program.
     out_version = expanded_data.front();
-    out_program = base32_compress(data_chunk
+
+    // Cannot fail because we created the expansion.
+    /* bool */ base32_compact(out_program, data_chunk
     { 
         std::next(expanded_data.begin()),
         expanded_data.end()

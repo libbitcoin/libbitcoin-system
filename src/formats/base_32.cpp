@@ -25,143 +25,175 @@
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
+// TODO: expose these from a new <utility/istream.hpp>
+#include <bitcoin/system/utility/container_source.hpp>
+#include <bitcoin/system/utility/istream_bit_reader.hpp>
+#include <bitcoin/system/utility/istream_reader.hpp>
+
+// TODO: expose these from a new <utility/ostream.hpp>
+#include <bitcoin/system/utility/container_sink.hpp>
+#include <bitcoin/system/utility/ostream_bit_writer.hpp>
+#include <bitcoin/system/utility/ostream_writer.hpp>
+
 namespace libbitcoin {
 namespace system {
-    
-constexpr uint8_t null = 0xff;
-constexpr char encode_map[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-constexpr uint8_t decode_map[] =
+
+constexpr char encode[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+constexpr uint8_t decode[] =
 {
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    15,   null, 10,   17,   21,   20,   26,   30,
-    7,    5,    null, null, null, null, null, null,
-    null, 29,   null, 24,   13,   25,   9,    8,
-    23,   null, 18,   22,   31,   27,   19,   null,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    15,   0xff, 10,   17,   21,   20,   26,   30,
+    7,    5,    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 29,   0xff, 24,   13,   25,   9,    8,
+    23,   0xff, 18,   22,   31,   27,   19,   0xff,
     1,    0,    3,    16,   11,   28,   12,   14,
-    6,    4,    2,    null, null, null, null, null,
-    null, 29,   null, 24,   13,   25,   9,    8,
-    23,   null, 18,   22,   31,   27,   19,   null,
+    6,    4,    2,    0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 29,   0xff, 24,   13,   25,   9,    8,
+    23,   0xff, 18,   22,   31,   27,   19,   0xff,
     1,    0,    3,    16,   11,   28,   12,   14,
-    6,    4,    2,    null, null, null, null, null
+    6,    4,    2,    0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-std::string encode_base32(const data_slice& data)
+std::string encode_base32(const data_chunk& data)
 {
-    const auto expanded = base32_expand(data);
-
-    ////// This should never fail as we just created it.
-    ////// 31 is the last index of the 32 element encode_map.
-    ////BITCOIN_ASSERT(std::all_of(expanded.begin(), expanded.end(),
-    ////    [](uint8_t byte) { return byte < 32; }));
-
     size_t index = 0;
     std::string out(data.size(), '\0');
 
-    // The map is 32 elements, all expanded byte indexes are valid.
-    for (const auto byte: expanded)
-        out[index++] = encode_map[byte];
-
+    // The map is 32 elements, expanded byte indexes are bounded.
+    for (const auto value: base32_expand(data))
+        out[index++] = encode[value];
+    
     return out;
 }
 
-data_chunk decode_base32(const std::string& data)
+bool decode_base32(data_chunk& out, const std::string& in)
 {
-    if (is_ascii_mixed_case(data))
-        return {};
-
     size_t index = 0;
-    data_chunk expanded(data.size());
+    data_chunk expanded(in.size());
 
-    // The map is 256 elements, all char indexes are valid.
-    for (const auto character: ascii_to_lower(data))
-        if (((expanded[index++] = decode_map[character])) == null)
-            return {};
+    // The map is 256 elements, char indexes are bounded.
+    for (const auto character: ascii_to_lower(in))
+        if (((expanded[index++] = decode[character])) == 0xff)
+            return false;
 
-    ////// This should never fail since the expansion was successful.
-    ////BITCOIN_ASSERT(base32_compress(expanded).empty() == in.empty());
-
-    return base32_compress(expanded);
+    // Length hasn't been checked, but this handles it.
+    return base32_compact(out, expanded);
 }
 
-// compression/expansion
-// ----------------------------------------------------------------------------
+// compact/expand
 
-static bool transform(data_chunk& out, const data_slice& data,
-    uint32_t from_bits, uint32_t to_bits, bool pad)
+#if !defined(UNDEFINED)
+
+// This is how C developers do it. :P
+static bool transform(data_chunk& out, const data_chunk& data, bool expand)
 {
+    // Compact is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
+    if (!expand && (data.size() * 5) % 8 != 0)
+        return false;
+
+    const uint32_t to_bits = expand ? 5 : 8;
+    const uint32_t from_bits = expand ? 8 : 5;
+    const uint32_t to_max = (1 << to_bits) - 1;
+    const uint32_t from_max = (1 << ((8 + 5) - 1)) - 1;
+
+    const auto is_valid = [=](uint8_t byte)
+        { return expand || byte < (1 << 5); };
+    const auto remainder = [=](uint32_t accumulator, uint32_t bits)
+        { return (accumulator << (to_bits - bits)) & to_max; };
+    const auto shift_in = [=](uint32_t accumulator, uint8_t byte)
+        { return ((accumulator << from_bits) | byte) & from_max; };
+    const auto shift_out = [](uint32_t acc, uint32_t bits)
+        { return acc >> bits; };
+    const auto push = [&](uint8_t byte)
+        { out.push_back(byte & to_max); };
+
     uint32_t bits = 0;
     uint32_t accumulator = 0;
-    const uint32_t max_value = (1 << to_bits) - 1;
-    const uint32_t max_accumulator = (1 << (from_bits + to_bits - 1)) - 1;
 
-    for (const auto value: data)
+    for (const auto byte: data)
     {
-        accumulator = ((accumulator << from_bits) | value) & max_accumulator;
+        if (!is_valid(byte))
+            return false;
+
+        accumulator = shift_in(accumulator, byte);
         bits += from_bits;
 
         while (bits >= to_bits)
         {
             bits -= to_bits;
-            out.push_back((accumulator >> bits) & max_value);
+            push(shift_out(accumulator, bits));
         }
     }
 
-    if (pad)
-    {
-        if (bits > 0)
-        {
-            out.push_back((accumulator << (to_bits - bits)) & max_value);
-            return true;
-        }
-    }
-    else
-    {
-        if (bits >= from_bits || ((accumulator << (to_bits - bits)) & max_value))
-        {
-            ////// Expansion may never fail as any data is encodable.
-            ////BITCOIN_ASSERT(from_bits < to_bits);
-            out.clear();
-            return false;
-        }
-    }
+    // Expand is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
+    BITCOIN_ASSERT(!expand || bits == (data.size() * 8) % 5);
 
+    if (bits > 0)
+        push(remainder(accumulator, bits));
+
+    // Expand cannot fail.
     return true;
 }
 
-static bool transform(data_chunk& out, const data_slice& data, bool compress)
-{
-    const auto pad = !compress;
-    const auto bits = [](bool compress) { return compress ? 5 : 8; };
-    return transform(out, data, bits(compress), bits(!compress), pad);
-}
+#endif
 
-// Failure cannot happen for expansion as any data is encodable.
-data_chunk base32_expand(const data_slice& data)
+data_chunk base32_expand(const data_chunk& data)
 {
+    // The bit reader reads zeros past end until exhaustion check.
+    // The bit writer pads bits up to the last whole byte upon flush.
+    // This is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
+    data_source source(data);
+    istream_reader reader(source);
+    istream_bit_reader bit_reader(reader);
+
     data_chunk out;
+    data_sink sink(out);
+    ostream_writer writer(sink);
+    ostream_bit_writer bit_writer(writer);
 
-    // The boolean return is a consequence of symmetrical conversion.
-    /* bool */ transform(out, data, false);
+    // This is how c++ developers do it. :)
+    while (!bit_reader.is_exhausted())
+        bit_writer.write_bits(bit_reader.read_bits(8), 5);
 
+    bit_writer.flush();
+    sink.flush();
+    ////transform(out, data, true);
     return out;
 }
 
-// Expanded data may be invalid, returns empty.
-data_chunk base32_compress(const data_slice& expanded)
+bool base32_compact(data_chunk& out, const data_chunk& expanded)
 {
-    data_chunk out;
+    // Only a clean read and write on byte boundaries is allowed.
+    // This is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
+    if ((expanded.size() * 5) % 8 != 0)
+        return false;
 
-    // Pass the failure as an empty result (for non-empty input).
-    // This allows caller who generates expansion to flow the return.
-    if (!transform(out, expanded, true))
-        out.clear();
+    // A nonzero top three (unused) bit is not allowed.
+    if (!std::all_of(expanded.begin(), expanded.end(),
+        [](uint8_t value) { return value < (1 << 5); }))
+        return false;
 
-    return out;
+    data_sink sink(out);
+    ostream_writer writer(sink);
+    ostream_bit_writer bit_writer(writer);
+
+    data_source source(expanded);
+    istream_reader reader(source);
+    istream_bit_reader bit_reader(reader);
+
+    // This is how c++ developers do it. :)
+    while (!bit_reader.is_exhausted())
+        bit_writer.write_bits(bit_reader.read_bits(5), 8);
+
+    bit_writer.flush();
+    sink.flush();
+    ////return transform(out, expanded, false);
+    return true;
 }
 
 } // namespace system

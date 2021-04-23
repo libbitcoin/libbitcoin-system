@@ -30,15 +30,13 @@ namespace system {
 // p2p message checksum is implemented independently.
 // ----------------------------------------------------------------------------
 
-static const size_t checksum_default_size = sizeof(uint32_t);
-
 /// These utilities are used for bitcoin payment addresses and other standards
 /// that leverage the same technique. A bitcoin checksum is the leading bytes
-/// of a double sha256 hash of any data. Bitcoin checksums are appended to the
-/// data, typically later base58 encoded. Bitcoin standards typically use a four
+/// of a double sha256 hash of any data. Bitcoin standards typically use a four
 /// byte checksum, though any length up to min(Size, 256) is allowed here.
-/// Bitcoin payment addresses prefix data with a version before checksumming.
 /// Accessing Checksum (length) parameter requires explicitly specifying both.
+
+static const size_t checksum_default_size = sizeof(uint32_t);
 
 /// Append the bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.
@@ -66,26 +64,26 @@ BC_API bool verify_checksum(const data_slice& data);
 // ----------------------------------------------------------------------------
 
 /// These utilities are used for witness payment addresses and other standards
-/// that leverage the same technique. Bitcoin witness addresses prefix data
-/// with version bytes before checking. Checksum length is six bytes.
-/// The prefix is use for checksumming and not incorporate into output.
-/// Standard prefixes are provided in the witness_address implementation.
+/// that leverage the same technique. These hide the complexities of data
+/// expansion and contraction inherent to BIP173. base_32 class is a typical
+/// byte encoder/decoder, yet fully complaint with BIP173. The output from
+/// decode_base32 can be fed directly to bech32_verify_checked(data) and
+/// the output of bech32_build_checked can be fed directly to encode_base32.
 
-/// Base32 encoding conforms to "bech32" requirements but isolates the encoding
-/// facility from the checksum facility. In this way it behaves in the same
-/// manner as other data-string transforms, such as base 16, 58, 64 and 85.
-/// This approach also brings address manipulation in line with expectations.
-/// A witness address may be checksummed and encoded like a payment addresses.
-/// The only visible distinction is the additional 'prefix' parameter. One may
-/// think of this as a checksum "salt".
+/// Manipulating bech32 version, prefix and checksum directly is supported by
+/// the base32_expand and base32_compact functions, as bech32 maps data to this
+/// intermediate encoding (between base32 and native encodings).
 
-/// Combine version, data and checksum.
-BC_API data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
+/// Combine witness version, program and checksum.
+/// The result may be passed to encode_base32 when creating a witness address.
+BC_API data_chunk bech32_build_checked(uint8_t version,
+    const data_chunk& program, const std::string& prefix);
+
+/// Verify the bech32 checksum and extract witness version and program.
+/// The data parameter may obtained from a witness address using decode_base32.
+BC_API bool bech32_verify_checked(uint8_t& out_version,
+    data_chunk& out_program, const data_chunk& data,
     const std::string& prefix);
-
-/// Verify the bech32 checksum and extract version and payload.
-BC_API bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
-    const data_chunk& data, const std::string& prefix);
 
 } // namespace system
 } // namespace libbitcoin
