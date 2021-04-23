@@ -66,6 +66,7 @@ bool verify_checksum(const data_slice& data)
 
 // bech32 checksum.
 // ----------------------------------------------------------------------------
+// TODO: move to "external/bech32.c" with the other spooky math functions.
 
 // bech32_checksum encoding is a private data format, do not expose.
 using bech32_checksum = byte_array<6>;
@@ -133,6 +134,7 @@ static const uint32_t constant(bool bech32m)
 }
 
 // published
+// ----------------------------------------------------------------------------
 
 data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
     const std::string& prefix)
