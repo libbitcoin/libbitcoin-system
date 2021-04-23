@@ -59,14 +59,8 @@ BOOST_AUTO_TEST_SUITE(payment_address_tests)
 // $ bx script-to-address "dup hash160 [18c0bd8d1818f1bf99cb1df2269c645318ef7b73] equalverify checksig" -v 196 | bx base58-decode
 #define PAYMENT_TESTNET "c475566c599452b7bcb7f8cd4087bde9686fa9c52d2fba2898"
 
-// $ bx base58-decode 1111111111111111111114oLvT2 | bx wrap-decode
-// wrapper
-// {
-//     checksum 285843604
-//     payload 0000000000000000000000000000000000000000
-//     version 0
-// }
-#define UNINITIALIZED_ADDRESS "1111111111111111111114oLvT2"
+// Null hash and checksum.
+#define UNINITIALIZED_ADDRESS "1111111111111111111111111"
 
 // negative tests:
 
