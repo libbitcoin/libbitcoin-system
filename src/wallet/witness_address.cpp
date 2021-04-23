@@ -104,7 +104,7 @@ witness_address::witness_address(const short_hash& public_key_hash,
 // version_0_p2kh
 witness_address::witness_address(const ec_private& secret,
     const std::string& prefix)
-  : witness_address(from_public(secret, prefix))
+  : witness_address(from_private(secret, prefix))
 {
 }
 
@@ -155,7 +155,7 @@ bool witness_address::is_valid_prefix(const std::string& prefix)
     if (prefix.length() > (address_maximum_length - checksum_length - 2))
         return false;
 
-    return (std::any_of(prefix.begin(), prefix.end(), [](const char character)
+    return (std::none_of(prefix.begin(), prefix.end(), [](const char character)
     {
         return character < prefix_minimum_character ||
             character > prefix_maximum_character;
@@ -194,6 +194,7 @@ bool witness_address::parse_address(std::string& out_prefix,
     if (!decode_base32(data, payload))
         return false;
 
+    // Verify the bech32 checksum and extract version and program.
     return bech32_verify_checked(out_version, out_program, data, out_prefix);
 }
 
@@ -242,6 +243,7 @@ witness_address witness_address::from_address(const std::string& address)
     if (identifier == program_type::invalid)
         return {};
 
+    // Address is the only way to construct unknown program type addresses.
     return { std::move(program), identifier, prefix, version };
 }
 
@@ -253,19 +255,31 @@ witness_address witness_address::from_short(const short_hash& hash,
     if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
         return {};
 
+    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
+    // If the version byte is 0, and the witness program is 20 bytes it is
+    // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
     return { hash, program_type::version_0_p2kh, prefix, version_0 };
+}
+
+// version_0_p2kh
+witness_address witness_address::from_private(const ec_private& secret,
+    const std::string& prefix)
+{
+    if (!secret)
+        return {};
+
+    // Contruction from secret utilizes the public key.
+    return from_public(secret, prefix);
 }
 
 // version_0_p2kh
 witness_address witness_address::from_public(const ec_public& point,
     const std::string& prefix)
 {
-    // point.point() is always a compressed public key, as required.
+    if (!point)
+        return {};
 
-    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
-    // If the version byte is 0, and the witness program is 20 bytes it is
-    // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
-    // The HASH160 of the public key must match the 20-byte witness program.
+    // .point() is always the compressed public key, as required.
     return from_short(bitcoin_short_hash(point.point()), prefix);
 }
 
@@ -277,6 +291,9 @@ witness_address witness_address::from_long(const hash_digest& hash,
     if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
         return {};
 
+    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
+    // If the version byte is 0, and the witness program is 32 bytes it is
+    // interpreted as a pay-to-witness-script-hash (P2WSH) program.
     return { hash, program_type::version_0_p2sh, prefix, version_0 };
 }
 
@@ -284,10 +301,11 @@ witness_address witness_address::from_long(const hash_digest& hash,
 witness_address witness_address::from_script(const chain::script& script,
     const std::string& prefix)
 {
-    // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
-    // If the version byte is 0, and the witness program is 32 bytes it is
-    // It is interpreted as a pay-to-witness-script-hash (P2WSH) program.
-    // SHA256 of the witnessScript must match the 32-byte witness program.
+    // Disallow construction of a valid address for an invalid script.
+    if (!script.is_valid())
+        return {};
+
+    // .to_payments_key() is the sha256 hash of the serialized script.
     return from_long(script.to_payments_key(), prefix);
 }
 

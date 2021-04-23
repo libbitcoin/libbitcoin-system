@@ -137,6 +137,8 @@ private:
 
     static witness_address from_short(const short_hash& hash,
         const std::string& prefix);
+    static witness_address from_private(const ec_private& secret,
+        const std::string& prefix);
     static witness_address from_public(const ec_public& point,
         const std::string& prefix);
 

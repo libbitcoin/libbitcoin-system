@@ -99,16 +99,15 @@ payment_address::payment_address(const short_hash& hash, uint8_t prefix)
 
 payment_address payment_address::from_string(const std::string& address)
 {
-    // TODO: make array versions of encoders/decoders.
-
     data_chunk decoded;
     if (!decode_base58(decoded, address) || 
         decoded.size() != payment::value_size)
         return {};
 
+    // TODO: make array versions of encoders/decoders.
     payment value(to_array<payment::value_size>(decoded));
 
-    // Validate checksum.
+    // Validates checksum.
     if (!value)
         return {};
 
@@ -139,6 +138,9 @@ payment_address payment_address::from_public(const ec_public& point,
 payment_address payment_address::from_script(const chain::script& script,
     uint8_t prefix)
 {
+    if (!script.is_valid())
+        return {};
+
     // Working around VC++ CTP compiler break here.
     const auto data = script.to_data(false);
     return { bitcoin_short_hash(data), prefix };
