@@ -300,7 +300,7 @@ void aes_expandDecKey(uint8_t* k, uint8_t* rc)
 
 
 /* -------------------------------------------------------------------------- */
-void aes256_init(aes256_context* context, const uint8_t* key)
+void aes256_init(aes256_context* context, const uint8_t key[AES256_KEY_LENGTH])
 {
     uint8_t rcon = 1;
     register uint8_t i;
@@ -319,7 +319,7 @@ void aes256_done(aes256_context* context)
 } /* aes256_done */
 
 /* -------------------------------------------------------------------------- */
-void aes256_encrypt_ecb(aes256_context* context, uint8_t* buf)
+void aes256_encrypt_ecb(aes256_context* context, uint8_t buf[AES256_BLOCK_LENGTH])
 {
     uint8_t i, rcon;
 
@@ -339,7 +339,7 @@ void aes256_encrypt_ecb(aes256_context* context, uint8_t* buf)
 } /* aes256_encrypt */
 
 /* -------------------------------------------------------------------------- */
-void aes256_decrypt_ecb(aes256_context* context, uint8_t* buf)
+void aes256_decrypt_ecb(aes256_context* context, uint8_t buf[AES256_BLOCK_LENGTH])
 {
     uint8_t i, rcon;
 
