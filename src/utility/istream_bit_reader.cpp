@@ -30,8 +30,6 @@
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint8_t bit_mask = 0x80;
-BC_CONSTEXPR uint64_t low_bit_mask_64 = 0x01;
 BC_CONSTEXPR uint64_t uint64_bits =
     static_cast<uint64_t>(byte_bits) *
     static_cast<uint64_t>(sizeof(uint64_t));
@@ -133,9 +131,9 @@ uint64_t istream_bit_reader::read_variable_big_endian()
 
 uint64_t istream_bit_reader::read_bits(uint8_t bits)
 {
-    auto remaining_bits = std::min(uint64_bits, static_cast<uint64_t>(bits));
+    auto read_bits = std::min(uint64_bits, static_cast<uint64_t>(bits));
 
-    if (remaining_bits == 0)
+    if (read_bits == 0)
     {
         invalidate();
         return 0;
@@ -143,16 +141,16 @@ uint64_t istream_bit_reader::read_bits(uint8_t bits)
 
     uint64_t result = 0;
 
-    while (remaining_bits > byte_bits)
+    while (read_bits > byte_bits)
     {
         const auto current = read_byte();
-        result |= (static_cast<uint64_t>(current) << (remaining_bits - byte_bits));
-        remaining_bits -= byte_bits;
+        result |= (static_cast<uint64_t>(current) << (read_bits - byte_bits));
+        read_bits -= byte_bits;
     }
 
-    for (uint8_t index = 1; index <= remaining_bits; index++)
+    for (uint8_t index = 1; index <= read_bits; index++)
         if (read_bit())
-            result |= (low_bit_mask_64 << (remaining_bits - index));
+            result |= (uint64_t{ 1 } << (read_bits - index));
 
     return result;
 }
@@ -230,7 +228,7 @@ size_t istream_bit_reader::read_size_little_endian()
 bool istream_bit_reader::read_bit()
 {
     // Returns false on read past end.
-    return feed() && ((buffer_ << offset_++) & bit_mask) != 0;
+    return feed() && ((buffer_ << offset_++) & 0x80) != 0;
 }
 
 // Bytes.
