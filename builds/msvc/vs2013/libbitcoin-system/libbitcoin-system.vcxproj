@@ -168,6 +168,7 @@
     <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c" />
+    <ClCompile Include="..\..\..\..\src\math\external\bech32.c" />
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha512.c" />
@@ -243,6 +244,8 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\conditional_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\data.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\data_slice.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\flush_lock.cpp" />
@@ -457,7 +460,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_istream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_streambuf.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp" />
@@ -470,9 +472,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\container_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\container_source.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\data.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\data_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\delegates.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deserialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deserializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\enable_shared_from_base.hpp" />
@@ -496,6 +500,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\scope_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\sequencer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\sequential_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\serialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\socket.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\string.hpp" />
@@ -538,6 +543,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\witness_address.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\bech32.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha512.h" />
@@ -582,9 +588,10 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\math.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data_slice.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\istream_bit_reader.ipp" />
@@ -594,8 +601,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\pending.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\property_tree.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\resubscriber.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serializer.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\string.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\subscriber.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\track.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\checked.ipp" />

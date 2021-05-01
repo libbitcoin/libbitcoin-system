@@ -309,6 +309,9 @@
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\bech32.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
@@ -508,6 +511,12 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\conditional_lock.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\data.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\data_slice.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp">
@@ -1112,9 +1121,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_streambuf.hpp">
       <Filter>include\bitcoin\system\unicode</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\array_slice.hpp">
-      <Filter>include\bitcoin\system\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\asio.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1151,6 +1157,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\data.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\data_slice.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deadline.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1158,6 +1167,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\delegates.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deserialize.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\deserializer.hpp">
@@ -1227,6 +1239,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\sequential_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\serialize.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\serializer.hpp">
@@ -1353,6 +1368,9 @@
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\bech32.h">
       <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">
@@ -1483,13 +1501,16 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\math.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\array_slice.ipp">
-      <Filter>include\bitcoin\system\impl\utility</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\collection.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\data_slice.ipp">
+      <Filter>include\bitcoin\system\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserialize.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\deserializer.ipp">
@@ -1519,10 +1540,10 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\resubscriber.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serializer.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serialize.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\string.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\utility\serializer.ipp">
       <Filter>include\bitcoin\system\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\utility\subscriber.ipp">

@@ -174,8 +174,8 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\test\overloads.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
+    <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />
@@ -183,12 +183,16 @@
     <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\deserialize.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\serialize.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
@@ -233,7 +237,7 @@
     <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\math\siphash.hpp" />
-    <ClInclude Include="..\..\..\..\test\overloads.hpp" />
+    <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
@@ -280,6 +284,11 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets'))" />
   </Target>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
+    <PostBuildEvent>
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

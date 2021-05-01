@@ -154,7 +154,6 @@
 #include <bitcoin/system/unicode/unicode_istream.hpp>
 #include <bitcoin/system/unicode/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/unicode_streambuf.hpp>
-#include <bitcoin/system/utility/array_slice.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/atomic.hpp>
@@ -167,9 +166,11 @@
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/data_slice.hpp>
 #include <bitcoin/system/utility/deadline.hpp>
 #include <bitcoin/system/utility/decorator.hpp>
 #include <bitcoin/system/utility/delegates.hpp>
+#include <bitcoin/system/utility/deserialize.hpp>
 #include <bitcoin/system/utility/deserializer.hpp>
 #include <bitcoin/system/utility/dispatcher.hpp>
 #include <bitcoin/system/utility/enable_shared_from_base.hpp>
@@ -193,6 +194,7 @@
 #include <bitcoin/system/utility/scope_lock.hpp>
 #include <bitcoin/system/utility/sequencer.hpp>
 #include <bitcoin/system/utility/sequential_lock.hpp>
+#include <bitcoin/system/utility/serialize.hpp>
 #include <bitcoin/system/utility/serializer.hpp>
 #include <bitcoin/system/utility/socket.hpp>
 #include <bitcoin/system/utility/string.hpp>
