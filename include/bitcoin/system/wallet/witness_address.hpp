@@ -41,6 +41,30 @@ namespace wallet {
 class BC_API witness_address
 {
   public:
+    enum class parse_result
+    {
+        /// parse_address and parse_prefix failures.
+        prefix_not_ascii,
+        prefix_not_lower_case,
+        prefix_too_short,
+        prefix_too_long,
+        prefix_invalid_character,
+
+        /// parse_address failures.
+        address_not_ascii,
+        address_mixed_case,
+        address_too_long,
+        missing_prefix,
+        invalid_checksum,
+        payload_too_short,
+        payload_not_base32,
+        checksum_invalid,
+        version_invalid,
+        program_invalid,
+
+        valid
+    };
+
     enum class program_type
     {
         version_0_p2kh,
@@ -71,19 +95,19 @@ class BC_API witness_address
 
     // TODO: script address extraction, see payment_address.
 
-    /// Helpers.
-    static bool is_valid_prefix(const std::string& prefix);
-    static bool parse_address(std::string& out_prefix,
+    /// Parsers.
+    static parse_result parse_prefix(const std::string& prefix);
+    static parse_result parse_address(std::string& out_prefix,
         uint8_t& out_version, data_chunk& out_program,
-        const std::string& address);
-    static program_type to_program_type(uint8_t version,
+        const std::string& address, bool strict=false);
+    static program_type parse_program(uint8_t version,
         const data_slice& program);
 
     /// Constructors.
     witness_address();
     witness_address(witness_address&& other);
     witness_address(const witness_address& other);
-    witness_address(const std::string& address);
+    witness_address(const std::string& address, bool strict=false);
 
     // version_0_p2kh
     witness_address(const short_hash& public_key_hash,
@@ -123,18 +147,20 @@ class BC_API witness_address
 
 private:
     template <size_t Size>
-    witness_address(const byte_array<Size>& program, program_type identifier,
+    witness_address(const byte_array<Size>& program,
         const std::string& prefix, uint8_t version)
-      : witness_address(to_chunk(program), identifier, prefix, version)
+      : witness_address(to_chunk(program), prefix, version)
     {
     }
 
-    witness_address(data_chunk&& program, program_type identifier,
-        const std::string& prefix, uint8_t version);
+    witness_address(data_chunk&& program, const std::string& prefix,
+        uint8_t version);
 
     // Factories.
-    static witness_address from_address(const std::string& address);
+    static witness_address from_address(const std::string& address,
+        bool strict);
 
+    // version_0_p2kh
     static witness_address from_short(const short_hash& hash,
         const std::string& prefix);
     static witness_address from_private(const ec_private& secret,
@@ -142,6 +168,7 @@ private:
     static witness_address from_public(const ec_public& point,
         const std::string& prefix);
 
+    // version_0_p2sh
     static witness_address from_long(const hash_digest& hash,
         const std::string& prefix);
     static witness_address from_script(const chain::script& script,
@@ -149,7 +176,6 @@ private:
 
     data_chunk program_;
     std::string prefix_;
-    program_type identifier_;
     uint8_t version_;
 };
 

@@ -65,7 +65,6 @@ const size_t witness_address::checksum_length = 6;
 witness_address::witness_address()
   : program_(),
     prefix_(),
-    identifier_(program_type::invalid),
     version_(version_invalid)
 {
 }
@@ -74,7 +73,6 @@ witness_address::witness_address()
 witness_address::witness_address(witness_address&& other)
   : program_(std::move(other.program_)),
     prefix_(other.prefix_),
-    identifier_(other.identifier_),
     version_(other.version_)
 {
 }
@@ -83,14 +81,13 @@ witness_address::witness_address(witness_address&& other)
 witness_address::witness_address(const witness_address& other)
   : program_(other.program_),
     prefix_(other.prefix_),
-    identifier_(other.identifier_),
     version_(other.version_)
 {
 }
 
 // fully specified by address
-witness_address::witness_address(const std::string& address)
-  : witness_address(from_address(address))
+witness_address::witness_address(const std::string& address, bool strict)
+  : witness_address(from_address(address, strict))
 {
 }
 
@@ -130,11 +127,10 @@ witness_address::witness_address(const chain::script& script,
 }
 
 // private
-witness_address::witness_address(data_chunk&& program, program_type identifier,
+witness_address::witness_address(data_chunk&& program,
     const std::string& prefix, uint8_t version)
   : program_(std::move(program)),
     prefix_(prefix),
-    identifier_(identifier),
     version_(version)
 {
 }
@@ -142,66 +138,109 @@ witness_address::witness_address(data_chunk&& program, program_type identifier,
 // Helpers.
 // ----------------------------------------------------------------------------
 
-// Lower case required for creation but not validation.
-bool witness_address::is_valid_prefix(const std::string& prefix)
+// local
+inline bool is_invalid_version(uint8_t version)
 {
-    if (is_ascii_mixed_case(prefix))
-        return false;
+    return version > version_maximum;
+}
 
-    if (prefix.length() < prefix_minimum_length)
-        return false;
-
-    // One separator and one version byte are required.
-    if (prefix.length() > (address_maximum_length - checksum_length - 2))
-        return false;
-
-    return (std::none_of(prefix.begin(), prefix.end(), [](const char character)
+// local
+static bool has_invalid_prefix_character(const std::string& prefix)
+{
+    return (std::any_of(prefix.begin(), prefix.end(), [](const char character)
     {
-        return character < prefix_minimum_character ||
-            character > prefix_maximum_character;
+        return character < witness_address::prefix_minimum_character ||
+            character > witness_address::prefix_maximum_character;
     }));
 }
 
-// Enforces only address structural conformance, all future versions are valid.
+// Lower case required for creation but not validation.
+witness_address::parse_result witness_address::parse_prefix(
+    const std::string& prefix)
+{
+    if (!is_ascii(prefix))
+        return parse_result::prefix_not_ascii;
+
+    // Require all lower case (unless part of all upper case address).
+    if (ascii_to_lower(prefix) != prefix)
+        return parse_result::prefix_not_lower_case;
+
+    if (prefix.length() < prefix_minimum_length)
+        return parse_result::prefix_too_short;
+
+    // A separator, version, and checksum are also required.
+    if (prefix.length() > (address_maximum_length - sizeof(separator) -
+        sizeof(version_) - checksum_length))
+        return parse_result::prefix_too_long;
+
+    if (has_invalid_prefix_character(prefix))
+        return parse_result::prefix_invalid_character;
+        
+    return parse_result::valid;
+}
+
 // Version is exactly 1 char but encoded into other program and checksum data.
 // Limits: [[prefix:1-][separator:1]([version:1][program:0-][checksum:6])]:-90.
-bool witness_address::parse_address(std::string& out_prefix,
-    uint8_t& out_version, data_chunk& out_program,
-    const std::string& address)
+witness_address::parse_result witness_address::parse_address(
+    std::string& out_prefix, uint8_t& out_version, data_chunk& out_program,
+    const std::string& address, bool strict)
 {
+    if (!is_ascii(address))
+        return parse_result::address_not_ascii;
+
+    if (has_mixed_ascii_case(address))
+        return parse_result::address_mixed_case;
+
     if (address.length() > address_maximum_length)
-        return false;
+        return parse_result::address_too_long;
 
-    if (is_ascii_mixed_case(address))
-        return false;
+    // Allow all upper case.
+    const auto lowered = ascii_to_lower(address);
 
-    const auto split = address.rfind(separator);
-    if (split == address.npos)
-        return false;
+    const auto split = lowered.rfind(separator);
+    if (split == lowered.npos)
+        return parse_result::missing_prefix;
 
     // Split the parts and discard the separator character.
-    out_prefix = address.substr(0, split - 1);
-    const auto payload = address.substr(split + 1);
+    out_prefix = lowered.substr(0, split - sizeof(separator));
+    const auto payload = lowered.substr(split + sizeof(separator));
 
-    if (!is_valid_prefix(out_prefix))
-        return false;
+    // Parsing lowered prefix, so all upper will pass as all lower.
+    const auto parse = parse_prefix(out_prefix);
+    if (parse != parse_result::valid)
+        return parse;
 
     // The payload must contain at least the checksum and version byte.
-    if (payload.length() < checksum_length + 1)
-        return false;
+    if (payload.length() < checksum_length + sizeof(version_))
+        return parse_result::payload_too_short;
 
     data_chunk data;
     if (!decode_base32(data, payload))
-        return false;
+        return parse_result::payload_not_base32;
 
     // Verify the bech32 checksum and extract version and program.
-    return bech32_verify_checked(out_version, out_program, data, out_prefix);
+    if (!bech32_verify_checked(out_version, out_program, data, out_prefix))
+        return parse_result::checksum_invalid;
+
+    if (is_invalid_version(out_version))
+        return parse_result::version_invalid;
+
+    // Rejects invalid known programs even if strict is false.
+    const auto type = parse_program(out_version, out_program);
+    if (type == program_type::invalid)
+        return parse_result::program_invalid;
+
+    // Rejects unknown script programs if strict is true.
+    if (strict && type == program_type::unknown)
+        return parse_result::program_invalid;
+    
+    return parse_result::valid;
 }
 
-witness_address::program_type witness_address::to_program_type(uint8_t version,
+witness_address::program_type witness_address::parse_program(uint8_t version,
     const data_slice& program)
 {
-    if (version > version_maximum)
+    if (is_invalid_version(version))
         return program_type::invalid;
 
     switch (version)
@@ -229,36 +268,33 @@ witness_address::program_type witness_address::to_program_type(uint8_t version,
 // ----------------------------------------------------------------------------
 
 // fully specified by address
-witness_address witness_address::from_address(const std::string& address)
+witness_address witness_address::from_address(const std::string& address,
+    bool strict)
 {
     std::string prefix;
     uint8_t version;
     data_chunk program;
-    if (!parse_address(prefix, version, program, address))
-        return {};
-
-    const auto identifier = to_program_type(version, program);
 
     // Unknown programs are valid but output_script will return empty.
-    if (identifier == program_type::invalid)
+    if (parse_address(prefix, version, program, address, strict) !=
+        parse_result::valid)
         return {};
 
     // Address is the only way to construct unknown program type addresses.
-    return { std::move(program), identifier, prefix, version };
+    return { std::move(program), prefix, version };
 }
 
 // version_0_p2kh
 witness_address witness_address::from_short(const short_hash& hash,
     const std::string& prefix)
 {
-    // Constructed addresses must have lower case prefixes.
-    if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
+    if (parse_prefix(prefix) != parse_result::valid)
         return {};
 
     // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
     // If the version byte is 0, and the witness program is 20 bytes it is
     // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
-    return { hash, program_type::version_0_p2kh, prefix, version_0 };
+    return { hash, prefix, version_0 };
 }
 
 // version_0_p2kh
@@ -287,14 +323,13 @@ witness_address witness_address::from_public(const ec_public& point,
 witness_address witness_address::from_long(const hash_digest& hash,
     const std::string& prefix)
 {
-    // Constructed addresses must have lower case prefixes.
-    if (!is_valid_prefix(prefix) || ascii_to_lower(prefix) != prefix)
+    if (parse_prefix(prefix) != parse_result::valid)
         return {};
 
     // github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
     // If the version byte is 0, and the witness program is 32 bytes it is
     // interpreted as a pay-to-witness-script-hash (P2WSH) program.
-    return { hash, program_type::version_0_p2sh, prefix, version_0 };
+    return { hash, prefix, version_0 };
 }
 
 // version_0_p2sh
@@ -316,7 +351,7 @@ witness_address::operator bool() const
 {
     // The program may be unknown, in which case output_script returns empty.
     // Yet all other properties are valid and conformant, so unknown is valid.
-    return identifier_ != program_type::invalid;
+    return !is_invalid_version(version_);
 }
 
 // Serializer.
@@ -349,13 +384,13 @@ const data_chunk& witness_address::program() const
 
 witness_address::program_type witness_address::identifier() const
 {
-    return identifier_;
+    return parse_program(version_, program_);
 }
 
 // Return constructed output script for known program types.
 chain::script witness_address::output_script() const
 {
-    switch (identifier_)
+    switch (identifier())
     {
         case program_type::version_0_p2kh:
             return chain::script::to_pay_witness_key_hash_pattern(
@@ -377,7 +412,6 @@ witness_address& witness_address::operator=(witness_address&& other)
 {
     program_ = std::move(other.program_);
     prefix_ = other.prefix_;
-    identifier_ = other.identifier_;
     version_ = other.version_;
     return *this;
 }
@@ -386,7 +420,6 @@ witness_address& witness_address::operator=(const witness_address& other)
 {
     program_ = other.program_;
     prefix_ = other.prefix_;
-    identifier_ = other.identifier_;
     version_ = other.version_;
     return *this;
 }
