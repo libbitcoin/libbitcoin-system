@@ -26,13 +26,14 @@
 namespace libbitcoin {
 namespace system {
 
-struct BC_API color
-{
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha;
-};
+////// Dead code
+////struct BC_API color
+////{
+////    uint8_t red;
+////    uint8_t green;
+////    uint8_t blue;
+////    uint8_t alpha;
+////};
 
 } // namespace system
 } // namespace libbitcoin
