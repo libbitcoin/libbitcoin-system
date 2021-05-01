@@ -16,17 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "overloads.hpp"
+#include "test.hpp"
 
 #include <ostream>
+#include <bitcoin/system.hpp>
 
 namespace std {
 
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::data_chunk& data) noexcept
+    const data_slice& slice) noexcept
 {
-    stream << bc::system::encode_base16(data);
+    // Avoid serialize() here for its own test benefit.
+    // stream << serialize(slice);
+    stream << encode_base16(slice);
     return stream;
 }
 

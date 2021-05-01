@@ -16,25 +16,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_OVERLOADS_HPP
-#define LIBBITCOIN_SYSTEM_TEST_OVERLOADS_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_HPP
+#define LIBBITCOIN_SYSTEM_TEST_HPP
 
+#include <boost/test/unit_test.hpp>
+
+#include <algorithm>
+#include <array>
+#include <iterator>
+#include <ostream>
+#include <sstream>
+#include <vector>
 #include <bitcoin/system.hpp>
 
-#include <ostream>
+using namespace bc;
+using namespace bc::system;
 
 namespace std {
 
-template <size_t Size>
+// data_chunk/byte_array -> base16(data)
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::byte_array<Size>& bytes) noexcept
+    const data_slice& slice) noexcept;
+
+// vector<Type> -> join(<<Type)
+template <typename Type>
+std::ostream& operator<<(std::ostream& stream,
+    const std::vector<Type>& values) noexcept
 {
-    stream << bc::system::encode_base16(bytes);
+    // Ok when testing serialize because only used for error message out.
+    stream << serialize(values);
     return stream;
 }
 
+// array<Type, Size> -> join(<<Type)
+template <typename Type, size_t Size>
 std::ostream& operator<<(std::ostream& stream,
-    const bc::system::data_chunk& data) noexcept;
+    const std::array<Type, Size>& values) noexcept
+{
+    // Ok when testing serialize because only used for error message out.
+    stream << serialize(values);
+    return stream;
+}
 
 } // namespace std
 
