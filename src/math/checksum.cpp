@@ -24,6 +24,7 @@
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/string.hpp>
+#include "external/bech32.h"
 
 namespace libbitcoin {
 namespace system {
@@ -64,99 +65,31 @@ bool verify_checksum(const data_slice& data)
     return check == bitcoin_checksum({ data.begin(), position });
 }
 
-// bech32 checksum.
-// ----------------------------------------------------------------------------
-// TODO: move to "external/bech32.c" with the other spooky math functions.
-
-// bech32_checksum encoding is a private data format, do not expose.
-using bech32_checksum = byte_array<6>;
-constexpr auto null_extension = bech32_checksum{ 0 };
-
-static data_chunk bech32_expand_prefix(const std::string& prefix)
-{
-    const auto size = prefix.size();
-
-    data_chunk out;
-    out.resize(2 * size + 1);
-
-    for (size_t i = 0; i < size; ++i)
-    {
-        const auto c = prefix[i];
-
-        out[i] = c >> 5;
-        out[i + size + 1] = c & 31;
-    }
-
-    out[size] = 0;
-    return out;
-}
-
-static bech32_checksum bech32_expand_checksum(uint32_t polymod)
-{
-    return bech32_checksum
-    {
-        (polymod >> 25) & 31,
-        (polymod >> 20) & 31,
-        (polymod >> 15) & 31,
-        (polymod >> 10) & 31,
-        (polymod >>  5) & 31,
-        (polymod >>  0) & 31
-    };
-}
-
-static uint32_t bech32_polymod(const data_slice& expanded)
-{
-    constexpr uint32_t g[]
-    {
-        0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3
-    };
-
-    uint32_t c = 1;
-
-    for (const auto v: expanded)
-    {
-        const auto c0 = (c >> 25);
-        c = ((c & 0x1ffffff) << 5) ^ v;
-
-        if (c0 & 0x01) c ^= g[0];
-        if (c0 & 0x02) c ^= g[1];
-        if (c0 & 0x04) c ^= g[2];
-        if (c0 & 0x08) c ^= g[3];
-        if (c0 & 0x10) c ^= g[4];
-    }
-
-    return c;
-}
-
-static const uint32_t constant(bool bech32m)
-{
-    return bech32m ? 0x2bc830a3 : 0x00000001;
-}
-
-// published
+// bech32 checksum
 // ----------------------------------------------------------------------------
 
 data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
     const std::string& prefix)
 {
+    // Build the expanded data with prefix buffer, version, and null checksum.
     auto expanded = build_chunk(
     {
-        bech32_expand_prefix(prefix),
-        data_chunk{ version },
+        data_chunk(bech32_expanded_prefix_size(prefix.length())),
+        to_array(version),
         base32_expand(data),
-        null_extension
+        data_chunk(bech32_checksum_size)
     });
 
-    const auto polymod = bech32_polymod(expanded) ^ constant(version > 0u);
+    // Expanded the prefix into the prefix buffer.
+    bech32_expand_prefix(expanded.data(), prefix.c_str(), prefix.length());
 
-    // Strip extension, append checksum and recompress.
-    expanded.resize(expanded.size() - null_extension.size());
-    extend_data(expanded, bech32_expand_checksum(polymod));
+    // Insert the checksum into the null checksum.
+    bech32_insert_checksum(expanded.data(), expanded.size(), version);
 
+    // Compact the data.
+    // Cannot fail because the expansion was performed here.
     data_chunk out;
-
-    // Cannot fail because we created the expansion.
-    /* bool */ base32_compact(out, expanded);
+    base32_compact(out, expanded);
     return out;
 }
 
@@ -166,21 +99,33 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
     if (data.empty() || prefix.empty())
         return false;
 
-    auto expanded = bech32_expand_prefix(prefix);
-    const auto expanded_data = base32_expand(data);
-    extend_data(expanded, expanded_data);
+    // Get the size of the expanded prefix.
+    const auto prefix_size  = bech32_expanded_prefix_size(prefix.length());
 
-    // Strip version from expanded data and return with compressed program.
-    out_version = expanded_data.front();
-
-    // Cannot fail because we created the expansion.
-    /* bool */ base32_compact(out_program, data_chunk
-    { 
-        std::next(expanded_data.begin()),
-        expanded_data.end()
+    // Prepend the expanded, versioned/checked data with prefix buffer.
+    auto expanded = build_chunk(
+    {
+        data_chunk(prefix_size),
+        base32_expand(data)
     });
 
-    return bech32_polymod(expanded) == constant(out_version > 0u);
+    // Expanded the prefix into the prefix buffer.
+    bech32_expand_prefix(expanded.data(), prefix.c_str(), prefix.length());
+
+    // Read version byte from the expanded data (after the prefix).
+    out_version = expanded[prefix_size];
+
+    // Extract program from expanded data (after the version) and recompact.
+    // Cannot fail because the expansion was performed here.
+    base32_compact(out_program, data_chunk
+    (
+        std::next(expanded.begin(), prefix_size + sizeof(out_version)),
+        std::prev(expanded.end(), bech32_checksum_size)
+    ));
+
+    // Verify the checksum.
+    return bech32_verify_checksum(expanded.data(), expanded.size(),
+        out_version) == 0;
 }
 
 } // namespace system
