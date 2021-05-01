@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <utility>
 #include <bitcoin/system/utility/assert.hpp>
@@ -28,56 +29,34 @@
 namespace libbitcoin {
 namespace system {
 
-inline one_byte to_array(uint8_t byte)
+inline uint8_t to_byte(char character)
 {
-    return byte_array<1>{ { byte } };
+    return static_cast<uint8_t>(character);
 }
 
 template <size_t Size>
 byte_array<Size> to_array(const data_slice& bytes)
 {
-    return build_array<Size>({ bytes });
+    return bytes.to_array<Size>();
 }
 
 template <size_t Size>
 byte_array<Size> build_array(const loaf& slices)
 {
+    static const ptrdiff_t zero{ 0 };
     byte_array<Size> out;
     auto position = out.begin();
     for (const auto& slice: slices)
     {
         const auto unfilled = std::distance(position, out.end());
-        const auto remain = static_cast<size_t>(unfilled < 0 ? 0 : unfilled);
+        const auto remain = static_cast<size_t>(std::max(unfilled, zero));
         const auto size = std::min(remain, slice.size());
-
-        std::copy(slice.begin(), slice.begin() + size, position);
-        position += size;
+        std::copy_n(slice.begin(), size, position);
+        std::advance(position, size);
     }
 
     // Pad any unfilled remainder of the array with zeros.
     std::fill(position, out.end(), 0x00);
-    return out;
-}
-
-template <typename Source>
-data_chunk to_chunk(const Source& bytes)
-{
-    return data_chunk(bytes.begin(), bytes.end());
-}
-
-// TODO: move this to cpp file (only reason for inline here).
-inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
-{
-    size_t size = 0;
-    for (const auto& slice: slices)
-        size += slice.size();
-
-    const auto reserved = size + extra_reserve;
-    data_chunk out;
-    out.reserve(reserved);
-    for (const auto& slice: slices)
-        out.insert(out.end(), slice.begin(), slice.end());
-
     return out;
 }
 
@@ -100,7 +79,6 @@ Target& extend_data(Target& target, Extension&& extension)
     return target;
 }
 
-// std::array<> is used in place of byte_array<> to enable Size deduction.
 template <size_t Start, size_t End, size_t Size>
 byte_array<End - Start> slice(const byte_array<Size>& bytes)
 {
@@ -162,7 +140,6 @@ byte_array<Size> xor_offset(const byte_array<Size1>& bytes1,
     byte_array<Size> out;
     const auto& data1 = bytes1.data();
     const auto& data2 = bytes2.data();
-
     for (size_t index = 0; index < Size; index++)
         out[index] = data1[index + Offset1] ^ data2[index + Offset2];
 

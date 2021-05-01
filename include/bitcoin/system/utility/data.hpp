@@ -28,119 +28,92 @@
 #include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/array_slice.hpp>
+#include <bitcoin/system/utility/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Define a byte array of a specified length.
+/// Byte array of a specified length.
 template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
 
+/// Return type for splitters.
 template <size_t Size>
 using split_parts = std::pair<byte_array<Size>, byte_array<Size>>;
 
-// Define arbitrary byte storage types.
+/// Arbitrary byte storage types.
 typedef byte_array<1> one_byte;
-typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
 typedef std::initializer_list<data_slice> loaf;
 
-/**
- * Create a single byte arrray with an initial value.
- */
-inline one_byte to_array(uint8_t byte);
+/// Cast a char to a byte.
+inline uint8_t to_byte(char character);
 
-/**
- * Convert the data slice to an array.
- * Underfill is padded with 0x00, excess is truncated.
- */
+/// Convert the data slice to an array.
+/// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
 byte_array<Size> to_array(const data_slice& bytes);
 
-/**
- * Concatenate several data slices into a single fixed size array.
- * Underfill is padded with 0x00, excess is truncated.
- */
+/// Concatenate several data slices into a single fixed size array.
+/// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
 byte_array<Size> build_array(const loaf& slices);
 
-/**
- * Create a data chunk from an iterable object.
- * This supports std::string conversion from signed char to uint8_t;
- */
-template <typename Source>
-data_chunk to_chunk(const Source& bytes);
-
-/**
- * Concatenate several data slices into a single data_chunk.
- * @param  extra_reserve  Reserve but do not allocate these additional bytes.
- */
-inline data_chunk build_chunk(const loaf& slices, size_t extra_reserve=0);
-
-/**
- * Extend insertable target by copying extension.
- */
+/// Extend insertable target by copying extension.
 template <class Target, class Extension>
 Target& extend_data(Target& target, const Extension& extension);
 
-/**
- * Extend insertable target by moving extension.
- */
+/// Extend insertable target by moving extension.
 template <class Target, class Extension>
 Target& extend_data(Target& target, Extension&& extension);
 
-/**
- * Extract a subarray from start position with length end minus start.
- */
+/// Extract a subarray from start position with length end minus start.
 template <size_t Start, size_t End, size_t Size>
 byte_array<End - Start> slice(const byte_array<Size>& bytes);
 
-/**
- * Break an evenly-sized array array into two equal length parts.
- */
+/// Break an evenly-sized array array into two equal length parts.
 template <size_t Size>
 split_parts<Size / 2u> split(const byte_array<Size>& bytes);
 
-/**
- * Concatenate two arrays into a new array.
- */
+/// Concatenate two arrays into a new array.
 template <size_t Left, size_t Right>
 byte_array<Left + Right> splice(const byte_array<Left>& left,
     const byte_array<Right>& right);
 
-/**
- * Concatenate three arrays into a new array.
- */
+/// Concatenate three arrays into a new array.
 template <size_t Left, size_t Middle, size_t Right>
 byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
     const byte_array<Middle>& middle, const byte_array<Right>& right);
 
-/**
- * Safely determine if a buffer starts with a byte sequence.
- */
+/// Determine if a buffer starts with a byte sequence.
 template <typename Source, class Target>
 bool starts_with(const typename Source::const_iterator& begin,
     const typename Source::const_iterator& end, const Source& value);
 
-/**
- * Perform an exclusive or (xor) on two arrays to specified length.
- * Return the resulting array.
- */
+/// Perform an exclusive or (xor) on two arrays to specified length.
 template <size_t Size, size_t Size1, size_t Size2>
 byte_array<Size> xor_data(const byte_array<Size1>& bytes1,
     const byte_array<Size2>& bytes2);
 
-/**
- * Perform an exclusive or (xor) on two arrays at specified offsets and length.
- * Return the resulting array.
- */
-template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1,
-    size_t Size2>
+/// Perform an exclusive or (xor) on two arrays at specified offsets and length.
+template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2>
 byte_array<Size> xor_offset(const byte_array<Size1>& bytes1,
     const byte_array<Size2>& bytes2);
+
+/// Create a single byte arrray with given element value.
+BC_API one_byte to_array(uint8_t byte);
+
+/// Create a single byte data_chunk with given element value.
+BC_API data_chunk to_chunk(uint8_t byte);
+
+/// Create a data chunk from data slice.
+BC_API data_chunk to_chunk(const data_slice& bytes);
+
+/// Concatenate several data slices into a single data_chunk.
+/// extra_reserve reserves but does not allocate additional bytes.
+BC_API data_chunk build_chunk(const loaf& slices, size_t extra_reserve=0);
 
 } // namespace system
 } // namespace libbitcoin

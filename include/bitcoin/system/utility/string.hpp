@@ -23,122 +23,57 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/data_slice.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 typedef std::vector<std::string> string_list;
 
-/**
- * Cast a char to a byte.
- * @param[in]  character  The character to cast.
- * @returns               The byte.
- */
-inline uint8_t to_byte(char character)
-{
-    return static_cast<uint8_t>(character);
-}
-
-/**
- * Convert a text string to the specified type.
- * @param      <Value>    The converted type.
- * @param[out] out_value  The parsed value.
- * @param[in]  text       The text to convert.
- * @param[in]  trim       True if text should be trimmed.
- * @return                True if successful.
- */
-template <typename Value>
-bool deserialize(Value& out_value, const std::string& text, bool trim);
-
-/**
- * Deserialize the tokens of a text string to a vector of the inner type.
- * @param      <Value>         The inner type.
- * @param[out] out_collection  The parsed vector value.
- * @param[in]  text            The text to convert.
- * @param[in]  trim            True if text values should be trimmed.
- * @return                     True if successful.
- */
-template <typename Value>
-bool deserialize(std::vector<Value>& out_collection, const std::string& text,
-    bool trim);
-
-/**
- * Conveniently convert an instance of the specified type to string.
- * @param      <Value>   The type to serialize.
- * @param[in]  out_value The instance to convert.
- * @param[in]  fallback  The text to populate if value is empty.
- * @return               The serialized value.
- */
-template <typename Value>
-std::string serialize(const Value& out_value, const std::string& fallback="");
-
-/**
- * Lower case each byte in the string. Caller must ensure text is ASCII.
- */
+/// Convert each ASCII letter in text to lower case.
 BC_API std::string ascii_to_lower(const std::string& text);
 
-/**
- * True if all chars in the string are < 0x80 (ASCII).
- */
+/// Convert each ASCII letter in text to upper case.
+BC_API std::string ascii_to_upper(const std::string& text);
+
+/// True if text has upper and lower ASCII case letters.
+BC_API bool has_mixed_ascii_case(const std::string& text);
+
+/// True if all characters are in the ASCII subset of UTF8.
 BC_API bool is_ascii(const std::string& text);
 
-/**
- * True if there is a mix of ASCII upper and lower case letters.
- */
-BC_API bool is_ascii_mixed_case(const std::string& text);
+/// True if the character is in the ASCII subset of UTF8.
+BC_API bool is_ascii_character(char character);
 
-/**
- * Join a list of strings into a single string, in order.
- * @param[in]  words      The list of strings to join.
- * @param[in]  delimiter  The delimiter, defaults to " ".
- * @return                The resulting string.
- */
-BC_API std::string join(const string_list& words,
-    const std::string& delimiter=" ");
+/// True if the character is an ASCII "whitespace" [\x20,\t,\n,\v,\f,\r].
+BC_API bool is_ascii_whitespace(char character);
 
-/**
- * Split a sentence on one character into string vector, compresses multiples.
- * @param[in]  sentence    The string to split.
- * @param[in]  delimiters  The set of independent delimeters, defaults to " ".
- * @param[in]  trim        Trim the sentence for whitespace, defaults to true.
- * @return                 The list of resulting strings.
- */
-BC_API string_list split(const std::string& sentence,
-    const std::string& delimiters=" ", bool trim=true);
+/// Join a list of string tokens in order into a single string.
+/// Delimiter defaults to ASCII space (0x20), and can be any length.
+BC_API std::string join(const string_list& tokens,
+    const std::string& delimiter="\x20");
 
-/**
- * Split a sentence on a regular expression into a string vector.
- * @param[in]  sentence    The string to split.
- * @param[in]  delimiters  The splitting phrase, defaults to " ".
- * @return                 The list of resulting strings.
- */
-BC_API string_list split_regex(const std::string& sentence,
-    const std::string& phrase);
+/// Split text into a list of tokens, always returns at least one.
+/// Delimiter can be any length, defaults to ASCII space (0x20).
+/// Trimming applies to each token independently, defaults to true.
+/// Compression removes empty tokens, defaults to true.
+BC_API string_list split(const std::string& text,
+    const std::string& delimiter="\x20", bool trim=true, bool compress=true);
 
-/**
- * Return true if value starts with the prefix.
- */
-BC_API bool starts_with(const std::string& value, const std::string& prefix);
+/// Return true if text starts with the prefix.
+BC_API bool starts_with(const std::string& text, const std::string& prefix);
 
-/**
- * Copy bytes to a new string.
- * @param[in]  source  The iterable collection of bytes to copy.
- * @returns            A new string with copied bytes.
- */
-BC_API std::string to_string(const data_slice& source);
+/// Convert a data slice to text, uint8_t is cast to char.
+BC_API std::string to_string(const data_slice& bytes);
 
-/**
- * Copy character array into a new data chunk.
- * @param[in]  source  The character array to copy.
- * @returns            A new string with copied characters.
- */
-BC_API data_chunk to_chunk(const char source[]);
+/// Trim ASCII whitespace from both ends of text.
+BC_API void trim(std::string& text);
+
+/// Trim ASCII whitespace from both ends of text and return result.
+BC_API std::string trim_copy(const std::string& text);
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/utility/string.ipp>
 
 #endif
