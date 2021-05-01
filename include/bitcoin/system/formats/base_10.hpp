@@ -34,9 +34,7 @@ BC_CONSTEXPR uint8_t ubtc_decimal_places = 2;
 /**
  * Validates and parses an amount string according to the BIP21 grammar.
  * @param decimal_places the location of the decimal point.
- * The default is 0, which treats the input as a normal integer.
- * @param strict true to treat fractional results as an error,
- * or false to round them upwards.
+ * @param strict true disallows fractional results, false rounds up.
  * @return false for failure.
  */
 BC_API bool decode_base10(uint64_t& out, const std::string& amount,

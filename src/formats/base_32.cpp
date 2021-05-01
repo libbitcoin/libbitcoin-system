@@ -77,7 +77,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
     data_chunk expanded(in.size());
 
     // The map is 256 elements, char indexes are bounded.
-    for (const auto character: ascii_to_lower(in))
+    for (const uint8_t character: ascii_to_lower(in))
         if (((expanded[index++] = decode[character])) == 0xff)
             return false;
 
@@ -87,7 +87,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
 
 // compact/expand
 
-#if !defined(UNDEFINED)
+#if defined(UNDEFINED)
 
 // This is how C developers do it. :P
 static bool transform(data_chunk& out, const data_chunk& data, bool expand)
@@ -173,7 +173,7 @@ bool base32_compact(data_chunk& out, const data_chunk& expanded)
     if ((expanded.size() * 5) % 8 != 0)
         return false;
 
-    // A nonzero top three (unused) bit is not allowed.
+    // Top 3 bits must be zero for consistency, as they carry no information.
     if (!std::all_of(expanded.begin(), expanded.end(),
         [](uint8_t value) { return value < (1 << 5); }))
         return false;

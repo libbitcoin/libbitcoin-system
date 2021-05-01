@@ -34,7 +34,7 @@ namespace system {
  * The Microsoft `isdigit` includes superscript characters like '²'
  * in some locales, for example.
  */
-static bool is_digit(const char c)
+inline bool is_digit(const char c)
 {
     return '0' <= c && c <= '9';
 }
@@ -50,40 +50,42 @@ bool decode_base10(uint64_t& out, const std::string& amount,
 {
     std::string value(amount);
 
-    // Get rid of the decimal point:
+    // Remove the decimal point.
     auto point = std::find(value.begin(), value.end(), '.');
     if (point != value.end())
         point = value.erase(point);
 
-    // Only digits should remain:
+    // Only digits should remain.
     if (!std::all_of(value.begin(), value.end(), is_digit))
         return false;
 
-    // Add digits to the end if there are too few:
+    // Add digits to the end if there are too few.
     auto actual_places = value.end() - point;
     if (actual_places < decimal_places)
         value.append(decimal_places - actual_places, '0');
 
-    // Remove digits from the end if there are too many:
-    bool round = false;
+    // Remove digits from the end if there are too many.
+    auto round = false;
     if (actual_places > decimal_places)
     {
         auto end = point + decimal_places;
         round = !std::all_of(end, value.end(), char_is<'0'>);
         value.erase(end, value.end());
     }
+
     if (strict && round)
         return false;
 
-    // Convert to an integer:
+    // Convert to an integer.
     std::istringstream stream(value);
     uint64_t number = 0;
-    if (value.size() && !(stream >> number))
+    if (!value.empty() && !(stream >> number))
         return false;
 
-    // Round and return:
+    // Round and return.
     if (round && number == max_uint64)
         return false;
+
     out = number + round;
     return true;
 }
