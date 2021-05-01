@@ -16,12 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test_suite.hpp>
-
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(tiff_tests)
 

@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc;
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(input_tests)
+
 using namespace bc::system::chain;
 
 const auto valid_raw_input = to_chunk(base16_literal(
@@ -29,8 +28,6 @@ const auto valid_raw_input = to_chunk(base16_literal(
     "7795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915"
     "da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b"
     "8066c9c585f9ffffffff"));
-
-BOOST_AUTO_TEST_SUITE(input_tests)
 
 BOOST_AUTO_TEST_CASE(input__constructor_1__always__returns_default_initialized)
 {

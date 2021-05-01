@@ -18,7 +18,7 @@
  */
 #include "test.hpp"
 
-#include <ostream>
+#include <iostream>
 #include <bitcoin/system.hpp>
 
 namespace std {

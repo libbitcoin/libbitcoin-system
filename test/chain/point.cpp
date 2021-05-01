@@ -16,14 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-
-const auto valid_raw_point = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f00000015"));
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(point_tests)
+
+const auto valid_raw_point = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f00000015"));
 
 BOOST_AUTO_TEST_CASE(point__constructor_1__always__returns_default_initialized)
 {

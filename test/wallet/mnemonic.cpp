@@ -16,17 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 #include "mnemonic.hpp"
 
-using namespace bc::system;
-using namespace bc::system::wallet;
+ // Disabled until rebuilt.
+#ifdef DISABLED_TESTS
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
-// Disabled until rebuilt.
-#ifdef DISABLED_TESTS
+using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__trezor_vectors__success)
 {
@@ -152,6 +150,6 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct1__any_language__true)
     BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"));
 }
 
-#endif // DISABLED_TESTS
-
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // DISABLED_TESTS

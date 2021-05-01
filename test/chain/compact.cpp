@@ -16,14 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <cstdint>
-#include <bitcoin/system.hpp>
 
 BOOST_AUTO_TEST_SUITE(compact_tests)
 
-using namespace bc::system;
 using namespace bc::system::chain;
 
 #define PRIMES "020305070b0d1113171d1f25292b2f353b3d4347494f53596165676b6d717f83"

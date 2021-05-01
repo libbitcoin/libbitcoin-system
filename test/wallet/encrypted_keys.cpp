@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../test.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <string>
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(encrypted_tests)
+
+using namespace bc::system::wallet;
 
 #ifdef WITH_ICU
 

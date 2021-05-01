@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::chain;
-using namespace bc::system::wallet;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(witness_address_tests)
+
+using namespace bc::system::chain;
+using namespace bc::system::wallet;
 
 // BIP173 test constants.
 #define MAINNET_WITNESS_PUBKEY_HASH_ADDRESS "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"

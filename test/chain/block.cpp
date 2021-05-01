@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc;
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(chain_block_tests)
 
 // Test helper.
 static bool all_valid(const chain::transaction::list& transactions)
@@ -47,7 +45,7 @@ static bool all_valid(const chain::transaction::list& transactions)
     return valid;
 }
 
-BOOST_AUTO_TEST_SUITE(chain_block_tests)
+BOOST_AUTO_TEST_SUITE(chain_block_construct_tests)
 
 BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
 {
@@ -243,6 +241,8 @@ BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__returns_true)
     BOOST_REQUIRE(instance.from_data(raw_block));
     BOOST_REQUIRE(instance.is_valid_merkle_root());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(block_serialization_tests)
 

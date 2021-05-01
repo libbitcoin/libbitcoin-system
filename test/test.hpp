@@ -21,11 +21,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <algorithm>
 #include <array>
-#include <iterator>
-#include <ostream>
-#include <sstream>
+#include <iostream>
 #include <vector>
 #include <bitcoin/system.hpp>
 

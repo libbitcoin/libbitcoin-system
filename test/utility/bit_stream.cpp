@@ -19,11 +19,10 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <sstream>
-#include <bitcoin/system.hpp>
-#include "../overloads.hpp"
+
+BOOST_AUTO_TEST_SUITE(bit_stream_tests)
 
 // The bit reader/writer operates from high to low order bits.
 // It reads and writes high bits first both in the operand and the buffer.
@@ -61,10 +60,6 @@
 //
 // Round trip tests do not see a difference in buffer bit (or byte) ordering,
 // so the test cases below test the expected (high endian) buffer as well.
-
-using namespace bc::system;
-
-BOOST_AUTO_TEST_SUITE(bit_stream_tests)
 
 BOOST_AUTO_TEST_CASE(istream_bit_reader__bool__uninitialized_stream__false)
 {

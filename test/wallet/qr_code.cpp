@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <string>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(qr_code_tests)
+
+using namespace bc::system::wallet;
 
 // encode
 

@@ -16,14 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include "../test.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <vector>
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(unicode_tests)
 
@@ -659,6 +655,9 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__null_termination__expec
     BOOST_REQUIRE_EQUAL(argv_terminator, (char*)nullptr);
     free_environment(narrow_args);
 }
+
+// is_terminal_utf8_character
+// offset_to_terminal_utf8_character
 
 #endif
 

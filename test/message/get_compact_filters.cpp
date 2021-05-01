@@ -19,10 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(get_compact_filters_tests)
 

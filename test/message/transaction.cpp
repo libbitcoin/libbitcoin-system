@@ -16,18 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::message;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(message_transaction_tests)
+
+using namespace bc::system::message;
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__initialized_invalid)
 {
     transaction instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)

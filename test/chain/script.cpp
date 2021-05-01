@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <sstream>
-#include <bitcoin/system.hpp>
 #include "script.hpp"
-#include "../overloads.hpp"
 
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(script_tests)
+
 using namespace bc::system::chain;
 using namespace bc::system::machine;
 
@@ -131,8 +129,6 @@ std::string test_name(const script_test& test)
         << "name: " << test.description;
     return out.str();
 }
-
-BOOST_AUTO_TEST_SUITE(script_tests)
 
 BOOST_AUTO_TEST_CASE(script__one__literal__expected)
 {

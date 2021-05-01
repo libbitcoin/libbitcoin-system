@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <algorithm>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(stealth_receiver_tests)
+
+using namespace bc::system::wallet;
 
 #define MAIN_KEY "tprv8ctN3HAF9dCgX9ggdCwiZHa7c3UHuG2Ev4jgYWDhTHDUVWKKsg7znbr3vYtmCzVqcMQsjd9cSKsyKGaDvTAUMkw1UphETe1j8LcT21eWPkH"
 #define STEALTH_ADDRESS "vJmudwspxzmEoz1AP5tTrRMcuop6XjNWa1SnjHFmLeSc9DAkro6J6oYnD7MubLHx9wT3rm7D6xgA8U9Lr9zjzijhVSuUbYdMNYUN27"

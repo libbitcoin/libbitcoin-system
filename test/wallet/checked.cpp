@@ -16,17 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <tuple>
 #include <utility>
-#include <bitcoin/system.hpp>
-#include "../overloads.hpp"
-
-using namespace bc::system;
-using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(checked_tests)
+
+using namespace bc::system::wallet;
 
 typedef checked<0, 0, 0> zero_checked;
 typedef checked<1, mini_hash_size, 2> mini_checked;

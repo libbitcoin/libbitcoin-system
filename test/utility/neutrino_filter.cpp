@@ -19,11 +19,9 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include "../overloads.hpp"
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(chain_neutrino_filter_tests)
 
 struct prevout_data
 {
@@ -81,8 +79,6 @@ bool add_metadata(prevout_data::list& metadata, chain::block& block)
 
     return result;
 }
-
-BOOST_AUTO_TEST_SUITE(chain_neutrino_filter_tests)
 
 //BOOST_AUTO_TEST_CASE(compute__first_11_blocks__success)
 //{

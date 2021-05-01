@@ -16,16 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(uri_reader_tests)
+
+using namespace bc::system::wallet;
 
 // Test helper that relies on bitcoin_uri.
 static bitcoin_uri parse(const std::string& uri, bool strict=true)

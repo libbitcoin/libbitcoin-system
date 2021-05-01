@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-
+#include "../test.hpp"
 #include <stdexcept>
-#include <bitcoin/system.hpp>
 
 #ifdef _MSC_VER
     #include <windows.h>
@@ -36,8 +34,6 @@
     #define THREAD_PRIORITY_BELOW_NORMAL 2
     #define THREAD_PRIORITY_LOWEST PRIO_MAX
 #endif
-
-using namespace bc::system;
 
 BOOST_AUTO_TEST_SUITE(thread_tests)
 

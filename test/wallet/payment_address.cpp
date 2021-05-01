@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::chain;
-using namespace bc::system::wallet;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(payment_address_tests)
+
+using namespace bc::system::chain;
+using namespace bc::system::wallet;
 
 // $ bx base16-encode "Satoshi" | bx sha256
 #define SECRET "002688cc350a5333a87fa622eacec626c3d1c0ebf9f3793de3885fa254d7e393"

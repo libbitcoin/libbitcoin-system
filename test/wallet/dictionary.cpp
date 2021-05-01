@@ -16,17 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../test.hpp"
 
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
+ // Disabled until rebuilt.
+#ifdef DISABLED_TESTS
 
 BOOST_AUTO_TEST_SUITE(electrum_tests)
 
-// Disabled until rebuilt.
-#ifdef DISABLED_TESTS
+using namespace bc::system::wallet;
 
 // These test cases were generated using electrum code and verified to
 // match output from:
@@ -286,6 +283,6 @@ BOOST_AUTO_TEST_CASE(electrum__create_mnemonic__incorrent_mnemonic__invalid)
 
 #endif
 
-#endif // DISABLED_TESTS
-
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // DISABLED_TESTS

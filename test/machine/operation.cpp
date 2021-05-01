@@ -16,15 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(operation_tests)
+
 using namespace bc::system::machine;
 
 const auto valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
-
-BOOST_AUTO_TEST_SUITE(operation_tests)
 
 BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initialized)
 {

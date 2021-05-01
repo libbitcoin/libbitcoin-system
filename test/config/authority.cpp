@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../test.hpp"
 #include <sstream>
 #include <boost/program_options.hpp>
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::config;
-using namespace boost::program_options;
 
 BOOST_AUTO_TEST_SUITE(authority_tests)
+
+using namespace bc::system::config;
+using namespace boost::program_options;
 
 // tools.ietf.org/html/rfc4291#section-2.2
 #define BC_AUTHORITY_IPV4_ADDRESS "1.2.240.1"

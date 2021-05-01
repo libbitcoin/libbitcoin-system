@@ -16,14 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-
-const auto valid_raw_output = to_chunk(base16_literal("20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(output_tests)
+
+const auto valid_raw_output = to_chunk(base16_literal("20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac"));
 
 BOOST_AUTO_TEST_CASE(output__constructor_1__always__returns_default_initialized)
 {

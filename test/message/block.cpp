@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc::system;
 using namespace bc::system::message;
 
 BOOST_AUTO_TEST_SUITE(message_block_tests)

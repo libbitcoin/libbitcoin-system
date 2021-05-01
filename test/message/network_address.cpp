@@ -16,21 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc::system;
+BOOST_AUTO_TEST_SUITE(network_address_tests)
 
 bool equal(const message::network_address& left,
     const message::network_address& right, bool with_timestamp)
 {
-    bool matches_timestamp = with_timestamp ?
-        (left.timestamp() == right.timestamp()) : true;
+    if (with_timestamp && left.timestamp() == right.timestamp())
+        return false;
 
-    return matches_timestamp && (left == right);
+    return left == right;
 }
-
-BOOST_AUTO_TEST_SUITE(network_address_tests)
 
 BOOST_AUTO_TEST_CASE(network_address__constructor_1__always__invalid)
 {

@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(ec_private_tests)
+
+using namespace bc::system::wallet;
 
 // TODO: add version tests
 

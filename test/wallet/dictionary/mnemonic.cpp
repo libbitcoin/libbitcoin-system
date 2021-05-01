@@ -16,18 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
+#include "../../test.hpp"
 #include <algorithm>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
-
-// TODO: determine if any overlaps have distinct indexes.
 
 // Disabled until rebuilt.
 #ifdef DISABLED_TESTS
 
+// TODO: determine if any overlaps have distinct indexes.
+
+BOOST_AUTO_TEST_SUITE(dictionary_tests)
+
+using namespace bc::system::wallet;
 static ptrdiff_t intersection(const dictionary& left, const dictionary& right)
 {
     return std::count_if(left.words.begin(), left.words.end(),
@@ -48,16 +47,10 @@ static bool intersects(const dictionary& left, const dictionary& right)
         });
 }
 
-BOOST_AUTO_TEST_SUITE(dictionary_mnemonic_tests)
-
-BOOST_AUTO_TEST_SUITE(dictionary_mnemonic_tests)
-
 BOOST_AUTO_TEST_CASE(dictionary_electrum_v1__construct__en__expected_size)
 {
     BOOST_REQUIRE(false);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 {

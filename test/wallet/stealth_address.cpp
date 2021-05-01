@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
-
-using namespace bc::system;
-using namespace bc::system::wallet;
+#include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(stealth_address_tests)
+
+using namespace bc::system::wallet;
 
 #define SCAN_KEY "03d9e876028f4fc062c19f7097762e4affc2ce4edfffa7d42e3c17cd157ec6d1bc"
 #define SPEND_KEY1 "0215a49b55a2ed2a02569cb6c018644211d408caab3aca86d2cc7d6a9e5789b1d2"
