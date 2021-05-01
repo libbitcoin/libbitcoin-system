@@ -65,8 +65,8 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
         }
     }
 
-    // Remove duplicates.
-    bc::system::distinct(items);
+    // Order and remove duplicates.
+    items = distinct(std::move(items));
 
     data_sink stream(out_filter);
     ostream_writer writer(stream);

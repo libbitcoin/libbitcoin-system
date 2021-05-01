@@ -78,7 +78,7 @@ bool contains(const Container& list, const Element& value)
 }
 
 template <typename Element>
-std::vector<Element>& distinct(std::vector<Element>& list)
+std::vector<Element> distinct(std::vector<Element>&& list)
 {
     std::sort(list.begin(), list.end());
     list.erase(std::unique(list.begin(), list.end()), list.end());
@@ -118,6 +118,13 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
         predicate), element);
 }
 
+template <typename Element>
+bool is_distinct(std::vector<Element>&& list)
+{
+    std::sort(list.begin(), list.end());
+    return std::unique(list.begin(), list.end()) == list.end();
+}
+
 template <typename Type>
 void move_append(std::vector<Type>& target, std::vector<Type>& source)
 {
@@ -146,27 +153,5 @@ Collection reverse(const Collection& source)
 
 } // namespace system
 } // namespace libbitcoin
-
-// TODO: clean up std namespace.
-namespace std {
-
-template <class Type>
-std::ostream& operator<<(std::ostream& output, const std::vector<Type>& list)
-{
-    size_t current = 0;
-    const auto end = list.size();
-
-    for (const auto& element: list)
-    {
-        output << element;
-
-        if (++current < end)
-            output << std::endl;
-    }
-
-    return output;
-}
-
-} // namespace std
 
 #endif

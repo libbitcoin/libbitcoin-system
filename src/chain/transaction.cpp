@@ -917,8 +917,7 @@ point::list transaction::previous_outputs() const
         prevouts.push_back(input.previous_output());
     };
 
-    const auto& ins = inputs_;
-    std::for_each(ins.begin(), ins.end(), pointer);
+    std::for_each(inputs_.begin(), inputs_.end(), pointer);
     return prevouts;
 }
 
@@ -945,22 +944,19 @@ hash_list transaction::missing_previous_transactions() const
     const auto points = missing_previous_outputs();
     hash_list hashes;
     hashes.reserve(points.size());
-    const auto hasher = [&hashes](const output_point& point)
+    const auto point_hash = [](const output_point& point)
     {
-        hashes.push_back(point.hash());
+        return point.hash();
     };
 
-    std::for_each(points.begin(), points.end(), hasher);
-    return distinct(hashes);
+    // Order is not preserved.
+    std::transform(points.begin(), points.end(), hashes.begin(), point_hash);
+    return distinct(std::move(hashes));
 }
 
 bool transaction::is_internal_double_spend() const
 {
-    auto prevouts = previous_outputs();
-    std::sort(prevouts.begin(), prevouts.end());
-    const auto distinct_end = std::unique(prevouts.begin(), prevouts.end());
-    const auto distinct = (distinct_end == prevouts.end());
-    return !distinct;
+    return !is_distinct(previous_outputs());
 }
 
 bool transaction::is_confirmed_double_spend() const

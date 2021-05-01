@@ -20,9 +20,7 @@
 #define LIBBITCOIN_SYSTEM_COLLECTION_HPP
 
 #include <iterator>
-#include <iostream>
 #include <vector>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
@@ -65,10 +63,10 @@ bool contains(const Container& list, const Element& value);
  * Obtain the sorted distinct elements of the list.
  * @param      <Element>  The list element type.
  * @param[in]  list       The list.
- * @return                The sorted list reduced to its distinct elements.
+ * @return                The sorted distinct list.
  */
 template <typename Element>
-std::vector<Element>& distinct(std::vector<Element>& list);
+std::vector<Element> distinct(std::vector<Element>&& list);
 
 /**
  * Find the position of a pair in an ordered list.
@@ -106,6 +104,16 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     const Type& element, Predicate predicate);
 
 /**
+ * Determine if a collection contains only distinct members.
+ * @param      <Container>  The type of list.
+ * @param      <Element>    The type of list member elements.
+ * @param[in]  list         The list to search.
+ * @return                  True if distinct, otherwise false.
+ */
+template <typename Element>
+bool is_distinct(std::vector<Element>&& list);
+
+/**
  * Move members of a source list to end of a target list. Source members
  * are undefined upon return.
  * @param      <Type>  The type of list member elements.
@@ -133,20 +141,6 @@ Collection reverse(const Collection& source);
 
 } // namespace system
 } // namespace libbitcoin
-
-namespace std {
-
-/**
- * Make vectors of serializable elements serializable to std::ostream.
- * @param      <Type>  The type of list member elements.
- * @param[in]  output  The output stream to serialize to.
- * @param[in]  list    The list to serialize.
- * @return             The output stream.
- */
-template <class Type>
-std::ostream& operator<<(std::ostream& output, const std::vector<Type>& list);
-
-} // namespace std
 
 #include <bitcoin/system/impl/utility/collection.ipp>
 

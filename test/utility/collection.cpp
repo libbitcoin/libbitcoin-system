@@ -134,55 +134,80 @@ BOOST_AUTO_TEST_CASE(collection__cast__distinct_types__same)
 
 BOOST_AUTO_TEST_CASE(collection__distinct__empty__same)
 {
-    data_chunk parameter;
-    const auto& result = distinct(parameter);
-    BOOST_REQUIRE(parameter.empty());
-    BOOST_REQUIRE(&result == &parameter);
+    data_chunk set{};
+    set = distinct(std::move(set));
+    BOOST_REQUIRE(set.empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__single__match)
 {
     const uint8_t expected = 42;
     data_chunk set{ expected };
-    const auto& result = distinct(set);
-    BOOST_REQUIRE_EQUAL(result.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result[0], expected);
+    set = distinct(std::move(set));
+    BOOST_REQUIRE_EQUAL(set.size(), 1u);
+    BOOST_REQUIRE_EQUAL(set[0], expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__sorted)
 {
     data_chunk set{ 0, 2, 4, 6, 8 };
-    const auto& result = distinct(set);
-    BOOST_REQUIRE_EQUAL(result.size(), 5u);
-    BOOST_REQUIRE_EQUAL(result[0], 0u);
-    BOOST_REQUIRE_EQUAL(result[1], 2u);
-    BOOST_REQUIRE_EQUAL(result[2], 4u);
-    BOOST_REQUIRE_EQUAL(result[3], 6u);
-    BOOST_REQUIRE_EQUAL(result[4], 8u);
+    set = distinct(std::move(set));
+    BOOST_REQUIRE_EQUAL(set.size(), 5u);
+    BOOST_REQUIRE_EQUAL(set[0], 0u);
+    BOOST_REQUIRE_EQUAL(set[1], 2u);
+    BOOST_REQUIRE_EQUAL(set[2], 4u);
+    BOOST_REQUIRE_EQUAL(set[3], 6u);
+    BOOST_REQUIRE_EQUAL(set[4], 8u);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
 {
     data_chunk set{ 2, 0, 8, 6, 4 };
-    const auto& result = distinct(set);
-    BOOST_REQUIRE_EQUAL(result.size(), 5u);
-    BOOST_REQUIRE_EQUAL(result[0], 0u);
-    BOOST_REQUIRE_EQUAL(result[1], 2u);
-    BOOST_REQUIRE_EQUAL(result[2], 4u);
-    BOOST_REQUIRE_EQUAL(result[3], 6u);
-    BOOST_REQUIRE_EQUAL(result[4], 8u);
+    set = distinct(std::move(set));
+    BOOST_REQUIRE_EQUAL(set.size(), 5u);
+    BOOST_REQUIRE_EQUAL(set[0], 0u);
+    BOOST_REQUIRE_EQUAL(set[1], 2u);
+    BOOST_REQUIRE_EQUAL(set[2], 4u);
+    BOOST_REQUIRE_EQUAL(set[3], 6u);
+    BOOST_REQUIRE_EQUAL(set[4], 8u);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted_duplicates__sorted_distinct)
 {
     data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    const auto& result = distinct(set);
-    BOOST_REQUIRE_EQUAL(result.size(), 5u);
-    BOOST_REQUIRE_EQUAL(result[0], 0u);
-    BOOST_REQUIRE_EQUAL(result[1], 2u);
-    BOOST_REQUIRE_EQUAL(result[2], 4u);
-    BOOST_REQUIRE_EQUAL(result[3], 6u);
-    BOOST_REQUIRE_EQUAL(result[4], 8u);
+    set = distinct(std::move(set));
+    BOOST_REQUIRE_EQUAL(set.size(), 5u);
+    BOOST_REQUIRE_EQUAL(set[0], 0u);
+    BOOST_REQUIRE_EQUAL(set[1], 2u);
+    BOOST_REQUIRE_EQUAL(set[2], 4u);
+    BOOST_REQUIRE_EQUAL(set[3], 6u);
+    BOOST_REQUIRE_EQUAL(set[4], 8u);
+}
+
+// is_distinct
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__empty__true)
+{
+    data_chunk set{};
+    BOOST_REQUIRE(is_distinct(std::move(set)));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__single__true)
+{
+    data_chunk set{ 42 };
+    BOOST_REQUIRE(is_distinct(std::move(set)));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__distinct__true)
+{
+    data_chunk set{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(is_distinct(std::move(set)));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__nondistinct__false)
+{
+    data_chunk set{ 0, 2, 4, 2, 8 };
+    BOOST_REQUIRE(!is_distinct(std::move(set)));
 }
 
 // move_append
@@ -267,5 +292,7 @@ BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_and_returns_expected)
     BOOST_REQUIRE_EQUAL(stack[3], 3u);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
+
+// reverse
 
 BOOST_AUTO_TEST_SUITE_END()
