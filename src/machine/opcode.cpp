@@ -20,10 +20,10 @@
 
 #include <cstdint>
 #include <string>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -408,7 +408,7 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
 bool opcode_from_string(opcode& out_code, const std::string& value)
 {
     // Normalize to ASCII lower case.
-    const auto norm = boost::algorithm::to_lower_copy(value);
+    const auto norm = ascii_to_lower(value);
 
     RETURN_IF_OPCODE("zero", push_size_0);
     RETURN_IF_OPCODE("push_0", push_size_0);

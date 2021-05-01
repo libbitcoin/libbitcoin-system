@@ -33,6 +33,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// TODO: move this to client/server.
 /// This class models blockchain storage of a payment record.
 class BC_API payment_record
 {

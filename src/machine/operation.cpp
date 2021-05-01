@@ -18,14 +18,14 @@
  */
 #include <bitcoin/system/machine/operation.hpp>
 
+#include <iterator>
 #include <string>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/deserialize.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
@@ -116,12 +116,12 @@ inline bool is_valid_data_size(opcode code, size_t size)
 inline std::string trim_token(const std::string& token)
 {
     BITCOIN_ASSERT(token.size() > 1);
-    return std::string(token.begin() + 1, token.end() - 1);
+    return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
 inline string_list split_push_token(const std::string& token)
 {
-    return split(trim_token(token), ".", false);
+    return split(trim_token(token), ".", false, false);
 }
 
 static bool opcode_from_data_prefix(opcode& out_code,
@@ -158,7 +158,7 @@ static bool data_from_number_token(data_chunk& out_data,
     const std::string& token)
 {
     int64_t value;
-    if (!deserialize(value, token, false))
+    if (!deserialize(value, token))
         return false;
 
     out_data = number(value).data();

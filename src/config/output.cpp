@@ -26,6 +26,7 @@
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
+#include <bitcoin/system/utility/deserialize.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 
@@ -84,7 +85,7 @@ std::istream& operator>>(std::istream& input, output& argument)
     }
 
     uint64_t amount;
-    deserialize(amount, tokens[1], true);
+    deserialize(amount, tokens[1]);
 
     argument.amount_ = amount;
     const auto& target = tokens.front();
@@ -98,12 +99,11 @@ std::istream& operator>>(std::istream& input, output& argument)
         return input;
     }
 
+    // TODO: remove stealth outputs.
     // Is the target a stealth address?
     const wallet::stealth_address stealth(target);
     if (stealth)
     {
-        // TODO: finish stealth multisig implemetation (p2sh and !p2sh).
-
         if (stealth.spend_keys().size() != 1 || tokens.size() != 3)
         {
             BOOST_THROW_EXCEPTION(invalid_option_value(tuple));

@@ -21,7 +21,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/utility/data.hpp>
@@ -84,7 +83,7 @@ std::istream& operator>>(std::istream& input, script& argument)
 {
     std::istreambuf_iterator<char> end;
     std::string mnemonic(std::istreambuf_iterator<char>(input), end);
-    boost::trim(mnemonic);
+    trim(mnemonic);
 
     // Test for invalid result sentinel.
     if (!argument.value_.from_string(mnemonic) && mnemonic.length() > 0)

@@ -25,7 +25,6 @@
 #include <numeric>
 #include <string>
 #include <utility>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/machine/operation.hpp>
@@ -38,6 +37,7 @@
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -273,7 +273,7 @@ std::string witness::to_string() const
     };
 
     std::for_each(stack_.begin(), stack_.end(), serialize);
-    return boost::trim_copy(text);
+    return trim_copy(text);
 }
 
 // Iteration.

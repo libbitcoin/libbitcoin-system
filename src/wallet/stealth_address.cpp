@@ -224,7 +224,7 @@ stealth_address::operator bool() const
 
 stealth_address::operator const data_chunk() const
 {
-    return to_chunk();
+    return stealth_address::to_chunk();
 }
 
 // Serializer.
@@ -232,7 +232,7 @@ stealth_address::operator const data_chunk() const
 
 std::string stealth_address::encoded() const
 {
-    return encode_base58(to_chunk());
+    return encode_base58(stealth_address::to_chunk());
 }
 
 uint8_t stealth_address::version() const

@@ -20,7 +20,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/config/parameter.hpp>
@@ -134,7 +133,7 @@ static std::string format_row_name(const parameter& value)
 
     if (value.position() != parameter::not_positional)
         return (format(BC_PRINTER_TABLE_ARGUMENT_FORMAT) %
-            boost::to_upper_copy(value.long_name())).str();
+            ascii_to_upper(value.long_name())).str();
     else if (value.short_name() == parameter::no_short_name)
         return (format(BC_PRINTER_TABLE_OPTION_LONG_FORMAT) %
             value.long_name()).str();
@@ -348,11 +347,11 @@ std::string printer::format_usage_parameters()
         {
             // to_upper_copy is a hack for boost bug, see format_row_name.
             if (required)
-                required_arguments.push_back(boost::to_upper_copy(long_name));
+                required_arguments.push_back(ascii_to_upper(long_name));
             else if (optional)
-                optional_arguments.push_back(boost::to_upper_copy(long_name));
+                optional_arguments.push_back(ascii_to_upper(long_name));
             else
-                multiple_arguments.push_back(boost::to_upper_copy(long_name));
+                multiple_arguments.push_back(ascii_to_upper(long_name));
         }
     }
 
@@ -390,7 +389,7 @@ std::string printer::format_usage_parameters()
         usage << format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT) %
             multiple_argument;
 
-    return boost::trim_copy(usage.str());
+    return trim_copy(usage.str());
 }
 
 /* Initialization */

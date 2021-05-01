@@ -24,6 +24,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/config/point.hpp>
+#include <bitcoin/system/utility/deserialize.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
@@ -32,7 +33,7 @@ namespace config {
 
 using namespace boost::program_options;
 
-// input is currently a private encoding in bx.
+// input is a private encoding in bx.
 static bool decode_input(chain::input& input, const std::string& tuple)
 {
     const auto tokens = split(tuple, point::delimiter);
@@ -42,10 +43,11 @@ static bool decode_input(chain::input& input, const std::string& tuple)
     input.set_sequence(max_input_sequence);
     input.set_previous_output(point(tokens[0] + ":" + tokens[1]));
 
+    // TODO: remove stealth inputs.
     if (tokens.size() == 3)
     {
         uint32_t value;
-        if (!deserialize(value, tokens[2], true))
+        if (!deserialize(value, tokens[2]))
             return false;
 
         input.set_sequence(value);
