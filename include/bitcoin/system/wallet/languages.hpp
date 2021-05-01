@@ -52,6 +52,16 @@ public:
     /// The name of the specified language, empty string if not found.
     static std::string to_name(language identifier);
 
+    /// The mnemonic delimiter for the given language.
+    static std::string to_delimiter(language identifier);
+
+    /// All languages except reference::ja are joined by an ASCII space.
+    static std::string join(const string_list& words, language identifier);
+
+    /// There is no trimming or token compression for reference::ja.
+    /// All other languages are split and trimmed on ASCII whitespace.
+    static string_list split(const std::string& sentence, language identifier);
+
     // public methods
     // ------------------------------------------------------------------------
 
@@ -66,13 +76,6 @@ public:
 
     /// The individual words of the mnemonic.
     const string_list& words() const;
-
-    /// All languages except reference::ja are joined by an ASCII space.
-    std::string join(const string_list& words, language identifier) const;
-
-    /// There is no trimming or token compression for reference::ja.
-    /// All other languages are split and trimmed on ASCII whitespace.
-    string_list split(const std::string& sentence, language identifier) const;
 
     // operators
     // ------------------------------------------------------------------------

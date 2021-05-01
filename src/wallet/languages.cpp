@@ -81,6 +81,21 @@ std::string languages::to_name(language identifier)
     return it != map.end() ? it->second : "";
 }
 
+std::string languages::to_delimiter(language identifier)
+{
+    return (identifier == language::ja) ? ideographic_space : ascii_space;
+}
+
+std::string languages::join(const string_list& words, language identifier)
+{
+    return system::join(words, to_delimiter(identifier));
+}
+
+string_list languages::split(const std::string& sentence, language identifier)
+{
+    return system::split(sentence, to_delimiter(identifier));
+}
+
 // protected constructors
 // ----------------------------------------------------------------------------
 
@@ -122,21 +137,6 @@ std::string languages::sentence() const
 const string_list& languages::words() const
 {
     return words_;
-}
-
-std::string languages::join(const string_list& words,
-    language identifier) const
-{
-    return system::join(words, identifier == language::ja ?
-        ideographic_space : ascii_space);
-}
-
-string_list languages::split(const std::string& sentence,
-    language identifier) const
-{
-    return identifier == language::ja ?
-        split_regex(sentence, ideographic_space) :
-        system::split(sentence, ascii_space);
 }
 
 // operators
