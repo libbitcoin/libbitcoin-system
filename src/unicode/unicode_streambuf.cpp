@@ -106,7 +106,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
     // This will be in the range 0..4, indicating the number of bytes that were
     // not written in the conversion. A nonzero value results when the buffer
     // terminates within a utf8 multiple byte character.
-    uint8_t unwritten = 0;
+    size_t unwritten = 0;
     const auto next = pptr();
     const auto first = pbase();
 
@@ -144,8 +144,9 @@ std::streambuf::int_type unicode_streambuf::overflow(
     // We could use just pbump for this if it wasn't limited to 'int' width.
     setp(narrow_, &narrow_[narrow_size_ - 1u]);
 
+    // Guard: unwritten has range of [0..3].
     // Reset pptr just after the fractional character.
-    pbump(unwritten);
+    pbump(static_cast<int>(unwritten));
 
     // Return the overflow byte or EOF sentinel.
     return character;

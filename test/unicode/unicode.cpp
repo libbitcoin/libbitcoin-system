@@ -440,28 +440,28 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__non_ascii__test)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_truncated__zero)
 {
-    uint8_t truncated;
+    size_t truncated;
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_out__zero)
 {
-    uint8_t truncated;
+    size_t truncated;
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_in__zero)
 {
-    uint8_t truncated;
+    size_t truncated;
     wchar_t out[42];
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, nullptr, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
 {
-    uint8_t truncated;
+    size_t truncated;
     wchar_t out[42];
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, in, 0), 0u);
@@ -469,25 +469,26 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_out__zero)
 {
-    uint8_t truncated;
-    wchar_t out[42];
+    size_t truncated;
+    wchar_t* out = nullptr;
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 0, in, 42), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__ascii__expected)
 {
-    wchar_t utf16[20];
+    const auto length = 20u;
+    wchar_t utf16[length];
 
     // Text buffer provides null termination for test comparison.
-    wmemset(utf16, 0, sizeof(utf16) / sizeof(wchar_t));
+    wmemset(utf16, 0, length);
 
     // Use of L is not recommended as it will only work for ascii.
     const std::wstring expected_utf16(L"ascii");
     const std::string utf8("ascii");
 
-    uint8_t truncated;
-    const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
+    size_t truncated;
+    const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
@@ -496,16 +497,17 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__ascii__expected)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii__expected)
 {
-    wchar_t utf16[36];
+    const auto length = 36u;
+    wchar_t utf16[length];
 
     // Text buffer provides null termination for test comparison.
-    wmemset(utf16, 0, sizeof(utf16) / sizeof(wchar_t));
+    wmemset(utf16, 0, length);
 
     const std::string utf8("テスト");
     const auto expected_utf16 = to_utf16(utf8);
 
-    uint8_t truncated;
-    const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
+    size_t truncated;
+    const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
@@ -514,10 +516,11 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii__expected)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
 {
-    wchar_t utf16[36];
+    const auto length = 36u;
+    wchar_t utf16[length];
 
     // Text buffer provides null termination for test comparison.
-    wmemset(utf16, 0, sizeof(utf16) / sizeof(wchar_t));
+    wmemset(utf16, 0, length);
 
     std::string utf8("テスト");
     auto expected_utf16 = to_utf16(utf8);
@@ -532,8 +535,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
     // Expect the truncation of the remaining bytes of the last character.
     const auto expected_truncated = strlen("ト") - 1u;
 
-    uint8_t truncated;
-    const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
+    size_t truncated;
+    const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
     BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
@@ -542,10 +545,11 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
 {
-    wchar_t utf16[36];
+    const auto length = 36u;
+    wchar_t utf16[length];
 
     // Text buffer provides null termination for test comparison.
-    wmemset(utf16, 0, sizeof(utf16) / sizeof(wchar_t));
+    wmemset(utf16, 0, length);
 
     std::string utf8("テスト");
     auto expected_utf16 = to_utf16(utf8);
@@ -560,8 +564,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
     // Expect the truncation of the remaining bytes of the last character.
     const auto expected_truncated = strlen("ト") - drop_bytes;
 
-    uint8_t truncated;
-    const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
+    size_t truncated;
+    const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
     BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
@@ -656,8 +660,47 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__null_termination__expec
     free_environment(narrow_args);
 }
 
-// is_terminal_utf8_character
-// offset_to_terminal_utf8_character
+// utf8_remainder_size
+
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__empty_zero)
+{
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size(nullptr, 0), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes___zero)
+{
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("a", 1), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("ab", 2), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("abc", 3), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("abcd", 4), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("abcde", 5), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("abcdef", 6), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__whole_characters___zero)
+{
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF\xbf", 2), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF\xbf\xbf", 3), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf\xbf", 4), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes___expected)
+{
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF", 1), 1u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF", 1), 1u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF\xbf", 2), 2u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7", 1), 1u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf", 2), 2u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf", 3), 3u);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__invalid_leading_bytes___zero)
+{
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf", 1), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf\xbf", 2), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf\xbf\xbf", 3), 0u);
+    BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf\xbf\xbf\xbf", 4), 0u);
+}
 
 #endif
 

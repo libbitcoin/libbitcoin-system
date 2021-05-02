@@ -400,7 +400,7 @@ std::string to_utf8(const std::u32string& wide)
 // Truncation results from having split the input buffer arbitrarily (stream).
 // Returns zero in case of invalid arguments, including insufficient buffer.
 // A null terminating character will not be copied.
-size_t to_utf16(uint8_t& out_truncated, wchar_t out_to[], size_t to_chars,
+size_t to_utf16(size_t& out_truncated, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes)
 {
     out_truncated = 0;
@@ -408,8 +408,8 @@ size_t to_utf16(uint8_t& out_truncated, wchar_t out_to[], size_t to_chars,
         to_chars < from_bytes)
         return 0;
 
-    // Calculate a character break offset of 0..4 bytes.
-    out_truncated = offset_to_terminal_utf8_character(from, from_bytes);
+    // Calculate a character break offset of 0..3 bytes.
+    out_truncated = utf8_remainder_size(from, from_bytes);
 
     const auto wide = to_utf16({ from, &from[from_bytes - out_truncated] });
     const auto chars = wide.size();
@@ -543,71 +543,51 @@ static bool is_utf8_trailing_byte(char byte)
 }
 
 // Determine if the full sequence is a valid utf8 character.
-static bool is_utf8_character_sequence(const char sequence[], uint8_t bytes)
+static bool is_utf8_leading_byte(char byte, size_t size)
 {
     BITCOIN_ASSERT(bytes <= utf8_max_character_size);
 
     // See tools.ietf.org/html/rfc3629#section-3 for definition.
-    switch (bytes)
+    switch (size)
     {
         case 1:
             // 0xxxxxxx
-            return
-                ((0x80 & sequence[0]) == 0x00);
+            return ((0x80 & byte) == 0x00);
         case 2:
             // 110xxxxx 10xxxxxx
-            return
-                ((0xE0 & sequence[0]) == 0xC0) &&
-                is_utf8_trailing_byte(sequence[1]);
+            return ((0xE0 & byte) == 0xC0);
         case 3:
             // 1110xxxx 10xxxxxx 10xxxxxx
-            return
-                ((0xF0 & sequence[0]) == 0xE0) &&
-                is_utf8_trailing_byte(sequence[1]) &&
-                is_utf8_trailing_byte(sequence[2]);
+            return ((0xF0 & byte) == 0xE0);
         case 4:
             // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            return
-                ((0xF8 & sequence[0]) == 0xF0) &&
-                is_utf8_trailing_byte(sequence[1]) &&
-                is_utf8_trailing_byte(sequence[2]) &&
-                is_utf8_trailing_byte(sequence[3]);
+            return ((0xF8 & byte) == 0xF0);
         default:
             return false;
     }
 }
 
-// Determine if the text is terminated by a valid utf8 character.
-bool is_terminal_utf8_character(const char text[], size_t size)
+// The number of bytes of a partial utf8 character at the end of text.
+// This assumes that the text is well formed utf8 but truncated at any point.
+size_t utf8_remainder_size(const char text[], size_t size)
 {
-    // Walk back up to the max length of a utf8 character.
-    for (uint8_t length = 1; length <= utf8_max_character_size &&
-        length < size; length++)
+    if (size == 0u)
+        return 0;
+
+    for (size_t length = 1; length <= std::min(utf8_max_character_size, size);
+        ++length)
     {
-        const auto start = size - length;
-        const auto sequence = &text[start];
-        if (is_utf8_character_sequence(sequence, length))
-            return true;
+        const auto byte = text[size - length];
+
+        // Skip trailing bytes.
+        if (is_utf8_trailing_byte(byte))
+            continue;
+
+        // If not a valid character length, return truncated length.
+        return !is_utf8_leading_byte(byte, length) ? length : 0;
     }
 
-    return false;
-}
-
-// This optimizes character split detection by taking advantage of utf8
-// character recognition so we don't have to convert in full up to 3 times.
-// This does not guarantee that the entire string is valid as utf8, just that a
-// returned offset follows the last byte of a utf8 terminal char if it exists.
-uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
-{
-    // Walk back up to the max length of a utf8 character.
-    for (uint8_t unread = 0; unread < utf8_max_character_size &&
-        unread < size; unread++)
-    {
-        const auto length = size - unread;
-        if (is_terminal_utf8_character(text, length))
-            return unread;
-    }
-
+    // The text is not well-formed utf8, assume no truncation.
     return 0;
 }
 

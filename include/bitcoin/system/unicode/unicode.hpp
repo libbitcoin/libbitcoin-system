@@ -176,7 +176,7 @@ BC_API std::string to_utf8(const std::u32string& wide);
  * @param[in]  from_bytes     The number of 'from' bytes to convert.
  * @return                    The number of characters converted.
  */
-BC_API size_t to_utf16(uint8_t& out_truncated, wchar_t out_to[],
+BC_API size_t to_utf16(size_t& out_truncated, wchar_t out_to[],
     size_t to_chars, const char from[], size_t from_bytes);
 
 /**
@@ -228,8 +228,7 @@ BC_API void set_binary_stdin();
 BC_API void set_binary_stdout();
 
 /// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
-bool is_terminal_utf8_character(const char text[], size_t size);
-uint8_t offset_to_terminal_utf8_character(const char text[], size_t size);
+size_t utf8_remainder_size(const char text[], size_t size);
 
 #ifdef _MSC_VER
 
