@@ -22,7 +22,6 @@
 BOOST_AUTO_TEST_SUITE(string_tests)
 
 constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
 
 // ascii_to_lower
 
@@ -42,7 +41,7 @@ BOOST_AUTO_TEST_CASE(string__ascii_to_lower__upper__lowered)
 {
     const auto value{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
     const auto expected{ "abcdefghijklmnopqrstuvwxyz0123456789" };
-    BOOST_REQUIRE_EQUAL(ascii_to_lower(expected), expected);
+    BOOST_REQUIRE_EQUAL(ascii_to_lower(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_lower__mixed__lowered)
