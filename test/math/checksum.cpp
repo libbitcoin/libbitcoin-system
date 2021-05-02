@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__expected)
     BOOST_REQUIRE_EQUAL(data[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__empty__expected)
+BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__empty__expected)
 {
     byte_array<0> data;
     const auto out = insert_checksum<checksum_default_size>({ { data } });
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__empty__expected)
     BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__not_empty__expected)
+BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__not_empty__expected)
 {
     byte_array<5 + checksum_default_size> data{ { 0, 0, 0, 0, 0 } };
     const auto out = insert_checksum<5 + checksum_default_size>({ { data } });
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__not_empty__expected)
     BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_loaf__maximum_checksum__expected)
+BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__maximum_checksum__expected)
 {
     constexpr size_t checksum_maximum = 32;
     byte_array<5 + checksum_maximum> data{ { 0, 0, 0, 0, 0 } };
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(checksum__append_checksum__zeros__expected)
     BOOST_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum_loaf__zeros__expected)
+BOOST_AUTO_TEST_CASE(checksum__append_checksum_data_loaf__zeros__expected)
 {
     data_chunk data1{ 0, 0 };
     data_chunk data2{ 0, 0, 0 };

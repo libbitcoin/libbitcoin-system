@@ -134,7 +134,7 @@ private:
 bool operator==(const data_slice& left, const data_slice& right);
 bool operator!=(const data_slice& left, const data_slice& right);
 
-typedef std::initializer_list<data_slice> loaf;
+typedef std::initializer_list<data_slice> data_loaf;
 
 } // namespace system
 } // namespace libbitcoin

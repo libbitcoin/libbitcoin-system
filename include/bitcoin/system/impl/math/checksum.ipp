@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Size, size_t Checksum>
-byte_array<Size> insert_checksum(const loaf& slices)
+byte_array<Size> insert_checksum(const data_loaf& slices)
 {
     auto out = build_array<Size>(slices);
     insert_checksum<Size, Checksum>(out);

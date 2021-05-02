@@ -42,7 +42,7 @@ byte_array<Size> to_array(const data_slice& bytes)
 }
 
 template <size_t Size>
-byte_array<Size> build_array(const loaf& slices)
+byte_array<Size> build_array(const data_loaf& slices)
 {
     static const ptrdiff_t zero{ 0 };
     byte_array<Size> out;

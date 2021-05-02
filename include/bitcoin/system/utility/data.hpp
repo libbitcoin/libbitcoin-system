@@ -58,7 +58,7 @@ byte_array<Size> to_array(const data_slice& bytes);
 /// Concatenate several data slices into a single fixed size array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
-byte_array<Size> build_array(const loaf& slices);
+byte_array<Size> build_array(const data_loaf& slices);
 
 /// Extend insertable target by copying extension.
 template <class Target, class Extension>
@@ -112,7 +112,7 @@ BC_API data_chunk to_chunk(const data_slice& bytes);
 
 /// Concatenate several data slices into a single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
-BC_API data_chunk build_chunk(const loaf& slices, size_t extra_reserve=0);
+BC_API data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve=0);
 
 } // namespace system
 } // namespace libbitcoin

@@ -40,7 +40,7 @@ data_chunk to_chunk(const data_slice& bytes)
     return bytes.to_chunk();
 }
 
-data_chunk build_chunk(const loaf& slices, size_t extra_reserve)
+data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve)
 {
     size_t size = 0;
     for (const auto& slice: slices)

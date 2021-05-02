@@ -42,7 +42,7 @@ static checksum bitcoin_checksum(const data_slice& data)
     return from_little_endian_unsafe<checksum>(hash.begin());
 }
 
-data_chunk append_checksum(const loaf& slices)
+data_chunk append_checksum(const data_loaf& slices)
 {
     auto out = build_chunk(slices, checksum_default_size);
     append_checksum(out);

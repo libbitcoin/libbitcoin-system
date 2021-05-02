@@ -42,7 +42,7 @@ static const size_t checksum_default_size = sizeof(uint32_t);
 /// Append the bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size, size_t Checksum = checksum_default_size>
-byte_array<Size> insert_checksum(const loaf& slices);
+byte_array<Size> insert_checksum(const data_loaf& slices);
 
 /// Append bitcoin checksum of preceding data to end of existing Size array.
 template <size_t Size, size_t Checksum = checksum_default_size>
@@ -53,7 +53,7 @@ template <size_t Size, size_t Checksum = checksum_default_size>
 bool verify_checksum(const byte_array<Size>& data);
 
 /// Append slices and a four byte bitcoin checksum.
-BC_API data_chunk append_checksum(const loaf& slices);
+BC_API data_chunk append_checksum(const data_loaf& slices);
 
 /// Append a four byte bitcoin checksum of data to itself.
 BC_API void append_checksum(data_chunk& data);
