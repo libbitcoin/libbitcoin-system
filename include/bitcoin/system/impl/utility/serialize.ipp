@@ -23,6 +23,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -36,6 +37,13 @@ namespace system {
 // TODO: implement stream parameter overrides.
 // Cannot use a data_slice override for byte_array/data_chunk because it would
 // pick up string and serialize as bytes vs. chars.
+    
+template <typename Value>
+void serialize(std::ostream& output, const Value& value,
+    const std::string& fallback)
+{
+    output << serialize(value, fallback);
+}
 
 inline std::string serialize(uint8_t value, const std::string& fallback)
 {

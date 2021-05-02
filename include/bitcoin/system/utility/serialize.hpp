@@ -36,6 +36,11 @@ namespace system {
 /// it will deserialize as a data_chunk, due to its cast operators. Both work
 /// though its array serialization can truncate or zero-pad the output by Size.
 
+/// Deserialize from text, call serialize(Value, fallback), send to ostream.
+template <typename Value>
+void serialize(std::ostream& output, const Value& value,
+    const std::string& fallback);
+
 /// Specialize template because basic_ostream treats uint8_t as char.
 inline std::string serialize(uint8_t value, const std::string& fallback="");
 
