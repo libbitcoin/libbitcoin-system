@@ -107,10 +107,10 @@ inline bool is_ascii_char(char32_t point)
     return (point & 0xffffff80) == 0;
 }
 
-static bool is_ascii(const std::u32string points)
-{
-    return std::all_of(points.begin(), points.end(), is_ascii_char);
-}
+////static bool is_ascii(const std::u32string points)
+////{
+////    return std::all_of(points.begin(), points.end(), is_ascii_char);
+////}
 
 static bool is_ascii_whitespace32(char32_t point)
 {
