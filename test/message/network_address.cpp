@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(network_address_tests)
 bool equal(const message::network_address& left,
     const message::network_address& right, bool with_timestamp)
 {
-    if (with_timestamp && left.timestamp() == right.timestamp())
+    if (with_timestamp && (left.timestamp() != right.timestamp()))
         return false;
 
     return left == right;
