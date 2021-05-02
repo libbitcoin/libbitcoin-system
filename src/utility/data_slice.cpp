@@ -143,7 +143,17 @@ data_slice::value_type data_slice::operator[](size_type index) const
 
 bool operator==(const data_slice& left, const data_slice& right)
 {
-    return std::equal(left.begin(), left.end(), right.begin(), right.end());
+    // Produces clang template specialization error.
+    ////return std::equal(left.begin(), left.end(), right.begin(), right.end());
+
+    if (left.size() != right.size())
+        return false;
+
+    for (data_slice::size_type index = 0; index < left.size(); ++index)
+        if (left[index] != right[index])
+            return false;
+
+    return true;
 }
 
 bool operator!=(const data_slice& left, const data_slice& right)
