@@ -38,6 +38,18 @@
 namespace libbitcoin {
 namespace system {
 
+template <typename Value>
+bool deserialize(Value& out, std::istream& input, bool trim)
+{
+    std::string text;
+    input >> text;
+
+    if (trim)
+        system::trim(text);
+
+    return deserialize(out, text);
+}
+
 inline bool deserialize(std::string& out, const std::string& text)
 {
     out.assign(text);

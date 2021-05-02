@@ -33,6 +33,10 @@ namespace system {
 /// Value may be any non-specialized deserializable type (implements >>).
 /// The data_slice type is not deserializable (cannot hold data).
 
+/// Deserialize to text, trim as specified, call deserialize(Value, string).
+template <typename Value>
+bool deserialize(Value& out, std::istream& input, bool trim);
+
 /// Specialize template to avoid trimming of string deserialization.
 /// Strings are pass through unchanged, this provides type generalization.
 inline bool deserialize(std::string& out, const std::string& text);
