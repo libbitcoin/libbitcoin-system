@@ -100,19 +100,19 @@ BOOST_AUTO_TEST_CASE(string__array__string_class__text_delimited)
 
 BOOST_AUTO_TEST_CASE(string__array__string_padded__text_delimited_untrimmed)
 {
-    const std::array<char*, 3> value{ { " foo", " --- ", "bar " } };
+    const std::array<const char*, 3> value{ { " foo", " --- ", "bar " } };
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_empty___text_delimited_default_fallback)
 {
-    const std::array<char*, 3> value{ { "foo", "", "bar" } };
+    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_fallback__text_delimited_specified_fallback)
 {
-    const std::array<char*, 3> value{ { "foo", "", "bar" } };
+    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
 }
 
@@ -144,19 +144,19 @@ BOOST_AUTO_TEST_CASE(string__vector__string_class__text_delimited)
 
 BOOST_AUTO_TEST_CASE(string__vector__string_padded__text_delimited_untrimmed)
 {
-    const std::vector<char*> value{ " foo", " --- ", "bar " };
+    const std::vector<const char*> value{ " foo", " --- ", "bar " };
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_empty___text_delimited_default_fallback)
 {
-    const std::vector<char*> value{ "foo", "", "bar" };
+    const std::vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_fallback__text_delimited_specified_fallback)
 {
-    const std::vector<char*> value{ "foo", "", "bar" };
+    const std::vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
 }
 
