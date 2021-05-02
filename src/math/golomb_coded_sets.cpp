@@ -272,7 +272,7 @@ bool match(const data_stack& targets, reader& compressed_set,
     {
         range += golomb_decode(source, bits);
 
-        for (auto value = *it; it != set.end(); value = *(++it))
+        for (auto value = *it; it != set.end(); value = *(it++))
         {
             if (value == range)
                 return true;
