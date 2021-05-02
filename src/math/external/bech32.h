@@ -26,7 +26,7 @@
 extern "C" { 
 #endif
 
-static const size_t bech32_checksum_size;
+extern const size_t bech32_checksum_size;
 
 /* This is the 'out' allocation size required by bech32_expand_prefix. */
 size_t bech32_expanded_prefix_size(size_t prefix_size);
