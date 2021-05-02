@@ -21,10 +21,7 @@
 #include <string>
 #include <vector>
 
-BOOST_AUTO_TEST_SUITE(string_tests)
-
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
+BOOST_AUTO_TEST_SUITE(serialize_tests)
 
 // <uint8_t>
 
