@@ -22,6 +22,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/utility/data.hpp>
