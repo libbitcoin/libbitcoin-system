@@ -83,7 +83,7 @@ std::vector<Element> distinct(std::vector<Element>&& list)
     std::sort(list.begin(), list.end());
     list.erase(std::unique(list.begin(), list.end()), list.end());
     list.shrink_to_fit();
-    return list;
+    return std::move(list);
 }
 
 template <typename Pair, typename Key>

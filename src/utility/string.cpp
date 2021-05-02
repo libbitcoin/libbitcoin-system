@@ -116,13 +116,13 @@ string_list split(const std::string& text, const std::string& delimiter,
     string_list tokens;
 
     // Apply trimming and compression when pushing tokens.
-    const auto push = [trim, &tokens](std::string& token, bool compress)
+    const auto push = [trim, &tokens](std::string&& token, bool compress)
     {
         if (trim)
             system::trim(token);
 
         if (!(compress && token.empty()))
-            tokens.push_back(token);
+            tokens.push_back(std::move(token));
     };
 
     size_t next = 0;
