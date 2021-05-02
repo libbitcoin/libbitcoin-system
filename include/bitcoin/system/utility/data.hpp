@@ -46,7 +46,6 @@ typedef byte_array<1> one_byte;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
-typedef std::initializer_list<data_slice> loaf;
 
 /// Cast a char to a byte.
 inline uint8_t to_byte(char character);

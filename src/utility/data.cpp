@@ -20,6 +20,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/system/utility/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {

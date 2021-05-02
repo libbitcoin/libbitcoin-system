@@ -41,7 +41,6 @@ public:
     typedef uint8_t value_type;
     typedef const value_type* const_pointer;
     typedef size_t size_type;
-    typedef std::initializer_list<value_type> initializer;
     
     /// Zero is returned when value would be undefined.
     /// This allows a caller to pad by value-iterating past end.
@@ -134,6 +133,8 @@ private:
 /// Binary operators.
 bool operator==(const data_slice& left, const data_slice& right);
 bool operator!=(const data_slice& left, const data_slice& right);
+
+typedef std::initializer_list<data_slice> loaf;
 
 } // namespace system
 } // namespace libbitcoin
