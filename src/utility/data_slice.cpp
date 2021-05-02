@@ -39,6 +39,11 @@ data_slice::data_slice()
 {
 }
 
+data_slice::data_slice(data_slice&& other)
+  : begin_(other.begin_), end_(other.end_), size_(other.size_)
+{
+}
+
 data_slice::data_slice(std::initializer_list<value_type> bytes)
   : data_slice(from_size(bytes.begin(), bytes.size()))
 {

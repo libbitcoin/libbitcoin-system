@@ -33,8 +33,6 @@ namespace system {
    
 /// Const iterable wrapper for byte collection pointers.
 /// Not a substitute for move overrides or containment.
-/// Does not copy constructing instance, caller must keep it in scope.
-/// Provides default copy/move construction and assignment.
 /// Value (not pointer) iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
 class BC_API data_slice
@@ -53,6 +51,9 @@ public:
 
     /// Empty data object.
     data_slice();
+
+    /// Move construction.
+    data_slice(data_slice&& other);
 
     /// Literal text constructor.
     /// Integral null terminator is not indexed.
@@ -112,6 +113,7 @@ public:
     value_type operator[](size_type index) const;
 
 private:
+    data_slice(const data_slice& other) = delete;
     data_slice(const_pointer begin, const_pointer end, size_type size);
 
     template <size_type Size>
