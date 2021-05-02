@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <limits>
 #include <random>
 #include <boost/thread.hpp>
 #include <bitcoin/system/utility/asio.hpp>
@@ -34,6 +35,26 @@ using namespace std::chrono;
 
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // Values may or may not be truly random depending on the underlying device.
+
+void pseudo_random::fill(data_chunk& out)
+{
+    std::transform(out.begin(), out.end(), out.begin(), [](uint8_t)
+    {
+        return next();
+    });
+}
+
+uint8_t pseudo_random::next()
+{
+    return next(std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
+}
+
+uint8_t pseudo_random::next(uint8_t begin, uint8_t end)
+{
+    std::uniform_int_distribution<uint16_t> distribution(begin, end);
+    return static_cast<uint8_t>(distribution(get_twister()));
+}
 
 std::mt19937& pseudo_random::get_twister()
 {
@@ -60,18 +81,9 @@ std::mt19937& pseudo_random::get_twister()
         twister.reset(new std::mt19937(get_clock_seed()));
     }
 
+    // The instance remains in scope and is deleted by thread_specific_ptr
+    // when the thread terminates, so dereferencing the instance is safe.
     return *twister;
-}
-
-uint64_t pseudo_random::next()
-{
-    return next(0, max_uint64);
-}
-
-uint64_t pseudo_random::next(uint64_t begin, uint64_t end)
-{
-    std::uniform_int_distribution<uint64_t> distribution(begin, end);
-    return distribution(get_twister());
 }
 
 // Randomly select a time duration in the range:
@@ -80,7 +92,7 @@ uint64_t pseudo_random::next(uint64_t begin, uint64_t end)
 asio::duration pseudo_random::duration(const asio::duration& expiration,
     uint8_t ratio)
 {
-    if (ratio == 0)
+    if (ratio == 0u)
         return expiration;
 
     // Uses milliseconds level resolution.
@@ -89,11 +101,11 @@ asio::duration pseudo_random::duration(const asio::duration& expiration,
     // [10 secs, 4] => 10000 / 4 => 2500
     const auto limit = max_expire / ratio;
 
-    if (limit == 0)
+    if (limit == 0u)
         return expiration;
 
     // [0..2^64) % 2500 => [0..2500]
-    const auto random_offset = static_cast<int>(pseudo_random::next(0, limit));
+    const auto random_offset = pseudo_random::next<uint64_t>(0u, limit);
 
     // (10000 - [0..2500]) => [7500..10000]
     const auto expires = max_expire - random_offset;

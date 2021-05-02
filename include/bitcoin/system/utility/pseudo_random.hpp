@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_PSEUDO_RANDOM_HPP
 #define LIBBITCOIN_SYSTEM_PSEUDO_RANDOM_HPP
 
+#include <algorithm>
 #include <random>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
@@ -33,43 +34,66 @@ class BC_API pseudo_random
 {
   public:
     /**
-     * Fill a container with randomness using the default random engine.
+     * Fill a byte array with randomness using the default random engine.
      */
-    template<class Container>
-    static Container& fill(Container& out)
+    template<size_t Size>
+    static void fill(byte_array<Size>& out)
     {
-        // uniform_int_distribution is undefined for sizes < 16 bits.
-        std::uniform_int_distribution<uint16_t> distribution(0, max_uint8);
-        auto& twister = pseudo_random::get_twister();
-
-        const auto fill = [&distribution, &twister](uint8_t)
+        std::transform(out.begin(), out.end(), out.begin(), [](uint8_t)
         {
-            return static_cast<uint8_t>(distribution(twister));
-        };
-
-        std::transform(out.begin(), out.end(), out.begin(), fill);
+            return next();
+        });
     }
 
     /**
-     * Shuffle a container using the default random engine.
+     * Fill a byte vector with randomness using the default random engine.
+     */
+    static void fill(data_chunk& out);
+
+    /**
+     * Generate a pseudo random number within the uint8_t domain.
+     * Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
+     * @return  The number.
+     */
+    static uint8_t next();
+
+    /**
+     * Generate a pseudo random number within [begin, end].
+     * Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
+     * @return  The number.
+     */
+    static uint8_t next(uint8_t begin, uint8_t end);
+
+    /**
+     * Generate a pseudo random number within the Type domain.
+     * @return  The number.
+     */
+    template<typename Type>
+    static Type next()
+    {
+        return next(std::numeric_limits<Type>::min(),
+            std::numeric_limits<Type>::max());
+    }
+
+    /**
+     * Generate a pseudo random number within [begin, end].
+     * @return  The number.
+     */
+    template<typename Type>
+    static Type next(Type begin, Type end)
+    {
+        std::uniform_int_distribution<Type> distribution(begin, end);
+        return distribution(get_twister());
+    }
+
+    /**
+     * Shuffle a container elements using the random engine.
      */
     template<class Container>
     static void shuffle(Container& out)
     {
         std::shuffle(out.begin(), out.end(), get_twister());
     }
-
-    /**
-     * Generate a pseudo random number within the domain.
-     * @return  The 64 bit number.
-     */
-    static uint64_t next();
-
-    /**
-     * Generate a pseudo random number within [begin, end].
-     * @return  The 64 bit number.
-     */
-    static uint64_t next(uint64_t begin, uint64_t end);
 
     /**
      * Convert a time duration to a value in the range [max/ratio, max].
@@ -81,7 +105,7 @@ class BC_API pseudo_random
     static asio::duration duration(const asio::duration& maximum,
         uint8_t ratio=2);
 
-  private:
+private:
     static std::mt19937& get_twister();
 };
 
