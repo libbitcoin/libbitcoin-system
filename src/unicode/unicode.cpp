@@ -545,7 +545,7 @@ static bool is_utf8_trailing_byte(char byte)
 // Determine if the full sequence is a valid utf8 character.
 static bool is_utf8_leading_byte(char byte, size_t size)
 {
-    BITCOIN_ASSERT(bytes <= utf8_max_character_size);
+    BITCOIN_ASSERT(size <= utf8_max_character_size);
 
     // See tools.ietf.org/html/rfc3629#section-3 for definition.
     switch (size)
