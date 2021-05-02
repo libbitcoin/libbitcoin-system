@@ -92,11 +92,12 @@ void bech32_insert_checksum(uint8_t expanded_data[], size_t size,
     uint8_t version)
 {
     /* Zeroize the checksum buffer. */
-    void* offset = &expanded_data[size - bech32_checksum_size];
+    uint8_t* offset = &expanded_data[size - bech32_checksum_size];
     zeroize(offset, bech32_checksum_size);
 
     /* Compute the checksum for the given version. */
-    const checksum = bech32_checksum(expanded_data, size) ^ constant(version);
+    const uint32_t checksum = bech32_checksum(expanded_data, size) ^
+        constant(version);
 
     /* Insert the expanded checksum into the checksum buffer. */
     bech32_expand_checksum(offset, checksum);
@@ -106,5 +107,5 @@ int bech32_verify_checksum(const uint8_t expanded_data[], size_t size,
     uint8_t version)
 {
     /* Compute the checksum and compare to versioned expectation. */
-    return (bech32_checksum(expanded_data, size) == constant(version)) ? 0 : -1;
+    return bech32_checksum(expanded_data, size) == constant(version) ? 0 : -1;
 }
