@@ -23,12 +23,14 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <istream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
  // TODO: implement stream parameter overrides.
  // Cannot use a data_slice override as it is not deserializable.

@@ -28,6 +28,7 @@
 #include <vector>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
