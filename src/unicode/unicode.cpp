@@ -43,11 +43,12 @@
 #include <bitcoin/system/unicode/unicode_ostream.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 #ifdef WITH_ICU
     #define ICU_ONLY(expression) expression
 #else
-    #define ICU_ONLY(expression) expression
+    #define ICU_ONLY(expression)
 #endif
 
 namespace libbitcoin {
@@ -99,34 +100,43 @@ std::ostream& cerr_stream()
     return error;
 }
 
-static bool is_c_whitespace(char32_t value)
+// helpers
+
+inline bool is_ascii_char(char32_t point)
 {
-    // C whitespace characters:
-    // space(0x20, ' ')
-    // form feed(0x0c, '\f')
-    // line feed(0x0a, '\n')
-    // carriage return (0x0d, '\r')
-    // horizontal tab(0x09, '\t')
-    // vertical tab(0x0b, '\v')
-    constexpr auto ascii_mask = uint32_t{ 0x0000007f };
-
-    if (value > ascii_mask)
-        return false;
-
-    // An ascii test is redundant with the C locale, but not all environments
-    // provide an implementation of isspace(char32_t, locale).
-    const auto byte = static_cast<char>(value & ascii_mask);
-    return std::isspace(byte, std::locale("C"));
+    return (point & 0xffffff80) == 0;
 }
 
-static bool is_chinese_japanese_or_korean(char32_t value)
+static bool is_ascii(const std::u32string points)
 {
+    return std::all_of(points.begin(), points.end(), is_ascii_char);
+}
+
+static bool is_ascii_whitespace32(char32_t point)
+{
+    return is_ascii_char(point) &&
+        is_ascii_whitespace(static_cast<char>(point));
+}
+
+static bool is_chinese_japanese_or_korean(char32_t point)
+{
+    const auto is_contained = [point](const utf32_interval& interval)
+    {
+        return interval.first <= point && point <= interval.second;
+    };
+
     return std::any_of(chinese_japanese_korean.begin(),
-        chinese_japanese_korean.end(),
-        [value](const utf32_interval& interval)
-        {
-            return interval.first <= value && value <= interval.second;
-        });
+        chinese_japanese_korean.end(), is_contained);
+}
+
+static bool is_diacritic(char32_t point)
+{
+    const auto is_contained = [point](const utf32_interval& interval)
+    {
+        return interval.first <= point && point <= interval.second;
+    };
+
+    return std::any_of(diacritics.begin(), diacritics.end(), is_contained);
 }
 
 #ifdef WITH_ICU
@@ -289,14 +299,7 @@ std::string to_unaccented_form(const std::string& value)
     auto points = to_utf32(value);
 
     points.erase(std::remove_if(points.begin(), points.end(),
-        [](char32_t point)
-        {
-            return std::any_of(diacritics.begin(), diacritics.end(),
-                [point](const utf32_interval& interval)
-                {
-                    return interval.first <= point && point <= interval.second;
-                });
-        }), points.end());
+        is_diacritic), points.end());
 
     return to_utf8(points);
 }
@@ -320,7 +323,7 @@ std::string to_compressed_cjk_form(const std::string& value)
     // points.back() cannot be between two characters, so skip it.
     for (size_t point = 1; point < points.size() - 1u; point++)
     {
-        if (!(is_c_whitespace(points[point]) &&
+        if (!(is_ascii_whitespace32(points[point]) &&
             is_chinese_japanese_or_korean(points[point - 1u]) &&
             is_chinese_japanese_or_korean(points[point + 1u])))
         {
@@ -569,14 +572,13 @@ static bool is_utf8_character_sequence(const char sequence[], uint8_t bytes)
                 is_utf8_trailing_byte(sequence[1]) &&
                 is_utf8_trailing_byte(sequence[2]) &&
                 is_utf8_trailing_byte(sequence[3]);
-        default:;
+        default:
+            return false;
     }
-
-    return false;
 }
 
 // Determine if the text is terminated by a valid utf8 character.
-static bool is_terminal_utf8_character(const char text[], size_t size)
+bool is_terminal_utf8_character(const char text[], size_t size)
 {
     // Walk back up to the max length of a utf8 character.
     for (uint8_t length = 1; length <= utf8_max_character_size &&

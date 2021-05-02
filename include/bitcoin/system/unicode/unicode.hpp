@@ -98,6 +98,14 @@ std::ostream& cerr_stream();
 #ifdef WITH_ICU
 
 /**
+ * Lowercase string value in accordance with section 3.13 of Unicode Standard.
+ * This function requires the ICU dependency.
+ * @param[in]  value  The value to lowercase.
+ * @return            The lowercased value.
+ */
+BC_API std::string to_lower(const std::string& value);
+
+/**
  * Normalize a string value using nfc normalization.
  * Failure is indicated by empty string return for non-empty value.
  * This function requires the ICU dependency.
@@ -115,31 +123,21 @@ BC_API std::string to_normal_nfc_form(const std::string& value);
  */
 BC_API std::string to_normal_nfkd_form(const std::string& value);
 
-/**
- * Lowercase a string value with locale awareness.
- * This function requires the ICU dependency.
- * @param[in]  value  The value to lowercase.
- * @return            The lowercased value.
- */
-BC_API std::string to_lower(const std::string& value);
-
 #endif // WITH_ICU
 
 /**
  * Remove accent characters (diacritics).
- * This function requires the ICU dependency.
  * @param[in]  value  The value to scrub.
  * @return            The scrubbed value.
  */
-std::string to_unaccented_form(const std::string& value);
+BC_API std::string to_unaccented_form(const std::string& value);
 
 /**
  * Remove spaces between chinese, japanese, and korean characters.
- * This function requires the ICU dependency.
  * @param[in]  value  The value to scrub.
  * @return            The scrubbed value.
  */
-std::string to_compressed_cjk_form(const std::string& value);
+BC_API std::string to_compressed_cjk_form(const std::string& value);
 
 /**
  * Convert a wide (UTF16/wchar_t) array to narrow (UTF8/char).
@@ -230,6 +228,7 @@ BC_API void set_binary_stdin();
 BC_API void set_binary_stdout();
 
 /// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
+bool is_terminal_utf8_character(const char text[], size_t size);
 uint8_t offset_to_terminal_utf8_character(const char text[], size_t size);
 
 #ifdef _MSC_VER
