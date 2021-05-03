@@ -120,38 +120,28 @@ BOOST_AUTO_TEST_CASE(string__is_ascii__alphanumeric__true)
 
 BOOST_AUTO_TEST_CASE(string__is_ascii__below_128__true)
 {
-    for (char character = '\x00'; character < '\x80'; ++character)
-    {
-        BOOST_REQUIRE(is_ascii(std::string{ character }));
-    }
+    BOOST_REQUIRE(is_ascii(std::string{ '\x00' }));
+    BOOST_REQUIRE(is_ascii(std::string{ '\x7f' }));
 }
 
 BOOST_AUTO_TEST_CASE(string__is_ascii__above_127__false)
 {
-    // Even though char is negative this increments as indicated.
-    for (char character = '\x80'; character <= '\xff'; ++character)
-    {
-        BOOST_REQUIRE(!is_ascii(std::string{ character }));
-    }
+    BOOST_REQUIRE(!is_ascii(std::string{ '\x80' }));
+    BOOST_REQUIRE(!is_ascii(std::string{ '\xff' }));
 }
 
 // is_ascii_character
 
 BOOST_AUTO_TEST_CASE(string__is_ascii_character__below_128__true)
 {
-    for (char character = '\x00'; character < '\x80'; ++character)
-    {
-        BOOST_REQUIRE(is_ascii_character(character));
-    }
+    BOOST_REQUIRE(is_ascii_character('\x00'));
+    BOOST_REQUIRE(is_ascii_character('\x7f'));
 }
 
 BOOST_AUTO_TEST_CASE(string__is_ascii_character__above_127__false)
 {
-    // Even though char is negative this increments as indicated.
-    for (char character = '\x80'; character <= '\xff'; ++character)
-    {
-        BOOST_REQUIRE(!is_ascii_character(character));
-    }
+    BOOST_REQUIRE(!is_ascii_character('\x80'));
+    BOOST_REQUIRE(!is_ascii_character('\xff'));
 }
 
 // is_ascii_whitespace
@@ -200,52 +190,52 @@ BOOST_AUTO_TEST_CASE(string__is_ascii_whitespace__return__true)
 
 BOOST_AUTO_TEST_CASE(string__join1__empties__one_space)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "", "" }), " ");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "", "" }), " ");
 }
 
 BOOST_AUTO_TEST_CASE(string__join1__spaces__three_spaces)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ " ", " " }, " "), "   ");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ " ", " " }, " "), "   ");
 }
 
 BOOST_AUTO_TEST_CASE(string__join1__left_value__right_space)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "a", "" }), "a ");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "a", "" }), "a ");
 }
 
 BOOST_AUTO_TEST_CASE(string__join1__right_value__left_space)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "", "b" }), " b");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "", "b" }), " b");
 }
 
 BOOST_AUTO_TEST_CASE(string__join1__values__delimited)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "abc", "xyz" }), "abc xyz");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "abc", "xyz" }), "abc xyz");
 }
 
 BOOST_AUTO_TEST_CASE(string__join2__empties_empty_delimiter__empty)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "", "" }, ""), "");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "", "" }, ""), "");
 }
 
 BOOST_AUTO_TEST_CASE(string__join2__values_empty_delimiter__undelimited)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "abc", "xyz" }, ""), "abcxyz");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "abc", "xyz" }, ""), "abcxyz");
 }
 
 BOOST_AUTO_TEST_CASE(string__join2__values_comma_delimiter__delimited)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "abc", "xyz" }, ","), "abc,xyz");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "abc", "xyz" }, ","), "abc,xyz");
 }
 
 BOOST_AUTO_TEST_CASE(string__join2__values_ideographic_space_delimiter__delimited)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ "abc", "xyz" }, ideographic_space), "abc\xe3\x80\x80xyz");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ "abc", "xyz" }, ideographic_space), "abc\xe3\x80\x80xyz");
 }
 
 BOOST_AUTO_TEST_CASE(string__join2__untrimmed_values_comma_delimiter__untrimmed_delimited)
 {
-    BOOST_REQUIRE_EQUAL(system::join({ " abc ", " xyz " }, ","), " abc , xyz ");
+    BOOST_REQUIRE_EQUAL(system::join(string_list{ " abc ", " xyz " }, ","), " abc , xyz ");
 }
 
 // split
