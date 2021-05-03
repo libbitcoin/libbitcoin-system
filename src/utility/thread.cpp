@@ -48,14 +48,15 @@ static int get_priority(thread_priority priority)
 {
     switch (priority)
     {
-        case thread_priority::high:
-            return THREAD_PRIORITY_ABOVE_NORMAL;
-        case thread_priority::normal:
-            return THREAD_PRIORITY_NORMAL;
-        case thread_priority::low:
-            return THREAD_PRIORITY_BELOW_NORMAL;
         case thread_priority::lowest:
             return THREAD_PRIORITY_LOWEST;
+        case thread_priority::low:
+            return THREAD_PRIORITY_BELOW_NORMAL;
+        case thread_priority::high:
+            return THREAD_PRIORITY_ABOVE_NORMAL;
+        default:
+        case thread_priority::normal:
+            return THREAD_PRIORITY_NORMAL;
     }
 }
 
