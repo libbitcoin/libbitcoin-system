@@ -85,13 +85,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector_empty__empty)
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__pointers_empty__empty)
 {
-    const auto value{ "foobar" };
+    const std::string value{ "foobar" };
     BOOST_REQUIRE(data_slice(&value[0], &value[0]).empty());
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__pointers_reversed__empty)
 {
-    const auto value{ "foobar" };
+    const std::string value{ "foobar" };
     BOOST_REQUIRE(data_slice(&value[5], &value[0]).empty());
 }
 
@@ -253,12 +253,15 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
     BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
-    // construct(byte_array)
-    const data_slice slice2 = byte;
-    BOOST_REQUIRE(!slice2.empty());
-    BOOST_REQUIRE_EQUAL(slice2.size(), size);
-    BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
+    // Deleted function, use:
+    // data_slice slice(byte);
+    ////// construct(byte_array)
+    ////const data_slice slice2 = byte;
+    ////BOOST_REQUIRE(!slice2.empty());
+    ////BOOST_REQUIRE_EQUAL(slice2.size(), size);
+    ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
 
+    // Array construction is non-ambiguous.
     // Unnecessary copy construction.
     // construct(byte_array)
     const data_slice slice3({ byte });
@@ -337,11 +340,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__string__expected)
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
     BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
-    // construct(string)
-    const data_slice slice2 = string;
-    BOOST_REQUIRE(!slice2.empty());
-    BOOST_REQUIRE_EQUAL(slice2.size(), size);
-    BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
+    // Deleted function, use:
+    // data_slice slice(string);
+    ////// construct(string)
+    ////const data_slice slice2 = string;
+    ////BOOST_REQUIRE(!slice2.empty());
+    ////BOOST_REQUIRE_EQUAL(slice2.size(), size);
+    ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
 
     // construct(string)
     const data_slice slice3 = { string };
@@ -349,12 +354,14 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__string__expected)
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
     BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 
-    // Unnecessary copy construction.
-    // construct(string)
-    const data_slice slice4({ string });
-    BOOST_REQUIRE(!slice4.empty());
-    BOOST_REQUIRE_EQUAL(slice4.size(), size);
-    BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
+    // Ambiguous, use:
+    // data_slice slice(string);
+    ////// Unnecessary copy construction.
+    ////// construct(string)
+    ////const data_slice slice4({ string });
+    ////BOOST_REQUIRE(!slice4.empty());
+    ////BOOST_REQUIRE_EQUAL(slice4.size(), size);
+    ////BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
@@ -365,11 +372,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
     BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
-    // construct(data_chunk)
-    const data_slice slice2 = data;
-    BOOST_REQUIRE(!slice2.empty());
-    BOOST_REQUIRE_EQUAL(slice2.size(), size);
-    BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
+    // Deleted function, use:
+    // data_slice slice(data);
+    ////// construct(data_chunk)
+    ////const data_slice slice2 = data;
+    ////BOOST_REQUIRE(!slice2.empty());
+    ////BOOST_REQUIRE_EQUAL(slice2.size(), size);
+    ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
 
     // construct(data_chunk)
     const data_slice slice3 = { data };
@@ -377,12 +386,14 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
     BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 
-    // Unnecessary copy construction.
-    // construct(data_chunk)
-    const data_slice slice4({ data });
-    BOOST_REQUIRE(!slice4.empty());
-    BOOST_REQUIRE_EQUAL(slice4.size(), size);
-    BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
+    // Ambiguous, use:
+    // data_slice slice(data);
+    ////// Unnecessary copy construction.
+    ////// construct(data_chunk)
+    ////const data_slice slice4({ data });
+    ////BOOST_REQUIRE(!slice4.empty());
+    ////BOOST_REQUIRE_EQUAL(slice4.size(), size);
+    ////BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__pointers__expected)
