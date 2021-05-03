@@ -283,7 +283,7 @@ data_chunk stealth_address::to_chunk() const
     address.push_back(number_spend_pubkeys);
 
     // Serialize the spend keys, excluding any that match the scan key.
-    for (const auto& key : spend_keys_)
+    for (const auto& key: spend_keys_)
         if (key != scan_key_)
             extend_data(address, key);
 
