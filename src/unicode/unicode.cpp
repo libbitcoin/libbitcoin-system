@@ -26,7 +26,6 @@
 #include <iostream>
 #include <locale>
 #include <mutex>
-#include <stdexcept>
 #include <string>
 #ifdef _MSC_VER
     #include <fcntl.h>
@@ -43,6 +42,7 @@
 #include <bitcoin/system/unicode/unicode_ostream.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 #ifdef WITH_ICU
@@ -235,7 +235,7 @@ static void validate_localization()
         available_backends.cend(), icu_backend_name);
 
     if (iterator == available_backends.cend())
-        throw std::runtime_error(
+        throw dependency_exception(
             "Unicode normalization test failed, a dependency may be missing.");
 }
 
@@ -471,13 +471,13 @@ LCOV_EXCL_START("Untestable but visually-verifiable section.")
 static void set_utf8_stdio(FILE* file)
 {
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
-        throw std::runtime_error("Could not set STDIO to utf8 mode.");
+        throw runtime_exception("Could not set STDIO to utf8 mode.");
 }
 
 static void set_binary_stdio(FILE* file)
 {
     if (_setmode(_fileno(file), _O_BINARY) == -1)
-        throw std::runtime_error("Could not set STDIO to binary mode.");
+        throw runtime_exception("Could not set STDIO to binary mode.");
 }
 
 #else // _MSC_VER

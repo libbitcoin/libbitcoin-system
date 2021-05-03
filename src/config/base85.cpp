@@ -21,8 +21,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_85.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -72,10 +72,7 @@ std::istream& operator>>(std::istream& input, base85& argument)
 
     data_chunk out_value;
     if (!decode_base85(out_value, base85) || (out_value.size() % 4) != 0u)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base85));
-    }
+        throw istream_exception(base85);
 
     argument.value_ = out_value;
     return input;

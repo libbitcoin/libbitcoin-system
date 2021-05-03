@@ -20,9 +20,9 @@
 
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_64.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -58,10 +58,7 @@ std::istream& operator>>(std::istream& input, base64& argument)
     input >> base64;
 
     if (!decode_base64(argument.value_, base64))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base64));
-    }
+        throw istream_exception(base64);
 
     return input;
 }

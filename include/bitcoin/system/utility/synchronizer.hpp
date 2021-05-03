@@ -74,8 +74,6 @@ public:
                 return !ec;
             case synchronizer_terminate::on_count:
                 return false;
-            default:
-                throw std::invalid_argument("mode");
         }
     }
 
@@ -90,8 +88,6 @@ public:
                 return !ec ? error::success : ec;
             case synchronizer_terminate::on_count:
                 return error::success;
-            default:
-                throw std::invalid_argument("mode");
         }
     }
 

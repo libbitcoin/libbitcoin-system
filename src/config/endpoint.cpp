@@ -21,10 +21,10 @@
 #include <cstdint>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -126,9 +126,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     const auto& match = *it;
     argument.scheme_ = match[2];
@@ -141,7 +139,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     }
     catch (const boost::exception&)
     {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+        throw istream_exception(value);
     }
 
     return input;

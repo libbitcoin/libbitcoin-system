@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <string>
 #include <utility>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/math/checksum.hpp>
@@ -32,6 +31,7 @@
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -446,10 +446,7 @@ std::istream& operator>>(std::istream& in, witness_address& to)
     to = witness_address(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

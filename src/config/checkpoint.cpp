@@ -22,10 +22,10 @@
 #include <regex>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -55,9 +55,7 @@ checkpoint::checkpoint(const std::string& hash, size_t height)
   : height_(height)
 {
     if (!decode_hash(hash_, hash))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(hash));
-    }
+        throw istream_exception(hash);
 }
 
 checkpoint::checkpoint(const hash_digest& hash, size_t height)
@@ -126,15 +124,11 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     const auto& match = *it;
     if (!decode_hash(argument.hash_, match[1]))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     try
     {
@@ -142,7 +136,7 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
     }
     catch (const boost::exception&)
     {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+        throw istream_exception(value);
     }
 
     return input;

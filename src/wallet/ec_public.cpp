@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <iostream>
 #include <utility>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/wallet/ec_private.hpp>
 #include <bitcoin/system/wallet/payment_address.hpp>
 
@@ -223,10 +223,7 @@ std::istream& operator>>(std::istream& in, ec_public& to)
     to = ec_public(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

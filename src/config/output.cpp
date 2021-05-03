@@ -21,12 +21,12 @@
 #include <cstdint>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/utility/deserialize.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 
@@ -80,9 +80,7 @@ std::istream& operator>>(std::istream& input, output& argument)
 
     const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() < 2 || tokens.size() > 3)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-    }
+        throw istream_exception(tuple);
 
     uint64_t amount;
     deserialize(amount, tokens[1]);
@@ -105,29 +103,21 @@ std::istream& operator>>(std::istream& input, output& argument)
     if (stealth)
     {
         if (stealth.spend_keys().size() != 1 || tokens.size() != 3)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
+            throw istream_exception(tuple);
 
         data_chunk seed;
         if (!decode_base16(seed, tokens[2]) || seed.size() < minimum_seed_size)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
+            throw istream_exception(tuple);
 
         ec_secret ephemeral_secret;
         if (!create_stealth_data(argument.script_, ephemeral_secret,
             stealth.filter(), seed))
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
+            throw istream_exception(tuple);
 
         ec_compressed stealth_key;
         if (!uncover_stealth(stealth_key, stealth.scan_key(), ephemeral_secret,
             stealth.spend_keys().front()))
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
+            throw istream_exception(tuple);
 
         argument.is_stealth_ = true;
         argument.pay_to_hash_ = bitcoin_short_hash(stealth_key);
@@ -140,9 +130,7 @@ std::istream& operator>>(std::istream& input, output& argument)
     // as an address above. That is unlikely but considered intended behavior.
     data_chunk decoded;
     if (!decode_base16(decoded, target))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(target));
-    }
+        throw istream_exception(target);
 
     argument.script_ = script(decoded);
     return input;

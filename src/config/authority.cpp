@@ -23,9 +23,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
@@ -34,7 +34,6 @@ namespace system {
 namespace config {
 
 using namespace boost;
-using namespace boost::program_options;
 
 // host:    [2001:db8::2] or  2001:db8::2  or 1.2.240.1
 // returns: [2001:db8::2] or [2001:db8::2] or 1.2.240.1
@@ -229,9 +228,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     const auto& match = *it;
     std::string port(match[5]);
@@ -246,7 +243,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
     }
     catch (const boost::exception&)
     {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+        throw istream_exception(value);
     }
 
     return input;

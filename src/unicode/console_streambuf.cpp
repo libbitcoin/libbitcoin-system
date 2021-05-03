@@ -23,6 +23,7 @@
 #include <new>
 #include <streambuf>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 #ifdef _MSC_VER
     #include <windows.h>
@@ -38,7 +39,7 @@ static LPVOID get_input_handle()
 {
     const auto handle = GetStdHandle(STD_INPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
-        throw std::ios_base::failure("Failed to get input handle.");
+        throw runtime_exception("Failed to get input handle.");
 
     return handle;
 }
@@ -48,7 +49,7 @@ void console_streambuf::initialize(size_t size)
 {
     // Set the console to operate in UTF-8 for this process.
     if (SetConsoleCP(CP_UTF8) == FALSE)
-        throw std::ios_base::failure("Failed to set console to utf8.");
+        throw runtime_exception("Failed to set console to utf8.");
 
     DWORD console_mode;
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
@@ -76,9 +77,9 @@ std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
 {
     DWORD read_bytes;
 
-    if (ReadConsoleW(get_input_handle(), buffer,
-        static_cast<DWORD>(size), &read_bytes, nullptr) == FALSE)
-        throw std::iostream::failure("Failed to read from console.");
+    if (ReadConsoleW(get_input_handle(), buffer, static_cast<DWORD>(size),
+        &read_bytes, nullptr) == FALSE)
+        throw runtime_exception("Failed to read from console.");
 
     return static_cast<std::streamsize>(read_bytes);
 }

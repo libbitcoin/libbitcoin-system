@@ -25,6 +25,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,7 +40,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
 {
     if (wide_size_ == 0u || wide_buffer == nullptr ||
         wide_size_ > (bc::max_size_t / utf8_max_character_size))
-        throw std::ios_base::failure("unicode_streambuf paramters");
+        throw runtime_exception("unicode_streambuf paramters");
 
     // Input buffer is not yet populated, reflect zero length buffer here.
     setg(narrow_, narrow_, narrow_);

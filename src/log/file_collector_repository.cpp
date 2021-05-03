@@ -41,7 +41,6 @@ boost::shared_ptr<boost::log::sinks::file::collector> file_collector_repository:
     boost::shared_ptr<file_collector> result;
     if (it != collectors_.end()) try
     {
-        // This may throw if the collector is being currently destroyed
         result = it->shared_from_this();
         result->update(max_size, min_free_space, max_files);
     }

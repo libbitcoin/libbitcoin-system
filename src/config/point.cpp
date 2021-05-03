@@ -21,11 +21,11 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/chain/output_point.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/deserialize.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
@@ -95,9 +95,7 @@ std::istream& operator>>(std::istream& input, point& argument)
     input >> tuple;
 
     if (!decode_point(argument.value_, tuple))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-    }
+        throw istream_exception(tuple);
 
     return input;
 }

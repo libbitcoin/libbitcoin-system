@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <map>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/language.hpp>
 

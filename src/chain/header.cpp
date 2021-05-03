@@ -481,7 +481,7 @@ uint256_t header::proof(uint32_t bits)
     // CONSENSUS: satoshi will throw division by zero in the case where the
     // target is (2^256)-1 as the overflow will result in a zero divisor.
     // While actually achieving this work is improbable, this method operates
-    // on user data method and therefore must be guarded.
+    // on a public method and therefore must be guarded.
     //*************************************************************************
     const auto divisor = target + 1;
 

@@ -21,10 +21,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -123,10 +123,7 @@ std::istream& operator>>(std::istream& in, ek_public& to)
     to = ek_public(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_add__size_t_minimum_plus_minimum__minimum)
 
 BOOST_AUTO_TEST_CASE(limits__safe_add__size_t_maximum_plus_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_add(maximum, maximum), std::overflow_error);
+    BOOST_REQUIRE_THROW(safe_add(maximum, maximum), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(limits__safe_add__size_t_minimum_plus_maximum__maximum)
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_add__size_t_maximum_plus_minimum__maximum)
 
 BOOST_AUTO_TEST_CASE(limits__safe_add__size_t_half_plus_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_add(half, maximum), std::overflow_error);
+    BOOST_REQUIRE_THROW(safe_add(half, maximum), overflow_exception);
 }
 
 // safe_subtract
@@ -290,12 +290,12 @@ BOOST_AUTO_TEST_CASE(limits__safe_subtract__size_t_maximum_minus_minimum__maximu
 
 BOOST_AUTO_TEST_CASE(limits__safe_subtract__size_t_minimum_minus_maximum__throws_underflow)
 {
-    BOOST_REQUIRE_THROW(safe_subtract(minimum, maximum), std::underflow_error);
+    BOOST_REQUIRE_THROW(safe_subtract(minimum, maximum), underflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(limits__safe_subtract__size_t_half_minus_maximum__throws_underflow)
 {
-    BOOST_REQUIRE_THROW(safe_subtract(half, maximum), std::underflow_error);
+    BOOST_REQUIRE_THROW(safe_subtract(half, maximum), underflow_exception);
 }
 
 // safe_multiply
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_multiply__size_t_minimum_times_minimum__minimu
 
 BOOST_AUTO_TEST_CASE(limits__safe_multiply__size_t_maximum_times_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_multiply(maximum, maximum), std::overflow_error);
+    BOOST_REQUIRE_THROW(safe_multiply(maximum, maximum), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(limits__safe_multiply__size_t_minimum_times_maximum__minimum)
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_multiply__size_t_half_times_2__maximum_minus_1
 
 BOOST_AUTO_TEST_CASE(limits__safe_multiply__size_t_2_times_half_plus_1__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_multiply(size_t{2}, half + size_t{1}), std::overflow_error);
+    BOOST_REQUIRE_THROW(safe_multiply(size_t{2}, half + size_t{1}), overflow_exception);
 }
 
 // safe_increment
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_increment__size_t_half__expected)
 BOOST_AUTO_TEST_CASE(limits__safe_increment__size_t_maximum__throws_overflow)
 {
     auto value = maximum;
-    BOOST_REQUIRE_THROW(safe_increment(value), std::overflow_error);
+    BOOST_REQUIRE_THROW(safe_increment(value), overflow_exception);
 }
 
 // safe_decrement
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_decrement__size_t_half__expected)
 BOOST_AUTO_TEST_CASE(limits__safe_decrement__size_t_minimum__throws_underflow)
 {
     auto value = minimum;
-    BOOST_REQUIRE_THROW(safe_decrement(value), std::underflow_error);
+    BOOST_REQUIRE_THROW(safe_decrement(value), underflow_exception);
 }
 
 // safe_signed
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_signed__max_int32_to_int32__max_int32)
 
 BOOST_AUTO_TEST_CASE(limits__safe_signed__min_int64_to_int32__throws_range)
 {
-    BOOST_REQUIRE_THROW(safe_signed<int32_t>(min_int64), std::range_error);
+    BOOST_REQUIRE_THROW(safe_signed<int32_t>(min_int64), range_exception);
 }
 
 // safe_unsigned
@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_unsigned__max_uint32_to_uint32__max_uint32)
 
 BOOST_AUTO_TEST_CASE(limits__safe_unsigned__max_uint64_to_uint32__throws_range)
 {
-    BOOST_REQUIRE_THROW(safe_unsigned<uint32_t>(max_uint64), std::range_error);
+    BOOST_REQUIRE_THROW(safe_unsigned<uint32_t>(max_uint64), range_exception);
 }
 
 // safe_to_signed
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_to_signed__min_uint32_to_int32__min_uint32)
 
 BOOST_AUTO_TEST_CASE(limits__safe_to_signed__max_uint32_to_int32__throws_range)
 {
-    BOOST_REQUIRE_THROW(safe_to_signed<int32_t>(max_uint32), std::range_error);
+    BOOST_REQUIRE_THROW(safe_to_signed<int32_t>(max_uint32), range_exception);
 }
 
 BOOST_AUTO_TEST_CASE(limits__safe_to_signed__min_uint64_to_int32__min_uint64)
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_to_signed__min_uint64_to_int32__min_uint64)
 
 BOOST_AUTO_TEST_CASE(limits__safe_to_unsigned__min_int32_to_uint32__throws_range)
 {
-    BOOST_REQUIRE_THROW(safe_to_unsigned<uint32_t>(min_int32), std::range_error);
+    BOOST_REQUIRE_THROW(safe_to_unsigned<uint32_t>(min_int32), range_exception);
 }
 
 BOOST_AUTO_TEST_CASE(limits__safe_to_unsigned__max_int32_to_uint32__max_int32)
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(limits__safe_to_unsigned__max_int32_to_uint32__max_int32)
 
 BOOST_AUTO_TEST_CASE(limits__safe_to_unsigned__min_int64_to_uint32__throws_range)
 {
-    BOOST_REQUIRE_THROW(safe_to_unsigned<uint32_t>(min_int64), std::range_error);
+    BOOST_REQUIRE_THROW(safe_to_unsigned<uint32_t>(min_int64), range_exception);
 }
 
 // range_constrain

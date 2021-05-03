@@ -20,8 +20,8 @@
 
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -63,8 +63,7 @@ std::istream& operator>>(std::istream& input, base2& argument)
 
     if (!binary::is_base2(binary))
     {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(binary));
+        throw istream_exception(binary);
     }
 
     std::stringstream(binary) >> argument.value_;

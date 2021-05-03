@@ -22,8 +22,8 @@
 #include <cstdint>
 #include <iostream>
 #include <map>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_10.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/wallet/payment_address.hpp>
 #include <bitcoin/system/wallet/stealth_address.hpp>
 #include <bitcoin/system/wallet/uri.hpp>
@@ -284,10 +284,7 @@ std::istream& operator>>(std::istream& in, bitcoin_uri& to)
     to = bitcoin_uri(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

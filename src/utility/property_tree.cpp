@@ -20,8 +20,8 @@
 #include <bitcoin/system/utility/property_tree.hpp>
 
 #include <cstdint>
-#include <exception>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <boost/iostreams/stream.hpp>

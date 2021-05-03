@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(uint256__add256__1_to_negative_zero_hash__expected)
 
 BOOST_AUTO_TEST_CASE(uint256__divide256__unit_hash_by_null_hash__throws_overflow_error)
 {
-    BOOST_REQUIRE_THROW(uint256_t(unit_hash) / uint256_t(0), std::overflow_error);
+    BOOST_REQUIRE_THROW(uint256_t(unit_hash) / uint256_t(0), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(uint256__divide256__null_hash_by_unit_hash__null_hash)
@@ -605,7 +605,7 @@ BOOST_AUTO_TEST_CASE(uint256__assign_multiply32__max_hash_by_256__shifts_left_8_
 BOOST_AUTO_TEST_CASE(uint256__assign_divide32__unit_hash_by_null_hash__throws_overflow_error)
 {
     uint256_t value(unit_hash);
-    BOOST_REQUIRE_THROW(value /= 0, std::overflow_error);
+    BOOST_REQUIRE_THROW(value /= 0, overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(uint256__assign_divide32__null_hash_by_unit_hash__null_hash)
@@ -739,7 +739,7 @@ BOOST_AUTO_TEST_CASE(uint256__assign_subtract256__1_from_negative_zero_hash__mos
 BOOST_AUTO_TEST_CASE(uint256__assign_divide__unit_hash_by_null_hash__throws_overflow_error)
 {
     uint256_t value(unit_hash);
-    BOOST_REQUIRE_THROW(value /= uint256_t(0), std::overflow_error);
+    BOOST_REQUIRE_THROW(value /= uint256_t(0), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(uint256__assign_divide__null_hash_by_unit_hash__null_hash)

@@ -103,9 +103,4 @@ BOOST_AUTO_TEST_CASE(thread__set_thread_priorites__all__set_as_expected)
 
 #endif
 
-BOOST_AUTO_TEST_CASE(thread__set_thread_priority__invalid__throws_invalid_argument)
-{
-    BOOST_REQUIRE_THROW(set_priority(static_cast<thread_priority>(42)), std::invalid_argument);
-}
-
 BOOST_AUTO_TEST_SUITE_END()

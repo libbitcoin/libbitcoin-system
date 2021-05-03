@@ -20,10 +20,9 @@
 #define LIBBITCOIN_SYSTEM_LIMITS_HPP
 
 #include <algorithm>
-#include <stdexcept>
 #include <limits>
 #include <bitcoin/system/compat.hpp>
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -71,7 +70,7 @@ Integer safe_add(Integer left, Integer right)
     static const auto maximum = std::numeric_limits<Integer>::max();
 
     if (left > maximum - right)
-        throw std::overflow_error("addition overflow");
+        throw overflow_exception("addition overflow");
 
     return left + right;
 }
@@ -82,7 +81,7 @@ Integer safe_subtract(Integer left, Integer right)
     static const auto minimum = std::numeric_limits<Integer>::min();
 
     if (left < minimum + right)
-        throw std::underflow_error("subtraction underflow");
+        throw underflow_exception("subtraction underflow");
 
     return left - right;
 }
@@ -96,7 +95,7 @@ Integer safe_multiply(Integer left, Integer right)
         return 0u;
 
     if (left > maximum / right)
-        throw std::overflow_error("multiplication overflow");
+        throw overflow_exception("multiplication overflow");
 
     return left * right;
 }
@@ -122,7 +121,7 @@ To safe_signed(From signed_value)
     static const auto signed_maximum = std::numeric_limits<To>::max();
 
     if (signed_value < signed_minimum || signed_value > signed_maximum)
-        throw std::range_error("signed assignment out of range");
+        throw range_exception("signed assignment out of range");
 
     return static_cast<To>(signed_value);
 }
@@ -134,7 +133,7 @@ To safe_unsigned(From unsigned_value)
     static const auto unsigned_maximum = std::numeric_limits<To>::max();
 
     if (unsigned_value < unsigned_minimum || unsigned_value > unsigned_maximum)
-        throw std::range_error("unsigned assignment out of range");
+        throw range_exception("unsigned assignment out of range");
 
     return static_cast<To>(unsigned_value);
 }
@@ -146,7 +145,7 @@ To safe_to_signed(From unsigned_value)
     static const auto signed_maximum = std::numeric_limits<To>::max();
 
     if (unsigned_value > static_cast<uint64_t>(signed_maximum))
-        throw std::range_error("to signed assignment out of range");
+        throw range_exception("to signed assignment out of range");
 
     return static_cast<To>(unsigned_value);
 }
@@ -159,7 +158,7 @@ To safe_to_unsigned(From signed_value)
 
     if (signed_value < 0 ||
         static_cast<uint64_t>(signed_value) > unsigned_maximum)
-        throw std::range_error("to unsigned assignment out of range");
+        throw range_exception("to unsigned assignment out of range");
 
     return static_cast<To>(signed_value);
 }

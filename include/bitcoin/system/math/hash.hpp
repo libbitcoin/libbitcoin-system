@@ -111,6 +111,7 @@ BC_CONSTEXPR mini_hash null_mini_hash
 
 inline uint256_t to_uint256(const hash_digest& hash)
 {
+    // BUGBUG: may be an endianness bug, as uint256_t may be sensitive.
     return from_little_endian<uint256_t>(hash.begin(), hash.end());
 }
 

@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
@@ -32,6 +31,7 @@
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/wallet/ec_public.hpp>
 #include <bitcoin/system/wallet/hd_private.hpp>
@@ -282,10 +282,7 @@ std::istream& operator>>(std::istream& in, hd_public& to)
     to = hd_public(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

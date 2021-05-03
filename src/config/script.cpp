@@ -21,9 +21,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
@@ -87,9 +87,7 @@ std::istream& operator>>(std::istream& input, script& argument)
 
     // Test for invalid result sentinel.
     if (!argument.value_.from_string(mnemonic) && mnemonic.length() > 0)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(mnemonic));
-    }
+        throw istream_exception(mnemonic);
 
     return input;
 }

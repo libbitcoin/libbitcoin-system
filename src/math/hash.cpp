@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <errno.h>
 #include <new>
-#include <stdexcept>
 #include "../math/external/crypto_scrypt.h"
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
@@ -129,13 +128,12 @@ long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key)
 long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations)
 {
-    long_hash hash;
-    const auto result = pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
+    long_hash hash = null_long_hash;
+    pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
         salt.data(), salt.size(), hash.data(), hash.size(), iterations);
 
-    if (result != 0)
-        throw std::bad_alloc();
-
+    // If pkcs5_pbkdf2 returns != 0 then hash will be zeroized.
+    // This can only be caused by out-of-memory or invalid parameterization.
     return hash;
 }
 
@@ -148,32 +146,16 @@ data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
     return output;
 }
 
-static void handle_script_result(int result)
-{
-    if (result == 0)
-        return;
-
-    switch (errno)
-    {
-        case EFBIG:
-            throw std::length_error("scrypt parameter too large");
-        case EINVAL:
-            throw std::runtime_error("scrypt invalid argument");
-        case ENOMEM:
-            throw std::length_error("scrypt address space");
-        default:
-            throw std::bad_alloc();
-    }
-}
-
 data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
     uint32_t p, uint32_t r, size_t length)
 {
-    data_chunk output(length);
-    const auto result = crypto_scrypt(data.data(), data.size(), salt.data(),
-        salt.size(), N, r, p, output.data(), output.size());
-    handle_script_result(result);
-    return output;
+    data_chunk out(length, 0x00);
+    crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), N, r, p,
+        out.data(), out.size());
+
+    // If crypto_scrypt returns != 0 then out will be zeroized.
+    // This can only be caused by out-of-memory or invalid parameterization.
+    return out;
 }
 
 } // namespace system

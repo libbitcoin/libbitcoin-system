@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -30,6 +29,7 @@
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/binary.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -356,10 +356,7 @@ std::istream& operator>>(std::istream& in, stealth_address& to)
     to = stealth_address(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

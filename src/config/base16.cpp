@@ -21,9 +21,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -61,7 +61,7 @@ std::istream& operator>>(std::istream& input, base16& argument)
     if (!decode_base16(argument.value_, hexcode))
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+        throw istream_exception(hexcode);
     }
 
     return input;

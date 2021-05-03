@@ -22,13 +22,13 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <boost/program_options.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_bit_writer.hpp>
@@ -331,10 +331,7 @@ std::istream& operator>>(std::istream& in, mnemonic& to)
     to = mnemonic(value);
 
     if (!to)
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
+        throw istream_exception(value);
 
     return in;
 }

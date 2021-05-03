@@ -56,8 +56,6 @@ static int get_priority(thread_priority priority)
             return THREAD_PRIORITY_BELOW_NORMAL;
         case thread_priority::lowest:
             return THREAD_PRIORITY_LOWEST;
-        default:
-            throw std::invalid_argument("priority");
     }
 }
 
