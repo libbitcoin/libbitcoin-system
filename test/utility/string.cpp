@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(string__split1__one_delimiter___right_trimmed_and_compresse
 
 BOOST_AUTO_TEST_CASE(string__split1__twelve_delimiters__trimmed_and_compressed)
 {
-    const auto value{ "  \t\r\n  abc  \t\r\n  xyz  \t\r\n  " };
+    const std::string value{ "  \t\r\n  abc  \t\r\n  xyz  \t\r\n  " };
     const string_list expected{ "abc", "xyz" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
