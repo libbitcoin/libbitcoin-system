@@ -27,27 +27,27 @@ constexpr auto ideographic_space = "\xe3\x80\x80";
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_lower__empty__empty)
 {
-    const auto value{ "" };
-    BOOST_REQUIRE_EQUAL(ascii_to_lower(""), value);
+    const std::string value{ "" };
+    BOOST_REQUIRE_EQUAL(ascii_to_lower(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_lower__lower__unchanged)
 {
-    const auto value{ "abcdefghijklmnopqrstuvwxyz0123456789" };
+    const std::string value{ "abcdefghijklmnopqrstuvwxyz0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_lower(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_lower__upper__lowered)
 {
-    const auto value{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
-    const auto expected{ "abcdefghijklmnopqrstuvwxyz0123456789" };
+    const std::string value{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_lower(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_lower__mixed__lowered)
 {
-    const auto value{ "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789" };
-    const auto expected{ "abcdefghijklmnopqrstuvwxyz0123456789" };
+    const std::string value{ "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789" };
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_lower(value), expected);
 }
 
@@ -55,27 +55,27 @@ BOOST_AUTO_TEST_CASE(string__ascii_to_lower__mixed__lowered)
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_upper__empty__empty)
 {
-    const auto value{ "" };
-    BOOST_REQUIRE_EQUAL(ascii_to_upper(""), value);
+    const std::string value{ "" };
+    BOOST_REQUIRE_EQUAL(ascii_to_upper(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_upper__lower__raised)
 {
-    const auto value{ "abcdefghijklmnopqrstuvwxyz0123456789" };
-    const auto expected{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
+    const std::string value{ "abcdefghijklmnopqrstuvwxyz0123456789" };
+    const std::string expected{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_upper(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_upper__upper__unchanged)
 {
-    const auto value{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
+    const std::string value{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_upper(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(string__ascii_to_upper__mixed__raised)
 {
-    const auto value{ "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789" };
-    const auto expected{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
+    const std::string value{ "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789" };
+    const std::string expected{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
     BOOST_REQUIRE_EQUAL(ascii_to_upper(value), expected);
 }
 
@@ -254,42 +254,42 @@ BOOST_AUTO_TEST_CASE(string__join2__untrimmed_values_comma_delimiter__untrimmed_
 
 BOOST_AUTO_TEST_CASE(string__split1__empty__empty_token)
 {
-    const auto value{ "" };
+    const std::string value{ "" };
     const string_list expected{ value };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__no_delimiter__one_token)
 {
-    const auto value{ "abc" };
+    const std::string value{ "abc" };
     const string_list expected{ value };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__one_delimiter__split)
 {
-    const auto value{ "abc xyz" };
+    const std::string value{ "abc xyz" };
     const string_list expected{ "abc", "xyz" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__nine_delimiters__compressed)
 {
-    const auto value{ "abc   xyz   123   456" };
+    const std::string value{ "abc   xyz   123   456" };
     const string_list expected{ "abc", "xyz", "123", "456" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__one_delimiter__left_trimmed_and_compressed)
 {
-    const auto value{ "\t\r\n abc" };
+    const std::string value{ "\t\r\n abc" };
     const string_list expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__one_delimiter___right_trimmed_and_compressed)
 {
-    const auto value{ "abc \t\r\n" };
+    const std::string value{ "abc \t\r\n" };
     const string_list expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE(string__split1__twelve_delimiters__trimmed_and_compressed)
 
 BOOST_AUTO_TEST_CASE(string__split2__one_ideographic_space_delimiter__split)
 {
-    const auto value{ "www\xe3\x80\x80mmm" };
+    const std::string value{ "www\xe3\x80\x80mmm" };
     const string_list expected{ "www", "mmm" };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space), expected);
 }
@@ -317,49 +317,49 @@ BOOST_AUTO_TEST_CASE(string__split2__three_ideographic_space_delimiters__compres
 
 BOOST_AUTO_TEST_CASE(string__split2__four_ideographic_space_delimiters__trimmed_compressed)
 {
-    const auto value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
+    const std::string value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
     const string_list expected{ "www", "mmm" };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split3__one_delimiter__untrimmed)
 {
-    const auto value{ "\t\r\n abc" };
+    const std::string value{ "\t\r\n abc" };
     const string_list expected{ "\t\r\n", "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value, " ", false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split3__one_delimiter___untrimmed)
 {
-    const auto value{ "abc \t\r\n" };
+    const std::string value{ "abc \t\r\n" };
     const string_list expected{ "abc", "\t\r\n" };
     BOOST_REQUIRE_EQUAL(system::split(value, " ", false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split3__twelve_delimiters__untrimmed_compressed)
 {
-    const auto value{ "  \t\r\n  abc  \t\r\n  xyz  \t\r\n  " };
+    const std::string value{ "  \t\r\n  abc  \t\r\n  xyz  \t\r\n  " };
     const string_list expected{ "\t\r\n", "abc", "\t\r\n", "xyz", "\t\r\n" };
     BOOST_REQUIRE_EQUAL(system::split(value, " ", false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split3__four_ideographic_space_delimiters__untrimmed_compressed)
 {
-    const auto value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
+    const std::string value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
     const string_list expected{ " ", " www ", " mmm ", " " };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space, false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split4__twelve_comma_delimiters__trimmed_uncompressed)
 {
-    const auto value{ ",,\t\r\n,,abc,,\t\r\n,,xyz,,\t\r\n,," };
+    const std::string value{ ",,\t\r\n,,abc,,\t\r\n,,xyz,,\t\r\n,," };
     const string_list expected{ "", "", "", "", "abc", "", "", "", "xyz", "", "", "", "" };
     BOOST_REQUIRE_EQUAL(system::split(value, ",", true, false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split4__four_ideographic_space_delimiters__untrimmed_uncompressed)
 {
-    const auto value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
+    const std::string value{ " \xe3\x80\x80 www \xe3\x80\x80\xe3\x80\x80 mmm \xe3\x80\x80 " };
     const string_list expected{ " ", " www ", "", " mmm ", " " };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space, false, false), expected);
 }
@@ -391,21 +391,21 @@ BOOST_AUTO_TEST_CASE(string__starts_with__found__true)
 BOOST_AUTO_TEST_CASE(string__to_string__empty__empty)
 {
     const data_chunk value{};
-    const auto expected{ "" };
+    const std::string expected{ "" };
     BOOST_REQUIRE_EQUAL(to_string(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__to_string__vector__expected)
 {
     const data_chunk value{ 'a', 'b', 'c' };
-    const auto expected{ "abc" };
+    const std::string expected{ "abc" };
     BOOST_REQUIRE_EQUAL(to_string(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__to_string__array__expected)
 {
     const byte_array<3> value{ { 'a', 'b', 'c' } };
-    const auto expected{ "abc" };
+    const std::string expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
 }
 
