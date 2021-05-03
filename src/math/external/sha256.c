@@ -269,9 +269,9 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
         state[i] += S[i];
     }
 
-    // This is unnecessary, as these are locals going out of scope.
-    ////zeroize((void*)W, sizeof W);
-    ////zeroize((void*)S, sizeof S);
-    ////zeroize((void*)&t0, sizeof t0);
-    ////zeroize((void*)&t1, sizeof t1);
+    /* This is unnecessary, as these are locals going out of scope. */
+    /* zeroize((void*)W, sizeof W); */
+    /* zeroize((void*)S, sizeof S); */
+    /* zeroize((void*)&t0, sizeof t0); */
+    /* zeroize((void*)&t1, sizeof t1); */
 }

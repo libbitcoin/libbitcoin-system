@@ -91,13 +91,14 @@ uint32_t constant(uint8_t version)
 void bech32_insert_checksum(uint8_t expanded_data[], size_t size,
     uint8_t version)
 {
+    uint32_t checksum;
+
     /* Zeroize the checksum buffer. */
     uint8_t* offset = &expanded_data[size - bech32_checksum_size];
     zeroize(offset, bech32_checksum_size);
 
     /* Compute the checksum for the given version. */
-    const uint32_t checksum = bech32_checksum(expanded_data, size) ^
-        constant(version);
+    checksum = bech32_checksum(expanded_data, size) ^ constant(version);
 
     /* Insert the expanded checksum into the checksum buffer. */
     bech32_expand_checksum(offset, checksum);
