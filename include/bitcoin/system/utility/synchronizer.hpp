@@ -72,6 +72,7 @@ public:
                 return !!ec;
             case synchronizer_terminate::on_success:
                 return !ec;
+            default:
             case synchronizer_terminate::on_count:
                 return false;
         }
@@ -86,6 +87,7 @@ public:
                 return ec ? ec : error::success;
             case synchronizer_terminate::on_success:
                 return !ec ? error::success : ec;
+            default:
             case synchronizer_terminate::on_count:
                 return error::success;
         }
