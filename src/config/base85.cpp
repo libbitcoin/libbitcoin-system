@@ -16,82 +16,81 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/sodium.hpp>
+#include <bitcoin/system/config/base85.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/formats/base_85.hpp>
-#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-sodium::sodium()
-  : value_(null_hash)
+base85::base85()
+  : value_()
 {
 }
 
-sodium::sodium(const std::string& base85)
+base85::base85(const std::string& base85)
 {
     std::stringstream(base85) >> *this;
 }
 
-sodium::sodium(const hash_digest& value)
+base85::base85(const data_chunk& value)
   : value_(value)
 {
 }
 
-sodium::sodium(const sodium& other)
-  : sodium(other.value_)
+base85::base85(const base85& other)
+  : base85(other.value_)
 {
 }
 
-sodium::operator const hash_digest&() const
+base85::operator bool() const
+{
+    return (value_.size() % 4) == 0u;
+}
+
+base85::operator const data_chunk&() const
 {
     return value_;
 }
 
-sodium::operator data_slice() const
-{
-    return value_;
-}
-
-sodium::operator bool() const
-{
-    return value_ != null_hash;
-}
-
-std::string sodium::to_string() const
+std::string base85::to_string() const
 {
     std::stringstream value;
     value << *this;
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, sodium& argument)
+std::istream& operator>>(std::istream& input, base85& argument)
 {
     std::string base85;
     input >> base85;
 
     data_chunk out_value;
-    if (!decode_base85(out_value, base85) || out_value.size() != hash_size)
+    if (!decode_base85(out_value, base85) || (out_value.size() % 4) != 0u)
     {
         using namespace boost::program_options;
         BOOST_THROW_EXCEPTION(invalid_option_value(base85));
     }
 
-    std::copy_n(out_value.begin(), hash_size, argument.value_.begin());
+    argument.value_ = out_value;
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const sodium& argument)
+std::ostream& operator<<(std::ostream& output, const base85& argument)
 {
     std::string decoded;
 
-    // Z85 requires four byte alignment (hash_digest is 32).
-    /* bool */ encode_base85(decoded, argument.value_);
+    // Base85 requires four byte alignment.
+    if (!encode_base85(decoded, argument.value_))
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(std::iostream::failure(decoded));
+    }
 
     output << decoded;
     return output;

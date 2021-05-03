@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE64_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_BASE64_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
+#define LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
 
 #include <iostream>
 #include <string>
@@ -29,34 +29,34 @@ namespace system {
 namespace config {
 
 /**
- * Serialization helper for base64 encoded data.
+ * Serialization helper for base32 encoded data.
  */
-class BC_API base64
+class BC_API base32
 {
 public:
 
     /**
      * Default constructor.
      */
-    base64();
+    base32();
 
     /**
      * Initialization constructor.
-     * @param[in]  base64  The value to initialize with.
+     * @param[in]  base32  The value to initialize with.
      */
-    base64(const std::string& base64);
+    base32(const std::string& base32);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    base64(const data_chunk& value);
+    base32(const data_chunk& value);
 
     /**
      * Copy constructor.
      * @param[in]  other  The object to copy into self on construct.
      */
-    base64(const base64& other);
+    base32(const base32& other);
 
     /**
      * Overload cast to internal type.
@@ -71,7 +71,7 @@ public:
      * @return                The input stream reference.
      */
     friend std::istream& operator>>(std::istream& input,
-        base64& argument);
+        base32& argument);
 
     /**
      * Overload stream out.
@@ -80,7 +80,7 @@ public:
      * @return                The output stream reference.
      */
     friend std::ostream& operator<<(std::ostream& output,
-        const base64& argument);
+        const base32& argument);
 
 private:
 

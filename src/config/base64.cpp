@@ -52,11 +52,6 @@ base64::operator const data_chunk&() const
     return value_;
 }
 
-base64::operator data_slice() const
-{
-    return value_;
-}
-
 std::istream& operator>>(std::istream& input, base64& argument)
 {
     std::string base64;

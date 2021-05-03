@@ -57,8 +57,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
+    src/config/base32.cpp \
     src/config/base58.cpp \
     src/config/base64.cpp \
+    src/config/base85.cpp \
     src/config/block.cpp \
     src/config/checkpoint.cpp \
     src/config/compact_filter.cpp \
@@ -74,7 +76,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/point.cpp \
     src/config/printer.cpp \
     src/config/script.cpp \
-    src/config/sodium.cpp \
     src/config/transaction.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
@@ -468,8 +469,10 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/authority.hpp \
     include/bitcoin/system/config/base16.hpp \
     include/bitcoin/system/config/base2.hpp \
+    include/bitcoin/system/config/base32.hpp \
     include/bitcoin/system/config/base58.hpp \
     include/bitcoin/system/config/base64.hpp \
+    include/bitcoin/system/config/base85.hpp \
     include/bitcoin/system/config/block.hpp \
     include/bitcoin/system/config/checkpoint.hpp \
     include/bitcoin/system/config/compact_filter.hpp \
@@ -486,7 +489,6 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/printer.hpp \
     include/bitcoin/system/config/script.hpp \
     include/bitcoin/system/config/settings.hpp \
-    include/bitcoin/system/config/sodium.hpp \
     include/bitcoin/system/config/transaction.hpp
 
 include_bitcoin_system_formatsdir = ${includedir}/bitcoin/system/formats

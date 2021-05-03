@@ -106,8 +106,10 @@
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\base32.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base64.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\base85.cpp" />
     <ClCompile Include="..\..\..\..\src\config\block.cpp">
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
@@ -137,7 +139,6 @@
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
       <ObjectFileName>$(IntDir)src_config_script.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\sodium.cpp" />
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
@@ -340,8 +341,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\compact_filter.hpp" />
@@ -358,7 +361,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\settings.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\sodium.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />

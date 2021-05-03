@@ -186,10 +186,16 @@
     <ClCompile Include="..\..\..\..\src\config\base2.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base32.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base58.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base64.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base85.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\block.cpp">
@@ -235,9 +241,6 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\sodium.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
@@ -776,10 +779,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base85.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp">
@@ -828,9 +837,6 @@
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\settings.hpp">
-      <Filter>include\bitcoin\system\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\sodium.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp">

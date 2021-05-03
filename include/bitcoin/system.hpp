@@ -42,8 +42,10 @@
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
+#include <bitcoin/system/config/base32.hpp>
 #include <bitcoin/system/config/base58.hpp>
 #include <bitcoin/system/config/base64.hpp>
+#include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/config/compact_filter.hpp>
@@ -60,7 +62,6 @@
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/settings.hpp>
-#include <bitcoin/system/config/sodium.hpp>
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/formats/base_10.hpp>
 #include <bitcoin/system/formats/base_16.hpp>

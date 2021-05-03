@@ -24,7 +24,6 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,43 +31,38 @@ namespace config {
 
 /**
  * Serialization helper for base58 sodium keys.
+ * Base85 requires four byte alignment, sodium keys are 32 bytes.
  */
-class BC_API sodium
+class BC_API base85
 {
 public:
-    /**
-     * A list of base85 values.
-     * This must provide operator<< for ostream in order to be used as a
-     * boost::program_options default_value.
-     */
-    typedef std::vector<sodium> list;
 
     /**
      * Default constructor.
      */
-    sodium();
+    base85();
 
     /**
      * Initialization constructor.
      * @param[in]  base85  The value to initialize with.
      */
-    sodium(const std::string& base85);
+    base85(const std::string& base85);
 
     /**
      * Initialization constructor.
      * @param[in]  value  The value to initialize with.
      */
-    sodium(const hash_digest& value);
+    base85(const data_chunk& value);
 
     /**
      * Copy constructor.
      * @param[in]  other  The object to copy into self on construct.
      */
-    sodium(const sodium& other);
+    base85(const base85& other);
 
     /**
      * Getter.
-     * @return True if the key is initialized.
+     * @return True if the data size is evenly divisible by 4.
      */
     operator bool() const;
 
@@ -76,13 +70,7 @@ public:
      * Overload cast to internal type.
      * @return  This object's value cast to internal type.
      */
-    operator const hash_digest&() const;
-
-    /**
-     * Overload cast to generic data reference.
-     * @return  This object's value cast to generic data.
-     */
-    operator data_slice() const;
+    operator const data_chunk&() const;
 
     /**
      * Get the key as a base85 encoded (z85) string.
@@ -97,7 +85,7 @@ public:
      * @return                The input stream reference.
      */
     friend std::istream& operator>>(std::istream& input,
-        sodium& argument);
+        base85& argument);
 
     /**
      * Overload stream out.
@@ -106,14 +94,14 @@ public:
      * @return                The output stream reference.
      */
     friend std::ostream& operator<<(std::ostream& output,
-        const sodium& argument);
+        const base85& argument);
 
 private:
 
     /**
      * The state of this object.
      */
-    hash_digest value_;
+    data_chunk value_;
 };
 
 } // namespace config

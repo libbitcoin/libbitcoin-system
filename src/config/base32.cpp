@@ -16,60 +16,59 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/base16.hpp>
+#include <bitcoin/system/config/base32.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-base16::base16()
+base32::base32()
 {
 }
 
-base16::base16(const std::string& hexcode)
+base32::base32(const std::string& base32)
 {
-    std::stringstream(hexcode) >> *this;
+    std::stringstream(base32) >> *this;
 }
 
-base16::base16(const data_chunk& value)
+base32::base32(const data_chunk& value)
   : value_(value)
 {
 }
 
-base16::base16(const base16& other)
-  : base16(other.value_)
+base32::base32(const base32& other)
+  : base32(other.value_)
 {
 }
 
-base16::operator const data_chunk&() const
+base32::operator const data_chunk&() const
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base16& argument)
+std::istream& operator>>(std::istream& input, base32& argument)
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base32;
+    input >> base32;
 
-    if (!decode_base16(argument.value_, hexcode))
+    if (!decode_base32(argument.value_, base32))
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+        BOOST_THROW_EXCEPTION(invalid_option_value(base32));
     }
 
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base16& argument)
+std::ostream& operator<<(std::ostream& output, const base32& argument)
 {
-    output << encode_base16(argument.value_);
+    output << encode_base32(argument.value_);
     return output;
 }
 
