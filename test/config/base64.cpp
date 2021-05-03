@@ -18,8 +18,8 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base_32_tests)
+BOOST_AUTO_TEST_SUITE(base64_tests)
 
-// TODO: standard encoding/decoding tests.
+using namespace bc::system::config;
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -307,7 +307,12 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/stealth_record.cpp \
     test/chain/transaction.cpp \
     test/config/authority.cpp \
+    test/config/base16.cpp \
+    test/config/base2.cpp \
+    test/config/base32.cpp \
     test/config/base58.cpp \
+    test/config/base64.cpp \
+    test/config/base85.cpp \
     test/config/block.cpp \
     test/config/checkpoint.cpp \
     test/config/compact_filter.cpp \

@@ -42,14 +42,4 @@ BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
     BOOST_REQUIRE(original == instance);
 }
 
-////BOOST_AUTO_TEST_CASE(base58__constructor__bogus_string__throws_invalid_option)
-////{
-////    //BX_REQUIRE_THROW_INVALID_OPTION_VALUE(base58("bo-gus"));
-////}
-
-////BOOST_AUTO_TEST_CASE(base58__constructor__copy_address_primitives__round_trips)
-////{
-////    //BX_SERIALIZE_COPY_ROUND_TRIP(base58, BASE58_ENCODED_A);
-////}
-
 BOOST_AUTO_TEST_SUITE_END()
