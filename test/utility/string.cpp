@@ -21,7 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(string_tests)
 
-constexpr auto ideographic_space = "\xe3\x80\x80";
+const std::string ideographic_space{ "\xe3\x80\x80" };
 
 // ascii_to_lower
 
@@ -120,7 +120,6 @@ BOOST_AUTO_TEST_CASE(string__is_ascii__alphanumeric__true)
 
 BOOST_AUTO_TEST_CASE(string__is_ascii__below_128__true)
 {
-    // char is signed, so these are positive (increasing).
     for (char character = '\x00'; character < '\x80'; ++character)
     {
         BOOST_REQUIRE(is_ascii(std::string{ character }));
@@ -129,8 +128,8 @@ BOOST_AUTO_TEST_CASE(string__is_ascii__below_128__true)
 
 BOOST_AUTO_TEST_CASE(string__is_ascii__above_127__false)
 {
-    // char is signed, so these are negative (increasing).
-    for (char character = '\xff'; character <= '\x80'; ++character)
+    // Even though char is negative this increments as indicated.
+    for (char character = '\x80'; character <= '\xff'; ++character)
     {
         BOOST_REQUIRE(!is_ascii(std::string{ character }));
     }
@@ -140,7 +139,6 @@ BOOST_AUTO_TEST_CASE(string__is_ascii__above_127__false)
 
 BOOST_AUTO_TEST_CASE(string__is_ascii_character__below_128__true)
 {
-    // char is signed, so these are positive (increasing).
     for (char character = '\x00'; character < '\x80'; ++character)
     {
         BOOST_REQUIRE(is_ascii_character(character));
@@ -149,8 +147,8 @@ BOOST_AUTO_TEST_CASE(string__is_ascii_character__below_128__true)
 
 BOOST_AUTO_TEST_CASE(string__is_ascii_character__above_127__false)
 {
-    // char is signed, so these are negative (increasing).
-    for (char character = '\xff'; character <= '\x80'; ++character)
+    // Even though char is negative this increments as indicated.
+    for (char character = '\x80'; character <= '\xff'; ++character)
     {
         BOOST_REQUIRE(!is_ascii_character(character));
     }
@@ -310,7 +308,7 @@ BOOST_AUTO_TEST_CASE(string__split2__one_ideographic_space_delimiter__split)
 
 BOOST_AUTO_TEST_CASE(string__split2__three_ideographic_space_delimiters__compressed)
 {
-    const auto value{ "\xe3\x80\x80www\xe3\x80\x80mmm\xe3\x80\x80" };
+    const std::string value{ "\xe3\x80\x80www\xe3\x80\x80mmm\xe3\x80\x80" };
     const string_list expected{ "www", "mmm" };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space), expected);
 }
