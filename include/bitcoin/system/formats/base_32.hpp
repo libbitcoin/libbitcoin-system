@@ -28,16 +28,16 @@ namespace system {
 
 // This is NOT an implementation of RFC 4648: tools.ietf.org/html/rfc4648
 // This is a generic byte-aligned data encoder fully compliant with the data
-// conversion aspect of BIP713. However, unlike bech32 this is entirely
-// decoupled from bitcoin semantics. Bech32 requires version and checksum
+// conversion aspect of BIP713. However, unlike BIP173 this is entirely
+// decoupled from bitcoin semantics. BIP173 requires version and checksum
 // incorporation, fed into an internal stage of encoding. This makes unusable
 // for general purpose encoding (and complex to work with even in bitcoin).
 
-// Bech32 actually specifies two mappings. One is this base32 and the other
+// BIP173 actually specifies two mappings. One is this base32 and the other
 // is a numeric expansion with that can be mapped to and from base32 characters
 // by holding the index offset of those characters. This is also base 32 but it
 // is not a texual encoding. Instead it is a simple expansion of the original
-// data to 5 bits per byte. This would be inconsequential but for the bech32
+// data to 5 bits per byte. This would be inconsequential but for the BIP173
 // specification that bitcoin segregated witness script version and checksum
 // be written directly to the expanded encoding with purposeful non-conformance
 // with its own base32 data mapping. These elements must be injected into and
@@ -50,6 +50,16 @@ namespace system {
 // encode/decode, but are not necessary given the bech32 checked functions.
 // The expand/contract functions here are exposed for implementation of the
 // bech32 checked functions and for testing and are otherwise unnecessary.
+
+// BIP173 address test vectors do not round trip here, even with the prefix and
+// separator charactors removed. The prefix and checksum are injected into the
+// expanded representation, which is internal to this base32 encoding. The
+// injection appears as base32, but is non-standard base32 encoding. The BIP173
+// data value must be compressed from the checked expansion before encoding
+// as base32, and must be unchecked to parse data values after base32 decoding.
+// In this implementation any encoded value that was created by encode_base32
+// will be returned by decode_base32. Arbitrary encoding characters will decode
+// but may not round trip (as is the case with BIP173 address encoding).
 
 /**
 * Convert bytes to a base32 string.

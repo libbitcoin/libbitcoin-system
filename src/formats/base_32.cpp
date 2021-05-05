@@ -62,10 +62,11 @@ constexpr uint8_t decode[] =
 std::string encode_base32(const data_chunk& data)
 {
     size_t index = 0;
-    std::string out(data.size(), '\0');
+    const auto expanded = base32_expand(data);
+    std::string out(expanded.size(), '\0');
 
-    // The map is 32 elements, expanded byte indexes are bounded.
-    for (const auto value: base32_expand(data))
+    // This cannot be out of bounds because expanded bytes are < 32.
+    for (auto value: expanded)
         out[index++] = encode[value];
     
     return out;
@@ -74,14 +75,15 @@ std::string encode_base32(const data_chunk& data)
 bool decode_base32(data_chunk& out, const std::string& in)
 {
     size_t index = 0;
-    data_chunk expanded(in.size());
+    const auto lowered = ascii_to_lower(in);
+    data_chunk expanded(lowered.size(), 0x00);
 
-    // The map is 256 elements, char indexes are bounded.
-    for (const uint8_t character: ascii_to_lower(in))
+    // This cannot be out of bounds because characters are < 256.
+    for (auto character: lowered)
         if (((expanded[index++] = decode[character])) == 0xff)
             return false;
 
-    // Length hasn't been checked, but this handles it.
+    // This cannot be false because decoded bytes are < 32.
     return base32_compact(out, expanded);
 }
 
@@ -92,9 +94,9 @@ bool decode_base32(data_chunk& out, const std::string& in)
 // This is how C developers do it. :P
 static bool transform(data_chunk& out, const data_chunk& data, bool expand)
 {
-    // Compact is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
-    if (!expand && (data.size() * 5) % 8 != 0)
-        return false;
+    ////// Compact is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
+    ////if (!expand && (data.size() * 5) % 8 != 0)
+    ////    return false;
 
     const uint32_t to_bits = expand ? 5 : 8;
     const uint32_t from_bits = expand ? 8 : 5;
@@ -158,7 +160,7 @@ data_chunk base32_expand(const data_chunk& data)
 
     // This is how c++ developers do it. :)
     while (!bit_reader.is_exhausted())
-        bit_writer.write_bits(bit_reader.read_bits(8), 5);
+        bit_writer.write_bits(bit_reader.read_bits(5), 8);
 
     bit_writer.flush();
     sink.flush();
@@ -168,10 +170,10 @@ data_chunk base32_expand(const data_chunk& data)
 
 bool base32_compact(data_chunk& out, const data_chunk& expanded)
 {
-    // Only a clean read and write on byte boundaries is allowed.
-    // This is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
-    if ((expanded.size() * 5) % 8 != 0)
-        return false;
+    ////// Only a clean read and write on byte boundaries is allowed.
+    ////// This is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
+    ////if ((expanded.size() * 5) % 8 != 0)
+    ////    return false;
 
     // Top 3 bits must be zero for consistency, as they carry no information.
     if (!std::all_of(expanded.begin(), expanded.end(),
@@ -188,11 +190,19 @@ bool base32_compact(data_chunk& out, const data_chunk& expanded)
 
     // This is how c++ developers do it. :)
     while (!bit_reader.is_exhausted())
-        bit_writer.write_bits(bit_reader.read_bits(5), 8);
+        bit_writer.write_bits(bit_reader.read_bits(8), 5);
 
     bit_writer.flush();
     sink.flush();
     ////return transform(out, expanded, false);
+
+    // Remove a byte that is only padding.
+    if ((expanded.size() * 5) % 8 != 0)
+    {
+        BITCOIN_ASSERT(out.back() == 0x00);
+        out.resize(out.size() - 1u);
+    }
+
     return true;
 }
 
