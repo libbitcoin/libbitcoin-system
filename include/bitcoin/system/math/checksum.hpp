@@ -81,7 +81,7 @@ BC_API data_chunk bech32_build_checked(uint8_t version,
 /// The data parameter may obtained from a witness address using decode_base32.
 /// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
-    data_chunk& out_program, const data_chunk& data,
+    data_chunk& out_program, const data_chunk& checked,
     const std::string& prefix);
 
 } // namespace system

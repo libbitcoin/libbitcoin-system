@@ -74,12 +74,14 @@ std::string encode_base32(const data_chunk& data)
 
 bool decode_base32(data_chunk& out, const std::string& in)
 {
+    if (has_mixed_ascii_case(in))
+        return false;
+
     size_t index = 0;
-    const auto lowered = ascii_to_lower(in);
-    data_chunk expanded(lowered.size(), 0x00);
+    data_chunk expanded(in.size(), 0x00);
 
     // This cannot be out of bounds because characters are < 256.
-    for (auto character: lowered)
+    for (auto character: in)
         if (((expanded[index++] = decode[character])) == 0xff)
             return false;
 

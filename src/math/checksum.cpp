@@ -95,9 +95,9 @@ data_chunk bech32_build_checked(uint8_t version, const data_chunk& data,
 }
 
 bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
-    const data_chunk& data, const std::string& prefix)
+    const data_chunk& checked, const std::string& prefix)
 {
-    if (data.empty() || prefix.empty())
+    if (checked.empty() || prefix.empty())
         return false;
 
     // Get the size of the expanded prefix.
@@ -107,7 +107,7 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
     auto expanded = build_chunk(
     {
         data_chunk(prefix_size),
-        base32_expand(data)
+        base32_expand(checked)
     });
 
     // Expanded the prefix into the prefix buffer.
@@ -120,7 +120,7 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
     // Cannot fail because the expansion was performed here.
     base32_compact(out_program, data_chunk
     (
-        std::next(expanded.begin(), prefix_size + sizeof(out_version)),
+        std::next(expanded.begin(), prefix_size + 1u),
         std::prev(expanded.end(), bech32_checksum_size)
     ));
 
