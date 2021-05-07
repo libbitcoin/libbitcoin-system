@@ -214,12 +214,12 @@ witness_address::parse_result witness_address::parse_address(
     if (payload.length() < checksum_length + sizeof(version_))
         return parse_result::payload_too_short;
 
-    data_chunk data;
-    if (!decode_base32(data, payload))
+    base32_chunk checked;
+    if (!decode_base32(checked, payload))
         return parse_result::payload_not_base32;
 
     // Verify the bech32 checksum and extract version and program.
-    if (!bech32_verify_checked(out_version, out_program, data, out_prefix))
+    if (!bech32_verify_checked(out_version, out_program, out_prefix, checked))
         return parse_result::checksum_invalid;
 
     if (is_invalid_version(out_version))
@@ -359,7 +359,7 @@ witness_address::operator bool() const
 
 std::string witness_address::encoded() const
 {
-    const auto checked = bech32_build_checked(version_, program_, prefix_);
+    const auto checked = bech32_build_checked(version_, prefix_, program_);
     return prefix_ + separator + encode_base32(checked);
 }
 

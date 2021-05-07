@@ -20,14 +20,22 @@
 #define LIBBITCOIN_SYSTEM_BASE_32_HPP
 
 #include <string>
+#include <vector>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+typedef boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<5, 5,
+    boost::multiprecision::unsigned_magnitude,
+    boost::multiprecision::unchecked, void>> uint5_t;
+typedef std::vector<uint5_t> base32_chunk;
+
 // This is NOT an implementation of RFC 4648: tools.ietf.org/html/rfc4648
-// This is a generic byte-aligned data encoder fully compliant with the data
+// This is a generic data-text encoder fully compliant with the data
 // conversion aspect of BIP713. However, unlike BIP173 this is entirely
 // decoupled from bitcoin semantics. BIP173 requires version and checksum
 // incorporation, fed into an internal stage of encoding. This makes unusable
@@ -39,9 +47,8 @@ namespace system {
 // is not a texual encoding. Instead it is a simple expansion of the original
 // data to 5 bits per byte. This would be inconsequential but for the BIP173
 // specification that bitcoin segregated witness script version and checksum
-// be written directly to the expanded encoding with purposeful non-conformance
-// with its own base32 data mapping. These elements must be injected into and
-// extracted from the intermediate stage of the base32 encoding.
+// be written directly to the expanded encoding. These elements must be injected
+// into and extracted from the intermediate stage of the base32 encoding.
 
 // For these reasons we provide bech32_build_checked and bech32_verify_checked
 // functions as a bridge for base32 for those working with witness addresses.
@@ -62,36 +69,36 @@ namespace system {
 // but may not round trip (as is the case with BIP173 address encoding).
 
 /**
-* Convert bytes to a base32 string.
-* @return the base32 encoded string.
+* Convert data to a base32 string.
 */
 BC_API std::string encode_base32(const data_chunk& data);
 
 /**
- * Convert a base32 string to a byte vector.
- * The input is invalid if mixed case, any character is not from base32
- * character set, or expanded.size % 8 != 0.
- * @return false if invalid input.
+ * Convert a base32 string to bytes.
+ * False if mixed case or any character is not from the base32 character set.
  */
 BC_API bool decode_base32(data_chunk& out, const std::string& in);
 
 /**
- * Expand any data (8 bit bytes) to a vector of 5 bit bytes.
- * @return the expanded data. This is an internal intermediate base32 encoding
- * step, exposed only because it is required to implement the bech32 checksum
- * fuctions. If you are working with addresses you probably don't need it.
- */
-BC_API data_chunk base32_expand(const data_chunk& data);
+* Convert base32 data to a base32 string.
+*/
+BC_API std::string encode_base32(const base32_chunk& data);
 
 /**
- * Compact bytes with 5 bit values to vector of 8 bit bytes.
- * The input is invalid if any byte has a value greater than (2^5)-1 or if
- * expanded.size % 8 != 0. This is an internal intermediate base32 encoding
- * step, exposed only because it is required to implement the bech32 checksum
- * fuctions. If you are working with addresses you probably don't need it.
- * @return false if invalid input.
+ * Convert a base32 string to base32 data.
+ * False if mixed case or any character is not from the base32 character set.
  */
-BC_API bool base32_compact(data_chunk& out, const data_chunk& expanded);
+BC_API bool decode_base32(base32_chunk& out, const std::string& in);
+
+/**
+ * Expand any vector of 8 bit bytes to a vector of 5 bit bytes.
+ */
+BC_API base32_chunk base32_expand(const data_chunk& data);
+
+/**
+ * Compact any vector of 5 bit bytes to vector of 8 bit bytes.
+ */
+BC_API data_chunk base32_compact(const base32_chunk& expanded);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

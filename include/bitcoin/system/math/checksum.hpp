@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/data_slice.hpp>
 
@@ -73,16 +74,18 @@ BC_API bool verify_checksum(const data_slice& data);
 
 /// Combine witness version, program and checksum.
 /// The result may be passed to encode_base32 when creating a witness address.
-/// For implementation details see wallet::witness_address.
-BC_API data_chunk bech32_build_checked(uint8_t version,
-    const data_chunk& program, const std::string& prefix);
+/// For implementation details see wallet::witness_address. Version is limited
+/// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
+/// zero versions select bech32m (vs. bech32), resulting in distinct checksum.
+BC_API base32_chunk bech32_build_checked(uint8_t version,
+    const std::string& prefix, const data_chunk& program);
 
 /// Verify the bech32 checksum and extract witness version and program.
 /// The data parameter may obtained from a witness address using decode_base32.
 /// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
-    data_chunk& out_program, const data_chunk& checked,
-    const std::string& prefix);
+    data_chunk& out_program, const std::string& prefix,
+    const base32_chunk& checked);
 
 } // namespace system
 } // namespace libbitcoin

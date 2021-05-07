@@ -312,9 +312,6 @@
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\external\bech32.c">
-      <Filter>src\math\external</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
@@ -1374,9 +1371,6 @@
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
-      <Filter>src\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\math\external\bech32.h">
       <Filter>src\math\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">

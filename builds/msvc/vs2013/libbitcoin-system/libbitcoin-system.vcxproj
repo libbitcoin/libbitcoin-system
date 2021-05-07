@@ -169,7 +169,6 @@
     <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c" />
-    <ClCompile Include="..\..\..\..\src\math\external\bech32.c" />
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha512.c" />
@@ -545,7 +544,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\witness_address.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
-    <ClInclude Include="..\..\..\..\src\math\external\bech32.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha512.h" />

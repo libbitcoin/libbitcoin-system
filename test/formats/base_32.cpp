@@ -127,67 +127,56 @@ BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector05__expected)
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector00__expected)
 {
     // []=>[]
-    const data_chunk expanded{};
+    const base32_chunk expanded{};
     const data_chunk expected{};
     data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector01__expected)
 {
-    // [xxx11111][xxx111pp]=>
+    // [11111][111pp]=>
     // [11111111]
-    const data_chunk expanded{ 0x1f, 0x1c };
+    const base32_chunk expanded{ 0x1f, 0x1c };
     const data_chunk expected(1, 0xff);
-    data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector02__expected)
 {
-    // [xxx11111][xxx11111][xxx11111][xxx1pppp]=>
+    // [11111][11111][11111][1pppp]=>
     // [11111111][11111111]
-    const data_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x10 };
+    const base32_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x10 };
     const data_chunk expected(2, 0xff);
-    data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector03__expected)
 {
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx1111p]=>
+    // [11111][11111][11111][11111][1111p]=>
     // [11111111][11111111][11111111]
-    const data_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
+    const base32_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
     const data_chunk expected(3, 0xff);
-    data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector04__expected)
 {
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11ppp]=>
+    // [11111][11111][11111][11111][11111][11111][11ppp]=>
     // [11111111][11111111][11111111][11111111]
-    const data_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
+    const base32_chunk expanded{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
     const data_chunk expected(4, 0xff);
-    data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 // Minimum unpadded (non-zero) size.
 BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector05__expected)
 {
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111]=>
+    // [11111][11111][11111][11111][11111][11111][11111][11111]=>
     // [11111111][11111111][11111111][11111111][11111111]
-    const data_chunk expanded(8, 0x1f);
+    const base32_chunk expanded(8, 0x1f);
     const data_chunk expected((expanded.size() * 5) / 8, 0xff);
-    data_chunk out;
-    BOOST_REQUIRE(base32_compact(out, expanded));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BOOST_REQUIRE_EQUAL(base32_compact(expanded), expected);
 }
 
 // base32_expand
@@ -195,44 +184,44 @@ BOOST_AUTO_TEST_CASE(base_32__base32_compact__vector05__expected)
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector00__expected)
 {
     // []=>[]
-    const data_chunk expected{};
     const data_chunk compacted{};
+    const base32_chunk expected{};
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector01__expected)
 {
     // [11111111]=>
-    // [xxx11111][xxx111pp]
-    const data_chunk expected{ 0x1f, 0x1c };
+    // [11111][111pp]
     const data_chunk compacted(1, 0xff);
+    const base32_chunk expected{ 0x1f, 0x1c };
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector02__expected)
 {
     // [11111111][11111111]=>
-    // [xxx11111][xxx11111][xxx11111][xxx1pppp]
-    const data_chunk expected{ 0x1f, 0x1f, 0x1f, 0x10 };
+    // [11111][11111][11111][1pppp]
     const data_chunk compacted(2, 0xff);
+    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x10 };
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector03__expected)
 {
     // [11111111][11111111][11111111]=>
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx1111p]
-    const data_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
+    // [11111][11111][11111][11111][1111p]
     const data_chunk compacted(3, 0xff);
+    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector04__expected)
 {
     // [11111111][11111111][11111111][11111111]=>
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11ppp]
-    const data_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
+    // [11111][11111][11111][11111][11111][11111][11ppp]
     const data_chunk compacted(4, 0xff);
+    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 
@@ -240,9 +229,9 @@ BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector04__expected)
 BOOST_AUTO_TEST_CASE(base_32__base32_expand__vector05__expected)
 {
     // [11111111][11111111][11111111][11111111][11111111]=>
-    // [xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111][xxx11111]
+    // [11111][11111][11111][11111][11111][11111][11111][11111]
     const data_chunk compacted(5, 0xff);
-    const data_chunk expected((compacted.size() * 8) / 5, 0x1f);
+    const base32_chunk expected((compacted.size() * 8) / 5, 0x1f);
     BOOST_REQUIRE_EQUAL(base32_expand(compacted), expected);
 }
 

@@ -108,8 +108,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/math/stealth.cpp \
     src/math/external/aes256.c \
     src/math/external/aes256.h \
-    src/math/external/bech32.c \
-    src/math/external/bech32.h \
     src/math/external/crypto_scrypt.c \
     src/math/external/crypto_scrypt.h \
     src/math/external/hmac_sha256.c \

@@ -61,32 +61,50 @@ constexpr uint8_t decode[] =
 
 std::string encode_base32(const data_chunk& data)
 {
-    size_t index = 0;
-    const auto expanded = base32_expand(data);
-    std::string out(expanded.size(), '\0');
+    return encode_base32(base32_expand(data));
+}
 
-    // This cannot be out of bounds because expanded bytes are < 32.
-    for (auto value: expanded)
-        out[index++] = encode[value];
+std::string encode_base32(const base32_chunk& data)
+{
+    std::string out;
+    out.reserve(data.size());
+
+    // encode[] cannot be out of bounds because expanded bytes are < 32.
+    for (auto value: data)
+        out.push_back(encode[value.convert_to<uint8_t>()]);
     
     return out;
 }
 
 bool decode_base32(data_chunk& out, const std::string& in)
 {
+    base32_chunk expanded;
+    if (!decode_base32(expanded, in))
+        return false;
+
+    out = base32_compact(expanded);
+    return true;
+}
+
+bool decode_base32(base32_chunk& out, const std::string& in)
+{
     if (has_mixed_ascii_case(in))
         return false;
 
-    size_t index = 0;
-    data_chunk expanded(in.size(), 0x00);
+    out.clear();
+    out.reserve(in.size());
 
-    // This cannot be out of bounds because characters are < 256.
+    // decode[] cannot be out of bounds because char are < 256.
     for (auto character: in)
-        if (((expanded[index++] = decode[character])) == 0xff)
+    {
+        const auto value = decode[character];
+        if (value == 0xff)
             return false;
 
-    // This cannot be false because decoded bytes are < 32.
-    return base32_compact(out, expanded);
+        out.push_back(static_cast<uint5_t>(value));
+    }
+
+    return true;
 }
 
 // compact/expand
@@ -146,66 +164,43 @@ static bool transform(data_chunk& out, const data_chunk& data, bool expand)
 
 #endif
 
-data_chunk base32_expand(const data_chunk& data)
+// This is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
+base32_chunk base32_expand(const data_chunk& data)
 {
-    // The bit reader reads zeros past end until exhaustion check.
-    // The bit writer pads bits up to the last whole byte upon flush.
-    // This is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
+    base32_chunk out;
     data_source source(data);
     istream_reader reader(source);
     istream_bit_reader bit_reader(reader);
 
+    // This is how c++ developers do it. :)
+    while (!bit_reader.is_exhausted())
+        out.push_back(bit_reader.read_bits(5));
+
+    // The bit reader reads zeros past end as padding.
+    return out;
+}
+
+// This is a ((n * 5) / 8) operation, ((n * 5) % 8) are padding.
+data_chunk base32_compact(const base32_chunk& data)
+{
     data_chunk out;
     data_sink sink(out);
     ostream_writer writer(sink);
     ostream_bit_writer bit_writer(writer);
 
     // This is how c++ developers do it. :)
-    while (!bit_reader.is_exhausted())
-        bit_writer.write_bits(bit_reader.read_bits(5), 8);
+    for (const auto& value: data)
+        bit_writer.write_bits(value.convert_to<uint8_t>(), 5);
 
     bit_writer.flush();
     sink.flush();
-    ////transform(out, data, true);
-    return out;
-}
 
-bool base32_compact(data_chunk& out, const data_chunk& expanded)
-{
-    ////// Only a clean read and write on byte boundaries is allowed.
-    ////// This is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
-    ////if ((expanded.size() * 5) % 8 != 0)
-    ////    return false;
-
-    // Top 3 bits must be zero for consistency, as they carry no information.
-    if (!std::all_of(expanded.begin(), expanded.end(),
-        [](uint8_t value) { return value < (1 << 5); }))
-        return false;
-
-    data_sink sink(out);
-    ostream_writer writer(sink);
-    ostream_bit_writer bit_writer(writer);
-
-    data_source source(expanded);
-    istream_reader reader(source);
-    istream_bit_reader bit_reader(reader);
-
-    // This is how c++ developers do it. :)
-    while (!bit_reader.is_exhausted())
-        bit_writer.write_bits(bit_reader.read_bits(8), 5);
-
-    bit_writer.flush();
-    sink.flush();
-    ////return transform(out, expanded, false);
-
-    // Remove a byte that is only padding.
-    if ((expanded.size() * 5) % 8 != 0)
-    {
-        BITCOIN_ASSERT(out.back() == 0x00);
+    // The bit writer writes zeros past end as padding.
+    // Remove a byte that is only padding (last byte may remain padded). 
+    if ((data.size() * 5) % 8 != 0)
         out.resize(out.size() - 1u);
-    }
 
-    return true;
+    return out;
 }
 
 } // namespace system
