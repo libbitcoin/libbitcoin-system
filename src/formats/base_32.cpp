@@ -97,7 +97,8 @@ bool decode_base32(base32_chunk& out, const std::string& in)
     // decode[] cannot be out of bounds because char are < 256.
     for (auto character: in)
     {
-        const auto value = decode[character];
+        const auto value = decode[static_cast<uint8_t>(character)];
+
         if (value == 0xff)
             return false;
 
