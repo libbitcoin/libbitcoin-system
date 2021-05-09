@@ -236,7 +236,7 @@ inline opcode operation::nominal_opcode_from_data(const data_chunk& data)
 
 inline opcode operation::opcode_from_version(uint8_t value)
 {
-    BITCOIN_ASSERT(value <= positive_16);
+    BITCOIN_ASSERT(value <= number::positive_16);
     return (value == number::positive_0) ? opcode::push_size_0 :
         operation::opcode_from_positive(value);
 }
