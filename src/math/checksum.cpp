@@ -77,12 +77,13 @@ static size_t bech32_expanded_prefix_size(const std::string& prefix)
 
 static void bech32_expand_prefix(base32_chunk& out, const std::string& prefix)
 {
-    const auto size = prefix.size();
+    const auto lower = ascii_to_lower(prefix);
+    const auto size = lower.size();
     out[size] = 0x00;
 
     for (size_t index = 0; index < size; ++index)
     {
-        char character = prefix[index];
+        char character = lower[index];
         out[index] = character >> 5;
         out[size + 1u + index] = character;
     }
@@ -92,7 +93,7 @@ static void bech32_expand_checksum(base32_chunk& out, uint32_t checksum)
 {
     auto index = out.size() - bech32_checksum_size;
 
-    // The top two bits of the 32 bit checksum are discarded.
+    // The top two bits of the 32 bit checksum are unused/discarded.
     out[index++] = (checksum >> 25);
     out[index++] = (checksum >> 20);
     out[index++] = (checksum >> 15);
@@ -113,7 +114,7 @@ static uint32_t bech32_checksum(const base32_chunk& data)
     for (const auto& value: data)
     {
         const uint32_t coeficient = (checksum >> 25);
-        checksum = ((checksum & 0x1ffffff) << 5) ^ value.convert_to<uint8_t>();
+        checksum = ((checksum & 0x01ffffff) << 5) ^ value.convert_to<uint8_t>();
 
         if (coeficient & 0x01) checksum ^= generator[0];
         if (coeficient & 0x02) checksum ^= generator[1];
@@ -125,16 +126,17 @@ static uint32_t bech32_checksum(const base32_chunk& data)
     return checksum;
 }
 
-// Version zero implies bech32, otherwise bech32m.
-static uint32_t constant(uint8_t version)
+// BIP173: All versions use 0x00000001 (bech32).
+// BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
+static uint32_t bech32_constant(uint8_t version)
 {
-    return version > 0 ? 0x2bc830a3 : 0x00000001;
+    return version == 0 ? 0x00000001 : 0x2bc830a3;
 }
 
 static void bech32_insert_checksum(base32_chunk& data, uint8_t version)
 {
     // Compute the checksum for the given version.
-    const auto checksum = bech32_checksum(data) ^ constant(version);
+    const auto checksum = bech32_checksum(data) ^ bech32_constant(version);
 
     // Expand the checksum into the checksum buffer.
     bech32_expand_checksum(data, checksum);
@@ -143,11 +145,11 @@ static void bech32_insert_checksum(base32_chunk& data, uint8_t version)
 static bool bech32_verify_checksum(const base32_chunk& data, uint8_t version)
 {
     // Compute the checksum and compare to versioned expectation.
-    return bech32_checksum(data) == constant(version);
+    return bech32_checksum(data) == bech32_constant(version);
 }
 
-base32_chunk bech32_build_checked(uint8_t version, const std::string& prefix,
-    const data_chunk& program)
+base32_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
+    const std::string& prefix)
 {
     // Get the expanded prefix size.
     const auto prefix_size = bech32_expanded_prefix_size(prefix);
@@ -174,7 +176,7 @@ base32_chunk bech32_build_checked(uint8_t version, const std::string& prefix,
 
     // [version|program|checksum]
     // Return the checked data.
-    return{ std::next(buffer.begin(), prefix_size), buffer.end() };
+    return { std::next(buffer.begin(), prefix_size), buffer.end() };
 }
 
 bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,

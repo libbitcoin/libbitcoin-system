@@ -71,6 +71,8 @@ BC_API bool verify_checksum(const data_slice& data);
 /// byte encoder/decoder, yet fully complaint with BIP173. The output from
 /// decode_base32 can be fed directly to bech32_verify_checked(data) and
 /// the output of bech32_build_checked can be fed directly to encode_base32.
+/// The implementation does not support unversioned bech32 payloads as there
+/// is no use case and support requires exposure of bech32 internals.
 
 /// Combine witness version, program and checksum.
 /// The result may be passed to encode_base32 when creating a witness address.
@@ -78,7 +80,7 @@ BC_API bool verify_checksum(const data_slice& data);
 /// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
 /// zero versions select bech32m (vs. bech32), resulting in distinct checksum.
 BC_API base32_chunk bech32_build_checked(uint8_t version,
-    const std::string& prefix, const data_chunk& program);
+    const data_chunk& program, const std::string& prefix);
 
 /// Verify the bech32 checksum and extract witness version and program.
 /// The data parameter may obtained from a witness address using decode_base32.

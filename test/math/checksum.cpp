@@ -216,45 +216,45 @@ const auto bip173_p2wsh_program = sha256_hash_chunk(chain::script(bip173_p2wsh_o
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wkh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_mainnet_prefix, bip173_p2wkh_program);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program, bip173_mainnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_mainnet_p2wkh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wkh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_testnet_prefix, bip173_p2wkh_program);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program, bip173_testnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_testnet_p2wkh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wsh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_mainnet_prefix, bip173_p2wsh_program);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program, bip173_mainnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_mainnet_p2wsh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_testnet_prefix, bip173_p2wsh_program);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program, bip173_testnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_testnet_p2wsh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_one_empty__expected_size)
 {
-    const auto checked = bech32_build_checked(1, "", {});
+    const auto checked = bech32_build_checked(1, {}, "");
     BOOST_REQUIRE_EQUAL(checked.size(), 1 + 0 + 6);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "p2gdwpf");
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__truncated_version_one_empty__same_as_version_one)
 {
-    const auto checked = bech32_build_checked(33, "", {});
+    const auto checked = bech32_build_checked(33, {}, "");
     BOOST_REQUIRE_EQUAL(checked.size(), 1 + 0 + 6);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "p2gdwpf");
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__prefix_empty_payload__size_same_as_empty_prefix)
 {
-    const auto checked = bech32_build_checked(0, "abcdef", {});
+    const auto checked = bech32_build_checked(0, {}, "abcdef");
     BOOST_REQUIRE_EQUAL(checked.size(), 1 + 0 + 6);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "qgfl9ah");
 }
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__prefix_empty_payload__size_
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expected_size)
 {
     const data_chunk program{ 1, 2, 3, 4, 5 };
-    const auto checked = bech32_build_checked(0, "", program);
+    const auto checked = bech32_build_checked(0, program, "");
     BOOST_REQUIRE_EQUAL(checked.size(), 1 + (program.size() * 8) / 5 + 6);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "qqypqxpq939vyak");
 }
