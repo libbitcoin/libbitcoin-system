@@ -1151,9 +1151,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\collection.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\color.hpp">
-      <Filter>include\bitcoin\system\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\conditional_lock.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>

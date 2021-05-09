@@ -162,7 +162,6 @@
 #include <bitcoin/system/utility/bit_reader.hpp>
 #include <bitcoin/system/utility/bit_writer.hpp>
 #include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/color.hpp>
 #include <bitcoin/system/utility/conditional_lock.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
