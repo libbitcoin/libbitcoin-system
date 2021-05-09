@@ -202,6 +202,7 @@
     <ClCompile Include="..\..\..\..\test\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\checked.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum.cpp">
       <ObjectFileName>$(IntDir)test_wallet_dictionary_electrum.obj</ObjectFileName>

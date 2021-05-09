@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(dictionary_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
 

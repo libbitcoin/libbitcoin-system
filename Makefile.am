@@ -402,6 +402,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/tiff.cpp \
     test/wallet/bitcoin_uri.cpp \
     test/wallet/checked.cpp \
+    test/wallet/dictionaries.cpp \
     test/wallet/dictionary.cpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \

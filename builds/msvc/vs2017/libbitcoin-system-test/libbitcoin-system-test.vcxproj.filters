@@ -384,6 +384,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\checked.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>

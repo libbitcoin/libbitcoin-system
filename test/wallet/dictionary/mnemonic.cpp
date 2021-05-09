@@ -24,7 +24,7 @@
 
 // TODO: determine if any overlaps have distinct indexes.
 
-BOOST_AUTO_TEST_SUITE(dictionary_tests)
+BOOST_AUTO_TEST_SUITE(dictionary_mnemonic_tests)
 
 using namespace bc::system::wallet;
 static ptrdiff_t intersection(const dictionary& left, const dictionary& right)
