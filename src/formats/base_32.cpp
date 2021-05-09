@@ -110,62 +110,6 @@ bool decode_base32(base32_chunk& out, const std::string& in)
 
 // compact/expand
 
-#if defined(UNDEFINED)
-
-// This is how C developers do it. :P
-static bool transform(data_chunk& out, const data_chunk& data, bool expand)
-{
-    ////// Compact is a ((n * 5) / 8) operation, ((n * 5) % 8) must be zero.
-    ////if (!expand && (data.size() * 5) % 8 != 0)
-    ////    return false;
-
-    const uint32_t to_bits = expand ? 5 : 8;
-    const uint32_t from_bits = expand ? 8 : 5;
-    const uint32_t to_max = (1 << to_bits) - 1;
-    const uint32_t from_max = (1 << ((8 + 5) - 1)) - 1;
-
-    const auto is_valid = [=](uint8_t byte)
-        { return expand || byte < (1 << 5); };
-    const auto remainder = [=](uint32_t accumulator, uint32_t bits)
-        { return (accumulator << (to_bits - bits)) & to_max; };
-    const auto shift_in = [=](uint32_t accumulator, uint8_t byte)
-        { return ((accumulator << from_bits) | byte) & from_max; };
-    const auto shift_out = [](uint32_t acc, uint32_t bits)
-        { return acc >> bits; };
-    const auto push = [&](uint8_t byte)
-        { out.push_back(byte & to_max); };
-
-    uint32_t bits = 0;
-    uint32_t accumulator = 0;
-
-    for (const auto byte: data)
-    {
-        if (!is_valid(byte))
-            return false;
-
-        accumulator = shift_in(accumulator, byte);
-        bits += from_bits;
-
-        while (bits >= to_bits)
-        {
-            bits -= to_bits;
-            push(shift_out(accumulator, bits));
-        }
-    }
-
-    // Expand is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
-    BITCOIN_ASSERT(!expand || bits == (data.size() * 8) % 5);
-
-    if (bits > 0)
-        push(remainder(accumulator, bits));
-
-    // Expand cannot fail.
-    return true;
-}
-
-#endif
-
-// This is a ((n * 8) / 5) operation, ((n * 8) % 5) bits are padded.
 base32_chunk base32_expand(const data_chunk& data)
 {
     base32_chunk out;
@@ -178,10 +122,12 @@ base32_chunk base32_expand(const data_chunk& data)
         out.push_back(bit_reader.read_bits(5));
 
     // The bit reader reads zeros past end as padding.
+    // This is a ((n * 8) / 5) operation, so (5 - ((n * 8) % 5)) bits are pad.
+    ////const auto padded = (data.size() * 8) % 5 != 0;
+
     return out;
 }
 
-// This is a ((n * 5) / 8) operation, ((n * 5) % 8) are padding.
 data_chunk base32_compact(const base32_chunk& data)
 {
     data_chunk out;
@@ -197,9 +143,15 @@ data_chunk base32_compact(const base32_chunk& data)
     sink.flush();
 
     // The bit writer writes zeros past end as padding.
-    // Remove a byte that is only padding (last byte may remain padded). 
+    // This is a ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
+    // Remove a byte that is only padding, assumes base32_expand encoding.
     if ((data.size() * 5) % 8 != 0)
-        out.resize(out.size() - 1u);
+    {
+        // If pad byte is non-zero the expansion was not base32_expand, but
+        // it remains possible that zero but non-pad data may be passed.
+        // So we return an failure where the condition is detecable.
+        out.resize(out.back() == 0x00 ? out.size() - 1u : 0);
+    }
 
     return out;
 }
