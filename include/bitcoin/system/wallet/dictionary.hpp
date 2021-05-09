@@ -79,7 +79,7 @@ private:
 
     // Arrays of words are declared statically and held by reference here.
     // The array type is POD, so no words are copied into the array. Only
-    // This wrapper dictionary object is created for each word list, for
+    // this wrapper dictionary object is created for each word list, for
     // each dictionaries object constructed by various mnemonic classes.
     const words& words_;
 };

@@ -81,7 +81,7 @@ public:
     /// The language that contains the specified word, or language::none.
     /// If language::none is specified all dictionaries are searched.
     /// If any other language is specified the search is limited to it.
-    /// Dictionary order is not preserve in the case of conflicts.
+    /// Dictionary order is not preserved in the case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const std::string& word,
         language identifier=language::none) const;
@@ -89,7 +89,7 @@ public:
     /// The language that contains all specified words, or language::none.
     /// If language::none is specified all dictionaries are searched.
     /// If any other language is specified the search is limited to it.
-    /// Dictionary order is not preserve in the case of conflicts.
+    /// Dictionary order is not preserved in the case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const string_list& words,
         language identifier=language::none) const;
