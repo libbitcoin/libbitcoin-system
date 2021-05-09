@@ -111,6 +111,9 @@ public:
     /// Restricted to sized data, avoids conversion to numeric opcodes.
     static opcode nominal_opcode_from_data(const data_chunk& data);
 
+    /// Convert the [0..16] value to the corresponding opcode (or undefined).
+    static opcode opcode_from_version(uint8_t value);
+
     /// Convert the [1..16] value to the corresponding opcode (or undefined).
     static opcode opcode_from_positive(uint8_t value);
 

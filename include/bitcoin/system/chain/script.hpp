@@ -178,6 +178,8 @@ public:
     static bool is_pay_public_key_pattern(const operation::list& ops);
     static bool is_pay_key_hash_pattern(const operation::list& ops);
     static bool is_pay_script_hash_pattern(const operation::list& ops);
+    static bool is_pay_witness_pattern(const operation::list& ops);
+    static bool is_pay_witness_key_hash_pattern(const operation::list& ops);
     static bool is_pay_witness_script_hash_pattern(const operation::list& ops);
 
     /// Common input patterns (skh is also consensus).
@@ -195,6 +197,8 @@ public:
         const compressed_list& points);
     static operation::list to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points);
+    static  operation::list to_pay_witness_pattern(uint8_t version,
+        const data_slice& data);
     static operation::list to_pay_witness_key_hash_pattern(
         const short_hash& hash);
     static operation::list to_pay_witness_script_hash_pattern(

@@ -1033,6 +1033,20 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
+bool script::is_pay_witness_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].is_version()
+        && ops[1].is_push();
+}
+
+bool script::is_pay_witness_key_hash_pattern(const operation::list& ops)
+{
+    return ops.size() == 2
+        && ops[0].code() == opcode::push_size_0
+        && ops[1].code() == opcode::push_size_20;
+}
+
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip141 validation rules.
 //*****************************************************************************
@@ -1177,6 +1191,15 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     ops.emplace_back(op_n);
     ops.emplace_back(opcode::checkmultisig);
     return ops;
+}
+
+operation::list script::to_pay_witness_pattern(uint8_t version, const data_slice& data)
+{
+    return
+    {
+        { operation::opcode_from_version(version) },
+        { to_chunk(data) },
+    };
 }
 
 operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
