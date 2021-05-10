@@ -53,12 +53,12 @@ bool dictionaries<Count, Size>::exists(language identifier) const
 template<size_t Count, size_t Size>
 language dictionaries<Count, Size>::to_identifier(const std::string& name) const
 {
-    const auto it = to_dictionary(dictionary<Size>::to_identifier(name));
+    const auto it = to_dictionary(name);
     return it != dictionaries_.end() ? it->identifier() : language::none;
 }
 
 template<size_t Count, size_t Size>
-const std::string& dictionaries<Count, Size>::to_name(language identifier) const
+std::string dictionaries<Count, Size>::to_name(language identifier) const
 {
     const auto it = to_dictionary(identifier);
     return it != dictionaries_.end() ? it->name() : "";
@@ -97,8 +97,7 @@ dictionaries<Count, Size>::index(const string_list& words,
     language identifier) const
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->index(words) :
-        result{ { missing } };
+    return it != dictionaries_.end() ? it->index(words) : result{};
 }
 
 template<size_t Count, size_t Size>
@@ -152,6 +151,17 @@ dictionaries<Count, Size>::to_dictionary(language identifier) const
         [&](const dictionary<Size>& dictionary)
         {
             return dictionary.identifier() == identifier;
+        });
+}
+
+template<size_t Count, size_t Size>
+typename dictionaries<Count, Size>::list::const_iterator
+dictionaries<Count, Size>::to_dictionary(const std::string& name) const
+{
+    return std::find_if(dictionaries_.begin(), dictionaries_.end(),
+        [&](const dictionary<Size>& dictionary)
+        {
+            return dictionary.name() == name;
         });
 }
 

@@ -55,7 +55,7 @@ public:
     language to_identifier(const std::string& name) const;
 
     /// The name of the specified dictionary, empty string if not contained.
-    const std::string& to_name(language identifier) const;
+    std::string to_name(language identifier) const;
 
     /// Search.
 
@@ -75,7 +75,7 @@ public:
     /// -1 for any word that is not found in the specified language.
     /// The word index for each word that is found in the specified language.
     /// The word indexes are returned in the same order as the words list.
-    /// All -1 if the language does not exist.
+    /// Empty list if language does not exist.
     result index(const string_list& words, language identifier) const;
 
     /// The language that contains the specified word, or language::none.
@@ -95,8 +95,9 @@ public:
         language identifier=language::none) const;
 
 private:
-    // Obtain an iterator to the specified language dictionary.
+    // Obtain an iterator to the specified dictionary.
     typename list::const_iterator to_dictionary(language identifier) const;
+    typename list::const_iterator to_dictionary(const std::string& name) const;
 
     // This dictionary collection creates only one word of state for each
     // dictionary reference, each which creates only one word of state for the

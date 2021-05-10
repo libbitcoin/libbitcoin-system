@@ -111,6 +111,8 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
     // Reserve buffer to include entropy and checksum, always one byte.
     data_chunk buffer;
     buffer.reserve(entropy_size(words) + 1u);
+
+    // Safe to assume valid indexes here as containment has been verified.
     const auto indexes = dictionaries_.index(words, identifier);
 
     // Word indexes are not byte aligned, high-to-low bit writer required.
