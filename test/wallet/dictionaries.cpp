@@ -300,6 +300,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains1__overlapping_wordlists__expected)
     BOOST_REQUIRE(lingo == language::zh_Hans || lingo == language::zh_Hant);
 }
 
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__empty__none)
+{
+    BOOST_REQUIRE(instance.contains("") == language::none);
+}
+
 BOOST_AUTO_TEST_CASE(dictionaries__contains2__valid_words__expected)
 {
     BOOST_REQUIRE(instance.contains(
@@ -346,6 +351,12 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains2__mismatched_identifier__none)
         test_words_es[7],
         test_words_es[9]
     }, language::ja) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries__contains2__empty__en)
+{
+    // This is based on the order of dictionary insertion (first).
+    BOOST_REQUIRE(instance.contains(string_list{}) == language::en);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -157,6 +157,11 @@ BOOST_AUTO_TEST_CASE(dictionary__contains1__words__expected)
     BOOST_REQUIRE(!instance.contains(""));
 }
 
+BOOST_AUTO_TEST_CASE(dictionary__contains1__empty__false)
+{
+    BOOST_REQUIRE(!instance.contains(""));
+}
+
 BOOST_AUTO_TEST_CASE(dictionary__contains2__valid_words__true)
 {
     BOOST_REQUIRE(instance.contains(
@@ -179,6 +184,11 @@ BOOST_AUTO_TEST_CASE(dictionary__contains2__invalid_word__false)
         test_words_es[6],
         test_words_es[8]
     }));
+}
+
+BOOST_AUTO_TEST_CASE(dictionary__contains2__empty__true)
+{
+    BOOST_REQUIRE(instance.contains(string_list{}));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
