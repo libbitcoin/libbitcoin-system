@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(dictionary__name__empty__expected)
     BOOST_REQUIRE_EQUAL(dictionary<0>(language::ko, {}).name(), "ko");
     BOOST_REQUIRE_EQUAL(dictionary<0>(language::zh_Hans, {}).name(), "zh_Hans");
     BOOST_REQUIRE_EQUAL(dictionary<0>(language::zh_Hant, {}).name(), "zh_Hant");
-    BOOST_REQUIRE_EQUAL(dictionary<0>(language::none, {}).name(), "none");
+    BOOST_REQUIRE_EQUAL(dictionary<0>(language::none, {}).name(), "");
 }
 
 BOOST_AUTO_TEST_CASE(dictionary__at1__indexes__expected)
