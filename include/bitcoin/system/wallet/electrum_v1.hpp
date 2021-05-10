@@ -84,7 +84,8 @@ public:
     electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
     electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
 
-    /// Deserialize an electrum_v1 sentence.
+    /// Serialized sentence.
+    friend std::istream& operator>>(std::istream& in, electrum_v1& to);
     friend std::ostream& operator<<(std::ostream& out, const electrum_v1& of);
 
 protected:

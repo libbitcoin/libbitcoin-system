@@ -116,7 +116,8 @@ public:
     hd_private to_seed(const std::string& passphrase="",
         uint64_t chain=hd_private::mainnet) const;
 
-    /// Deserialize an electrum sentence.
+    /// Serialized sentence.
+    friend std::istream& operator>>(std::istream& in, electrum& to);
     friend std::ostream& operator<<(std::ostream& out, const electrum& of);
 
 protected:
@@ -155,17 +156,15 @@ protected:
 private:
     typedef struct { data_chunk entropy; string_list words; } result;
 
-    // public
+    static bool is_normalized(const string_list& words);
     static bool is_valid_seed_prefix(seed_prefix prefix);
     static bool is_valid_two_factor_authentication_size(size_t count);
 
-    // private
     static result grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit);
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
 
-    static bool normalized(const string_list& words);
     static std::string normalizer(const std::string& text);
     static hd_private seeder(const string_list& words,
         const std::string& passphrase, uint64_t chain);

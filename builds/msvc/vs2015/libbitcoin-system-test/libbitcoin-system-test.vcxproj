@@ -224,6 +224,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\languages.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp">
       <ObjectFileName>$(IntDir)test_wallet_mnemonic.obj</ObjectFileName>

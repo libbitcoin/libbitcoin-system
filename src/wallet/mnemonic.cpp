@@ -134,11 +134,6 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
 }
 
-bool mnemonic::normalized(const string_list& words)
-{
-    return contained_by(words) != language::none;
-}
-
 std::string mnemonic::normalizer(const std::string& text)
 {
 #ifdef WITH_ICU
@@ -336,6 +331,12 @@ std::istream& operator>>(std::istream& in, mnemonic& to)
         throw istream_exception(value);
 
     return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const mnemonic& of)
+{
+    out << of.sentence();
+    return out;
 }
 
 } // namespace wallet

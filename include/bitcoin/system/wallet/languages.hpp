@@ -87,10 +87,9 @@ public:
     bool operator<(const languages& other) const;
     bool operator==(const languages& other) const;
     bool operator!=(const languages& other) const;
-    languages& operator=(const languages& other);
 
-    /// Serialize a joined sentence from member words.
-    friend std::ostream& operator<<(std::ostream& out, const languages& of);
+    /// Assignment.
+    languages& operator=(const languages& other);
 
 protected:
     languages();

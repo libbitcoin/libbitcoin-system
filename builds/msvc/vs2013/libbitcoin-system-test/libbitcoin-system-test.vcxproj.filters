@@ -420,6 +420,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\hd_public.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\languages.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>

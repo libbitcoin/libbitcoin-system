@@ -715,6 +715,7 @@ if (with-tests)
         "../../test/wallet/encrypted_keys.cpp"
         "../../test/wallet/hd_private.cpp"
         "../../test/wallet/hd_public.cpp"
+        "../../test/wallet/languages.cpp"
         "../../test/wallet/message.cpp"
         "../../test/wallet/mnemonic.cpp"
         "../../test/wallet/mnemonic.hpp"

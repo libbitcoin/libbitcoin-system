@@ -254,6 +254,12 @@ std::istream& operator>>(std::istream& in, electrum_v1& to)
     return in;
 }
 
+std::ostream& operator<<(std::ostream& out, const electrum_v1& of)
+{
+    out << of.sentence();
+    return out;
+}
+
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

@@ -170,12 +170,6 @@ bool languages::operator!=(const languages& other) const
     return !(*this == other);
 }
 
-std::ostream& operator<<(std::ostream& out, const languages& of)
-{
-    out << of.sentence();
-    return out;
-}
-
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

@@ -217,7 +217,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
     return {};
 }
 
-bool electrum::normalized(const string_list& words)
+bool electrum::is_normalized(const string_list& words)
 {
     return contained_by(words) != language::none;
 }
@@ -397,7 +397,7 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
         !is_valid_two_factor_authentication_size(words.size()))
         return false;
 
-    if (!with_icu() && !normalized(words))
+    if (!with_icu() && !is_normalized(words))
         return false;
 
     return validator(words, prefix);
@@ -425,7 +425,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
     // words have not been prenormalized. However a collision on the version
     // bits of the resulting hash is certainly possible. So we exclude the
     // possibility of a mismatch by requiring prenormalized words.
-    if (!with_icu() && !normalized(words))
+    if (!with_icu() && !is_normalized(words))
         return seed_prefix::none;
 
     return prefixer(words);
@@ -516,7 +516,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    if (!with_icu() && !normalized(words))
+    if (!with_icu() && !is_normalized(words))
         return {};
 
     const auto tokens = system::split(normalizer(system::join(words)));
@@ -562,6 +562,12 @@ std::istream& operator>>(std::istream& in, electrum& to)
         throw istream_exception(value);
 
     return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const electrum& of)
+{
+    out << of.sentence();
+    return out;
 }
 
 } // namespace wallet
