@@ -217,7 +217,7 @@ electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
         return {};
 
     // Save original entropy and derived words.
-    return encoder(entropy, identifier);
+    return { entropy, encoder(entropy, identifier), identifier };
 }
 
 electrum_v1 electrum_v1::from_words(const string_list& words,
@@ -235,8 +235,8 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    // Save normalized words and derived entropy, original words are discarded.
-    return decoder(tokens, lexicon);
+    // Save normal words and derived entropy.
+    return { decoder(tokens, lexicon), tokens, identifier };
 }
 
 // operators
