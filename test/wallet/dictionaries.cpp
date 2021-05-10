@@ -22,4 +22,87 @@ BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
 
+const size_t test_dictionary_size = 10;
+typedef std::array<const char*, test_dictionary_size> test_words;
+
+const test_words test_words_en
+{
+    {
+        "abandon",
+        "ability",
+        "able",
+        "about",
+        "above",
+        "absent",
+        "absorb",
+        "abstract",
+        "absurd",
+        "abuse"
+    }
+};
+
+const test_words test_words_es
+{
+    {
+        "ábaco",
+        "abdomen",
+        "abeja",
+        "abierto",
+        "abogado",
+        "abono",
+        "aborto",
+        "abrazo",
+        "abrir",
+        "abuelo"
+    }
+};
+
+const test_words test_words_ja
+{
+    {
+        "あいこくしん",
+        "あいさつ",
+        "あいだ",
+        "あおぞら",
+        "あかちゃん",
+        "あきる",
+        "あけがた",
+        "あける",
+        "あこがれる",
+        "あさい"
+    }
+};
+
+const test_words test_words_zh_Hans
+{
+    {
+        "的",
+        "一",
+        "是",
+        "在",
+        "不",
+        "了",
+        "有",
+        "和",
+        "人",
+        "这"
+    }
+};
+
+const test_words test_words_zh_Hant
+{
+    {
+        "的",
+        "一",
+        "是",
+        "在",
+        "不",
+        "了",
+        "有",
+        "和",
+        "人",
+        "這"
+    }
+};
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -86,9 +86,11 @@ string_list dictionary<Size>::at(const search& indexes) const
 template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const
 {
-    // binary_search returns -1 if not found.
-    // Test cases ensure dictionaries are lexically sorted.
-    return system::binary_search(words_, word);
+    // Standard wordlists are not sorted for c++ < operator, so cannot use a
+    // binary_search (O(log2(n))) and instead must scan entire list (O(n)).
+    const auto it = std::find(words_.begin(), words_.end(), word);
+    return it == words_.end() ? -1 : 
+        static_cast<int32_t>(std::distance(words_.begin(), it));
 }
 
 template <size_t Size>

@@ -33,7 +33,7 @@ namespace system {
 namespace wallet {
 
 // Search container for a set of dictionaries with POD word lists.
-// POD dictionaries wrapper with per dictionary O(log2) search and O(1) index.
+// POD dictionaries wrapper with per dictionary O(n) search and O(1) index.
 template<size_t Count, size_t Size>
 class dictionaries
 {

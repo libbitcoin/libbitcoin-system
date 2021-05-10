@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/language.hpp>
 
@@ -32,7 +33,7 @@ namespace system {
 namespace wallet {
 
 // Search container for a dictionary of lexically-sorted words.
-// POD dictionary wrapper with O(log2) search and O(1) index.
+// POD dictionary wrapper with O(n) search and O(1) index.
 template<size_t Size>
 class dictionary
 {
@@ -40,6 +41,7 @@ public:
     typedef std::vector<size_t> search;
     typedef std::vector<int32_t> result;
     typedef std::array<const char*, Size> words;
+    static_assert(Size <= static_cast<size_t>(max_int32), "dictionary");
 
     /// The number of words in the dictionary.
     static constexpr size_t size() { return Size; };
