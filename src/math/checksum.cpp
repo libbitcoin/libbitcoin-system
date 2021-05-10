@@ -152,6 +152,10 @@ static bool bech32_verify_checksum(const base32_chunk& checked,
 base32_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
     const std::string& prefix)
 {
+    // Version expansion would truncate a value above 5 bits.
+    if (version >= (1 << 5))
+        return {};
+
     auto checked = base32_expand(program);
     checked.insert(checked.begin(), static_cast<uint5_t>(version));
     bech32_append_checksum(checked, prefix, version);
