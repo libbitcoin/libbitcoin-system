@@ -161,7 +161,6 @@ bool electrum_v1::is_valid_word_count(size_t count)
 // construction
 // ----------------------------------------------------------------------------
 
-// protected
 electrum_v1::electrum_v1()
   : languages()
 {

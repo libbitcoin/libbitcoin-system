@@ -74,6 +74,9 @@ public:
     /// Valid word counts (12 or 24 words).
     static bool is_valid_word_count(size_t count);
 
+    /// This instance is initialized invalid, but can be assigned to.
+    electrum_v1();
+
     /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
     electrum_v1(const std::string& sentence, language identifier=language::none);
@@ -102,7 +105,6 @@ protected:
     static size_t word_count(const data_slice& entropy);
 
     /// Constructors.
-    electrum_v1();
     electrum_v1(const data_chunk& entropy, const string_list& words,
         language identifier);
 
