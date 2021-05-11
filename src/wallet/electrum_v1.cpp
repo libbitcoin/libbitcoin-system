@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <iterator>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -243,8 +244,8 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
 
 std::istream& operator>>(std::istream& in, electrum_v1& to)
 {
-    std::string value;
-    in >> value;
+    std::istreambuf_iterator<char> begin(in), end;
+    std::string value(begin, end);
     to = electrum_v1(value);
 
     if (!to)
