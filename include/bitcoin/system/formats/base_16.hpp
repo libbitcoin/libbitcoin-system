@@ -89,6 +89,28 @@ byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
 template <size_t Size>
 byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size]);
 
+
+// TODO: replace base16_literal with this (rename).
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> base16_array(const char(&string)[Size])
+{
+    return base16_literal(string);
+}
+
+// TODO: replace hash_literal with this (rename).
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> base16_hash(const char(&string)[Size])
+{
+    return hash_literal(string);
+}
+
+// TODO: move to ipp and update code to use this (mostly test cases).
+template <size_t Size>
+data_chunk base16_chunk(const char(&string)[Size])
+{
+    return to_chunk(base16_literal(string));
+}
+
 } // namespace system
 } // namespace libbitcoin
 
