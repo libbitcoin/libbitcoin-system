@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -323,8 +324,8 @@ hd_private mnemonic::to_seed(const std::string& passphrase,
 
 std::istream& operator>>(std::istream& in, mnemonic& to)
 {
-    std::string value;
-    in >> value;
+    std::istreambuf_iterator<char> begin(in), end;
+    std::string value(begin, end);
     to = mnemonic(value);
 
     if (!to)

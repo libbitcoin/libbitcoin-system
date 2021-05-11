@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <iterator>
 #include <string>
 #include <vector>
@@ -554,8 +555,8 @@ hd_private electrum::to_seed(const std::string& passphrase,
 
 std::istream& operator>>(std::istream& in, electrum& to)
 {
-    std::string value;
-    in >> value;
+    std::istreambuf_iterator<char> begin(in), end;
+    std::string value(begin, end);
     to = electrum(value);
 
     if (!to)
