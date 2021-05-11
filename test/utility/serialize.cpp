@@ -18,6 +18,7 @@
  */
 #include "../test.hpp"
 #include <array>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,14 @@ BOOST_AUTO_TEST_CASE(serialize__uint8__uchar___base10)
     BOOST_REQUIRE_EQUAL(serialize(value), "255");
 }
 
+BOOST_AUTO_TEST_CASE(serialize__uint8__ostream___base10)
+{
+    const uint8_t value = 0xff;
+    std::ostringstream out;
+    serialize(out, value, "");
+    BOOST_REQUIRE_EQUAL(out.str(), "255");
+}
+
 // <byte_array<Size>>
 
 BOOST_AUTO_TEST_CASE(serialize__byte_array__empty__empty)
@@ -58,6 +67,14 @@ BOOST_AUTO_TEST_CASE(serialize__byte_array__bytes__base16)
     BOOST_REQUIRE_EQUAL(serialize(value), "072a0b");
 }
 
+BOOST_AUTO_TEST_CASE(serialize__byte_array__ostream__base16)
+{
+    const std::array<uint8_t, 3> value{ { 7, 42, 11 } };
+    std::ostringstream out;
+    serialize(out, value, "");
+    BOOST_REQUIRE_EQUAL(out.str(), "072a0b");
+}
+
 // <data_chunk>
 
 BOOST_AUTO_TEST_CASE(serialize__data_chunk__empty__empty)
@@ -70,6 +87,14 @@ BOOST_AUTO_TEST_CASE(serialize__data_chunk__bytes__base16)
 {
     const std::vector<uint8_t> value{ 7, 42, 11 };
     BOOST_REQUIRE_EQUAL(serialize(value), "072a0b");
+}
+
+BOOST_AUTO_TEST_CASE(serialize__data_chunk__ostream__base16)
+{
+    const std::vector<uint8_t> value{ 7, 42, 11 };
+    std::ostringstream out;
+    serialize(out, value, "");
+    BOOST_REQUIRE_EQUAL(out.str(), "072a0b");
 }
 
 // <array<Value>>
@@ -116,6 +141,14 @@ BOOST_AUTO_TEST_CASE(string__array__string_fallback__text_delimited_specified_fa
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
 }
 
+BOOST_AUTO_TEST_CASE(string__array__istream__text_delimited_specified_fallback)
+{
+    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
+    std::ostringstream out;
+    serialize(out, value, "*");
+    BOOST_REQUIRE_EQUAL(out.str(), "foo * bar");
+}
+
 // <vector<Value>>
 
 BOOST_AUTO_TEST_CASE(serialize__vector__int__base10_delimited)
@@ -158,6 +191,14 @@ BOOST_AUTO_TEST_CASE(string__vector__string_fallback__text_delimited_specified_f
 {
     const std::vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
+}
+
+BOOST_AUTO_TEST_CASE(string__vector__istream__text_delimited_specified_fallback)
+{
+    const std::vector<const char*> value{ "foo", "", "bar" };
+    std::ostringstream out;
+    serialize(out, value, "*");
+    BOOST_REQUIRE_EQUAL(out.str(), "foo * bar");
 }
 
 // <Value>
@@ -242,23 +283,31 @@ BOOST_AUTO_TEST_CASE(serialize__value__size_t__base10)
     BOOST_REQUIRE_EQUAL(serialize(value), "42");
 }
 
+BOOST_AUTO_TEST_CASE(serialize__value__ostream__base10)
+{
+    const size_t value = 42;
+    std::ostringstream out;
+    serialize(out, value, "");
+    BOOST_REQUIRE_EQUAL(out.str(), "42");
+}
+
 // <string> is overloaded in the deserializer but not in the serializer.
 
 BOOST_AUTO_TEST_CASE(serialize__value__string_class__text)
 {
-    const std::string value = "foobar";
+    const std::string value = "foo bar";
     BOOST_REQUIRE_EQUAL(serialize(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__value__text__text)
 {
-    const auto value = "foobar";
+    const auto value = "foo bar";
     BOOST_REQUIRE_EQUAL(serialize(value), value);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__value__text_padded__text_untrimmed)
 {
-    const auto value = "  /n/r/t/vfoobar/n/r/t/v  ";
+    const auto value = "  /n/r/t/vfoo bar/n/r/t/v  ";
     BOOST_REQUIRE_EQUAL(serialize(value), value);
 }
 
@@ -271,6 +320,14 @@ BOOST_AUTO_TEST_CASE(serialize__value__text_fallback__specified_fallback)
 {
     const auto fallback = "***";
     BOOST_REQUIRE_EQUAL(serialize("", fallback), fallback);
+}
+
+BOOST_AUTO_TEST_CASE(serialize__value__stringstream__specified_fallback)
+{
+    std::stringstream out;
+    const auto value = "foo bar";
+    serialize(out, value, "");
+    BOOST_REQUIRE_EQUAL(out.str(), value);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

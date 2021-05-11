@@ -22,7 +22,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <istream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/utility/data.hpp>
@@ -34,9 +34,9 @@ namespace system {
 /// Value may be any non-specialized deserializable type (implements >>).
 /// The data_slice type is not deserializable (cannot hold data).
 
-/// Deserialize to text, trim as specified, call deserialize(Value, string).
+/// Deserialize to untrimmed/unsplit text, call deserialize(Value, string).
 template <typename Value>
-bool deserialize(Value& out, std::istream& input, bool trim);
+bool deserialize(Value& out, std::istream& input);
 
 /// Specialize template to avoid trimming of string deserialization.
 /// Strings are pass through unchanged, this provides type generalization.

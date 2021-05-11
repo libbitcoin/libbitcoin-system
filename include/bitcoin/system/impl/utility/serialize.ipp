@@ -23,8 +23,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <ostream>
-#include <sstream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/formats/base_16.hpp>
@@ -34,7 +33,6 @@
 namespace libbitcoin {
 namespace system {
 
-// TODO: implement stream parameter overrides.
 // Cannot use a data_slice override for byte_array/data_chunk because it would
 // pick up string and serialize as bytes vs. chars.
     

@@ -23,8 +23,8 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <istream>
-#include <sstream>
+#include <iterator>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
@@ -32,21 +32,17 @@
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
- // TODO: implement stream parameter overrides.
  // Cannot use a data_slice override as it is not deserializable.
 
 namespace libbitcoin {
 namespace system {
 
 template <typename Value>
-bool deserialize(Value& out, std::istream& input, bool trim)
+bool deserialize(Value& out, std::istream& input)
 {
-    std::string text;
-    input >> text;
-
-    if (trim)
-        system::trim(text);
-
+    // Consumes an entire whitespace-delimited stream.
+    std::istreambuf_iterator<char> begin(input), end;
+    std::string text(begin, end);
     return deserialize(out, text);
 }
 
