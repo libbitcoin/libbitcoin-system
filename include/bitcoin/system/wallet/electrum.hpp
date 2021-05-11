@@ -111,8 +111,11 @@ public:
         seed_prefix prefix=seed_prefix::standard,
         language lexicon=language::en);
 
+    /// The prefix indicates the intended use of the seed.
+    seed_prefix prefix() const;
+
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    /// Base class returns invalid hd_private if WITH_ICU not defined.
+    /// Returns invalid hd_private if WITH_ICU is not defined.
     hd_private to_seed(const std::string& passphrase="",
         uint64_t chain=hd_private::mainnet) const;
 

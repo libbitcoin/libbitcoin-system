@@ -113,7 +113,6 @@ string_list electrum::encoder(const data_chunk& entropy, language identifier)
     // Read eleven bits into an index (0..2047).
     const auto read_index = [](istream_bit_reader& reader)
     {
-        // TODO: verify endianness.
         return static_cast<uint32_t>(reader.read_bits(index_bits));
     };
 
@@ -124,6 +123,7 @@ string_list electrum::encoder(const data_chunk& entropy, language identifier)
     istream_reader byte_reader(source);
     istream_bit_reader bit_reader(byte_reader);
 
+    // TODO: may want to ensure that the skipped bits are zero.
     // Skip unused high order bits, as n*2^11 may not be byte aligned.
     bit_reader.skip(unused_bits(entropy));
 
@@ -149,7 +149,6 @@ data_chunk electrum::decoder(const string_list& words, language identifier)
     // Write an index into eleven bits (0..2047).
     const auto write_index = [](ostream_bit_writer& writer, int32_t index)
     {
-        // TODO: verify endianness.
         writer.write_bits(static_cast<size_t>(index), index_bits);
     };
 
@@ -196,7 +195,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
     const auto size = usable_size(entropy);
 
     // This just grinds away until exhausted or prefix found.
-    // On the first iteration the usable entropy is unchnaged.
+    // On the first iteration the usable entropy is unchanged.
     // On the first iteration one entropy byte may be discarded.
     // On subsequent iterations size will be reduced from 512 bytes.
     // This allows the entropy to round trip after it is sufficient.
@@ -253,7 +252,7 @@ hd_private electrum::seeder(const string_list& words,
     const auto part = system::split(seed);
 
     // The object will be false if the secret (left) does not ec verify.
-    return hd_private(part.first, part.second, chain);
+    return { part.first, part.second, chain };
 }
 
 electrum::seed_prefix electrum::prefixer(const string_list& words)
@@ -406,19 +405,17 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
 {
-    // Electrum rejects seed creation wha a seed would conflict with v1.
+    // Electrum rejects seed creation when a seed would conflict with v1.
     // So if it validates under electrum v1 it cannot be a v2 seed.
     // This is possible given dictionary overlap and 12 or 24 words.
     // Any set of 12 or 24 words in the v1 dictionary will validate.
-    // TODO: compute random words collision probability from word overlap.
     if (electrum_v1(words))
         return seed_prefix::old;
 
-    // Electrum rejects seed creation if it conflicts with bip39.
+    // Electrum rejects seed creation when a seed would conflict with bip39.
     // So if it validates under bip39/mnemonic it cannot be a v2 seed.
     // Possible given shared dictionaries and 12, 15, 18, 21, or 24 words.
     // But a bip39/mnemonic seed (words) incorporates a checksum, so unlikely.
-    // TODO: compute random words bip39 checksum collision probability.
     if (mnemonic(words))
         return seed_prefix::bip39;
 
@@ -535,6 +532,11 @@ electrum electrum::from_words(const string_list& words, language identifier)
 
 // public
 // ----------------------------------------------------------------------------
+
+electrum::seed_prefix electrum::prefix() const
+{
+    return prefix_;
+}
 
 hd_private electrum::to_seed(const std::string& passphrase,
     uint64_t chain) const
