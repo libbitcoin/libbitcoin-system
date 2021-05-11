@@ -42,7 +42,10 @@ public:
     typedef typename dictionary<Size>::result result;
     typedef std::array<dictionary<Size>, Count> list;
 
-     /// The number of words in each dictionary (all are the same size).
+    /// The number of dictionaries.
+    static constexpr size_t count() { return Count; };
+
+    /// The number of words in each dictionary (all are the same size).
     static constexpr size_t size() { return Size; };
 
     /// Constructor.

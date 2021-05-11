@@ -119,9 +119,20 @@ const test_dictionaries instance
     }
 };
 
+BOOST_AUTO_TEST_CASE(dictionaries__count__42__42)
+{
+    const auto count = dictionaries<42, 24>::count();
+    BOOST_REQUIRE_EQUAL(count, 42u);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries__count__instance__expected)
+{
+    BOOST_REQUIRE_EQUAL(instance.count(), 5u);
+}
+
 BOOST_AUTO_TEST_CASE(dictionaries__size__42__42)
 {
-    const auto size = dictionaries<5, 42>::size();
+    const auto size = dictionaries<24, 42>::size();
     BOOST_REQUIRE_EQUAL(size, 42u);
 }
 
