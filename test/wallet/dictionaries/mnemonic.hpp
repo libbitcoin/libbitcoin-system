@@ -83,13 +83,13 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 
 #ifdef WITH_ICU
 
-static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
-{
-    return std::count_if(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_normal_nfkd_form(test);
-    });
-}
+////static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
+////{
+////    return std::count_if(words.begin(), words.end(), [&](const char test[])
+////    {
+////        return test != to_normal_nfkd_form(test);
+////    });
+////}
 
 static bool abnormal(const mnemonic::dictionary::words& words)
 {

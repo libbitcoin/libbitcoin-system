@@ -27,13 +27,13 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
-static ptrdiff_t compressions(const electrum::dictionary::words& words)
-{
-    return std::count_if(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_compressed_cjk_form(test);
-    });
-}
+////static ptrdiff_t compressions(const electrum::dictionary::words& words)
+////{
+////    return std::count_if(words.begin(), words.end(), [&](const char test[])
+////    {
+////        return test != to_compressed_cjk_form(test);
+////    });
+////}
 
 static bool compressed(const electrum::dictionary::words& words)
 {
@@ -80,13 +80,13 @@ static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
     });
 }
 
-static bool abnormal(const mnemonic::dictionary::words& words)
-{
-    return std::all_of(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_normal_nfkd_form(test);
-    });
-}
+////static bool abnormal(const mnemonic::dictionary::words& words)
+////{
+////    return std::all_of(words.begin(), words.end(), [&](const char test[])
+////    {
+////        return test != to_normal_nfkd_form(test);
+////    });
+////}
 
 #endif
 
