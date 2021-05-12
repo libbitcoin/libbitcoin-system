@@ -95,6 +95,16 @@ string_list languages::split(const std::string& sentence, language identifier)
     return system::split(sentence, to_delimiter(identifier));
 }
 
+// protected
+string_list languages::normalize(const string_list& words)
+{
+#ifdef WITH_ICU
+    return system::split(to_lower(to_normal_nfkd_form(system::join(words))));
+#else
+    return system::split(ascii_to_lower(system::join(words)));
+#endif
+}
+
 // protected constructors
 // ----------------------------------------------------------------------------
 

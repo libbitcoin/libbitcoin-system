@@ -132,6 +132,12 @@ public:
     {
     }
 
+    // Expose protected method.
+    static string_list normalize(const string_list& words)
+    {
+        return languages::normalize(words);
+    }
+
     // Verify assignment and copy construction with derived member.
     const std::string& value() const
     {
@@ -143,15 +149,6 @@ private:
 };
 
 // statics
-
-BOOST_AUTO_TEST_CASE(languages__with_icu__conditionally__expected)
-{
-#ifdef WITH_ICU
-    BOOST_REQUIRE(languages::with_icu());
-#else
-    BOOST_REQUIRE(!languages::with_icu());
-#endif
-}
 
 BOOST_AUTO_TEST_CASE(languages__from_name__always__expected)
 {
@@ -306,6 +303,47 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ideographic_space_space_delimite
         test_words_es[3];
 
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
+}
+
+BOOST_AUTO_TEST_CASE(languages__normalize__lower_ascii__unchanged)
+{
+    const string_list words{ "abc", "def", "xyz" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), words);
+}
+
+BOOST_AUTO_TEST_CASE(languages__normalize__mixed_ascii__lowered)
+{
+    const string_list words{ "aBc", "DeF", "xYz" };
+    const string_list expected{ "abc", "def", "xyz" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+}
+
+BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
+{
+    const string_list words{ " aBc ", "  DeF  ", "\t\r\nxYz\f\v" };
+    const string_list expected{ "abc", "def", "xyz" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+}
+
+////#ifdef WITH_ICU
+////BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_with_icu__nfkd_ascii_lowered_trimmed)
+////{
+////    const string_list words{ " aBc ", " ábaco ", "\t\r\nxYz\f\v" };
+////    const string_list expected{ "abc", "ábaco", "xyz" };
+////    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+////}
+////#else
+////BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_without_icu__ascii_lowered_trimmed)
+////{
+////    const string_list words{ " aBc ", " ábaco ", "\t\r\nxYz\f\v" };
+////    const string_list expected{ "abc", "ábaco", "xyz" };
+////    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+////}
+////#endif
+
+BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
+{
+    BOOST_REQUIRE_EQUAL(accessor::normalize({}), string_list{});
 }
 
 // construct/properties/bool

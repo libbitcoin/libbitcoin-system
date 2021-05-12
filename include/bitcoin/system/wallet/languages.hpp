@@ -33,16 +33,6 @@ namespace wallet {
 class languages
 {
 public:
-    /// Returns true if WITH_ICU is defined.
-    static bool with_icu()
-    {
-#ifdef WITH_ICU
-        return true;
-#else
-        return false;
-#endif
-    }
-
     // static methods
     // ------------------------------------------------------------------------
 
@@ -96,6 +86,9 @@ protected:
     languages(const languages& other);
     languages(const data_chunk& entropy, const string_list& words,
         language identifier);
+
+    // This is only used to improve the chance of wordlist matching.
+    static string_list normalize(const string_list& words);
 
     // These should be const, apart from the need to implement assignment.
     data_chunk entropy_;
