@@ -17,86 +17,201 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "mnemonic.hpp"
 #include <algorithm>
 
-// Disabled until rebuilt.
-#ifdef DISABLED_TESTS
-
-// TODO: determine if any overlaps have distinct indexes.
-
-BOOST_AUTO_TEST_SUITE(dictionary_mnemonic_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
-static ptrdiff_t intersection(const dictionary& left, const dictionary& right)
+
+const auto dictionary_count = 10u;
+const auto dictionary_size = 2048;
+const auto deviations_en_fr = 100;
+const auto intersecton_en_fr = 100;
+const auto deviations_zh = 0;
+const auto intersection_zh = 1275;
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__count__all__expected)
 {
-    return std::count_if(left.words.begin(), left.words.end(),
-        [&](const char test[])
-        {
-            return std::find(right.words.begin(), right.words.end(), test) !=
-                right.words.end();
-        });
+    // Any new dictionary must be added below to guarantee lack of normalization.
+    // Failure to do so may lead to invalid seed generation, which is very bad.
+    BOOST_REQUIRE_MESSAGE(mnemonic::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
-static bool intersects(const dictionary& left, const dictionary& right)
+#ifdef WITH_ICU
+
+// abnormal (requires ICU)
+
+// These dictionaries are in normal form.
+// So there is no need to nfkd normalize these for wordlist-based seedings.
+// This also removes the ICU dependency for these language.
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normal__normal_words__true)
 {
-    return std::any_of(left.words.begin(), left.words.end(),
-        [&](const char test[])
-        {
-            return std::find(right.words.begin(), right.words.end(), test) !=
-                right.words.end();
-        });
+    BOOST_REQUIRE(!abnormal(mnemonic::en));
+    BOOST_REQUIRE(!abnormal(mnemonic::es));
+    BOOST_REQUIRE(!abnormal(mnemonic::it));
+    BOOST_REQUIRE(!abnormal(mnemonic::fr));
+    BOOST_REQUIRE(!abnormal(mnemonic::cs));
+    BOOST_REQUIRE(!abnormal(mnemonic::pt));
+    BOOST_REQUIRE(!abnormal(mnemonic::ja));
+    BOOST_REQUIRE(!abnormal(mnemonic::ko));
+    BOOST_REQUIRE(!abnormal(mnemonic::zh_Hans));
+    BOOST_REQUIRE(!abnormal(mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(dictionary_electrum_v1__construct__en__expected_size)
+#endif
+
+// All zh_Hans/zh_Hant collisions are interchangeable.
+// None of the en/fr collisions are interchangeable.
+// It is unsafe to deduce en/fr dictionary, but only if all words collide.
+// Always check both dictionaries in both zh_Hans/zh_Hant and en/fr.
+// If zh_Hans/zh_Hant collide, may pick either (but should be consistent).
+// If en/fr collide, must fail as decode requires explicit language identifier.
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__deviation__deviants__expected)
 {
-    BOOST_REQUIRE(false);
+    BOOST_REQUIRE_EQUAL(deviation(mnemonic::en, mnemonic::fr), deviations_en_fr);
+    BOOST_REQUIRE_EQUAL(deviation(mnemonic::zh_Hans, mnemonic::zh_Hant), deviations_zh);
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__en__expected)
 {
-    BOOST_REQUIRE(!intersects(language::en, language::es));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::en, mnemonic::en), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::es));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::it));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::en, mnemonic::fr), intersecton_en_fr);
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::cs));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::pt));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::en, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__es_it__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__es__expected)
 {
-    BOOST_REQUIRE(!intersects(language::es, language::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::en));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::es, mnemonic::es), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::it));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::fr));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::cs));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::pt));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::es, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_fr__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__it__expected)
 {
-    BOOST_REQUIRE(!intersects(language::it, language::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::es));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::it, mnemonic::it), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::fr));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::cs));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::pt));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::it, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_cs__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__fr__expected)
 {
-    BOOST_REQUIRE(!intersects(language::fr, language::cs));
+    ////BOOST_REQUIRE_EQUAL(intersection(mnemonic::fr, mnemonic::en), intersecton_en_fr);
+    ////BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::it));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::fr, mnemonic::fr), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::cs));
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::pt));
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::fr, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_pt__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__cs__expected)
 {
-    BOOST_REQUIRE(!intersects(language::cs, language::pt));
+    ////BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::fr));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::cs, mnemonic::cs), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::pt));
+    BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::cs, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__pt_ko__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__pt__expected)
 {
-    BOOST_REQUIRE(!intersects(language::pt, language::ko));
+    ////BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::cs));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::pt, mnemonic::pt), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::ja));
+    BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::pt, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__ko_zh_Hans__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__ja__expected)
 {
-    BOOST_REQUIRE(!intersects(language::ko, language::zh_Hans));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::cs));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::pt));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::ja, mnemonic::ja), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::ko));
+    BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::ja, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_zh_Hant__1275_intersections)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__ko__expected)
 {
-    BOOST_REQUIRE_EQUAL(intersection(language::zh_Hans, language::zh_Hant), 1275);
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::cs));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::pt));
+    ////BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::ja));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::ko, mnemonic::ko), dictionary_size);
+    BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::zh_Hans));
+    BOOST_REQUIRE(!intersects(mnemonic::ko, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hant_en__no_intersection)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__zh_Hans__expected)
 {
-    BOOST_REQUIRE(!intersects(language::zh_Hant, language::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::cs));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::pt));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::ja));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hans, mnemonic::ko));
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hans), dictionary_size);
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hant), intersection_zh);
 }
 
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__zh_Hant__expected)
+{
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::en));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::es));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::it));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::fr));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::cs));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::pt));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::ja));
+    ////BOOST_REQUIRE(!intersects(mnemonic::zh_Hant, mnemonic::ko));
+    ////BOOST_REQUIRE(intersection(mnemonic::zh_Hant, mnemonic::zh_Hans), intersection_zh);
+    BOOST_REQUIRE_EQUAL(intersection(mnemonic::zh_Hant, mnemonic::zh_Hant), dictionary_size);
+}
+
+////BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif // DISABLED_TESTS

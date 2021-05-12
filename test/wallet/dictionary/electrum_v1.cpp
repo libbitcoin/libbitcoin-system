@@ -17,14 +17,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "electrum_v1.hpp"
 
-BOOST_AUTO_TEST_SUITE(dictionary_electrum_v1_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(dictionary_electrum_v1__construct__en__expected_size)
+#ifdef WITH_ICU
+
+// abnormal (requires ICU)
+
+// These dictionaries are in normal form.
+// So there is no need to nfkd normalize these for wordlist-based seedings.
+// This also removes the ICU dependency for these language.
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
 {
-    BOOST_REQUIRE(true);
+    BOOST_REQUIRE(!abnormal(electrum_v1::en));
+    BOOST_REQUIRE(!abnormal(electrum_v1::pt));
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
