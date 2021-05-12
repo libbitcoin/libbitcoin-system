@@ -36,7 +36,7 @@ public:
     language lingo;
     std::string mnemonic;
     data_chunk mnemonic_chunk;
-    prefix prefix;
+    electrum::seed_prefix prefix;
     data_chunk entropy;
     std::string passphrase;
     data_chunk passphrase_chunk;
