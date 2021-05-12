@@ -144,7 +144,8 @@ hd_private mnemonic::seeder(const string_list& words,
 #ifdef WITH_ICU
     auto pass = to_normal_nfkd_form(passphrase);
 #else
-    if (!is_ascii(passphrase))
+    auto pass = passphrase;
+    if (!is_ascii(pass))
         return {};
 #endif
 
