@@ -226,7 +226,8 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
     if (!is_valid_word_count(words.size()))
         return {};
 
-    const auto tokens = system::split(system::join(words));
+    // Normalize to improve chance of dictionary matching.
+    const auto tokens = normalize(words);
     const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)

@@ -103,6 +103,9 @@ public:
     /// Obtain the version corresponding to the enumeration value.
     static std::string to_version(seed_prefix prefix);
 
+    /// This instance is initialized invalid, but can be assigned to.
+    electrum();
+
     /// The instance should be tested for validity after construction.
     electrum(const electrum& other);
     electrum(const std::string& sentence, language identifier=language::none);
@@ -115,7 +118,7 @@ public:
     seed_prefix prefix() const;
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    /// Returns invalid hd_private if WITH_ICU is not defined.
+    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefined.
     hd_private to_seed(const std::string& passphrase="",
         uint64_t chain=hd_private::mainnet) const;
 
@@ -152,14 +155,12 @@ protected:
     static size_t usable_size(const data_slice& entropy);
 
     /// Constructors.
-    electrum();
     electrum(const data_chunk& entropy, const string_list& words,
         language identifier, seed_prefix prefix);
 
 private:
     typedef struct { data_chunk entropy; string_list words; } result;
 
-    static bool is_normalized(const string_list& words);
     static bool is_valid_seed_prefix(seed_prefix prefix);
     static bool is_valid_two_factor_authentication_size(size_t count);
 
@@ -167,8 +168,6 @@ private:
         language identifier, size_t limit);
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
-
-    static std::string normalizer(const std::string& text);
     static hd_private seeder(const string_list& words,
         const std::string& passphrase, uint64_t chain);
 

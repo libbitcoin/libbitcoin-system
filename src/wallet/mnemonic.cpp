@@ -135,15 +135,6 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
 }
 
-std::string mnemonic::normalizer(const std::string& text)
-{
-#ifdef WITH_ICU
-    return to_normal_nfkd_form(text);
-#else
-    return text;
-#endif
-}
-
 hd_private mnemonic::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
@@ -151,7 +142,16 @@ hd_private mnemonic::seeder(const string_list& words,
     const auto sentence = to_chunk(system::join(words));
 
     // Passphrase is limited to ascii (normal) if without ICU.
-    const auto salt = to_chunk(passphrase_prefix + normalizer(passphrase));
+    // Unlike electrum, BIP39 does not lower case passphrases.
+#ifdef WITH_ICU
+    auto pass = to_normal_nfkd_form(passphrase);
+#else
+    if (!is_ascii(passphrase))
+        return {};
+#endif
+
+    // Passphrase is limited to ascii (normal) if without ICU.
+    const auto salt = to_chunk(passphrase_prefix + pass);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     const auto part = system::split(seed);
 
@@ -229,7 +229,6 @@ bool mnemonic::is_valid_word_count(size_t count)
 // construction
 // ----------------------------------------------------------------------------
 
-// protected
 mnemonic::mnemonic()
   : languages()
 {
@@ -282,8 +281,8 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    // Normalize is non-critical here, unnormalized words will be rejected.
-    const auto tokens = system::split(normalizer(system::join(words)));
+    // Normalize to improve chance of dictionary matching.
+    const auto tokens = normalize(words);
     const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)
@@ -298,7 +297,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (entropy.empty())
         return {};
 
-    // Save normalized words and derived entropy, original words are discarded.
+    // Save dictionary words and derived entropy, original words are discarded.
     return { entropy, tokens, lexicon };
 }
 
@@ -310,10 +309,6 @@ hd_private mnemonic::to_seed(const std::string& passphrase,
 {
     // Preclude derivation from an invalid object state.
     if (!(*this))
-        return {};
-
-    // Passphrase normalization is necessary, however ASCII is normal.
-    if (!with_icu() && !is_ascii(passphrase))
         return {};
 
     return seeder(words(), passphrase, chain);

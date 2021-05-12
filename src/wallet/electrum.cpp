@@ -217,37 +217,33 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
     return {};
 }
 
-bool electrum::is_normalized(const string_list& words)
-{
-    return contained_by(words) != language::none;
-}
-
 // Electrum uses the same normalization function for words and passphrases.
 // There is no entropy impact on lower casing seed words, but by lowering the
 // passphrase there is a material entropy loss. This is presumably an oversight
 // arising from reuse of the normalization function.
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
-std::string electrum::normalizer(const std::string& text)
-{
-#ifdef WITH_ICU
-    auto seed = to_normal_nfkd_form(text);
-    seed = to_lower(seed);
-    seed = to_unaccented_form(seed);
-    seed = system::join(system::split(seed));
-    return to_compressed_cjk_form(seed);
-#else
-    return ascii_to_lower(text);
-#endif
-}
-
 hd_private electrum::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
+    // Passphrase normalization is necessary, but ASCII is already normal.
+#ifdef WITH_ICU
+    auto pass = to_lower(to_normal_nfkd_form(passphrase));
+#else
+    auto pass = ascii_to_lower(passphrase);
+    if (!is_ascii(pass))
+        return {};
+#endif
+
+    // With normalized dictionaries there is no benefit and a material
+    // performance cost in applying this additional normalization to words,
+    // so we apply it only in seeding, which is a compatibility requirement.
+    pass = to_unaccented_form(pass);
+    pass = system::join(system::split(pass));
+    pass = to_compressed_cjk_form(pass);
+
     // Words are in normal form, even without ICU.
     const auto sentence = to_chunk(system::join(words));
-
-    // Passphrase is limited to ascii (normal) if without ICU.
-    const auto salt = to_chunk(passphrase_prefix + normalizer(passphrase));
+    const auto salt = to_chunk(passphrase_prefix + pass);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     const auto part = system::split(seed);
 
@@ -273,7 +269,7 @@ electrum::seed_prefix electrum::prefixer(const string_list& words)
 bool electrum::validator(const string_list& words, seed_prefix prefix)
 {
     // Words are in normal form, even without ICU.
-    const auto sentence = to_chunk(normalizer(system::join(words)));
+    const auto sentence = to_chunk(system::join(words));
     const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
     return starts_with(seed, to_version(prefix));
 }
@@ -397,8 +393,12 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
         !is_valid_two_factor_authentication_size(words.size()))
         return false;
 
-    if (!with_icu() && !is_normalized(words))
-        return false;
+    // Normalize to improve chance of dictionary matching.
+    const auto tokens = normalize(words);
+
+    // Tokens are accepted if they are contained by any single dictionary.
+    if (contained_by(tokens) == language::none)
+        return {};
 
     return validator(words, prefix);
 }
@@ -419,12 +419,12 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
     if (mnemonic(words))
         return seed_prefix::bip39;
 
-    // In a non-ICU build these are likely to produce 'none' if the specified
-    // words have not been prenormalized. However a collision on the version
-    // bits of the resulting hash is certainly possible. So we exclude the
-    // possibility of a mismatch by requiring prenormalized words.
-    if (!with_icu() && !is_normalized(words))
-        return seed_prefix::none;
+    // Normalize to improve chance of dictionary matching.
+    const auto tokens = normalize(words);
+
+    // Tokens are accepted if they are contained by any single dictionary.
+    if (contained_by(tokens) == language::none)
+        return {};
 
     return prefixer(words);
 }
@@ -514,11 +514,9 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    if (!with_icu() && !is_normalized(words))
-        return {};
-
-    const auto tokens = system::split(normalizer(system::join(words)));
-    const auto lexicon = contained_by(words, identifier);
+    // Normalize to improve chance of dictionary matching.
+    const auto tokens = normalize(words);
+    const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)
         return {};
@@ -526,7 +524,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    // Save normalized words and derived entropy, original words are discarded.
+    // Save dictionary words and derived entropy, original words are discarded.
     return { decoder(tokens, identifier), tokens, lexicon, prefixer(tokens) };
 }
 
@@ -543,10 +541,6 @@ hd_private electrum::to_seed(const std::string& passphrase,
 {
     // Preclude derivation from an invalid object state.
     if (!(*this))
-        return {};
-
-    // Passphrase normalization is necessary, however ASCII is normal.
-    if (!with_icu() && !is_ascii(passphrase))
         return {};
 
     return seeder(words(), passphrase, chain);
