@@ -27,7 +27,7 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
-static ptrdiff_t compressions(const electrum::dictionary::words& words)
+ptrdiff_t compressions(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
@@ -35,7 +35,7 @@ static ptrdiff_t compressions(const electrum::dictionary::words& words)
     });
 }
 
-static bool compressed(const electrum::dictionary::words& words)
+bool compressed(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
@@ -43,7 +43,7 @@ static bool compressed(const electrum::dictionary::words& words)
     });
 }
 
-static ptrdiff_t accents(const electrum::dictionary::words& words)
+ptrdiff_t accents(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
@@ -51,7 +51,7 @@ static ptrdiff_t accents(const electrum::dictionary::words& words)
     });
 }
 
-static bool accented(const electrum::dictionary::words& words)
+bool accented(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
@@ -61,7 +61,7 @@ static bool accented(const electrum::dictionary::words& words)
 
 #ifdef WITH_ICU
 
-static bool diverged(const mnemonic::dictionary::words& normal,
+bool diverged(const mnemonic::dictionary::words& normal,
     const mnemonic::dictionary::words& test)
 {
     auto it = normal.begin();

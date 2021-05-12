@@ -252,6 +252,7 @@
     <ClInclude Include="..\..\..\..\test\wallet\dictionary\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\languages.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -494,6 +494,9 @@
     <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\languages.hpp">
+      <Filter>src\wallet</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>

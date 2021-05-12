@@ -27,7 +27,7 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
-static ptrdiff_t intersection(const mnemonic::dictionary::words& left,
+ptrdiff_t intersection(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
     return std::count_if(left.begin(), left.end(), [&](const char test[])
@@ -36,7 +36,7 @@ static ptrdiff_t intersection(const mnemonic::dictionary::words& left,
     });
 }
 
-static bool intersects(const mnemonic::dictionary::words& left,
+bool intersects(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
     return std::any_of(left.begin(), left.end(), [&](const char test[])
@@ -45,7 +45,7 @@ static bool intersects(const mnemonic::dictionary::words& left,
     });
 }
 
-static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
+ptrdiff_t deviation(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
     ptrdiff_t count = 0;
@@ -64,7 +64,7 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
     return count;
 }
 
-////static bool deviates(const mnemonic::dictionary::words& left,
+////bool deviates(const mnemonic::dictionary::words& left,
 ////    const mnemonic::dictionary::words& right)
 ////{
 ////    for (auto outer = left.begin(); outer != left.end(); ++outer)
@@ -83,7 +83,7 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 
 #ifdef WITH_ICU
 
-static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
+ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
@@ -91,7 +91,7 @@ static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
     });
 }
 
-static bool abnormal(const mnemonic::dictionary::words& words)
+bool abnormal(const mnemonic::dictionary::words& words)
 {
     return std::all_of(words.begin(), words.end(), [&](const char test[])
     {

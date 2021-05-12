@@ -416,6 +416,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/hd_private.cpp \
     test/wallet/hd_public.cpp \
     test/wallet/languages.cpp \
+    test/wallet/languages.hpp \
     test/wallet/message.cpp \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \

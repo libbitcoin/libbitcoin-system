@@ -17,136 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-
+#include "languages.hpp"
 #include <string>
 
 BOOST_AUTO_TEST_SUITE(languages_tests)
 
 using namespace bc::system::wallet;
-
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
-
-const size_t test_dictionary_size = 10;
-typedef std::array<const char*, test_dictionary_size> test_words;
-
-const test_words test_words_en
-{
-    {
-        "abandon",
-        "ability",
-        "able",
-        "about",
-        "above",
-        "absent",
-        "absorb",
-        "abstract",
-        "absurd",
-        "abuse"
-    }
-};
-
-const test_words test_words_es
-{
-    {
-        "ábaco",
-        "abdomen",
-        "abeja",
-        "abierto",
-        "abogado",
-        "abono",
-        "aborto",
-        "abrazo",
-        "abrir",
-        "abuelo"
-    }
-};
-
-const test_words test_words_ja
-{
-    {
-        "あいこくしん",
-        "あいさつ",
-        "あいだ",
-        "あおぞら",
-        "あかちゃん",
-        "あきる",
-        "あけがた",
-        "あける",
-        "あこがれる",
-        "あさい"
-    }
-};
-
-const test_words test_words_zh_Hans
-{
-    {
-        "的",
-        "一",
-        "是",
-        "在",
-        "不",
-        "了",
-        "有",
-        "和",
-        "人",
-        "这"
-    }
-};
-
-const test_words test_words_zh_Hant
-{
-    {
-        "的",
-        "一",
-        "是",
-        "在",
-        "不",
-        "了",
-        "有",
-        "和",
-        "人",
-        "這"
-    }
-};
-
-
-// languages is a protected class, provide test accesss.
-class accessor
-  : public languages
-{
-public:
-    accessor()
-      : languages(), value_()
-    {
-    }
-
-    accessor(const languages& other)
-      : languages(other), value_()
-    {
-    }
-
-    accessor(const data_chunk& entropy, const string_list& words,
-        language identifier, const std::string& value="")
-      : languages(entropy, words, identifier), value_(value)
-    {
-    }
-
-    // Expose protected method.
-    static string_list normalize(const string_list& words)
-    {
-        return languages::normalize(words);
-    }
-
-    // Verify assignment and copy construction with derived member.
-    const std::string& value() const
-    {
-        return value_;
-    }
-
-private:
-    std::string value_;
-};
 
 // statics
 
@@ -305,6 +181,12 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ideographic_space_space_delimite
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
 }
 
+BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
+{
+    const string_list words{};
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), words);
+}
+
 BOOST_AUTO_TEST_CASE(languages__normalize__lower_ascii__unchanged)
 {
     const string_list words{ "abc", "def", "xyz" };
@@ -325,26 +207,30 @@ BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
     BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
 }
 
-////#ifdef WITH_ICU
-////BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_with_icu__nfkd_ascii_lowered_trimmed)
-////{
-////    const string_list words{ " aBc ", " ábaco ", "\t\r\nxYz\f\v" };
-////    const string_list expected{ "abc", "ábaco", "xyz" };
-////    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
-////}
-////#else
-////BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_without_icu__ascii_lowered_trimmed)
-////{
-////    const string_list words{ " aBc ", " ábaco ", "\t\r\nxYz\f\v" };
-////    const string_list expected{ "abc", "ábaco", "xyz" };
-////    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
-////}
-////#endif
+#ifdef WITH_ICU
+BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_with_icu__normal_ascii_lowered_trimmed)
+{
+    const auto abnormal = "ábaco";
+    const auto normal = to_normal_nfkd_form(abnormal);
+    BOOST_REQUIRE_NE(abnormal, normal);
 
-////BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
-////{
-////    BOOST_REQUIRE_EQUAL(accessor::normalize({}), string_list{});
-////}
+    const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
+    const string_list expected{ "abc", normal, "xyz" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+}
+#else
+BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_without_icu__abnormal_ascii_lowered_trimmed)
+{
+    const auto abnormal = "ábaco";
+    const auto normal = "ábaco";
+    ////const auto normal = to_normal_nfkd_form(abnormal);
+    BOOST_REQUIRE_NE(abnormal, normal);
+
+    const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
+    const string_list expected{ "abc", abnormal, "xyz" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+}
+#endif
 
 // construct/properties/bool
 

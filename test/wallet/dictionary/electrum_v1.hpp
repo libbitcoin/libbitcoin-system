@@ -27,7 +27,7 @@ using namespace bc::system::wallet;
 
 #ifdef WITH_ICU
 
-////static ptrdiff_t abnormals(const electrum_v1::dictionary::words& words)
+////ptrdiff_t abnormals(const electrum_v1::dictionary::words& words)
 ////{
 ////    return std::count_if(words.begin(), words.end(), [&](const char test[])
 ////    {
@@ -35,7 +35,7 @@ using namespace bc::system::wallet;
 ////    });
 ////}
 
-static bool abnormal(const electrum_v1::dictionary::words& words)
+bool abnormal(const electrum_v1::dictionary::words& words)
 {
     return std::all_of(words.begin(), words.end(), [&](const char test[])
     {
