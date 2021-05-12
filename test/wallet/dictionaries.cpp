@@ -17,107 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "dictionaries.hpp"
 
 BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
-
-const size_t test_dictionary_size = 10;
-typedef std::array<const char*, test_dictionary_size> test_words;
-typedef wallet::dictionary<test_dictionary_size> test_dictionary;
-typedef wallet::dictionaries<5, test_dictionary::size()> test_dictionaries;
-
-const test_words test_words_en
-{
-    {
-        "abandon",
-        "ability",
-        "able",
-        "about",
-        "above",
-        "absent",
-        "absorb",
-        "abstract",
-        "absurd",
-        "abuse"
-    }
-};
-
-const test_words test_words_es
-{
-    {
-        "ábaco",
-        "abdomen",
-        "abeja",
-        "abierto",
-        "abogado",
-        "abono",
-        "aborto",
-        "abrazo",
-        "abrir",
-        "abuelo"
-    }
-};
-
-const test_words test_words_ja
-{
-    {
-        "あいこくしん",
-        "あいさつ",
-        "あいだ",
-        "あおぞら",
-        "あかちゃん",
-        "あきる",
-        "あけがた",
-        "あける",
-        "あこがれる",
-        "あさい"
-    }
-};
-
-const test_words test_words_zh_Hans
-{
-    {
-        "的",
-        "一",
-        "是",
-        "在",
-        "不",
-        "了",
-        "有",
-        "和",
-        "人",
-        "这"
-    }
-};
-
-const test_words test_words_zh_Hant
-{
-    {
-        "的",
-        "一",
-        "是",
-        "在",
-        "不",
-        "了",
-        "有",
-        "和",
-        "人",
-        "這"
-    }
-};
-
-// This is the instance under test.
-const test_dictionaries instance
-{
-    {
-        test_dictionary{ language::en, test_words_en },
-        test_dictionary{ language::es, test_words_es },
-        test_dictionary{ language::ja, test_words_ja },
-        test_dictionary{ language::zh_Hans, test_words_zh_Hans },
-        test_dictionary{ language::zh_Hant, test_words_zh_Hant }
-    }
-};
 
 BOOST_AUTO_TEST_CASE(dictionaries__count__42__42)
 {
@@ -183,7 +87,7 @@ BOOST_AUTO_TEST_CASE(dictionaries__to_name__invalid_identifier__empty)
     BOOST_REQUIRE_EQUAL(instance.to_name(language::ko), "");
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__at1__valid_langauges__expected)
+BOOST_AUTO_TEST_CASE(dictionaries__at1__valid_languages__expected)
 {
     BOOST_REQUIRE_EQUAL(instance.at(0, language::en), test_words_en[0]);
     BOOST_REQUIRE_EQUAL(instance.at(1, language::es), test_words_es[1]);
@@ -192,7 +96,7 @@ BOOST_AUTO_TEST_CASE(dictionaries__at1__valid_langauges__expected)
     BOOST_REQUIRE_EQUAL(instance.at(4, language::zh_Hant), test_words_zh_Hant[4]);
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__at1__invalid_langauge__empty)
+BOOST_AUTO_TEST_CASE(dictionaries__at1__invalid_language__empty)
 {
     BOOST_REQUIRE_EQUAL(instance.at(5, language::ko), "");
 }

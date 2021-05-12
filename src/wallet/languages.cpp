@@ -37,7 +37,7 @@ constexpr auto ideographic_space = "\xe3\x80\x80";
 constexpr auto ascii_space = "\x20";
 
 // All languages, dictionary-independent.
-// Dictionaries are collections of words in one of these langauges.
+// Dictionaries are collections of words in one of these languages.
 // There can be multiple dictionaries for a given language identifier.
 
 static const language_map map

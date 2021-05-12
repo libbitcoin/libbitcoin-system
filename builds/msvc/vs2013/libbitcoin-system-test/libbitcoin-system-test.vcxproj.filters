@@ -473,6 +473,21 @@
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries.hpp">
+      <Filter>src\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionary.hpp">
+      <Filter>src\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum.hpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum_v1.hpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionary\mnemonic.hpp">
+      <Filter>src\wallet\dictionary</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>

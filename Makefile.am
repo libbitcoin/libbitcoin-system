@@ -403,7 +403,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/bitcoin_uri.cpp \
     test/wallet/checked.cpp \
     test/wallet/dictionaries.cpp \
+    test/wallet/dictionaries.hpp \
     test/wallet/dictionary.cpp \
+    test/wallet/dictionary.hpp \
     test/wallet/ec_private.cpp \
     test/wallet/ec_public.cpp \
     test/wallet/electrum.cpp \
@@ -427,8 +429,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/uri_reader.cpp \
     test/wallet/witness_address.cpp \
     test/wallet/dictionary/electrum.cpp \
+    test/wallet/dictionary/electrum.hpp \
     test/wallet/dictionary/electrum_v1.cpp \
-    test/wallet/dictionary/mnemonic.cpp
+    test/wallet/dictionary/electrum_v1.hpp \
+    test/wallet/dictionary/mnemonic.cpp \
+    test/wallet/dictionary/mnemonic.hpp
 
 endif WITH_TESTS
 

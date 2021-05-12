@@ -49,7 +49,7 @@ const test_words test_words_en
 const test_words test_words_es
 {
     {
-        "ábaco",
+        "ábaco",
         "abdomen",
         "abeja",
         "abierto",
@@ -67,13 +67,13 @@ const test_words test_words_ja
     {
         "あいこくしん",
         "あいさつ",
-        "あいだ",
-        "あおぞら",
+        "あいだ",
+        "あおぞら",
         "あかちゃん",
         "あきる",
-        "あけがた",
+        "あけがた",
         "あける",
-        "あこがれる",
+        "あこがれる",
         "あさい"
     }
 };
@@ -341,10 +341,10 @@ BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
 ////}
 ////#endif
 
-BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
-{
-    BOOST_REQUIRE_EQUAL(accessor::normalize({}), string_list{});
-}
+////BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
+////{
+////    BOOST_REQUIRE_EQUAL(accessor::normalize({}), string_list{});
+////}
 
 // construct/properties/bool
 
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE(languages__equality__same_entropy_distinct_language__expect
     BOOST_REQUIRE(instance2 == instance2);
 }
 
-BOOST_AUTO_TEST_CASE(languages__inequality__distinct_entropy_same_langauge__expected)
+BOOST_AUTO_TEST_CASE(languages__inequality__distinct_entropy_same_language__expected)
 {
     const data_chunk entropy1{ 0x01, 0x02, 0x03 };
     const data_chunk entropy2{ 0x02, 0x03, 0x04 };

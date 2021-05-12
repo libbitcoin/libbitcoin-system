@@ -17,33 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "dictionary.hpp"
 
 BOOST_AUTO_TEST_SUITE(dictionary_tests)
 
 using namespace bc::system::wallet;
-
-const size_t test_dictionary_size = 10;
-typedef std::array<const char*, test_dictionary_size> test_words;
-
-// First 10 words of BIP39 es, first word not sorted for c++ < operator.
-const test_words test_words_es
-{
-    {
-        "ábaco",
-        "abdomen",
-        "abeja",
-        "abierto",
-        "abogado",
-        "abono",
-        "aborto",
-        "abrazo",
-        "abrir",
-        "abuelo"
-    }
-};
-
-// This is the instance under test.
-dictionary<test_dictionary_size> instance(language::es, test_words_es);
 
 BOOST_AUTO_TEST_CASE(dictionary__size__42__42)
 {
