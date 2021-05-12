@@ -138,11 +138,9 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
 hd_private mnemonic::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
-    // Words are in normal form, even without ICU.
-    const auto sentence = to_chunk(system::join(words));
-
     // Passphrase is limited to ascii (normal) if without ICU.
-    // Unlike electrum, BIP39 does not lower case passphrases.
+    // Unlike electrum, BIP39 does not lower case passphrases, trim whitespace
+    // remove diacritics, or compress cjk.
 #ifdef WITH_ICU
     auto pass = to_normal_nfkd_form(passphrase);
 #else
@@ -150,7 +148,8 @@ hd_private mnemonic::seeder(const string_list& words,
         return {};
 #endif
 
-    // Passphrase is limited to ascii (normal) if without ICU.
+    // Words are in normal (nfkd) form, even without ICU.
+    const auto sentence = to_chunk(system::join(words));
     const auto salt = to_chunk(passphrase_prefix + pass);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
     const auto part = system::split(seed);

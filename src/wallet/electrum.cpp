@@ -237,11 +237,20 @@ hd_private electrum::seeder(const string_list& words,
     // With normalized dictionaries there is no benefit and a material
     // performance cost in applying this additional normalization to words,
     // so we apply it only in seeding, which is a compatibility requirement.
+
+    // Remove diacritics from the nfkd form.
     pass = to_unaccented_form(pass);
+
+    // Normalize ascii whitespace to a single 0x20 between each word.
     pass = system::join(system::split(pass));
+
+    // Remove cjk separators from the nfkd form.
+    // This is an unnecessary transform for the existing dictionaries when
+    // using only words from those dictionaries as there are no matches.
+    // See electrum dictionary tests for more information.
     pass = to_compressed_cjk_form(pass);
 
-    // Words are in normal form, even without ICU.
+    // Words are in normal (nfkd) form, even without ICU.
     const auto sentence = to_chunk(system::join(words));
     const auto salt = to_chunk(passphrase_prefix + pass);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
