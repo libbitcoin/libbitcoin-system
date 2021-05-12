@@ -203,61 +203,61 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/threadpool.cpp \
     src/utility/tiff.cpp \
     src/utility/work.cpp \
-    src/wallet/bitcoin_uri.cpp \
-    src/wallet/ec_private.cpp \
-    src/wallet/ec_public.cpp \
-    src/wallet/ek_private.cpp \
-    src/wallet/ek_public.cpp \
-    src/wallet/ek_token.cpp \
-    src/wallet/electrum.cpp \
-    src/wallet/electrum_v1.cpp \
-    src/wallet/encrypted_keys.cpp \
-    src/wallet/hd_private.cpp \
-    src/wallet/hd_public.cpp \
-    src/wallet/languages.cpp \
     src/wallet/message.cpp \
-    src/wallet/mini_keys.cpp \
-    src/wallet/mnemonic.cpp \
-    src/wallet/payment_address.cpp \
-    src/wallet/qr_code.cpp \
     src/wallet/select_outputs.cpp \
-    src/wallet/stealth_address.cpp \
-    src/wallet/stealth_receiver.cpp \
-    src/wallet/stealth_sender.cpp \
-    src/wallet/uri.cpp \
-    src/wallet/witness_address.cpp \
-    src/wallet/dictionaries/electrum.cpp \
-    src/wallet/dictionaries/electrum_v1.cpp \
-    src/wallet/dictionaries/mnemonic.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.ipp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_private.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_private.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_public.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_public.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp \
-    src/wallet/qrencode/bitstream.c \
-    src/wallet/qrencode/bitstream.h \
-    src/wallet/qrencode/mask.c \
-    src/wallet/qrencode/mask.h \
-    src/wallet/qrencode/mmask.c \
-    src/wallet/qrencode/mmask.h \
-    src/wallet/qrencode/mqrspec.c \
-    src/wallet/qrencode/mqrspec.h \
-    src/wallet/qrencode/qrencode.c \
-    src/wallet/qrencode/qrencode.h \
-    src/wallet/qrencode/qrencode_inner.h \
-    src/wallet/qrencode/qrinput.c \
-    src/wallet/qrencode/qrinput.h \
-    src/wallet/qrencode/qrspec.c \
-    src/wallet/qrencode/qrspec.h \
-    src/wallet/qrencode/rsecc.c \
-    src/wallet/qrencode/rsecc.h \
-    src/wallet/qrencode/split.c \
-    src/wallet/qrencode/split.h
+    src/wallet/addresses/bitcoin_uri.cpp \
+    src/wallet/addresses/payment_address.cpp \
+    src/wallet/addresses/qr_code.cpp \
+    src/wallet/addresses/stealth_address.cpp \
+    src/wallet/addresses/stealth_receiver.cpp \
+    src/wallet/addresses/stealth_sender.cpp \
+    src/wallet/addresses/uri.cpp \
+    src/wallet/addresses/witness_address.cpp \
+    src/wallet/addresses/qrencode/bitstream.c \
+    src/wallet/addresses/qrencode/bitstream.h \
+    src/wallet/addresses/qrencode/mask.c \
+    src/wallet/addresses/qrencode/mask.h \
+    src/wallet/addresses/qrencode/mmask.c \
+    src/wallet/addresses/qrencode/mmask.h \
+    src/wallet/addresses/qrencode/mqrspec.c \
+    src/wallet/addresses/qrencode/mqrspec.h \
+    src/wallet/addresses/qrencode/qrencode.c \
+    src/wallet/addresses/qrencode/qrencode.h \
+    src/wallet/addresses/qrencode/qrencode_inner.h \
+    src/wallet/addresses/qrencode/qrinput.c \
+    src/wallet/addresses/qrencode/qrinput.h \
+    src/wallet/addresses/qrencode/qrspec.c \
+    src/wallet/addresses/qrencode/qrspec.h \
+    src/wallet/addresses/qrencode/rsecc.c \
+    src/wallet/addresses/qrencode/rsecc.h \
+    src/wallet/addresses/qrencode/split.c \
+    src/wallet/addresses/qrencode/split.h \
+    src/wallet/keys/ec_private.cpp \
+    src/wallet/keys/ec_public.cpp \
+    src/wallet/keys/ek_private.cpp \
+    src/wallet/keys/ek_public.cpp \
+    src/wallet/keys/ek_token.cpp \
+    src/wallet/keys/encrypted_keys.cpp \
+    src/wallet/keys/hd_private.cpp \
+    src/wallet/keys/hd_public.cpp \
+    src/wallet/keys/mini_keys.cpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_key.hpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_key.ipp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_prefix.hpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_prefix.ipp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_private.cpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_private.hpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_public.cpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_public.hpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_token.cpp \
+    src/wallet/keys/parse_encrypted_keys/parse_encrypted_token.hpp \
+    src/wallet/mnemonics/electrum.cpp \
+    src/wallet/mnemonics/electrum_v1.cpp \
+    src/wallet/mnemonics/languages.cpp \
+    src/wallet/mnemonics/mnemonic.cpp \
+    src/wallet/mnemonics/dictionaries/electrum.cpp \
+    src/wallet/mnemonics/dictionaries/electrum_v1.cpp \
+    src/wallet/mnemonics/dictionaries/mnemonic.cpp
 
 # local: examples/libbitcoin-system-examples
 #------------------------------------------------------------------------------
@@ -400,41 +400,41 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/string.cpp \
     test/utility/thread.cpp \
     test/utility/tiff.cpp \
-    test/wallet/bitcoin_uri.cpp \
-    test/wallet/checked.cpp \
-    test/wallet/dictionaries.cpp \
-    test/wallet/dictionaries.hpp \
-    test/wallet/dictionary.cpp \
-    test/wallet/dictionary.hpp \
-    test/wallet/ec_private.cpp \
-    test/wallet/ec_public.cpp \
-    test/wallet/electrum.cpp \
-    test/wallet/electrum.hpp \
-    test/wallet/electrum_v1.cpp \
-    test/wallet/electrum_v1.hpp \
-    test/wallet/encrypted_keys.cpp \
-    test/wallet/hd_private.cpp \
-    test/wallet/hd_public.cpp \
-    test/wallet/languages.cpp \
-    test/wallet/languages.hpp \
     test/wallet/message.cpp \
-    test/wallet/mnemonic.cpp \
-    test/wallet/mnemonic.hpp \
-    test/wallet/payment_address.cpp \
-    test/wallet/qr_code.cpp \
     test/wallet/select_outputs.cpp \
-    test/wallet/stealth_address.cpp \
-    test/wallet/stealth_receiver.cpp \
-    test/wallet/stealth_sender.cpp \
-    test/wallet/uri.cpp \
-    test/wallet/uri_reader.cpp \
-    test/wallet/witness_address.cpp \
-    test/wallet/dictionaries/electrum.cpp \
-    test/wallet/dictionaries/electrum.hpp \
-    test/wallet/dictionaries/electrum_v1.cpp \
-    test/wallet/dictionaries/electrum_v1.hpp \
-    test/wallet/dictionaries/mnemonic.cpp \
-    test/wallet/dictionaries/mnemonic.hpp
+    test/wallet/addresses/bitcoin_uri.cpp \
+    test/wallet/addresses/checked.cpp \
+    test/wallet/addresses/payment_address.cpp \
+    test/wallet/addresses/qr_code.cpp \
+    test/wallet/addresses/stealth_address.cpp \
+    test/wallet/addresses/stealth_receiver.cpp \
+    test/wallet/addresses/stealth_sender.cpp \
+    test/wallet/addresses/uri.cpp \
+    test/wallet/addresses/uri_reader.cpp \
+    test/wallet/addresses/witness_address.cpp \
+    test/wallet/keys/ec_private.cpp \
+    test/wallet/keys/ec_public.cpp \
+    test/wallet/keys/encrypted_keys.cpp \
+    test/wallet/keys/hd_private.cpp \
+    test/wallet/keys/hd_public.cpp \
+    test/wallet/mnemonics/dictionaries.cpp \
+    test/wallet/mnemonics/dictionaries.hpp \
+    test/wallet/mnemonics/dictionary.cpp \
+    test/wallet/mnemonics/dictionary.hpp \
+    test/wallet/mnemonics/electrum.cpp \
+    test/wallet/mnemonics/electrum.hpp \
+    test/wallet/mnemonics/electrum_v1.cpp \
+    test/wallet/mnemonics/electrum_v1.hpp \
+    test/wallet/mnemonics/languages.cpp \
+    test/wallet/mnemonics/languages.hpp \
+    test/wallet/mnemonics/mnemonic.cpp \
+    test/wallet/mnemonics/mnemonic.hpp \
+    test/wallet/mnemonics/dictionaries/electrum.cpp \
+    test/wallet/mnemonics/dictionaries/electrum.hpp \
+    test/wallet/mnemonics/dictionaries/electrum_v1.cpp \
+    test/wallet/mnemonics/dictionaries/electrum_v1.hpp \
+    test/wallet/mnemonics/dictionaries/mnemonic.cpp \
+    test/wallet/mnemonics/dictionaries/mnemonic.hpp
 
 endif WITH_TESTS
 
@@ -557,11 +557,14 @@ include_bitcoin_system_impl_utility_HEADERS = \
     include/bitcoin/system/impl/utility/subscriber.ipp \
     include/bitcoin/system/impl/utility/track.ipp
 
-include_bitcoin_system_impl_walletdir = ${includedir}/bitcoin/system/impl/wallet
-include_bitcoin_system_impl_wallet_HEADERS = \
-    include/bitcoin/system/impl/wallet/checked.ipp \
-    include/bitcoin/system/impl/wallet/dictionaries.ipp \
-    include/bitcoin/system/impl/wallet/dictionary.ipp
+include_bitcoin_system_impl_wallet_addressesdir = ${includedir}/bitcoin/system/impl/wallet/addresses
+include_bitcoin_system_impl_wallet_addresses_HEADERS = \
+    include/bitcoin/system/impl/wallet/addresses/checked.ipp
+
+include_bitcoin_system_impl_wallet_mnemonicsdir = ${includedir}/bitcoin/system/impl/wallet/mnemonics
+include_bitcoin_system_impl_wallet_mnemonics_HEADERS = \
+    include/bitcoin/system/impl/wallet/mnemonics/dictionaries.ipp \
+    include/bitcoin/system/impl/wallet/mnemonics/dictionary.ipp
 
 include_bitcoin_system_logdir = ${includedir}/bitcoin/system/log
 include_bitcoin_system_log_HEADERS = \
@@ -724,34 +727,43 @@ include_bitcoin_system_utility_HEADERS = \
 
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
-    include/bitcoin/system/wallet/bitcoin_uri.hpp \
-    include/bitcoin/system/wallet/checked.hpp \
-    include/bitcoin/system/wallet/dictionaries.hpp \
-    include/bitcoin/system/wallet/dictionary.hpp \
-    include/bitcoin/system/wallet/ec_private.hpp \
-    include/bitcoin/system/wallet/ec_public.hpp \
-    include/bitcoin/system/wallet/ek_private.hpp \
-    include/bitcoin/system/wallet/ek_public.hpp \
-    include/bitcoin/system/wallet/ek_token.hpp \
-    include/bitcoin/system/wallet/electrum.hpp \
-    include/bitcoin/system/wallet/electrum_v1.hpp \
-    include/bitcoin/system/wallet/encrypted_keys.hpp \
-    include/bitcoin/system/wallet/hd_private.hpp \
-    include/bitcoin/system/wallet/hd_public.hpp \
-    include/bitcoin/system/wallet/language.hpp \
-    include/bitcoin/system/wallet/languages.hpp \
     include/bitcoin/system/wallet/message.hpp \
-    include/bitcoin/system/wallet/mini_keys.hpp \
-    include/bitcoin/system/wallet/mnemonic.hpp \
-    include/bitcoin/system/wallet/payment_address.hpp \
-    include/bitcoin/system/wallet/qr_code.hpp \
-    include/bitcoin/system/wallet/select_outputs.hpp \
-    include/bitcoin/system/wallet/stealth_address.hpp \
-    include/bitcoin/system/wallet/stealth_receiver.hpp \
-    include/bitcoin/system/wallet/stealth_sender.hpp \
-    include/bitcoin/system/wallet/uri.hpp \
-    include/bitcoin/system/wallet/uri_reader.hpp \
-    include/bitcoin/system/wallet/witness_address.hpp
+    include/bitcoin/system/wallet/select_outputs.hpp
+
+include_bitcoin_system_wallet_addressesdir = ${includedir}/bitcoin/system/wallet/addresses
+include_bitcoin_system_wallet_addresses_HEADERS = \
+    include/bitcoin/system/wallet/addresses/bitcoin_uri.hpp \
+    include/bitcoin/system/wallet/addresses/checked.hpp \
+    include/bitcoin/system/wallet/addresses/payment_address.hpp \
+    include/bitcoin/system/wallet/addresses/qr_code.hpp \
+    include/bitcoin/system/wallet/addresses/stealth_address.hpp \
+    include/bitcoin/system/wallet/addresses/stealth_receiver.hpp \
+    include/bitcoin/system/wallet/addresses/stealth_sender.hpp
+
+include_bitcoin_system_wallet_keysdir = ${includedir}/bitcoin/system/wallet/keys
+include_bitcoin_system_wallet_keys_HEADERS = \
+    include/bitcoin/system/wallet/keys/ec_private.hpp \
+    include/bitcoin/system/wallet/keys/ec_public.hpp \
+    include/bitcoin/system/wallet/keys/ek_private.hpp \
+    include/bitcoin/system/wallet/keys/ek_public.hpp \
+    include/bitcoin/system/wallet/keys/ek_token.hpp \
+    include/bitcoin/system/wallet/keys/encrypted_keys.hpp \
+    include/bitcoin/system/wallet/keys/hd_private.hpp \
+    include/bitcoin/system/wallet/keys/hd_public.hpp \
+    include/bitcoin/system/wallet/keys/mini_keys.hpp \
+    include/bitcoin/system/wallet/keys/uri.hpp \
+    include/bitcoin/system/wallet/keys/uri_reader.hpp \
+    include/bitcoin/system/wallet/keys/witness_address.hpp
+
+include_bitcoin_system_wallet_mnemonicsdir = ${includedir}/bitcoin/system/wallet/mnemonics
+include_bitcoin_system_wallet_mnemonics_HEADERS = \
+    include/bitcoin/system/wallet/mnemonics/dictionaries.hpp \
+    include/bitcoin/system/wallet/mnemonics/dictionary.hpp \
+    include/bitcoin/system/wallet/mnemonics/electrum.hpp \
+    include/bitcoin/system/wallet/mnemonics/electrum_v1.hpp \
+    include/bitcoin/system/wallet/mnemonics/language.hpp \
+    include/bitcoin/system/wallet/mnemonics/languages.hpp \
+    include/bitcoin/system/wallet/mnemonics/mnemonic.hpp
 
 
 # Custom make targets.

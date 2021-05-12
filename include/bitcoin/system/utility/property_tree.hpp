@@ -33,9 +33,9 @@
 #include <bitcoin/system/message/compact_filter.hpp>
 #include <bitcoin/system/message/compact_filter_checkpoint.hpp>
 #include <bitcoin/system/message/compact_filter_headers.hpp>
-#include <bitcoin/system/wallet/bitcoin_uri.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
-#include <bitcoin/system/wallet/stealth_address.hpp>
+#include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/addresses/payment_address.hpp>
+#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 
 namespace pt = boost::property_tree;
 

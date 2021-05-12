@@ -31,7 +31,7 @@
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/reader.hpp>
 #include <bitcoin/system/utility/writer.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -23,7 +23,7 @@
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
-#include <bitcoin/system/wallet/ec_private.hpp>
+#include <bitcoin/system/wallet/keys/ec_private.hpp>
 
 namespace libbitcoin {
 namespace system {

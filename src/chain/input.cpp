@@ -26,7 +26,7 @@
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/ostream_writer.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
 namespace system {

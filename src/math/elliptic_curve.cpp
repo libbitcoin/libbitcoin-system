@@ -27,7 +27,7 @@
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/wallet/hd_private.hpp>
+#include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include "../math/external/lax_der_parsing.h"
 #include "secp256k1_initializer.hpp"
 

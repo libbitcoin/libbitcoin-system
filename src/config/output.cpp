@@ -28,7 +28,7 @@
 #include <bitcoin/system/utility/deserialize.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>
-#include <bitcoin/system/wallet/stealth_address.hpp>
+#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace system {
