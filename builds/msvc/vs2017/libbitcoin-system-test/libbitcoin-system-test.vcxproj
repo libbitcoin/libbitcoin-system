@@ -203,16 +203,16 @@
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\dictionaries.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_mnemonic.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_electrum.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum_v1.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_electrum_v1.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\mnemonic.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_mnemonic.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp">
@@ -246,10 +246,10 @@
     <ClInclude Include="..\..\..\..\test\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\dictionaries.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\dictionary.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum_v1.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\languages.hpp" />
@@ -297,11 +297,6 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets'))" />
   </Target>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
-    <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=languages_tests --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include "mnemonic.hpp"
-#include <algorithm>
 
 BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 

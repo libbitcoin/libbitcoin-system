@@ -37,7 +37,7 @@
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\dictionary">
+    <Filter Include="src\wallet\dictionaries">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -387,17 +387,17 @@
     <ClCompile Include="..\..\..\..\test\wallet\dictionaries.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum.cpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.cpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\mnemonic.cpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp">
       <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum.cpp">
-      <Filter>src\wallet\dictionary</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum_v1.cpp">
-      <Filter>src\wallet\dictionary</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\mnemonic.cpp">
-      <Filter>src\wallet\dictionary</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp">
       <Filter>src\wallet</Filter>
@@ -476,17 +476,17 @@
     <ClInclude Include="..\..\..\..\test\wallet\dictionaries.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum.hpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.hpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\mnemonic.hpp">
+      <Filter>src\wallet\dictionaries</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\dictionary.hpp">
       <Filter>src\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum.hpp">
-      <Filter>src\wallet\dictionary</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum_v1.hpp">
-      <Filter>src\wallet\dictionary</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\mnemonic.hpp">
-      <Filter>src\wallet\dictionary</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp">
       <Filter>src\wallet</Filter>

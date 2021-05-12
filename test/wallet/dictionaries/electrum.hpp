@@ -27,7 +27,7 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
-ptrdiff_t compressions(const electrum::dictionary::words& words)
+static ptrdiff_t compressions(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
@@ -35,7 +35,7 @@ ptrdiff_t compressions(const electrum::dictionary::words& words)
     });
 }
 
-bool compressed(const electrum::dictionary::words& words)
+static bool compressed(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
@@ -43,7 +43,7 @@ bool compressed(const electrum::dictionary::words& words)
     });
 }
 
-ptrdiff_t accents(const electrum::dictionary::words& words)
+static ptrdiff_t accents(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
@@ -51,7 +51,7 @@ ptrdiff_t accents(const electrum::dictionary::words& words)
     });
 }
 
-bool accented(const electrum::dictionary::words& words)
+static bool accented(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
@@ -61,7 +61,7 @@ bool accented(const electrum::dictionary::words& words)
 
 #ifdef WITH_ICU
 
-bool diverged(const mnemonic::dictionary::words& normal,
+static bool diverged(const mnemonic::dictionary::words& normal,
     const mnemonic::dictionary::words& test)
 {
     auto it = normal.begin();
@@ -70,6 +70,22 @@ bool diverged(const mnemonic::dictionary::words& normal,
             return true;
 
     return false;
+}
+
+static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
+{
+    return std::count_if(words.begin(), words.end(), [&](const char test[])
+    {
+        return test != to_normal_nfkd_form(test);
+    });
+}
+
+static bool abnormal(const mnemonic::dictionary::words& words)
+{
+    return std::all_of(words.begin(), words.end(), [&](const char test[])
+    {
+        return test != to_normal_nfkd_form(test);
+    });
 }
 
 #endif

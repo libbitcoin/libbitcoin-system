@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include "electrum.hpp"
-#include "mnemonic.hpp"
 
 BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 

@@ -203,16 +203,16 @@
     <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\dictionaries.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\dictionaries\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_dictionaries_mnemonic.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\dictionary.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_electrum.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\electrum_v1.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_electrum_v1.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\dictionary\mnemonic.cpp">
-      <ObjectFileName>$(IntDir)test_wallet_dictionary_mnemonic.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp">
@@ -246,10 +246,10 @@
     <ClInclude Include="..\..\..\..\test\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\dictionaries.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\electrum_v1.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\dictionaries\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\dictionary.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\electrum_v1.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\dictionary\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\languages.hpp" />

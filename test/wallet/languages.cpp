@@ -181,10 +181,12 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ideographic_space_space_delimite
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
 }
 
-BOOST_AUTO_TEST_CASE(languages__normalize__empty__empty)
+// split creates a single empty token from the joined empty string.
+BOOST_AUTO_TEST_CASE(languages__normalize__empty_string__single_empty_token)
 {
     const string_list words{};
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), words);
+    const string_list expected{ "" };
+    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
 }
 
 BOOST_AUTO_TEST_CASE(languages__normalize__lower_ascii__unchanged)

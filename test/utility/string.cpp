@@ -240,7 +240,14 @@ BOOST_AUTO_TEST_CASE(string__join2__untrimmed_values_comma_delimiter__untrimmed_
 
 // split
 
-BOOST_AUTO_TEST_CASE(string__split1__empty__empty_token)
+BOOST_AUTO_TEST_CASE(string__split1__empty__empty)
+{
+    const std::string value{};
+    const string_list expected{ "" };
+    BOOST_REQUIRE_EQUAL(system::split(value), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__split1__empty_token__empty_token)
 {
     const std::string value{ "" };
     const string_list expected{ value };
