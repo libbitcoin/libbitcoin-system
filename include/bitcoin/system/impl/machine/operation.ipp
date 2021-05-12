@@ -20,10 +20,10 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_OPERATION_IPP
 
 #include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {

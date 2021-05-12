@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/formats/base_58.hpp>
 
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/assert.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -24,9 +24,9 @@
 #include <cstdint>
 #include <iterator>
 #include <tuple>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {

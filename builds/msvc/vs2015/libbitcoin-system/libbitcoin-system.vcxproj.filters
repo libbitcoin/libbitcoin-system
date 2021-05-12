@@ -728,6 +728,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\assert.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
@@ -883,9 +886,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_85.hpp">
       <Filter>include\bitcoin\system\formats</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\handlers.hpp">
-      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\log\attributes.hpp">
       <Filter>include\bitcoin\system\log</Filter>
@@ -1151,9 +1151,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\asio.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp">
-      <Filter>include\bitcoin\system\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
@@ -1212,6 +1209,9 @@
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\handlers.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp">

@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_BASE_16_IPP
 
 #include <algorithm>
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/assert.hpp>
 
 namespace libbitcoin {
 namespace system {

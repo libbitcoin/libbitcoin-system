@@ -14,12 +14,12 @@
  * Maintainers: Do not include this header internal to this library.
  */
 
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/compat.h>
 #include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/handlers.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/chain/block.hpp>
@@ -156,7 +156,6 @@
 #include <bitcoin/system/unicode/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/unicode_streambuf.hpp>
 #include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/atomic.hpp>
 #include <bitcoin/system/utility/binary.hpp>
 #include <bitcoin/system/utility/bit_reader.hpp>
@@ -177,6 +176,7 @@
 #include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/flush_lock.hpp>
+#include <bitcoin/system/utility/handlers.hpp>
 #include <bitcoin/system/utility/interprocess_lock.hpp>
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>

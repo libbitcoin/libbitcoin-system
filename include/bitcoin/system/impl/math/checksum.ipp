@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/data_slice.hpp>
 

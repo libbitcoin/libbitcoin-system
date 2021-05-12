@@ -446,12 +446,12 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
+    include/bitcoin/system/assert.hpp \
     include/bitcoin/system/compat.h \
     include/bitcoin/system/compat.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/error.hpp \
-    include/bitcoin/system/handlers.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/version.hpp
 
@@ -673,7 +673,6 @@ include_bitcoin_system_unicode_HEADERS = \
 include_bitcoin_system_utilitydir = ${includedir}/bitcoin/system/utility
 include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/asio.hpp \
-    include/bitcoin/system/utility/assert.hpp \
     include/bitcoin/system/utility/atomic.hpp \
     include/bitcoin/system/utility/binary.hpp \
     include/bitcoin/system/utility/bit_reader.hpp \
@@ -694,6 +693,7 @@ include_bitcoin_system_utility_HEADERS = \
     include/bitcoin/system/utility/endian.hpp \
     include/bitcoin/system/utility/exceptions.hpp \
     include/bitcoin/system/utility/flush_lock.hpp \
+    include/bitcoin/system/utility/handlers.hpp \
     include/bitcoin/system/utility/interprocess_lock.hpp \
     include/bitcoin/system/utility/istream_bit_reader.hpp \
     include/bitcoin/system/utility/istream_reader.hpp \

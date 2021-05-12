@@ -20,9 +20,9 @@
 
 #include <iterator>
 #include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/deserialize.hpp>

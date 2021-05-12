@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
@@ -29,7 +30,6 @@
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>

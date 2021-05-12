@@ -21,12 +21,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/binary.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>

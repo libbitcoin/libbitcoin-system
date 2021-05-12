@@ -18,10 +18,10 @@
  */
 #include <bitcoin/system/message/filter_load.hpp>
 
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>

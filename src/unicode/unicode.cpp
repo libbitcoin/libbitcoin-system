@@ -34,13 +34,13 @@
 #endif
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/unicode/console_streambuf.hpp>
 #include <bitcoin/system/unicode/unicode_istream.hpp>
 #include <bitcoin/system/unicode/unicode_ostream.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/string.hpp>

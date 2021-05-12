@@ -26,8 +26,8 @@
 #include <thread>
 #include <type_traits>
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {

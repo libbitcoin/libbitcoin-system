@@ -29,6 +29,7 @@
 #include <utility>
 #include <unordered_map>
 #include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -42,7 +43,6 @@
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>

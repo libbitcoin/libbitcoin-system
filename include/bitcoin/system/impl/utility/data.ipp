@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <iterator>
 #include <utility>
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/utility/data_slice.hpp>
 
 namespace libbitcoin {

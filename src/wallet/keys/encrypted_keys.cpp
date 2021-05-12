@@ -23,13 +23,13 @@
 #include <algorithm>
 #include <stdexcept>
 #include <boost/locale.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/crypto.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

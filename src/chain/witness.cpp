@@ -25,12 +25,12 @@
 #include <numeric>
 #include <string>
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>

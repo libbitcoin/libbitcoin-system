@@ -20,9 +20,9 @@
 
 #include <cstdint>
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>

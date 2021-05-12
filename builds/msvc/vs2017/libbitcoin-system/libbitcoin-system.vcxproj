@@ -318,6 +318,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
@@ -370,7 +371,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_85.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\log\attributes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\counter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\log\features\gauge.hpp" />
@@ -459,7 +459,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\asio.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\atomic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\bit_reader.hpp" />
@@ -480,6 +479,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\endian.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp" />

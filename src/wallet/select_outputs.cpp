@@ -20,8 +20,8 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/chain/points_value.hpp>
 
 namespace libbitcoin {

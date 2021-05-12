@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/utility/assert.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 

@@ -23,8 +23,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 
 namespace libbitcoin {

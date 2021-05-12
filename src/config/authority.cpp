@@ -24,9 +24,9 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {

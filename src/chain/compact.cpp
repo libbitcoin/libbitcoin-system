@@ -19,8 +19,8 @@
 #include <bitcoin/system/chain/compact.hpp>
 
 #include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 
 namespace libbitcoin {
 namespace system {

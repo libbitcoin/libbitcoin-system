@@ -22,9 +22,9 @@
 #include <cstring>
 #include <iostream>
 #include <streambuf>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {

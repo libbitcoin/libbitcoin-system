@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_DEADLINE_HPP
 
 #include <memory>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 #include <bitcoin/system/utility/enable_shared_from_base.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/noncopyable.hpp>
 #include <bitcoin/system/utility/thread.hpp>
 #include <bitcoin/system/utility/threadpool.hpp>

@@ -22,9 +22,9 @@
 #include <atomic>
 #include <cstddef>
 #include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/log/source.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 
 // libbitcoin defines the log and tracking but does not use them.
 // These are defined in bc so that they can be used in network and blockchain.

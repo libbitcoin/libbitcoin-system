@@ -19,8 +19,8 @@
 #include <bitcoin/system/utility/sequencer.hpp>
 
 #include <utility>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/thread.hpp>
 
 namespace libbitcoin {

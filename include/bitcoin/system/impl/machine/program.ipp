@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
@@ -30,7 +31,6 @@
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {

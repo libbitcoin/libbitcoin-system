@@ -26,6 +26,7 @@
 #include <sstream>
 #include <utility>
 #include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
@@ -41,7 +42,6 @@
 #include <bitcoin/system/machine/script_version.hpp>
 #include <bitcoin/system/machine/sighash_algorithm.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/assert.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
