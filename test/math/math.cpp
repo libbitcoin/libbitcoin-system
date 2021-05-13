@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_log2__negative__undefined)
     BOOST_REQUIRE_EQUAL(system::ceilinged_log2(-42), 0);
 }
 
-BOOST_AUTO_TEST_CASE(math__ceilinged_log2__maximums__sizeof_maximum_minus_one)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__maximums__sizeof_maximum)
 {
     BOOST_REQUIRE_EQUAL(system::ceilinged_log2(max_uint8), sizeof(uint8_t) * byte_bits);
     BOOST_REQUIRE_EQUAL(system::ceilinged_log2(max_uint16), sizeof(uint16_t) * byte_bits);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(math__floored_log2__negative__undefined)
     BOOST_REQUIRE_EQUAL(system::floored_log2(-42), 0);
 }
 
-BOOST_AUTO_TEST_CASE(math__floored_log2__maximums__sizeof_maximum)
+BOOST_AUTO_TEST_CASE(math__floored_log2__maximums__sizeof_maximum_minus_one)
 {
     BOOST_REQUIRE_EQUAL(system::floored_log2(max_uint8), sizeof(uint8_t) * byte_bits - 1);
     BOOST_REQUIRE_EQUAL(system::floored_log2(max_uint16), sizeof(uint16_t) * byte_bits - 1);
