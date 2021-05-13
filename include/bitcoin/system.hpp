@@ -98,7 +98,7 @@
 #include <bitcoin/system/math/ec_point.hpp>
 #include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/math/golomb_coding.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/math.hpp>

@@ -99,7 +99,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/math/ec_point.cpp \
     src/math/ec_scalar.cpp \
     src/math/elliptic_curve.cpp \
-    src/math/golomb_coded_sets.cpp \
+    src/math/golomb_coding.cpp \
     src/math/hash.cpp \
     src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
@@ -604,7 +604,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/ec_point.hpp \
     include/bitcoin/system/math/ec_scalar.hpp \
     include/bitcoin/system/math/elliptic_curve.hpp \
-    include/bitcoin/system/math/golomb_coded_sets.hpp \
+    include/bitcoin/system/math/golomb_coding.hpp \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/math.hpp \

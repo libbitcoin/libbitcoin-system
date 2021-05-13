@@ -26,7 +26,7 @@
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/math/golomb_coding.hpp>
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/istream_bit_reader.hpp>

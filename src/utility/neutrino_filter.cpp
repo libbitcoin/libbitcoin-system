@@ -22,7 +22,7 @@
 #include <bitcoin/system/utility/neutrino_filter.hpp>
 
 #include <algorithm>
-#include <bitcoin/system/math/golomb_coded_sets.hpp>
+#include <bitcoin/system/math/golomb_coding.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/container_sink.hpp>
 #include <bitcoin/system/utility/container_source.hpp>

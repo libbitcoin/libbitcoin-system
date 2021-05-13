@@ -375,7 +375,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\golomb_coded_sets.cpp">
+    <ClCompile Include="..\..\..\..\src\math\golomb_coding.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\hash.cpp">
@@ -977,7 +977,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coding.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp">

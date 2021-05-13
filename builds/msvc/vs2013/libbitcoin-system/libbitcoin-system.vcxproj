@@ -180,7 +180,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\math\external\zeroize.c" />
-    <ClCompile Include="..\..\..\..\src\math\golomb_coded_sets.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\golomb_coding.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
@@ -402,7 +402,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coded_sets.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coding.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />

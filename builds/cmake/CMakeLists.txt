@@ -340,7 +340,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/math/ec_point.cpp"
     "../../src/math/ec_scalar.cpp"
     "../../src/math/elliptic_curve.cpp"
-    "../../src/math/golomb_coded_sets.cpp"
+    "../../src/math/golomb_coding.cpp"
     "../../src/math/hash.cpp"
     "../../src/math/ring_signature.cpp"
     "../../src/math/secp256k1_initializer.cpp"
