@@ -206,7 +206,6 @@
 #include <bitcoin/system/utility/work.hpp>
 #include <bitcoin/system/utility/writer.hpp>
 #include <bitcoin/system/wallet/message.hpp>
-#include <bitcoin/system/wallet/select_outputs.hpp>
 #include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
 #include <bitcoin/system/wallet/addresses/checked.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>

@@ -720,9 +720,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\mnemonic.cpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
@@ -1381,9 +1378,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\mnemonic.hpp">
       <Filter>include\bitcoin\system\wallet\mnemonics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp">
-      <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
       <Filter>src\math\external</Filter>

@@ -204,7 +204,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/utility/tiff.cpp \
     src/utility/work.cpp \
     src/wallet/message.cpp \
-    src/wallet/select_outputs.cpp \
     src/wallet/addresses/bitcoin_uri.cpp \
     src/wallet/addresses/payment_address.cpp \
     src/wallet/addresses/qr_code.cpp \
@@ -401,7 +400,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/utility/thread.cpp \
     test/utility/tiff.cpp \
     test/wallet/message.cpp \
-    test/wallet/select_outputs.cpp \
     test/wallet/addresses/bitcoin_uri.cpp \
     test/wallet/addresses/checked.cpp \
     test/wallet/addresses/payment_address.cpp \
@@ -725,8 +723,7 @@ include_bitcoin_system_utility_HEADERS = \
 
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
-    include/bitcoin/system/wallet/message.hpp \
-    include/bitcoin/system/wallet/select_outputs.hpp
+    include/bitcoin/system/wallet/message.hpp
 
 include_bitcoin_system_wallet_addressesdir = ${includedir}/bitcoin/system/wallet/addresses
 include_bitcoin_system_wallet_addresses_HEADERS = \

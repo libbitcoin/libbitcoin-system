@@ -462,9 +462,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">

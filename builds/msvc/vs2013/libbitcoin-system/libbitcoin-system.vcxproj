@@ -317,7 +317,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\select_outputs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
@@ -539,7 +538,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\language.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\languages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\mnemonic.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\select_outputs.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
