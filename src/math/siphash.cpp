@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/siphash.hpp>
+#include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
 #include <bitcoin/system/utility/iostream.hpp>
 
@@ -107,13 +108,10 @@ uint64_t siphash(const siphash_key& key, const data_slice& message)
 
 siphash_key to_siphash_key(const half_hash& hash)
 {
-    const auto upper = from_little_endian<uint64_t, half_hash::const_iterator>(
-        hash.begin(), hash.begin() + (half_hash_size / 2));
-
-    const auto lower = from_little_endian<uint64_t, half_hash::const_iterator>(
-        hash.begin() + (half_hash_size / 2), hash.end());
-
-    return std::make_tuple(upper, lower);
+    const auto part = split(hash);
+    const auto hi = from_little_endian_unsafe<uint64_t>(part.first.begin());
+    const auto lo = from_little_endian_unsafe<uint64_t>(part.second.begin());
+    return std::make_tuple(hi, lo);
 }
 
 } // namespace system
