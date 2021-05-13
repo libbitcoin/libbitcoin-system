@@ -149,8 +149,8 @@ protected:
     /// Map entropy size to number of unused bits.
     static uint8_t unused_bits(const data_slice& entropy);
 
-    /// Determine if there is an unsable byte of entropy.
-    static bool unused_byte(const data_slice& entropy);
+    /// Determine the number of unused bytes of entropy.
+    static uint8_t unused_bytes(const data_slice& entropy);
 
     /// Map entropy size to usable bytes (unused bits may remain).
     static size_t usable_size(const data_slice& entropy);

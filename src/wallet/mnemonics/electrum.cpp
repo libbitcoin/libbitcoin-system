@@ -322,7 +322,7 @@ uint8_t electrum::unused_bits(const data_slice& entropy)
     return entropy_bits(entropy) % index_bits;
 }
 
-bool electrum::unused_byte(const data_slice& entropy)
+uint8_t electrum::unused_bytes(const data_slice& entropy)
 {
     // 0..10 unused bits implies we can discard up to one byte.
     return unused_bits(entropy) / byte_bits;
@@ -330,7 +330,7 @@ bool electrum::unused_byte(const data_slice& entropy)
 
 size_t electrum::usable_size(const data_slice& entropy)
 {
-    return entropy.size() - (unused_byte(entropy) ? 1u : 0u);
+    return entropy.size() - unused_bytes(entropy);
 }
 
 // public static
