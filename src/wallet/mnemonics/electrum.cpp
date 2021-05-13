@@ -67,7 +67,7 @@ static const auto version_none = "none";
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
 static const auto index_bits = static_cast<uint8_t>(
-    system::log2(electrum::dictionary::size()));
+    system::floored_log2(electrum::dictionary::size()));
 
 // private static
 // ----------------------------------------------------------------------------

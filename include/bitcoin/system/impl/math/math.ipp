@@ -43,7 +43,7 @@ bool remainder(Dividend dividend, Divisor divisor)
 }
 
 template <typename Integer>
-Integer log2(Integer value)
+Integer floored_log2(Integer value)
 {
     if (value <= 0)
         return 0;
@@ -51,6 +51,12 @@ Integer log2(Integer value)
     Integer power = 0;
     while (((value >>= 1)) > 0) { ++power; };
     return power;
+}
+
+template <typename Integer>
+Integer ceilinged_log2(Integer value)
+{
+    return floored_log2(value) + (value % 2);
 }
 
 template <typename Integer>

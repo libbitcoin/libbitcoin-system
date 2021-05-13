@@ -53,12 +53,20 @@ template <typename Dividend, typename Divisor>
 bool remainder(Dividend dividend, Divisor divisor);
 
 /**
- * Obtain the integer base 2 logarithm of given value.
+ * Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
  * @param[in] value   The value.
  * @return            The log2, or zero if value zero or negative (undefined).
  */
 template <typename Integer>
-Integer log2(Integer value);
+Integer ceilinged_log2(Integer value);
+
+/**
+ * Obtain the floored (rounded down) integer base 2 logarithm of given value.
+ * @param[in] value   The value.
+ * @return            The log2, or zero if value zero or negative (undefined).
+ */
+template <typename Integer>
+Integer floored_log2(Integer value);
 
 /**
  * Obtain the integer base 2 power for given exponent (can overflow).

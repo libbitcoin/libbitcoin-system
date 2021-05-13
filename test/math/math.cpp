@@ -133,69 +133,200 @@ BOOST_AUTO_TEST_CASE(math__remainder__negatives__true)
 // exponents
 // ----------------------------------------------------------------------------
 
-// log2
+// ceilinged_log2
 
-BOOST_AUTO_TEST_CASE(math__log2__zero__undefined)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__zero__undefined)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(0), 0);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(math__log2__negative__undefined)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__negative__undefined)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(-42), 0);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(-42), 0);
 }
 
-BOOST_AUTO_TEST_CASE(math__log2__maximums__sizeof_maximum_minus_one)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__maximums__sizeof_maximum_minus_one)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(max_uint8), sizeof(uint8_t) * byte_bits - 1);
-    BOOST_REQUIRE_EQUAL(system::log2(max_uint16), sizeof(uint16_t) * byte_bits - 1);
-    BOOST_REQUIRE_EQUAL(system::log2(max_uint32), sizeof(uint32_t) * byte_bits - 1);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(max_uint8), sizeof(uint8_t) * byte_bits);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(max_uint16), sizeof(uint16_t) * byte_bits);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(max_uint32), sizeof(uint32_t) * byte_bits);
 }
 
-BOOST_AUTO_TEST_CASE(math__log2__powers_of_2__expected)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__powers_of_2__expected)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 0), 0);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 1), 1);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 2), 2);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 3), 3);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 4), 4);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 5), 5);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 6), 6);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 7), 7);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 8), 8);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 9), 9);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 10), 10);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 11), 11);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 12), 12);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 13), 13);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 14), 14);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 15), 15);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 16), 16);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 17), 17);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 18), 18);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 19), 19);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 20), 20);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 21), 21);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 22), 22);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 23), 23);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 24), 24);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 25), 25);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 26), 26);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 27), 27);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 28), 28);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 29), 29);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 30), 30);
-    BOOST_REQUIRE_EQUAL(system::log2(1u << 31), 31);
+    // Third case (2) is redundant with second (2).
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 0) + 0), 1);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 0) + 1), 1);
+    ////BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 1) + 0), 1);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 1) + 1), 2);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 2) + 0), 2);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 2) + 1), 3);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 3) + 0), 3);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 3) + 1), 4);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 4) + 0), 4);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 4) + 1), 5);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 5) + 0), 5);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 5) + 1), 6);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 6) + 0), 6);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 6) + 1), 7);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 7) + 0), 7);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 7) + 1), 8);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 8) + 0), 8);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 8) + 1), 9);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 9) + 0), 9);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 9) + 1), 10);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 10) + 0), 10);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 10) + 1), 11);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 11) + 0), 11);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 11) + 1), 12);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 12) + 0), 12);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 12) + 1), 13);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 13) + 0), 13);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 13) + 1), 14);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 14) + 0), 14);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 14) + 1), 15);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 15) + 0), 15);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 15) + 1), 16);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 16) + 0), 16);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 16) + 1), 17);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 17) + 0), 17);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 17) + 1), 18);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 18) + 0), 18);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 18) + 1), 19);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 19) + 0), 19);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 19) + 1), 20);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 20) + 0), 20);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 20) + 1), 21);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 21) + 0), 21);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 21) + 1), 22);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 22) + 0), 22);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 22) + 1), 23);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 23) + 0), 23);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 23) + 1), 24);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 24) + 0), 24);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 24) + 1), 25);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 25) + 0), 25);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 25) + 1), 26);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 26) + 0), 26);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 26) + 1), 27);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 27) + 0), 27);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 27) + 1), 28);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 28) + 0), 28);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 28) + 1), 29);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 29) + 0), 29);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 29) + 1), 30);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 30) + 0), 30);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 30) + 1), 31);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 31) + 0), 31);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2((1u << 31) + 1), 32);
 }
 
-BOOST_AUTO_TEST_CASE(math__log2__pow2__identity)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__pow2__identity)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(system::pow2(15)), 15);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(system::pow2(15)), 15);
 }
 
-BOOST_AUTO_TEST_CASE(math__log2__power_2__identity)
+BOOST_AUTO_TEST_CASE(math__ceilinged_log2__power_2__identity)
 {
-    BOOST_REQUIRE_EQUAL(system::log2(system::power(2, 15)), 15);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(system::power(2, 15)), 15);
+}
+
+// floored_log2
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__zero__undefined)
+{
+    BOOST_REQUIRE_EQUAL(system::floored_log2(0), 0);
+}
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__negative__undefined)
+{
+    BOOST_REQUIRE_EQUAL(system::floored_log2(-42), 0);
+}
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__maximums__sizeof_maximum)
+{
+    BOOST_REQUIRE_EQUAL(system::floored_log2(max_uint8), sizeof(uint8_t) * byte_bits - 1);
+    BOOST_REQUIRE_EQUAL(system::floored_log2(max_uint16), sizeof(uint16_t) * byte_bits - 1);
+    BOOST_REQUIRE_EQUAL(system::floored_log2(max_uint32), sizeof(uint32_t) * byte_bits - 1);
+}
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__powers_of_2__expected)
+{
+    // Third case (2) is redundant with second (2).
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 0) + 0), 0);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 0) + 1), 1);
+    ///BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 1) + 0), 1);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 1) + 1), 1);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 2) + 0), 2);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 2) + 1), 2);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 3) + 0), 3);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 3) + 1), 3);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 4) + 0), 4);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 4) + 1), 4);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 5) + 0), 5);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 5) + 1), 5);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 6) + 0), 6);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 6) + 1), 6);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 7) + 0), 7);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 7) + 1), 7);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 8) + 0), 8);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 8) + 1), 8);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 9) + 0), 9);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 9) + 1), 9);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 10) + 0), 10);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 10) + 1), 10);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 11) + 0), 11);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 11) + 1), 11);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 12) + 0), 12);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 12) + 1), 12);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 13) + 0), 13);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 13) + 1), 13);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 14) + 0), 14);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 14) + 1), 14);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 15) + 0), 15);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 15) + 1), 15);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 16) + 0), 16);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 16) + 1), 16);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 17) + 0), 17);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 17) + 1), 17);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 18) + 0), 18);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 18) + 1), 18);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 19) + 0), 19);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 19) + 1), 19);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 20) + 0), 20);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 20) + 1), 20);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 21) + 0), 21);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 21) + 1), 21);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 22) + 0), 22);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 22) + 1), 22);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 23) + 0), 23);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 23) + 1), 23);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 24) + 0), 24);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 24) + 1), 24);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 25) + 0), 25);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 25) + 1), 25);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 26) + 0), 26);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 26) + 1), 26);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 27) + 0), 27);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 27) + 1), 27);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 28) + 0), 28);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 28) + 1), 28);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 29) + 0), 29);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 29) + 1), 29);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 30) + 0), 30);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 30) + 1), 30);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 31) + 0), 31);
+    BOOST_REQUIRE_EQUAL(system::floored_log2((1u << 31) + 1), 31);
+}
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__pow2__identity)
+{
+    BOOST_REQUIRE_EQUAL(system::floored_log2(system::pow2(15)), 15);
+}
+
+BOOST_AUTO_TEST_CASE(math__floored_log2__power_2__identity)
+{
+    BOOST_REQUIRE_EQUAL(system::floored_log2(system::power(2, 15)), 15);
 }
 
 // pow2
