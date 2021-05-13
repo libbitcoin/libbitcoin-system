@@ -79,6 +79,7 @@ public:
 
     /// The dictionary, limited by identifier, that contains all words.
     /// If 'none' is specified all dictionaries are searched.
+    /// If 'none' is specified and contained by both en and fr, returns en.
     static language contained_by(const string_list& words,
         language identifier=language::none);
 
@@ -111,9 +112,7 @@ public:
     electrum(const electrum& other);
     electrum(const std::string& sentence, language identifier=language::none);
     electrum(const string_list& words, language identifier=language::none);
-    electrum(const data_chunk& entropy,
-        seed_prefix prefix=seed_prefix::standard,
-        language lexicon=language::en);
+    electrum(const data_chunk& entropy, seed_prefix prefix, language lexicon);
 
     /// The prefix indicates the intended use of the seed.
     seed_prefix prefix() const;
@@ -130,21 +129,21 @@ public:
 protected:
     /// Map entropy to entropy bit count (132 to 506 bits).
     static size_t entropy_bits(const data_slice& entropy);
-
+    
     /// Map words to entropy bit count (132 to 506 bits).
     static size_t entropy_bits(const string_list& words);
 
+    /// Map entropy bits to sufficient entropy size (17 to 64 bytes).
+    static size_t entropy_size(size_t bit_strength);
+
     /// Map words to entropy size (17 to 64 bytes).
     static size_t entropy_size(const string_list& words);
-
-    /// Map entropy bits to sufficient entropy size (17 to 64 bytes).
-    static size_t entropy_size(size_t entropy_bits);
-
+    
     /// Map entropy size to word count (12 to 46 words).
     static size_t word_count(const data_slice& entropy);
 
     /// Map entropy bits to sufficient word count (12 to 46 words).
-    static size_t word_count(size_t entropy_bits);
+    static size_t word_count(size_t bit_strength);
 
     /// Map entropy size to number of unused bits.
     static uint8_t unused_bits(const data_slice& entropy);
@@ -159,12 +158,10 @@ protected:
     electrum(const data_chunk& entropy, const string_list& words,
         language identifier, seed_prefix prefix);
 
-private:
-    typedef struct { data_chunk entropy; string_list words; } result;
-
     static bool is_valid_seed_prefix(seed_prefix prefix);
     static bool is_valid_two_factor_authentication_size(size_t count);
 
+    typedef struct { data_chunk entropy; string_list words; } result;
     static result grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit);
     static string_list encoder(const data_chunk& entropy, language identifier);
@@ -179,6 +176,7 @@ private:
     static electrum from_entropy(const data_chunk& entropy, seed_prefix prefix,
         language identifier);
 
+private:
     // All Electrum dictionaries, subset of <dictionaries/mnemonic.cpp>.
     static const dictionaries dictionaries_;
 

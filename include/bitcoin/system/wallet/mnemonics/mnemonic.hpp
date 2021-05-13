@@ -69,8 +69,9 @@ public:
 
     /// The dictionary, limited by identifier, that contains all words.
     /// If 'none' is specified all dictionaries are searched.
+    /// If 'none' is specified and contained by both en and fr, returns en.
     static language contained_by(const string_list& words,
-        language identifier = language::none);
+        language identifier=language::none);
 
     /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
     static bool is_valid_dictionary(language identifier);

@@ -88,24 +88,10 @@ const electrum::dictionaries electrum::dictionaries_
     }
 };
 
-// Words are encoded in 11 bits and therefore are not byte aligned.
-// As a consequence bit ordering matters. Bits are serialized to entropy bytes
-// in big-endian order.
-// TODO: provide Electrum reference URL.
-
+// Entropy is an entirely private (internal) format.
+// TODO: decode_base2048(base2048_chunk&, const std::string&, language)
 string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
-    string_list words;
-
-    // We can use the bit reader here (exactly the same as BIP39).
-    // BIP39 entropy is extended by a checksum byte, so length is equivalent.
-    // Shift right 11 bits (one word) is the same as / 2048.
-    // This is equivalent to a read low 11 bits and shift left 11 bits.
-    // That can be done by reading 11 bits at a time, hi-to-low.
-    ////for (; number != 0; number /= 2048)
-    ////    words.push_back(dictionaries_.at(number % dictionary::size()));
-
-    // Read eleven bits into an index (0..2047).
     const auto read_index = [](istream_bit_reader& reader)
     {
         return static_cast<uint32_t>(reader.read_bits(index_bits));
@@ -113,62 +99,39 @@ string_list electrum::encoder(const data_chunk& entropy, language identifier)
 
     dictionary::search indexes(word_count(entropy));
 
-    // Word indexes are not byte aligned, high-to-low bit reader required.
     data_source source(entropy);
     istream_reader byte_reader(source);
     istream_bit_reader bit_reader(byte_reader);
 
-    // TODO: may want to ensure that the skipped bits are zero.
-    // Skip unused high order bits, as n*2^11 may not be byte aligned.
-    bit_reader.skip(unused_bits(entropy));
-
-    // Create a search index.
     for (auto& index: indexes)
         index = read_index(bit_reader);
 
     return dictionaries_.at(indexes, identifier);
 }
 
+// Entropy is an entirely private (internal) format.
+// TODO: create encode_base2048(const base2048_chunk& data, language)
 data_chunk electrum::decoder(const string_list& words, language identifier)
 {
-    // We can use the bit writer here (same as BIP39).
-    // BIP39 entropy is extended by a checksum byte, so length is equivalent.
-    // This is equivalent to a shift left 11 bits and write low 11 bits.
-    // << 11 bits (one word) is the same as * 2048.
-    // There is no need to reverse when writing big-endian.
-    ////uint512_t value{ 0 };
-    ////const auto indexes = dictionaries_.index(words, language);
-    ////for (const auto index: boost::adaptors::reverse(indexes))
-    ////    value = value * 2048 + index;
-
-    // Write an index into eleven bits (0..2047).
     const auto write_index = [](ostream_bit_writer& writer, int32_t index)
     {
         writer.write_bits(static_cast<size_t>(index), index_bits);
     };
 
-    // Reserve buffer to include entropy and checksum, always one byte.
+    const auto indexes = dictionaries_.index(words, identifier);
+
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
 
-    // Safe to assume valid indexes here as containment has been verified.
-    const auto indexes = dictionaries_.index(words, identifier);
-
-    // Word indexes are not byte aligned, high-to-low bit writer required.
     data_sink sink(entropy);
     ostream_writer byte_writer(sink);
     ostream_bit_writer bit_writer(byte_writer);
 
-    // Pad unused high order bits with zero, as n*2^11 may not be byte aligned.
-    bit_writer.write_bits(0, unused_bits(entropy));
-
-    // Convert word indexes to entropy.
     for (const auto index: indexes)
         write_index(bit_writer, index);
 
     bit_writer.flush();
     sink.flush();
-
     return entropy;
 }
 
@@ -193,17 +156,17 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
     // On the first iteration the usable entropy is unchanged.
     // On the first iteration one entropy byte may be discarded.
     // On subsequent iterations size will be reduced from 512 bytes.
-    // This allows the entropy to round trip after it is sufficient.
-
-    while (limit-- != 0u)
+    // Previously discovered entropy round trips, matching on the first pass.
+    while (limit-- > 0u)
     {
         hash.resize(size);
         words = encoder(hash, identifier);
 
+        // TODO: enable once electrum_v1 and mnemonic are tested.
         // Avoid collisions with Electrum v1 and BIP39 mnemonics.
-        if (!electrum_v1(words, identifier) && !mnemonic(words) &&
-            is_version(words, prefix))
-                return { hash, words };
+        ////if (!electrum_v1(words, identifier) && !mnemonic(words) &&...
+        if (is_version(words, prefix))
+            return { hash, words };
 
         // This replaces Electrum's prng with determinism.
         hash = to_chunk(sha512_hash(hash));
@@ -283,32 +246,38 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
 
 size_t electrum::entropy_bits(const data_slice& entropy)
 {
-    return (entropy.size() * byte_bits) / index_bits;
+    // The number of bits for the given number of bytes.
+    return entropy.size() * byte_bits;
 }
 
 size_t electrum::entropy_bits(const string_list& words)
 {
+    // The number of bits for the given number of words.
     return words.size() * index_bits;
 }
 
-size_t electrum::entropy_size(size_t entropy_bits)
+size_t electrum::entropy_size(size_t bit_strength)
 {
-    return ceilinged_divide(entropy_bits, byte_bits);
+    // The required number of bytes to achieve the given bit strength.
+    return ceilinged_divide(bit_strength, byte_bits);
 }
 
 size_t electrum::entropy_size(const string_list& words)
 {
+    // The required number of bytes for the given number of words.
     return ceilinged_divide(entropy_bits(words), byte_bits);
 }
 
 size_t electrum::word_count(const data_slice& entropy)
 {
-    return ceilinged_divide(entropy_bits(entropy), index_bits);
+    // The number of words that can be derived from the given entropy size.
+    return entropy_bits(entropy) / index_bits;
 }
 
-size_t electrum::word_count(size_t entropy_bits)
+size_t electrum::word_count(size_t bit_strength)
 {
-    return ceilinged_divide(entropy_bits, index_bits);
+    // The required number of words to achieve the given bit strength.
+    return ceilinged_divide(bit_strength, index_bits);
 }
 
 uint8_t electrum::unused_bits(const data_slice& entropy)
@@ -497,10 +466,10 @@ electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     if (!is_valid_entropy_size(entropy.size()))
         return {};
 
-    if (!dictionaries_.exists(identifier))
+    if (!is_valid_seed_prefix(prefix))
         return {};
 
-    if (!is_valid_seed_prefix(prefix))
+    if (!dictionaries_.exists(identifier))
         return {};
 
     const auto result = grinder(entropy, prefix, identifier, grind_limit);
@@ -509,7 +478,7 @@ electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     if (result.words.empty())
         return {};
 
-    // Save found entropy and normal words, originals are discarded.
+    // Save derived words and ground entropy, original is discarded.
     return { result.entropy, result.words, identifier, prefixer(result.words) };
 }
 
@@ -528,7 +497,13 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    // Save dictionary words and derived entropy, original words are discarded.
+    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // If unspecified and matches en then check fr, since en is searched first.
+    if (identifier == language::none && lexicon == language::en &&
+        contained_by(tokens, language::fr) == language::fr)
+        return {};
+
+    // Save derived entropy and dictionary words, originals are discarded.
     return { decoder(tokens, identifier), tokens, lexicon, prefixer(tokens) };
 }
 

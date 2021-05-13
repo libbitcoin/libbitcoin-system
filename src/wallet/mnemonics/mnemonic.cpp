@@ -72,9 +72,10 @@ const mnemonic::dictionaries mnemonic::dictionaries_
 // in big-endian order. This can be observed in the reference implementation:
 // github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
 
+// Entropy requires wordlist mapping because of the checksum.
+// TODO: decode_base2048(base2048_chunk&, const std::string&, language)
 string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
-    // Read eleven bits into an index (0..2047).
     const auto read_index = [](istream_bit_reader& reader)
     {
         return static_cast<uint32_t>(reader.read_bits(index_bits));
@@ -84,21 +85,20 @@ string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
     const auto checksum = data_chunk{ checksum_byte(entropy) };
     const auto buffer = build_chunk({ entropy, checksum });
 
-    // Word indexes are not byte aligned, high-to-low bit reader required.
     data_source source(buffer);
     istream_reader byte_reader(source);
     istream_bit_reader bit_reader(byte_reader);
 
-    // Create a search index.
     for (auto& index: indexes)
         index = read_index(bit_reader);
 
     return dictionaries_.at(indexes, identifier);
 }
 
+// Entropy requires wordlist mapping because of the checksum.
+// TODO: create encode_base2048(const base2048_chunk& data, language)
 data_chunk mnemonic::decoder(const string_list& words, language identifier)
 {
-    // Write an index into eleven bits (0..2047).
     const auto write_index = [](ostream_bit_writer& writer, int32_t index)
     {
         writer.write_bits(static_cast<size_t>(index), index_bits);
@@ -108,15 +108,12 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
     data_chunk buffer;
     buffer.reserve(entropy_size(words) + 1u);
 
-    // Safe to assume valid indexes here as containment has been verified.
     const auto indexes = dictionaries_.index(words, identifier);
 
-    // Word indexes are not byte aligned, high-to-low bit writer required.
     data_sink sink(buffer);
     ostream_writer byte_writer(sink);
     ostream_bit_writer bit_writer(byte_writer);
 
-    // Convert word indexes to entropy.
     for (const auto index: indexes)
         write_index(bit_writer, index);
 
@@ -267,7 +264,7 @@ mnemonic mnemonic::from_entropy(const data_chunk& entropy, language identifier)
     if (!dictionaries_.exists(identifier))
         return {};
 
-    // Save original entropy and derived normal words.
+    // Save entropy and derived words.
     return { entropy, encoder(entropy, identifier), identifier };
 }
 
@@ -286,13 +283,19 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
+    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // If unspecified and matches en then check fr, since en is searched first.
+    if (identifier == language::none && lexicon == language::en &&
+        contained_by(tokens, language::fr) == language::fr)
+        return {};
+
     const auto entropy = decoder(tokens, identifier);
 
     // Checksum verification failed.
     if (entropy.empty())
         return {};
 
-    // Save dictionary words and derived entropy, original words are discarded.
+    // Save derived entropy and dictionary words, originals are discarded.
     return { entropy, tokens, lexicon };
 }
 

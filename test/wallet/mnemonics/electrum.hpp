@@ -178,4 +178,107 @@ electrum_result_list vectors
     }
 };
 
+class accessor
+  : public electrum
+{
+public:
+    static size_t entropy_bits(const data_slice& entropy)
+    {
+        return electrum::entropy_bits(entropy);
+    }
+    
+    static size_t entropy_bits(const string_list& words)
+    {
+        return electrum::entropy_bits(words);
+    }
+
+    static size_t entropy_size(size_t bit_strength)
+    {
+        return electrum::entropy_size(bit_strength);
+    }
+
+    static size_t entropy_size(const string_list& words)
+    {
+        return electrum::entropy_size(words);
+    }
+    
+    static size_t word_count(const data_slice& entropy)
+    {
+        return electrum::word_count(entropy);
+    }
+
+    static size_t word_count(size_t bit_strength)
+    {
+        return electrum::word_count(bit_strength);
+    }
+
+    static uint8_t unused_bits(const data_slice& entropy)
+    {
+        return electrum::unused_bits(entropy);
+    }
+
+    static uint8_t unused_bytes(const data_slice& entropy)
+    {
+        return electrum::unused_bytes(entropy);
+    }
+
+    static size_t usable_size(const data_slice& entropy)
+    {
+        return electrum::usable_size(entropy);
+    }
+
+    static bool is_valid_seed_prefix(seed_prefix prefix)
+    {
+        return electrum::is_valid_seed_prefix(prefix);
+    }
+
+    static bool is_valid_two_factor_authentication_size(size_t count)
+    {
+        return electrum::is_valid_two_factor_authentication_size(count);
+    }
+
+    static result grinder(const data_chunk& entropy, seed_prefix prefix,
+        language identifier, size_t limit)
+    {
+        return electrum::grinder(entropy, prefix, identifier, limit);
+    }
+
+    static string_list encoder(const data_chunk& entropy, language identifier)
+    {
+        return electrum::encoder(entropy, identifier);
+    }
+
+    static data_chunk decoder(const string_list& words, language identifier)
+    {
+        return electrum::decoder(words, identifier);
+    }
+
+    static hd_private seeder(const string_list& words,
+        const std::string& passphrase, uint64_t chain)
+    {
+        return electrum::seeder(words, passphrase, chain);
+    }
+
+    static seed_prefix prefixer(const string_list& words)
+    {
+        return electrum::prefixer(words);
+    }
+
+    static bool validator(const string_list& words, seed_prefix prefix)
+    {
+        return electrum::validator(words, prefix);
+    }
+
+    static electrum from_words(const string_list& words, language identifier)
+    {
+        return electrum::from_words(words, identifier);
+    }
+
+    static electrum from_entropy(const data_chunk& entropy, seed_prefix prefix,
+        language identifier)
+    {
+        return electrum::from_entropy(entropy, prefix, identifier);
+    }
+};
+
 #endif
