@@ -23,9 +23,7 @@
 #include <cmath>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

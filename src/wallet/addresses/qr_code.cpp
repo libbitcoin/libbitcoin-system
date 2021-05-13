@@ -24,11 +24,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_bit_writer.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/tiff.hpp>
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 #include "qrencode/qrencode.h"

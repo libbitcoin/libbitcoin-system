@@ -29,14 +29,9 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/istream_bit_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
-#include <bitcoin/system/utility/ostream_bit_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

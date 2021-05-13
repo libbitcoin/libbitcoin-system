@@ -1208,6 +1208,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\iostream.hpp">
+      <Filter>include\bitcoin\system\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp">
       <Filter>include\bitcoin\system\utility</Filter>
     </ClInclude>

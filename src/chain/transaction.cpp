@@ -39,10 +39,7 @@
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

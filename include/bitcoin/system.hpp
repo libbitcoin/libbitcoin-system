@@ -176,6 +176,7 @@
 #include <bitcoin/system/utility/flush_lock.hpp>
 #include <bitcoin/system/utility/handlers.hpp>
 #include <bitcoin/system/utility/interprocess_lock.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/istream_bit_reader.hpp>
 #include <bitcoin/system/utility/istream_reader.hpp>
 #include <bitcoin/system/utility/monitor.hpp>

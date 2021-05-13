@@ -21,9 +21,8 @@
 
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/siphash.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/endian.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

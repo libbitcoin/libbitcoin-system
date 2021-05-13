@@ -478,6 +478,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\flush_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\interprocess_lock.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\iostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\istream_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\utility\monitor.hpp" />

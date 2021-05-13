@@ -21,10 +21,7 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/message/inventory.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

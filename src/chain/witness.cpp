@@ -32,11 +32,8 @@
 #include <bitcoin/system/machine/program.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
