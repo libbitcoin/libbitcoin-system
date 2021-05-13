@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WALLET_MESSAGE_HPP
 
 #include <string>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -33,7 +32,7 @@ namespace wallet {
 /**
  * A message signature is an EC signature with one prefix byte.
  */
-static BC_CONSTEXPR size_t message_signature_size = 1 + ec_signature_size;
+static constexpr size_t message_signature_size = 1 + ec_signature_size;
 typedef byte_array<message_signature_size> message_signature;
 
 /**

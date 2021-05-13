@@ -20,7 +20,6 @@
 #include <boost/bind.hpp>
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/smart_ptr/bad_weak_ptr.hpp>
-#include <bitcoin/system/compat.hpp>
 
 namespace libbitcoin {
 namespace system {

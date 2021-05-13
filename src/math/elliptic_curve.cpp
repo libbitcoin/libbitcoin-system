@@ -40,7 +40,7 @@ static constexpr uint8_t compressed_even = 0x02;
 static constexpr uint8_t compressed_odd = 0x03;
 static constexpr uint8_t uncompressed = 0x04;
 
-BC_CONSTFUNC int to_flags(bool compressed)
+constexpr int to_flags(bool compressed)
 {
     return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 }

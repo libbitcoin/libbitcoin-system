@@ -15,8 +15,6 @@
  */
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/compat.h>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>

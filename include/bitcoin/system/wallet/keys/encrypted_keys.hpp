@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_ENCRYPTED_KEYS_HPP
 
 #include <string>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/crypto.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -34,39 +33,39 @@ namespace wallet {
 /**
  * The maximum lot and sequence values for encrypted key token creation.
  */
-static BC_CONSTEXPR uint32_t ek_max_lot = 1048575;
-static BC_CONSTEXPR uint32_t ek_max_sequence = 4095;
+static constexpr uint32_t ek_max_lot = 1048575;
+static constexpr uint32_t ek_max_sequence = 4095;
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
  */
-static BC_CONSTEXPR size_t ek_salt_size = 4;
+static constexpr size_t ek_salt_size = 4;
 typedef byte_array<ek_salt_size> ek_salt;
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
  */
-static BC_CONSTEXPR size_t ek_entropy_size = 8;
+static constexpr size_t ek_entropy_size = 8;
 typedef byte_array<ek_entropy_size> ek_entropy;
 
 /**
  * A seed for use in creating a key pair.
  */
-static BC_CONSTEXPR size_t ek_seed_size = 24;
+static constexpr size_t ek_seed_size = 24;
 typedef byte_array<ek_seed_size> ek_seed;
 
 /**
  * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t encrypted_token_encoded_size = 72;
-static BC_CONSTEXPR size_t encrypted_token_decoded_size = 53;
+static constexpr size_t encrypted_token_encoded_size = 72;
+static constexpr size_t encrypted_token_decoded_size = 53;
 typedef byte_array<encrypted_token_decoded_size> encrypted_token;
 
 /**
  * An encrypted private key type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t ek_private_encoded_size = 58;
-static BC_CONSTEXPR size_t ek_private_decoded_size = 43;
+static constexpr size_t ek_private_encoded_size = 58;
+static constexpr size_t ek_private_decoded_size = 43;
 typedef byte_array<ek_private_decoded_size> encrypted_private;
 
 /**
@@ -74,8 +73,8 @@ typedef byte_array<ek_private_decoded_size> encrypted_private;
  * An encrypted public key type (checked but not base58 encoded).
  * This is refered to as a confirmation code in bip38.
  */
-static BC_CONSTEXPR size_t encrypted_public_encoded_size = 75;
-static BC_CONSTEXPR size_t encrypted_public_decoded_size = 55;
+static constexpr size_t encrypted_public_encoded_size = 75;
+static constexpr size_t encrypted_public_decoded_size = 55;
 typedef byte_array<encrypted_public_decoded_size> encrypted_public;
 
 // BIP38

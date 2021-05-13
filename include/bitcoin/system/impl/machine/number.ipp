@@ -23,7 +23,6 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/limits.hpp>
 

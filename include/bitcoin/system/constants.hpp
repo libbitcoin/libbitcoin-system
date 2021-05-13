@@ -21,7 +21,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -39,62 +38,62 @@ static_assert(sizeof(size_t) == sizeof(uint32_t) ||
 // Generic constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR int64_t min_int64 = MIN_INT64;
-BC_CONSTEXPR int64_t max_int64 = MAX_INT64;
-BC_CONSTEXPR int32_t min_int32 = MIN_INT32;
-BC_CONSTEXPR int32_t max_int32 = MAX_INT32;
-BC_CONSTEXPR uint64_t max_uint64 = MAX_UINT64;
-BC_CONSTEXPR uint32_t max_uint32 = MAX_UINT32;
-BC_CONSTEXPR uint16_t max_uint16 = MAX_UINT16;
-BC_CONSTEXPR uint8_t max_uint8 = MAX_UINT8;
-BC_CONSTEXPR uint64_t max_size_t = BC_MAX_SIZE;
-BC_CONSTEXPR uint8_t byte_bits = 8;
+constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
+constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
+constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
+constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
+constexpr uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
+constexpr uint32_t max_uint32 = std::numeric_limits<uint32_t>::max();
+constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
+constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
+constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
+constexpr uint8_t byte_bits = 8;
 
 // Consensus sentinels.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint32_t no_previous_output = max_uint32;
-BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
-BC_CONSTEXPR uint64_t sighash_null_value = max_uint64;
+constexpr uint32_t no_previous_output = max_uint32;
+constexpr uint32_t max_input_sequence = max_uint32;
+constexpr uint64_t sighash_null_value = max_uint64;
 
 // Script/interpreter constants.
 //-----------------------------------------------------------------------------
 
 // Consensus
-BC_CONSTEXPR size_t max_counted_ops = 201;
-BC_CONSTEXPR size_t max_stack_size = 1000;
-BC_CONSTEXPR size_t max_script_size = 10000;
-BC_CONSTEXPR size_t max_push_data_size = 520;
-BC_CONSTEXPR size_t max_script_public_keys = 20;
-BC_CONSTEXPR size_t multisig_default_sigops = 20;
-BC_CONSTEXPR size_t max_number_size = 4;
-BC_CONSTEXPR size_t max_check_locktime_verify_number_size = 5;
-BC_CONSTEXPR size_t max_check_sequence_verify_number_size = 5;
+constexpr size_t max_counted_ops = 201;
+constexpr size_t max_stack_size = 1000;
+constexpr size_t max_script_size = 10000;
+constexpr size_t max_push_data_size = 520;
+constexpr size_t max_script_public_keys = 20;
+constexpr size_t multisig_default_sigops = 20;
+constexpr size_t max_number_size = 4;
+constexpr size_t max_check_locktime_verify_number_size = 5;
+constexpr size_t max_check_sequence_verify_number_size = 5;
 
 // Policy.
-BC_CONSTEXPR size_t max_null_data_size = 80;
+constexpr size_t max_null_data_size = 80;
 
 // Various validation constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR size_t min_coinbase_size = 2;
-BC_CONSTEXPR size_t max_coinbase_size = 100;
-BC_CONSTEXPR size_t coinbase_maturity = 100;
-BC_CONSTEXPR size_t median_time_past_interval = 11;
-BC_CONSTEXPR size_t locktime_threshold = 500000000;
-BC_CONSTEXPR size_t max_block_size = 1000000;
-BC_CONSTEXPR size_t max_sigops_factor = 50;
-BC_CONSTEXPR size_t max_block_sigops = max_block_size / max_sigops_factor;
-BC_CONSTEXPR uint64_t satoshi_per_bitcoin = 100000000;
+constexpr size_t min_coinbase_size = 2;
+constexpr size_t max_coinbase_size = 100;
+constexpr size_t coinbase_maturity = 100;
+constexpr size_t median_time_past_interval = 11;
+constexpr size_t locktime_threshold = 500000000;
+constexpr size_t max_block_size = 1000000;
+constexpr size_t max_sigops_factor = 50;
+constexpr size_t max_block_sigops = max_block_size / max_sigops_factor;
+constexpr uint64_t satoshi_per_bitcoin = 100000000;
 
 // Relative locktime constants.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR size_t relative_locktime_min_version = 2;
-BC_CONSTEXPR size_t relative_locktime_seconds_shift = 9;
-BC_CONSTEXPR uint32_t relative_locktime_mask = 0x0000ffff;
-BC_CONSTEXPR uint32_t relative_locktime_disabled = 0x80000000;
-BC_CONSTEXPR uint32_t relative_locktime_time_locked = 0x00400000;
+constexpr size_t relative_locktime_min_version = 2;
+constexpr size_t relative_locktime_seconds_shift = 9;
+constexpr uint32_t relative_locktime_mask = 0x0000ffff;
+constexpr uint32_t relative_locktime_disabled = 0x80000000;
+constexpr uint32_t relative_locktime_time_locked = 0x00400000;
 
 // Fork constants.
 //-----------------------------------------------------------------------------
@@ -113,70 +112,70 @@ static const system::config::checkpoint mainnet_bip30_exception_checkpoint2
 //-----------------------------------------------------------------------------
 
 // Explicit size.
-BC_CONSTEXPR size_t command_size = 12;
+constexpr size_t command_size = 12;
 
 // Explicit limits.
-BC_CONSTEXPR size_t max_address = 1000;
-BC_CONSTEXPR size_t max_filter_add = 520;
-BC_CONSTEXPR size_t max_filter_functions = 50;
-BC_CONSTEXPR size_t max_filter_hashes = 2000;
-BC_CONSTEXPR size_t max_filter_load = 36000;
-BC_CONSTEXPR size_t max_get_blocks = 500;
-BC_CONSTEXPR size_t max_get_headers = 2000;
-BC_CONSTEXPR size_t max_get_data = 50000;
-BC_CONSTEXPR size_t max_inventory = 50000;
-BC_CONSTEXPR size_t max_get_compact_filter_headers = 1999;
-BC_CONSTEXPR size_t max_get_compact_filters = 99;
+constexpr size_t max_address = 1000;
+constexpr size_t max_filter_add = 520;
+constexpr size_t max_filter_functions = 50;
+constexpr size_t max_filter_hashes = 2000;
+constexpr size_t max_filter_load = 36000;
+constexpr size_t max_get_blocks = 500;
+constexpr size_t max_get_headers = 2000;
+constexpr size_t max_get_data = 50000;
+constexpr size_t max_inventory = 50000;
+constexpr size_t max_get_compact_filter_headers = 1999;
+constexpr size_t max_get_compact_filters = 99;
 
 // compact filter checkpoint interval
-BC_CONSTEXPR size_t compact_filter_checkpoint_interval = 1000;
+constexpr size_t compact_filter_checkpoint_interval = 1000;
 
 // The minimum safe length of a seed in bits (multiple of 8).
-BC_CONSTEXPR size_t minimum_seed_bits = 128;
+constexpr size_t minimum_seed_bits = 128;
 
 // The minimum safe length of a seed in bytes (16).
-BC_CONSTEXPR size_t minimum_seed_size = minimum_seed_bits / byte_bits;
+constexpr size_t minimum_seed_size = minimum_seed_bits / byte_bits;
 
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
-BC_CONSTEXPR size_t max_locator = 43;
+constexpr size_t max_locator = 43;
 
 // Variable integer prefix sentinels.
-BC_CONSTEXPR uint8_t varint_two_bytes = 0xfd;
-BC_CONSTEXPR uint8_t varint_four_bytes = 0xfe;
-BC_CONSTEXPR uint8_t varint_eight_bytes = 0xff;
+constexpr uint8_t varint_two_bytes = 0xfd;
+constexpr uint8_t varint_four_bytes = 0xfe;
+constexpr uint8_t varint_eight_bytes = 0xff;
 
 // String padding sentinel.
-BC_CONSTEXPR uint8_t string_terminator = 0x00;
+constexpr uint8_t string_terminator = 0x00;
 
 // Witness serialization values (bip141).
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint8_t witness_marker = 0x00;
-BC_CONSTEXPR uint8_t witness_flag = 0x01;
-BC_CONSTEXPR uint32_t witness_head = 0xaa21a9ed;
-BC_CONSTEXPR size_t fast_sigops_factor = 4;
-BC_CONSTEXPR size_t max_fast_sigops = fast_sigops_factor * max_block_sigops;
-BC_CONSTEXPR size_t light_weight_factor = 4;
-BC_CONSTEXPR size_t max_block_weight = light_weight_factor * max_block_size;
-BC_CONSTEXPR size_t base_size_contribution = 3;
-BC_CONSTEXPR size_t total_size_contribution = 1;
-BC_CONSTEXPR size_t min_witness_program = 2;
-BC_CONSTEXPR size_t max_witness_program = 40;
+constexpr uint8_t witness_marker = 0x00;
+constexpr uint8_t witness_flag = 0x01;
+constexpr uint32_t witness_head = 0xaa21a9ed;
+constexpr size_t fast_sigops_factor = 4;
+constexpr size_t max_fast_sigops = fast_sigops_factor * max_block_sigops;
+constexpr size_t light_weight_factor = 4;
+constexpr size_t max_block_weight = light_weight_factor * max_block_size;
+constexpr size_t base_size_contribution = 3;
+constexpr size_t total_size_contribution = 1;
+constexpr size_t min_witness_program = 2;
+constexpr size_t max_witness_program = 40;
 
 // Golomb-Rice related values (bip158).
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint8_t neutrino_filter_type = 0x00;
-BC_CONSTEXPR uint8_t golomb_bits = 19;
-BC_CONSTEXPR uint64_t golomb_target_false_positive_rate = 784931;
+constexpr uint8_t neutrino_filter_type = 0x00;
+constexpr uint8_t golomb_bits = 19;
+constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
 // Siphash related values.
 //-----------------------------------------------------------------------------
 
-BC_CONSTEXPR uint64_t siphash_magic_0 = 0x736f6d6570736575;
-BC_CONSTEXPR uint64_t siphash_magic_1 = 0x646f72616e646f6d;
-BC_CONSTEXPR uint64_t siphash_magic_2 = 0x6c7967656e657261;
-BC_CONSTEXPR uint64_t siphash_magic_3 = 0x7465646279746573;
+constexpr uint64_t siphash_magic_0 = 0x736f6d6570736575;
+constexpr uint64_t siphash_magic_1 = 0x646f72616e646f6d;
+constexpr uint64_t siphash_magic_2 = 0x6c7967656e657261;
+constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
 
 } // namespace libbitcoin
 

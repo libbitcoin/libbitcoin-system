@@ -108,7 +108,7 @@ inline bool is_text_token(const std::string& token)
 
 inline bool is_valid_data_size(opcode code, size_t size)
 {
-    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto value = static_cast<uint8_t>(code);
     return value > op_75 || value == size;
 }
@@ -127,7 +127,7 @@ inline string_list split_push_token(const std::string& token)
 static bool opcode_from_data_prefix(opcode& out_code,
     const std::string& prefix, const data_chunk& data)
 {
-    BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = data.size();
     out_code = operation::opcode_from_size(size);
 

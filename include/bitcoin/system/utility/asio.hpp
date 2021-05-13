@@ -23,7 +23,6 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include <bitcoin/system/compat.hpp>
 
 // Convenience namespace for commonly used boost asio aliases.
 
@@ -65,7 +64,7 @@ typedef boost::thread thread;
 
 typedef std::shared_ptr<socket> socket_ptr;
 
-BC_CONSTEXPR int max_connections = boost::asio::socket_base::max_connections;
+constexpr int max_connections = boost::asio::socket_base::max_connections;
 
 } // namespace asio
 } // namespace system

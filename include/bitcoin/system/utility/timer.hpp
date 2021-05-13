@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <time.h>
 #include <string>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 
 namespace libbitcoin {
@@ -61,7 +60,7 @@ inline std::string local_time()
     // %c writes standard date and time string, e.g.
     // Sun Oct 17 04:41:13 2010 (locale dependent)
     static const auto format = "%c";
-    static BC_CONSTEXPR size_t size = 25;
+    static constexpr size_t size = 25;
     char buffer[size];
 
     // std::strftime is required because gcc doesn't implement std::put_time.

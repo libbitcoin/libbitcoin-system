@@ -339,8 +339,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stealth_record.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\compat.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\compat.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp" />

@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint64_t uint64_bits =
+constexpr uint64_t uint64_bits =
     static_cast<uint64_t>(byte_bits) *
     static_cast<uint64_t>(sizeof(uint64_t));
 

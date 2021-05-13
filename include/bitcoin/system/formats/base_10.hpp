@@ -21,15 +21,14 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint8_t btc_decimal_places = 8;
-BC_CONSTEXPR uint8_t mbtc_decimal_places = 5;
-BC_CONSTEXPR uint8_t ubtc_decimal_places = 2;
+constexpr uint8_t btc_decimal_places = 8;
+constexpr uint8_t mbtc_decimal_places = 5;
+constexpr uint8_t ubtc_decimal_places = 2;
 
 /**
  * Validates and parses an amount string according to the BIP21 grammar.

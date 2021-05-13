@@ -21,8 +21,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/spirit/home/qi/numeric/numeric_utils.hpp>
-
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/log/file_char_traits.hpp>
 #include <bitcoin/system/log/file_collector_repository.hpp>
 

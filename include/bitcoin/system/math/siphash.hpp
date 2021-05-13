@@ -24,7 +24,6 @@
 
 #include <cstdint>
 #include <tuple>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/utility/data.hpp>

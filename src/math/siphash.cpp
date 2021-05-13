@@ -28,8 +28,8 @@
 namespace libbitcoin {
 namespace system {
 
-BC_CONSTEXPR uint64_t finalization = 0x00000000000000ff;
-BC_CONSTEXPR uint32_t max_encoded_byte_count = (1 << byte_bits);
+constexpr uint64_t finalization = 0x00000000000000ff;
+constexpr uint32_t max_encoded_byte_count = (1 << byte_bits);
 
 // NOTE: C++20 provides std::rotl which could replace this function.
 uint64_t inline rotate_left(uint64_t value, uint8_t shift)

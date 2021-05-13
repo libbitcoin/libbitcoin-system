@@ -24,7 +24,6 @@
 #include <vector>
 #include <boost/functional/hash_fwd.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>
@@ -33,12 +32,12 @@ namespace libbitcoin {
 namespace system {
 
 // Common bitcoin hash container sizes.
-static BC_CONSTEXPR size_t hash_size = 32;
-static BC_CONSTEXPR size_t half_hash_size = hash_size / 2;
-static BC_CONSTEXPR size_t quarter_hash_size = half_hash_size / 2;
-static BC_CONSTEXPR size_t long_hash_size = 2 * hash_size;
-static BC_CONSTEXPR size_t short_hash_size = 20;
-static BC_CONSTEXPR size_t mini_hash_size = 6;
+static constexpr size_t hash_size = 32;
+static constexpr size_t half_hash_size = hash_size / 2;
+static constexpr size_t quarter_hash_size = half_hash_size / 2;
+static constexpr size_t long_hash_size = 2 * hash_size;
+static constexpr size_t short_hash_size = 20;
+static constexpr size_t mini_hash_size = 6;
 
 // Common bitcoin hash containers.
 typedef byte_array<hash_size> hash_digest;
@@ -63,7 +62,7 @@ typedef boost::multiprecision::uint512_t uint512_t;
 
 // Null-valued common bitcoin hashes.
 
-BC_CONSTEXPR hash_digest null_hash
+constexpr hash_digest null_hash
 {
     {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -71,21 +70,21 @@ BC_CONSTEXPR hash_digest null_hash
     }
 };
 
-BC_CONSTEXPR half_hash null_half_hash
+constexpr half_hash null_half_hash
 {
     {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
 };
 
-BC_CONSTEXPR quarter_hash null_quarter_hash
+constexpr quarter_hash null_quarter_hash
 {
     {
         0, 0, 0, 0, 0, 0, 0, 0
     }
 };
 
-BC_CONSTEXPR long_hash null_long_hash
+constexpr long_hash null_long_hash
 {
     {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -95,14 +94,14 @@ BC_CONSTEXPR long_hash null_long_hash
     }
 };
 
-BC_CONSTEXPR short_hash null_short_hash
+constexpr short_hash null_short_hash
 {
     {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
 };
 
-BC_CONSTEXPR mini_hash null_mini_hash
+constexpr mini_hash null_mini_hash
 {
     {
         0, 0, 0, 0, 0, 0

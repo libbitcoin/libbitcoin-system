@@ -32,9 +32,9 @@
 namespace libbitcoin {
 namespace system {
 
-////BC_CONSTEXPR uint8_t bit_mask = 0x01;
-BC_CONSTEXPR uint64_t low_byte_mask_64 = 0x00000000000000FF;
-BC_CONSTEXPR uint64_t low_bit_mask_64 = 0x0000000000000001;
+////constexpr uint8_t bit_mask = 0x01;
+constexpr uint64_t low_byte_mask_64 = 0x00000000000000FF;
+constexpr uint64_t low_bit_mask_64 = 0x0000000000000001;
 
 ostream_bit_writer::ostream_bit_writer(writer& writer)
   : buffer_(0x00), offset_(0), writer_(writer)

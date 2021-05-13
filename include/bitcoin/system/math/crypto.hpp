@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_AES256_HPP
 
 #include <cstdint>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
 
@@ -30,13 +29,13 @@ namespace system {
 /**
  * The secret for aes256 block cypher.
  */
-BC_CONSTEXPR uint8_t aes256_key_size = 32;
+constexpr uint8_t aes256_key_size = 32;
 typedef byte_array<aes256_key_size> aes_secret;
 
 /**
  * The data block for use with aes256 block cypher.
  */
-BC_CONSTEXPR uint8_t aes256_block_size = 16;
+constexpr uint8_t aes256_block_size = 16;
 typedef byte_array<aes256_block_size> aes_block;
 
 /**

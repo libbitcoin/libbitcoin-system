@@ -25,7 +25,6 @@
 #include <cstdint>
 #include <istream>
 #include <ostream>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/utility/data.hpp>

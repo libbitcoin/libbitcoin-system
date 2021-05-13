@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_ELLIPTIC_CURVE_HPP
 
 #include <cstddef>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -30,35 +29,35 @@ namespace libbitcoin {
 namespace system {
 
 /// The sign byte value for an even (y-valued) key.
-static BC_CONSTEXPR uint8_t ec_even_sign = 2;
+static constexpr uint8_t ec_even_sign = 2;
 
 /// Private key:
-static BC_CONSTEXPR size_t ec_secret_size = 32;
+static constexpr size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
 typedef std::vector<ec_secret> secret_list;
 
 /// Compressed public key:
-static BC_CONSTEXPR size_t ec_compressed_size = 33;
+static constexpr size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
 typedef std::vector<ec_compressed> compressed_list;
 
 /// Uncompressed public key:
-static BC_CONSTEXPR size_t ec_uncompressed_size = 65;
+static constexpr size_t ec_uncompressed_size = 65;
 typedef byte_array<ec_uncompressed_size> ec_uncompressed;
 typedef std::vector<ec_uncompressed> uncompressed_list;
 
 // Parsed ECDSA signature:
-static BC_CONSTEXPR size_t ec_signature_size = 64;
+static constexpr size_t ec_signature_size = 64;
 typedef byte_array<ec_signature_size> ec_signature;
 
 // DER encoded signature:
-static BC_CONSTEXPR size_t max_der_signature_size = 72;
+static constexpr size_t max_der_signature_size = 72;
 typedef data_chunk der_signature;
 
 /// DER encoded signature with sighash byte for contract endorsement:
-static BC_CONSTEXPR size_t min_endorsement_size = 9;
-static BC_CONSTEXPR size_t max_endorsement_size = 73;
+static constexpr size_t min_endorsement_size = 9;
+static constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
 // secg.org/sec2-v2.pdf

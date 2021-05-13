@@ -32,14 +32,14 @@ namespace system {
 namespace wallet {
 
 /// A constant used in key derivation.
-static BC_CONSTEXPR uint32_t hd_first_hardened_key = 1 << 31;
+static constexpr uint32_t hd_first_hardened_key = 1 << 31;
 
 /// An hd key chain code.
-static BC_CONSTEXPR size_t hd_chain_code_size = 32;
+static constexpr size_t hd_chain_code_size = 32;
 typedef byte_array<hd_chain_code_size> hd_chain_code;
 
 /// A decoded hd public or private key.
-static BC_CONSTEXPR size_t hd_key_size = 82;
+static constexpr size_t hd_key_size = 82;
 typedef byte_array<hd_key_size> hd_key;
 
 /// Key derivation information used in the serialization format.

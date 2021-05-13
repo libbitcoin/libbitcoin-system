@@ -447,8 +447,6 @@ include_bitcoin_HEADERS = \
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
     include/bitcoin/system/assert.hpp \
-    include/bitcoin/system/compat.h \
-    include/bitcoin/system/compat.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/error.hpp \

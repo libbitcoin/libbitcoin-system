@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <bitcoin/system/compat.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
@@ -103,14 +102,14 @@ Integer safe_multiply(Integer left, Integer right)
 template <typename Integer>
 void safe_increment(Integer& value)
 {
-    static BC_CONSTEXPR auto one = Integer{1};
+    static constexpr auto one = Integer{1};
     value = safe_add(value, one);
 }
 
 template <typename Integer>
 void safe_decrement(Integer& value)
 {
-    static BC_CONSTEXPR auto one = Integer{1};
+    static constexpr auto one = Integer{1};
     value = safe_subtract(value, one);
 }
 

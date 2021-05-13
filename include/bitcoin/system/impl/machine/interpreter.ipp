@@ -37,7 +37,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-static BC_CONSTEXPR auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
 // Operations (shared).
 //-----------------------------------------------------------------------------
