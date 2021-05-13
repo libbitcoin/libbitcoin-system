@@ -775,7 +775,7 @@ bool transaction::is_locktime_conflict() const
     return locktime_ != 0 && all_inputs_final();
 }
 
-// Returns max_uint64 in case of overflow.
+// Overflow returns max_uint64.
 uint64_t transaction::total_input_value() const
 {
     uint64_t value;
@@ -795,14 +795,13 @@ uint64_t transaction::total_input_value() const
     mutex_.unlock_upgrade_and_lock();
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto sum = [](uint64_t total, const input& input)
     {
         const auto& prevout = input.previous_output().metadata.cache;
         const auto missing = !prevout.is_valid();
 
         // Treat missing previous outputs as zero-valued, no math on sentinel.
-        return ceiling_add(total, missing ? 0 : prevout.value());
+        return ceiling_add(total, missing ? 0u : prevout.value());
     };
 
     value = std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), sum);
@@ -813,7 +812,7 @@ uint64_t transaction::total_input_value() const
     return value;
 }
 
-// Returns max_uint64 in case of overflow.
+// Overflow returns max_uint64.
 uint64_t transaction::total_output_value() const
 {
     uint64_t value;
@@ -833,7 +832,6 @@ uint64_t transaction::total_output_value() const
     mutex_.unlock_upgrade_and_lock();
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto sum = [](uint64_t total, const output& output)
     {
         return ceiling_add(total, output.value());
@@ -866,7 +864,7 @@ size_t transaction::signature_operations() const
     return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
-// Returns max_size_t in case of overflow.
+// Overflow returns max_size_t.
 size_t transaction::signature_operations(bool bip16, bool bip141) const
 {
     const auto in = [bip16, bip141](size_t total, const input& input)

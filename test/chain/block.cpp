@@ -47,25 +47,31 @@ static bool all_valid(const chain::transaction::list& transactions)
 
 BOOST_AUTO_TEST_SUITE(chain_block_construct_tests)
 
-BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one)
+BOOST_AUTO_TEST_CASE(block__locator_size__first_11__expected)
 {
-    const auto top = 7u;
-    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), top + 1);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(0), 1u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(1), 2u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(2), 3u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(3), 4u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(4), 5u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(5), 6u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(6), 7u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(7), 8u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(8), 9u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(9), 10u);
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(10), 11u);
 }
 
-BOOST_AUTO_TEST_CASE(block__locator_size__zero_backoff__returns_top_plus_one_regression_check)
+BOOST_AUTO_TEST_CASE(block__locator_size__10_plus_logs__expected)
 {
-    const auto top = 11u;
-    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), top + 1);
+    // This is not an exact representation of the math, since the log is not
+    // over the amount less 10 (or over the full amount) - but shows the magnitude.
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(10 + 128), 10u + floored_log2(128u));
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(10 + 256), 10u + floored_log2(256u));
+    BOOST_REQUIRE_EQUAL(chain::block::locator_size(10 + 512), 10u + floored_log2(512u));
 }
 
-BOOST_AUTO_TEST_CASE(block__locator_size__positive_backoff__returns_log_plus_eleven)
-{
-    const auto top = 138u;
-    BOOST_REQUIRE_EQUAL(chain::block::locator_size(top), 18u);
-}
-
-BOOST_AUTO_TEST_CASE(block__locator_heights__zero_backoff__returns_top_to_zero)
+BOOST_AUTO_TEST_CASE(block__locator_heights__top_7__returns_7_through_0)
 {
     const chain::block::indexes expected{ 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u };
     const auto top = 7u;
@@ -74,12 +80,12 @@ BOOST_AUTO_TEST_CASE(block__locator_heights__zero_backoff__returns_top_to_zero)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(block__locator_heights__positive_backoff__returns_top_plus_log_offset_to_zero)
+BOOST_AUTO_TEST_CASE(block__locator_heights__top_138__returns_138_through_129_and_backed_off_to_0)
 {
     const chain::block::indexes expected
     {
-        138u, 137u, 136u, 135u, 134u, 133u, 132u, 131u, 130u,
-        129u, 128u, 126u, 122u, 114u,  98u,  66u,   2u,   0u
+        138u, 137u, 136u, 135u, 134u, 133u, 132u, 131u, 130u, 129u,
+        127u, 123u, 115u,  99u,  67u,   3u,   0u
     };
 
     const auto top = 138u;

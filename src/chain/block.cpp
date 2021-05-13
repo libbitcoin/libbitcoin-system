@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cfenv>
-#include <cmath>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -43,6 +42,7 @@
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {
@@ -364,44 +364,36 @@ hash_digest block::hash() const
 // Utilities.
 //-----------------------------------------------------------------------------
 
-// With a 32 bit chain the size of the result should not exceed 43 and with a
-// 64 bit chain should not exceed 75, using a limit of: 10 + log2(height) + 1.
+// This predicts the size of locator_heights output.
 size_t block::locator_size(size_t top)
 {
-    const auto first_ten_or_top = std::min(size_t{10}, top);
-    const auto remaining = top - first_ten_or_top;
+    size_t size = 0, step = 1;
+    for (auto height = top; height > 0u; height = floor_subtract(height, step))
+        if (++size > 9u)
+            step <<= 1;
 
-    // Set log2(0) -> 0, log2(1) -> 1 and round up higher exponential backoff
-    // results to next whole number by adding 0.5 and truncating.
-    const auto back_off = remaining < 2u ? remaining :
-        static_cast<size_t>(std::log2(remaining) + 0.5);
-
-    return first_ten_or_top + back_off + 1u;
+    return ++size;
 }
 
 // This algorithm is a network best practice, not a consensus rule.
 block::indexes block::locator_heights(size_t top)
 {
-    size_t step = 1u;
+    size_t step = 1;
     indexes heights;
-    const auto reservation = locator_size(top);
-    heights.reserve(reservation);
+    heights.reserve(locator_size(top));
 
-    // Start at the top of the chain and work backwards to zero.
-    for (auto height = top; height > 0; height = floor_subtract(height, step))
+    // Start at top block and collect block indexes in reverse.
+    for (auto height = top; height > 0u; height = floor_subtract(height, step))
     {
         heights.push_back(height);
 
-        // Push top 10 indexes first, then back off exponentially.
-        if (heights.size() > 10u)
-            step <<= 1u;
+        // Push top 10 indexes then back off exponentially.
+        if (heights.size() > 9u)
+            step <<= 1;
     }
 
     // Push the genesis block index.
     heights.push_back(0);
-
-    // Validate the reservation computation.
-    BITCOIN_ASSERT(heights.size() <= reservation);
     return heights;
 }
 
@@ -449,7 +441,7 @@ size_t block::signature_operations() const
     return state ? signature_operations(bip16, bip141) : max_size_t;
 }
 
-// Returns max_size_t in case of overflow.
+// Overflow returns max_size_t.
 size_t block::signature_operations(bool bip16, bool bip141) const
 {
     const auto value = [bip16, bip141](size_t total, const transaction& tx)
@@ -575,9 +567,7 @@ bool block::is_distinct_transaction_set() const
     const auto& txs = transactions_;
     hash_list hashes(txs.size());
     std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
-    std::sort(hashes.begin(), hashes.end());
-    const auto distinct_end = std::unique(hashes.begin(), hashes.end());
-    return distinct_end == hashes.end();
+    return is_distinct(std::move(hashes));
 }
 
 hash_digest block::generate_merkle_root(bool witness) const
@@ -642,16 +632,13 @@ bool block::is_internal_double_spend() const
     const auto& txs = transactions_;
 
     // Merge the prevouts of all non-coinbase transactions into one set.
-    for (auto tx = txs.begin() + 1; tx != txs.end(); ++tx)
+    for (auto tx = std::next(txs.begin()); tx != txs.end(); ++tx)
     {
         auto out = tx->previous_outputs();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     }
 
-    std::sort(outs.begin(), outs.end());
-    const auto distinct_end = std::unique(outs.begin(), outs.end());
-    const auto distinct = (distinct_end == outs.end());
-    return !distinct;
+    return !is_distinct(std::move(outs));
 }
 
 bool block::is_valid_merkle_root() const
@@ -662,7 +649,6 @@ bool block::is_valid_merkle_root() const
 // Overflow returns max_uint64.
 uint64_t block::fees() const
 {
-    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     const auto value = [](uint64_t total, const transaction& tx)
     {
         return ceiling_add(total, tx.fees());
@@ -682,7 +668,6 @@ uint64_t block::claim() const
 uint64_t block::reward(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const
 {
-    ////static_assert(max_money() < max_uint64, "overflow sentinel invalid");
     return ceiling_add(fees(), subsidy(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
