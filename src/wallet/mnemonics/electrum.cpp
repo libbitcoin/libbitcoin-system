@@ -118,7 +118,11 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 {
     string_list words;
     data_chunk hash(entropy);
-    const auto size = usable_size(entropy);
+
+    // Normalize entropy to the wordlist by managing its pad bits.
+    const auto entropy_size = usable_size(hash);
+    hash.resize(entropy_size);
+    const auto padding_mask = 0xff << unused_bits(hash);
 
     // This just grinds away until exhausted or prefix found.
     // On the first iteration the usable entropy is unchanged.
@@ -127,7 +131,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
     // Previously discovered entropy round trips, matching on the first pass.
     while (limit-- > 0u)
     {
-        hash.resize(size);
+        hash[entropy_size - 1u] &= padding_mask;
         words = encoder(hash, identifier);
 
         // TODO: enable once electrum_v1 and mnemonic are tested.
@@ -138,6 +142,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 
         // This replaces Electrum's prng with determinism.
         hash = to_chunk(sha512_hash(hash));
+        hash.resize(entropy_size);
     }
 
     return {};
