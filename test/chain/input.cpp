@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__returns_input_initialize
 {
     const output_point previous_output{ null_hash, 5434u };
     script script;
-    BOOST_REQUIRE(script.from_data(to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")), false));
+    BOOST_REQUIRE(script.from_data(base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1"), false));
 
     uint32_t sequence = 4568656u;
 
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__returns_input_initialize
 {
     const output_point previous_output{ null_hash, 5434u };
     script script;
-    BOOST_REQUIRE(script.from_data(to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1")), false));
+    BOOST_REQUIRE(script.from_data(base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1"), false));
 
     uint32_t sequence = 4568656u;
 
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_time_type_sequence_age_below_min
 
 BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__returns_script_sigops)
 {
-    const auto raw_script = to_chunk(base16_literal("02acad"));
+    const auto raw_script = base16_chunk("02acad");
     script script;
     BOOST_REQUIRE(script.from_data(raw_script, true));
     input instance;
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__returns_script
 
 BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_active_cache_empty__returns_script_sigops)
 {
-    const auto raw_script = to_chunk(base16_literal("02acad"));
+    const auto raw_script = base16_chunk("02acad");
     script script;
     BOOST_REQUIRE(script.from_data(raw_script, true));
     input instance;
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(input__previous_output_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(input__script_setter_1__roundtrip__success)
 {
     script value;
-    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    const auto data = base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1");
     BOOST_REQUIRE(value.from_data(data, false));
 
     input instance;
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(input__script_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(input__script_setter_2__roundtrip__success)
 {
     script value;
-    const auto data = to_chunk(base16_literal("ece424a6bb6ddf4db592c0faed60685047a361b1"));
+    const auto data = base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1");
     BOOST_REQUIRE(value.from_data(data, false));
 
     auto dup_value = value;

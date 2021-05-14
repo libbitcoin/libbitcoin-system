@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(script__one__literal__expected)
 
 BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_invalid_op_codes__success)
 {
-    const auto raw_script = to_chunk(base16_literal("0130323066643366303435313438356531306633383837363437356630643265396130393739343332353534313766653139316438623963623230653430643863333030326431373463336539306366323433393231383761313037623634373337633937333135633932393264653431373731636565613062323563633534353732653302ae"));
+    const auto raw_script = base16_chunk("0130323066643366303435313438356531306633383837363437356630643265396130393739343332353534313766653139316438623963623230653430643863333030326431373463336539306366323433393231383761313037623634373337633937333135633932393264653431373731636565613062323563633534353732653302ae");
 
     script parsed;
     BOOST_REQUIRE(parsed.from_data(raw_script, false));
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_invalid_op_codes__success
 
 BOOST_AUTO_TEST_CASE(script__from_data__parse__success)
 {
-    const auto raw_script = to_chunk(base16_literal("3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744db2c8d9febfb84d01"));
+    const auto raw_script = base16_chunk("3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744db2c8d9febfb84d01");
 
     script parsed;
     BOOST_REQUIRE(parsed.from_data(raw_script, true));
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__parse__success)
 
 BOOST_AUTO_TEST_CASE(script__from_data__to_data__roundtrips)
 {
-    const auto normal_output_script = to_chunk(base16_literal("76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
+    const auto normal_output_script = base16_chunk("76a91406ccef231c2db72526df9338894ccf9355e8f12188ac");
 
     script out_script;
     BOOST_REQUIRE(out_script.from_data(normal_output_script, false));
@@ -196,14 +196,14 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
 
 BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
 {
-    const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     const auto instance = script::factory(raw, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 {
-    const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     data_source istream(raw);
     auto instance = script::factory(istream, false);
     BOOST_REQUIRE(instance.is_valid());
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 
 BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 {
-    const auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     data_source istream(raw);
     istream_reader source(istream);
     const auto instance = script::factory(source, false);

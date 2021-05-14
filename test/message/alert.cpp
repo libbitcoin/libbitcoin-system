@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert instance(payload, signature);
 
@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_2__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_3__always__equals_params)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
     auto dup_payload = payload;
     auto dup_signature = signature;
 
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert value(payload, signature);
     message::alert instance(value);
@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE(alert__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(alert__constructor_5__always__equals_params)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert value(payload, signature);
     message::alert instance(std::move(value));
@@ -213,8 +213,8 @@ BOOST_AUTO_TEST_CASE(alert__factory_3__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert instance(payload, signature);
     BOOST_REQUIRE(payload == instance.payload());
@@ -222,8 +222,8 @@ BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__payload_accessor_2__always__returns_initialized)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     const message::alert instance(payload, signature);
     BOOST_REQUIRE(payload == instance.payload());
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(alert__payload_accessor_2__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__payload_setter_1__roundtrip__success)
 {
-    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    const auto value = base16_chunk("aabbccddeeff");
     message::alert instance;
     BOOST_REQUIRE(instance.payload() != value);
     instance.set_payload(value);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(alert__payload_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__payload_setter_2__roundtrip__success)
 {
-    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    const auto value = base16_chunk("aabbccddeeff");
     auto dup_value = value;
     message::alert instance;
     BOOST_REQUIRE(instance.payload() != value);
@@ -250,8 +250,8 @@ BOOST_AUTO_TEST_CASE(alert__payload_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__signature_accessor_1__always__returns_initialized)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert instance(payload, signature);
     BOOST_REQUIRE(signature == instance.signature());
@@ -259,8 +259,8 @@ BOOST_AUTO_TEST_CASE(alert__signature_accessor_1__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__signature_accessor_2__always__returns_initialized)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     const message::alert instance(payload, signature);
     BOOST_REQUIRE(signature == instance.signature());
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(alert__signature_accessor_2__always__returns_initialized)
 
 BOOST_AUTO_TEST_CASE(alert__signature_setter_1__roundtrip__success)
 {
-    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    const auto value = base16_chunk("aabbccddeeff");
     message::alert instance;
     BOOST_REQUIRE(instance.signature() != value);
     instance.set_signature(value);
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(alert__signature_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__signature_setter_2__roundtrip__success)
 {
-    const auto value = to_chunk(base16_literal("aabbccddeeff"));
+    const auto value = base16_chunk("aabbccddeeff");
     auto dup_value = value;
     message::alert instance;
     BOOST_REQUIRE(instance.signature() != value);
@@ -287,8 +287,8 @@ BOOST_AUTO_TEST_CASE(alert__signature_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
 {
-    const auto payload = to_chunk(base16_literal("0123456789abcdef"));
-    const auto signature = to_chunk(base16_literal("fedcba9876543210"));
+    const auto payload = base16_chunk("0123456789abcdef");
+    const auto signature = base16_chunk("fedcba9876543210");
 
     message::alert value(payload, signature);
 
@@ -306,8 +306,8 @@ BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__duplicates__returns_true)
 {
     const message::alert expected(
-        to_chunk(base16_literal("0123456789abcdef")),
-        to_chunk(base16_literal("fedcba9876543210")));
+        base16_chunk("0123456789abcdef"),
+        base16_chunk("fedcba9876543210"));
 
     message::alert instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -316,8 +316,8 @@ BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__duplicates__returns_true)
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__differs__returns_false)
 {
     const message::alert expected(
-        to_chunk(base16_literal("0123456789abcdef")),
-        to_chunk(base16_literal("fedcba9876543210")));
+        base16_chunk("0123456789abcdef"),
+        base16_chunk("fedcba9876543210"));
 
     message::alert instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -326,8 +326,8 @@ BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__differs__returns_false)
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__duplicates__returns_false)
 {
     const message::alert expected(
-        to_chunk(base16_literal("0123456789abcdef")),
-        to_chunk(base16_literal("fedcba9876543210")));
+        base16_chunk("0123456789abcdef"),
+        base16_chunk("fedcba9876543210"));
 
     message::alert instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -336,8 +336,8 @@ BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__duplicates__returns_fal
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__differs__returns_true)
 {
     const message::alert expected(
-        to_chunk(base16_literal("0123456789abcdef")),
-        to_chunk(base16_literal("fedcba9876543210")));
+        base16_chunk("0123456789abcdef"),
+        base16_chunk("fedcba9876543210"));
 
     message::alert instance;
     BOOST_REQUIRE(instance != expected);

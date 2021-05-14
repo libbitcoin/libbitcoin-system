@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_2__always__equals_params)
     const uint8_t filter_type = 16u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(filter_type == instance.filter_type());
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_3__always__equals_params)
     auto dup_hash = block_hash;
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     auto dup_header = header;
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     auto dup_filter = filter;
     chain::block_filter instance(filter_type, std::move(dup_hash), std::move(dup_header), std::move(dup_filter));
     BOOST_REQUIRE(instance.is_valid());
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_4__always__equals_params)
     const uint8_t filter_type = 16u;
     const auto block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const auto header = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const auto filter = to_chunk(base16_literal("fedcba9876543210"));
+    const auto filter = base16_chunk("fedcba9876543210");
     chain::block_filter value(filter_type, block_hash, header, filter);
     chain::block_filter instance(value);
     BOOST_REQUIRE(instance.is_valid());
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(block_filter__constructor_5__always__equals_params)
     const uint8_t filter_type = 16u;
     const auto block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const auto header = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const auto filter = to_chunk(base16_literal("fedcba9876543210"));
+    const auto filter = base16_chunk("fedcba9876543210");
     chain::block_filter value(filter_type, block_hash, header, filter);
     chain::block_filter instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(block_filter__filter_type_accessor__always__returns_initial
     const uint8_t filter_type = 55u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(block_filter__block_hash_accessor__always__returns_initiali
     const uint8_t filter_type = 55u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     const chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(block_hash == instance.block_hash());
 }
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(block_filter__header_accessor__always__returns_initialized_
     const uint8_t filter_type = 55u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     const chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(header == instance.header());
 }
@@ -177,14 +177,14 @@ BOOST_AUTO_TEST_CASE(block_filter__filter_accessor__always__returns_initialized_
     const uint8_t filter_type = 55u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     const chain::block_filter instance(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(filter == instance.filter());
 }
 
 BOOST_AUTO_TEST_CASE(block_filter__filter_setter_1__roundtrip__success)
 {
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     chain::block_filter instance;
     BOOST_REQUIRE(filter != instance.filter());
 
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(block_filter__filter_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(block_filter__filter_setter_2__roundtrip__success)
 {
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     auto dup = filter;
     chain::block_filter instance;
     BOOST_REQUIRE(filter != instance.filter());
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_assign_equals__always__matches_equiv
     const uint8_t filter_type = 55u;
     const auto block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto header = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto filter = to_chunk(base16_literal("0123456789abcdef"));
+    const auto filter = base16_chunk("0123456789abcdef");
     chain::block_filter value(filter_type, block_hash, header, filter);
     BOOST_REQUIRE(value.is_valid());
 
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_equals__duplicates__returns_
         19u,
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        to_chunk(base16_literal("0123456789abcdef"))
+        base16_chunk("0123456789abcdef")
     };
     chain::block_filter instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_equals__differs__returns_fal
         19u,
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        to_chunk(base16_literal("0123456789abcdef"))
+        base16_chunk("0123456789abcdef")
     };
     chain::block_filter instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_not_equals__duplicates__retu
         19u,
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        to_chunk(base16_literal("0123456789abcdef"))
+        base16_chunk("0123456789abcdef")
     };
     chain::block_filter instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(block_filter__operator_boolean_not_equals__differs__returns
         19u,
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        to_chunk(base16_literal("0123456789abcdef"))
+        base16_chunk("0123456789abcdef")
     };
     chain::block_filter instance;
     BOOST_REQUIRE(instance != expected);

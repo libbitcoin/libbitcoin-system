@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(operation_tests)
 
 using namespace bc::system::machine;
 
-const auto valid_raw_operation = to_chunk(base16_literal("0900ff11ee22bb33aa44"));
+const auto valid_raw_operation = base16_chunk("0900ff11ee22bb33aa44");
 
 BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initialized)
 {
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initializ
 
 BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initialized)
 {
-    const auto data = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
+    const auto data = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     auto dup_data = data;
     operation instance(std::move(dup_data));
 
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initia
 
 BOOST_AUTO_TEST_CASE(operation__constructor_3__valid_input__returns_input_initialized)
 {
-    const auto data = to_chunk(base16_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
+    const auto data = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     operation instance(data);
 
     BOOST_REQUIRE(instance.is_valid());
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_3__valid_input__returns_input_initia
 
 BOOST_AUTO_TEST_CASE(operation__constructor_4__valid_input__returns_input_initialized)
 {
-    const operation expected(to_chunk(base16_literal("23156214")));
+    const operation expected(base16_chunk("23156214"));
     operation instance(expected);
 
     BOOST_REQUIRE(instance.is_valid());
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_4__valid_input__returns_input_initia
 
 BOOST_AUTO_TEST_CASE(operation__constructor_5__valid_input__returns_input_initialized)
 {
-    operation expected(to_chunk(base16_literal("23156214")));
+    operation expected(base16_chunk("23156214"));
     operation instance(std::move(expected));
 
     BOOST_REQUIRE(instance.is_valid());
@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(operation__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
 {
-    const auto data0 = to_chunk(base16_literal(""));
-    const auto raw_operation = to_chunk(base16_literal("00"));
+    const auto data0 = base16_chunk("");
+    const auto raw_operation = base16_chunk("00");
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));

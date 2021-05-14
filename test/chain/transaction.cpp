@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__failure
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
 {
-    const auto data = to_chunk(base16_literal("0000000103"));
+    const auto data = base16_chunk("0000000103");
     chain::transaction instance;
     BOOST_REQUIRE(!instance.from_data(data));
     BOOST_REQUIRE(!instance.is_valid());
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
 {
-    const auto data = to_chunk(base16_literal("000000010003"));
+    const auto data = base16_chunk("000000010003");
     chain::transaction instance;
     BOOST_REQUIRE(!instance.from_data(data));
     BOOST_REQUIRE(!instance.is_valid());

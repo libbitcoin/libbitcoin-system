@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
     BOOST_REQUIRE(decode_base16(hash, hash_test_key));
 
     const auto expected = 0xa129ca6149be45e5;
-    const auto message = to_chunk(base16_literal("000102030405060708090a0b0c0d0e"));
+    const auto message = base16_chunk("000102030405060708090a0b0c0d0e");
     BOOST_REQUIRE_EQUAL(siphash(hash, message), expected);
 }
 

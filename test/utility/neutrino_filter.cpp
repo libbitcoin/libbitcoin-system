@@ -84,17 +84,17 @@ bool add_metadata(prevout_data::list& metadata, chain::block& block)
 //{
 //
 //    std::vector<data_chunk> block_data = {
-//        to_chunk(base16_literal("0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000")),
-//        to_chunk(base16_literal("010000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000982051fd1e4ba744bbbe680e1fee14677ba1a3c3540bf7b1cdb606e857233e0e61bc6649ffff001d01e362990101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000")),
-//        to_chunk(base16_literal("010000004860eb18bf1b1620e37e9490fc8a427514416fd75159ab86688e9a8300000000d5fdcc541e25de1c7a5addedf24858b8bb665c9f36ef744ee42c316022c90f9bb0bc6649ffff001d08d2bd610101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d010bffffffff0100f2052a010000004341047211a824f55b505228e4c3d5194c1fcfaa15a456abdf37f9b9d97a4040afc073dee6c89064984f03385237d92167c13e236446b417ab79a0fcae412ae3316b77ac00000000")),
-//        to_chunk(base16_literal("01000000bddd99ccfda39da1b108ce1a5d70038d0a967bacb68b6b63065f626a0000000044f672226090d85db9a9f2fbfe5f0f9609b387af7be5b7fbb7a1767c831c9e995dbe6649ffff001d05e0ed6d0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d010effffffff0100f2052a0100000043410494b9d3e76c5b1629ecf97fff95d7a4bbdac87cc26099ada28066c6ff1eb9191223cd897194a08d0c2726c5747f1db49e8cf90e75dc3e3550ae9b30086f3cd5aaac00000000")),
-//        to_chunk(base16_literal("010000004944469562ae1c2c74d9a535e00b6f3e40ffbad4f2fda3895501b582000000007a06ea98cd40ba2e3288262b28638cec5337c1456aaf5eedc8e9e5a20f062bdf8cc16649ffff001d2bfee0a90101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d011affffffff0100f2052a01000000434104184f32b212815c6e522e66686324030ff7e5bf08efb21f8b00614fb7690e19131dd31304c54f37baa40db231c918106bb9fd43373e37ae31a0befc6ecaefb867ac00000000")),
-//        to_chunk(base16_literal("0100000085144a84488ea88d221c8bd6c059da090e88f8a2c99690ee55dbba4e00000000e11c48fecdd9e72510ca84f023370c9a38bf91ac5cae88019bee94d24528526344c36649ffff001d1d03e4770101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0120ffffffff0100f2052a0100000043410456579536d150fbce94ee62b47db2ca43af0a730a0467ba55c79e2a7ec9ce4ad297e35cdbb8e42a4643a60eef7c9abee2f5822f86b1da242d9c2301c431facfd8ac00000000")),
-//        to_chunk(base16_literal("01000000fc33f596f822a0a1951ffdbf2a897b095636ad871707bf5d3162729b00000000379dfb96a5ea8c81700ea4ac6b97ae9a9312b2d4301a29580e924ee6761a2520adc46649ffff001d189c4c970101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0123ffffffff0100f2052a0100000043410408ce279174b34c077c7b2043e3f3d45a588b85ef4ca466740f848ead7fb498f0a795c982552fdfa41616a7c0333a269d62108588e260fd5a48ac8e4dbf49e2bcac00000000")),
-//        to_chunk(base16_literal("010000008d778fdc15a2d3fb76b7122a3b5582bea4f21f5a0c693537e7a03130000000003f674005103b42f984169c7d008370967e91920a6a5d64fd51282f75bc73a68af1c66649ffff001d39a59c860101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d012bffffffff0100f2052a01000000434104a59e64c774923d003fae7491b2a7f75d6b7aa3f35606a8ff1cf06cd3317d16a41aa16928b1df1f631f31f28c7da35d4edad3603adb2338c4d4dd268f31530555ac00000000")),
-//        to_chunk(base16_literal("010000004494c8cf4154bdcc0720cd4a59d9c9b285e4b146d45f061d2b6c967100000000e3855ed886605b6d4a99d5fa2ef2e9b0b164e63df3c4136bebf2d0dac0f1f7a667c86649ffff001d1c4b56660101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d012cffffffff0100f2052a01000000434104cc8d85f5e7933cb18f13b97d165e1189c1fb3e9c98b0dd5446b2a1989883ff9e740a8a75da99cc59a21016caf7a7afd3e4e9e7952983e18d1ff70529d62e0ba1ac00000000")),
-//        to_chunk(base16_literal("01000000c60ddef1b7618ca2348a46e868afc26e3efc68226c78aa47f8488c4000000000c997a5e56e104102fa209c6a852dd90660a20b2d9c352423edce25857fcd37047fca6649ffff001d28404f530101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0134ffffffff0100f2052a0100000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000")),
-//        to_chunk(base16_literal("010000000508085c47cc849eb80ea905cc7800a3be674ffc57263cf210c59d8d00000000112ba175a1e04b14ba9e7ea5f76ab640affeef5ec98173ac9799a852fa39add320cd6649ffff001d1e2de5650101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0136ffffffff0100f2052a01000000434104fcc2888ca91cf0103d8c5797c256bf976e81f280205d002d85b9b622ed1a6f820866c7b5fe12285cfa78c035355d752fc94a398b67597dc4fbb5b386816425ddac00000000"))
+//        base16_chunk("0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000"),
+//        base16_chunk("010000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000982051fd1e4ba744bbbe680e1fee14677ba1a3c3540bf7b1cdb606e857233e0e61bc6649ffff001d01e362990101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000"),
+//        base16_chunk("010000004860eb18bf1b1620e37e9490fc8a427514416fd75159ab86688e9a8300000000d5fdcc541e25de1c7a5addedf24858b8bb665c9f36ef744ee42c316022c90f9bb0bc6649ffff001d08d2bd610101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d010bffffffff0100f2052a010000004341047211a824f55b505228e4c3d5194c1fcfaa15a456abdf37f9b9d97a4040afc073dee6c89064984f03385237d92167c13e236446b417ab79a0fcae412ae3316b77ac00000000"),
+//        base16_chunk("01000000bddd99ccfda39da1b108ce1a5d70038d0a967bacb68b6b63065f626a0000000044f672226090d85db9a9f2fbfe5f0f9609b387af7be5b7fbb7a1767c831c9e995dbe6649ffff001d05e0ed6d0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d010effffffff0100f2052a0100000043410494b9d3e76c5b1629ecf97fff95d7a4bbdac87cc26099ada28066c6ff1eb9191223cd897194a08d0c2726c5747f1db49e8cf90e75dc3e3550ae9b30086f3cd5aaac00000000"),
+//        base16_chunk("010000004944469562ae1c2c74d9a535e00b6f3e40ffbad4f2fda3895501b582000000007a06ea98cd40ba2e3288262b28638cec5337c1456aaf5eedc8e9e5a20f062bdf8cc16649ffff001d2bfee0a90101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d011affffffff0100f2052a01000000434104184f32b212815c6e522e66686324030ff7e5bf08efb21f8b00614fb7690e19131dd31304c54f37baa40db231c918106bb9fd43373e37ae31a0befc6ecaefb867ac00000000"),
+//        base16_chunk("0100000085144a84488ea88d221c8bd6c059da090e88f8a2c99690ee55dbba4e00000000e11c48fecdd9e72510ca84f023370c9a38bf91ac5cae88019bee94d24528526344c36649ffff001d1d03e4770101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0120ffffffff0100f2052a0100000043410456579536d150fbce94ee62b47db2ca43af0a730a0467ba55c79e2a7ec9ce4ad297e35cdbb8e42a4643a60eef7c9abee2f5822f86b1da242d9c2301c431facfd8ac00000000"),
+//        base16_chunk("01000000fc33f596f822a0a1951ffdbf2a897b095636ad871707bf5d3162729b00000000379dfb96a5ea8c81700ea4ac6b97ae9a9312b2d4301a29580e924ee6761a2520adc46649ffff001d189c4c970101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0123ffffffff0100f2052a0100000043410408ce279174b34c077c7b2043e3f3d45a588b85ef4ca466740f848ead7fb498f0a795c982552fdfa41616a7c0333a269d62108588e260fd5a48ac8e4dbf49e2bcac00000000"),
+//        base16_chunk("010000008d778fdc15a2d3fb76b7122a3b5582bea4f21f5a0c693537e7a03130000000003f674005103b42f984169c7d008370967e91920a6a5d64fd51282f75bc73a68af1c66649ffff001d39a59c860101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d012bffffffff0100f2052a01000000434104a59e64c774923d003fae7491b2a7f75d6b7aa3f35606a8ff1cf06cd3317d16a41aa16928b1df1f631f31f28c7da35d4edad3603adb2338c4d4dd268f31530555ac00000000"),
+//        base16_chunk("010000004494c8cf4154bdcc0720cd4a59d9c9b285e4b146d45f061d2b6c967100000000e3855ed886605b6d4a99d5fa2ef2e9b0b164e63df3c4136bebf2d0dac0f1f7a667c86649ffff001d1c4b56660101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d012cffffffff0100f2052a01000000434104cc8d85f5e7933cb18f13b97d165e1189c1fb3e9c98b0dd5446b2a1989883ff9e740a8a75da99cc59a21016caf7a7afd3e4e9e7952983e18d1ff70529d62e0ba1ac00000000"),
+//        base16_chunk("01000000c60ddef1b7618ca2348a46e868afc26e3efc68226c78aa47f8488c4000000000c997a5e56e104102fa209c6a852dd90660a20b2d9c352423edce25857fcd37047fca6649ffff001d28404f530101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0134ffffffff0100f2052a0100000043410411db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b412a3ac00000000"),
+//        base16_chunk("010000000508085c47cc849eb80ea905cc7800a3be674ffc57263cf210c59d8d00000000112ba175a1e04b14ba9e7ea5f76ab640affeef5ec98173ac9799a852fa39add320cd6649ffff001d1e2de5650101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0136ffffffff0100f2052a01000000434104fcc2888ca91cf0103d8c5797c256bf976e81f280205d002d85b9b622ed1a6f820866c7b5fe12285cfa78c035355d752fc94a398b67597dc4fbb5b386816425ddac00000000")
 //    };
 //
 //    hash_digest previous_filter_header = null_hash;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_0__success)
 {
     const auto expected = hash_literal("21584579b7eb08997773e5aeff3a7f932700042d0ed2a6129012b7d7ae81b750");
     const auto previous_header = hash_literal("0000000000000000000000000000000000000000000000000000000000000000");
-    const auto filter = to_chunk(base16_literal("019dfca8"));
+    const auto filter = base16_chunk("019dfca8");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_2__success)
 {
     const auto expected = hash_literal("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
     const auto previous_header = hash_literal("d7bdac13a59d745b1add0d2ce852f1a0442e8945fc1bf3848d3cbffd88c24fe1");
-    const auto filter = to_chunk(base16_literal("0174a170"));
+    const auto filter = base16_chunk("0174a170");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_3__success)
 {
     const auto expected = hash_literal("8d63aadf5ab7257cb6d2316a57b16f517bff1c6388f124ec4c04af1212729d2a");
     const auto previous_header = hash_literal("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
-    const auto filter = to_chunk(base16_literal("016cf7a0"));
+    const auto filter = base16_chunk("016cf7a0");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_15007__success)
 {
     const auto expected = hash_literal("07384b01311867949e0c046607c66b7a766d338474bb67f66c8ae9dbd454b20e");
     const auto previous_header = hash_literal("18b5c2b0146d2d09d24fb00ff5b52bd0742f36c9e65527abdb9de30c027a4748");
-    const auto filter = to_chunk(base16_literal("013c3710"));
+    const auto filter = base16_chunk("013c3710");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_49291__success)
 {
     const auto expected = hash_literal("b6d98692cec5145f67585f3434ec3c2b3030182e1cb3ec58b855c5c164dfaaa3");
     const auto previous_header = hash_literal("ed47705334f4643892ca46396eb3f4196a5e30880589e4009ef38eae895d4a13");
-    const auto filter = to_chunk(base16_literal("0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"));
+    const auto filter = base16_chunk("0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_180480__success)
 {
     const auto expected = hash_literal("c582d51c0ca365e3fcf36c51cb646d7f83a67e867cb4743fd2128e3e022b700c");
     const auto previous_header = hash_literal("d34ef98386f413769502808d4bac5f20f8dfd5bffc9eedafaa71de0eb1f01489");
-    const auto filter = to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+    const auto filter = base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_926485__success)
 {
     const auto expected = hash_literal("546c574a0472144bcaf9b6aeabf26372ad87c7af7d1ee0dbfae5e099abeae49c");
     const auto previous_header = hash_literal("8f13b9a9c85611635b47906c3053ac53cfcec7211455d4cb0d63dc9acc13d472");
-    const auto filter = to_chunk(base16_literal("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"));
+    const auto filter = base16_chunk("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_987876__success)
 {
     const auto expected = hash_literal("0965a544743bbfa36f254446e75630c09404b3d164a261892372977538928ed5");
     const auto previous_header = hash_literal("fe4d230dbb0f4fec9bed23a5283e08baf996e3f32b93f52c7de1f641ddfd04ad");
-    const auto filter = to_chunk(base16_literal("010c0b40"));
+    const auto filter = base16_chunk("010c0b40");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1263442__success)
 {
     const auto expected = hash_literal("4e6d564c2a2452065c205dd7eb2791124e0c4e0dbb064c410c24968572589dec");
     const auto previous_header = hash_literal("31d66d516a9eda7de865df29f6ef6cb8e4bf9309e5dac899968a9a62a5df61e3");
-    const auto filter = to_chunk(base16_literal("0385acb4f0fe889ef0"));
+    const auto filter = base16_chunk("0385acb4f0fe889ef0");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
 
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1414221__success)
 {
     const auto expected = hash_literal("021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc");
     const auto previous_header = hash_literal("5e5e12d90693c8e936f01847859404c67482439681928353ca1296982042864e");
-    const auto filter = to_chunk(base16_literal("00"));
+    const auto filter = base16_chunk("00");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
@@ -1415,9 +1415,9 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
     BOOST_REQUIRE(validated_block.is_valid());
 
     prevout_data::list metadata = {
-        { hash_literal("b4cf04be3d741d17932fb615532ab26668c5407fde7d4aaf7ef63e0da7970f97"), 0u, hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, 0u, to_chunk(base16_literal("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac")) },
-        { hash_literal("d110582b821b63959bd9a712b0aa160733d851244f84c7c3622f52622bc244e1"), 0u, hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 1u, 0u, to_chunk(base16_literal("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac")) },
-        { hash_literal("af3dd7d35132d3a4e6b283ae0ea42a1832187eb95f1974ba255a45f42962cb3b"), 0u, hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, 0u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) }
+        { hash_literal("b4cf04be3d741d17932fb615532ab26668c5407fde7d4aaf7ef63e0da7970f97"), 0u, hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { hash_literal("d110582b821b63959bd9a712b0aa160733d851244f84c7c3622f52622bc244e1"), 0u, hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 1u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { hash_literal("af3dd7d35132d3a4e6b283ae0ea42a1832187eb95f1974ba255a45f42962cb3b"), 0u, hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, 0u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") }
     };
 
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
@@ -1425,7 +1425,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
 
-    const auto expected_filter = to_chunk(base16_literal("06294070f18c8b0ff84b92738259ca89b4"));
+    const auto expected_filter = base16_chunk("06294070f18c8b0ff84b92738259ca89b4");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -2807,38 +2807,38 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
     BOOST_REQUIRE(validated_block.is_valid());
 
     prevout_data::list metadata = {
-        { hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 0u, null_hash, 0u, 1000000000u, to_chunk(base16_literal("76a9140fe23a9f788e094162ef8c187c6bab5398167bc288ac")) },
-        { hash_literal("cd165d61a02275953f807cde46612f12f237698007becdf04654625141ace7be"), 0u, null_hash, 1u, 26684929999u, to_chunk(base16_literal("76a9147585eddbafddeb5e09dca5c75a437f139fdf4b8f88ac")) },
-        { hash_literal("46ed65fae8c311ecd72d494be97fca25f4d4d4eeda8c586eec138a53dc330a5c"), 0u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac")) },
-        { hash_literal("8cbee06050b463d435a734e76aca1c4c50ae201d04660e93760ffcf5907042e6"), 0u, null_hash, 0u, 98799999u, to_chunk(base16_literal("76a914093ff32b9c19df316a50b108b1c69eee5e05ba6888ac")) },
-        { hash_literal("e4f01a73cf66e9ab72fa31a6d7319369bffd615ea296a03e61af8d3c583ec7b6"), 0u, null_hash, 1u, 3699499999u, to_chunk(base16_literal("76a9148e41a824970dfe29408cdb02b5b3a63eb7fd964388ac")) },
-        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 0u, null_hash, 0u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 1u, null_hash, 0u, 100000000u, to_chunk(base16_literal("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac")) },
-        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 0u, null_hash, 0u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 1u, null_hash, 1u, 99900000u, to_chunk(base16_literal("76a91470ed37a176fa31a417ac4342629fd2436626b67488ac")) },
-        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 0u, null_hash, 0u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 1u, null_hash, 1u, 99800000u, to_chunk(base16_literal("76a9147705a7a8dc42bfb549faa3253ed13a03fe42c21588ac")) },
-        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 0u, null_hash, 0u, 99700000u, to_chunk(base16_literal("76a9148c66db3c6265f127498084e7fe58abb97a0ff6cb88ac")) },
-        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 1u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 0u, null_hash, 0u, 99600000u, to_chunk(base16_literal("76a9144bc5d5b68950619e52797622a38fcec17caf2cfa88ac")) },
-        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 1u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 0u, null_hash, 0u, 99500000u, to_chunk(base16_literal("76a9143e766efd724a4de9950950f34e2d91c890bddc9588ac")) },
-        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 1u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 0u, null_hash, 0u, 99400000u, to_chunk(base16_literal("76a91498080ef934beb096af4ac7d90c6533db5c126d1588ac")) },
-        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 1u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 0u, null_hash, 0u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 1u, null_hash, 1u, 99300000u, to_chunk(base16_literal("76a9146e3158b43777301c4ca852160047a3d6a63e3a7b88ac")) },
-        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, null_hash, 0u, 99200000u, to_chunk(base16_literal("76a91475ead4cb03aff9bb395c2e4f29c227450e34289888ac")) },
-        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 1u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac")) },
-        { hash_literal("37976821d10ba9d7e96f268e2bc005bb4dcc73e0f08fe46b612278e2b8586bb9"), 0u, null_hash, 0u, 899950000u, to_chunk(base16_literal("76a91429911c1fbf60604b99d27082c2124e55cce11fbb88ac")) },
-        { hash_literal("9347d6b5dc828476a8e830c6be764d0e125eb2e8bd03078a5c62895448d4ac1c"), 0u, null_hash, 0u, 799900000u, to_chunk(base16_literal("76a914955dad7ac20a0e1d85e6428ede415c245f48719588ac")) },
-        { hash_literal("64690f31edcc7d7f69d7cf417916351bf4ec133031a149fca58dc294fbf1da86"), 0u, null_hash, 1u, 699850000u, to_chunk(base16_literal("76a9142621344f600b9bed2f330d695a4c5e45591a613088ac")) },
-        { hash_literal("335a4e5cb3647e0e140372750d49b2b633495de9f85edbe42728dbd83146026f"), 0u, null_hash, 1u, 599800000u, to_chunk(base16_literal("76a9145cd1b1ae6e1f8671e66b54f06446b19cc6baeec888ac")) },
-        { hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, null_hash, 1u, 499750000u, to_chunk(base16_literal("76a9140f694e25932910a03ab4e2d25d05192e9d84c24288ac")) },
-        { hash_literal("67c73721d83ae9cd0becdc9e7fdb7e50fcc8ddcfdfe6f73ce02929bb0c75bdbb"), 0u, null_hash, 1u, 399700000u, to_chunk(base16_literal("76a914d8d5238df70cc86c48a9c332a103ba72080667da88ac")) },
-        { hash_literal("0086bad73c94660c8bd6bec2526b71a9d5af5aeccde3ba5e21edecab3327edbc"), 0u, null_hash, 0u, 299650000u, to_chunk(base16_literal("76a9144390bb02b50e93fca3186b00a09193f342cc909888ac")) },
-        { hash_literal("a6ccd4f9bfd5540f2ff34253dfd4d0704748e112baaf1518ec18427f422d5f17"), 0u, null_hash, 1u, 100000000u, to_chunk(base16_literal("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac")) },
-        { hash_literal("0271d716bb72459c682d8cd1b8b65cff80891c8124cb508304f2f2f84e48a13a"), 0u, null_hash, 0u, 199600000u, to_chunk(base16_literal("76a91434fb159d8365bcf1613f6cfd42b269b130edbe6e88ac")) }
+        { hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 0u, null_hash, 0u, 1000000000u, base16_chunk("76a9140fe23a9f788e094162ef8c187c6bab5398167bc288ac") },
+        { hash_literal("cd165d61a02275953f807cde46612f12f237698007becdf04654625141ace7be"), 0u, null_hash, 1u, 26684929999u, base16_chunk("76a9147585eddbafddeb5e09dca5c75a437f139fdf4b8f88ac") },
+        { hash_literal("46ed65fae8c311ecd72d494be97fca25f4d4d4eeda8c586eec138a53dc330a5c"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
+        { hash_literal("8cbee06050b463d435a734e76aca1c4c50ae201d04660e93760ffcf5907042e6"), 0u, null_hash, 0u, 98799999u, base16_chunk("76a914093ff32b9c19df316a50b108b1c69eee5e05ba6888ac") },
+        { hash_literal("e4f01a73cf66e9ab72fa31a6d7319369bffd615ea296a03e61af8d3c583ec7b6"), 0u, null_hash, 1u, 3699499999u, base16_chunk("76a9148e41a824970dfe29408cdb02b5b3a63eb7fd964388ac") },
+        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 1u, null_hash, 0u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
+        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 1u, null_hash, 1u, 99900000u, base16_chunk("76a91470ed37a176fa31a417ac4342629fd2436626b67488ac") },
+        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 1u, null_hash, 1u, 99800000u, base16_chunk("76a9147705a7a8dc42bfb549faa3253ed13a03fe42c21588ac") },
+        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 0u, null_hash, 0u, 99700000u, base16_chunk("76a9148c66db3c6265f127498084e7fe58abb97a0ff6cb88ac") },
+        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 0u, null_hash, 0u, 99600000u, base16_chunk("76a9144bc5d5b68950619e52797622a38fcec17caf2cfa88ac") },
+        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 0u, null_hash, 0u, 99500000u, base16_chunk("76a9143e766efd724a4de9950950f34e2d91c890bddc9588ac") },
+        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 0u, null_hash, 0u, 99400000u, base16_chunk("76a91498080ef934beb096af4ac7d90c6533db5c126d1588ac") },
+        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 1u, null_hash, 1u, 99300000u, base16_chunk("76a9146e3158b43777301c4ca852160047a3d6a63e3a7b88ac") },
+        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, null_hash, 0u, 99200000u, base16_chunk("76a91475ead4cb03aff9bb395c2e4f29c227450e34289888ac") },
+        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { hash_literal("37976821d10ba9d7e96f268e2bc005bb4dcc73e0f08fe46b612278e2b8586bb9"), 0u, null_hash, 0u, 899950000u, base16_chunk("76a91429911c1fbf60604b99d27082c2124e55cce11fbb88ac") },
+        { hash_literal("9347d6b5dc828476a8e830c6be764d0e125eb2e8bd03078a5c62895448d4ac1c"), 0u, null_hash, 0u, 799900000u, base16_chunk("76a914955dad7ac20a0e1d85e6428ede415c245f48719588ac") },
+        { hash_literal("64690f31edcc7d7f69d7cf417916351bf4ec133031a149fca58dc294fbf1da86"), 0u, null_hash, 1u, 699850000u, base16_chunk("76a9142621344f600b9bed2f330d695a4c5e45591a613088ac") },
+        { hash_literal("335a4e5cb3647e0e140372750d49b2b633495de9f85edbe42728dbd83146026f"), 0u, null_hash, 1u, 599800000u, base16_chunk("76a9145cd1b1ae6e1f8671e66b54f06446b19cc6baeec888ac") },
+        { hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, null_hash, 1u, 499750000u, base16_chunk("76a9140f694e25932910a03ab4e2d25d05192e9d84c24288ac") },
+        { hash_literal("67c73721d83ae9cd0becdc9e7fdb7e50fcc8ddcfdfe6f73ce02929bb0c75bdbb"), 0u, null_hash, 1u, 399700000u, base16_chunk("76a914d8d5238df70cc86c48a9c332a103ba72080667da88ac") },
+        { hash_literal("0086bad73c94660c8bd6bec2526b71a9d5af5aeccde3ba5e21edecab3327edbc"), 0u, null_hash, 0u, 299650000u, base16_chunk("76a9144390bb02b50e93fca3186b00a09193f342cc909888ac") },
+        { hash_literal("a6ccd4f9bfd5540f2ff34253dfd4d0704748e112baaf1518ec18427f422d5f17"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { hash_literal("0271d716bb72459c682d8cd1b8b65cff80891c8124cb508304f2f2f84e48a13a"), 0u, null_hash, 0u, 199600000u, base16_chunk("76a91434fb159d8365bcf1613f6cfd42b269b130edbe6e88ac") }
     };
 
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
@@ -2846,7 +2846,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
 
-    const auto expected_filter = to_chunk(base16_literal("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000"));
+    const auto expected_filter = base16_chunk("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 #endif
@@ -2855,7 +2855,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
 {
     // const auto expected_block_hash = hash_literal("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
 
-    const auto expected_filter = to_chunk(base16_literal("019dfca8"));
+    const auto expected_filter = base16_chunk("019dfca8");
 
     const auto raw_block = to_chunk(base16_literal(
         "01000000000000000000000000000000000000000000000000000000000000000000"
@@ -2883,7 +2883,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
 {
     // const auto expected_block_hash = hash_literal("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
 
-    const auto expected_filter = to_chunk(base16_literal("0174a170"));
+    const auto expected_filter = base16_chunk("0174a170");
 
     const auto raw_block = to_chunk(base16_literal(
         "0100000006128e87be8b1b4dea47a7247d5528d2702c96826c7a648497e773b80000"
@@ -2908,7 +2908,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
 {
     // const auto expected_block_hash = hash_literal("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
 
-    const auto expected_filter = to_chunk(base16_literal("016cf7a0"));
+    const auto expected_filter = base16_chunk("016cf7a0");
 
     const auto raw_block = to_chunk(base16_literal(
         "0100000020782a005255b657696ea057d5b98f34defcf75196f64f6eeac8026c0000"
@@ -2933,7 +2933,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
 {
     // const auto expected_block_hash = hash_literal("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
 
-    const auto expected_filter = to_chunk(base16_literal("013c3710"));
+    const auto expected_filter = base16_chunk("013c3710");
 
     const auto raw_block = to_chunk(base16_literal(
         "0100000002394092aa378fe35d7e9ac79c869b975c4de4374cd75eb5484b0e1e0000"
@@ -3021,7 +3021,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
             0u,
             5000000u,
-            to_chunk(base16_literal("5221033423007d8f263819a2e42becaaf5b06f34cb09919e06304349d950668209eaed21021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae"))
+            base16_chunk("5221033423007d8f263819a2e42becaaf5b06f34cb09919e06304349d950668209eaed21021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3029,7 +3029,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
             2u,
             5000000u,
-            to_chunk(base16_literal("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae"))
+            base16_chunk("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3037,7 +3037,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
             1u,
             5000000u,
-            to_chunk(base16_literal("522102a7ae1e0971fc1689bd66d2a7296da3a1662fd21a53c9e38979e0f090a375c12d21022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae"))
+            base16_chunk("522102a7ae1e0971fc1689bd66d2a7296da3a1662fd21a53c9e38979e0f090a375c12d21022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3045,7 +3045,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
             2u,
             5000000u,
-            to_chunk(base16_literal("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae"))
+            base16_chunk("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3053,7 +3053,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("b35d9ebb02063751cd03ad5a390ace15ba84d0fd20f590cdd6979c343e73a823"),
             1u,
             5000000u,
-            to_chunk(base16_literal("512103b9d1d0e2b4355ec3cdef7c11a5c0beff9e8b8d8372ab4b4e0aaf30e80173001951ae"))
+            base16_chunk("512103b9d1d0e2b4355ec3cdef7c11a5c0beff9e8b8d8372ab4b4e0aaf30e80173001951ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3061,7 +3061,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
             0u,
             4070000u,
-            to_chunk(base16_literal("76a9149144761ebaccd5b4bbdc2a35453585b5637b2f8588ac"))
+            base16_chunk("76a9149144761ebaccd5b4bbdc2a35453585b5637b2f8588ac")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3069,7 +3069,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
             1u,
             5000000u,
-            to_chunk(base16_literal("522103f1848b40621c5d48471d9784c8174ca060555891ace6d2b03c58eece946b1a9121020ee5d32b54d429c152fdc7b1db84f2074b0564d35400d89d11870f9273ec140c52ae"))
+            base16_chunk("522103f1848b40621c5d48471d9784c8174ca060555891ace6d2b03c58eece946b1a9121020ee5d32b54d429c152fdc7b1db84f2074b0564d35400d89d11870f9273ec140c52ae")
         },
         {
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
@@ -3077,7 +3077,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
             hash_literal("1f371c2c0e0d6813de3aa2e9d1d53573f96114fcedd5361848397b2b72c363a5"),
             3u,
             19840000u,
-            to_chunk(base16_literal("76a914f4fa1cc7de742d135ea82c17adf0bb9cf5f4fb8388ac"))
+            base16_chunk("76a914f4fa1cc7de742d135ea82c17adf0bb9cf5f4fb8388ac")
         }
     };
 
@@ -3092,7 +3092,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
 {
     // const auto expected_block_hash = hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
 
-    const auto expected_filter = to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+    const auto expected_filter = base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026");
 
     const auto raw_block = to_chunk(base16_literal(
         "020000006058aa080a655aa991a444bd7d1f2defd9a3bbe68aabb69030cf3b4e0000"
@@ -3147,7 +3147,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             1u,
             50000000u,
-            to_chunk(base16_literal(""))
+            base16_chunk("")
         },
         {
             hash_literal("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
@@ -3155,7 +3155,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("4cd1404b266feff0c17f0c5511c32bac3222247595bd28215e213d8367b204c9"),
             1u,
             3354000000,
-            to_chunk(base16_literal(""))
+            base16_chunk("")
         },
         {
             hash_literal("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
@@ -3163,7 +3163,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("75f7d5e99912875e88d667afb48021b0b74916539c518618a8db4966661509df"),
             0u,
             10000000u,
-            to_chunk(base16_literal(""))
+            base16_chunk("")
         },
         {
             hash_literal("88b760ee751176d80b0808e7e72916a63684688f9ed6374c2368f300c1f84dd0"),
@@ -3171,7 +3171,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("b4c804843976c89d813fc09b4d111b30944e5efc74af5260d682ba4f438ba38d"),
             1u,
             265903318u,
-            to_chunk(base16_literal("76a9142903b138c24be9e070b3e73ec495d77a204615e788ac"))
+            base16_chunk("76a9142903b138c24be9e070b3e73ec495d77a204615e788ac")
         },
         {
             hash_literal("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
@@ -3179,7 +3179,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("830fadd1c80d9fcbee9c5398e5ee5acad3c125a273c836de02a622342ea63961"),
             1u,
             4000000u,
-            to_chunk(base16_literal("76a91433a1941fd9a37b9821d376f5a51bd4b52fa50e2888ac"))
+            base16_chunk("76a91433a1941fd9a37b9821d376f5a51bd4b52fa50e2888ac")
         },
         {
             hash_literal("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
@@ -3187,7 +3187,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("aeee59002c3622a5e1858c946d8cb2c2d51450525619670d0420f07cc8823c98"),
             1u,
             1250000u,
-            to_chunk(base16_literal("76a914e4374e8155d0865742ca12b8d4d14d41b57d682f88ac"))
+            base16_chunk("76a914e4374e8155d0865742ca12b8d4d14d41b57d682f88ac")
         },
         {
             hash_literal("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
@@ -3195,7 +3195,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("dcf1e7987bd0e56aef07061d105c4d540c7d7f022ca8c4750c3f93d98c6e56be"),
             0u,
             999990000u,
-            to_chunk(base16_literal("76a914001fa7459a6cfc64bdc178ba7e7a21603bb2568f88ac"))
+            base16_chunk("76a914001fa7459a6cfc64bdc178ba7e7a21603bb2568f88ac")
         },
         {
             hash_literal("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
@@ -3203,7 +3203,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
             hash_literal("90fc0d2cbfa6252df32f085516eefe156a4547488722e93fb2ce765b6467cf96"),
             0u,
             1036940u,
-            to_chunk(base16_literal("76a914f6039952bc2b307aeec5371bfb96b66078ec17f688ac"))
+            base16_chunk("76a914f6039952bc2b307aeec5371bfb96b66078ec17f688ac")
         }
     };
 
@@ -3218,7 +3218,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
 {
     // const auto expected_block_hash = hash_literal("000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
 
-    const auto expected_filter = to_chunk(base16_literal("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"));
+    const auto expected_filter = base16_chunk("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800");
 
     const auto raw_block = to_chunk(base16_literal(
         "0000002060bbab0edbf3ef8a49608ee326f8fd75c473b7e3982095e2d10000000000"
@@ -3292,7 +3292,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("0a510f49749aaaa2638048132eafea959dd8e47e79332dbcb2a14189870e3145"),
             1u,
             20021300u,
-            to_chunk(base16_literal("a914feb8a29635c56d9cd913122f90678756bf23887687"))
+            base16_chunk("a914feb8a29635c56d9cd913122f90678756bf23887687")
         },
         {
             hash_literal("06eee51317a76a76c67499c8f782819745b58d28cdb4d8357ef7f7e6d79cc513"),
@@ -3300,7 +3300,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("df3b6ebcfead10c9c21d11fb68f93e7afe2bb6b15aedb1ebdce41d2634559220"),
             1u,
             450380894u,
-            to_chunk(base16_literal("76a914c01a7ca16b47be50cbdbc60724f701d52d75156688ac"))
+            base16_chunk("76a914c01a7ca16b47be50cbdbc60724f701d52d75156688ac")
         },
         {
             hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
@@ -3308,7 +3308,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
             0u,
             100000000u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
             hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
@@ -3316,7 +3316,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
             1u,
             16559999u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
             hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
@@ -3324,7 +3324,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
             1u,
             16549999u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
             hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
@@ -3332,7 +3332,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("926ba916aa1487be7e500477e57cccf2ed27ce65baf11e73840fe3cc019437a5"),
             1u,
             100000u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
             hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
@@ -3340,7 +3340,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("ce43f8403c00606c24004bcaff1291091a7395085184312cf15f2393e131e770"),
             0u,
             16250000u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
             hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
@@ -3348,7 +3348,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
             hash_literal("6f9ff0ce05a22b70346c0357f285c98f401a3ffe18fc858e9c37503e1ba7b766"),
             0u,
             260000000u,
-            to_chunk(base16_literal("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac"))
+            base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         }
     };
 
@@ -3363,7 +3363,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
 {
     // const auto expected_block_hash = hash_literal("0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
 
-    const auto expected_filter = to_chunk(base16_literal("010c0b40"));
+    const auto expected_filter = base16_chunk("010c0b40");
 
     const auto raw_block = to_chunk(base16_literal(
         "000000202694f74969fdb542090e95a56bc8aa2d646e27033850e32f1c5f00000000"
@@ -3388,7 +3388,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
 {
     // const auto expected_block_hash = hash_literal("000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
 
-    const auto expected_filter = to_chunk(base16_literal("0385acb4f0fe889ef0"));
+    const auto expected_filter = base16_chunk("0385acb4f0fe889ef0");
 
     const auto raw_block = to_chunk(base16_literal(
         "000000201c8d1a529c39a396db2db234d5ec152fa651a2872966daccbde028b40000"
@@ -3419,7 +3419,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
             hash_literal("c52ca2fa069190af53b20a905de80debd58db8942419e7f54fba0639467809d2"),
             1u,
             16745155u,
-            to_chunk(base16_literal("002027a5000c7917f785d8fc6e5a55adfca8717ecb973ebb7743849ff956d896a7ed"))
+            base16_chunk("002027a5000c7917f785d8fc6e5a55adfca8717ecb973ebb7743849ff956d896a7ed")
         }
     };
 
@@ -3434,7 +3434,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
 {
     // const auto expected_block_hash = hash_literal("0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
 
-    const auto expected_filter = to_chunk(base16_literal("00"));
+    const auto expected_filter = base16_chunk("00");
 
     const auto raw_block = to_chunk(base16_literal(
         "000000204ea88307a7959d8207968f152bedca5a93aefab253f1fb2cfb032a400000"
@@ -3459,7 +3459,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__return_true)
     const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address address(
         base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
@@ -3473,7 +3473,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__return_false)
     const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address address(
         base16_literal("001fa005900cf004b00100ba700021000b00500f"),
@@ -3487,7 +3487,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__return_true)
     const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address::list addresses
     {
@@ -3509,7 +3509,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__return_false)
     const message::compact_filter filter(
         bc::neutrino_filter_type,
         hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        to_chunk(base16_literal("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address::list addresses
     {
