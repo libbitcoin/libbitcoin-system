@@ -650,7 +650,7 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_thread-vc120.1.57.0.0\build\native\boost_thread-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_thread-vc120.1.57.0.0\build\native\boost_thread-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc120.0.1.0.19\build\native\secp256k1_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc120.0.1.0.19\build\native\secp256k1_vc120.targets'))" />
   </Target>
-    <ItemGroup>
-      <Natvis Include="..\..\debug.natvis" />
-    </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\debug.natvis" />
+  </ItemGroup>
 </Project>
