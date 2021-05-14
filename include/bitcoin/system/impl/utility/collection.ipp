@@ -59,7 +59,7 @@ int binary_search(const Container& list, const Element& value)
     return -1;
 }
 
-template <typename Source, typename Target>
+template <typename Target, typename Source>
 std::vector<Target> cast(const std::vector<Source>& source)
 {
     std::vector<Target> target(source.size());

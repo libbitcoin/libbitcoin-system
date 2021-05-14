@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__lucky)
 BOOST_AUTO_TEST_CASE(collection__cast__empty__same)
 {
     data_chunk parameter;
-    const auto result = cast<uint8_t, uint8_t>(parameter);
+    const auto result = cast<uint8_t>(parameter);
     BOOST_REQUIRE(parameter.empty());
     BOOST_REQUIRE(result.empty());
 }
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(collection__cast__empty__same)
 BOOST_AUTO_TEST_CASE(collection__cast__one_element__same)
 {
     data_chunk parameter{ 42 };
-    const auto result = cast<uint8_t, uint8_t>(parameter);
+    const auto result = cast<uint8_t>(parameter);
     BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
 }
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(collection__cast__one_element__same)
 BOOST_AUTO_TEST_CASE(collection__cast__distinct_types__same)
 {
     data_chunk parameter{ 42, 24 };
-    const auto result = cast<uint8_t, uint32_t>(parameter);
+    const auto result = cast<uint32_t>(parameter);
     BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
     BOOST_REQUIRE_EQUAL(result[1], parameter[1]);

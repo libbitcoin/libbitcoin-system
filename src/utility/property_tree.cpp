@@ -157,7 +157,7 @@ ptree property_tree(const config::input& input)
 
 ptree property_tree(const std::vector<config::input>& inputs, bool json)
 {
-    const auto tx_inputs = cast<input, chain::input>(inputs);
+    const auto tx_inputs = cast<chain::input>(inputs);
 
     ptree tree;
     tree.add_child("inputs", property_tree_list("input", tx_inputs, json));
@@ -380,7 +380,7 @@ ptree property_list(const stealth_address& stealth, bool json)
     // So instead we emit the reused key as one of the spend keys.
     // This means that it is typical to see the same key in scan and spend.
 
-    const auto spends = cast<ec_compressed, ec_public>(stealth.spend_keys());
+    const auto spends = cast<ec_public>(stealth.spend_keys());
     const auto spends_values = property_value_list("public_key", spends, json);
 
     ptree tree;
