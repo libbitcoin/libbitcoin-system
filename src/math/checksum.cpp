@@ -156,7 +156,7 @@ base32_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
     if (version >= (1 << 5))
         return {};
 
-    auto checked = base32_expand(program);
+    auto checked = base32_unpack(program);
     checked.insert(checked.begin(), static_cast<uint5_t>(version));
     bech32_append_checksum(checked, prefix, version);
     BITCOIN_ASSERT(bech32_verify_checksum(checked, prefix, version));
@@ -171,7 +171,7 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
         return false;
 
     out_version = checked.front().convert_to<uint8_t>();
-    out_program = base32_compact(
+    out_program = base32_pack(
     {
         std::next(checked.begin(), bech32_version_size),
         std::prev(checked.end(), bech32_checksum_size)

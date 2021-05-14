@@ -52,7 +52,7 @@ typedef std::vector<uint5_t> base32_chunk;
 
 // For these reasons we provide bech32_build_checked and bech32_verify_checked
 // functions as a bridge for base32 for those working with witness addresses.
-// These are implemented using the base32_expand and base32_compact functions
+// These are implemented using the base32_unpack and base32_pack functions
 // here. These expose the internal expand/contract stages of base32
 // encode/decode, but are not necessary given the bech32 checked functions.
 // The expand/contract functions here are exposed for implementation of the
@@ -91,14 +91,14 @@ BC_API std::string encode_base32(const base32_chunk& data);
 BC_API bool decode_base32(base32_chunk& out, const std::string& in);
 
 /**
- * Expand any vector of 8 bit bytes to a vector of 5 bit bytes.
+ * Unpack any vector of 8 bit bytes to a vector of 5 bit bytes.
  */
-BC_API base32_chunk base32_expand(const data_chunk& data);
+BC_API base32_chunk base32_unpack(const data_chunk& data);
 
 /**
- * Compact any vector of 5 bit bytes to vector of 8 bit bytes.
+ * Pack any vector of 5 bit bytes to vector of 8 bit bytes.
  */
-BC_API data_chunk base32_compact(const base32_chunk& expanded);
+BC_API data_chunk base32_pack(const base32_chunk& unpacked);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

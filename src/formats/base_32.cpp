@@ -52,7 +52,7 @@ constexpr uint8_t decode[] =
 
 std::string encode_base32(const data_chunk& data)
 {
-    return encode_base32(base32_expand(data));
+    return encode_base32(base32_unpack(data));
 }
 
 std::string encode_base32(const base32_chunk& data)
@@ -73,7 +73,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
     if (!decode_base32(expanded, in))
         return false;
 
-    out = base32_compact(expanded);
+    out = base32_pack(expanded);
     return true;
 }
 
@@ -99,9 +99,9 @@ bool decode_base32(base32_chunk& out, const std::string& in)
     return true;
 }
 
-// compact/expand
+// pack/unpack
 
-base32_chunk base32_expand(const data_chunk& data)
+base32_chunk base32_unpack(const data_chunk& data)
 {
     base32_chunk out;
     data_source source(data);
@@ -119,7 +119,7 @@ base32_chunk base32_expand(const data_chunk& data)
     return out;
 }
 
-data_chunk base32_compact(const base32_chunk& data)
+data_chunk base32_pack(const base32_chunk& unpacked)
 {
     data_chunk out;
     data_sink sink(out);
@@ -127,7 +127,7 @@ data_chunk base32_compact(const base32_chunk& data)
     ostream_bit_writer bit_writer(writer);
 
     // This is how c++ developers do it. :)
-    for (const auto& value: data)
+    for (const auto& value: unpacked)
         bit_writer.write_bits(value.convert_to<uint8_t>(), 5);
 
     bit_writer.flush();
@@ -135,10 +135,10 @@ data_chunk base32_compact(const base32_chunk& data)
 
     // The bit writer writes zeros past end as padding.
     // This is a ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
-    // Remove a byte that is only padding, assumes base32_expand encoding.
-    if ((data.size() * 5) % 8 != 0)
+    // Remove a byte that is only padding, assumes base32_unpack encoding.
+    if ((unpacked.size() * 5) % 8 != 0)
     {
-        // If pad byte is non-zero the expansion was not base32_expand, but
+        // If pad byte is non-zero the unpacking was not base32_unpack, but
         // it remains possible that zero but non-pad data may be passed.
         // So we return an failure where the condition is detecable.
         out.resize(out.back() == 0x00 ? out.size() - 1u : 0);
