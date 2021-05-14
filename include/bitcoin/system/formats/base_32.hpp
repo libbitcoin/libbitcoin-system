@@ -69,7 +69,7 @@ typedef std::vector<uint5_t> base32_chunk;
 // but may not round trip (as is the case with BIP173 address encoding).
 
 /**
-* Convert data to a base32 string.
+* Convert bytes to a base32 string.
 */
 BC_API std::string encode_base32(const data_chunk& data);
 
