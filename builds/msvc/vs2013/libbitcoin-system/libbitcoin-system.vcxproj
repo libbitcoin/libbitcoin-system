@@ -148,6 +148,7 @@
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_16.cpp" />
+    <ClCompile Include="..\..\..\..\src\formats\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_32.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_64.cpp" />
@@ -367,6 +368,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_16.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_2048.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_64.hpp" />

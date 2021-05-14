@@ -79,6 +79,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/transaction.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
+    src/formats/base_2048.cpp \
     src/formats/base_32.cpp \
     src/formats/base_58.cpp \
     src/formats/base_64.cpp \
@@ -319,6 +320,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/printer.cpp \
     test/formats/base_10.cpp \
     test/formats/base_16.cpp \
+    test/formats/base_2048.cpp \
     test/formats/base_32.cpp \
     test/formats/base_58.cpp \
     test/formats/base_64.cpp \
@@ -502,6 +504,7 @@ include_bitcoin_system_formatsdir = ${includedir}/bitcoin/system/formats
 include_bitcoin_system_formats_HEADERS = \
     include/bitcoin/system/formats/base_10.hpp \
     include/bitcoin/system/formats/base_16.hpp \
+    include/bitcoin/system/formats/base_2048.hpp \
     include/bitcoin/system/formats/base_32.hpp \
     include/bitcoin/system/formats/base_58.hpp \
     include/bitcoin/system/formats/base_64.hpp \

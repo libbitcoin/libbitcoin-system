@@ -63,6 +63,7 @@
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/formats/base_10.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/formats/base_64.hpp>

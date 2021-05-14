@@ -279,6 +279,9 @@
     <ClCompile Include="..\..\..\..\src\formats\base_16.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base_2048.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_32.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
@@ -870,6 +873,9 @@
       <Filter>include\bitcoin\system\formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_16.hpp">
+      <Filter>include\bitcoin\system\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_2048.hpp">
       <Filter>include\bitcoin\system\formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\formats\base_32.hpp">

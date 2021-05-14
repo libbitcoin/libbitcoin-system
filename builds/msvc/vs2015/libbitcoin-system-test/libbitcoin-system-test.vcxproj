@@ -112,6 +112,7 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_32.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_58.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
