@@ -49,132 +49,119 @@ static const mnemonic::dictionaries base2048
     }
 };
 
-static base2048_chunk base2048_expand(const data_chunk& data);
-static data_chunk base2048_compact(const base2048_chunk& expanded);
-
 // encode
 
-static string_list encode_base2048(const base2048_chunk& data,
+static bool encode_base2048(base2048_chunk& out, const string_list& in,
+    wallet::language language)
+{
+    // Empty if words not contained in dictionary.
+    const auto indexes = base2048.index(in, language);
+    if (indexes.empty() && !in.empty())
+        return false;
+
+    if (std::any_of(indexes.begin(), indexes.end(),
+        [](const int32_t& index) { return index < 0; }))
+        return false;
+
+    out.resize(indexes.size());
+    std::transform(indexes.begin(), indexes.end(), out.begin(),
+        [](const int32_t& index) { return static_cast<uint11_t>(index); });
+
+    return true;
+}
+
+bool encode_base2048_list(data_chunk& out, const string_list& in,
+    wallet::language langauge)
+{
+    base2048_chunk packed;
+    if (!encode_base2048(packed, in, langauge))
+        return false;
+
+    out = base2048_unpack(packed);
+    return true;
+}
+
+bool encode_base2048(data_chunk& out, const std::string& in,
+    wallet::language language)
+{
+    out.clear();
+
+    // An empty string will split into one empty element, so normalize return.
+    return in.empty() || encode_base2048_list(out, split(in), language);
+}
+
+// decode
+
+static string_list decode_base2048(const base2048_chunk& data,
     wallet::language language)
 {
     mnemonic::dictionaries::search indexes(data.size());
-    std::transform(data.begin(), data.end(), indexes.begin(), 
-    [](const uint11_t& index)
-    {
-        return index.convert_to<size_t>();
-    });
+    std::transform(data.begin(), data.end(), indexes.begin(),
+        [](const uint11_t& index) { return index.convert_to<size_t>(); });
 
     // Empty if dictionary not found.
     return base2048.at(indexes, language);
 }
 
-string_list encode_base2048_list(const data_chunk& data,
+string_list decode_base2048_list(const data_chunk& data,
     wallet::language language)
 {
-    return encode_base2048(base2048_expand(data), language);
+    return decode_base2048(base2048_pack(data), language);
 }
 
-std::string encode_base2048(const data_chunk& data,
+std::string decode_base2048(const data_chunk& data,
     wallet::language language)
 {
-    return join(encode_base2048_list(data, language));
+    // Empty chunk returns empty string, consistent with encoding empty string.
+    return join(decode_base2048_list(data, language));
 }
 
-// decode
+// pack/unpack
 
-static bool decode_base2048(base2048_chunk& out, const string_list& in,
-    wallet::language language)
+base2048_chunk base2048_pack(const data_chunk& unpacked)
 {
-    out.clear();
-
-    // Empty if words not contained in dictionary.
-    const auto indexes = base2048.index(in, language);
-    if (indexes.empty())
-        return false;
-
-    if (std::any_of(indexes.begin(), indexes.end(),
-        [](const int32_t& index)
-        {
-            return index < 0;
-        }))
-        return false;
-
-    out.resize(indexes.size());
-    std::transform(indexes.begin(), indexes.end(), out.begin(),
-        [](const int32_t& index)
-        {
-            return static_cast<uint11_t>(index);
-        });
-
-    return true;
-}
-
-bool decode_base2048_list(data_chunk& out, const string_list& in,
-    wallet::language langauge)
-{
-    base2048_chunk expanded;
-    if (!decode_base2048(expanded, in, langauge))
-        return false;
-
-    out = base2048_compact(expanded);
-    return true;
-}
-
-bool decode_base2048(data_chunk& out, const std::string& in,
-    wallet::language language)
-{
-    return decode_base2048_list(out, split(in), language);
-}
-
-// compact/expand
-
-static base2048_chunk base2048_expand(const data_chunk& data)
-{
-    base2048_chunk out;
-    data_source source(data);
+    base2048_chunk packed;
+    data_source source(unpacked);
     istream_reader reader(source);
     istream_bit_reader bit_reader(reader);
 
     while (!bit_reader.is_exhausted())
-        out.push_back(bit_reader.read_bits(11));
+        packed.push_back(bit_reader.read_bits(11));
 
-    // TODO: look at pad calc.
-
-    // The bit reader reads zeros past end as padding.
+    // Remove an element that is only padding, assumes base2048_unpack encoding.
+    // The bit writer writes zeros past end as padding.
     // This is a ((n * 8) / 11) operation, (11 - ((n * 8) % 11)) bits are pad.
-    ////const auto padded = (data.size() * 8) % 11 != 0;
+    // This padding is in addition to that added by unpacking. When unpacked
+    // and then packed this will always result in either no pad bits or a full
+    // element of zeros that is padding. This should be apparent from the fact
+    // that the number of used bits is unchanged. Remainder indicates padding.
+    if ((unpacked.size() * 8) % 11 != 0)
+    {
+        // If pad element is non-zero the unpacking was not base2048_unpack.
+        // So we return a failure where the condition is detected.
+        packed.resize(packed.back() == 0x00 ? packed.size() - 1u : 0);
+    }
 
-    return out;
+    return packed;
 }
 
-static data_chunk base2048_compact(const base2048_chunk& data)
+data_chunk base2048_unpack(const base2048_chunk& packed)
 {
-    data_chunk out;
-    data_sink sink(out);
+    data_chunk unpacked;
+    data_sink sink(unpacked);
     ostream_writer writer(sink);
     ostream_bit_writer bit_writer(writer);
 
-    for (const auto& value: data)
-        bit_writer.write_bits(value.convert_to<uint32_t>(), 11);
+    for (const auto& value: packed)
+        bit_writer.write_bits(value.convert_to<uint64_t>(), 11);
 
     bit_writer.flush();
     sink.flush();
 
-    // TODO: look at pad calc.
-    // TODO: remove two bytes if padding > 8 bits.
-
-    // The bit writer writes zeros past end as padding.
+    // The bit reader reads zeros past end as padding.
     // This is a ((n * 11) / 8) operation, so (8 - ((n * 11) % 8)) are pad.
-    // Remove a byte that is only padding, assumes base2048_expand encoding.
-    if ((data.size() * 11) % 8 != 0)
-    {
-        // If pad byte is non-zero the expansion was not base2048_expand, but
-        // it remains possible that zero but non-pad data may be passed.
-        // So we return a failure where the condition is detected.
-        out.resize(out.back() == 0x00 ? out.size() - 1u : 0);
-    }
-
-    return out;
+    ////const auto padded = (packed.size() * 11) % 8 != 0;
+    return unpacked;
 }
 
 } // namespace system

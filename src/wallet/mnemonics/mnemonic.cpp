@@ -70,16 +70,18 @@ const mnemonic::dictionaries mnemonic::dictionaries_
 // Entropy requires wordlist mapping because of the checksum.
 string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
+    // Bytes are the base2048 encoding, so this is byte decoding.
     const auto checksum = data_chunk{ checksum_byte(entropy) };
     const auto buffer = build_chunk({ entropy, checksum });
-    return encode_base2048_list(buffer, identifier);
+    return decode_base2048_list(buffer, identifier);
 }
 
 // Entropy requires wordlist mapping because of the checksum.
 data_chunk mnemonic::decoder(const string_list& words, language identifier)
 {
+    // Words are the base2048 decoding, so this is word encoding.
     data_chunk buffer;
-    if (!decode_base2048_list(buffer, words, identifier))
+    if (!encode_base2048_list(buffer, words, identifier))
         return {};
 
     // Entropy is always byte aligned.

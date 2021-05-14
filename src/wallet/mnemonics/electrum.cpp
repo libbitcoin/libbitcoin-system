@@ -91,14 +91,16 @@ const electrum::dictionaries electrum::dictionaries_
 // Entropy is an entirely private (internal) format.
 string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
-    return encode_base2048_list(entropy, identifier);
+    // Bytes are the base2048 encoding, so this is byte decoding.
+    return decode_base2048_list(entropy, identifier);
 }
 
 // Entropy is an entirely private (internal) format.
 data_chunk electrum::decoder(const string_list& words, language identifier)
 {
+    // Words are the base2048 decoding, so this is word encoding.
     data_chunk out;
-    return decode_base2048_list(out, words, identifier) ? out : data_chunk{};
+    return encode_base2048_list(out, words, identifier) ? out : data_chunk{};
 }
 
 // Electrum also grinds randoms on a sequential nonce until the entropy is high

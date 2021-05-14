@@ -39,38 +39,49 @@ typedef std::vector<uint11_t> base2048_chunk;
 // This is the encoding used by both BIP39 and Electrum mnemonics.
 // Dictionaries are unicode lower case and nfkd normalized.
 // Words must be space (0x20) delimited and match dictionary (bytewise).
-// Decoding returns false if specified language is 'none' and words are not in
-// a single dictionary. Uses en decoding if 'none' speficied and all words in
-// both en and fr. No other dictionaries have overlapping words with mismatched
-// mappings.
-
-/**
-* Convert bytes to a base2048 sentence in the specified language.
-* Returns empty if the language is not contained in the dictionary.
-*/
-BC_API std::string encode_base2048(const data_chunk& data,
-    wallet::language language=wallet::language::en);
+// The packing direction is reversed from base32 encoding, since base2048
+// elements are larger than byte elements. This means that round trip must
+// start with words, not bytes. Coding in the reverse direction is ambiguous
+// and will lead to full pad bytes in 3 out of every 12 bit lengths. Words are
+// encoded as bytes, not bytes as words. Words are authoritative for entropy.
 
 /**
  * Convert a base2048 sentence to bytes.
  * False if any word is not from the specified dictionary.
  */
-BC_API bool decode_base2048(data_chunk& out, const std::string& in,
-    wallet::language language=wallet::language::none);
+BC_API bool encode_base2048(data_chunk& out, const std::string& in,
+    wallet::language language = wallet::language::en);
 
 /**
-* Convert bytes to a base2048 word list in the specified language.
-* Returns empty if the language is not contained in the dictionary.
+* Convert bytes to a base2048 sentence in the specified language.
+* Returns empty if language is not a supported dictionary.
 */
-BC_API string_list encode_base2048_list(const data_chunk& data,
+BC_API std::string decode_base2048(const data_chunk& data,
     wallet::language language=wallet::language::en);
 
 /**
  * Convert a base2048 word list to bytes.
  * False if any word is not from the specified dictionary.
  */
-BC_API bool decode_base2048_list(data_chunk& out, const string_list& in,
-    wallet::language language=wallet::language::none);
+BC_API bool encode_base2048_list(data_chunk& out, const string_list& in,
+    wallet::language language=wallet::language::en);
+
+/**
+* Convert bytes to a base2048 word list in the specified language.
+* Returns empty if language is not a supported dictionary.
+*/
+BC_API string_list decode_base2048_list(const data_chunk& data,
+    wallet::language language=wallet::language::en);
+
+/**
+ * Pack any vector of 8 bit bytes to vector of 11 bit bytes.
+ */
+base2048_chunk base2048_pack(const data_chunk& unpacked);
+
+/**
+ * Unpack any vector of 11 bit bytes to a vector of 8 bit bytes.
+ */
+data_chunk base2048_unpack(const base2048_chunk& packed);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

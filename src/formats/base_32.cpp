@@ -50,10 +50,7 @@ constexpr uint8_t decode[] =
     6,    4,    2,    0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-std::string encode_base32(const data_chunk& data)
-{
-    return encode_base32(base32_unpack(data));
-}
+// encode
 
 std::string encode_base32(const base32_chunk& data)
 {
@@ -61,21 +58,18 @@ std::string encode_base32(const base32_chunk& data)
     out.reserve(data.size());
 
     // encode[] cannot be out of bounds because expanded bytes are < 32.
-    for (auto value: data)
+    for (auto value : data)
         out.push_back(encode[value.convert_to<uint8_t>()]);
-    
+
     return out;
 }
 
-bool decode_base32(data_chunk& out, const std::string& in)
+std::string encode_base32(const data_chunk& data)
 {
-    base32_chunk expanded;
-    if (!decode_base32(expanded, in))
-        return false;
-
-    out = base32_pack(expanded);
-    return true;
+    return encode_base32(base32_unpack(data));
 }
+
+// decode
 
 bool decode_base32(base32_chunk& out, const std::string& in)
 {
@@ -99,52 +93,64 @@ bool decode_base32(base32_chunk& out, const std::string& in)
     return true;
 }
 
-// pack/unpack
-
-base32_chunk base32_unpack(const data_chunk& data)
+bool decode_base32(data_chunk& out, const std::string& in)
 {
-    base32_chunk out;
-    data_source source(data);
-    istream_reader reader(source);
-    istream_bit_reader bit_reader(reader);
+    base32_chunk expanded;
+    if (!decode_base32(expanded, in))
+        return false;
 
-    // This is how c++ developers do it. :)
-    while (!bit_reader.is_exhausted())
-        out.push_back(bit_reader.read_bits(5));
-
-    // The bit reader reads zeros past end as padding.
-    // This is a ((n * 8) / 5) operation, so (5 - ((n * 8) % 5)) bits are pad.
-    ////const auto padded = (data.size() * 8) % 5 != 0;
-
-    return out;
+    out = base32_pack(expanded);
+    return true;
 }
+
+// pack/unpack
 
 data_chunk base32_pack(const base32_chunk& unpacked)
 {
-    data_chunk out;
-    data_sink sink(out);
+    data_chunk packed;
+    data_sink sink(packed);
     ostream_writer writer(sink);
     ostream_bit_writer bit_writer(writer);
 
     // This is how c++ developers do it. :)
     for (const auto& value: unpacked)
-        bit_writer.write_bits(value.convert_to<uint8_t>(), 5);
+        bit_writer.write_bits(value.convert_to<uint64_t>(), 5);
 
     bit_writer.flush();
     sink.flush();
 
+    // Remove an element that is only padding, assumes base32_unpack encoding.
     // The bit writer writes zeros past end as padding.
     // This is a ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
-    // Remove a byte that is only padding, assumes base32_unpack encoding.
+    // This padding is in addition to that added by unpacking. When unpacked
+    // and then packed this will always result in either no pad bits or a full
+    // element of zeros that is padding. This should be apparent from the fact
+    // that the number of used bits is unchanged. Remainder indicates padding.
     if ((unpacked.size() * 5) % 8 != 0)
     {
-        // If pad byte is non-zero the unpacking was not base32_unpack, but
-        // it remains possible that zero but non-pad data may be passed.
+        // If pad byte is non-zero the unpacking was not base32_unpack.
         // So we return an failure where the condition is detecable.
-        out.resize(out.back() == 0x00 ? out.size() - 1u : 0);
+        packed.resize(packed.back() == 0x00 ? packed.size() - 1u : 0);
     }
 
-    return out;
+    return packed;
+}
+
+base32_chunk base32_unpack(const data_chunk& packed)
+{
+    base32_chunk unpacked;
+    data_source source(packed);
+    istream_reader reader(source);
+    istream_bit_reader bit_reader(reader);
+
+    // This is how c++ developers do it. :)
+    while (!bit_reader.is_exhausted())
+        unpacked.push_back(bit_reader.read_bits(5));
+
+    // The bit reader reads zeros past end as padding.
+    // This is a ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.
+    ////const auto padded = (packed.size() * 8) % 5 != 0;
+    return unpacked;
 }
 
 } // namespace system
