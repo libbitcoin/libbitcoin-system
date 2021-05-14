@@ -302,4 +302,7 @@
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
   </ItemGroup>
+    <ItemGroup>
+      <Natvis Include="..\..\debug.natvis" />
+    </ItemGroup>
 </Project>
