@@ -24,11 +24,11 @@
 #include <iterator>
 #include <string>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
@@ -67,63 +67,24 @@ const mnemonic::dictionaries mnemonic::dictionaries_
     }
 };
 
-// Words are encoded in 11 bits and therefore are not byte aligned.
-// As a consequence bit ordering matters. Bits are serialized to entropy bytes
-// in big-endian order. This can be observed in the reference implementation:
-// github.com/trezor/python-mnemonic/blob/master/mnemonic/mnemonic.py#L152-L162
-
 // Entropy requires wordlist mapping because of the checksum.
-// TODO: decode_base2048(base2048_chunk&, const std::string&, language)
 string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
-    const auto read_index = [](istream_bit_reader& reader)
-    {
-        return static_cast<uint32_t>(reader.read_bits(index_bits));
-    };
-
-    dictionary::search indexes(word_count(entropy));
     const auto checksum = data_chunk{ checksum_byte(entropy) };
     const auto buffer = build_chunk({ entropy, checksum });
-
-    data_source source(buffer);
-    istream_reader byte_reader(source);
-    istream_bit_reader bit_reader(byte_reader);
-
-    for (auto& index: indexes)
-        index = read_index(bit_reader);
-
-    return dictionaries_.at(indexes, identifier);
+    return encode_base2048_list(buffer, identifier);
 }
 
 // Entropy requires wordlist mapping because of the checksum.
-// TODO: create encode_base2048(const base2048_chunk& data, language)
 data_chunk mnemonic::decoder(const string_list& words, language identifier)
 {
-    const auto write_index = [](ostream_bit_writer& writer, int32_t index)
-    {
-        writer.write_bits(static_cast<size_t>(index), index_bits);
-    };
-
-    // Reserve buffer to include entropy and checksum, always one byte.
     data_chunk buffer;
-    buffer.reserve(entropy_size(words) + 1u);
-
-    const auto indexes = dictionaries_.index(words, identifier);
-
-    data_sink sink(buffer);
-    ostream_writer byte_writer(sink);
-    ostream_bit_writer bit_writer(byte_writer);
-
-    for (const auto index: indexes)
-        write_index(bit_writer, index);
-
-    bit_writer.flush();
-    sink.flush();
+    if (!decode_base2048_list(buffer, words, identifier))
+        return {};
 
     // Entropy is always byte aligned.
-    const data_chunk entropy{ buffer.begin(), std::prev(buffer.end()) };
-
     // Checksum is in high order bits of last buffer byte, zero-padded.
+    const data_chunk entropy{ buffer.begin(), std::prev(buffer.end()) };
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
 }
 

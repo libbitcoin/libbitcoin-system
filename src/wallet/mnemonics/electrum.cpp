@@ -25,13 +25,13 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
@@ -89,50 +89,16 @@ const electrum::dictionaries electrum::dictionaries_
 };
 
 // Entropy is an entirely private (internal) format.
-// TODO: decode_base2048(base2048_chunk&, const std::string&, language)
 string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
-    const auto read_index = [](istream_bit_reader& reader)
-    {
-        return static_cast<uint32_t>(reader.read_bits(index_bits));
-    };
-
-    dictionary::search indexes(word_count(entropy));
-
-    data_source source(entropy);
-    istream_reader byte_reader(source);
-    istream_bit_reader bit_reader(byte_reader);
-
-    for (auto& index: indexes)
-        index = read_index(bit_reader);
-
-    return dictionaries_.at(indexes, identifier);
+    return encode_base2048_list(entropy, identifier);
 }
 
 // Entropy is an entirely private (internal) format.
-// TODO: create encode_base2048(const base2048_chunk& data, language)
 data_chunk electrum::decoder(const string_list& words, language identifier)
 {
-    const auto write_index = [](ostream_bit_writer& writer, int32_t index)
-    {
-        writer.write_bits(static_cast<size_t>(index), index_bits);
-    };
-
-    const auto indexes = dictionaries_.index(words, identifier);
-
-    data_chunk entropy;
-    entropy.reserve(entropy_size(words));
-
-    data_sink sink(entropy);
-    ostream_writer byte_writer(sink);
-    ostream_bit_writer bit_writer(byte_writer);
-
-    for (const auto index: indexes)
-        write_index(bit_writer, index);
-
-    bit_writer.flush();
-    sink.flush();
-    return entropy;
+    data_chunk out;
+    return decode_base2048_list(out, words, identifier) ? out : data_chunk{};
 }
 
 // Electrum also grinds randoms on a sequential nonce until the entropy is high

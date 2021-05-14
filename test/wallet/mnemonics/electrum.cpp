@@ -21,6 +21,8 @@
 
 BOOST_AUTO_TEST_SUITE(electrum_tests)
 
+#ifdef UNDEFINED
+
 using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(electrum__decoder__vector0_english__expected)
@@ -286,5 +288,7 @@ BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(17, 0)), 17u - ((17u * 8u) % 11u) / 8u);
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(64, 0)), 64u - ((64u * 8u) % 11u) / 8u);
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
