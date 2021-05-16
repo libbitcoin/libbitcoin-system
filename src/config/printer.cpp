@@ -101,7 +101,7 @@ static void enqueue_fragment(std::string& fragment,
 std::vector<std::string> printer::columnize(const std::string& paragraph,
     size_t width)
 {
-    const auto words = split(paragraph, " ", false);
+    const auto words = split(paragraph, false);
 
     std::string fragment;
     std::vector<std::string> column;

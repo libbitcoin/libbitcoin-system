@@ -20,12 +20,21 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+constexpr size_t ascii_separators8_count = 1;
+constexpr size_t ascii_whitespace8_count = 6;
+extern const char ascii_separators8[ascii_separators8_count];
+extern const char ascii_whitespace8[ascii_whitespace8_count];
+
+// Utilities.
+// ----------------------------------------------------------------------------
 
 // All string utilities are based on utf8 encoded values.
 // Every byte of a non-ascii utf8 character has high order bit set.
@@ -71,27 +80,24 @@ bool has_mixed_ascii_case(const std::string& text)
     return lower && upper;
 }
 
-bool is_ascii(const std::string& text)
+inline bool is_ascii_character(char character)
 {
-    return std::all_of(text.begin(), text.end(), is_ascii_character);
-}
-
-bool is_ascii_character(char character)
-{
+    // en.wikipedia.org/wiki/ASCII
     return (character & 0x80) == 0;
 }
 
-// This is locale independent and ensures compiler consistency.
-// The default "C" locale is not always present for std::isspace.
-bool is_ascii_whitespace(char character)
+static bool is_ascii_whitespace(char character)
 {
-    return
-        character == 0x20 ||
-        character == '\t' ||
-        character == '\n' ||
-        character == '\v' ||
-        character == '\f' ||
-        character == '\r';
+    for (size_t space = 0; space < ascii_whitespace8_count; ++space)
+        if (character == ascii_whitespace8[space])
+            return true;
+
+    return false;
+}
+
+bool is_ascii(const std::string& text)
+{
+    return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
 
 std::string join(const string_list& tokens, const std::string& delimiter)
@@ -100,7 +106,7 @@ std::string join(const string_list& tokens, const std::string& delimiter)
         return {};
 
     // Start with the first token.
-    std::stringstream sentence;
+    std::ostringstream sentence;
     sentence << tokens.front();
 
     // Add remaining tokens preceded by delimiters.
@@ -110,58 +116,108 @@ std::string join(const string_list& tokens, const std::string& delimiter)
     return sentence.str();
 }
 
+void reduce(string_list& tokens, bool trim, bool compress)
+{
+    static const std::string empty{};
+
+    if (tokens.empty())
+        return;
+
+    if (trim)
+        for (auto& token: tokens)
+            system::trim(token);
+
+    if (compress)
+        tokens.erase(std::remove(tokens.begin(), tokens.end(), empty),
+            tokens.end());
+
+    if (tokens.empty())
+        tokens.push_back({});
+}
+
+string_list reduce_copy(const string_list& tokens, bool trim, bool compress)
+{
+    auto copy = tokens;
+    reduce(copy, trim, compress);
+    return copy;
+}
+
+size_t replace(std::string& text, const std::string& from, const std::string& to)
+{
+    size_t count = 0;
+
+    for (auto position = text.find(from, 0);
+        position != std::string::npos;
+        position = text.find(from, position + to.length()))
+    {
+        ++count;
+        text.replace(position, from.length(), to);
+    }
+
+    return count;
+}
+
+static string_list splitter(const std::string& text, const std::string& delimiter,
+    bool trim, bool compress)
+{
+    size_t start = 0;
+    string_list tokens;
+
+    // Push all but the last token.
+    for (auto position = text.find(delimiter, 0);
+        position != std::string::npos;
+        position = text.find(delimiter, start))
+    {
+        tokens.push_back(text.substr(start, position - start));
+        start = position + delimiter.length();
+    }
+
+    // Push last token (delimiter not found).
+    tokens.push_back(text.substr(start, text.length() - start));
+    reduce(tokens, trim, compress);
+    return tokens;
+}
+
+string_list split(const std::string& text, const string_list& delimiters,
+    bool trim, bool compress)
+{
+    if (delimiters.empty())
+        return { trim ? trim_copy(text) : text };
+
+    // Avoids copying text if only one delimiter.
+    if (delimiters.size() == 1u)
+        return splitter(text, delimiters.front(), trim, compress);
+
+    auto copy = text;
+    const auto first = delimiters.front();
+
+    // Replace all other delimiters with the first delimiter.
+    for (auto it = std::next(delimiters.begin()); it != delimiters.end(); ++it)
+        replace(copy, *it, first);
+
+    // Split copy on the first delimiter.
+    return splitter(copy, first, trim, compress);
+}
+
 string_list split(const std::string& text, const std::string& delimiter,
     bool trim, bool compress)
 {
-    string_list tokens;
+    return split(text, string_list{ delimiter }, trim, compress);
+}
 
-    // Apply trimming and compression when pushing tokens.
-    const auto push = [trim, &tokens](std::string&& token, bool compress)
-    {
-        if (trim)
-            system::trim(token);
-
-        if (!(compress && token.empty()))
-            tokens.push_back(std::move(token));
-    };
-
-    size_t next = 0;
-    const auto size = delimiter.size();
-    auto position = text.find(delimiter, next);
-
-    // Push all but the last token.
-    while (position != std::string::npos)
-    {
-        push(text.substr(next, position - next), compress);
-        next = position + size;
-        position = text.find(delimiter, next);
-    }
-
-    // Do not compress if only one (empty) token.
-    compress &= !tokens.empty();
-
-    // Push last token (delimiter not found).
-    push(text.substr(next, text.length() - next), compress);
-    return tokens;
+string_list split(const std::string& text, bool trim, bool compress)
+{
+    return split(text, ascii_separators, trim, compress);
 }
 
 bool starts_with(const std::string& text, const std::string& prefix)
 {
-    // Guarded against prefix length greater than string length.
-    return prefix.length() <= text.length() &&
-        (text.substr(0, prefix.length()) == prefix);
+    return text.find(prefix, 0) == 0u;
 }
 
 std::string to_string(const data_slice& bytes)
 {
     return bytes.to_string();
-}
-
-std::string trim_copy(const std::string& text)
-{
-    auto copy = text;
-    trim(copy);
-    return copy;
 }
 
 void trim(std::string& text)
@@ -177,6 +233,54 @@ void trim(std::string& text)
     text.erase(last.base(), text.end());
     text.shrink_to_fit();
 }
+
+std::string trim_copy(const std::string& text)
+{
+    auto copy = text;
+    trim(copy);
+    return copy;
+}
+
+// ASCII reference data.
+// ----------------------------------------------------------------------------
+// en.wikipedia.org/wiki/Whitespace_character
+
+const char ascii_separators8[]
+{
+    // ASCII separator characters.
+    0x20  // space ' '
+};
+
+const std::string ascii_space
+{
+    ascii_separators8[0]
+};
+
+const string_list ascii_separators
+{
+    { ascii_separators8[0] }
+};
+
+const char ascii_whitespace8[]
+{
+    // ASCII whitespace characters (C whitespace).
+    0x09, // character tabulation '\t'
+    0x0a, // line feed '\n'
+    0x0b, // line tabulation '\v'
+    0x0c, // form feed '\f'
+    0x0d, // carriage return '\r'
+    0x20  // space ' '
+};
+
+const string_list ascii_whitespace
+{
+    { ascii_whitespace8[0] },
+    { ascii_whitespace8[1] },
+    { ascii_whitespace8[2] },
+    { ascii_whitespace8[3] },
+    { ascii_whitespace8[4] },
+    { ascii_whitespace8[5] }
+};
 
 } // namespace system
 } // namespace libbitcoin
