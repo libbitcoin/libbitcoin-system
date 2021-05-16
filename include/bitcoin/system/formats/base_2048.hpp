@@ -76,12 +76,12 @@ BC_API string_list decode_base2048_list(const data_chunk& data,
 /**
  * Pack any vector of 8 bit bytes to vector of 11 bit bytes.
  */
-base2048_chunk base2048_pack(const data_chunk& unpacked);
+BC_API base2048_chunk base2048_pack(const data_chunk& unpacked);
 
 /**
  * Unpack any vector of 11 bit bytes to a vector of 8 bit bytes.
  */
-data_chunk base2048_unpack(const base2048_chunk& packed);
+BC_API data_chunk base2048_unpack(const base2048_chunk& packed);
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

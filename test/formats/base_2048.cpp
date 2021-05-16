@@ -20,32 +20,140 @@
 
 BOOST_AUTO_TEST_SUITE(base_2048_tests)
 
+using namespace wallet;
+
 // decode_base2048_list
 
 BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector0__expected)
 {
     // []=>[]
-    const auto encoded = base16_chunk("");
     const string_list decoded{};
+    const auto encoded = base16_chunk("");
     BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded), decoded);
 }
 
 BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector1__expected)
 {
-    // [00000000][00000000]=>
+    // [00000000][000ppppp]=>
     // [00000000000]
-    const auto encoded = base16_chunk("0000");
-    const string_list decoded{ "abandon" };
-    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded), decoded);
+    const string_list decoded
+    {
+        "abandon"
+    };
+    const auto encoded = base16_chunk("00""00");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::en), decoded);
 }
 
 BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector2__expected)
 {
-    // [00000000][00000000][00000100]=>
+    // [00000000][00000000][000001pp]=>
     // [00000000000][00000000001]
-    const auto encoded = base16_chunk("000004");
-    const string_list decoded{ "abandon", "ability" };
-    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded), decoded);
+    const string_list decoded
+    {
+        "ábaco",
+        "abdomen"
+    };
+    const auto encoded = base16_chunk("0000""04");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::es), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector3__expected)
+{
+    // [00000000][00000000][00000100][00000001][0ppppppp]=>
+    // [00000000000][00000000001][00000000010]
+    const string_list decoded
+    {
+        "abaco",
+        "abbaglio",
+        "abbinato"
+    };
+    const auto encoded = base16_chunk("000004""0100");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::it), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector4__expected)
+{
+    // [00000000][00000000][00000100][00000001][00000000][0011pppp]=>
+    // [00000000000][00000000001][00000000010][00000000011]
+    const string_list decoded
+    {
+        "abaisser",
+        "abandon",
+        "abdiquer",
+        "abeille"
+    };
+    const auto encoded = base16_chunk("0000040100""30");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::fr), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector5__expected)
+{
+    // [00000000][00000000][00000100][00000001][00000000][00110000][0000100p]=>
+    // [00000000000][00000000001][00000000010][00000000011][00000000100]
+    const string_list decoded
+    {
+        "abdikace",
+        "abeceda",
+        "adresa",
+        "agrese",
+        "akce"
+    };
+    const auto encoded = base16_chunk("000004010030""08");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::cs), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector6__expected)
+{
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01pppppp]=>
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101]
+    const string_list decoded
+    {
+        "abacate",
+        "abaixo",
+        "abalar",
+        "abater",
+        "abduzir",
+        "abelha"
+    };
+    const auto encoded = base16_chunk("00000401003008""0140");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::pt), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector7__expected)
+{
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01000000][00110ppp]=>
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101][00000000110]
+    const string_list decoded
+    {
+        "あいこくしん",
+        "あいさつ",
+        "あいだ",
+        "あおぞら",
+        "あかちゃん",
+        "あきる",
+        "あけがた"
+    };
+    const auto encoded = base16_chunk("000004010030080140""30");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::ja), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector8__expected)
+{
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01000000][00110000][00000111]=>
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101][00000000110][00000000111]
+    const string_list decoded
+    {
+        "가격",
+        "가끔",
+        "가난",
+        "가능",
+        "가득",
+        "가르침",
+        "가뭄",
+        "가방"
+    };
+    const auto encoded = base16_chunk("00000401003008014030""07");
+    BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::ko), decoded);
 }
 
 // encode_base2048_list
@@ -63,9 +171,12 @@ BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector0__expected)
 BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector1__expected)
 {
     // [00000000000]=>
-    // [00000000][00000000]
-    const string_list decoded{ "abandon" };
-    const auto encoded = base16_chunk("0000");
+    // [00000000][000ppppp]
+    const string_list decoded
+    {
+        "abandon"
+    };
+    const auto encoded = base16_chunk("00""00");
     data_chunk out;
     BOOST_REQUIRE(encode_base2048_list(out, decoded));
     BOOST_REQUIRE_EQUAL(out, encoded);
@@ -74,11 +185,126 @@ BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector1__expected)
 BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector2__expected)
 {
     // [00000000000][00000000001]=>
-    // [00000000][00000000][00000100]
-    const string_list decoded{ "abandon", "ability" };
-    const auto encoded = base16_chunk("000004");
+    // [00000000][00000000][000001pp]
+    const string_list decoded
+    {
+        "ábaco",
+        "abdomen"
+    };
+    const auto encoded = base16_chunk("0000""04");
     data_chunk out;
-    BOOST_REQUIRE(encode_base2048_list(out, decoded));
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::es));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector3__expected)
+{
+    // [00000000000][00000000001][00000000010]=>
+    // [00000000][00000000][00000100][00000001][0ppppppp]
+    const string_list decoded
+    {
+        "abaco",
+        "abbaglio",
+        "abbinato"
+    };
+    const auto encoded = base16_chunk("000004""0100");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::it));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector4__expected)
+{
+    // [00000000000][00000000001][00000000010][00000000011]=>
+    // [00000000][00000000][00000100][00000001][00000000][0011pppp]
+    const string_list decoded
+    {
+        "abaisser",
+        "abandon",
+        "abdiquer",
+        "abeille"
+    };
+    const auto encoded = base16_chunk("0000040100""30");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::fr));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector5__expected)
+{
+    // [00000000000][00000000001][00000000010][00000000011][00000000100]=>
+    // [00000000][00000000][00000100][00000001][00000000][00110000][0000100p]
+    const string_list decoded
+    {
+        "abdikace",
+        "abeceda",
+        "adresa",
+        "agrese",
+        "akce"
+    };
+    const auto encoded = base16_chunk("000004010030""08");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::cs));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector6__expected)
+{
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101]=>
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01pppppp]
+    const string_list decoded
+    {
+        "abacate",
+        "abaixo",
+        "abalar",
+        "abater",
+        "abduzir",
+        "abelha"
+    };
+    const auto encoded = base16_chunk("00000401003008""0140");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::pt));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector7__expected)
+{
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101][00000000110]=>
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01000000][00110ppp]
+    const string_list decoded
+    {
+        "あいこくしん",
+        "あいさつ",
+        "あいだ",
+        "あおぞら",
+        "あかちゃん",
+        "あきる",
+        "あけがた"
+    };
+    const auto encoded = base16_chunk("000004010030080140""30");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::ja));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048_list__vector8__expected)
+{
+    // [00000000000][00000000001][00000000010][00000000011][00000000100][00000000101][00000000110][00000000111]=>
+    // [00000000][00000000][00000100][00000001][00000000][00110000][00001000][00000001][01000000][00110000][00000111]
+    const string_list decoded
+    {
+        "가격",
+        "가끔",
+        "가난",
+        "가능",
+        "가득",
+        "가르침",
+        "가뭄",
+        "가방"
+    };
+    const auto encoded = base16_chunk("00000401003008014030""07");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048_list(out, decoded, language::ko));
     BOOST_REQUIRE_EQUAL(out, encoded);
 }
 
