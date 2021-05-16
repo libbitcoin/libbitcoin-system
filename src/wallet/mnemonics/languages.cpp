@@ -89,7 +89,7 @@ std::string languages::join(const string_list& words, language identifier)
     return system::join(words, to_delimiter(identifier));
 }
 
-string_list languages::split(const std::string& sentence, language identifier)
+string_list languages::split(const std::string& sentence, language)
 {
     // Split input on any unicode separator, trimming any unicode whitespace.
     return unicode_split(sentence);
