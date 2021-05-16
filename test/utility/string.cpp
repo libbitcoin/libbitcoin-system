@@ -565,6 +565,13 @@ BOOST_AUTO_TEST_CASE(string__trim__empty__empty)
     BOOST_REQUIRE_EQUAL(value, "");
 }
 
+BOOST_AUTO_TEST_CASE(string__trim___no_whitespace__unchanged)
+{
+    std::string value{ "abcdefghij" };
+    const auto expected = value;
+    BOOST_REQUIRE_EQUAL(value, value);
+}
+
 BOOST_AUTO_TEST_CASE(string__trim___all_whitespace__empty)
 {
     std::string value{ " \t\n\v\f\r " };

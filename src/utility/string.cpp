@@ -223,14 +223,12 @@ std::string to_string(const data_slice& bytes)
 void trim(std::string& text)
 {
     // Find the first non-space or end and erase to that point.
-    const auto first = std::find_if_not(text.begin(), text.end(),
-        is_ascii_whitespace);
-    text.erase(text.begin(), first);
+    text.erase(text.begin(), std::find_if_not(text.begin(), text.end(),
+        is_ascii_whitespace));
 
     // Find the last non-space or rend and erase from that point.
-    const auto last = std::find_if_not(text.rbegin(), text.rend(),
-        is_ascii_whitespace);
-    text.erase(last.base(), text.end());
+    text.erase(std::find_if_not(text.rbegin(), text.rend(),
+        is_ascii_whitespace).base(), text.end());
     text.shrink_to_fit();
 }
 
