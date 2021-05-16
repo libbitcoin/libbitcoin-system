@@ -25,9 +25,6 @@
  // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system::wallet;
 
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
-
 const size_t test_dictionary_size = 10;
 typedef std::array<const char*, test_dictionary_size> test_words;
 

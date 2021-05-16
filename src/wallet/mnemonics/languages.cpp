@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <map>
 #include <string>
+#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
@@ -32,9 +33,6 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 typedef std::map<language, std::string> language_map;
-
-constexpr auto ideographic_space = "\xe3\x80\x80";
-constexpr auto ascii_space = "\x20";
 
 // All languages, dictionary-independent.
 // Dictionaries are collections of words in one of these languages.
@@ -82,24 +80,27 @@ std::string languages::to_name(language identifier)
 
 std::string languages::to_delimiter(language identifier)
 {
-    return (identifier == language::ja) ? ideographic_space : ascii_space;
+    return identifier == language::ja ? ideographic_space : ascii_space;
 }
 
 std::string languages::join(const string_list& words, language identifier)
 {
+    // Join output using the ideographic space for japanese.
     return system::join(words, to_delimiter(identifier));
 }
 
 string_list languages::split(const std::string& sentence, language identifier)
 {
-    return system::split(sentence, to_delimiter(identifier));
+    // Split input on any unicode separator, trimming any unicode whitespace.
+    return unicode_split(sentence);
 }
 
 // protected
 string_list languages::normalize(const string_list& words)
 {
 #ifdef WITH_ICU
-    return system::split(to_lower(to_normal_nfkd_form(system::join(words))));
+    return system::split(to_lower(to_compatibility_demposition(
+        system::join(words))));
 #else
     return system::split(ascii_to_lower(system::join(words)));
 #endif

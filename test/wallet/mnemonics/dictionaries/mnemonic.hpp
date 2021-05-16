@@ -87,7 +87,7 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 ////{
 ////    return std::count_if(words.begin(), words.end(), [&](const char test[])
 ////    {
-////        return test != to_normal_nfkd_form(test);
+////        return test != to_compatibility_demposition(test);
 ////    });
 ////}
 
@@ -95,7 +95,7 @@ static bool abnormal(const mnemonic::dictionary::words& words)
 {
     return std::all_of(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_normal_nfkd_form(test);
+        return test != to_compatibility_demposition(test);
     });
 }
 

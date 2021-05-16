@@ -97,7 +97,7 @@ hd_private mnemonic::seeder(const string_list& words,
     // Unlike electrum, BIP39 does not lower case passphrases, trim whitespace
     // remove diacritics, or compress cjk.
 #ifdef WITH_ICU
-    auto pass = to_normal_nfkd_form(passphrase);
+    auto pass = to_compatibility_demposition(passphrase);
 #else
     auto pass = passphrase;
     if (!is_ascii(pass))

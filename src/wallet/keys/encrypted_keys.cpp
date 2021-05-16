@@ -306,7 +306,7 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 // This call requires an ICU build, the other excluded calls are dependencies.
 static data_chunk normal(const std::string& passphrase)
 {
-    return to_chunk(to_normal_nfc_form(passphrase));
+    return to_chunk(to_canonical_composition(passphrase));
 }
 
 static bool create_token(encrypted_token& out_token,

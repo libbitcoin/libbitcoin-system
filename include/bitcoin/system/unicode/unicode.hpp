@@ -23,8 +23,12 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/string.hpp>
+
+// TODO: move comments to unicode/utf8_everywhere.hpp/cpp.
 
 // Regarding Unicode design for Windows:
 //
@@ -80,164 +84,149 @@
 namespace libbitcoin {
 namespace system {
 
-/**
- * Use bc::system::cin in place of std::cin, see BC_USE_LIBBITCOIN_MAIN.
- */
-std::istream& cin_stream();
+extern const std::string ideographic_space;
+extern const string_list unicode_separators;
+extern const string_list unicode_whitespace;
 
-/**
- * Use bc::system::cout in place of std::cout, see BC_USE_LIBBITCOIN_MAIN.
- */
-std::ostream& cout_stream();
-
-/**
- * Use bc::system::cerr in place of std::cerr, see BC_USE_LIBBITCOIN_MAIN.
- */
-std::ostream& cerr_stream();
+// Normalization functions.
+// ----------------------------------------------------------------------------
+// TODO: move to unicode/normalization.hpp/.cpp
 
 #ifdef WITH_ICU
 
-/**
- * Lowercase string value in accordance with section 3.13 of Unicode Standard.
- * This function requires the ICU dependency.
- * @param[in]  value  The value to lowercase.
- * @return            The lowercased value.
- */
+/// Change case of text, complies with section 3.13 of Unicode Standard.
 BC_API std::string to_lower(const std::string& value);
+BC_API std::string to_upper(const std::string& value);
 
-/**
- * Normalize a string value using nfc normalization.
- * Failure is indicated by empty string return for non-empty value.
- * This function requires the ICU dependency.
- * @param[in]  value  The value to normalize.
- * @return            The normalized value.
- */
-BC_API std::string to_normal_nfc_form(const std::string& value);
-
-/**
- * Normalize a string value using nfkd normalization.
- * Failure is indicated by empty string return for non-empty value.
- * This function requires the ICU dependency.
- * @param[in]  value  The value to normalize.
- * @return            The normalized value.
- */
-BC_API std::string to_normal_nfkd_form(const std::string& value);
+/// Convert text to Unicode normal form.
+/// Failure indicated by empty string return for non-empty value.
+BC_API std::string to_canonical_composition(const std::string& value);
+BC_API std::string to_canonical_decomposition(const std::string& value);
+BC_API std::string to_compatibility_composition(const std::string& value);
+BC_API std::string to_compatibility_demposition(const std::string& value);
 
 #endif // WITH_ICU
 
-/**
- * Remove accent characters (diacritics).
- * @param[in]  value  The value to scrub.
- * @return            The scrubbed value.
- */
+/// Remove accent (diacritic) characters.
 BC_API std::string to_unaccented_form(const std::string& value);
 
-/**
- * Remove spaces between chinese, japanese, and korean characters.
- * @param[in]  value  The value to scrub.
- * @return            The scrubbed value.
- */
+/// Remove spaces between chinese, japanese, and korean characters.
 BC_API std::string to_compressed_cjk_form(const std::string& value);
 
-/**
- * Convert a wide (UTF16/wchar_t) array to narrow (UTF8/char).
- * @param[in]  out_to      The converted narrow array.
- * @param[in]  to_bytes    The allocated number of bytes in 'out_to'.
- * @param[in]  from        The wide character array to convert.
- * @param[in]  from_chars  The number of 'from' wide characters to convert.
- * @return                 The number of bytes converted.
- */
+// UTF8/UTF16 conversions.
+// ----------------------------------------------------------------------------
+// These are useful when it is necessary to interface with Win32.
+// Win32 APIs support UTF16 but not UTF8.
+
+/// Convert a wide (UTF16/wchar_t) string to narrow (UTF8/char).
+BC_API std::string to_utf8(const std::wstring& wide);
+
+/// Convert a narrow (UTF8/char) string to wide (UTF16/wchar_t).
+BC_API std::wstring to_utf16(const std::string& narrow);
+
+// UTF8/UTF32 conversions.
+// ----------------------------------------------------------------------------
+// These are usefule when looping over Unicode characters.
+// A single char32_t maps to a single Unicode code point (character).
+
+/// Convert a wide (UTF32/char32_t) string to narrow (UTF8/char).
+BC_API std::string to_utf8(const std::u32string& wide);
+
+/// Convert a narrow (UTF8/char) string to wide (UTF32/char32_t).
+BC_API std::u32string to_utf32(const std::string& narrow);
+
+// C-style UTF8/UTF16 conversions.
+// ----------------------------------------------------------------------------
+// TODO: move to unicode/utf8_everywhere.hpp/cpp.
+
+/// Convert a wide (UTF16/wchar_t) array to narrow (UTF8/char).
+/// Returns the converted size or zero if return buffer size is insufficient.
 BC_API size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     size_t from_chars);
 
-/**
- * Convert a wide (UTF16/wchar_t) string to narrow (UTF8/char).
- * @param[in]  wide  The utf16 string to convert.
- * @return           The resulting utf8 string.
- */
-BC_API std::string to_utf8(const std::wstring& wide);
-
-/**
- * Convert a wide (UTF32/char32_t) string to narrow (UTF8/char).
- * @param[in]  wide  The utf32 string to convert.
- * @return           The resulting utf8 string.
- */
-BC_API std::string to_utf8(const std::u32string& wide);
-
-/**
- * Convert a narrow (UTF8/char) array to wide (UTF16/wchar_t).
- * This is designed for buffering, where the narrow array may have been
- * truncated in the middle of a multiple byte character. The terminating
- * offset is returned in the 'out_truncated' out parameter.
- * @param[in]  out_truncated  The number of 'from' bytes [0..3] truncated.
- * @param[in]  out_to         The converted wide array.
- * @param[in]  to_chars       The allocated number of wide chars in 'out_to'.
- * @param[in]  from           The narrow array to convert.
- * @param[in]  from_bytes     The number of 'from' bytes to convert.
- * @return                    The number of characters converted.
- */
-BC_API size_t to_utf16(size_t& out_truncated, wchar_t out_to[],
+/// Convert a narrow (UTF8/char) array to wide (UTF16/wchar_t).
+/// If the input terminates inside of a multiple byte character, the
+/// 'remainder' paramter returns the non-zero remainder size.
+/// Returns the converted size or zero if return buffer size is insufficient.
+BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[],
     size_t to_chars, const char from[], size_t from_bytes);
 
-/**
- * Convert a narrow (UTF8/char) string to wide (UTF16/wchar_t).
- * @param[in]  narrow  The utf8 string to convert.
- * @return             The resulting utf16 string.
- */
-BC_API std::wstring to_utf16(const std::string& narrow);
+// Utilities.
+// ----------------------------------------------------------------------------
+// TODO: overload bool trim tokens in string utilities so that these can be
+// replaced with non-default trim. Empty trim tokens implies trim false.
 
-/**
- * Convert a narrow (UTF8/char) string to wide (UTF32/char32_t).
- * @param[in]  narrow  The utf8 string to convert.
- * @return             The resulting utf32 string.
- */
-BC_API std::u32string to_utf32(const std::string& narrow);
+/// Trim and compress string tokens.
+/// Unicode trimming, compression removes empty tokens, except last.
+BC_API void unicode_reduce(string_list& tokens, bool trim=true,
+    bool compress=true);
 
-/**
- * Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
- * once set bc stdio must be used in place of std stdio.
- */
+/// Trim and compress string tokens and return result.
+/// Unicode trimming, compression removes empty tokens, except last.
+BC_API string_list unicode_reduce_copy(const string_list& tokens,
+    bool trim=true, bool compress=true);
+
+/// Split text into a list of tokens, always returns at least one.
+/// Unicode trimming, compression removes empty tokens, except last.
+BC_API string_list unicode_split(const std::string& text, bool trim=true,
+    bool compress=true);
+
+/// Split text into a list of tokens, always returns at least one.
+/// Unicode trimming, compression removes empty tokens, except last.
+BC_API string_list unicode_split(const std::string& text,
+    const std::string& delimiter, bool trim=true, bool compress=true);
+
+/// Split text into a list of tokens, always returns at least one.
+/// Unicode trimming, compression removes empty tokens, except last.
+BC_API string_list unicode_split(const std::string& text,
+    const string_list& delimiters, bool trim=true, bool compress=true);
+
+/// Trim Unicode whitespace from both ends of text.
+BC_API void unicode_trim(std::string& text);
+
+/// Trim Unicode whitespace from both ends of text and return result.
+BC_API std::string unicode_trim_copy(const std::string& text);
+
+// UTF8 Everywhere stream utilities.
+// ----------------------------------------------------------------------------
+// TODO: move to unicode/utf8_everywhere.hpp/.cpp.
+
+/// Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
+/// once set bc stdio must be used in place of std stdio.
 BC_API void set_utf8_stdio();
 
-/**
- * Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
- * once set bc::system::cin must be used in place of std::cin.
- */
+/// Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
+/// once set bc::system::cin must be used in place of std::cin.
 BC_API void set_utf8_stdin();
 
-/**
- * Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
- * once set bc::system::cout must be used in place of std::cout.
- */
+/// Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
+/// once set bc::system::cout must be used in place of std::cout.
 BC_API void set_utf8_stdout();
 
-/**
- * Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
- * once set bc::system::cerr must be used in place of std::cerr.
- */
+/// Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
+/// once set bc::system::cerr must be used in place of std::cerr.
 BC_API void set_utf8_stderr();
 
-/**
- * Initialize windows to use binary for stdin. This cannot be uninitialized.
- */
+/// Initialize windows to use binary for stdin. This cannot be uninitialized.
 BC_API void set_binary_stdin();
 
-/**
- * Initialize windows to use binary for stdout. This cannot be uninitialized.
- */
+/// Initialize windows to use binary for stdout. This cannot be uninitialized.
 BC_API void set_binary_stdout();
 
-/// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
-size_t utf8_remainder_size(const char text[], size_t size);
+/// Use bc::system::cin in place of std::cin/cout/cerr, see BC_USE_LIBBITCOIN_MAIN.
+std::istream& cin_stream();
+
+/// Use bc::system::cout in place of std::cout, see BC_USE_LIBBITCOIN_MAIN.
+std::ostream& cout_stream();
+
+/// Use bc::system::cerr in place of std::cerr, see BC_USE_LIBBITCOIN_MAIN.
+std::ostream& cerr_stream();
+
+// BC_USE_LIBBITCOIN_MAIN
+// ----------------------------------------------------------------------------
+// TODO: move to unicode/utf8_everywhere.hpp/cpp.
 
 #ifdef _MSC_VER
-
-/// Exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
-int call_utf8_main(int argc, wchar_t* argv[],
-    int(*main)(int argc, char* argv[]));
-void free_environment(char* environment[]);
-char** allocate_environment(wchar_t* environment[]);
-char** allocate_environment(int argc, wchar_t* argv[]);
 
 #define BC_USE_LIBBITCOIN_MAIN \
     namespace libbitcoin \
@@ -275,6 +264,20 @@ char** allocate_environment(int argc, wchar_t* argv[]);
     { \
         return libbitcoin::system::main(argc, argv); \
     }
+
+#endif
+
+// Function exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
+size_t utf8_remainder_size(const char text[], size_t size);
+
+#ifdef _MSC_VER
+
+// Functions exposed for testing only, use BC_USE_LIBBITCOIN_MAIN.
+int call_utf8_main(int argc, wchar_t* argv[],
+    int(*main)(int argc, char* argv[]));
+void free_environment(char* environment[]);
+char** allocate_environment(wchar_t* environment[]);
+char** allocate_environment(int argc, wchar_t* argv[]);
 
 #endif
 

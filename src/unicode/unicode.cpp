@@ -57,91 +57,44 @@ namespace system {
 // Avoid codecvt as it is deprecated in c++17.
 using namespace boost::locale;
 
-typedef std::pair<char32_t, char32_t> utf32_interval;
-typedef std::vector<utf32_interval> utf32_intervals;
+constexpr size_t unicode_separators32_count = 17;
+constexpr size_t unicode_whitespace32_count = 25;
+extern const char32_t unicode_separators32[unicode_separators32_count];
+extern const char32_t unicode_whitespace32[unicode_whitespace32_count];
 
-// Forward declarations for long tables at end of the file.
-extern const utf32_intervals chinese_japanese_korean;
-extern const utf32_intervals diacritics;
+// Local helpers.
+// ----------------------------------------------------------------------------
 
-// The width of utf16 stdio buffers.
-constexpr size_t utf16_buffer_size = 256;
-
-// Local definition for max number of bytes in a utf8 character.
-constexpr size_t utf8_max_character_size = 4;
-
-// Ensure console_streambuf::initialize is called only once.
-static std::once_flag io_mutex;
-
-// Ensure validate_localization is called only once.
-ICU_ONLY(static std::once_flag icu_mutex;)
-
-// Static initializer for bc::system::cin.
-std::istream& cin_stream()
+inline bool is_ascii_character(char32_t point)
 {
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
-    static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
-    return input;
-}
-
-// Static initializer for bc::system::cout.
-std::ostream& cout_stream()
-{
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
-    static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
-    return output;
-}
-
-// Static initializer for bc::system::cerr.
-std::ostream& cerr_stream()
-{
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
-    static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
-    return error;
-}
-
-// helpers
-
-inline bool is_ascii_char(char32_t point)
-{
+    // en.wikipedia.org/wiki/ASCII
     return (point & 0xffffff80) == 0;
 }
 
-////static bool is_ascii(const std::u32string points)
-////{
-////    return std::all_of(points.begin(), points.end(), is_ascii_char);
-////}
-
-static bool is_ascii_whitespace32(char32_t point)
+static bool is_unicode_whitespace(char32_t point)
 {
-    return is_ascii_char(point) &&
-        is_ascii_whitespace(static_cast<char>(point));
+    for (size_t space = 0; space < unicode_whitespace32_count; ++space)
+        if (point == unicode_whitespace32[space])
+            return true;
+
+    return false;
 }
 
-static bool is_chinese_japanese_or_korean(char32_t point)
+static bool is_ascii_whitespace(char32_t point)
 {
-    const auto is_contained = [point](const utf32_interval& interval)
-    {
-        return interval.first <= point && point <= interval.second;
-    };
-
-    return std::any_of(chinese_japanese_korean.begin(),
-        chinese_japanese_korean.end(), is_contained);
-}
-
-static bool is_diacritic(char32_t point)
-{
-    const auto is_contained = [point](const utf32_interval& interval)
-    {
-        return interval.first <= point && point <= interval.second;
-    };
-
-    return std::any_of(diacritics.begin(), diacritics.end(), is_contained);
+    return is_ascii_character(point) && is_unicode_whitespace(point);
 }
 
 #ifdef WITH_ICU
 
 #ifdef _MSC_VER
+
+// Workarounds for lack of Windows ICU support in boost-locale packages.
+// The ICU library was first added to Windows 10 in [10.0.15063].
+// docs.microsoft.com/en-us/windows/win32/intl/international-components-for-unicode--icu-
+// Windows XP, Windows Server 2003: No longer supported.
+// The required header file and DLL are part of the Microsoft Internationalized
+// Domain Name(IDN) Mitigation APIs, which are no longer available for download.
 
 static NORM_FORM to_win32_normal_form(boost::locale::norm_type form)
 {
@@ -161,12 +114,6 @@ static NORM_FORM to_win32_normal_form(boost::locale::norm_type form)
     }
 }
 
-// Workaround lack of ICU support in published boost-locale packages.
-// The ICU library was first added to Windows 10 in [10.0.15063].
-// docs.microsoft.com/en-us/windows/win32/intl/international-components-for-unicode--icu-
-// Windows XP, Windows Server 2003: No longer supported.
-// The required header file and DLL are part of the Microsoft Internationalized
-// Domain Name(IDN) Mitigation APIs, which are no longer available for download.
 static std::string normal_form(const std::string& value, norm_type form)
 {
     if (value.empty())
@@ -195,6 +142,9 @@ static std::string normal_form(const std::string& value, norm_type form)
     return result > 0 ? to_utf8(buffer.substr(0, result)) : std::string{};
 }
 
+// Normalization functions.
+// ----------------------------------------------------------------------------
+
 std::string to_lower(const std::string& value)
 {
     if (value.empty())
@@ -211,10 +161,32 @@ std::string to_lower(const std::string& value)
     const auto length = static_cast<DWORD>(size);
 
     // CharLowerBuffW ensures conversion in place.
-    const auto result = (CharLowerBuffW(&wide.front(), length) == length);
+    if (CharLowerBuffW(&wide.front(), length) != length)
+        return {};
 
-    // Return empty if conversion did not succeed.
-    return result ? to_utf8(wide) : std::string{};
+    return to_utf8(wide);
+}
+
+std::string to_upper(const std::string& value)
+{
+    if (value.empty())
+        return value;
+
+    auto wide = to_utf16(value);
+    const auto size = wide.size();
+
+    // Guard against DWORD overflow.
+    if (size > std::numeric_limits<DWORD>::max())
+        return {};
+
+    // std::vector ensures contiguous bytes.
+    const auto length = static_cast<DWORD>(size);
+
+    // CharUpperBuffW ensures conversion in place.
+    if (CharUpperBuffW(&wide.front(), length) != length)
+        return {};
+
+    return to_utf8(wide);
 }
 
 #else // _MSC_VER
@@ -273,21 +245,63 @@ std::string to_lower(const std::string& value)
     return boost::locale::to_lower(value, locale(utf8_locale_name));
 }
 
+// Python 2 string.upper() is *locale dependent* (invalid).
+// Python 3 string.upper() follows section 3.13 of the Unicode Standard.
+std::string to_upper(const std::string& value)
+{
+    if (value.empty())
+        return value;
+
+    std::call_once(icu_mutex, validate_localization);
+
+    // Thread safe.
+    constexpr auto icu_backend_name = "icu";
+    constexpr auto utf8_locale_name = "en_US.UTF8";
+    auto backend_manager = localization_backend_manager::global();
+    backend_manager.select(icu_backend_name);
+    const generator locale(backend_manager);
+    return boost::locale::to_upper(value, locale(utf8_locale_name));
+}
+
 #endif // _MSC_VER
 
-// Normalize strings using unicode nfc normalization.
-std::string to_normal_nfc_form(const std::string& value)
+std::string to_canonical_composition(const std::string& value)
 {
     return normal_form(value, norm_type::norm_nfc);
 }
 
-// Normalize strings using unicode nfkd normalization.
-std::string to_normal_nfkd_form(const std::string& value)
+std::string to_canonical_decomposition(const std::string& value)
+{
+    return normal_form(value, norm_type::norm_nfd);
+}
+
+std::string to_compatibility_composition(const std::string& value)
+{
+    return normal_form(value, norm_type::norm_nfkc);
+}
+
+std::string to_compatibility_demposition(const std::string& value)
 {
     return normal_form(value, norm_type::norm_nfkd);
 }
 
 #endif // WITH_ICU
+
+// Forward declarations for long tables at end of the file.
+typedef std::pair<char32_t, char32_t> utf32_interval;
+typedef std::vector<utf32_interval> utf32_intervals;
+extern const utf32_intervals chinese_japanese_korean;
+extern const utf32_intervals diacritics;
+
+static bool is_diacritic(char32_t point)
+{
+    const auto is_contained = [point](const utf32_interval& interval)
+    {
+        return interval.first <= point && point <= interval.second;
+    };
+
+    return std::any_of(diacritics.begin(), diacritics.end(), is_contained);
+}
 
 // Remove accent characters (diacritics).
 std::string to_unaccented_form(const std::string& value)
@@ -304,7 +318,18 @@ std::string to_unaccented_form(const std::string& value)
     return to_utf8(points);
 }
 
-// Remove spaces between cjk characters.
+static bool is_chinese_japanese_or_korean(char32_t point)
+{
+    const auto is_contained = [point](const utf32_interval& interval)
+    {
+        return interval.first <= point && point <= interval.second;
+    };
+
+    return std::any_of(chinese_japanese_korean.begin(),
+        chinese_japanese_korean.end(), is_contained);
+}
+
+// Remove ascii whitespace between cjk characters.
 // utf32 ensures each word is a single character.
 std::string to_compressed_cjk_form(const std::string& value)
 {
@@ -318,12 +343,11 @@ std::string to_compressed_cjk_form(const std::string& value)
     // Copy the first character to the result string.
     std::u32string result{ points.front() };
 
-    // Remove whitespaces between CJK.
-    // points.front() cannot be between two characters, so skip it.
-    // points.back() cannot be between two characters, so skip it.
+    // Remove a single ascii whitespace between CJK characters.
+    // Front and back cannot be between two characters, so skip them.
     for (size_t point = 1; point < points.size() - 1u; point++)
     {
-        if (!(is_ascii_whitespace32(points[point]) &&
+        if (!(is_ascii_whitespace(points[point]) &&
             is_chinese_japanese_or_korean(points[point - 1u]) &&
             is_chinese_japanese_or_korean(points[point + 1u])))
         {
@@ -336,10 +360,131 @@ std::string to_compressed_cjk_form(const std::string& value)
     return to_utf8(result);
 }
 
+// Encoding conversions.
+// ----------------------------------------------------------------------------
+
+// method_type::stop throws conv::conversion_error.
+// Other stop methods skip characters, resulting in hidden failure.
+// So use method_type::stop and trap conversion exceptions.
+template <typename CharOut, typename StringIn>
+static std::basic_string<CharOut> to_utf(const StringIn& in)
+{
+    using namespace boost::locale;
+    std::basic_string<CharOut> out;
+
+    try
+    {
+        out = conv::utf_to_utf<CharOut>(in, conv::method_type::stop);
+    }
+    catch (const conv::conversion_error&)
+    {
+        out.clear();
+    }
+
+    return out;
+}
+
+std::string to_utf8(const std::wstring& wide)
+{
+    return to_utf<char>(wide);
+}
+
+std::string to_utf8(const std::u32string& wide)
+{
+    return to_utf<char>(wide);
+}
+
+std::u32string to_utf32(const std::string& narrow)
+{
+    return to_utf<char32_t>(narrow);
+}
+
+std::wstring to_utf16(const std::string& narrow)
+{
+    return to_utf<wchar_t>(narrow);
+}
+
+// Utilities.
+// ----------------------------------------------------------------------------
+
+void unicode_reduce(string_list& tokens, bool trim, bool compress)
+{
+    static const std::string empty{};
+
+    if (tokens.empty())
+        return;
+
+    if (trim)
+        for (auto& token: tokens)
+            unicode_trim(token);
+
+    if (compress)
+        tokens.erase(std::remove(tokens.begin(), tokens.end(), empty),
+            tokens.end());
+
+    if (tokens.empty())
+        tokens.push_back({});
+}
+
+string_list unicode_reduce_copy(const string_list& tokens, bool trim,
+    bool compress)
+{
+    auto copy = tokens;
+    unicode_reduce(copy, trim, compress);
+    return copy;
+}
+
+// This unicode splitter exists to change default delimiters and to provide
+// full unicode (vs. only the ascii subset) whitespace trimming.
+string_list unicode_split(const std::string& text,
+    const string_list& delimiters, bool trim, bool compress)
+{
+    return unicode_reduce_copy(split(text, delimiters, false, false),
+        trim, compress);
+}
+
+string_list unicode_split(const std::string& text,
+    const std::string& delimiter, bool trim, bool compress)
+{
+    return unicode_split(text, string_list{ delimiter }, trim, compress);
+}
+
+string_list unicode_split(const std::string& text, bool trim, bool compress)
+{
+    return unicode_split(text, unicode_separators, trim, compress);
+}
+
+void unicode_trim(std::string& text)
+{
+    // Round trip through char32_t.
+    auto copy = to_utf32(text);
+
+    // Find the first non-space or end and erase to that point.
+    const auto first = std::find_if_not(copy.begin(), copy.end(), is_unicode_whitespace);
+    copy.erase(copy.begin(), first);
+
+    // Find the last non-space or rend and erase from that point.
+    const auto last = std::find_if_not(copy.rbegin(), copy.rend(), is_unicode_whitespace);
+    copy.erase(last.base(), copy.end());
+    text = to_utf8(copy);
+}
+
+std::string unicode_trim_copy(const std::string& text)
+{
+    auto copy = text;
+    unicode_trim(copy);
+    return copy;
+}
+
+// UTF8 Everywhere stream utilities.
+// ----------------------------------------------------------------------------
+// TODO: move to to unicode/utf8_everywhere.hpp/cpp.
+
+// Local definition for max number of bytes in a utf8 character.
+constexpr size_t utf8_max_character_size = 4;
+
 // Convert utf16 wchar_t buffer to utf8 char buffer.
 // This is used in wmain for conversion of wide args and environ on Windows.
-// Returns zero in case of invalid arguments, including insufficient buffer.
-// A null terminating character will not be copied.
 size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     size_t from_chars)
 {
@@ -356,62 +501,20 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     return bytes > to_bytes ? 0 : bytes;
 }
 
-// Convert utf16 wstring to utf8 string.
-std::string to_utf8(const std::wstring& wide)
-{
-    using namespace boost::locale;
-    std::string result;
-
-    try
-    {
-        // method_type::stop throws conv::conversion_error.
-        // Other stop methods skip characters, resulting in hidden failure.
-        result = conv::utf_to_utf<char>(wide, conv::method_type::stop);
-    }
-    catch (const conv::conversion_error&)
-    {
-        result.clear();
-    }
-
-    return result;
-}
-
-// Convert utf32 u32string to utf8 string.
-std::string to_utf8(const std::u32string& wide)
-{
-    using namespace boost::locale;
-    std::string result;
-
-    try
-    {
-        // method_type::stop throws conv::conversion_error.
-        // Other stop methods skip characters, resulting in hidden failure.
-        result = conv::utf_to_utf<char>(wide, conv::method_type::stop);
-    }
-    catch (const conv::conversion_error&)
-    {
-        result.clear();
-    }
-
-    return result;
-}
-
 // Convert utf8 char buffer to utf16 wchar_t buffer, with truncation handling.
 // Truncation results from having split the input buffer arbitrarily (stream).
-// Returns zero in case of invalid arguments, including insufficient buffer.
-// A null terminating character will not be copied.
-size_t to_utf16(size_t& out_truncated, wchar_t out_to[], size_t to_chars,
+size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes)
 {
-    out_truncated = 0;
+    remainder = 0;
     if (from == nullptr || out_to == nullptr || from_bytes == 0 ||
         to_chars < from_bytes)
         return 0;
 
     // Calculate a character break offset of 0..3 bytes.
-    out_truncated = utf8_remainder_size(from, from_bytes);
+    remainder = utf8_remainder_size(from, from_bytes);
 
-    const auto wide = to_utf16({ from, &from[from_bytes - out_truncated] });
+    const auto wide = to_utf16({ from, &from[from_bytes - remainder] });
     const auto chars = wide.size();
 
     if (chars <= to_chars)
@@ -420,51 +523,7 @@ size_t to_utf16(size_t& out_truncated, wchar_t out_to[], size_t to_chars,
     return chars > to_chars ? 0 : chars;
 }
 
-// Convert utf8 string to utf16 wstring.
-std::wstring to_utf16(const std::string& narrow)
-{
-    using namespace boost::locale;
-    std::wstring result;
-
-    try
-    {
-        // method_type::stop throws conv::conversion_error.
-        // Other stop methods skip characters, resulting in hidden failure.
-        result = conv::utf_to_utf<wchar_t>(narrow, conv::method_type::stop);
-    }
-    catch (const conv::conversion_error&)
-    {
-        result.clear();
-    }
-
-    return result;
-}
-
-// Convert utf8 string to utf32 wstring.
-// In utf32 each 32 bit word is a single character.
-std::u32string to_utf32(const std::string& narrow)
-{
-    using namespace boost::locale;
-    std::u32string result;
-
-    try
-    {
-        // method_type::stop throws conv::conversion_error.
-        // Other stop methods skip characters, resulting in hidden failure.
-        result = conv::utf_to_utf<char32_t>(narrow, conv::method_type::stop);
-    }
-    catch (const conv::conversion_error&)
-    {
-        result.clear();
-    }
-
-    return result;
-}
-
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
-
-// Stream functions.
-// ----------------------------------------------------------------------------
 
 #ifdef _MSC_VER
 
@@ -532,14 +591,48 @@ void set_binary_stdout()
 
 LCOV_EXCL_STOP()
 
-// Internal UTF8 utilities.
+// Local UTF8 utilities.
 // ----------------------------------------------------------------------------
+// TODO: move to to unicode/utf8_everywhere.hpp/cpp.
+
+// The width of utf16 stdio buffers.
+constexpr size_t utf16_buffer_size = 256;
+
+// Ensure console_streambuf::initialize is called only once.
+static std::once_flag io_mutex;
+
+// Ensure validate_localization is called only once.
+ICU_ONLY(static std::once_flag icu_mutex;)
+
+// Static initializer for bc::system::cin.
+std::istream& cin_stream()
+{
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
+    return input;
+}
+
+// Static initializer for bc::system::cout.
+std::ostream& cout_stream()
+{
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
+    return output;
+}
+
+// Static initializer for bc::system::cerr.
+std::ostream& cerr_stream()
+{
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
+    return error;
+}
 
 // All non-leading bytes of utf8 have the same two bit prefix.
 static bool is_utf8_trailing_byte(char byte)
 {
     // 10xxxxxx
-    return ((0xC0 & byte) == 0x80);
+    return ((0xc0 & byte) == 0x80);
 }
 
 // Determine if the full sequence is a valid utf8 character.
@@ -555,13 +648,13 @@ static bool is_utf8_leading_byte(char byte, size_t size)
             return ((0x80 & byte) == 0x00);
         case 2:
             // 110xxxxx 10xxxxxx
-            return ((0xE0 & byte) == 0xC0);
+            return ((0xe0 & byte) == 0xc0);
         case 3:
             // 1110xxxx 10xxxxxx 10xxxxxx
-            return ((0xF0 & byte) == 0xE0);
+            return ((0xf0 & byte) == 0xe0);
         case 4:
             // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            return ((0xF8 & byte) == 0xF0);
+            return ((0xf8 & byte) == 0xf0);
         default:
             return false;
     }
@@ -591,8 +684,9 @@ size_t utf8_remainder_size(const char text[], size_t size)
     return 0;
 }
 
-// Windows environment functions (exposed for testing only).
+// BC_USE_LIBBITCOIN_MAIN
 // ----------------------------------------------------------------------------
+// TODO: move to to unicode/utf8_everywhere.hpp/cpp.
 
 #ifdef _MSC_VER
 
@@ -701,6 +795,128 @@ int call_utf8_main(int argc, wchar_t* argv[],
 
 #endif // _MSC_VER
 
+// Unicode reference data.
+// ----------------------------------------------------------------------------
+// en.wikipedia.org/wiki/Whitespace_character
+
+inline std::string to_utf8(char32_t point)
+{
+    return to_utf8(std::u32string{ point });
+}
+
+const char32_t unicode_separators32[]
+{
+    // Non-ASCII Unicode separator-space characters.
+    0x00000020, // space ' '
+    0x000000a0, // no-break space
+    0x00001680, // ogham space mark
+    0x00002000, // en quad
+    0x00002001, // em quad
+    0x00002002, // en space
+    0x00002003, // em space
+    0x00002004, // three-per-em space
+    0x00002005, // four-per-em space
+    0x00002006, // six-per-em space
+    0x00002007, // figure space
+    0x00002008, // punctuation space
+    0x00002009, // thin space
+    0x0000200a, // hair space
+    0x0000202f, // narrow no-break space
+    0x0000205f, // medium mathematical space
+    0x00003000  // ideographic space
+};
+
+const std::string ideographic_space
+{
+    to_utf8(unicode_separators32[16])
+};
+
+const string_list unicode_separators
+{
+    { to_utf8(unicode_separators32[0]) },
+    { to_utf8(unicode_separators32[1]) },
+    { to_utf8(unicode_separators32[2]) },
+    { to_utf8(unicode_separators32[3]) },
+    { to_utf8(unicode_separators32[4]) },
+    { to_utf8(unicode_separators32[5]) },
+    { to_utf8(unicode_separators32[6]) },
+    { to_utf8(unicode_separators32[7]) },
+    { to_utf8(unicode_separators32[8]) },
+    { to_utf8(unicode_separators32[9]) },
+    { to_utf8(unicode_separators32[10]) },
+    { to_utf8(unicode_separators32[11]) },
+    { to_utf8(unicode_separators32[12]) },
+    { to_utf8(unicode_separators32[13]) },
+    { to_utf8(unicode_separators32[14]) },
+    { to_utf8(unicode_separators32[15]) },
+    { to_utf8(unicode_separators32[16]) }
+};
+
+const char32_t unicode_whitespace32[]
+{
+    // ASCII/Unicode whitespace characters (C whitespace).
+    0x00000009, // character tabulation '\t'
+    0x0000000a, // line feed '\n'
+    0x0000000b, // line tabulation '\v'
+    0x0000000c, // form feed '\f'
+    0x0000000d, // carriage return '\r'
+
+    // ASCII/Unicode whitespace separator-space characters.
+    0x00000020, // space ' '
+
+    // Unicode separator-space characters.
+    0x000000a0, // no-break space
+    0x00001680, // ogham space mark
+    0x00002000, // en quad
+    0x00002001, // em quad
+    0x00002002, // en space
+    0x00002003, // em space
+    0x00002004, // three-per-em space
+    0x00002005, // four-per-em space
+    0x00002006, // six-per-em space
+    0x00002007, // figure space
+    0x00002008, // punctuation space
+    0x00002009, // thin space
+    0x0000200a, // hair space
+    0x0000202f, // narrow no-break space
+    0x0000205f, // medium mathematical space
+    0x00003000, // ideographic space
+
+    // Unicode other whitespace characters.
+    0x00000085, // next line
+    0x00002028, // line separator
+    0x00002029  // paragraph separator
+};
+
+const string_list unicode_whitespace
+{
+    { to_utf8(unicode_whitespace32[0]) },
+    { to_utf8(unicode_whitespace32[1]) },
+    { to_utf8(unicode_whitespace32[2]) },
+    { to_utf8(unicode_whitespace32[3]) },
+    { to_utf8(unicode_whitespace32[4]) },
+    { to_utf8(unicode_whitespace32[5]) },
+    { to_utf8(unicode_whitespace32[6]) },
+    { to_utf8(unicode_whitespace32[7]) },
+    { to_utf8(unicode_whitespace32[8]) },
+    { to_utf8(unicode_whitespace32[9]) },
+    { to_utf8(unicode_whitespace32[10]) },
+    { to_utf8(unicode_whitespace32[11]) },
+    { to_utf8(unicode_whitespace32[12]) },
+    { to_utf8(unicode_whitespace32[13]) },
+    { to_utf8(unicode_whitespace32[14]) },
+    { to_utf8(unicode_whitespace32[15]) },
+    { to_utf8(unicode_whitespace32[16]) },
+    { to_utf8(unicode_whitespace32[17]) },
+    { to_utf8(unicode_whitespace32[18]) },
+    { to_utf8(unicode_whitespace32[19]) },
+    { to_utf8(unicode_whitespace32[20]) },
+    { to_utf8(unicode_whitespace32[21]) },
+    { to_utf8(unicode_whitespace32[22]) },
+    { to_utf8(unicode_whitespace32[23]) },
+    { to_utf8(unicode_whitespace32[24]) }
+};
+
 // Based on Electrum source, which references:
 // asahi-net.or.jp/~ax2s-kmtn/ref/unicode/e_asia.html
 // More information: en.wikipedia.org/wiki/CJK_characters
@@ -734,7 +950,7 @@ const utf32_intervals chinese_japanese_korean
     { 0x0000a4d0, 0x0000a4ff }, // lisu
     { 0x00016f00, 0x00016f9f }, // miao
     { 0x0000a000, 0x0000a48f }, // yi syllables
-    { 0x0000a490, 0x0000a4cf }, // yi radicals
+    { 0x0000a490, 0x0000a4cf }  // yi radicals
 };
 
 // Combining Diacritics list taken from:
@@ -939,7 +1155,7 @@ const utf32_intervals diacritics
     { 0x0001d1aa, 0x0001d1ad }, // musical symbol combining down bow..musical symbol combining snap pizzicato
     { 0x0001e8d0, 0x0001e8d6 }, // mende kikakui combining number teens..mende kikakui combining number millions
     { 0x0001e944, 0x0001e946 }, // adlam alif lengthener..adlam gemination mark
-    { 0x0001e948, 0x0001e94a }, // adlam consonant modifier..adlam nukta
+    { 0x0001e948, 0x0001e94a }  // adlam consonant modifier..adlam nukta
 };
 
 } // namespace system

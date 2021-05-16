@@ -66,7 +66,7 @@ static bool diverged(const mnemonic::dictionary::words& normal,
 {
     auto it = normal.begin();
     for (const auto& word: test)
-        if (*it++ != to_normal_nfkd_form(word))
+        if (*it++ != to_compatibility_demposition(word))
             return true;
 
     return false;
@@ -76,7 +76,7 @@ static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_normal_nfkd_form(test);
+        return test != to_compatibility_demposition(test);
     });
 }
 
@@ -84,7 +84,7 @@ static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
 ////{
 ////    return std::all_of(words.begin(), words.end(), [&](const char test[])
 ////    {
-////        return test != to_normal_nfkd_form(test);
+////        return test != to_compatibility_demposition(test);
 ////    });
 ////}
 

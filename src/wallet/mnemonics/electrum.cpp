@@ -158,7 +158,7 @@ hd_private electrum::seeder(const string_list& words,
 {
     // Passphrase normalization is necessary, but ASCII is already normal.
 #ifdef WITH_ICU
-    auto pass = to_lower(to_normal_nfkd_form(passphrase));
+    auto pass = to_lower(to_compatibility_demposition(passphrase));
 #else
     auto pass = ascii_to_lower(passphrase);
     if (!is_ascii(pass))

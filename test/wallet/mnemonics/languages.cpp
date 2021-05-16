@@ -136,12 +136,13 @@ BOOST_AUTO_TEST_CASE(languages__split__korean_ascii_space_delimited__split)
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ko), expected);
 }
 
-BOOST_AUTO_TEST_CASE(languages__split__korean_ideographic_space_delimited__unsplit)
+// The space character is the only ascii whitespace that is also a separator.
+BOOST_AUTO_TEST_CASE(languages__split__korean_non_separator_whitespace_delimited__unsplit)
 {
     const auto sentence =
-        std::string(test_words_zh_Hans[0]) + ideographic_space +
-        test_words_es[1] + ideographic_space +
-        test_words_zh_Hans[2] + ideographic_space +
+        std::string(test_words_zh_Hans[0]) + '\t' +
+        test_words_es[1] + '\f' +
+        test_words_zh_Hans[2] + '\n' +
         test_words_es[3];
 
     const string_list expected{ sentence };
@@ -149,15 +150,22 @@ BOOST_AUTO_TEST_CASE(languages__split__korean_ideographic_space_delimited__unspl
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ko), expected);
 }
 
-BOOST_AUTO_TEST_CASE(languages__split__japanese_ascii_space_delimited__unsplit)
+// Langauge splitting applies all unicode separator characters.
+BOOST_AUTO_TEST_CASE(languages__split__japanese_ascii_space_delimited__split)
 {
+    const string_list expected
+    {
+        test_words_zh_Hant[0],
+        test_words_es[1],
+        test_words_zh_Hant[2],
+        test_words_es[3]
+    };
+
     const auto sentence =
         std::string(test_words_zh_Hans[0]) + ascii_space +
         test_words_es[1] + ascii_space +
         test_words_zh_Hans[2] + ascii_space +
         test_words_es[3];
-
-    const string_list expected{ sentence };
 
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
 }
@@ -213,7 +221,7 @@ BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
 BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_with_icu__normal_ascii_lowered_trimmed)
 {
     const auto abnormal = "ábaco";
-    const auto normal = to_normal_nfkd_form(abnormal);
+    const auto normal = to_compatibility_demposition(abnormal);
     BOOST_REQUIRE_NE(abnormal, normal);
 
     const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
@@ -225,7 +233,7 @@ BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_without_icu__abnormal_ascii_
 {
     const auto abnormal = "ábaco";
     const auto normal = "ábaco";
-    ////const auto normal = to_normal_nfkd_form(abnormal);
+    ////const auto normal = to_compatibility_demposition(abnormal);
     BOOST_REQUIRE_NE(abnormal, normal);
 
     const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };

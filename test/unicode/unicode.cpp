@@ -25,6 +25,66 @@ BOOST_AUTO_TEST_SUITE(unicode_tests)
 
 #ifdef WITH_ICU
 
+// data
+
+BOOST_AUTO_TEST_CASE(unicode__ideographic_space__utf32__expected)
+{
+    BOOST_REQUIRE_EQUAL(ideographic_space.size(), 3u);
+    BOOST_REQUIRE_EQUAL(to_utf32(ideographic_space)[0], 0x00003000);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__separators__utf32__expected)
+{
+    BOOST_REQUIRE_EQUAL(unicode_separators.size(), 17u);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[0])[0], 0x00000020);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[1])[0], 0x000000a0);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[2])[0], 0x00001680);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[3])[0], 0x00002000);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[4])[0], 0x00002001);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[5])[0], 0x00002002);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[6])[0], 0x00002003);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[7])[0], 0x00002004);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[8])[0], 0x00002005);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[9])[0], 0x00002006);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[10])[0], 0x00002007);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[11])[0], 0x00002008);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[12])[0], 0x00002009);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[13])[0], 0x0000200a);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[14])[0], 0x0000202f);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[15])[0], 0x0000205f);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_separators[16])[0], 0x00003000);
+}
+
+BOOST_AUTO_TEST_CASE(unicode__whitespace__utf32__expected)
+{
+    BOOST_REQUIRE_EQUAL(unicode_whitespace.size(), 25u);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[0])[0], 0x00000009);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[1])[0], 0x0000000a);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[2])[0], 0x0000000b);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[3])[0], 0x0000000c);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[4])[0], 0x0000000d);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[5])[0], 0x00000020);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[6])[0], 0x000000a0);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[7])[0], 0x00001680);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[8])[0], 0x00002000);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[9])[0], 0x00002001);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[10])[0], 0x00002002);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[11])[0], 0x00002003);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[12])[0], 0x00002004);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[13])[0], 0x00002005);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[14])[0], 0x00002006);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[15])[0], 0x00002007);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[16])[0], 0x00002008);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[17])[0], 0x00002009);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[18])[0], 0x0000200a);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[19])[0], 0x0000202f);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[20])[0], 0x0000205f);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[21])[0], 0x00003000);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[22])[0], 0x00000085);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[23])[0], 0x00002028);
+    BOOST_REQUIRE_EQUAL(to_utf32(unicode_whitespace[24])[0], 0x00002029);
+}
+
 // to_lower
 
 BOOST_AUTO_TEST_CASE(unicode__to_lower__empty__empty)
@@ -62,15 +122,15 @@ BOOST_AUTO_TEST_CASE(unicode__to_lower__mixed_ascii__lowered)
 ////    BOOST_REQUIRE_EQUAL(to_lower(upper), expected);
 ////}
 
-// to_normal_nfc_form
+// to_canonical_composition
 
-BOOST_AUTO_TEST_CASE(unicode__to_normal_nfc_form__empty__empty)
+BOOST_AUTO_TEST_CASE(unicode__to_canonical_composition__empty__empty)
 {
-    BOOST_REQUIRE(to_normal_nfc_form("").empty());
+    BOOST_REQUIRE(to_canonical_composition("").empty());
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
-BOOST_AUTO_TEST_CASE(unicode__to_normal_nfc_form__bip38__expected)
+BOOST_AUTO_TEST_CASE(unicode__to_canonical_composition__bip38__expected)
 {
     data_chunk original;
     BOOST_REQUIRE(decode_base16(original, "cf92cc8100f0909080f09f92a9"));
@@ -80,21 +140,21 @@ BOOST_AUTO_TEST_CASE(unicode__to_normal_nfc_form__bip38__expected)
     BOOST_REQUIRE(decode_base16(normal, "cf9300f0909080f09f92a9"));
     std::string expected_normal_string(normal.begin(), normal.end());
 
-    const auto derived_normal_string = to_normal_nfc_form(original_string);
+    const auto derived_normal_string = to_canonical_composition(original_string);
     BOOST_REQUIRE_EQUAL(expected_normal_string, derived_normal_string);
 }
 
-// to_normal_nfkd_form
+// to_compatibility_demposition
 
-BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__ideographic_space_sandwich__expected)
+BOOST_AUTO_TEST_CASE(unicode__to_compatibility_demposition__ideographic_space_sandwich__expected)
 {
     const auto ascii_space_sandwich = "space-> <-space";
     const auto ideographic_space_sandwich = "space->　<-space";
-    const auto normalized = to_normal_nfkd_form(ideographic_space_sandwich);
+    const auto normalized = to_compatibility_demposition(ideographic_space_sandwich);
     BOOST_REQUIRE_EQUAL(normalized.c_str(), ascii_space_sandwich);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__61cc81__c3a1)
+BOOST_AUTO_TEST_CASE(unicode__to_compatibility_demposition__61cc81__c3a1)
 {
     const std::string literal_c3a1 = "á";
 
@@ -107,8 +167,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__61cc81__c3a1)
     BOOST_REQUIRE_EQUAL(string_c3a1, literal_c3a1);
     BOOST_REQUIRE_EQUAL(string_61cc81, literal_61cc81);
 
-    const auto normalized_c3a1 = to_normal_nfkd_form(string_c3a1);
-    const auto normalized_61cc81 = to_normal_nfkd_form(string_61cc81);
+    const auto normalized_c3a1 = to_compatibility_demposition(string_c3a1);
+    const auto normalized_61cc81 = to_compatibility_demposition(string_61cc81);
     BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_61cc81);
     BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_61cc81);
 }
