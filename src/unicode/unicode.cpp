@@ -191,6 +191,9 @@ std::string to_upper(const std::string& value)
 
 #else // _MSC_VER
 
+// Ensure validate_localization is called only once.
+static std::once_flag icu_mutex;
+
 // One time verifier of the localization backend manager.
 // Guard against backend_manager.select(BC_LOCALE_BACKEND) silent failure.
 static void validate_localization()
@@ -600,9 +603,6 @@ constexpr size_t utf16_buffer_size = 256;
 
 // Ensure console_streambuf::initialize is called only once.
 static std::once_flag io_mutex;
-
-// Ensure validate_localization is called only once.
-ICU_ONLY(static std::once_flag icu_mutex;)
 
 // Static initializer for bc::system::cin.
 std::istream& cin_stream()
