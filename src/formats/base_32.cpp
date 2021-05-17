@@ -22,8 +22,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/utility/iostream.hpp>
 
 namespace libbitcoin {

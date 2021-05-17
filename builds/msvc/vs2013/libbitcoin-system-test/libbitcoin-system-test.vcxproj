@@ -182,9 +182,13 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />

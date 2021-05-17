@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WALLET_LANGUAGES_HPP
 
 #include <string>
-#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

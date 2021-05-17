@@ -21,7 +21,9 @@
 #include <algorithm>
 #include <map>
 #include <string>
-#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
+#include <bitcoin/system/unicode/code_points.hpp>
+#include <bitcoin/system/unicode/normalization.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
@@ -85,22 +87,20 @@ std::string languages::to_delimiter(language identifier)
 
 std::string languages::join(const string_list& words, language identifier)
 {
-    // Join output using the ideographic space for japanese.
     return system::join(words, to_delimiter(identifier));
 }
 
 string_list languages::split(const std::string& sentence, language)
 {
-    // Split input on any unicode separator, trimming any unicode whitespace.
-    return unicode_split(sentence);
+    return system::split(sentence, unicode_separators, unicode_whitespace);
 }
 
 // protected
 string_list languages::normalize(const string_list& words)
 {
 #ifdef WITH_ICU
-    return system::split(to_lower(to_compatibility_demposition(
-        system::join(words))));
+    const auto nfkd = to_compatibility_demposition(system::join(words));
+    return system::split(to_lower(nfkd));
 #else
     return system::split(ascii_to_lower(system::join(words)));
 #endif

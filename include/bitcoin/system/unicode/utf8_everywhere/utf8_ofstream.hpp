@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_OFSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_OFSTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_OFSTREAM_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_OFSTREAM_HPP
 
 #include <fstream>
 #include <string>
@@ -28,7 +28,7 @@ namespace system {
 
 /**
  * Use bc::system::ofstream in place of std::ofstream.
- * This provides utf8 to utf16 path translation for Windows.
+ * This provides utf8 to utf16 path translation for Win32.
  */
 class BC_API ofstream
   : public std::ofstream

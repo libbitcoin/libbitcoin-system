@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#include "../../test.hpp"
 #include <string>
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(unicode_istream_tests)
+BOOST_AUTO_TEST_SUITE(utf8_istream_tests)
 
 // Use of L is not recommended as it will only work for ascii.
 BOOST_AUTO_TEST_CASE(unicode_istream__conditional__test)

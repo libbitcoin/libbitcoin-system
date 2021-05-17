@@ -36,7 +36,7 @@
 #include <bitcoin/system/log/file_collector_repository.hpp>
 #include <bitcoin/system/log/severity.hpp>
 #include <bitcoin/system/log/udp_client_sink.hpp>
-#include <bitcoin/system/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 #include <bitcoin/system/utility/asio.hpp>
 #include <bitcoin/system/utility/threadpool.hpp>
 

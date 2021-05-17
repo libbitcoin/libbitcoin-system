@@ -25,7 +25,6 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 #include <bitcoin/system/utility/iostream.hpp>

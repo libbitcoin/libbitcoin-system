@@ -24,7 +24,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/log/rotable_file.hpp>
 #include <bitcoin/system/log/severity.hpp>
-#include <bitcoin/system/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 
 namespace libbitcoin {
 namespace system {

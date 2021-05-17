@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/unicode_streambuf.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
 
 #include <cstddef>
 #include <cstring>
@@ -24,14 +24,12 @@
 #include <streambuf>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/conversion.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// Local definition for max number of bytes in a utf8 character.
-constexpr size_t utf8_max_character_size = 4;
 
 unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
   : wide_size_(size), narrow_size_(wide_size_ * utf8_max_character_size),

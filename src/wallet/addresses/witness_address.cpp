@@ -27,6 +27,7 @@
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

@@ -21,8 +21,8 @@
 #include <memory>
 #include <string>
 #include <boost/filesystem.hpp>
-#include <bitcoin/system/unicode/file_lock.hpp>
-#include <bitcoin/system/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_file_lock.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 
 namespace libbitcoin {
 namespace system {

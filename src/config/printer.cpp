@@ -25,6 +25,8 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
+#include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/utility/collection.hpp>
 #include <bitcoin/system/utility/string.hpp>
 
@@ -101,7 +103,7 @@ static void enqueue_fragment(std::string& fragment,
 std::vector<std::string> printer::columnize(const std::string& paragraph,
     size_t width)
 {
-    const auto words = split(paragraph, false);
+    const auto words = split(paragraph, ascii_space, false);
 
     std::string fragment;
     std::vector<std::string> column;

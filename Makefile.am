@@ -171,13 +171,17 @@ src_libbitcoin_system_la_SOURCES = \
     src/message/transaction.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
-    src/unicode/console_streambuf.cpp \
-    src/unicode/ifstream.cpp \
-    src/unicode/ofstream.cpp \
-    src/unicode/unicode.cpp \
-    src/unicode/unicode_istream.cpp \
-    src/unicode/unicode_ostream.cpp \
-    src/unicode/unicode_streambuf.cpp \
+    src/unicode/ascii.cpp \
+    src/unicode/code_points.cpp \
+    src/unicode/conversion.cpp \
+    src/unicode/normalization.cpp \
+    src/unicode/utf8_everywhere/utf8_console_streambuf.cpp \
+    src/unicode/utf8_everywhere/utf8_environment.cpp \
+    src/unicode/utf8_everywhere/utf8_ifstream.cpp \
+    src/unicode/utf8_everywhere/utf8_istream.cpp \
+    src/unicode/utf8_everywhere/utf8_ofstream.cpp \
+    src/unicode/utf8_everywhere/utf8_ostream.cpp \
+    src/unicode/utf8_everywhere/utf8_streambuf.cpp \
     src/utility/binary.cpp \
     src/utility/conditional_lock.cpp \
     src/utility/data.cpp \
@@ -382,9 +386,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/unicode/unicode.cpp \
-    test/unicode/unicode_istream.cpp \
-    test/unicode/unicode_ostream.cpp \
+    test/unicode/ascii.cpp \
+    test/unicode/code_points.cpp \
+    test/unicode/conversion.cpp \
+    test/unicode/normalization.cpp \
+    test/unicode/utf8_everywhere/utf8_environment.cpp \
+    test/unicode/utf8_everywhere/utf8_istream.cpp \
+    test/unicode/utf8_everywhere/utf8_ostream.cpp \
     test/utility/binary.cpp \
     test/utility/bit_stream.cpp \
     test/utility/collection.cpp \
@@ -660,14 +668,23 @@ include_bitcoin_system_message_HEADERS = \
 
 include_bitcoin_system_unicodedir = ${includedir}/bitcoin/system/unicode
 include_bitcoin_system_unicode_HEADERS = \
-    include/bitcoin/system/unicode/console_streambuf.hpp \
-    include/bitcoin/system/unicode/file_lock.hpp \
-    include/bitcoin/system/unicode/ifstream.hpp \
-    include/bitcoin/system/unicode/ofstream.hpp \
-    include/bitcoin/system/unicode/unicode.hpp \
-    include/bitcoin/system/unicode/unicode_istream.hpp \
-    include/bitcoin/system/unicode/unicode_ostream.hpp \
-    include/bitcoin/system/unicode/unicode_streambuf.hpp
+    include/bitcoin/system/unicode/ascii.hpp \
+    include/bitcoin/system/unicode/code_points.hpp \
+    include/bitcoin/system/unicode/conversion.hpp \
+    include/bitcoin/system/unicode/normalization.hpp
+
+include_bitcoin_system_unicode_utf8_everywheredir = ${includedir}/bitcoin/system/unicode/utf8_everywhere
+include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_about.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_console_streambuf.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_file_lock.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_main.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp
 
 include_bitcoin_system_utilitydir = ${includedir}/bitcoin/system/utility
 include_bitcoin_system_utility_HEADERS = \

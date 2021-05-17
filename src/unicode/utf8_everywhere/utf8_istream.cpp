@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -16,40 +16,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_ISTREAM_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_ISTREAM_HPP
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp>
 
 #include <cstddef>
 #include <iostream>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/**
- * Class to expose a narrowing input stream.
- * std::wcin must be patched by console_streambuf if used for Windows input.
- */
-class BC_API unicode_istream
-    : public std::istream
+unicode_istream::unicode_istream(
+#ifdef _MSC_VER
+    std::istream&, std::wistream& wide_stream, size_t size)
+#else
+    std::istream& narrow_stream, std::wistream&, size_t)
+#endif
+#ifdef _MSC_VER
+  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
+#else
+  : std::istream(narrow_stream.rdbuf())
+#endif
 {
-public:
-    /**
-     * Construct instance of a conditionally-narrowing input stream.
-     * @param[in]  narrow_stream  A narrow input stream such as std::cin.
-     * @param[in]  wide_stream    A wide input stream such as std::wcin.
-     * @param[in]  size           The wide buffer size.
-     */
-    unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,
-        size_t size);
+}
 
-    /**
-     * Delete the unicode_streambuf that wraps wide_stream.
-     */
-    virtual ~unicode_istream();
-};
+unicode_istream::~unicode_istream()
+{
+#ifdef _MSC_VER
+    delete rdbuf();
+#endif
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#endif

@@ -31,6 +31,9 @@
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\unicode\utf8_everywhere">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\utility">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
@@ -38,16 +41,16 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics\dictionaries">
+    <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics\dictionaries">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -333,14 +336,26 @@
     <ClCompile Include="..\..\..\..\test\test.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp">
+    <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp">
+    <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp">
+    <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp">
       <Filter>src\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp">
+      <Filter>src\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp">
       <Filter>src\utility</Filter>

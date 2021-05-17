@@ -16,38 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_FLUSH_LOCK_HPP
-#define LIBBITCOIN_SYSTEM_FLUSH_LOCK_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_ASCII_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_ASCII_HPP
 
-#include <memory>
-#include <boost/filesystem.hpp>
+#include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_file_lock.hpp>
+#include <bitcoin/system/utility/string.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// This class is not thread safe.
-/// Guard a resource that may be corrupted due to an interrupted write.
-class BC_API flush_lock
-{
-public:
-    typedef boost::filesystem::path path;
+/// Character tests.
+BC_API bool is_ascii_character(char32_t point);
+BC_API bool is_ascii_separator(char32_t point);
+BC_API bool is_ascii_whitespace(char32_t point);
+BC_API bool is_separator(char32_t point);
+BC_API bool is_whitespace(char32_t point);
 
-    flush_lock(const path& file);
+/// Convert each ASCII letter in text to lower case.
+BC_API std::string ascii_to_lower(const std::string& text);
 
-    bool try_lock();
-    bool lock_shared();
-    bool unlock_shared();
+/// Convert each ASCII letter in text to upper case.
+BC_API std::string ascii_to_upper(const std::string& text);
 
-private:
-    static bool create(const std::string& file);
-    static bool exists(const std::string& file);
-    static bool destroy(const std::string& file);
+/// True if text has upper and lower ASCII case letters.
+BC_API bool has_mixed_ascii_case(const std::string& text);
 
-    bool locked_;
-    const std::string file_;
-};
+/// True if all characters are in the ASCII subset of UTF8 [<128].
+BC_API bool is_ascii(const std::string& text);
 
 } // namespace system
 } // namespace libbitcoin

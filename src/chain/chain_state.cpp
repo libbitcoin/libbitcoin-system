@@ -35,7 +35,6 @@
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/settings.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/utility/timer.hpp>
 
 namespace libbitcoin {

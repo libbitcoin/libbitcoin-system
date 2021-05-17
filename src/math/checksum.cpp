@@ -21,6 +21,7 @@
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/data_slice.hpp>
 #include <bitcoin/system/utility/endian.hpp>

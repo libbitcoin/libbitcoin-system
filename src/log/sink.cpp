@@ -31,7 +31,7 @@
 #include <bitcoin/system/log/attributes.hpp>
 #include <bitcoin/system/log/file_collector_repository.hpp>
 #include <bitcoin/system/log/severity.hpp>
-#include <bitcoin/system/unicode/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 
 namespace libbitcoin {
 namespace system {
