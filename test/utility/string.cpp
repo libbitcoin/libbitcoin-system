@@ -214,18 +214,32 @@ BOOST_AUTO_TEST_CASE(string__replace__with_spaces__expected)
 
 // split
 
-BOOST_AUTO_TEST_CASE(string__split0__compress__untrimmed)
+BOOST_AUTO_TEST_CASE(string__split0__false_trim_default_compress__untrimmed_compressed)
 {
     const std::string value{ "\t\r\n abc " };
-    const string_list expected{ "abc" };
+    const string_list expected{ "\t\r\n", "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value, false), expected);
 }
 
-BOOST_AUTO_TEST_CASE(string__split0__trim___uncompressed)
+BOOST_AUTO_TEST_CASE(string__split0__true_trim_default_compress__trimmed_compressed)
+{
+    const std::string value{ "\t\r\n abc " };
+    const string_list expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(system::split(value, true), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__split0__true_trim_false_compress__trimmed_uncompressed)
 {
     const std::string value{ " abc \t\r\n" };
     const string_list expected{ "", "abc", "" };
     BOOST_REQUIRE_EQUAL(system::split(value, true, false), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__split0__false_trim_false_compress__untrimmed_uncompressed)
+{
+    const std::string value{ " abc \t\r\n" };
+    const string_list expected{ "", "abc", "\t\r\n" };
+    BOOST_REQUIRE_EQUAL(system::split(value, false, false), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split1__empty__empty)
@@ -283,8 +297,6 @@ BOOST_AUTO_TEST_CASE(string__split1__twelve_delimiters__trimmed_and_compressed)
     const string_list expected{ "abc", "xyz" };
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
-
-// TODO: add split(string, bool, bool) tests.
 
 BOOST_AUTO_TEST_CASE(string__split2__one_ideographic_space_delimiter__split)
 {
