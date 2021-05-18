@@ -80,28 +80,28 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__diverges__unused_words__false)
 
 #endif
 
-// accented
+// diacriticed
 
 // The spanish, french and japanese dictionaries contain diacritics.
 // This requires diacritic removal in these (only) for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__accents__accented_words__true)
 {
-    BOOST_REQUIRE_EQUAL(accents(electrum::es), accents_es);
-    BOOST_REQUIRE_EQUAL(accents(electrum::fr), accents_fr);
-    BOOST_REQUIRE_EQUAL(accents(electrum::ja), accents_ja);
+    BOOST_REQUIRE_EQUAL(diacritics(electrum::es), accents_es);
+    BOOST_REQUIRE_EQUAL(diacritics(electrum::fr), accents_fr);
+    BOOST_REQUIRE_EQUAL(diacritics(electrum::ja), accents_ja);
 }
 
 // No words in these dictionaries contain diacritics.
 // So there is no need to normalize diacritics these for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__accented__not_accented_words__false)
 {
-    BOOST_REQUIRE(!accented(electrum::en));
-    BOOST_REQUIRE(!accented(electrum::it));
-    BOOST_REQUIRE(!accented(electrum::cs));
-    BOOST_REQUIRE(!accented(electrum::pt));
-    BOOST_REQUIRE(!accented(electrum::ko));
-    BOOST_REQUIRE(!accented(electrum::zh_Hans));
-    BOOST_REQUIRE(!accented(electrum::zh_Hant));
+    BOOST_REQUIRE(!diacriticed(electrum::en));
+    BOOST_REQUIRE(!diacriticed(electrum::it));
+    BOOST_REQUIRE(!diacriticed(electrum::cs));
+    BOOST_REQUIRE(!diacriticed(electrum::pt));
+    BOOST_REQUIRE(!diacriticed(electrum::ko));
+    BOOST_REQUIRE(!diacriticed(electrum::zh_Hans));
+    BOOST_REQUIRE(!diacriticed(electrum::zh_Hant));
 }
 
 // compressed_cjk

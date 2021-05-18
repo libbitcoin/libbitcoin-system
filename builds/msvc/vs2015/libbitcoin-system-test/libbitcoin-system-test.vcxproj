@@ -249,6 +249,7 @@
     <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\math\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
+    <ClInclude Include="..\..\..\..\test\unicode\normalization.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum_v1.hpp" />

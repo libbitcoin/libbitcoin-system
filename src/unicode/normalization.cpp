@@ -187,8 +187,6 @@ static std::string normal_form(const std::string& value, norm_type form)
     return normalize(value, form, locale(utf8_locale_name));
 }
 
-// Python 2 string.lower() is *locale dependent* (invalid).
-// Python 3 string.lower() follows section 3.13 of the Unicode Standard.
 std::string to_lower(const std::string& value)
 {
     if (value.empty())
@@ -205,8 +203,6 @@ std::string to_lower(const std::string& value)
     return boost::locale::to_lower(value, locale(utf8_locale_name));
 }
 
-// Python 2 string.upper() is *locale dependent* (invalid).
-// Python 3 string.upper() follows section 3.13 of the Unicode Standard.
 std::string to_upper(const std::string& value)
 {
     if (value.empty())
@@ -247,18 +243,45 @@ std::string to_compatibility_demposition(const std::string& value)
 
 #endif // WITH_ICU
 
-static bool is_diacritic(char32_t point)
+bool is_separator(char32_t point)
 {
-    const auto is_contained = [point](const utf32_interval& interval)
-    {
-        return interval.first <= point && point <= interval.second;
-    };
+    for (size_t index = 0; index < char32_separators_count; ++index)
+        if (point == char32_separators[index])
+            return true;
 
-    return std::any_of(diacritics.begin(), diacritics.end(), is_contained);
+    return false;
 }
 
-// Remove accent characters (diacritics).
-std::string to_unaccented_form(const std::string& value)
+bool is_whitespace(char32_t point)
+{
+    for (size_t index = 0; index < char32_whitespace_count; ++index)
+        if (point == char32_whitespace[index])
+            return true;
+
+    return false;
+}
+
+bool is_chinese_japanese_or_korean(char32_t point)
+{
+    for (size_t index = 0; index < char32_chinese_japanese_korean_count; ++index)
+        if (point >= char32_chinese_japanese_korean[index].first &&
+            point <= char32_chinese_japanese_korean[index].second)
+            return true;
+
+    return false;
+}
+
+bool is_diacritic(char32_t point)
+{
+    for (size_t index = 0; index < char32_diacritics_count; ++index)
+        if (point >= char32_diacritics[index].first &&
+            point <= char32_diacritics[index].second)
+            return true;
+
+    return false;
+}
+
+std::string to_non_diacritic_form(const std::string& value)
 {
     if (value.empty())
         return value;
@@ -272,19 +295,7 @@ std::string to_unaccented_form(const std::string& value)
     return to_utf8(points);
 }
 
-static bool is_chinese_japanese_or_korean(char32_t point)
-{
-    const auto is_contained = [point](const utf32_interval& interval)
-    {
-        return interval.first <= point && point <= interval.second;
-    };
-
-    return std::any_of(chinese_japanese_korean.begin(),
-        chinese_japanese_korean.end(), is_contained);
-}
-
-// Remove ascii whitespace between cjk characters.
-// utf32 ensures each word is a single character.
+// Remove a single ascii whitespace between cjk characters.
 std::string to_compressed_cjk_form(const std::string& value)
 {
     // utf32 ensures each word is a single unicode character.

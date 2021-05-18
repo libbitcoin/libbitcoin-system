@@ -43,19 +43,19 @@ static bool compressed(const electrum::dictionary::words& words)
     });
 }
 
-static ptrdiff_t accents(const electrum::dictionary::words& words)
+static ptrdiff_t diacritics(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_unaccented_form(test);
+        return test != to_non_diacritic_form(test);
     });
 }
 
-static bool accented(const electrum::dictionary::words& words)
+static bool diacriticed(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_unaccented_form(test);
+        return test != to_non_diacritic_form(test);
     });
 }
 

@@ -28,8 +28,7 @@ namespace libbitcoin {
 namespace system {
 
 typedef std::vector<std::string> string_list;
-typedef std::pair<char32_t, char32_t> utf32_interval;
-typedef std::vector<utf32_interval> utf32_intervals;
+typedef std::pair<char32_t, char32_t> char32_interval;
 
 /// The space (0x00000020) character is the only ASCII separator.
 extern const std::string ascii_space;
@@ -53,9 +52,11 @@ constexpr size_t char32_whitespace_count = 25;
 extern const char32_t char32_separators[char32_separators_count];
 extern const char32_t char32_whitespace[char32_whitespace_count];
 
-/// Unicode character subset ranges.
-extern const utf32_intervals chinese_japanese_korean;
-extern const utf32_intervals diacritics;
+/// Unicode character subset intervals.
+constexpr size_t char32_diacritics_count = 197;
+constexpr size_t char32_chinese_japanese_korean_count = 29;
+extern const char32_interval char32_diacritics[char32_diacritics_count];
+extern const char32_interval char32_chinese_japanese_korean[char32_chinese_japanese_korean_count];
 
 } // namespace system
 } // namespace libbitcoin

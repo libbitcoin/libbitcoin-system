@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <string>
-#include <bitcoin/system/unicode/code_points.hpp>
+#include <bitcoin/system/unicode/normalization.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,24 +41,6 @@ bool is_ascii_separator(char32_t point)
 bool is_ascii_whitespace(char32_t point)
 {
     return is_ascii_character(point) && is_whitespace(point);
-}
-
-bool is_separator(char32_t point)
-{
-    for (size_t separator = 0; separator < char32_separators_count; ++separator)
-        if (point == char32_separators[separator])
-            return true;
-
-    return false;
-}
-
-bool is_whitespace(char32_t point)
-{
-    for (size_t space = 0; space < char32_whitespace_count; ++space)
-        if (point == char32_whitespace[space])
-            return true;
-
-    return false;
 }
 
 // string functions.

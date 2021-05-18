@@ -157,35 +157,43 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 hd_private electrum::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
-    // Passphrase normalization is necessary, but ASCII is already normal.
+    // Python 3 [but not 2] string.lower() conforms to the Unicode Standard.
+    // seed = seed.lower()
 #ifdef WITH_ICU
-    auto pass = to_lower(to_compatibility_demposition(passphrase));
+    // Conforms to the Unicode Standard for nfkd and case lowering.
+    auto passwords = to_lower(to_compatibility_demposition(passphrase));
 #else
-    auto pass = ascii_to_lower(passphrase);
+    // Passphrase normalization is necessary, but ASCII is already normal.
+    auto passwords = ascii_to_lower(passphrase);
     if (!is_ascii(pass))
         return {};
 #endif
-
-    // With normalized dictionaries there is no benefit and a material
-    // performance cost in applying this additional normalization to words,
-    // so we apply it only in seeding, which is a compatibility requirement.
-
+    // Python's unicodedata.combining "returns the canonical combining
+    // class assigned to the character chr as integer. Returns 0 if no
+    // combining class is defined. Note that this is not diacritics.
+    // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
     // Remove diacritics from the nfkd form.
-    pass = to_unaccented_form(pass);
+    passwords = to_non_diacritic_form(passwords);
 
-    // Normalize ascii whitespace to a single 0x20 between each word.
-    pass = system::join(system::split(pass));
+    // Python splits on the 6 ascii/C whitespace chars and compresses.
+    // seed = u' '.join(seed.split())
+    // Compress ascii whitespace to a single 0x20 between each token.
+    passwords = system::join(system::split(passwords));
 
-    // Remove cjk separators from the nfkd form.
-    // This is an unnecessary transform for the existing dictionaries when
-    // using only words from those dictionaries as there are no matches.
-    // See electrum dictionary tests for more information.
-    pass = to_compressed_cjk_form(pass);
+    // Python string.whitespace represents the 6 ascii/C whitespace chars.
+    // seed = u''.join([seed[i] for i in range(len(seed))
+    // if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and is_CJK(seed[i+1]))])
+    // Remove a single space between any pair of CJK characters.
+    passwords = to_compressed_cjk_form(passwords);
 
-    // Words are in normal (nfkd) form, even without ICU.
-    const auto sentence = to_chunk(system::join(words));
-    const auto salt = to_chunk(passphrase_prefix + pass);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    // Words are in normal (lower, nfkd) form, even without ICU.
+    auto sentence = system::join(words);
+    sentence = to_non_diacritic_form(sentence);
+    sentence = to_compressed_cjk_form(sentence);
+
+    const auto data = to_chunk(sentence);
+    const auto salt = to_chunk(passphrase_prefix + passwords);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
     const auto part = system::split(seed);
 
     // The object will be false if the secret (left) does not ec verify.
@@ -209,9 +217,13 @@ electrum::seed_prefix electrum::prefixer(const string_list& words)
 
 bool electrum::validator(const string_list& words, seed_prefix prefix)
 {
-    // Words are in normal form, even without ICU.
-    const auto sentence = to_chunk(system::join(words));
-    const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
+    // Words are in normal (lower, nfkd) form, even without ICU.
+    auto sentence = system::join(words);
+    sentence = to_non_diacritic_form(sentence);
+    sentence = to_compressed_cjk_form(sentence);
+
+    const auto data = to_chunk(sentence);
+    const auto seed = encode_base16(hmac_sha512_hash(data, seed_version));
     return starts_with(seed, to_version(prefix));
 }
 

@@ -99,17 +99,17 @@ hd_private mnemonic::seeder(const string_list& words,
     // Unlike electrum, BIP39 does not lower case passphrases, trim whitespace
     // remove diacritics, or compress cjk.
 #ifdef WITH_ICU
-    auto pass = to_compatibility_demposition(passphrase);
+    auto passwords = to_compatibility_demposition(passphrase);
 #else
-    auto pass = passphrase;
+    auto passwords = passphrase;
     if (!is_ascii(pass))
         return {};
 #endif
 
-    // Words are in normal (nfkd) form, even without ICU.
-    const auto sentence = to_chunk(system::join(words));
-    const auto salt = to_chunk(passphrase_prefix + pass);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(sentence, salt, hmac_iterations);
+    // Words are in normal (lower, nfkd) form, even without ICU.
+    const auto data = to_chunk(system::join(words));
+    const auto salt = to_chunk(passphrase_prefix + passwords);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
     const auto part = system::split(seed);
 
     // The object will be false if the secret (left) does not ec verify.

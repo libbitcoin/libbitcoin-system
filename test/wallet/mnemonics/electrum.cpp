@@ -55,145 +55,188 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__minimum_null_witness_english__expected)
 
 // electrum standard vectors
 
+BOOST_AUTO_TEST_CASE(random)
+{
+    const auto version = to_chunk("Seed version");
+    const string_list words
+    {
+        "なのか",
+        "ひろい",
+        "しなん",
+        "まなぶ",
+        "つぶす",
+        "さがす",
+        "おしゃれ",
+        "かわく",
+        "おいかける",
+        "けさき",
+        "かいとう",
+        "さたん"
+    };
+    const std::string sentence0
+    {
+        "なのか ひろい しなん まなぶ つぶす さがす おしゃれ かわく おいかける けさき かいとう さたん"
+    };
+    BOOST_REQUIRE_EQUAL(system::join(words), sentence0);
+
+    const auto sentence1 = to_non_diacritic_form(sentence0);
+    BOOST_REQUIRE_NE(sentence1, sentence0);
+
+    const auto sentence2 = to_compressed_cjk_form(sentence1);
+    BOOST_REQUIRE_NE(sentence2, sentence1);
+
+    const auto hash = hmac_sha512_hash(sentence2, version);
+    const auto seed = encode_base16(hash);
+
+    BOOST_REQUIRE_EQUAL(seed.substr(0, 2), "01");
+}
+
 BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
 {
     const auto vector = vectors[0];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
     BOOST_REQUIRE(instance.prefix() == vector.prefix);
     BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
     BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
 
     electrum derived(instance.entropy(), instance.prefix(), instance.lingo());
     BOOST_REQUIRE(derived.lingo() == instance.lingo());
-    BOOST_REQUIRE(derived.prefix() == instance.prefix());
-    BOOST_REQUIRE_EQUAL(derived.words(), instance.words());
+    BOOST_REQUIRE(derived.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(derived.words(), split(vector.mnemonic));
     BOOST_REQUIRE_EQUAL(derived.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(derived.entropy(), instance.entropy());
+    BOOST_REQUIRE_EQUAL(derived.entropy(), vector.entropy);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
 {
     const auto vector = vectors[1];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
     BOOST_REQUIRE(instance.prefix() == vector.prefix);
-    ////BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
     BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
 }
 
-// TODO: Test vector japanese is ascii space delimited.
-// TODO: determine if electrum normalization strips ideographic spaces.
-// TODO: split japanese on both types of spaces, join with ideographic.
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
 {
     const auto vector = vectors[2];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
-    ////BOOST_REQUIRE(instance);
-    ////BOOST_REQUIRE(instance.lingo() == vector.lingo);
-    ////BOOST_REQUIRE(instance.prefix() == vector.prefix);
-    ////BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    ////BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
 {
     const auto vector = vectors[3];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
-    ////BOOST_REQUIRE(instance);
-    ////BOOST_REQUIRE(instance.lingo() == vector.lingo);
-    ////BOOST_REQUIRE(instance.prefix() == vector.prefix);
-    ////BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    ////BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
 {
     const auto vector = vectors[4];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
 {
     const auto vector = vectors[5];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
 {
     const auto vector = vectors[6];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
 {
     const auto vector = vectors[7];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
 {
     const auto vector = vectors[8];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
 {
     const auto vector = vectors[9];
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
     electrum instance(vector.mnemonic, vector.lingo);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.lingo() == vector.lingo);
-//    BOOST_REQUIRE(instance.prefix() == vector.prefix);
-//    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-//    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.mnemonic_chunk), vector.mnemonic);
-    ////BOOST_REQUIRE_EQUAL(encode_base16(vector.passphrase_chunk), vector.passphrase);
+    BOOST_REQUIRE(instance.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.to_hd());
 }
 
 // statics

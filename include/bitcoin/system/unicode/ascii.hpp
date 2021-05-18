@@ -30,8 +30,6 @@ namespace system {
 BC_API bool is_ascii_character(char32_t point);
 BC_API bool is_ascii_separator(char32_t point);
 BC_API bool is_ascii_whitespace(char32_t point);
-BC_API bool is_separator(char32_t point);
-BC_API bool is_whitespace(char32_t point);
 
 /// Convert each ASCII letter in text to lower case.
 BC_API std::string ascii_to_lower(const std::string& text);

@@ -110,6 +110,7 @@ const string_list unicode_separators
     { to_utf8(char32_separators[16]) }
 };
 
+// unicode.org/Public/UNIDATA/PropList.txt [White_Space (25 code points)]
 const char32_t char32_whitespace[]
 {
     // ASCII/Unicode whitespace characters (C whitespace).
@@ -175,10 +176,9 @@ const string_list unicode_whitespace
     { to_utf8(char32_whitespace[24]) }
 };
 
-// Based on Electrum source, which references:
-// asahi-net.or.jp/~ax2s-kmtn/ref/unicode/e_asia.html
-// More information: en.wikipedia.org/wiki/CJK_characters
-const utf32_intervals chinese_japanese_korean
+// Based on Electrum source (not Unicode standard).
+// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L41-L69
+const char32_interval char32_chinese_japanese_korean[]
 {
     { 0x00004e00, 0x00009fff }, // cjk unified ideographs
     { 0x00003400, 0x00004dbf }, // cjk unified ideographs extension a
@@ -211,11 +211,9 @@ const utf32_intervals chinese_japanese_korean
     { 0x0000a490, 0x0000a4cf }  // yi radicals
 };
 
-// Combining Diacritics list taken from:
-// unicode.org/Public/UNIDATA/PropList.txt
-// unicode.org/Public/11.0.0/charts/CodeCharts.pdf
-// Section "Combining Diacritical Marks"
-const utf32_intervals diacritics
+// unicode.org/Public/UNIDATA/PropList.txt [Diacritic (882 code points)]
+// This is not used by Electrum, instead it uses Python's unicodedata.combining.
+const char32_interval char32_diacritics[]
 {
     { 0x0000005e, 0x0000005e }, // circumflex accent
     { 0x00000060, 0x00000060 }, // grave accent
