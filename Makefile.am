@@ -390,7 +390,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/code_points.cpp \
     test/unicode/conversion.cpp \
     test/unicode/normalization.cpp \
-    test/unicode/normalization.hpp \
     test/unicode/utf8_everywhere/utf8_environment.cpp \
     test/unicode/utf8_everywhere/utf8_istream.cpp \
     test/unicode/utf8_everywhere/utf8_ostream.cpp \

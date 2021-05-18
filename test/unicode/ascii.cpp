@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(unicode_ascii_tests)
+BOOST_AUTO_TEST_SUITE(ascii_tests)
 
 // is_ascii_character
 

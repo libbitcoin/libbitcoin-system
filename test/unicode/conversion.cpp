@@ -22,7 +22,7 @@
 // the source file does not have a BOM (which we avoid for other reasons).
 // We use it below to simplify creation of ASCII test vectors.
 
-BOOST_AUTO_TEST_SUITE(unicode_conversion_tests)
+BOOST_AUTO_TEST_SUITE(conversion_tests)
 
 // to_utf8 (char32_t)
 

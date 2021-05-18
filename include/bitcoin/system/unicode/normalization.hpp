@@ -41,18 +41,21 @@ BC_API std::string to_compatibility_demposition(const std::string& value);
 #endif // WITH_ICU
 
 /// Character tests.
+inline bool is_unicode(char32_t point);
 BC_API bool is_separator(char32_t point);
 BC_API bool is_whitespace(char32_t point);
+BC_API bool is_combining(char32_t point);
 BC_API bool is_diacritic(char32_t point);
 BC_API bool is_chinese_japanese_or_korean(char32_t point);
 
-/// Remove combining (diacritic) characters.
+/// Remove combining class characters.
+BC_API std::string to_non_combining_form(const std::string& value);
+
+/// Remove diacritic characters.
 BC_API std::string to_non_diacritic_form(const std::string& value);
 
-/// Not a Unicode standard, proprietary to Electrum.
-/// Remove a single ascii whitespace character from between any pair of
-/// chinese, japanese, and/or korean characters (Electrum).
-BC_API std::string to_compressed_cjk_form(const std::string& value);
+/// Compress ascii whitespace and remove ascii spaces between cjk characters.
+BC_API std::string to_compressed_form(const std::string& value);
 
 } // namespace system
 } // namespace libbitcoin

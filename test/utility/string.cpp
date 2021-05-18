@@ -73,175 +73,22 @@ BOOST_AUTO_TEST_CASE(string__join2__untrimmed_values_comma_delimiter__untrimmed_
     BOOST_REQUIRE_EQUAL(system::join(string_list{ " abc ", " xyz " }, ","), " abc , xyz ");
 }
 
-// reduce
-
-BOOST_AUTO_TEST_CASE(string__reduce__empty__empty)
-{
-    string_list values{};
-    const string_list expected{};
-    reduce(values);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__nothing_to_do__unchanged)
-{
-    string_list values{ "a", "b", "c" };
-    const string_list expected{ "a", "b", "c" };
-    reduce(values);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__empties__single_empty)
-{
-    string_list values{ "", "", "" };
-    const string_list expected{ "" };
-    reduce(values);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__whitespace__trimmed)
-{
-    string_list values{ " \ta\t ", "\r\tb\t\n", "\t\tc\t\t" };
-    const string_list expected{ "a", "b", "c" };
-    reduce(values);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__only_whitespace__trimmed_and_reduced)
-{
-    string_list values{ " \t\t ", "\r\t\t\n", "\t\tc\t\t" };
-    const string_list expected{ "c" };
-    reduce(values);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__empties_reduce_false__unchanged)
-{
-    string_list values{ "", "", "" };
-    const string_list expected = values;
-    reduce(values, {}, false);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__padded_trim_false__unchanged)
-{
-    string_list values{ " \ta\t ", "\r\tb\t\n", "\t\tc\t\t" };
-    const string_list expected = values;
-    reduce(values, {}, true);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__reduce__only_whitespace_both_false__unchanged)
-{
-    string_list values{ " \t\t ", "\r\t\t\n", "\t\tc\t\t" };
-    const string_list expected = values;
-    reduce(values, {}, false);
-    BOOST_REQUIRE_EQUAL(values, expected);
-}
-
-// replace
-
-BOOST_AUTO_TEST_CASE(string__replace__empty__empty)
-{
-    std::string value{};
-    const std::string expected{};
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 0u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__none__unchanged)
-{
-    std::string value{ "abc xyz abc xyz" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 0u);
-    BOOST_REQUIRE_EQUAL(value, value);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__multiple__expected)
-{
-    std::string value{ "abc def abc def" };
-    const std::string expected{ "abc klm abc klm" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__multiple_adjacent__expected)
-{
-    std::string value{ "defdefabcdef" };
-    const std::string expected{ "klmklmabcklm" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 3u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__shorter__expected)
-{
-    std::string value{ "abc def abc def" };
-    const std::string expected{ "abc kl abc kl" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "kl"), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__longer__expected)
-{
-    std::string value{ "abc def abc def" };
-    const std::string expected{ "abc klmn abc klmn" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "klmn"), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__reflexive__expected)
-{
-    std::string value{ "abc def abc def" };
-    const std::string expected{ "abc defdef abc defdef" };
-    BOOST_REQUIRE_EQUAL(replace(value, "def", "defdef"), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__replace__with_spaces__expected)
-{
-    std::string value{ "abc def abc def" };
-    const std::string expected1{ " bc def  bc def" };
-    BOOST_REQUIRE_EQUAL(replace(value, "a", " "), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected1);
-    const std::string expected2{ "  c def   c def" };
-    BOOST_REQUIRE_EQUAL(replace(value, "b", " "), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected2);
-    const std::string expected3{ "    def     def" };
-    BOOST_REQUIRE_EQUAL(replace(value, "c", " "), 2u);
-    BOOST_REQUIRE_EQUAL(value, expected3);
-    const string_list expected4{ "", "", "", "", "def", "", "", "", "", "def" };
-    BOOST_REQUIRE_EQUAL(split(value, false, false), expected4);
-}
-
 // split
 
-BOOST_AUTO_TEST_CASE(string__split0__false_trim_default_compress__untrimmed_compressed)
-{
-    const std::string value{ "\t\r\n abc " };
-    const string_list expected{ "\t\r\n", "abc" };
-    BOOST_REQUIRE_EQUAL(system::split(value, false), expected);
-}
 
-BOOST_AUTO_TEST_CASE(string__split0__true_trim_default_compress__trimmed_compressed)
+BOOST_AUTO_TEST_CASE(string__split0__true_compress__trimmed_compressed)
 {
     const std::string value{ "\t\r\n abc " };
     const string_list expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value, true), expected);
 }
 
-BOOST_AUTO_TEST_CASE(string__split0__true_trim_false_compress__trimmed_uncompressed)
+BOOST_AUTO_TEST_CASE(string__split0__false_compress__trimmed)
 {
     const std::string value{ " abc \t\r\n" };
-    const string_list expected{ "", "abc", "" };
-    BOOST_REQUIRE_EQUAL(system::split(value, true, false), expected);
+    const string_list expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(system::split(value, false), expected);
 }
-
-BOOST_AUTO_TEST_CASE(string__split0__false_trim_false_compress__untrimmed_uncompressed)
-{
-    const std::string value{ " abc \t\r\n" };
-    const string_list expected{ "", "abc", "\t\r\n" };
-    BOOST_REQUIRE_EQUAL(system::split(value, false, false), expected);
-}
-
 BOOST_AUTO_TEST_CASE(string__split1__empty__empty)
 {
     const std::string value{};
@@ -393,51 +240,6 @@ BOOST_AUTO_TEST_CASE(string__split5__alpha_bravo_charlie__trimmed)
     BOOST_REQUIRE_EQUAL(system::split(value, delimiters, ascii_whitespace, false), expected);
 }
 
-// starts_with
-
-BOOST_AUTO_TEST_CASE(string__starts_with__empty_empty__true)
-{
-    BOOST_REQUIRE(system::starts_with("", ""));
-}
-
-BOOST_AUTO_TEST_CASE(string__starts_with__ending__false)
-{
-    BOOST_REQUIRE(!system::starts_with("abc", "bc"));
-}
-
-BOOST_AUTO_TEST_CASE(string__starts_with__overflow__false)
-{
-    BOOST_REQUIRE(!system::starts_with("abc", "abcd"));
-}
-
-BOOST_AUTO_TEST_CASE(string__starts_with__found__true)
-{
-    BOOST_REQUIRE(system::starts_with("abc", "ab"));
-}
-
-// to_string
-
-BOOST_AUTO_TEST_CASE(string__to_string__empty__empty)
-{
-    const data_chunk value{};
-    const std::string expected{ "" };
-    BOOST_REQUIRE_EQUAL(to_string(value), expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__to_string__vector__expected)
-{
-    const data_chunk value{ 'a', 'b', 'c' };
-    const std::string expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(to_string(value), expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__to_string__array__expected)
-{
-    const byte_array<3> value{ { 'a', 'b', 'c' } };
-    const std::string expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
-}
-
 // trim
 
 BOOST_AUTO_TEST_CASE(string__trim__empty__empty)
@@ -496,6 +298,219 @@ BOOST_AUTO_TEST_CASE(string__trim_copy__internal_whitespace__unchanged)
 BOOST_AUTO_TEST_CASE(string__trim_copy__external_whitespace__trimmed)
 {
     BOOST_REQUIRE_EQUAL(system::trim_copy("\t\n\v\f\r 1 \r\f\v\n\t"), "1");
+}
+
+// reduce
+
+BOOST_AUTO_TEST_CASE(string__reduce__empty__empty)
+{
+    string_list values{};
+    const string_list expected{};
+    reduce(values);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__nothing_to_do__unchanged)
+{
+    string_list values{ "a", "b", "c" };
+    const string_list expected{ "a", "b", "c" };
+    reduce(values);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__empties__single_empty)
+{
+    string_list values{ "", "", "" };
+    const string_list expected{ "" };
+    reduce(values);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__whitespace__trimmed)
+{
+    string_list values{ " \ta\t ", "\r\tb\t\n", "\t\tc\t\t" };
+    const string_list expected{ "a", "b", "c" };
+    reduce(values);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__only_whitespace__trimmed_and_reduced)
+{
+    string_list values{ " \t\t ", "\r\t\t\n", "\t\tc\t\t" };
+    const string_list expected{ "c" };
+    reduce(values);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__empties_reduce_false__unchanged)
+{
+    string_list values{ "", "", "" };
+    const string_list expected = values;
+    reduce(values, {}, false);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__padded_trim_false__unchanged)
+{
+    string_list values{ " \ta\t ", "\r\tb\t\n", "\t\tc\t\t" };
+    const string_list expected = values;
+    reduce(values, {}, true);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__reduce__only_whitespace_both_false__unchanged)
+{
+    string_list values{ " \t\t ", "\r\t\t\n", "\t\tc\t\t" };
+    const string_list expected = values;
+    reduce(values, {}, false);
+    BOOST_REQUIRE_EQUAL(values, expected);
+}
+
+// replace
+
+BOOST_AUTO_TEST_CASE(string__replace__empty__empty)
+{
+    std::string value{};
+    const std::string expected{};
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 0u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__none__unchanged)
+{
+    std::string value{ "abc xyz abc xyz" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 0u);
+    BOOST_REQUIRE_EQUAL(value, value);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__multiple__expected)
+{
+    std::string value{ "abc def abc def" };
+    const std::string expected{ "abc klm abc klm" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__multiple_adjacent__expected)
+{
+    std::string value{ "defdefabcdef" };
+    const std::string expected{ "klmklmabcklm" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "klm"), 3u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__shorter__expected)
+{
+    std::string value{ "abc def abc def" };
+    const std::string expected{ "abc kl abc kl" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "kl"), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__longer__expected)
+{
+    std::string value{ "abc def abc def" };
+    const std::string expected{ "abc klmn abc klmn" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "klmn"), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__reflexive__expected)
+{
+    std::string value{ "abc def abc def" };
+    const std::string expected{ "abc defdef abc defdef" };
+    BOOST_REQUIRE_EQUAL(replace(value, "def", "defdef"), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__replace__with_spaces__expected)
+{
+    std::string value{ "abc def abc def" };
+    const std::string expected1{ " bc def  bc def" };
+    BOOST_REQUIRE_EQUAL(replace(value, "a", " "), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected1);
+    const std::string expected2{ "  c def   c def" };
+    BOOST_REQUIRE_EQUAL(replace(value, "b", " "), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected2);
+    const std::string expected3{ "    def     def" };
+    BOOST_REQUIRE_EQUAL(replace(value, "c", " "), 2u);
+    BOOST_REQUIRE_EQUAL(value, expected3);
+    const string_list expected4{ "def", "", "", "", "", "def" };
+    BOOST_REQUIRE_EQUAL(split(value, false), expected4);
+}
+
+// replace_copy
+
+BOOST_AUTO_TEST_CASE(string__replace_copy__empty__empty)
+{
+    BOOST_REQUIRE_EQUAL(replace_copy("abc def abc def", "def", "defdef"), "abc defdef abc defdef");
+}
+
+// starts_with
+
+BOOST_AUTO_TEST_CASE(string__starts_with__empty_empty__true)
+{
+    BOOST_REQUIRE(system::starts_with("", ""));
+}
+
+BOOST_AUTO_TEST_CASE(string__starts_with__ending__false)
+{
+    BOOST_REQUIRE(!system::starts_with("abc", "bc"));
+}
+
+BOOST_AUTO_TEST_CASE(string__starts_with__overflow__false)
+{
+    BOOST_REQUIRE(!system::starts_with("abc", "abcd"));
+}
+
+BOOST_AUTO_TEST_CASE(string__starts_with__found__true)
+{
+    BOOST_REQUIRE(system::starts_with("abc", "ab"));
+}
+
+// ends_with
+
+BOOST_AUTO_TEST_CASE(string__ends_with__empty_empty__true)
+{
+    BOOST_REQUIRE(system::ends_with("", ""));
+}
+
+BOOST_AUTO_TEST_CASE(string__ends_with__begining__false)
+{
+    BOOST_REQUIRE(!system::ends_with("abc", "ab"));
+}
+
+BOOST_AUTO_TEST_CASE(string__ends_with__overflow__false)
+{
+    BOOST_REQUIRE(!system::ends_with("abc", "dabc"));
+}
+
+BOOST_AUTO_TEST_CASE(string__ends_with__found__true)
+{
+    BOOST_REQUIRE(system::ends_with("abc", "bc"));
+}
+
+// to_string
+
+BOOST_AUTO_TEST_CASE(string__to_string__empty__empty)
+{
+    const data_chunk value{};
+    const std::string expected{ "" };
+    BOOST_REQUIRE_EQUAL(to_string(value), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string__vector__expected)
+{
+    const data_chunk value{ 'a', 'b', 'c' };
+    const std::string expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(to_string(value), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string__array__expected)
+{
+    const byte_array<3> value{ { 'a', 'b', 'c' } };
+    const std::string expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

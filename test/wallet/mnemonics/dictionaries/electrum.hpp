@@ -31,7 +31,7 @@ using namespace bc::system::wallet;
 ////{
 ////    return std::count_if(words.begin(), words.end(), [&](const char test[])
 ////    {
-////        return test != to_compressed_cjk_form(test);
+////        return test != to_compressed_form(test);
 ////    });
 ////}
 
@@ -39,23 +39,23 @@ static bool compressed(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_compressed_cjk_form(test);
+        return test != to_compressed_form(test);
     });
 }
 
-static ptrdiff_t diacritics(const electrum::dictionary::words& words)
+static ptrdiff_t combinings(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_non_diacritic_form(test);
+        return test != to_non_combining_form(test);
     });
 }
 
-static bool diacriticed(const electrum::dictionary::words& words)
+static bool combined(const electrum::dictionary::words& words)
 {
     return std::any_of(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_non_diacritic_form(test);
+        return test != to_non_combining_form(test);
     });
 }
 

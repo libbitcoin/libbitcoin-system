@@ -25,7 +25,7 @@ using namespace bc::system::wallet;
 
 const auto dictionary_count = 10u;
 
-// The french diacritics are in nfkd (normal) form.
+// The french combining diacritics are in nfkd (normal) form.
 const auto accents_es = 334;
 const auto accents_fr = 366;
 const auto accents_ja = 644;
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
 
 #ifdef WITH_ICU
 
-// All of the abnormals are from diacritics.
+// All of the abnormals are diacritics.
 const auto abnormals_es = 334;
 const auto abnormals_ja = 644;
 
@@ -80,28 +80,28 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__diverges__unused_words__false)
 
 #endif
 
-// diacriticed
+// combined
 
-// The spanish, french and japanese dictionaries contain diacritics.
-// This requires diacritic removal in these (only) for wordlist-based seedings.
+// The spanish, french and japanese dictionaries contain combining diacritics.
+// This requires combinings removal in these (only) for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__accents__accented_words__true)
 {
-    BOOST_REQUIRE_EQUAL(diacritics(electrum::es), accents_es);
-    BOOST_REQUIRE_EQUAL(diacritics(electrum::fr), accents_fr);
-    BOOST_REQUIRE_EQUAL(diacritics(electrum::ja), accents_ja);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::es), accents_es);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::fr), accents_fr);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::ja), accents_ja);
 }
 
-// No words in these dictionaries contain diacritics.
-// So there is no need to normalize diacritics these for wordlist-based seedings.
+// No words in these dictionaries contain combining diacritics.
+// So there is no need to normalize combinings these for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__accented__not_accented_words__false)
 {
-    BOOST_REQUIRE(!diacriticed(electrum::en));
-    BOOST_REQUIRE(!diacriticed(electrum::it));
-    BOOST_REQUIRE(!diacriticed(electrum::cs));
-    BOOST_REQUIRE(!diacriticed(electrum::pt));
-    BOOST_REQUIRE(!diacriticed(electrum::ko));
-    BOOST_REQUIRE(!diacriticed(electrum::zh_Hans));
-    BOOST_REQUIRE(!diacriticed(electrum::zh_Hant));
+    BOOST_REQUIRE(!combined(electrum::en));
+    BOOST_REQUIRE(!combined(electrum::it));
+    BOOST_REQUIRE(!combined(electrum::cs));
+    BOOST_REQUIRE(!combined(electrum::pt));
+    BOOST_REQUIRE(!combined(electrum::ko));
+    BOOST_REQUIRE(!combined(electrum::zh_Hans));
+    BOOST_REQUIRE(!combined(electrum::zh_Hant));
 }
 
 // compressed_cjk

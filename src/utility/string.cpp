@@ -120,23 +120,23 @@ static string_list splitter(const std::string& text, const std::string& delimite
 string_list split(const std::string& text, const string_list& delimiters,
     const string_list& trim_tokens, bool compress)
 {
-    // Guard front, and avoid copying text if no trim tokens.
+    // Nothing to do.
+    if (delimiters.empty() && trim_tokens.empty())
+        return { text };
+
+    // Trim first to preclude outer empty otherwise trimmable outer tokens.
+    auto trimmed = trim_copy(text, trim_tokens);
+
+    // Nothing more to do.
     if (delimiters.empty())
-        return { trim_tokens.empty() ? text : trim_copy(text, trim_tokens) };
-
-    // Avoid copying text if only one delimiter.
-    if (delimiters.size() == 1u)
-        return splitter(text, delimiters.front(), trim_tokens, compress);
-
-    auto copy = text;
-    const auto first = delimiters.front();
+        return { trimmed };
 
     // Replace all other delimiters with the first delimiter.
     for (auto it = std::next(delimiters.begin()); it != delimiters.end(); ++it)
-        replace(copy, *it, first);
+        replace(trimmed, *it, delimiters.front());
 
-    // Split copy on the first delimiter.
-    return splitter(copy, first, trim_tokens, compress);
+    // Split on the first delimiter and conditionally compress empty tokens.
+    return splitter(trimmed, delimiters.front(), trim_tokens, compress);
 }
 
 string_list split(const std::string& text, const std::string& delimiter,
@@ -146,13 +146,14 @@ string_list split(const std::string& text, const std::string& delimiter,
     return split(text, string_list{ delimiter }, trim_tokens, compress);
 }
 
-string_list split(const std::string& text, bool trim, bool compress)
+string_list split(const std::string& text, bool compress)
 {
-    return split(text, ascii_space, trim, compress);
+    // Splitting is prioritized over trimming, because each token is trimmed.
+    // So trimming is not an option when splitting on the trim characters.
+    return split(text, ascii_whitespace, ascii_whitespace, compress);
 }
 
-// TODO: test.
-bool trim_left(std::string& text, const std::string& token)
+static bool trim_left(std::string& text, const std::string& token)
 {
     auto found = false;
     const auto length = token.length();
@@ -165,8 +166,7 @@ bool trim_left(std::string& text, const std::string& token)
     return found;
 }
 
-// TODO: test.
-bool trim_right(std::string& text, const std::string& token)
+static  bool trim_right(std::string& text, const std::string& token)
 {
     auto found = false;
     const auto length = token.length();
@@ -222,7 +222,6 @@ std::string trim_copy(const std::string& text, const string_list& trim_tokens)
     return copy;
 }
 
-// TODO: test.
 bool ends_with(const std::string& text, const std::string& suffix)
 {
     const auto at = text.rfind(suffix);

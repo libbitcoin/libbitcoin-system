@@ -150,9 +150,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 }
 
 // Electrum uses the same normalization function for words and passphrases.
-// There is no entropy impact on lower casing seed words, but by lowering the
-// passphrase there is a material entropy loss. This is presumably an oversight
-// arising from reuse of the normalization function.
+// Passpharse entropy loss from lowering (and normalizing) should be considered.
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
 hd_private electrum::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
@@ -168,28 +166,24 @@ hd_private electrum::seeder(const string_list& words,
     if (!is_ascii(passwords))
         return {};
 #endif
-    // Python's unicodedata.combining "returns the canonical combining
-    // class assigned to the character chr as integer. Returns 0 if no
-    // combining class is defined. Note that this is not diacritics.
+    // Python's unicodedata.combining returns the canonical combining
+    // class assigned to the character, which may or may not be a diacritic.
     // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
-    // Remove diacritics from the nfkd form.
-    passwords = to_non_diacritic_form(passwords);
+    // Remove combining class characters (from the nfkd form converted above).
+    passwords = to_non_combining_form(passwords);
 
     // Python splits on the 6 ascii/C whitespace chars and compresses.
     // seed = u' '.join(seed.split())
-    // Compress ascii whitespace to a single 0x20 between each token.
-    passwords = system::join(system::split(passwords));
-
     // Python string.whitespace represents the 6 ascii/C whitespace chars.
     // seed = u''.join([seed[i] for i in range(len(seed))
     // if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and is_CJK(seed[i+1]))])
-    // Remove a single space between any pair of CJK characters.
-    passwords = to_compressed_cjk_form(passwords);
+    // Compress ascii whitespace and remove ascii spaces between cjk characters.
+    passwords = to_compressed_form(passwords);
 
     // Words are in normal (lower, nfkd) form, even without ICU.
     auto sentence = system::join(words);
-    sentence = to_non_diacritic_form(sentence);
-    sentence = to_compressed_cjk_form(sentence);
+    sentence = to_non_combining_form(sentence);
+    sentence = to_compressed_form(sentence);
 
     const auto data = to_chunk(sentence);
     const auto salt = to_chunk(passphrase_prefix + passwords);
@@ -220,7 +214,7 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
     // Words are in normal (lower, nfkd) form, even without ICU.
     auto sentence = system::join(words);
     sentence = to_non_diacritic_form(sentence);
-    sentence = to_compressed_cjk_form(sentence);
+    sentence = to_compressed_form(sentence);
 
     const auto data = to_chunk(sentence);
     const auto seed = encode_base16(hmac_sha512_hash(data, seed_version));

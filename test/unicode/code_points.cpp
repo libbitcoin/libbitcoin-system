@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(unicode_code_points_tests)
+BOOST_AUTO_TEST_SUITE(code_points_tests)
 
 BOOST_AUTO_TEST_CASE(code_points__ascii_space__utf32__expected)
 {

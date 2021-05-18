@@ -17,10 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "normalization.hpp"
 #include <vector>
 
-BOOST_AUTO_TEST_SUITE(unicode_normalization_tests)
+BOOST_AUTO_TEST_SUITE(normalization_tests)
 
 #ifdef WITH_ICU
 
@@ -236,7 +235,46 @@ BOOST_AUTO_TEST_CASE(ascii__is_whitespace__dash__false)
     BOOST_REQUIRE(!is_whitespace('-'));
 }
 
-// to_non_diacritic_form (Electrum)
+// to_non_combining_form
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__empty__empty)
+{
+    BOOST_REQUIRE(to_non_combining_form("").empty());
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__ascii_only__unchanged)
+{
+    const std::string expected{ 0x42, 0x43 };
+    const std::u32string ascii{ 0x42, 0x43 };
+    BOOST_REQUIRE_EQUAL(to_non_combining_form(to_utf8(ascii)), expected);
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__combining_circumflex_accent_only__empty)
+{
+    const std::u32string combining_circumflex_accent{ 0x00000302 };
+    BOOST_REQUIRE(to_non_combining_form(to_utf8(combining_circumflex_accent)).empty());
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__bassa_vah_tones_only__empty)
+{
+    const std::u32string bassa_vah{ 0x00016af1, 0x00016af2, 0x00016af3 };
+    BOOST_REQUIRE(to_non_combining_form(to_utf8(bassa_vah)).empty());
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__bassa_vah_tones_combining_circumflex_accent_sandwich__empty)
+{
+    const std::u32string bassa_vah_sandwich{ 0x00000302, 0x00016af1, 0x00016af2, 0x00016af3, 0x00000302 };
+    BOOST_REQUIRE(to_non_combining_form(to_utf8(bassa_vah_sandwich)).empty());
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__combining_circumflex_accent_and_ascii_mix__stripped)
+{
+    const std::string expected{ 0x42, 0x43, 0x44 };
+    const std::u32string bassa_vah{ 0x00000302, 0x42, 0x43, 0x00000302, 0x00000302, 0x44, 0x00000302 };
+    BOOST_REQUIRE_EQUAL(to_non_combining_form(to_utf8(bassa_vah)), expected);
+}
+
+// to_non_diacritic_form
 
 BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__empty__empty)
 {
@@ -245,8 +283,8 @@ BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__empty__empty)
 
 BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__ascii_only__unchanged)
 {
-    const std::u32string ascii{ 0x42, 0x43 };
     const std::string expected{ 0x42, 0x43 };
+    const std::u32string ascii{ 0x42, 0x43 };
     BOOST_REQUIRE_EQUAL(to_non_diacritic_form(to_utf8(ascii)), expected);
 }
 
@@ -276,77 +314,96 @@ BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__circumflex_accent_and
     BOOST_REQUIRE_EQUAL(to_non_diacritic_form(to_utf8(bassa_vah)), expected);
 }
 
-// to_compressed_cjk_form (Electrum)
+// to_compressed_form (Electrum)
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk_form__empty__empty)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__empty__empty)
 {
-    BOOST_REQUIRE(to_compressed_cjk_form("").empty());
+    BOOST_REQUIRE(to_compressed_form("").empty());
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk_form__ascii_with_spaces__unchanged)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__ascii_single_spaced__unchanged)
 {
-    const auto value = " foo  bar  baz ";
-    const auto result = to_compressed_cjk_form(value);
+    const auto value = "foo bar baz";
+    const auto result = to_compressed_form(value);
     BOOST_REQUIRE_EQUAL(result.c_str(), value);
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__ascii_whitespaced__normalized)
+{
+    const auto value = "foo bar\tbaz";
+    const auto result = to_compressed_form(value);
+    BOOST_REQUIRE_EQUAL(result.c_str(), "foo bar baz");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__ascii_uncompressed_whitespace__normalized)
+{
+    const auto value = " foo \rbar\t baz ";
+    const auto result = to_compressed_form(value);
+    BOOST_REQUIRE_EQUAL(result.c_str(), "foo bar baz");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__ascii_spaces_and_ideographic_space__ideographic_space_unchanged)
+{
+    const auto value = std::string{ " foo \rbar\t baz " } + ideographic_space;
+    const auto expected = std::string{ "foo bar baz " } + ideographic_space;
+    const auto result = to_compressed_form(value);
+    BOOST_REQUIRE_EQUAL(result.c_str(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_only__unchanged)
 {
     const std::u32string cjk_unified_ideograph{ 0x00004e00 };
     const auto utf8 = to_utf8(cjk_unified_ideograph);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), utf8);
+    BOOST_REQUIRE_EQUAL(to_compressed_form(to_utf8(cjk_unified_ideograph)), utf8);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_sandwich__stripped)
 {
     const std::u32string expected{ 0x00004e00, 0x00004e00 };
     const std::u32string cjk_unified_ideograph_sandwich{ 0x00004e00, 0x20, 0x00004e00 };
-    const auto utf8 = to_utf8(cjk_unified_ideograph_sandwich);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    BOOST_REQUIRE_EQUAL(to_compressed_form(to_utf8(cjk_unified_ideograph_sandwich)), to_utf8(expected));
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_right__unchanged)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_right__ascii_space_space_trimmed)
 {
-    const std::u32string expected{ 0x20, 0x00004e00, 0x00004e00 };
+    const std::u32string expected{ 0x00004e00, 0x00004e00 };
     const std::u32string cjk_unified_ideograph_right{ 0x20, 0x00004e00, 0x00004e00 };
-    const auto utf8 = to_utf8(cjk_unified_ideograph_right);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    const auto foo = to_compressed_form(to_utf8(cjk_unified_ideograph_right));
+    const auto bar = to_utf8(expected);
+    BOOST_REQUIRE_EQUAL(foo, bar);
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_left__unchanged)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_left__ascii_space_space_trimmed)
 {
-    const std::u32string expected{ 0x00004e00, 0x00004e00, 0x20 };
+    const std::u32string expected{ 0x00004e00, 0x00004e00 };
     const std::u32string cjk_unified_ideograph_left{ 0x00004e00, 0x00004e00, 0x20 };
-    const auto utf8 = to_utf8(cjk_unified_ideograph_left);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    BOOST_REQUIRE_EQUAL(to_compressed_form(to_utf8(cjk_unified_ideograph_left)), to_utf8(expected));
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_both__unchanged)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_both__ascii_space_spaces_trimmed)
 {
-    const std::u32string expected{ 0x20, 0x00004e00, 0x00004e00, 0x20 };
+    const std::u32string expected{ 0x00004e00, 0x00004e00 };
     const std::u32string cjk_unified_ideograph_both{ 0x20, 0x00004e00, 0x00004e00, 0x20 };
-    const auto utf8 = to_utf8(cjk_unified_ideograph_both);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    BOOST_REQUIRE_EQUAL(to_compressed_form(to_utf8(cjk_unified_ideograph_both)), to_utf8(expected));
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_all__middle_stripped)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__cjk_unified_ideograph_all__stripped_and_trimmed)
 {
-    const std::u32string expected{ 0x20, 0x00004e00, 0x00004e00, 0x20 };
+    const std::u32string expected{ 0x00004e00, 0x00004e00 };
     const std::u32string cjk_unified_ideograph_all{ 0x20, 0x00004e00, 0x0c, 0x00004e00, 0x20 };
-    const auto utf8 = to_utf8(cjk_unified_ideograph_all);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    BOOST_REQUIRE_EQUAL(to_compressed_form(to_utf8(cjk_unified_ideograph_all)), to_utf8(expected));
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__single_and_double_contained_whitespace__single_stripped)
+BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__single_and_double_contained_whitespace__stripped_trimmed)
 {
     const std::u32string expected
     {
-        0x20, 0x00004e00, 0x00004e00, 0x20,
-        0x20, 0x00004e00, 0x00004e00, 0x20,
-        0x20, 0x00004e00, 0x00004e00, 0x20,
-        0x20, 0x00004e00, 0x00004e00, 0x20,
-        0x20, 0x00004e00, 0x00004e00, 0x20,
-        0x20, 0x00004e00, 0x00004e00, 0x20
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00,
+        0x00004e00, 0x00004e00
     };
     const std::u32string single_and_double_contained
     {
@@ -358,35 +415,10 @@ BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__single_and_double_contain
         0x20, 0x00004e00, 0x0b, 0x00004e00, 0x20
     };
     const auto utf8 = to_utf8(single_and_double_contained);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
+    BOOST_REQUIRE_EQUAL(to_compressed_form(utf8), to_utf8(expected));
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__alternating_single_contained_whitespace__contained_stripped)
-{
-    const std::u32string expected
-    {
-        0x20, 
-        0x00004e00, 0x00004e00,
-        0x00004e00, 0x00004e00,
-        0x00004e00, 0x00004e00,
-        0x00004e00, 0x00004e00,
-        0x00004e00, 0x00004e00,
-        0x00004e00, 0x00004e00,
-        0x20
-    };
-    const std::u32string alternating_single_contained
-    {
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20, 0x00004e00, 0x20, 0x00004e00,
-        0x20
-    };
-    const auto utf8 = to_utf8(alternating_single_contained);
-    BOOST_REQUIRE_EQUAL(to_compressed_cjk_form(utf8), to_utf8(expected));
-}
+constexpr size_t maximum_code_point = 0x0010ffff;
 
 // is_separator
 
@@ -438,6 +470,7 @@ BOOST_AUTO_TEST_CASE(normalization__is_chinese_japanese_or_korean__points__90286
 
 // is_diacritic
 
+// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
 BOOST_AUTO_TEST_CASE(normalization__diacritics__points__882)
 {
     size_t points = 0;
@@ -450,6 +483,7 @@ BOOST_AUTO_TEST_CASE(normalization__diacritics__points__882)
     BOOST_REQUIRE_EQUAL(points, 836u);
 }
 
+// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
 BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__882)
 {
     size_t points = 0;
@@ -462,7 +496,7 @@ BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__882)
 
 // is_combining
 
-// TODO: determine if we have transcribed the table incorrectly (reimport using our split()).
+// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
 BOOST_AUTO_TEST_CASE(normalization__is_combining__points__882)
 {
     size_t points = 0;
@@ -473,7 +507,6 @@ BOOST_AUTO_TEST_CASE(normalization__is_combining__points__882)
     BOOST_REQUIRE_EQUAL(points, 872u);
 }
 
-// TODO: determine if the python algorithm is working as expected (use python compiler).
 BOOST_AUTO_TEST_CASE(normalization__is_combining__is_diacritic__differences)
 {
     std::vector<uint32_t> exceptions;

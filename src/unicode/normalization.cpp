@@ -29,6 +29,7 @@
 #endif
 #include <boost/locale.hpp>
 #include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/utility/string.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
@@ -243,8 +244,16 @@ std::string to_compatibility_demposition(const std::string& value)
 
 #endif // WITH_ICU
 
+inline bool is_unicode(char32_t point)
+{
+    return point < 0x0010ffff;
+}
+
 bool is_separator(char32_t point)
 {
+    if (!is_unicode(point))
+        return false;
+
     for (size_t index = 0; index < char32_separators_count; ++index)
         if (point == char32_separators[index])
             return true;
@@ -254,6 +263,9 @@ bool is_separator(char32_t point)
 
 bool is_whitespace(char32_t point)
 {
+    if (!is_unicode(point))
+        return false;
+
     for (size_t index = 0; index < char32_whitespace_count; ++index)
         if (point == char32_whitespace[index])
             return true;
@@ -261,8 +273,35 @@ bool is_whitespace(char32_t point)
     return false;
 }
 
+bool is_combining(char32_t point)
+{
+    if (!is_unicode(point))
+        return false;
+
+    // github.com/python/cpython/blob/main/Modules/unicodedata.c
+    const auto data1 = unicode_data1[(point >> 7)];
+    const auto data2 = unicode_data2[(data1 << 7) + (point & ((1 << 7) - 1))];
+    return combining_index[data2] != 0;
+}
+
+bool is_diacritic(char32_t point)
+{
+    if (!is_unicode(point))
+        return false;
+
+    for (size_t index = 0; index < char32_diacritics_count; ++index)
+        if (point >= char32_diacritics[index].first &&
+            point <= char32_diacritics[index].second)
+            return true;
+
+    return false;
+}
+
 bool is_chinese_japanese_or_korean(char32_t point)
 {
+    if (!is_unicode(point))
+        return false;
+
     for (size_t index = 0; index < char32_chinese_japanese_korean_count; ++index)
         if (point >= char32_chinese_japanese_korean[index].first &&
             point <= char32_chinese_japanese_korean[index].second)
@@ -271,14 +310,18 @@ bool is_chinese_japanese_or_korean(char32_t point)
     return false;
 }
 
-bool is_diacritic(char32_t point)
+std::string to_non_combining_form(const std::string& value)
 {
-    for (size_t index = 0; index < char32_diacritics_count; ++index)
-        if (point >= char32_diacritics[index].first &&
-            point <= char32_diacritics[index].second)
-            return true;
+    if (value.empty())
+        return value;
 
-    return false;
+    // utf32 ensures each word is a single unicode character.
+    auto points = to_utf32(value);
+
+    points.erase(std::remove_if(points.begin(), points.end(), is_combining),
+        points.end());
+
+    return to_utf8(points);
 }
 
 std::string to_non_diacritic_form(const std::string& value)
@@ -295,18 +338,21 @@ std::string to_non_diacritic_form(const std::string& value)
     return to_utf8(points);
 }
 
-// Remove a single ascii whitespace between cjk characters.
-std::string to_compressed_cjk_form(const std::string& value)
+/// Compress ascii whitespace and remove ascii spaces between cjk characters.
+std::string to_compressed_form(const std::string& value)
 {
+    // Compress ascii whitespace to a single 0x20 between each utf32 token.
+    const auto normalized = system::join(system::split(value));
+
     // utf32 ensures each word is a single unicode character.
-    const auto points = to_utf32(value);
+    const auto points = to_utf32(normalized);
 
     // A character cannot be between two others if there aren't at least three.
     if (points.size() < 3u)
-        return value;
+        return normalized;
 
-    // Copy the first character to the result string.
-    std::u32string result{ points.front() };
+    // Copy the first character to output.
+    std::u32string compressed{ points.front() };
 
     // Remove a single ascii whitespace between CJK characters.
     // Front and back cannot be between two characters, so skip them.
@@ -316,13 +362,13 @@ std::string to_compressed_cjk_form(const std::string& value)
             is_chinese_japanese_or_korean(points[point - 1u]) &&
             is_chinese_japanese_or_korean(points[point + 1u])))
         {
-            result += points[point];
+            compressed += points[point];
         }
     }
 
-    // Copy the last character to the result string.
-    result += points.back();
-    return to_utf8(result);
+    // Copy the last character to output.
+    compressed += points.back();
+    return to_utf8(compressed);
 }
 
 } // namespace system

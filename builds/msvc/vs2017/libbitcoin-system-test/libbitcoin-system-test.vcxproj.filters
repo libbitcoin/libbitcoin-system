@@ -497,9 +497,6 @@
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\unicode\normalization.hpp">
-      <Filter>src\unicode</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries.hpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClInclude>

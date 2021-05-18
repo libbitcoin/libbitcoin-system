@@ -176,7 +176,8 @@ electrum_result_list vectors
         base16_chunk("65717569706f20666961722061756765206c616e676f7374612068616368612063616c6f72207472616e63652063756272697220636172726f2070756c6d6fcc816e206f726f2061cc81737065726f"),
         prefix::witness,
         base16_chunk("4eab005dbd669c503b59df2bd7be988a80"),
-        //// base16_chunk("0448346710104003081119421156750490206837"), // one char short in original, padded left.
+        // one char short in original, padded left.
+        //// base16_chunk("0448346710104003081119421156750490206837"),
         empty_password,
         no_password,
         base16_array("001ebce6bfde5851f28a0d44aae5ae0c762b600daf3b33fc8fc630aee0d207646b6f98b18e17dfe3be0a5efe2753c7cdad95860adbbb62cecad4dedb88e02a64")

@@ -31,17 +31,13 @@ namespace system {
 BC_API std::string join(const string_list& tokens,
     const std::string& delimiter=ascii_space);
 
-BC_API string_list split(const std::string& text, bool trim=true,
-    bool compress=true);
+BC_API string_list split(const std::string& text, bool compress=true);
 BC_API string_list split(const std::string& text,
     const std::string& delimiter, bool trim=true, bool compress=true);
-BC_API string_list split(const std::string& text, const string_list& delimiters,
-    const string_list& trim_tokens, bool compress=true);
+BC_API string_list split(const std::string& text,
+    const string_list& delimiters, const string_list& trim_tokens,
+    bool compress=true);
 
-BC_API bool trim_left(std::string& text,
-    const std::string& token=ascii_space);
-BC_API bool trim_right(std::string& text,
-    const std::string& token=ascii_space);
 BC_API bool trim_left(std::string& text,
     const string_list& trim_tokens=ascii_whitespace);
 BC_API bool trim_right(std::string& text,

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_UNICODE_CODE_POINTS_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -56,7 +57,18 @@ extern const char32_t char32_whitespace[char32_whitespace_count];
 constexpr size_t char32_diacritics_count = 197;
 constexpr size_t char32_chinese_japanese_korean_count = 29;
 extern const char32_interval char32_diacritics[char32_diacritics_count];
-extern const char32_interval char32_chinese_japanese_korean[char32_chinese_japanese_korean_count];
+extern const char32_interval char32_chinese_japanese_korean[
+    char32_chinese_japanese_korean_count];
+
+// Python's generated Unicode combining class index.
+constexpr size_t combining_index_count = 342;
+extern const uint8_t combining_index[combining_index_count];
+
+/// Python's generated Unicode database.
+constexpr size_t unicode_data1_count = 8704;
+constexpr size_t unicode_data2_count = 34176;
+extern const uint16_t unicode_data1[unicode_data1_count];
+extern const uint16_t unicode_data2[unicode_data2_count];
 
 } // namespace system
 } // namespace libbitcoin
