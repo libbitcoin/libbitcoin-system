@@ -25,10 +25,6 @@ using namespace bc::system::wallet;
 
 const auto dictionary_count = 10u;
 
-// All of the abnormals are from diacritics.
-const auto abnormals_es = 334;
-const auto abnormals_ja = 644;
-
 // The french diacritics are in nfkd (normal) form.
 const auto accents_es = 334;
 const auto accents_fr = 366;
@@ -58,6 +54,10 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
 }
 
 #ifdef WITH_ICU
+
+// All of the abnormals are from diacritics.
+const auto abnormals_es = 334;
+const auto abnormals_ja = 644;
 
 // abnormal (requires ICU)
 
