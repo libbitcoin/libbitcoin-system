@@ -165,7 +165,7 @@ hd_private electrum::seeder(const string_list& words,
 #else
     // Passphrase normalization is necessary, but ASCII is already normal.
     auto passwords = ascii_to_lower(passphrase);
-    if (!is_ascii(pass))
+    if (!is_ascii(passwords))
         return {};
 #endif
     // Python's unicodedata.combining "returns the canonical combining

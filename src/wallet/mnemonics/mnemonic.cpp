@@ -102,7 +102,7 @@ hd_private mnemonic::seeder(const string_list& words,
     auto passwords = to_compatibility_demposition(passphrase);
 #else
     auto passwords = passphrase;
-    if (!is_ascii(pass))
+    if (!is_ascii(passwords))
         return {};
 #endif
 
