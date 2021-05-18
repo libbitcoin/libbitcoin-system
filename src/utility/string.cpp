@@ -148,7 +148,7 @@ string_list split(const std::string& text, const std::string& delimiter,
 
 string_list split(const std::string& text, bool trim, bool compress)
 {
-    return split(text, ascii_space, true, compress);
+    return split(text, ascii_space, trim, compress);
 }
 
 // TODO: test.

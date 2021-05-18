@@ -284,6 +284,8 @@ BOOST_AUTO_TEST_CASE(string__split1__twelve_delimiters__trimmed_and_compressed)
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
+// TODO: add split(string, bool, bool) tests.
+
 BOOST_AUTO_TEST_CASE(string__split2__one_ideographic_space_delimiter__split)
 {
     const std::string value{ "www\xe3\x80\x80mmm" };
