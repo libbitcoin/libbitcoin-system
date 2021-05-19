@@ -99,13 +99,12 @@ payment_address::payment_address(const short_hash& hash, uint8_t prefix)
 
 payment_address payment_address::from_string(const std::string& address)
 {
-    data_chunk decoded;
+    byte_array<payment::value_size> decoded;
     if (!decode_base58(decoded, address) || 
         decoded.size() != payment::value_size)
         return {};
 
-    // TODO: make array versions of encoders/decoders.
-    payment value(to_array<payment::value_size>(decoded));
+    payment value(std::move(decoded));
 
     // Validates checksum.
     if (!value)
