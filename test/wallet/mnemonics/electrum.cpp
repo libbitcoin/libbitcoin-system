@@ -157,37 +157,28 @@ BOOST_AUTO_TEST_CASE(electrum__prefixer__none__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__standard__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::standard, language::it, 10000);
-    ////BOOST_REQUIRE_EQUAL(result.iterations, 341u);
-    ////BOOST_REQUIRE_EQUAL(join(result.words), "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione");
+    // 17 null bytes, seed_prefix:standard, language::it, 341 iterations.
     const auto mnemonic = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
     BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::standard);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__witness__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::witness, language::it, 10000);
-    ////BOOST_REQUIRE_EQUAL(result.iterations, 9545u);
-    ////BOOST_REQUIRE_EQUAL(join(result.words), "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora");
+    // 17 null bytes, seed_prefix:witness, language::it, 9545 iterations.
     const auto mnemonic = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
     BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::witness);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::two_factor_authentication, language::it, 10000);
-    ////BOOST_REQUIRE_EQUAL(result.iterations, 8814u);
-    ////BOOST_REQUIRE_EQUAL(join(result.words), "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse");
-    ////mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
+    // 17 null bytes, seed_prefix:two_factor_authentication, language::it, 8814 iterations.
     const auto mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
     BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication_witness__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::two_factor_authentication_witness, language::it, 10000);
-    ////BOOST_REQUIRE_EQUAL(result.iterations, 332u);
-    ////BOOST_REQUIRE_EQUAL(join(result.words), "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia");
+    // 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 332 iterations.
     const auto mnemonic = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
     BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication_witness);
 }
@@ -223,82 +214,21 @@ BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication_witness__tru
     BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::two_factor_authentication_witness));
 }
 
-// construct from mnemonic and entropy
+// from_words
+// from_entropy
 
-BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
-{
-    ELECTRUM_VERIFY(0);
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-}
+// is_valid_seed_prefix
+// is_valid_two_factor_authentication_size
 
-BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
-{
-    ELECTRUM_VERIFY(1);
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-}
+// contained_by
+// is_valid_dictionary
+// is_valid_entropy_size
+// is_valid_word_count
+// is_version
+// to_prefix
+// to_version
 
-BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
-{
-    ELECTRUM_VERIFY(2);
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
-{
-    ELECTRUM_VERIFY(3);
-#ifdef WITH_ICU
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
-{
-    ELECTRUM_VERIFY(4);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
-{
-    ELECTRUM_VERIFY(5);
-#ifdef WITH_ICU
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
-{
-    ELECTRUM_VERIFY(6);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
-{
-    ELECTRUM_VERIFY(7);
-#ifdef WITH_ICU
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
-{
-    ELECTRUM_VERIFY(8);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
-{
-    ELECTRUM_VERIFY(9);
-#ifdef WITH_ICU
-    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
-#endif
-}
-
-// statics
+// sizers
 
 BOOST_AUTO_TEST_CASE(electrum__entropy_bits1__boundaries__expected)
 {
@@ -387,6 +317,89 @@ BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
     // The number of bytes that can be used in conversion to words.
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(17, 0)), 17u - ((17u * 8u) % 11u) / 8u);
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(64, 0)), 64u - ((64u * 8u) % 11u) / 8u);
+}
+
+// prefix
+// to_seed
+
+// operator>>
+// operator<<
+
+// electrum()
+
+// Full round trip Electrum repo tests, constructed from mnemonic and entropy.
+
+BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
+{
+    ELECTRUM_VERIFY(0);
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
+{
+    ELECTRUM_VERIFY(1);
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
+{
+    ELECTRUM_VERIFY(2);
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
+{
+    ELECTRUM_VERIFY(3);
+#ifdef WITH_ICU
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+#else
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+#endif
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
+{
+    ELECTRUM_VERIFY(4);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
+{
+    ELECTRUM_VERIFY(5);
+#ifdef WITH_ICU
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+#else
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+#endif
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
+{
+    ELECTRUM_VERIFY(6);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
+{
+    ELECTRUM_VERIFY(7);
+#ifdef WITH_ICU
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+#else
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+#endif
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
+{
+    ELECTRUM_VERIFY(8);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
+{
+    ELECTRUM_VERIFY(9);
+#ifdef WITH_ICU
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+#else
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()
