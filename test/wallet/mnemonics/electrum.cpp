@@ -23,32 +23,122 @@ BOOST_AUTO_TEST_SUITE(electrum_tests)
 
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(electrum__decoder__japanese__expected)
+// encoder
+
+BOOST_AUTO_TEST_CASE(electrum__encoder__invalid__empty)
 {
-    const auto vector = vectors[0];
-    const auto entropy = accessor::decoder(split(vector.mnemonic), language::en);
-    BOOST_REQUIRE_EQUAL(entropy, vector.entropy);
+    BOOST_REQUIRE(accessor::encoder({ 42, 42 }, language::pt).empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__encoder__japanese_with_passphrase__expected)
 {
     const auto vector = vectors[0];
-    const auto words = accessor::encoder(vector.entropy, vector.lingo);
-    BOOST_REQUIRE_EQUAL(words, split(vector.mnemonic));
+    const auto expected = split(vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(accessor::encoder(vector.entropy, vector.lingo), expected);
 }
 
-BOOST_AUTO_TEST_CASE(electrum__grinder__minimum_null_witness_english__expected)
+// decoder
+
+BOOST_AUTO_TEST_CASE(electrum__decoder__invalid__empty)
+{
+    BOOST_REQUIRE(accessor::decoder({ "42", "42" }, language::es).empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__decoder__japanese__expected)
+{
+    const auto vector = vectors[0];
+    BOOST_REQUIRE_EQUAL(accessor::decoder(split(vector.mnemonic), language::en), vector.entropy);
+}
+
+// grinder
+
+BOOST_AUTO_TEST_CASE(electrum__grinder__english__match_first_iteration)
 {
     const auto vector = vectors[0];
     const auto words = split(vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(words.size(), 12u);
 
-    const auto result = accessor::grinder(vector.entropy, vector.prefix, vector.lingo, 10000u);
+    // This verifies that previously-derived entropy round trips.
+    const auto result = accessor::grinder(vector.entropy, vector.prefix, vector.lingo, 42);
     BOOST_REQUIRE_EQUAL(result.entropy, vector.entropy);
     BOOST_REQUIRE_EQUAL(result.words, words);
+
+    // The derivation is deterministic, always finds previously-found on one iteration.
+    BOOST_REQUIRE_EQUAL(result.iterations, 1u);
 }
 
-// electrum standard vectors
+BOOST_AUTO_TEST_CASE(electrum__grinder__null_entropy__match_first_iteration)
+{
+    data_chunk entropy(17, 0x00);
+    const auto prefix = prefix::two_factor_authentication;
+
+    // This is an example of grinding to find the desired prefix.
+    const auto result = accessor::grinder(entropy, prefix, language::zh_Hans, 1000);
+    BOOST_REQUIRE_NE(result.entropy, entropy);
+    BOOST_REQUIRE(electrum::is_version(result.words, prefix));
+
+    // The derivation is deterministic, always finds this result at 274 iterations.
+    BOOST_REQUIRE_EQUAL(result.iterations, 274u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__grinder__18_byte_spanish__match_first_iteration)
+{
+    const auto vector = vectors[6];
+    const auto words = split(vector.mnemonic);
+
+    // This is an example of an unused leading byte having no entropy contribution.
+    const auto entropy = build_chunk({data_chunk{ 0x00 }, vector.entropy });
+    const auto result = accessor::grinder(vector.entropy, vector.prefix, vector.lingo, 42);
+    BOOST_REQUIRE_EQUAL(result.entropy, vector.entropy);
+    BOOST_REQUIRE_EQUAL(result.words, words);
+    BOOST_REQUIRE_EQUAL(result.iterations, 1u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__grinder__19_byte_spanish__match_first_iteration)
+{
+    const auto vector = vectors[6];
+    const auto words = split(vector.mnemonic);
+
+    // This is an example of usable additional bytes having an entropy contribution.
+    const auto entropy = build_chunk({ data_chunk{ 0x00, 0x00 }, vector.entropy });
+    const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, 10000);
+    BOOST_REQUIRE(!result.entropy.empty());
+    BOOST_REQUIRE_NE(result.entropy, vector.entropy);
+    BOOST_REQUIRE(electrum::is_version(result.words, vector.prefix));
+
+    // The iteration result of was just random luck :).
+    BOOST_REQUIRE_EQUAL(result.iterations, 42u);
+}
+
+// seeder
+
+BOOST_AUTO_TEST_CASE(electrum__seeder__ascii_passphrase_mainnet__expected_hd_key)
+{
+    const auto result = accessor::seeder(split(vectors[7].mnemonic), "Did you ever hear the tragedy of Darth Plagueis the Wise?", hd_private::mainnet);
+    BOOST_REQUIRE_EQUAL(result.encoded(), "xprv9s21ZrQH143K3J7uaJtH3fPYadCubChqdXxqpWVDU9PasYoWhbCXLLQCP1DtCtuixztKC6eYXXqrk1an8sztbZ8L53MDLsvKLHZ3GaxY1d8");
+}
+
+BOOST_AUTO_TEST_CASE(electrum__seeder__ascii_passphrase_testnet__expected_hd_key)
+{
+    const auto result = accessor::seeder(split(vectors[7].mnemonic), "Did you ever hear the tragedy of Darth Plagueis the Wise?", hd_private::testnet);
+    BOOST_REQUIRE_EQUAL(result.encoded(), "tprv8ZgxMBicQKsPe7MSEsjnDK1Xtkd7pijqy5sxgvufx7t4f9YbgxYGr5meJBPYDGJ3LSR6CCGJgtRfCs8XG6LqQcPvbgZX1EeNFPJTiGTAqkt");
+}
+
+#ifdef WITH_ICU
+BOOST_AUTO_TEST_CASE(electrum__seeder__non_ascii_passphrase_with_icu__valid)
+{
+    BOOST_REQUIRE(accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん", hd_private::testnet));
+}
+#else
+BOOST_AUTO_TEST_CASE(electrum__seeder__non_ascii_passphrase_without_icu__invalid)
+
+    // This is the only seeder failure condition.
+    BOOST_REQUIRE(!accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん", hd_private::testnet));
+}
+#endif
+
+// prefixer
+
+// construct from mnemonic and entropy
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
 {
@@ -74,7 +164,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
 #else
-    BOOST_REQUIRE_EQUAL(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
 #endif
 }
 
@@ -89,7 +179,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
 #else
-    BOOST_REQUIRE_EQUAL(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
 #endif
 }
 
@@ -104,7 +194,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
 #else
-    BOOST_REQUIRE_EQUAL(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
 #endif
 }
 
@@ -119,7 +209,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
 #else
-    BOOST_REQUIRE_EQUAL(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
 #endif
 }
 
