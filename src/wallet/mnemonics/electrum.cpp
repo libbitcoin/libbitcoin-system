@@ -114,11 +114,12 @@ data_chunk electrum::decoder(const string_list& words, language identifier)
 // The Electrum prng minimum value technique sacrifices 11 bits of entropy by
 // discarding any prng value that is below 2^(strength-11).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L190-L205
-electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix,
-    language identifier, size_t limit)
+electrum::result electrum::grinder(const data_chunk& entropy,
+    seed_prefix prefix, language identifier, size_t limit)
 {
     string_list words;
     data_chunk hash(entropy);
+    const auto start = limit;
 
     // Normalize entropy to the wordlist by managing its pad bits.
     const auto entropy_size = usable_size(hash);
@@ -139,7 +140,7 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
         // Avoid collisions with Electrum v1 and BIP39 mnemonics.
         ////if (!electrum_v1(words, identifier) && !mnemonic(words) &&...
         if (is_version(words, prefix))
-            return { hash, words };
+            return { hash, words, start - limit };
 
         // This replaces Electrum's prng with determinism.
         hash = to_chunk(sha512_hash(hash));

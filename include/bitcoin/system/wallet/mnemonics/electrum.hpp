@@ -127,6 +127,13 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const electrum& of);
 
 protected:
+    typedef struct
+    {
+        data_chunk entropy;
+        string_list words;
+        size_t iterations;
+    } result;
+
     /// Map entropy to entropy bit count (132 to 506 bits).
     static size_t entropy_bits(const data_slice& entropy);
     
@@ -161,7 +168,6 @@ protected:
     static bool is_valid_seed_prefix(seed_prefix prefix);
     static bool is_valid_two_factor_authentication_size(size_t count);
 
-    typedef struct { data_chunk entropy; string_list words; } result;
     static result grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit);
     static string_list encoder(const data_chunk& entropy, language identifier);
