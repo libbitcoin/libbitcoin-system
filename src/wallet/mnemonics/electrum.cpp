@@ -147,7 +147,7 @@ electrum::result electrum::grinder(const data_chunk& entropy,
         hash.resize(entropy_size);
     }
 
-    return {};
+    return { {}, {}, start };
 }
 
 // Electrum uses the same normalization function for words and passphrases.

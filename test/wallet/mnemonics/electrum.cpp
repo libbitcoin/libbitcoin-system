@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__english__match_first_iteration)
 BOOST_AUTO_TEST_CASE(electrum__grinder__null_entropy__match_first_iteration)
 {
     data_chunk entropy(17, 0x00);
-    const auto prefix = prefix::two_factor_authentication;
+    const auto prefix = electrum::seed_prefix::two_factor_authentication;
 
     // This is an example of grinding to find the desired prefix.
     const auto result = accessor::grinder(entropy, prefix, language::zh_Hans, 1000);
@@ -111,12 +111,13 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__19_byte_spanish__match_first_iteration)
 
 BOOST_AUTO_TEST_CASE(electrum__grinder__not_found__empty_iterations_zero)
 {
+    const auto limit = 41u;
     const auto vector = vectors[6];
     const auto entropy = build_chunk({ data_chunk{ 0x00, 0x00 }, vector.entropy });
-    const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, 41u);
+    const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, limit);
     BOOST_REQUIRE(result.entropy.empty());
     BOOST_REQUIRE(result.words.empty());
-    BOOST_REQUIRE_EQUAL(result.iterations, 0);
+    BOOST_REQUIRE_EQUAL(result.iterations, limit);
 }
 
 // seeder
@@ -151,75 +152,75 @@ BOOST_AUTO_TEST_CASE(electrum__seeder__ascii_passphrase_testnet__expected_hd_key
 BOOST_AUTO_TEST_CASE(electrum__prefixer__none__expected)
 {
     // All invalid wordlists or failures to match will produce 'none' (other enums unreachable).
-    BOOST_REQUIRE(accessor::prefixer({ "bogus" }) == prefix::none);
+    BOOST_REQUIRE(accessor::prefixer({ "bogus" }) == electrum::seed_prefix::none);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__standard__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::standard, language::it, 10000);
+    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::standard, language::it, 10000);
     ////BOOST_REQUIRE_EQUAL(result.iterations, 341u);
     ////BOOST_REQUIRE_EQUAL(join(result.words), "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione");
     const auto mnemonic = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == prefix::standard);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::standard);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__witness__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::witness, language::it, 10000);
+    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::witness, language::it, 10000);
     ////BOOST_REQUIRE_EQUAL(result.iterations, 9545u);
     ////BOOST_REQUIRE_EQUAL(join(result.words), "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora");
     const auto mnemonic = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == prefix::witness);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::witness);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::two_factor_authentication, language::it, 10000);
+    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::two_factor_authentication, language::it, 10000);
     ////BOOST_REQUIRE_EQUAL(result.iterations, 8814u);
     ////BOOST_REQUIRE_EQUAL(join(result.words), "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse");
     ////mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
     const auto mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == prefix::two_factor_authentication);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication_witness__expected)
 {
-    ////const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::two_factor_authentication_witness, language::it, 10000);
+    ////const auto result = accessor::grinder(data_chunk(17, 0x00), electrum::seed_prefix::two_factor_authentication_witness, language::it, 10000);
     ////BOOST_REQUIRE_EQUAL(result.iterations, 332u);
     ////BOOST_REQUIRE_EQUAL(join(result.words), "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia");
     const auto mnemonic = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == prefix::two_factor_authentication_witness);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication_witness);
 }
 
 // validator
 
 BOOST_AUTO_TEST_CASE(electrum__validator__invalid__false)
 {
-    BOOST_REQUIRE(!accessor::validator({ "bogus" }, prefix::standard));
+    BOOST_REQUIRE(!accessor::validator({ "bogus" }, electrum::seed_prefix::standard));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__standard__true)
 {
     const auto mnemonic = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), prefix::standard));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::standard));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__witness__true)
 {
     const auto mnemonic = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), prefix::witness));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::witness));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication__true)
 {
     const auto mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), prefix::two_factor_authentication));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::two_factor_authentication));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication_witness__true)
 {
     const auto mnemonic = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), prefix::two_factor_authentication_witness));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::two_factor_authentication_witness));
 }
 
 // construct from mnemonic and entropy
