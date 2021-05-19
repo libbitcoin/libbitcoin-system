@@ -25,8 +25,6 @@
 namespace libbitcoin {
 namespace system {
 
-#ifdef WITH_ICU
-
 /// Change case of text, complies with section 3.13 of Unicode Standard.
 BC_API bool to_lower(std::string& value);
 BC_API bool to_upper(std::string& value);
@@ -38,10 +36,8 @@ BC_API bool to_canonical_decomposition(std::string& value);
 BC_API bool to_compatibility_composition(std::string& value);
 BC_API bool to_compatibility_demposition(std::string& value);
 
-#endif // WITH_ICU
-
 /// Character tests.
-inline bool is_unicode(char32_t point);
+BC_API bool is_unicode(char32_t point);
 BC_API bool is_separator(char32_t point);
 BC_API bool is_whitespace(char32_t point);
 BC_API bool is_combining(char32_t point);

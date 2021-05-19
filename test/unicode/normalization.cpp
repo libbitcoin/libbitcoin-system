@@ -117,9 +117,9 @@ BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__empty__empty)
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
 {
     auto decomposed = to_string(base16_literal("cf92cc8100f0909080f09f92a9"));
-    const auto composed = to_string(base16_literal("cf9300f0909080f09f92a9"));
+    const auto composed = "cf9300f0909080f09f92a9";
     BOOST_REQUIRE(to_canonical_composition(decomposed));
-    BOOST_REQUIRE_EQUAL(decomposed, composed);
+    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), composed);
 }
 
 // to_canonical_decomposition (nfkc)
@@ -153,6 +153,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__bip38__expecte
     auto decomposed = to_string(base16_literal("cea5cc8100f0909080f09f92a9"));
     const auto composed = "ce8e00f0909080f09f92a9";
     BOOST_REQUIRE(to_compatibility_composition(decomposed));
+    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), composed);
 }
 
 // to_compatibility_demposition (nfkd)
@@ -169,6 +170,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__bip38__expecte
     auto composed = to_string(base16_literal("ce8e00f0909080f09f92a9"));
     const auto decomposed = "cea5cc8100f0909080f09f92a9";
     BOOST_REQUIRE(to_compatibility_demposition(composed));
+    BOOST_REQUIRE_EQUAL(encode_base16(composed), decomposed);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__ideographic_space_sandwich__expected)

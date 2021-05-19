@@ -43,8 +43,6 @@ using namespace boost::locale;
 // Local helpers.
 // ----------------------------------------------------------------------------
 
-#ifdef WITH_ICU
-
 #ifdef _MSC_VER
 
 // Workarounds for lack of Windows ICU support in boost-locale packages.
@@ -223,6 +221,7 @@ bool to_upper(std::string& out, const std::string& in)
     manager.select(icu_backend_name);
     const generator locale(manager);
     out = boost::locale::to_upper(in, locale(utf8_locale_name));
+    return true;
 }
 
 #endif // _MSC_VER
@@ -269,9 +268,7 @@ bool to_compatibility_demposition(std::string& value)
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
 }
 
-#endif // WITH_ICU
-
-inline bool is_unicode(char32_t point)
+bool is_unicode(char32_t point)
 {
     return point < 0x0010ffff;
 }
