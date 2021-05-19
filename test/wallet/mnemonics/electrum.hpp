@@ -19,8 +19,29 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 #define LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 
+#include "../../test.hpp"
 #include <string>
 #include <bitcoin/system.hpp>
+
+#define ELECTRUM_VERIFY(index) \
+    const auto vector = vectors[index]; \
+    \
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk); \
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk); \
+    \
+    electrum instance1(vector.mnemonic, vector.lingo); \
+    BOOST_REQUIRE(instance1); \
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo); \
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix); \
+    BOOST_REQUIRE_EQUAL(join(split(instance1.sentence(), ideographic_space)), vector.mnemonic); \
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy); \
+    \
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo); \
+    BOOST_REQUIRE(instance2); \
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo); \
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix); \
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence()); \
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy)
 
 // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system;
