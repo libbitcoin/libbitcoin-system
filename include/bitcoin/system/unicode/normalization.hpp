@@ -34,7 +34,7 @@ BC_API bool to_upper(std::string& value);
 BC_API bool to_canonical_composition(std::string& value);
 BC_API bool to_canonical_decomposition(std::string& value);
 BC_API bool to_compatibility_composition(std::string& value);
-BC_API bool to_compatibility_demposition(std::string& value);
+BC_API bool to_compatibility_decomposition(std::string& value);
 
 /// Character tests.
 BC_API bool is_unicode(char32_t point);

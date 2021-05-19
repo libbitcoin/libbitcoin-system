@@ -155,14 +155,14 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 hd_private electrum::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
-    // Passphrase is limited to ascii (normal) if WITH_ICU is not defined.
+    // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
 
     // Conforms to the Unicode Standard for nfkd and case lowering.
     // seed = unicodedata.normalize('NFKD', seed)
     // Python 3 [but not 2] string.lower() conforms to the Unicode Standard.
     // seed = seed.lower()
-    if (!to_compatibility_demposition(phrase) || !to_lower(phrase))
+    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
         return {};
 
     // Python's unicodedata.combining returns the canonical combining

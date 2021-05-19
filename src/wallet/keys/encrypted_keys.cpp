@@ -72,8 +72,6 @@ static bool address_salt(ek_salt& salt, const ec_compressed& point,
     return address ? address_salt(salt, address) : false;
 }
 
-#ifdef WITH_ICU
-
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
@@ -102,8 +100,6 @@ static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     return address ? address_validate(salt, address) : false;
 }
 
-#endif
-
 // point_
 // ----------------------------------------------------------------------------
 
@@ -121,19 +117,13 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
     return to_array(sign_byte);
 }
 
-#ifdef WITH_ICU
-
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
     return point_sign(single.front(), hash);
 }
 
-#endif
-
 // scrypt_
 // ----------------------------------------------------------------------------
-
-#ifdef WITH_ICU
 
 static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
 {
@@ -141,23 +131,17 @@ static hash_digest scrypt_token(const data_slice& data, const data_slice& salt)
     return scrypt<hash_size>(data, salt, 16384, 8, 8);
 }
 
-#endif
-
 static long_hash scrypt_pair(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024, 1, 1);
 }
 
-#ifdef WITH_ICU
-
 static long_hash scrypt_private(const data_slice& data, const data_slice& salt)
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384, 8, 8);
 }
-
-#endif
 
 // set_flags
 // ----------------------------------------------------------------------------
@@ -178,8 +162,6 @@ static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
     return to_array(byte);
 }
 
-#ifdef WITH_ICU
-
 static one_byte set_flags(bool compressed, bool lot_sequence)
 {
     return set_flags(compressed, lot_sequence, false);
@@ -189,8 +171,6 @@ static one_byte set_flags(bool compressed)
 {
     return set_flags(compressed, false);
 }
-
-#endif
 
 // create_key_pair
 // ----------------------------------------------------------------------------
@@ -297,8 +277,6 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
     return create_key_pair(out_private, out_public, out_point, token, seed,
         version, compressed);
 }
-
-#ifdef WITH_ICU
 
 // create_token
 // ----------------------------------------------------------------------------
@@ -525,8 +503,6 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     out_compressed = parse.compressed();
     return true;
 }
-
-#endif // WITH_ICU
 
 } // namespace wallet
 } // namespace system

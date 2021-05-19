@@ -218,27 +218,23 @@ BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
 }
 
 #ifdef WITH_ICU
-BOOST_AUTO_TEST_CASE(languages__normalize__with_icu__lowered_trimmed)
-{
-    const auto abnormal = "ábaco";
-    std::string out = abnormal;
-    BOOST_REQUIRE(to_compatibility_demposition(out));
-    BOOST_REQUIRE_NE(abnormal, out);
 
-    const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
-    const string_list expected{ "abc", out, "xyz" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words).size(), 3u);
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
-}
-#else
-BOOST_AUTO_TEST_CASE(languages__normalize__without_icu__false)
+BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_with_icu__not_empty)
 {
-    std::string abnormal = "ábaco";
-    std::string normal = "ábaco";
-    BOOST_REQUIRE(!to_compatibility_demposition(abnormal));
-    BOOST_REQUIRE(!to_compatibility_demposition(normal));
-    BOOST_REQUIRE(accessor::normalize({ abnormal }).empty());
+    std::string value = "ábaco";
+    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    BOOST_REQUIRE(!accessor::normalize({ value }).empty());
 }
+
+#else
+
+BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_without_icu__empty)
+{
+    std::string value = "ábaco";
+    BOOST_REQUIRE(!to_compatibility_decomposition(value));
+    BOOST_REQUIRE(accessor::normalize({ value }).empty());
+}
+
 #endif
 
 // construct/properties/bool

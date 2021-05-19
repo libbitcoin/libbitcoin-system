@@ -154,9 +154,9 @@ bool to_upper(std::string& out, const std::string& in)
 constexpr auto icu_backend_name = "icu";
 constexpr auto utf8_locale_name = "en_US.UTF8";
 
-// Guard against backend_manager.select(BC_LOCALE_BACKEND) silent failure.
 static bool get_backend_manager(localization_backend_manager& out)
 {
+#ifdef WITH_ICU
     static std::once_flag mutex;
     static bool initialized;
 
@@ -169,6 +169,8 @@ static bool get_backend_manager(localization_backend_manager& out)
     {
         // Not thread safe, use call_once.
         const auto all = out.get_all_backends();
+
+        // Guards backend_manager.select(BC_LOCALE_BACKEND) silent failure.
         initialized = std::find(all.cbegin(), all.cend(),
             icu_backend_name) != all.cend();
     };
@@ -176,6 +178,9 @@ static bool get_backend_manager(localization_backend_manager& out)
     // One time verifier of the localization backend manager.
     std::call_once(mutex, validate);
     return initialized;
+#else
+    return false;
+#endif
 }
 
 static bool normal_form(std::string& out, const std::string& in,
@@ -263,7 +268,7 @@ bool to_compatibility_composition(std::string& value)
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkc);
 }
 
-bool to_compatibility_demposition(std::string& value)
+bool to_compatibility_decomposition(std::string& value)
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
 }

@@ -95,11 +95,11 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
 hd_private mnemonic::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
-    // Passphrase is limited to ascii (normal) if WITH_ICU is not defined.
+    // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
 
     // Unlike Electrum, BIP39 does not perform any further normalization.
-    if (!to_compatibility_demposition(phrase))
+    if (!to_compatibility_decomposition(phrase))
         return {};
 
     // Words are in normal (lower, nfkd) form, even without ICU.

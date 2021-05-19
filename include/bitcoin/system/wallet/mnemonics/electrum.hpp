@@ -98,7 +98,7 @@ public:
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
-    /// Otherwise words must be prenormalized if WITH_ICU is not defined.
+    /// Otherwise words must be prenormalized if WITH_ICU undefind.
     /// A prefix other than 'none' implies the words represent a valid seed.
     static seed_prefix to_prefix(const string_list& words);
 
@@ -118,7 +118,7 @@ public:
     seed_prefix prefix() const;
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefined.
+    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_seed(const std::string& passphrase="",
         uint64_t chain=hd_private::mainnet) const;
 

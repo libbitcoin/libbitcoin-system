@@ -24,6 +24,106 @@ BOOST_AUTO_TEST_SUITE(normalization_tests)
 
 #ifdef WITH_ICU
 
+// Non-ASCII test cases without WITH_ICU defined
+// ----------------------------------------------------------------------------
+
+// casing
+
+BOOST_AUTO_TEST_CASE(normalization__to_upper__ideographic_space__unchanged)
+{
+    std::string space = ideographic_space;
+    BOOST_REQUIRE(to_upper(space));
+    BOOST_REQUIRE_EQUAL(space, ideographic_space);
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
+{
+    std::string space = ideographic_space;
+    BOOST_REQUIRE(to_lower(space));
+    BOOST_REQUIRE_EQUAL(space, ideographic_space);
+}
+
+// normal forms
+
+// github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
+{
+    auto decomposed = to_string(base16_literal("cf92cc8100f0909080f09f92a9"));
+    BOOST_REQUIRE(to_canonical_composition(decomposed));
+    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "cf9300f0909080f09f92a9");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__bip38__expected)
+{
+    auto composed = to_string(base16_literal("cf9300f0909080f09f92a9"));
+    BOOST_REQUIRE(to_canonical_decomposition(composed));
+    BOOST_REQUIRE_EQUAL(encode_base16(composed), "cf92cc8100f0909080f09f92a9");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__bip38__expected)
+{
+    auto decomposed = to_string(base16_literal("cea5cc8100f0909080f09f92a9"));
+    BOOST_REQUIRE(to_compatibility_composition(decomposed));
+    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "ce8e00f0909080f09f92a9");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expected)
+{
+    auto composed = to_string(base16_literal("ce8e00f0909080f09f92a9"));
+    BOOST_REQUIRE(to_compatibility_decomposition(composed));
+    BOOST_REQUIRE_EQUAL(encode_base16(composed), "cea5cc8100f0909080f09f92a9");
+}
+
+#else
+
+// Non-ASCII test cases without WITH_ICU defined.
+// ----------------------------------------------------------------------------
+
+// casing
+
+BOOST_AUTO_TEST_CASE(normalization__to_lower__upper_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_lower(non_ascii));
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_upper__lower_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_lower(non_ascii));
+}
+
+// normal forms
+
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__non_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_lower(non_ascii));
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__non_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_canonical_decomposition(non_ascii));
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__non_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_compatibility_composition(non_ascii));
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__non_ascii__false)
+{
+    std::string non_ascii{ char(0xff) };
+    BOOST_REQUIRE(!to_compatibility_decomposition(non_ascii));
+}
+
+#endif // WITH_ICU
+
+// ASCII test cases (valid with or without WITH_ICU defined).
+// ----------------------------------------------------------------------------
+
 // to_lower
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__empty__empty)
@@ -44,24 +144,15 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__lower_ascii__unchanged)
 BOOST_AUTO_TEST_CASE(normalization__to_lower__upper_ascii__lowered)
 {
     std::string upper{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
-    const auto lower{ "abcdefghijklmnopqrstuvwxyz" };
     BOOST_REQUIRE(to_lower(upper));
-    BOOST_REQUIRE_EQUAL(upper, lower);
+    BOOST_REQUIRE_EQUAL(upper, "abcdefghijklmnopqrstuvwxyz");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__mixed_ascii__lowered)
 {
     std::string mixed{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
-    const auto lower{ "abcdefghijklmnopqrstuvwxyz" };
     BOOST_REQUIRE(to_lower(mixed));
-    BOOST_REQUIRE_EQUAL(mixed, lower);
-}
-
-BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
-{
-    std::string space = ideographic_space;
-    BOOST_REQUIRE(to_lower(space));
-    BOOST_REQUIRE_EQUAL(space, ideographic_space);
+    BOOST_REQUIRE_EQUAL(mixed, "abcdefghijklmnopqrstuvwxyz");
 }
 
 // to_upper
@@ -76,9 +167,8 @@ BOOST_AUTO_TEST_CASE(normalization__to_upper__empty__empty)
 BOOST_AUTO_TEST_CASE(normalization__to_upper__lower_ascii__uppered)
 {
     std::string lower{ "abcdefghijklmnopqrstuvwxyz" };
-    const auto upper{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     BOOST_REQUIRE(to_upper(lower));
-    BOOST_REQUIRE_EQUAL(lower, upper);
+    BOOST_REQUIRE_EQUAL(lower, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_upper__upper_ascii__unchanged)
@@ -92,19 +182,11 @@ BOOST_AUTO_TEST_CASE(normalization__to_upper__upper_ascii__unchanged)
 BOOST_AUTO_TEST_CASE(normalization__to_upper__mixed_ascii__uppered)
 {
     std::string mixed{ "abcdefghijklmnopqrstuvwxyz" };
-    const auto upper{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     BOOST_REQUIRE(to_upper(mixed));
-    BOOST_REQUIRE_EQUAL(mixed, upper);
+    BOOST_REQUIRE_EQUAL(mixed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_upper__ideographic_space__unchanged)
-{
-    std::string space = ideographic_space;
-    BOOST_REQUIRE(to_upper(space));
-    BOOST_REQUIRE_EQUAL(space, ideographic_space);
-}
-
-// to_canonical_composition (nfc)
+// normal forms
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__empty__empty)
 {
@@ -113,16 +195,13 @@ BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__empty__empty)
     BOOST_REQUIRE(empty.empty());
 }
 
-// github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
-BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__ascii__unchanged)
 {
-    auto decomposed = to_string(base16_literal("cf92cc8100f0909080f09f92a9"));
-    const auto composed = "cf9300f0909080f09f92a9";
-    BOOST_REQUIRE(to_canonical_composition(decomposed));
-    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), composed);
+    std::string value{ "abc" };
+    const auto expected = value;
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
-
-// to_canonical_decomposition (nfkc)
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__empty__empty)
 {
@@ -131,15 +210,13 @@ BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__empty__empty)
     BOOST_REQUIRE(empty.empty());
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__bip38__expected)
+BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__ascii__unchanged)
 {
-    auto composed = to_string(base16_literal("cf9300f0909080f09f92a9"));
-    const auto decomposed = "cf92cc8100f0909080f09f92a9";
-    BOOST_REQUIRE(to_canonical_decomposition(composed));
-    BOOST_REQUIRE_EQUAL(encode_base16(composed), decomposed);
+    std::string value{ "abc" };
+    const auto expected = value;
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
-
-// to_compatibility_composition (nfd)
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__empty__empty)
 {
@@ -148,57 +225,28 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__empty__empty)
     BOOST_REQUIRE(empty.empty());
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__bip38__expected)
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__ascii__unchanged)
 {
-    auto decomposed = to_string(base16_literal("cea5cc8100f0909080f09f92a9"));
-    const auto composed = "ce8e00f0909080f09f92a9";
-    BOOST_REQUIRE(to_compatibility_composition(decomposed));
-    BOOST_REQUIRE_EQUAL(encode_base16(decomposed), composed);
+    std::string value{ "abc" };
+    const auto expected = value;
+    BOOST_REQUIRE(to_compatibility_composition(value));
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
 
-// to_compatibility_demposition (nfkd)
-
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__empty__empty)
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_compatibility_demposition(empty));
+    BOOST_REQUIRE(to_compatibility_decomposition(empty));
     BOOST_REQUIRE(empty.empty());
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__bip38__expected)
+BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__unchanged)
 {
-    auto composed = to_string(base16_literal("ce8e00f0909080f09f92a9"));
-    const auto decomposed = "cea5cc8100f0909080f09f92a9";
-    BOOST_REQUIRE(to_compatibility_demposition(composed));
-    BOOST_REQUIRE_EQUAL(encode_base16(composed), decomposed);
+    std::string value{ "abc" };
+    const auto expected = value;
+    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
-
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__ideographic_space_sandwich__expected)
-{
-    std::string original{ "space->　<-space" };
-    const auto expected{ "space-> <-space" };
-    BOOST_REQUIRE(to_compatibility_demposition(original));
-    BOOST_REQUIRE_EQUAL(original.c_str(), expected);
-}
-
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_demposition__61cc81__c3a1)
-{
-    const std::string literal_c3a1 = "á";
-    const std::string literal_61cc81 = "á";
-    const auto string_c3a1 = "\xc3\xa1";
-    const auto string_61cc81 = "\x61\xcc\x81";
-    BOOST_REQUIRE_EQUAL(string_c3a1, literal_c3a1);
-    BOOST_REQUIRE_EQUAL(string_61cc81, literal_61cc81);
-
-    std::string normalized_c3a1 = string_c3a1;
-    std::string normalized_61cc81 = string_61cc81;
-    BOOST_REQUIRE(to_compatibility_demposition(normalized_c3a1));
-    BOOST_REQUIRE(to_compatibility_demposition(normalized_61cc81));
-    BOOST_REQUIRE_EQUAL(normalized_61cc81.c_str(), string_61cc81);
-    BOOST_REQUIRE_EQUAL(normalized_c3a1.c_str(), string_61cc81);
-}
-
-#endif // WITH_ICU
 
 // is_separator
 

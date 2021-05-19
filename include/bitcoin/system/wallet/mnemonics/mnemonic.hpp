@@ -92,7 +92,7 @@ public:
     mnemonic(const data_chunk& entropy, language identifier=language::en);
 
     /// The seed derived from mnemonic entropy and an optional passphrase.
-    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefined.
+    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_seed(const std::string& passphrase="",
         uint64_t chain=hd_private::mainnet) const;
 

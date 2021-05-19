@@ -126,8 +126,6 @@ BC_API bool create_key_pair(encrypted_private& out_private,
     const encrypted_token& token, const ek_seed& seed, uint8_t version,
     bool compressed=true);
 
-#ifdef WITH_ICU
-
 /**
  * Create an intermediate passphrase for subsequent key pair generation.
  * @param[out] out_token   The new intermediate passphrase.
@@ -190,8 +188,6 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
 BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     bool& out_compressed, const encrypted_public& key,
     const std::string& passphrase);
-
-#endif // WITH_ICU
 
 } // namespace wallet
 } // namespace system

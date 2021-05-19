@@ -99,7 +99,7 @@ string_list languages::split(const std::string& sentence, language)
 string_list languages::normalize(const string_list& words)
 {
     auto sentence = system::join(words);
-    if (!to_compatibility_demposition(sentence) || !to_lower(sentence))
+    if (!to_compatibility_decomposition(sentence) || !to_lower(sentence))
         return {};
 
     return system::split(sentence);
