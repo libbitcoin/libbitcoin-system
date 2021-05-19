@@ -86,6 +86,7 @@ protected:
     languages(const data_chunk& entropy, const string_list& words,
         language identifier);
 
+    // Returns empty if WIT_ICU not defined and words are not ASCII.
     // This is only used to improve the chance of wordlist matching.
     static string_list normalize(const string_list& words);
 

@@ -31,7 +31,9 @@ using namespace bc::system::wallet;
 ////{
 ////    return std::count_if(words.begin(), words.end(), [&](const char test[])
 ////    {
-////        return test != to_compatibility_demposition(test);
+////        std::string copy = test;
+////        to_compatibility_demposition(copy);
+////        return test != copy;
 ////    });
 ////}
 
@@ -39,7 +41,9 @@ bool abnormal(const electrum_v1::dictionary::words& words)
 {
     return std::all_of(words.begin(), words.end(), [&](const char test[])
     {
-        return test != to_compatibility_demposition(test);
+        std::string copy = test;
+        to_compatibility_demposition(copy);
+        return test != copy;
     });
 }
 

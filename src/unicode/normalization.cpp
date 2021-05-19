@@ -72,174 +72,201 @@ static NORM_FORM to_win32_normal_form(norm_type form)
     }
 }
 
-static std::string normal_form(const std::string& value, norm_type form)
+static bool normal_form(std::string& out, const std::string& in,
+    norm_type form)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    const auto wide = to_utf16(value);
+    const auto wide = to_utf16(in);
     const auto size = wide.size();
     const auto source = wide.c_str();
     const auto norm = to_win32_normal_form(form);
 
     // Guard cast to int.
     if (size > std::numeric_limits<int>::max())
-        return {};
+        return false;
 
     const auto length = static_cast<int>(size);
     auto result = NormalizeString(norm, source, length, NULL, 0);
 
     // NormalizeString would overflow buffer (or length is empty).
     if (result <= 0)
-        return {};
+        return false;
 
     auto buffer = std::wstring(result, 0);
     result = NormalizeString(norm, source, length, &buffer.front(), result);
 
     // Conversion failed.
     if (result <= 0)
-        return {};
+        return false;
 
-    return to_utf8(buffer.substr(0, result));
+    out = to_utf8(buffer.substr(0, result));
+    return true;
 }
 
-std::string to_lower(const std::string& value)
+bool to_lower(std::string& out, const std::string& in)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    auto wide = to_utf16(value);
+    auto wide = to_utf16(in);
     const auto size = wide.size();
 
     // Guard against DWORD overflow.
     if (size > std::numeric_limits<DWORD>::max())
-        return {};
+        return false;
 
     // std::vector ensures contiguous bytes.
     const auto length = static_cast<DWORD>(size);
 
     // CharLowerBuffW ensures conversion in place.
     if (CharLowerBuffW(&wide.front(), length) != length)
-        return {};
+        return false;
 
-    return to_utf8(wide);
+    out = to_utf8(wide);
+    return true;
 }
 
-std::string to_upper(const std::string& value)
+bool to_upper(std::string& out, const std::string& in)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    auto wide = to_utf16(value);
+    auto wide = to_utf16(in);
     const auto size = wide.size();
 
     // Guard against DWORD overflow.
     if (size > std::numeric_limits<DWORD>::max())
-        return {};
+        return false;
 
     // std::vector ensures contiguous bytes.
     const auto length = static_cast<DWORD>(size);
 
     // CharUpperBuffW ensures conversion in place.
     if (CharUpperBuffW(&wide.front(), length) != length)
-        return {};
+        return false;
 
-    return to_utf8(wide);
+    out = to_utf8(wide);
+    return true;
 }
 
 #else // _MSC_VER
 
-// Ensure validate_localization is called only once.
-static std::once_flag icu_mutex;
+constexpr auto icu_backend_name = "icu";
+constexpr auto utf8_locale_name = "en_US.UTF8";
 
-// One time verifier of the localization backend manager.
 // Guard against backend_manager.select(BC_LOCALE_BACKEND) silent failure.
-static void validate_localization()
+static bool get_backend_manager(localization_backend_manager& out)
 {
-    // Thread safe.
-    // Creates a new global backend manager and returns the onld one.
-    // TODO: it would be more efficient to just store this globally.
-    const auto backend_manager = localization_backend_manager::global();
+    static std::once_flag mutex;
+    static bool initialized;
 
-    // Not thread safe (call to validate_localization is guarded).
-    constexpr auto icu_backend_name = "icu";
-    const auto available_backends = backend_manager.get_all_backends();
-    const auto iterator = std::find(available_backends.cbegin(),
-        available_backends.cend(), icu_backend_name);
+    // Thread safe, creates global on first call.
+    // Returns reference to the global backend manager.
+    out = localization_backend_manager::global();
 
-    if (iterator == available_backends.cend())
-        throw dependency_exception(
-            "Unicode normalization test failed, a dependency may be missing.");
+    // Set the static initialization state.
+    const auto validate = [&]()
+    {
+        // Not thread safe, use call_once.
+        const auto all = out.get_all_backends();
+        initialized = std::find(all.cbegin(), all.cend(),
+            icu_backend_name) != all.cend();
+    };
+
+    // One time verifier of the localization backend manager.
+    std::call_once(mutex, validate);
+    return initialized;
 }
 
-static std::string normal_form(const std::string& value, norm_type form)
+static bool normal_form(std::string& out, const std::string& in,
+    norm_type form)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    std::call_once(icu_mutex, validate_localization);
+    localization_backend_manager manager;
+    if (!get_backend_manager(manager))
+        return false;
 
-    // Thread safe.
-    constexpr auto icu_backend_name = "icu";
-    constexpr auto utf8_locale_name = "en_US.UTF8";
-    auto backend_manager = localization_backend_manager::global();
-    backend_manager.select(icu_backend_name);
-    const generator locale(backend_manager);
-    return normalize(value, form, locale(utf8_locale_name));
+    manager.select(icu_backend_name);
+    const generator locale(manager);
+    out = normalize(in, form, locale(utf8_locale_name));
+    return true;
 }
 
-std::string to_lower(const std::string& value)
+bool to_lower(std::string& out, const std::string& in)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    std::call_once(icu_mutex, validate_localization);
+    localization_backend_manager manager;
+    if (!get_backend_manager(manager))
+        return false;
 
-    // Thread safe.
-    constexpr auto icu_backend_name = "icu";
-    constexpr auto utf8_locale_name = "en_US.UTF8";
-    auto backend_manager = localization_backend_manager::global();
-    backend_manager.select(icu_backend_name);
-    const generator locale(backend_manager);
-    return boost::locale::to_lower(value, locale(utf8_locale_name));
+    manager.select(icu_backend_name);
+    const generator locale(manager);
+    out = boost::locale::to_lower(in, locale(utf8_locale_name));
+    return true;
 }
 
-std::string to_upper(const std::string& value)
+bool to_upper(std::string& out, const std::string& in)
 {
-    if (value.empty())
-        return value;
+    if (in.empty())
+        return true;
 
-    std::call_once(icu_mutex, validate_localization);
+    localization_backend_manager manager;
+    if (!get_backend_manager(manager))
+        return false;
 
-    // Thread safe.
-    constexpr auto icu_backend_name = "icu";
-    constexpr auto utf8_locale_name = "en_US.UTF8";
-    auto backend_manager = localization_backend_manager::global();
-    backend_manager.select(icu_backend_name);
-    const generator locale(backend_manager);
-    return boost::locale::to_upper(value, locale(utf8_locale_name));
+    manager.select(icu_backend_name);
+    const generator locale(manager);
+    out = boost::locale::to_upper(in, locale(utf8_locale_name));
 }
 
 #endif // _MSC_VER
 
-std::string to_canonical_composition(const std::string& value)
+bool to_lower(std::string& value)
 {
-    return normal_form(value, norm_type::norm_nfc);
+    if (is_ascii(value))
+    {
+        value = ascii_to_lower(value);
+        return true;
+    }
+
+    return to_lower(value, value);
 }
 
-std::string to_canonical_decomposition(const std::string& value)
+bool to_upper(std::string& value)
 {
-    return normal_form(value, norm_type::norm_nfd);
+    if (is_ascii(value))
+    {
+        value = ascii_to_upper(value);
+        return true;
+    }
+
+    return to_upper(value, value);
 }
 
-std::string to_compatibility_composition(const std::string& value)
+bool to_canonical_composition(std::string& value)
 {
-    return normal_form(value, norm_type::norm_nfkc);
+    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfc);
 }
 
-std::string to_compatibility_demposition(const std::string& value)
+bool to_canonical_decomposition(std::string& value)
 {
-    return normal_form(value, norm_type::norm_nfkd);
+    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfd);
+}
+
+bool to_compatibility_composition(std::string& value)
+{
+    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkc);
+}
+
+bool to_compatibility_demposition(std::string& value)
+{
+    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
 }
 
 #endif // WITH_ICU

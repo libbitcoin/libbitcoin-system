@@ -221,24 +221,23 @@ BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
 BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_with_icu__normal_ascii_lowered_trimmed)
 {
     const auto abnormal = "ábaco";
-    const auto normal = to_compatibility_demposition(abnormal);
-    BOOST_REQUIRE_NE(abnormal, normal);
+    std::string out = abnormal;
+    BOOST_REQUIRE(to_compatibility_demposition(out));
+    BOOST_REQUIRE_NE(abnormal, out);
 
     const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
-    const string_list expected{ "abc", normal, "xyz" };
+    const string_list expected{ "abc", out, "xyz" };
+    BOOST_REQUIRE(accessor::normalize(words).size(), 3u);
     BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
 }
 #else
 BOOST_AUTO_TEST_CASE(languages__normalize__abnormal_without_icu__abnormal_ascii_lowered_trimmed)
 {
-    const auto abnormal = "ábaco";
-    const auto normal = "ábaco";
-    ////const auto normal = to_compatibility_demposition(abnormal);
-    BOOST_REQUIRE_NE(abnormal, normal);
-
-    const string_list words{ " aBc ", abnormal, "\t\r\nxYz\f\v" };
-    const string_list expected{ "abc", abnormal, "xyz" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+    std::string abnormal = "ábaco";
+    std::string normal = "ábaco";
+    BOOST_REQUIRE(!to_compatibility_demposition(abnormal));
+    BOOST_REQUIRE(!to_compatibility_demposition(normal));
+    BOOST_REQUIRE(accessor::normalize(words).empty());
 }
 #endif
 

@@ -98,12 +98,11 @@ string_list languages::split(const std::string& sentence, language)
 // protected
 string_list languages::normalize(const string_list& words)
 {
-#ifdef WITH_ICU
-    const auto nfkd = to_compatibility_demposition(system::join(words));
-    return system::split(to_lower(nfkd));
-#else
-    return system::split(ascii_to_lower(system::join(words)));
-#endif
+    auto sentence = system::join(words);
+    if (!to_compatibility_demposition(sentence) || !to_lower(sentence))
+        return {};
+
+    return system::split(sentence);
 }
 
 // protected constructors

@@ -28,15 +28,15 @@ namespace system {
 #ifdef WITH_ICU
 
 /// Change case of text, complies with section 3.13 of Unicode Standard.
-BC_API std::string to_lower(const std::string& value);
-BC_API std::string to_upper(const std::string& value);
+BC_API bool to_lower(std::string& value);
+BC_API bool to_upper(std::string& value);
 
 /// Convert text to Unicode normal form (Unicode Standard).
 /// Failure indicated by empty string return for non-empty value.
-BC_API std::string to_canonical_composition(const std::string& value);
-BC_API std::string to_canonical_decomposition(const std::string& value);
-BC_API std::string to_compatibility_composition(const std::string& value);
-BC_API std::string to_compatibility_demposition(const std::string& value);
+BC_API bool to_canonical_composition(std::string& value);
+BC_API bool to_canonical_decomposition(std::string& value);
+BC_API bool to_compatibility_composition(std::string& value);
+BC_API bool to_compatibility_demposition(std::string& value);
 
 #endif // WITH_ICU
 

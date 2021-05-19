@@ -155,22 +155,21 @@ electrum::result electrum::grinder(const data_chunk& entropy, seed_prefix prefix
 hd_private electrum::seeder(const string_list& words,
     const std::string& passphrase, uint64_t chain)
 {
+    // Passphrase is limited to ascii (normal) if WITH_ICU is not defined.
+    auto phrase = passphrase;
+
+    // Conforms to the Unicode Standard for nfkd and case lowering.
+    // seed = unicodedata.normalize('NFKD', seed)
     // Python 3 [but not 2] string.lower() conforms to the Unicode Standard.
     // seed = seed.lower()
-#ifdef WITH_ICU
-    // Conforms to the Unicode Standard for nfkd and case lowering.
-    auto passwords = to_lower(to_compatibility_demposition(passphrase));
-#else
-    // Passphrase normalization is necessary, but ASCII is already normal.
-    auto passwords = ascii_to_lower(passphrase);
-    if (!is_ascii(passwords))
+    if (!to_compatibility_demposition(phrase) || !to_lower(phrase))
         return {};
-#endif
+
     // Python's unicodedata.combining returns the canonical combining
     // class assigned to the character, which may or may not be a diacritic.
     // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
     // Remove combining class characters (from the nfkd form converted above).
-    passwords = to_non_combining_form(passwords);
+    phrase = to_non_combining_form(phrase);
 
     // Python splits on the 6 ascii/C whitespace chars and compresses.
     // seed = u' '.join(seed.split())
@@ -178,7 +177,7 @@ hd_private electrum::seeder(const string_list& words,
     // seed = u''.join([seed[i] for i in range(len(seed))
     // if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and is_CJK(seed[i+1]))])
     // Compress ascii whitespace and remove ascii spaces between cjk characters.
-    passwords = to_compressed_form(passwords);
+    phrase = to_compressed_form(phrase);
 
     // Words are in normal (lower, nfkd) form, even without ICU.
     auto sentence = system::join(words);
@@ -186,7 +185,7 @@ hd_private electrum::seeder(const string_list& words,
     sentence = to_compressed_form(sentence);
 
     const auto data = to_chunk(sentence);
-    const auto salt = to_chunk(passphrase_prefix + passwords);
+    const auto salt = to_chunk(passphrase_prefix + phrase);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
     const auto part = system::split(seed);
 
