@@ -204,12 +204,37 @@ BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication_witness__tru
 
 // from_words
 
-BOOST_AUTO_TEST_CASE(electrum__from_words__bogus_none__false)
+BOOST_AUTO_TEST_CASE(electrum__from_words__empty_none__false)
 {
-    BOOST_REQUIRE(!accessor::from_words({ "bogus" }, language::none));
+    BOOST_REQUIRE(!accessor::from_words({}, language::none));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__from_words__invalid_prefix__true)
+BOOST_AUTO_TEST_CASE(electrum__from_words__bogus_none__false)
+{
+    BOOST_REQUIRE(!accessor::from_words({ "bogus", "bogus" }, language::none));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__low_word_count__true)
+{
+    BOOST_REQUIRE(!accessor::from_words(string_list(11, "眼"), language::zh_Hans));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__minimum_word_count__true)
+{
+    BOOST_REQUIRE(accessor::from_words(string_list(12, "眼"), language::zh_Hans));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__maximum_word_count__true)
+{
+    BOOST_REQUIRE(accessor::from_words(string_list(46, "眼"), language::zh_Hans));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__high_word_count__false)
+{
+    BOOST_REQUIRE(!accessor::from_words(string_list(47, "眼"), language::zh_Hans));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__unknown_prefix__true)
 {
     // Add a 13th valid word.
     const auto extended = join({ mnemonic_standard, "ristoro" });
@@ -228,15 +253,6 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__invalid_prefix__true)
 
     // The modified mnemonic is valid but does not have a known prefix.
     BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::none);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__from_words__invalid_word_count__false)
-{
-    // Remove the 12th word to invalidate the mnemonic word count.
-    auto words = split(mnemonic_standard);
-    words.resize(words.size() - 1u);
-    const auto invalid = join(words);
-    BOOST_REQUIRE(!accessor::from_words(split(invalid), language::it));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__mismatched_language__false)
@@ -269,18 +285,150 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__standard_italian__true)
     BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::standard);
 }
 
+BOOST_AUTO_TEST_CASE(electrum__from_words__witness_italian__true)
+{
+    const auto instance = accessor::from_words(split(mnemonic_witness), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::witness);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__two_factor_authentication_italian__true)
+{
+    const auto instance = accessor::from_words(split(mnemonic_two_factor_authentication), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::two_factor_authentication);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__two_factor_authentication_witness_italian__true)
+{
+    const auto instance = accessor::from_words(split(mnemonic_two_factor_authentication_witness), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::two_factor_authentication_witness);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
+{
+    // There are 100 common words in en and fr dictionaries, but all of the
+    // common words occupy a different index in their respective dictionaries.
+    // No other dictionary pair exibits conflicting behavior.
+    const string_list ambiguous
+    {
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+    };
+
+    // The words are in different positions in two dictionaries.
+    const auto english = accessor::from_words(ambiguous, language::en);
+    const auto french = accessor::from_words(ambiguous, language::fr);
+
+    // Explicit specification succeeds.
+    BOOST_REQUIRE(english);
+    BOOST_REQUIRE(french);
+
+    // But note that entropy for the same mnemonics is different!
+    BOOST_REQUIRE_NE(english.entropy(), french.entropy());
+
+    // So the language must be explicitly expecified.
+    BOOST_REQUIRE(!accessor::from_words(ambiguous, language::none));
+
+    // But this is only required when all words conflict.
+
+    const string_list distinct_english
+    {
+        "differ", "fragile", "fragile", "fragile", "fragile", "fragile",
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+    };
+
+    const auto english2 = accessor::from_words(distinct_english, language::none);
+    BOOST_REQUIRE(english2);
+    BOOST_REQUIRE_NE(english2.entropy(), english.entropy());
+
+    const string_list distinct_french
+    {
+        "différer", "fragile", "fragile", "fragile", "fragile", "fragile",
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+    };
+
+    const auto french2 = accessor::from_words(distinct_french, language::none);
+    BOOST_REQUIRE(french2);
+    BOOST_REQUIRE_NE(french2.entropy(), french.entropy());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
+{
+    // There are 1275 common words in the zh_Hans and zh_Hant dictionaries, but
+    // all common words occupy the same index in both dictionaries.
+    // No other dictionary pair exibits this partial symmetry.
+    const string_list words
+    {
+        "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
+    };
+
+    // These words are in the same positions in both dictionaries.
+    const auto simplified = accessor::from_words(words, language::zh_Hans);
+    const auto traditional = accessor::from_words(words, language::zh_Hant);
+
+    // Explicit specification succeeds.
+    BOOST_REQUIRE(simplified);
+    BOOST_REQUIRE(traditional);
+
+    // But note that entropy is the same for each.
+    BOOST_REQUIRE_EQUAL(simplified.entropy(), traditional.entropy());
+
+    // So the language does not ever have to be explicitly expecified.
+    const auto none = accessor::from_words(words, language::none);
+    BOOST_REQUIRE(none);
+    BOOST_REQUIRE_EQUAL(none.entropy(), traditional.entropy());
+    BOOST_REQUIRE_EQUAL(none.entropy(), simplified.entropy());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__mixed_languages__false)
+{
+    const string_list words
+    {
+        "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
+        "abdikace", "abandon", "abacate", "的", "歇", "above"
+    };
+
+    // All words must be from one dictionary.
+    BOOST_REQUIRE(!accessor::from_words(words, language::none));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__similar_words__false)
+{
+    const string_list words
+    {
+        "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+        "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+    };
+
+    // Normalization does not reduce á to a.
+    BOOST_REQUIRE(!accessor::from_words(words, language::none));
+}
+
 // from_entropy
+
+// contained_by
 
 // is_valid_seed_prefix
 // is_valid_two_factor_authentication_size
 
-// contained_by
 // is_valid_dictionary
 // is_valid_entropy_size
 // is_valid_word_count
+
 // is_version
-// to_prefix
 // to_version
+
+// to_prefix
+// prefix
+
+// to_seed
+
+// operator>>
+// operator<<
+
+// electrum()
 
 // sizers
 
@@ -372,14 +520,6 @@ BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(17, 0)), 17u - ((17u * 8u) % 11u) / 8u);
     BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(64, 0)), 64u - ((64u * 8u) % 11u) / 8u);
 }
-
-// prefix
-// to_seed
-
-// operator>>
-// operator<<
-
-// electrum()
 
 // Full round trip Electrum repo tests, constructed from mnemonic and entropy.
 // Electrum test vector mnemonics just happen to be prenormalized, even though
