@@ -20,8 +20,9 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <functional>
+#include <string>
 #include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/utility/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,6 +32,8 @@ inline bool is_between(uint8_t value, uint8_t low, uint8_t high)
     return low <= value && value <= high;
 }
 
+// The C standard library function `isxdigit` depends on the current locale,
+// and does not necessarily match the base16 encoding.
 bool is_base16(char character)
 {
     return
@@ -57,6 +60,13 @@ std::string encode_base16(const data_slice& data)
     }
 
     return out;
+}
+
+std::string encode_hash(const data_slice& hash)
+{
+    data_chunk data(hash.size());
+    std::reverse_copy(hash.begin(), hash.end(), data.begin());
+    return encode_base16(data);
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)

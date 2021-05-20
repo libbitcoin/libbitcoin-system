@@ -39,14 +39,6 @@ bool decode_base16(byte_array<Size>& out, const std::string& in)
 }
 
 template <size_t Size>
-std::string encode_hash(const byte_array<Size>& hash)
-{
-    byte_array<Size> data;
-    std::reverse_copy(hash.begin(), hash.end(), data.begin());
-    return encode_base16(data);
-}
-
-template <size_t Size>
 bool decode_hash(byte_array<Size>& out, const std::string& in)
 {
     data_chunk data(Size);
@@ -60,7 +52,23 @@ bool decode_hash(byte_array<Size>& out, const std::string& in)
 }
 
 template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
+std::string base16_string(const char(&string)[Size])
+{
+    return to_string(base16_chunk(string));
+}
+
+template <size_t Size>
+data_chunk base16_chunk(const char(&string)[Size])
+{
+    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
+
+    data_chunk out;
+    decode_base16(out, string);
+    return out;
+}
+
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> base16_array(const char(&string)[Size])
 {
     static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
 
@@ -72,7 +80,7 @@ byte_array<(Size - 1u) / 2u> base16_literal(const char (&string)[Size])
 }
 
 template <size_t Size>
-byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size])
+byte_array<(Size - 1u) / 2u> base16_hash(const char(&string)[Size])
 {
     static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
 
@@ -81,6 +89,20 @@ byte_array<(Size - 1u) / 2u> hash_literal(const char (&string)[Size])
         out.fill(0);
 
     return out;
+}
+
+// DEPRECATED: use base16_array (renamed).
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size])
+{
+    return base16_array(string);
+}
+
+// DEPRECATED: use base16_hash (renamed).
+template <size_t Size>
+byte_array<(Size - 1u) / 2u> hash_literal(const char(&string)[Size])
+{
+    return base16_hash(string);
 }
 
 } // namespace system
