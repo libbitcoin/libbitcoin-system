@@ -26,11 +26,11 @@
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
+#include <bitcoin/system/wallet/keys/ec_scalar.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 
 namespace libbitcoin {

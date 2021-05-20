@@ -188,8 +188,6 @@
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp" />
-    <ClCompile Include="..\..\..\..\src\math\ec_point.cpp" />
-    <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c" />
@@ -288,8 +286,10 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\tiff.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\witness_address.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\keys\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ek_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ek_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ek_token.cpp" />
@@ -448,8 +448,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\crypto.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\golomb_coding.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\hash.hpp" />
@@ -532,8 +530,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\witness_address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_public.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_scalar.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ek_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ek_public.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ek_token.hpp" />

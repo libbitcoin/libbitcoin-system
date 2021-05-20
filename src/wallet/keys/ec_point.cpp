@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/math/ec_point.hpp>
+#include <bitcoin/system/wallet/keys/ec_point.hpp>
 
 #include <cstdint>
 #include <utility>

@@ -429,12 +429,6 @@
     <ClCompile Include="..\..\..\..\src\math\crypto.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\ec_point.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\ec_scalar.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\elliptic_curve.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
@@ -705,10 +699,16 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\witness_address.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\keys\ec_point.cpp">
+      <Filter>src\wallet\keys</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_private.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_public.cpp">
+      <Filter>src\wallet\keys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\keys\ec_scalar.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\ek_private.cpp">
@@ -1145,12 +1145,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\crypto.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_point.hpp">
-      <Filter>include\bitcoin\system\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ec_scalar.hpp">
-      <Filter>include\bitcoin\system\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
@@ -1397,10 +1391,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\witness_address.hpp">
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_point.hpp">
+      <Filter>include\bitcoin\system\wallet\keys</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_private.hpp">
       <Filter>include\bitcoin\system\wallet\keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_public.hpp">
+      <Filter>include\bitcoin\system\wallet\keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_scalar.hpp">
       <Filter>include\bitcoin\system\wallet\keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ek_private.hpp">

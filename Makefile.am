@@ -119,8 +119,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/machine/program.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
-    src/math/ec_point.cpp \
-    src/math/ec_scalar.cpp \
     src/math/elliptic_curve.cpp \
     src/math/golomb_coding.cpp \
     src/math/hash.cpp \
@@ -236,8 +234,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/addresses/qrencode/rsecc.h \
     src/wallet/addresses/qrencode/split.c \
     src/wallet/addresses/qrencode/split.h \
+    src/wallet/keys/ec_point.cpp \
     src/wallet/keys/ec_private.cpp \
     src/wallet/keys/ec_public.cpp \
+    src/wallet/keys/ec_scalar.cpp \
     src/wallet/keys/ek_private.cpp \
     src/wallet/keys/ek_public.cpp \
     src/wallet/keys/ek_token.cpp \
@@ -308,6 +308,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/script.hpp \
     test/chain/stealth_record.cpp \
     test/chain/transaction.cpp \
+    test/concurrency/thread.cpp \
     test/config/authority.cpp \
     test/config/base16.cpp \
     test/config/base2.cpp \
@@ -322,6 +323,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
+    test/data/binary.cpp \
+    test/data/collection.cpp \
+    test/data/data.cpp \
+    test/data/data_slice.cpp \
+    test/data/string.cpp \
     test/formats/base_10.cpp \
     test/formats/base_16.cpp \
     test/formats/base_2048.cpp \
@@ -336,8 +342,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/machine/opcode.cpp \
     test/machine/operation.cpp \
     test/math/checksum.cpp \
-    test/math/ec_point.cpp \
-    test/math/ec_scalar.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \
@@ -389,7 +393,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
-    test/network/thread.cpp \
     test/serialization/deserialize.cpp \
     test/serialization/endian.cpp \
     test/serialization/serialize.cpp \
@@ -401,11 +404,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/utf8_everywhere/utf8_environment.cpp \
     test/unicode/utf8_everywhere/utf8_istream.cpp \
     test/unicode/utf8_everywhere/utf8_ostream.cpp \
-    test/utility/binary.cpp \
-    test/utility/collection.cpp \
-    test/utility/data.cpp \
-    test/utility/data_slice.cpp \
-    test/utility/string.cpp \
     test/wallet/message.cpp \
     test/wallet/neutrino_filter.cpp \
     test/wallet/property_tree.cpp \
@@ -420,8 +418,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/addresses/uri.cpp \
     test/wallet/addresses/uri_reader.cpp \
     test/wallet/addresses/witness_address.cpp \
+    test/wallet/keys/ec_point.cpp \
     test/wallet/keys/ec_private.cpp \
     test/wallet/keys/ec_public.cpp \
+    test/wallet/keys/ec_scalar.cpp \
     test/wallet/keys/encrypted_keys.cpp \
     test/wallet/keys/hd_private.cpp \
     test/wallet/keys/hd_public.cpp \
@@ -677,8 +677,6 @@ include_bitcoin_system_mathdir = ${includedir}/bitcoin/system/math
 include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/checksum.hpp \
     include/bitcoin/system/math/crypto.hpp \
-    include/bitcoin/system/math/ec_point.hpp \
-    include/bitcoin/system/math/ec_scalar.hpp \
     include/bitcoin/system/math/elliptic_curve.hpp \
     include/bitcoin/system/math/golomb_coding.hpp \
     include/bitcoin/system/math/hash.hpp \
@@ -782,8 +780,10 @@ include_bitcoin_system_wallet_addresses_HEADERS = \
 
 include_bitcoin_system_wallet_keysdir = ${includedir}/bitcoin/system/wallet/keys
 include_bitcoin_system_wallet_keys_HEADERS = \
+    include/bitcoin/system/wallet/keys/ec_point.hpp \
     include/bitcoin/system/wallet/keys/ec_private.hpp \
     include/bitcoin/system/wallet/keys/ec_public.hpp \
+    include/bitcoin/system/wallet/keys/ec_scalar.hpp \
     include/bitcoin/system/wallet/keys/ek_private.hpp \
     include/bitcoin/system/wallet/keys/ek_public.hpp \
     include/bitcoin/system/wallet/keys/ek_token.hpp \

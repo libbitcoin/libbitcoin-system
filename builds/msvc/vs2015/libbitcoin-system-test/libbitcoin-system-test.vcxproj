@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />
@@ -110,6 +111,11 @@
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\binary.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_2048.cpp" />
@@ -124,8 +130,6 @@
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ec_point.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
@@ -183,7 +187,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\test\network\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\serialization\deserialize.cpp" />
     <ClCompile Include="..\..\..\..\test\serialization\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp" />
@@ -197,11 +200,6 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\data_slice.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
@@ -213,8 +211,10 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\witness_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_scalar.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\hd_public.cpp" />
