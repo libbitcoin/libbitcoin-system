@@ -24,6 +24,100 @@ BOOST_AUTO_TEST_SUITE(electrum_tests)
 using namespace bc::system::wallet;
 using prefix = electrum::seed_prefix;
 
+// Protected methods.
+// ----------------------------------------------------------------------------
+
+// sizers
+
+BOOST_AUTO_TEST_CASE(electrum__entropy_bits1__boundaries__expected)
+{
+    // The number of bits for the given number of bytes.
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(17, 0)), 17u * 8u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(64, 0)), 64u * 8u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__entropy_bits2__boundaries__expected)
+{
+    // The number of bits for the given number of words.
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(12, "")), 12u * 11u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(46, "")), 46u * 11u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__entropy_size1__boundaries__expected)
+{
+    // This must round up to the next byte.
+    // The required number of bytes to achieve the given bit strength.
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(132), 132u / 8u + 1u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(506), 506u / 8u + 1u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__entropy_size2__boundaries__expected)
+{
+    // These number of bits are wasted.
+    BOOST_REQUIRE_EQUAL((12 * 11) % 8, 4);
+    BOOST_REQUIRE_EQUAL((46 * 11) % 8, 2);
+
+    // This must round up to the next byte.
+    // The required number of bytes for the given number of words.
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(12, "")), (12u * 11u) / 8u + 1u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(46, "")), (46u * 11u) / 8u + 1u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__word_count1__boundaries__expected)
+{
+    // These number of bits are wasted.
+    BOOST_REQUIRE_EQUAL((17 * 8) % 11, 4);
+    BOOST_REQUIRE_EQUAL((64 * 8) % 11, 6);
+
+    // The number of words that can be derived from the given entropy size.
+    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(17, 0)), (17u * 8u) / 11u);
+    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(64, 0)), (64u * 8u) / 11u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__word_count2__boundaries__expected)
+{
+    // The required number of words to achieve the given bit strength.
+    BOOST_REQUIRE_EQUAL(accessor::word_count(132), 132u / 11u + 0u);
+    BOOST_REQUIRE_EQUAL(accessor::word_count(506), 506u / 11u + 0u);
+
+    // This must round up to the next word.
+    BOOST_REQUIRE_EQUAL(accessor::word_count(131), 131u / 11u + 1u);
+    BOOST_REQUIRE_EQUAL(accessor::word_count(505), 505u / 11u + 1u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__unused_bits__boundaries__expected)
+{
+    // The supported word ranges determine the number of wasted entropy bits.
+    BOOST_REQUIRE_EQUAL((17 * 8) % 11, 4);
+    BOOST_REQUIRE_EQUAL((64 * 8) % 11, 6);
+
+    // The number of bits that must be wasted in conversion to words.
+    BOOST_REQUIRE_EQUAL(accessor::unused_bits(data_chunk(17, 0)), (17u * 8u) % 11u);
+    BOOST_REQUIRE_EQUAL(accessor::unused_bits(data_chunk(64, 0)), (64u * 8u) % 11u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__unused_bytes__boundaries__expected)
+{
+    // The entropy byte boundaries are chosen to not waste bytes.
+    BOOST_REQUIRE_EQUAL(((17 * 8) % 11) / 8, 0);
+    BOOST_REQUIRE_EQUAL(((64 * 8) % 11) / 8, 0);
+
+    // The number of bytes that must be wasted in conversion to words.
+    BOOST_REQUIRE_EQUAL(accessor::unused_bytes(data_chunk(17, 0)), ((17u * 8u) % 11u) / 8u);
+    BOOST_REQUIRE_EQUAL(accessor::unused_bytes(data_chunk(64, 0)), ((64u * 8u) % 11u) / 8u);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
+{
+    // The entropy byte boundaries are chosen to not waste bytes.
+    BOOST_REQUIRE_EQUAL(17 - ((17 * 8) % 11) / 8, 17);
+    BOOST_REQUIRE_EQUAL(64 - ((64 * 8) % 11) / 8, 64);
+
+    // The number of bytes that can be used in conversion to words.
+    BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(17, 0)), 17u - ((17u * 8u) % 11u) / 8u);
+    BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(64, 0)), 64u - ((64u * 8u) % 11u) / 8u);
+}
+
 // encoder
 
 BOOST_AUTO_TEST_CASE(electrum__encoder__invalid__empty)
@@ -242,12 +336,7 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__unknown_prefix__true)
     const auto instance = accessor::from_words(split(extended), language::it);
 
     // Electrum does not incorporate a checksum.
-    // If the prefix is as expected, the mnemonic is considered valid.
     // Words construction does not validate a prefix, it computes the prefix.
-    // Entropy (numeric) construction is used to generate words with a desired
-    // prefix. However, iteration over sets of words can be used to discover a
-    // set with the desired prefix. The presumption is that it is easier (and
-    // safer) to rely on numbers for word generation vs. the reverse.
     BOOST_REQUIRE(instance);
 
     // The modified mnemonic is valid but does not have a known prefix.
@@ -358,14 +447,14 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
     // There are 1275 common words in the zh_Hans and zh_Hant dictionaries, but
     // all common words occupy the same index in both dictionaries.
     // No other dictionary pair exibits this partial symmetry.
-    const string_list words
+    const string_list redundant
     {
         "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
     };
 
     // These words are in the same positions in both dictionaries.
-    const auto simplified = accessor::from_words(words, language::zh_Hans);
-    const auto traditional = accessor::from_words(words, language::zh_Hant);
+    const auto simplified = accessor::from_words(redundant, language::zh_Hans);
+    const auto traditional = accessor::from_words(redundant, language::zh_Hant);
 
     // Explicit specification succeeds.
     BOOST_REQUIRE(simplified);
@@ -375,7 +464,7 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
     BOOST_REQUIRE_EQUAL(simplified.entropy(), traditional.entropy());
 
     // So the language does not ever have to be explicitly expecified.
-    const auto none = accessor::from_words(words, language::none);
+    const auto none = accessor::from_words(redundant, language::none);
     BOOST_REQUIRE(none);
     BOOST_REQUIRE_EQUAL(none.entropy(), traditional.entropy());
     BOOST_REQUIRE_EQUAL(none.entropy(), simplified.entropy());
@@ -383,26 +472,26 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__mixed_languages__false)
 {
-    const string_list words
+    const string_list mixed
     {
         "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
         "abdikace", "abandon", "abacate", "的", "歇", "above"
     };
 
     // All words must be from one dictionary.
-    BOOST_REQUIRE(!accessor::from_words(words, language::none));
+    BOOST_REQUIRE(!accessor::from_words(mixed, language::none));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__similar_words__false)
 {
-    const string_list words
+    const string_list similar
     {
         "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
         "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
     };
 
     // Normalization does not reduce á to a.
-    BOOST_REQUIRE(!accessor::from_words(words, language::none));
+    BOOST_REQUIRE(!accessor::from_words(similar, language::none));
 }
 
 // from_entropy
@@ -457,7 +546,53 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__language_none__false)
     BOOST_REQUIRE(!accessor::from_entropy(vectors[6].entropy, prefix::standard, language::none, max_uint16));
 }
 
+// Public methods.
+// ----------------------------------------------------------------------------
+
 // contained_by
+
+BOOST_AUTO_TEST_CASE(electrum__contained_by__invalid__none)
+{
+    BOOST_REQUIRE(electrum::contained_by({ "bogus" }, language::none) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__contained_by__ambiguous__expected)
+{
+    const string_list ambiguous
+    {
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
+        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+    };
+
+    // contained_by returns the first matching language.
+    // The only ambiguous set is en-fr (100 words).
+    // So an en match should be explicitly tested against fr.
+    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::none) == language::en);
+    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::en) == language::en);
+    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::fr) == language::fr);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__contained_by__redundant__expected)
+{
+    const string_list redundant
+    {
+        "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
+    };
+
+    // contained_by returns the first matching language.
+    // The only redundant set is zh_Hans-zh_Hant (1275 words).
+    BOOST_REQUIRE(electrum::contained_by(redundant, language::none) == language::zh_Hans);
+    BOOST_REQUIRE(electrum::contained_by(redundant, language::zh_Hans) == language::zh_Hans);
+    BOOST_REQUIRE(electrum::contained_by(redundant, language::zh_Hant) == language::zh_Hant);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__contained_by__japanese__expected)
+{
+    const auto vector = vectors[electrum_vector::japanese];
+    BOOST_REQUIRE(electrum::contained_by(split(vector.mnemonic), vector.lingo) == vector.lingo);
+    BOOST_REQUIRE(electrum::contained_by(split(vector.mnemonic), language::none) == vector.lingo);
+    BOOST_REQUIRE(electrum::contained_by(split(vector.mnemonic), language::ko) == language::none);
+}
 
 // is_valid_seed_prefix
 // is_valid_two_factor_authentication_size
@@ -479,96 +614,8 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__language_none__false)
 
 // electrum()
 
-// sizers
-
-BOOST_AUTO_TEST_CASE(electrum__entropy_bits1__boundaries__expected)
-{
-    // The number of bits for the given number of bytes.
-    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(17, 0)), 17u * 8u);
-    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(64, 0)), 64u * 8u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__entropy_bits2__boundaries__expected)
-{
-    // The number of bits for the given number of words.
-    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(12, "")), 12u * 11u);
-    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(46, "")), 46u * 11u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__entropy_size1__boundaries__expected)
-{
-    // This must round up to the next byte.
-    // The required number of bytes to achieve the given bit strength.
-    BOOST_REQUIRE_EQUAL(accessor::entropy_size(132), 132u / 8u + 1u);
-    BOOST_REQUIRE_EQUAL(accessor::entropy_size(506), 506u / 8u + 1u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__entropy_size2__boundaries__expected)
-{
-    // These number of bits are wasted.
-    BOOST_REQUIRE_EQUAL((12 * 11) % 8, 4);
-    BOOST_REQUIRE_EQUAL((46 * 11) % 8, 2);
-
-    // This must round up to the next byte.
-    // The required number of bytes for the given number of words.
-    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(12, "")), (12u * 11u) / 8u + 1u);
-    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(46, "")), (46u * 11u) / 8u + 1u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__word_count1__boundaries__expected)
-{
-    // These number of bits are wasted.
-    BOOST_REQUIRE_EQUAL((17 * 8) % 11, 4);
-    BOOST_REQUIRE_EQUAL((64 * 8) % 11, 6);
-
-    // The number of words that can be derived from the given entropy size.
-    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(17, 0)), (17u * 8u) / 11u);
-    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(64, 0)), (64u * 8u) / 11u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__word_count2__boundaries__expected)
-{
-    // The required number of words to achieve the given bit strength.
-    BOOST_REQUIRE_EQUAL(accessor::word_count(132), 132u / 11u + 0u);
-    BOOST_REQUIRE_EQUAL(accessor::word_count(506), 506u / 11u + 0u);
-
-    // This must round up to the next word.
-    BOOST_REQUIRE_EQUAL(accessor::word_count(131), 131u / 11u + 1u);
-    BOOST_REQUIRE_EQUAL(accessor::word_count(505), 505u / 11u + 1u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__unused_bits__boundaries__expected)
-{
-    // The supported word ranges determine the number of wasted entropy bits.
-    BOOST_REQUIRE_EQUAL((17 * 8) % 11, 4);
-    BOOST_REQUIRE_EQUAL((64 * 8) % 11, 6);
-
-    // The number of bits that must be wasted in conversion to words.
-    BOOST_REQUIRE_EQUAL(accessor::unused_bits(data_chunk(17, 0)), (17u * 8u) % 11u);
-    BOOST_REQUIRE_EQUAL(accessor::unused_bits(data_chunk(64, 0)), (64u * 8u) % 11u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__unused_bytes__boundaries__expected)
-{
-    // The entropy byte boundaries are chosen to not waste bytes.
-    BOOST_REQUIRE_EQUAL(((17 * 8) % 11) / 8, 0);
-    BOOST_REQUIRE_EQUAL(((64 * 8) % 11) / 8, 0);
-
-    // The number of bytes that must be wasted in conversion to words.
-    BOOST_REQUIRE_EQUAL(accessor::unused_bytes(data_chunk(17, 0)), ((17u * 8u) % 11u) / 8u);
-    BOOST_REQUIRE_EQUAL(accessor::unused_bytes(data_chunk(64, 0)), ((64u * 8u) % 11u) / 8u);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
-{
-    // The entropy byte boundaries are chosen to not waste bytes.
-    BOOST_REQUIRE_EQUAL(17 - ((17 * 8) % 11) / 8, 17);
-    BOOST_REQUIRE_EQUAL(64 - ((64 * 8) % 11) / 8, 64);
-
-    // The number of bytes that can be used in conversion to words.
-    BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(17, 0)), 17u - ((17u * 8u) % 11u) / 8u);
-    BOOST_REQUIRE_EQUAL(accessor::usable_size(data_chunk(64, 0)), 64u - ((64u * 8u) % 11u) / 8u);
-}
+// Standard test vectors.
+// ----------------------------------------------------------------------------
 
 // Full round trip Electrum repo tests, constructed from mnemonic and entropy.
 // Electrum test vector mnemonics just happen to be prenormalized, even though
@@ -579,7 +626,7 @@ BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
 {
-    const auto index = electrum_vector::name::english;
+    const auto index = electrum_vector::english;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -606,7 +653,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
 {
-    const auto index = electrum_vector::name::english_with_passphrase;
+    const auto index = electrum_vector::english_with_passphrase;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -633,7 +680,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
 {
-    const auto index = electrum_vector::name::japanese;
+    const auto index = electrum_vector::japanese;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -661,7 +708,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
 {
-    const auto index = electrum_vector::name::japanese_with_passphrase;
+    const auto index = electrum_vector::japanese_with_passphrase;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -691,7 +738,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
 {
-    const auto index = electrum_vector::name::chinese;
+    const auto index = electrum_vector::chinese;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -718,7 +765,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
 {
-    const auto index = electrum_vector::name::chinese_with_passphrase;
+    const auto index = electrum_vector::chinese_with_passphrase;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -747,7 +794,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
 {
-    const auto index = electrum_vector::name::spanish;
+    const auto index = electrum_vector::spanish;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -774,7 +821,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
 {
-    const auto index = electrum_vector::name::spanish_with_passphrase;
+    const auto index = electrum_vector::spanish_with_passphrase;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -803,7 +850,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
 {
-    const auto index = electrum_vector::name::spanish2;
+    const auto index = electrum_vector::spanish2;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
@@ -830,7 +877,7 @@ BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
 {
-    const auto index = electrum_vector::name::spanish3;
+    const auto index = electrum_vector::spanish3;
 
     const auto vector = vectors[index];
     BOOST_REQUIRE_EQUAL(vector.index, index);
