@@ -71,10 +71,10 @@ static bool encode_base2048(base2048_chunk& out, const string_list& in,
 }
 
 bool encode_base2048_list(data_chunk& out, const string_list& in,
-    wallet::language langauge)
+    wallet::language language)
 {
     base2048_chunk packed;
-    if (!encode_base2048(packed, in, langauge))
+    if (!encode_base2048(packed, in, language))
         return false;
 
     out = base2048_unpack(packed);
