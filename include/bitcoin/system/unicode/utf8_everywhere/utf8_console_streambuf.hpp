@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_CONSOLE_STREAMBUF_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_UTF8_EVERYWHERE_CONSOLE_STREAMBUF_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_CONSOLE_STREAMBUF_HPP
 
 #include <cstddef>
 #include <streambuf>
