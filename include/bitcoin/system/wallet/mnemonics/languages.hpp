@@ -86,9 +86,10 @@ protected:
     languages(const data_chunk& entropy, const string_list& words,
         language identifier);
 
-    // Returns empty if WIT_ICU not defined and words are not ASCII.
+    // Normalizes ascii whitespace and attempts nfkd and case lowering.
+    // Both nfkd and case lowering are skipped if WITH_ICU undefined.
     // This is only used to improve the chance of wordlist matching.
-    static string_list normalize(const string_list& words);
+    static string_list try_normalize(const string_list& words);
 
     // These should be const, apart from the need to implement assignment.
     data_chunk entropy_;

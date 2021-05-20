@@ -223,7 +223,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
         return {};
 
     // Normalize to improve chance of dictionary matching.
-    const auto tokens = normalize(words);
+    const auto tokens = try_normalize(words);
     const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)

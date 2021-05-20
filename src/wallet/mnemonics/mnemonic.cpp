@@ -235,7 +235,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
         return {};
 
     // Normalize to improve chance of dictionary matching.
-    const auto tokens = normalize(words);
+    const auto tokens = try_normalize(words);
     const auto lexicon = contained_by(words, identifier);
 
     if (lexicon == language::none)

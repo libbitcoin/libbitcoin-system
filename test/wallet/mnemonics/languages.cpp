@@ -190,49 +190,51 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ideographic_space_space_delimite
 }
 
 // split creates a single empty token from the joined empty string.
-BOOST_AUTO_TEST_CASE(languages__normalize__empty_string__single_empty_token)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__empty_string__single_empty_token)
 {
     const string_list words{};
     const string_list expected{ "" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+    BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), expected);
 }
 
-BOOST_AUTO_TEST_CASE(languages__normalize__lower_ascii__unchanged)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__lower_ascii__unchanged)
 {
     const string_list words{ "abc", "def", "xyz" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), words);
+    BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), words);
 }
 
-BOOST_AUTO_TEST_CASE(languages__normalize__mixed_ascii__lowered)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__mixed_ascii__lowered)
 {
     const string_list words{ "aBc", "DeF", "xYz" };
     const string_list expected{ "abc", "def", "xyz" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+    BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), expected);
 }
 
-BOOST_AUTO_TEST_CASE(languages__normalize__padded_mixed_ascii__lowered_trimmed)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__padded_mixed_ascii__lowered_trimmed)
 {
     const string_list words{ " aBc ", "  DeF  ", "\t\r\nxYz\f\v" };
     const string_list expected{ "abc", "def", "xyz" };
-    BOOST_REQUIRE_EQUAL(accessor::normalize(words), expected);
+    BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), expected);
 }
 
 #ifdef WITH_ICU
 
-BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_with_icu__not_empty)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__with_icu__lowered_normalized)
 {
-    std::string value = "ábaco";
-    BOOST_REQUIRE(to_compatibility_decomposition(value));
-    BOOST_REQUIRE(!accessor::normalize({ value }).empty());
+    string_list words{ base16_string("c3a16261636f"), "XyZ" };
+    const string_list expected{ base16_string("61cc816261636f"), ascii_to_lower(words[1]) };
+    const auto result = accessor::try_normalize(words);
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
 #else
 
-BOOST_AUTO_TEST_CASE(languages__normalize__non_ascii_without_icu__empty)
+BOOST_AUTO_TEST_CASE(languages__try_normalize__without_icu__ascii_lowered_not_normalized)
 {
-    std::string value = "ábaco";
-    BOOST_REQUIRE(!to_compatibility_decomposition(value));
-    BOOST_REQUIRE(accessor::normalize({ value }).empty());
+    string_list words{ base16_string("c3a16261636f"), "XyZ" };
+    const string_list expected{ words[0], ascii_to_lower(words[1]) };
+    const auto result = accessor::try_normalize(words);
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
 #endif

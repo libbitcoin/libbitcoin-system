@@ -96,12 +96,11 @@ string_list languages::split(const std::string& sentence, language)
 }
 
 // protected
-string_list languages::normalize(const string_list& words)
+string_list languages::try_normalize(const string_list& words)
 {
-    auto sentence = system::join(words);
-    if (!to_compatibility_decomposition(sentence) || !to_lower(sentence))
-        return {};
-
+    auto sentence = ascii_to_lower(system::join(words));
+    to_compatibility_decomposition(sentence);
+    to_lower(sentence);
     return system::split(sentence);
 }
 

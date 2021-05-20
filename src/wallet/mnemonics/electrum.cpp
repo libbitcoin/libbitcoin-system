@@ -347,7 +347,7 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
         return false;
 
     // Normalize to improve chance of dictionary matching.
-    const auto tokens = normalize(words);
+    const auto tokens = try_normalize(words);
 
     // Tokens are accepted if they are contained by any single dictionary.
     if (contained_by(tokens) == language::none)
@@ -373,7 +373,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
         return seed_prefix::bip39;
 
     // Normalize to improve chance of dictionary matching.
-    const auto tokens = normalize(words);
+    const auto tokens = try_normalize(words);
 
     // Tokens are accepted if they are contained by any single dictionary.
     if (contained_by(tokens) == language::none)
@@ -468,7 +468,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
         return {};
 
     // Normalize to improve chance of dictionary matching.
-    const auto tokens = normalize(words);
+    const auto tokens = try_normalize(words);
     const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)

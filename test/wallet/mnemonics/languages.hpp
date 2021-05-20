@@ -98,9 +98,9 @@ public:
     }
 
     // Expose protected method.
-    static string_list normalize(const string_list& words)
+    static string_list try_normalize(const string_list& words)
     {
-        return languages::normalize(words);
+        return languages::try_normalize(words);
     }
 
     // Verify assignment and copy construction with derived member.
