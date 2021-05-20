@@ -23,39 +23,30 @@
 #include <string>
 #include <bitcoin/system.hpp>
 
-#define ELECTRUM_VERIFY(index) \
-    const auto vector = vectors[index]; \
-    \
-    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk); \
-    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk); \
-    \
-    electrum instance1(vector.mnemonic, vector.lingo); \
-    BOOST_REQUIRE(instance1); \
-    BOOST_REQUIRE(instance1.lingo() == vector.lingo); \
-    BOOST_REQUIRE(instance1.prefix() == vector.prefix); \
-    BOOST_REQUIRE_EQUAL(join(split(instance1.sentence(), ideographic_space)), vector.mnemonic); \
-    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy); \
-    \
-    electrum instance2(vector.entropy, vector.prefix, vector.lingo); \
-    BOOST_REQUIRE(instance2); \
-    BOOST_REQUIRE(instance2.lingo() == vector.lingo); \
-    BOOST_REQUIRE(instance2.prefix() == vector.prefix); \
-    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence()); \
-    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy)
-
 // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system;
 using namespace bc::system::wallet;
-using prefix = electrum::seed_prefix;
-static const data_chunk no_password{};
-static const std::string empty_password{};
 
 // All mnemonics here are 12 words and entropy is 20 bytes.
 // Japanese mnemonics are ascii space delimited (not ideographic space).
 class electrum_vector
 {
 public:
-    std::string name;
+    typedef enum name
+    {
+        english = 0,
+        english_with_passphrase,
+        japanese,
+        japanese_with_passphrase,
+        chinese,
+        chinese_with_passphrase,
+        spanish,
+        spanish_with_passphrase,
+        spanish2,
+        spanish3
+    } name;
+
+    name index;
     language lingo;
     std::string mnemonic;
     data_chunk mnemonic_chunk;
@@ -74,6 +65,10 @@ public:
 };
 
 typedef std::vector<electrum_vector> electrum_vector_list;
+using name = electrum_vector::name;
+using prefix = electrum::seed_prefix;
+static const data_chunk no_password{};
+static const std::string empty_password{};
 
 // Electrum tests cases show 20 bytes of entropy where there is only 17.
 // 12 words * 11 bits per word = 132 bits
@@ -87,7 +82,7 @@ electrum_vector_list vectors
 {
     electrum_vector
     {
-        "english",
+        name::english,
         language::en,
         "wild father tree among universe such mobile favorite target dynamic credit identify",
         base16_chunk("77696c6420666174686572207472656520616d6f6e6720756e6976657273652073756368206d6f62696c65206661766f72697465207461726765742064796e616d696320637265646974206964656e74696679"),
@@ -100,7 +95,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "english_with_passphrase",
+        name::english_with_passphrase,
         language::en,
         "wild father tree among universe such mobile favorite target dynamic credit identify",
         base16_chunk("77696c6420666174686572207472656520616d6f6e6720756e6976657273652073756368206d6f62696c65206661766f72697465207461726765742064796e616d696320637265646974206964656e74696679"),
@@ -113,7 +108,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "japanese",
+        name::japanese,
         language::ja,
         "なのか ひろい しなん まなぶ つぶす さがす おしゃれ かわく おいかける けさき かいとう さたん",
         base16_chunk("e381aae381aee3818b20e381b2e3828de3818420e38197e381aae3829320e381bee381aae381b5e3829920e381a4e381b5e38299e3819920e38195e3818be38299e3819920e3818ae38197e38283e3828c20e3818be3828fe3818f20e3818ae38184e3818be38191e3828b20e38191e38195e3818d20e3818be38184e381a8e3818620e38195e3819fe38293"),
@@ -126,7 +121,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "japanese_with_passphrase",
+        name::japanese_with_passphrase,
         language::ja,
         "なのか ひろい しなん まなぶ つぶす さがす おしゃれ かわく おいかける けさき かいとう さたん",
         base16_chunk("e381aae381aee3818b20e381b2e3828de3818420e38197e381aae3829320e381bee381aae381b5e3829920e381a4e381b5e38299e3819920e38195e3818be38299e3819920e3818ae38197e38283e3828c20e3818be3828fe3818f20e3818ae38184e3818be38191e3828b20e38191e38195e3818d20e3818be38184e381a8e3818620e38195e3819fe38293"),
@@ -139,7 +134,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "chinese",
+        name::chinese,
         language::zh_Hans,
         "眼 悲 叛 改 节 跃 衡 响 疆 股 遂 冬",
         base16_chunk("e79cbc20e682b220e58f9b20e694b920e88a8220e8b78320e8a1a120e5938d20e7968620e882a120e9818220e586ac"),
@@ -152,7 +147,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "chinese_with_passphrase",
+        name::chinese_with_passphrase,
         language::zh_Hans,
         "眼 悲 叛 改 节 跃 衡 响 疆 股 遂 冬",
         base16_chunk("e79cbc20e682b220e58f9b20e694b920e88a8220e8b78320e8a1a120e5938d20e7968620e882a120e9818220e586ac"),
@@ -165,7 +160,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "spanish",
+        name::spanish,
         language::es,
         "almíbar tibio superar vencer hacha peatón príncipe matar consejo polen vehículo odisea",
         base16_chunk("616c6d69cc8162617220746962696f20737570657261722076656e63657220686163686120706561746fcc816e20707269cc816e63697065206d6174617220636f6e73656a6f20706f6c656e2076656869cc8163756c6f206f6469736561"),
@@ -178,7 +173,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "spanish_with_passphrase",
+        name::spanish_with_passphrase,
         language::es,
         "almíbar tibio superar vencer hacha peatón príncipe matar consejo polen vehículo odisea",
         base16_chunk("616c6d69cc8162617220746962696f20737570657261722076656e63657220686163686120706561746fcc816e20707269cc816e63697065206d6174617220636f6e73656a6f20706f6c656e2076656869cc8163756c6f206f6469736561"),
@@ -191,7 +186,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "spanish2",
+        name::spanish2,
         language::es,
         "equipo fiar auge langosta hacha calor trance cubrir carro pulmón oro áspero",
         base16_chunk("65717569706f20666961722061756765206c616e676f7374612068616368612063616c6f72207472616e63652063756272697220636172726f2070756c6d6fcc816e206f726f2061cc81737065726f"),
@@ -205,7 +200,7 @@ electrum_vector_list vectors
     },
     electrum_vector
     {
-        "spanish3",
+        name::spanish3,
         language::es,
         "vidrio jabón muestra pájaro capucha eludir feliz rotar fogata pez rezar oír",
         base16_chunk("76696472696f206a61626fcc816e206d756573747261207061cc816a61726f206361707563686120656c756469722066656c697a20726f74617220666f676174612070657a2072657a6172206f69cc8172"),
@@ -217,6 +212,20 @@ electrum_vector_list vectors
         base16_array("c274665e5453c72f82b8444e293e048d700c59bf000cacfba597629d202dcf3aab1cf9c00ba8d3456b7943428541fed714d01d8a0a4028fc3a9bb33d981cb49f")
     }
 };
+
+// Menomics generated using the seed prefixer given the following paramters.
+
+// 17 null bytes, seed_prefix:standard, language::it, 341 iterations.
+const auto mnemonic_standard = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
+
+// 17 null bytes, seed_prefix:witness, language::it, 9545 iterations.
+const auto mnemonic_witness = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
+
+// 17 null bytes, seed_prefix:two_factor_authentication, language::it, 8814 iterations.
+const auto mnemonic_two_factor_authentication = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
+
+// 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 332 iterations.
+const auto mnemonic_two_factor_authentication_witness = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
 
 class accessor
   : public electrum

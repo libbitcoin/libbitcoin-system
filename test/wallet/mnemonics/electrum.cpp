@@ -157,30 +157,22 @@ BOOST_AUTO_TEST_CASE(electrum__prefixer__none__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__standard__expected)
 {
-    // 17 null bytes, seed_prefix:standard, language::it, 341 iterations.
-    const auto mnemonic = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::standard);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_standard)) == electrum::seed_prefix::standard);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__witness__expected)
 {
-    // 17 null bytes, seed_prefix:witness, language::it, 9545 iterations.
-    const auto mnemonic = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::witness);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_witness)) == electrum::seed_prefix::witness);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication__expected)
 {
-    // 17 null bytes, seed_prefix:two_factor_authentication, language::it, 8814 iterations.
-    const auto mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication)) == electrum::seed_prefix::two_factor_authentication);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication_witness__expected)
 {
-    // 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 332 iterations.
-    const auto mnemonic = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic)) == electrum::seed_prefix::two_factor_authentication_witness);
+    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication_witness)) == electrum::seed_prefix::two_factor_authentication_witness);
 }
 
 // validator
@@ -192,29 +184,91 @@ BOOST_AUTO_TEST_CASE(electrum__validator__invalid__false)
 
 BOOST_AUTO_TEST_CASE(electrum__validator__standard__true)
 {
-    const auto mnemonic = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::standard));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic_standard), electrum::seed_prefix::standard));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__witness__true)
 {
-    const auto mnemonic = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::witness));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic_witness), electrum::seed_prefix::witness));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication__true)
 {
-    const auto mnemonic = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::two_factor_authentication));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic_two_factor_authentication), electrum::seed_prefix::two_factor_authentication));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__validator__two_factor_authentication_witness__true)
 {
-    const auto mnemonic = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
-    BOOST_REQUIRE(accessor::validator(split(mnemonic), electrum::seed_prefix::two_factor_authentication_witness));
+    BOOST_REQUIRE(accessor::validator(split(mnemonic_two_factor_authentication_witness), electrum::seed_prefix::two_factor_authentication_witness));
 }
 
 // from_words
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__bogus_none__false)
+{
+    BOOST_REQUIRE(!accessor::from_words({ "bogus" }, language::none));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__invalid_prefix__true)
+{
+    // Add a 13th valid word.
+    const auto extended = join({ mnemonic_standard, "ristoro" });
+
+    // The instance is valid in relation to the discovered prefix.
+    const auto instance = accessor::from_words(split(extended), language::it);
+
+    // Electrum does not incorporate a checksum.
+    // If the prefix is as expected, the mnemonic is considered valid.
+    // Words construction does not validate a prefix, it computes the prefix.
+    // Entropy (numeric) construction is used to generate words with a desired
+    // prefix. However, iteration over sets of words can be used to discover a
+    // set with the desired prefix. The presumption is that it is easier (and
+    // safer) to rely on numbers for word generation vs. the reverse.
+    BOOST_REQUIRE(instance);
+
+    // The modified mnemonic is valid but does not have a known prefix.
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::none);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__invalid_word_count__false)
+{
+    // Remove the 12th word to invalidate the mnemonic word count.
+    auto words = split(mnemonic_standard);
+    words.resize(words.size() - 1u);
+    const auto invalid = join(words);
+    BOOST_REQUIRE(!accessor::from_words(split(invalid), language::it));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__mismatched_language__false)
+{
+    // Specify the incorrect dictionary to preclude mnemonic dictionary matching.
+    BOOST_REQUIRE(!accessor::from_words(split(mnemonic_standard), language::cs));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__uppercase_standard_italian__true)
+{
+    // WITH_ICU not required for ascii case normalization.
+    const auto instance = accessor::from_words(split(ascii_to_upper(mnemonic_standard)), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::standard);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__standard_none__true)
+{
+    // With 'none' specified the mnemonic is valid if contained in exactly one dictionary
+    // (only en-fr) or is the same in multiple dictionaries (only chinese).
+    const auto instance = accessor::from_words(split(mnemonic_standard), language::none);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::standard);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_words__standard_italian__true)
+{
+    const auto instance = accessor::from_words(split(mnemonic_standard), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::standard);
+}
+
 // from_entropy
 
 // is_valid_seed_prefix
@@ -328,77 +382,289 @@ BOOST_AUTO_TEST_CASE(electrum__usable_size__boundaries__expected)
 // electrum()
 
 // Full round trip Electrum repo tests, constructed from mnemonic and entropy.
+// Electrum test vector mnemonics just happen to be prenormalized, even though
+// the Electrum repo dictionaries are not all normalized. But our dictionaries
+// are fully-normalized, so construction from mnemonics succeeds even without
+// WITH_ICU defined. However non-ascii passhrases always require WITH_ICU, so
+// those checks are conditionally excluded below.
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english__expected)
 {
-    ELECTRUM_VERIFY(0);
+    const auto index = electrum_vector::name::english;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__english_with_passphrase__expected)
 {
-    ELECTRUM_VERIFY(1);
+    const auto index = electrum_vector::name::english_with_passphrase;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese__expected)
 {
-    ELECTRUM_VERIFY(2);
+    const auto index = electrum_vector::name::japanese;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_NE(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(join(split(instance1.sentence(), ideographic_space)), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__japanese_with_passphrase__expected)
 {
-    ELECTRUM_VERIFY(3);
+    const auto index = electrum_vector::name::japanese_with_passphrase;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_NE(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(join(split(instance1.sentence(), ideographic_space)), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese__expected)
 {
-    ELECTRUM_VERIFY(4);
+    const auto index = electrum_vector::name::chinese;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__chinese_with_passphrase__expected)
 {
-    ELECTRUM_VERIFY(5);
+    const auto index = electrum_vector::name::chinese_with_passphrase;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish__expected)
 {
-    ELECTRUM_VERIFY(6);
+    const auto index = electrum_vector::name::spanish;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish_with_passphrase__expected)
 {
-    ELECTRUM_VERIFY(7);
+    const auto index = electrum_vector::name::spanish_with_passphrase;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish2__expected)
 {
-    ELECTRUM_VERIFY(8);
+    const auto index = electrum_vector::name::spanish2;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
+    BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__vector__spanish3__expected)
 {
-    ELECTRUM_VERIFY(9);
+    const auto index = electrum_vector::name::spanish3;
+
+    const auto vector = vectors[index];
+    BOOST_REQUIRE_EQUAL(vector.index, index);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.mnemonic), vector.mnemonic_chunk);
+    BOOST_REQUIRE_EQUAL(to_chunk(vector.passphrase), vector.passphrase_chunk);
+
+    electrum instance1(vector.mnemonic, vector.lingo);
+    BOOST_REQUIRE(instance1);
+    BOOST_REQUIRE(instance1.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance1.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance1.sentence(), vector.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance1.entropy(), vector.entropy);
+
+    electrum instance2(vector.entropy, vector.prefix, vector.lingo);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE(instance2.lingo() == vector.lingo);
+    BOOST_REQUIRE(instance2.prefix() == vector.prefix);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector.entropy);
+
 #ifdef WITH_ICU
     BOOST_REQUIRE_EQUAL(instance1.to_seed(vector.passphrase), vector.to_hd());
-#else
-    BOOST_REQUIRE(!instance1.to_seed(vector.passphrase));
+    BOOST_REQUIRE_EQUAL(instance2.to_seed(vector.passphrase), vector.to_hd());
 #endif
 }
 
