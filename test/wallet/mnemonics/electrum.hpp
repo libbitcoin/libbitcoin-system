@@ -27,14 +27,12 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
-// All mnemonics here are 12 words and entropy is 20 bytes.
-// Japanese mnemonics are ascii space delimited (not ideographic space).
-class electrum_vector
+// Structure for holding each test vector.
+struct electrum_vector
 {
-public:
     typedef enum name
     {
-        english = 0,
+        english,
         english_with_passphrase,
         japanese,
         japanese_with_passphrase,
@@ -64,17 +62,20 @@ public:
     }
 };
 
+// Reduce verbosity using these.
 typedef std::vector<electrum_vector> electrum_vector_list;
 using name = electrum_vector::name;
 using prefix = electrum::seed_prefix;
 static const data_chunk no_password{};
 static const std::string empty_password{};
 
-// Electrum tests cases show 20 bytes of entropy where there is only 17.
+// All mnemonics here are 12 words.
+// Japanese mnemonics are ascii space delimited (not ideographic space).
+// Electrum tests cases show 20 bytes of entropy where there is only 17:
 // 12 words * 11 bits per word = 132 bits
 // 132 bits / 8 bits per byte = 16.5 bytes (requiring 17)
 // Entropy is an entirely internal format to Electrum encoding, so this more
-// curious than material.
+// curious than material. Original test vector entropy is commented out below.
 
 // github.com/spesmilo/electrum/blob/master/electrum/tests/test_mnemonic.py
 
@@ -213,7 +214,8 @@ electrum_vector_list vectors
     }
 };
 
-// Menomics generated using the seed prefixer given the following paramters.
+// The electrum test vectors do not include 2fa/2faw prefixes, so these are added.
+// Menomics generated using seed prefixer, with following paramters.
 
 // 17 null bytes, seed_prefix:standard, language::it, 340 iterations.
 const auto mnemonic_standard = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
@@ -227,6 +229,28 @@ const auto mnemonic_two_factor_authentication = "orfano verbale vessillo sabato 
 // 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 331 iterations.
 const auto mnemonic_two_factor_authentication_witness = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
 
+// The electrum test vectors do not include 2fa negative test vectors, so these are added.
+// Menomics generated using seed prefixer, with 2fa hack disabled, with following paramters.
+
+// 16 null bytes, seed_prefix:two_factor_authentication, language::pt, 734 iterations.
+const auto mnemonic_two_factor_authentication11 = "pneu jararaca olhar labareda extrato engenho descanso maroto coquetel roxo mestre";
+
+// 17 null bytes, seed_prefix:two_factor_authentication, language::pt, 3899 iterations.
+const auto mnemonic_two_factor_authentication12 = "ciente demanda absoluto aliar javali flacidez animar sambar bajular publicar educado golfe";
+
+// 18 null bytes, seed_prefix:two_factor_authentication, language::pt, 4492 iterations.
+const auto mnemonic_two_factor_authentication13 = "excesso hidratar emergir ciente falar touca vogal soletrar gaiola prezar budismo torque deitado";
+
+// 27 null bytes, seed_prefix:two_factor_authentication, language::pt, 4658 iterations.
+const auto mnemonic_two_factor_authentication19 = "trevo oficina sacudir alface tonel adorar vagaroso joia navalha carreira abduzir trevo insulto bloco costela eventual querido chutar amador";
+
+// 28 null bytes, seed_prefix:two_factor_authentication, language::pt, 1867 iterations.
+const auto mnemonic_two_factor_authentication20 = "geleia grafite raiva disfarce liberal figurado orgulho piranha mosquete infrator xarope cigana esquerda jogador queda oriundo unha melhor marquise robalo";
+
+// 29 null bytes, seed_prefix:two_factor_authentication, language::pt, 9901 iterations.
+const auto mnemonic_two_factor_authentication21 = "criminal sentado herdar joaninha iate lebre aderente arquivo confuso pedra bilhete culatra rajada enraizar complexo grudado avaria pneu fosco raridade voleibol";
+
+// Test wrapper for access to protected methods.
 class accessor
   : public electrum
 {
