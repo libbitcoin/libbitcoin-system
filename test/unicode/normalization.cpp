@@ -48,28 +48,28 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
 {
-    auto decomposed = to_string(base16_literal("cf92cc8100f0909080f09f92a9"));
+    auto decomposed = to_string(base16_chunk("cf92cc8100f0909080f09f92a9"));
     BOOST_REQUIRE(to_canonical_composition(decomposed));
     BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "cf9300f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__bip38__expected)
 {
-    auto composed = to_string(base16_literal("cf9300f0909080f09f92a9"));
+    auto composed = to_string(base16_chunk("cf9300f0909080f09f92a9"));
     BOOST_REQUIRE(to_canonical_decomposition(composed));
     BOOST_REQUIRE_EQUAL(encode_base16(composed), "cf92cc8100f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__bip38__expected)
 {
-    auto decomposed = to_string(base16_literal("cea5cc8100f0909080f09f92a9"));
+    auto decomposed = to_string(base16_chunk("cea5cc8100f0909080f09f92a9"));
     BOOST_REQUIRE(to_compatibility_composition(decomposed));
     BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "ce8e00f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expected)
 {
-    auto composed = to_string(base16_literal("ce8e00f0909080f09f92a9"));
+    auto composed = to_string(base16_chunk("ce8e00f0909080f09f92a9"));
     BOOST_REQUIRE(to_compatibility_decomposition(composed));
     BOOST_REQUIRE_EQUAL(encode_base16(composed), "cea5cc8100f0909080f09f92a9");
 }
