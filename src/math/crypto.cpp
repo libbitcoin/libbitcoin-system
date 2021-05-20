@@ -19,9 +19,9 @@
 #include <bitcoin/system/math/crypto.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include "../math/external/aes256.h"
 
 namespace libbitcoin {

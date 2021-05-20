@@ -19,9 +19,9 @@
 #include <bitcoin/system/wallet/addresses/stealth_receiver.hpp>
 
 #include <cstdint>
+#include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 

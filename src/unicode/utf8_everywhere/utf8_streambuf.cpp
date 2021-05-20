@@ -24,9 +24,9 @@
 #include <streambuf>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
-#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

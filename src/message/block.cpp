@@ -22,11 +22,11 @@
 #include <cstddef>
 #include <istream>
 #include <utility>
-#include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
 namespace system {

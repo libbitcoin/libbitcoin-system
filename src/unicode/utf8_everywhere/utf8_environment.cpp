@@ -35,8 +35,8 @@
 #include <boost/locale.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
 // TODO: rename the classes in these sources.

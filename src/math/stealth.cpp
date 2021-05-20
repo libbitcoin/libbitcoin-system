@@ -22,11 +22,11 @@
 #include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/machine/script_pattern.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {

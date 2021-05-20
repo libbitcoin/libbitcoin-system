@@ -32,14 +32,14 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/error.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/data/collection.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -25,9 +25,9 @@
 #include <iostream>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
 
 namespace libbitcoin {
 namespace system {

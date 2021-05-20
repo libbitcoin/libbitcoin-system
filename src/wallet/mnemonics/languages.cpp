@@ -21,10 +21,10 @@
 #include <algorithm>
 #include <map>
 #include <string>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {

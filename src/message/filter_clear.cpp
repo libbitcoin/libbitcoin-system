@@ -18,8 +18,8 @@
  */
 #include <bitcoin/system/message/filter_clear.hpp>
 
-#include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -22,8 +22,8 @@
 #include <iostream>
 #include <new>
 #include <streambuf>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 #ifdef _MSC_VER
     #include <windows.h>

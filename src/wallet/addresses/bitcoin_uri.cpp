@@ -22,8 +22,8 @@
 #include <cstdint>
 #include <iostream>
 #include <map>
-#include <bitcoin/system/formats/base_10.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/formats/base_10.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 #include <bitcoin/system/wallet/addresses/uri.hpp>

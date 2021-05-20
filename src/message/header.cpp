@@ -24,9 +24,9 @@
 #include <utility>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

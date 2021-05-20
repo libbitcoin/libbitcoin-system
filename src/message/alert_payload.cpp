@@ -19,8 +19,8 @@
 #include <bitcoin/system/message/alert_payload.hpp>
 
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/message/messages.hpp>
 
 namespace libbitcoin {
 namespace system {

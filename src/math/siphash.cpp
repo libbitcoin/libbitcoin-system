@@ -20,10 +20,10 @@
 // Sponsored in part by Digital Contract Design, LLC
 
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/siphash.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

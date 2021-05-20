@@ -21,8 +21,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <bitcoin/system/formats/base_85.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/formats/base_85.hpp>
 
 namespace libbitcoin {
 namespace system {

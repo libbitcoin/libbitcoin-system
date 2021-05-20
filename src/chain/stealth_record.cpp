@@ -23,10 +23,10 @@
 #include <istream>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

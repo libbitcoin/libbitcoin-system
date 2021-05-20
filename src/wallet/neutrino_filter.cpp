@@ -22,9 +22,9 @@
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
-#include <bitcoin/system/math/golomb_coding.hpp>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/golomb_coding.hpp>
 
 namespace libbitcoin {
 namespace system {

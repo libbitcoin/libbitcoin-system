@@ -22,9 +22,9 @@
 #include <cstdint>
 #include <istream>
 #include <utility>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 

@@ -23,11 +23,11 @@
 #include <string>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
+#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/serialization/deserialize.hpp>
-#include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 
 namespace libbitcoin {

@@ -20,13 +20,13 @@
 
 #include <algorithm>
 #include <initializer_list>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/message/inventory.hpp>
 #include <bitcoin/system/message/inventory_vector.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

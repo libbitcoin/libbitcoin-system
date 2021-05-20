@@ -18,8 +18,8 @@
  */
 #include <bitcoin/system/message/send_headers.hpp>
 
-#include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
 namespace system {

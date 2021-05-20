@@ -19,10 +19,10 @@
 #include <bitcoin/system/message/alert.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

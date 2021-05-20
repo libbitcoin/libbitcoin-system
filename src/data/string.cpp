@@ -23,8 +23,8 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/unicode/code_points.hpp>
 
 namespace libbitcoin {
 namespace system {

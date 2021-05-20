@@ -19,8 +19,8 @@
 #include <bitcoin/system/concurrency/threadpool.hpp>
 
 #include <thread>
-#include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {

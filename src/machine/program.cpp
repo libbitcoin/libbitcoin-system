@@ -23,9 +23,9 @@
 #include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

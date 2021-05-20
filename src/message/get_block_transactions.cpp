@@ -19,10 +19,10 @@
 #include <bitcoin/system/message/get_block_transactions.hpp>
 
 #include <initializer_list>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

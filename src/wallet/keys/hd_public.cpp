@@ -22,16 +22,16 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 

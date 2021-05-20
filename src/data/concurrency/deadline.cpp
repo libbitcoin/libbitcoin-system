@@ -19,10 +19,10 @@
 #include <bitcoin/system/concurrency/deadline.hpp>
 
 #include <functional>
-#include <bitcoin/system/error.hpp>
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
+#include <bitcoin/system/error.hpp>
 
 namespace libbitcoin {
 namespace system {

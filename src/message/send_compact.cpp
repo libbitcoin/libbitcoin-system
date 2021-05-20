@@ -19,8 +19,8 @@
 #include <bitcoin/system/message/send_compact.hpp>
 
 #include <cstdint>
-#include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
 namespace system {

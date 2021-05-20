@@ -19,10 +19,10 @@
 #include <bitcoin/system/concurrency/socket.hpp>
 
 #include <memory>
-#include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
+#include <bitcoin/system/config/authority.hpp>
 
 namespace libbitcoin {
 namespace system {

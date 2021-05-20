@@ -20,8 +20,8 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/message/inventory.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/message/inventory.hpp>
 
 namespace libbitcoin {
 namespace system {

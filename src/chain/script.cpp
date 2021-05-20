@@ -30,10 +30,11 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
@@ -41,10 +42,9 @@
 #include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
 #include <bitcoin/system/machine/sighash_algorithm.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

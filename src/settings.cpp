@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cstdint>
-#include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/settings.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -28,14 +28,14 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/concurrency/timer.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/settings.hpp>
-#include <bitcoin/system/concurrency/timer.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -29,13 +29,13 @@
 #undef BOOST_BIND_NO_PLACEHOLDERS
 #include <boost/property_tree/json_parser.hpp>
 #define BOOST_BIND_NO_PLACEHOLDERS
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/header.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
-#include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

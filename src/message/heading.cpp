@@ -19,9 +19,9 @@
 #include <bitcoin/system/message/heading.hpp>
 
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

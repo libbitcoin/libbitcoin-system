@@ -27,6 +27,8 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/log/features/counter.hpp>
 #include <bitcoin/system/log/features/gauge.hpp>
@@ -37,8 +39,6 @@
 #include <bitcoin/system/log/severity.hpp>
 #include <bitcoin/system/log/udp_client_sink.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
-#include <bitcoin/system/concurrency/asio.hpp>
-#include <bitcoin/system/concurrency/threadpool.hpp>
 
 namespace libbitcoin {
 namespace system {
