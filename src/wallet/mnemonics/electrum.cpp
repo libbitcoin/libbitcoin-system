@@ -484,7 +484,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
         return {};
 
     // Save derived entropy and dictionary words, originals are discarded.
-    return { decoder(tokens, identifier), tokens, lexicon, prefixer(tokens) };
+    return { decoder(tokens, lexicon), tokens, lexicon, prefixer(tokens) };
 }
 
 // public
