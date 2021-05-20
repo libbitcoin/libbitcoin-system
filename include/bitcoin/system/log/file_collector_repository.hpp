@@ -22,7 +22,6 @@
 #include <boost/intrusive/list_hook.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/log/detail/singleton.hpp>
-
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/log/file_collector.hpp>
 

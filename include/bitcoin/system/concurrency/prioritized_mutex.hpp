@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_CONCURRENCY_PRIORITIZED_MUTEX_HPP
 
 #include <memory>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

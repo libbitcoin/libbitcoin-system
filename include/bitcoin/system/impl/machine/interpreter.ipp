@@ -22,16 +22,16 @@
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace system {

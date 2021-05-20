@@ -28,10 +28,10 @@
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

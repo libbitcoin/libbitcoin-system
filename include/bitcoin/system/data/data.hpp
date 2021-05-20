@@ -27,8 +27,8 @@
 #include <queue>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

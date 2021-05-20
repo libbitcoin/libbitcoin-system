@@ -23,13 +23,12 @@
 #include <cstdint>
 #include <istream>
 #include <vector>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

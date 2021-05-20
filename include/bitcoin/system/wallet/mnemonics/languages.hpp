@@ -21,6 +21,7 @@
 
 #include <string>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -29,7 +30,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-class languages
+class BC_API languages
 {
 public:
     // static methods

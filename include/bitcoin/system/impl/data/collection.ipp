@@ -27,8 +27,8 @@
 #include <type_traits>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {

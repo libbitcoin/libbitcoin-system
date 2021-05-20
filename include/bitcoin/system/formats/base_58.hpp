@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_FORMATS_BASE_58_HPP
 
 #include <string>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

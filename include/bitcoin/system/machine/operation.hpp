@@ -23,12 +23,12 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/iostream/reader.hpp>
 #include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/machine/opcode.hpp>
+#include <bitcoin/system/machine/script_pattern.hpp>
 
 namespace libbitcoin {
 namespace system {

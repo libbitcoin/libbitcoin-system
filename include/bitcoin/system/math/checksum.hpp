@@ -20,10 +20,10 @@
 #define LIBBITCOIN_SYSTEM_MATH_CHECKSUM_HPP
 
 #include <cstddef>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/formats/base_32.hpp>
 
 namespace libbitcoin {
 namespace system {

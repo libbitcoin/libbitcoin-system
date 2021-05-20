@@ -29,10 +29,10 @@
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/deadline.hpp>
 #include <bitcoin/system/concurrency/delegates.hpp>
-#include <bitcoin/system/noncopyable.hpp>
 #include <bitcoin/system/concurrency/synchronizer.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
 #include <bitcoin/system/concurrency/work.hpp>
+#include <bitcoin/system/noncopyable.hpp>
 
 namespace libbitcoin {
 namespace system {

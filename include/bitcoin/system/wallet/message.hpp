@@ -20,6 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WALLET_MESSAGE_HPP
 
 #include <string>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>

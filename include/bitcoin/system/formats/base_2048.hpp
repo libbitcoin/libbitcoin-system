@@ -22,9 +22,9 @@
 #include <string>
 #include <vector>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {

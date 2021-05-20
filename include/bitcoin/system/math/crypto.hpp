@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_MATH_AES256_HPP
 
 #include <cstdint>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

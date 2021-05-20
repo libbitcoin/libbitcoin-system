@@ -25,11 +25,10 @@
 #include <cstdint>
 #include <istream>
 #include <ostream>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/siphash.hpp>
 
 namespace libbitcoin {
 namespace system {

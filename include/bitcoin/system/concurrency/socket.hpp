@@ -20,13 +20,13 @@
 #define LIBBITCOIN_SYSTEM_CONCURRENCY_SOCKET_HPP
 
 #include <memory>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/noncopyable.hpp>
-#include <bitcoin/system/concurrency/thread.hpp>
-#include <bitcoin/system/concurrency/threadpool.hpp>
 
 namespace libbitcoin {
 namespace system {

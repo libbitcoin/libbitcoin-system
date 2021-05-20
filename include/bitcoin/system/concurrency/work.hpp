@@ -23,13 +23,13 @@
 #include <string>
 #include <memory>
 #include <utility>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error.hpp>
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/monitor.hpp>
-#include <bitcoin/system/noncopyable.hpp>
 #include <bitcoin/system/concurrency/sequencer.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/noncopyable.hpp>
 
 namespace libbitcoin {
 namespace system {

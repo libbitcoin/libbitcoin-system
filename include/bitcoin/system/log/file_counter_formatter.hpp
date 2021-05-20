@@ -20,7 +20,6 @@
 
 #include <sstream>
 #include <boost/filesystem/path.hpp>
-
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

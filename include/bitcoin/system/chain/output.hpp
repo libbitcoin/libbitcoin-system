@@ -26,10 +26,9 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

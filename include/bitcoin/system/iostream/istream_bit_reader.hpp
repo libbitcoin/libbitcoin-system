@@ -27,7 +27,6 @@
 #include <istream>
 #include <type_traits>
 #include <bitcoin/system/iostream/bit_reader.hpp>
-#include <bitcoin/system/iostream/istream_reader.hpp>
 
 namespace libbitcoin {
 namespace system {

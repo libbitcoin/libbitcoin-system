@@ -24,13 +24,12 @@
 
 #include <istream>
 #include <memory>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/compact_filter.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

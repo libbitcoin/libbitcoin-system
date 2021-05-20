@@ -20,9 +20,9 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_RECEIVER_HPP
 
 #include <cstdint>
+#include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 

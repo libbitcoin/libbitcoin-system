@@ -20,12 +20,11 @@
 #define LIBBITCOIN_SYSTEM_MESSAGE_COMPACT_BLOCK_HPP
 
 #include <istream>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/prefilled_transaction.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {

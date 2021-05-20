@@ -22,8 +22,8 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

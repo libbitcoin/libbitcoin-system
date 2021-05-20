@@ -23,9 +23,9 @@
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

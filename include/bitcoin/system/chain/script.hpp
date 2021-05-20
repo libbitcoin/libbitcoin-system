@@ -24,18 +24,17 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/concurrency/thread.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace system {

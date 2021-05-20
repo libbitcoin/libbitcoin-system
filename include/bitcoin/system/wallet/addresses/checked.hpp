@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_CHECKED_HPP
 
 #include <cstddef>
-#include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/checksum.hpp>
 
 namespace libbitcoin {
 namespace system {

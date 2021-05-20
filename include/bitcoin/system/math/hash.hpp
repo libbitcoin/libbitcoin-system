@@ -24,8 +24,8 @@
 #include <vector>
 #include <boost/functional/hash_fwd.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {

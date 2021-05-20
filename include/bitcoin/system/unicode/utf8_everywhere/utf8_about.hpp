@@ -78,5 +78,4 @@
 // bc::system::cout
 // bc::system::cerr
 
-
 #endif

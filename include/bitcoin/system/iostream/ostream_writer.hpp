@@ -23,7 +23,7 @@
 #include <ostream>
 #include <type_traits>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {

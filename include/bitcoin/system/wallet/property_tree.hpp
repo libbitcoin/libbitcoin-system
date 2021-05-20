@@ -23,13 +23,13 @@
 #include <string>
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/points_value.hpp>
 #include <bitcoin/system/config/header.hpp>
 #include <bitcoin/system/config/input.hpp>
 #include <bitcoin/system/config/output.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/message/compact_filter.hpp>
 #include <bitcoin/system/message/compact_filter_checkpoint.hpp>
 #include <bitcoin/system/message/compact_filter_headers.hpp>

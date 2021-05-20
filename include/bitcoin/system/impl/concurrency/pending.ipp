@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/error.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/error.hpp>
 
 namespace libbitcoin {
 namespace system {

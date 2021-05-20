@@ -23,11 +23,10 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/network_address.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
-#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {
