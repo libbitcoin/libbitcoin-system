@@ -350,7 +350,7 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
     if (contained_by(tokens) == language::none)
         return {};
 
-    return validator(words, prefix);
+    return validator(tokens, prefix);
 }
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
