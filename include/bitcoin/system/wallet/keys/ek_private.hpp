@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_EK_PRIVATE_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_EK_PRIVATE_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_EK_PRIVATE_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_KEYS_EK_PRIVATE_HPP
 
 #include <iostream>
 #include <string>

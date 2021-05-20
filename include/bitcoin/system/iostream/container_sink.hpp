@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONTAINER_SINK_HPP
-#define LIBBITCOIN_SYSTEM_CONTAINER_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_CONTAINER_SINK_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_CONTAINER_SINK_HPP
 
 #include <algorithm>
 #include <cstdint>

@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_OSTREAM_BIT_WRITER_IPP
-#define LIBBITCOIN_SYSTEM_OSTREAM_BIT_WRITER_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_OSTREAM_BIT_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_OSTREAM_BIT_WRITER_IPP
 
 #include <cstddef>
 #include <bitcoin/system/utility/data.hpp>

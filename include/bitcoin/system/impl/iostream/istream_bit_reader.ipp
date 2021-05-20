@@ -19,8 +19,8 @@
  
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_ISTREAM_BIT_READER_IPP
-#define LIBBITCOIN_SYSTEM_ISTREAM_BIT_READER_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_BIT_READER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_BIT_READER_IPP
 
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>

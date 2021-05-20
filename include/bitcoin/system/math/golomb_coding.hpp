@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_GOLOMB_CODED_SETS
-#define LIBBITCOIN_SYSTEM_GOLOMB_CODED_SETS
+#ifndef LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODED_SETS
+#define LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODED_SETS
 
 #include <cstdint>
 #include <istream>

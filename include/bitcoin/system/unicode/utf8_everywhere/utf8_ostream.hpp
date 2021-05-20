@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_OSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_OSTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OSTREAM_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OSTREAM_HPP
 
 #include <cstddef>
 #include <iostream>

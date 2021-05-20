@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ISTREAM_READER_IPP
-#define LIBBITCOIN_SYSTEM_ISTREAM_READER_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_READER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_READER_IPP
 
 #include <bitcoin/system/utility/data.hpp>
 #include <bitcoin/system/utility/endian.hpp>

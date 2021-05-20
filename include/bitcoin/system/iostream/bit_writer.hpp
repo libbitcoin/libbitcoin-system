@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_BIT_WRITER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_BIT_WRITER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_BIT_WRITER_HPP
 
 #include <cstdint>
 #include <bitcoin/system/utility/writer.hpp>

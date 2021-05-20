@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 
 #include <bitcoin/system/utility/container_source.hpp>
 #include <bitcoin/system/utility/istream_bit_reader.hpp>

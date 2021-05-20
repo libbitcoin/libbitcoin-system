@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_BASE_58_HPP
-#define LIBBITCOIN_SYSTEM_BASE_58_HPP
+#ifndef LIBBITCOIN_SYSTEM_FORMATS_BASE_58_HPP
+#define LIBBITCOIN_SYSTEM_FORMATS_BASE_58_HPP
 
 #include <string>
 #include <bitcoin/system/define.hpp>

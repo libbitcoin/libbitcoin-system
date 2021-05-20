@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_SIPHASH
-#define LIBBITCOIN_SYSTEM_SIPHASH
+#ifndef LIBBITCOIN_SYSTEM_MATH_SIPHASH
+#define LIBBITCOIN_SYSTEM_MATH_SIPHASH
 
 #include <cstdint>
 #include <tuple>

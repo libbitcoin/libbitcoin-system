@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MINI_KEYS_HPP
-#define LIBBITCOIN_SYSTEM_MINI_KEYS_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
 
 #include <string>
 #include <bitcoin/system/define.hpp>
