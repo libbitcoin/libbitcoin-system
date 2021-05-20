@@ -116,14 +116,30 @@ BOOST_AUTO_TEST_CASE(data_slice__to_array__past_end__zero_padded)
     BOOST_REQUIRE_EQUAL(slice.to_array<size>(), expected);
 }
 
-// construct, not empty
-
 // test vector
 const auto size = 6u;
 const std::string string{ "foobar" };
 const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const byte_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const auto encoded = encode_base16(string);
+
+// copy construct
+
+BOOST_AUTO_TEST_CASE(data_slice__construct__copy__expected)
+{
+    const data_slice slice(string);
+    const data_slice copy(slice);
+    BOOST_REQUIRE_EQUAL(slice.size(), size);
+
+    // size/data
+    BOOST_REQUIRE(!slice.empty());
+    BOOST_REQUIRE_EQUAL(slice.size(), size);
+    BOOST_REQUIRE_EQUAL(*slice.data(), 'f');
+    BOOST_REQUIRE_EQUAL(slice.back(), 'r');
+    BOOST_REQUIRE_EQUAL(slice[size - 1], 'r');
+}
+
+// construct, not empty
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
 {

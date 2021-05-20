@@ -51,8 +51,8 @@ public:
     /// Empty data object.
     data_slice();
 
-    /// Move construction.
-    data_slice(data_slice&& other);
+    /// Copy construction.
+    data_slice(const data_slice& other);
 
     /// Literal text constructor.
     /// Integral null terminator is not indexed.
@@ -112,7 +112,6 @@ public:
     value_type operator[](size_type index) const;
 
 private:
-    data_slice(const data_slice& other) = delete;
     data_slice(const_pointer begin, const_pointer end, size_type size);
 
     template <size_type Size>
