@@ -60,7 +60,7 @@ extern const char32_interval char32_diacritics[char32_diacritics_count];
 extern const char32_interval char32_chinese_japanese_korean[
     char32_chinese_japanese_korean_count];
 
-// Python's generated Unicode combining class index.
+/// Python's generated Unicode combining class index.
 constexpr size_t combining_index_count = 342;
 extern const uint8_t combining_index[combining_index_count];
 
