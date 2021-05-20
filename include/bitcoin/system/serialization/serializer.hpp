@@ -27,7 +27,6 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
- ////#include <bitcoin/system/noncopyable.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -35,7 +34,7 @@ namespace system {
 /// Writer to wrap arbitrary iterator.
 template <typename Iterator>
 class serializer
-  : public writer/*, noncopyable*/
+  : public writer
 {
 public:
     typedef std::function<void(serializer<Iterator>&)> functor;

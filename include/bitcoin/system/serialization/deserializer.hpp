@@ -26,7 +26,6 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/reader.hpp>
- ////#include <bitcoin/system/noncopyable.hpp>
 #include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
@@ -35,7 +34,7 @@ namespace system {
 /// Reader to wrap arbitrary iterator.
 template <typename Iterator, bool CheckSafe>
 class deserializer
-  : public reader/*, noncopyable*/
+  : public reader
 {
 public:
     typedef std::function<void(deserializer<Iterator, CheckSafe>&)> functor;
