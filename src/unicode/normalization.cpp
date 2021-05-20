@@ -43,6 +43,11 @@ using namespace boost::locale;
 // Local helpers.
 // ----------------------------------------------------------------------------
 
+inline bool is_contained(char32_t value, const char32_interval& interval)
+{
+    return interval.first <= value && value <= interval.second;
+}
+
 #ifdef _MSC_VER
 
 // Workarounds for lack of Windows ICU support in boost-locale packages.
@@ -73,8 +78,9 @@ static NORM_FORM to_win32_normal_form(norm_type form)
 static bool normal_form(std::string& out, const std::string& in,
     norm_type form)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     const auto wide = to_utf16(in);
     const auto size = wide.size();
@@ -105,8 +111,9 @@ static bool normal_form(std::string& out, const std::string& in,
 
 bool to_lower(std::string& out, const std::string& in)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     auto wide = to_utf16(in);
     const auto size = wide.size();
@@ -128,8 +135,9 @@ bool to_lower(std::string& out, const std::string& in)
 
 bool to_upper(std::string& out, const std::string& in)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     auto wide = to_utf16(in);
     const auto size = wide.size();
@@ -156,7 +164,6 @@ constexpr auto utf8_locale_name = "en_US.UTF8";
 
 static bool get_backend_manager(localization_backend_manager& out)
 {
-#ifdef WITH_ICU
     static std::once_flag mutex;
     static bool initialized;
 
@@ -178,16 +185,14 @@ static bool get_backend_manager(localization_backend_manager& out)
     // One time verifier of the localization backend manager.
     std::call_once(mutex, validate);
     return initialized;
-#else
-    return false;
-#endif
 }
 
 static bool normal_form(std::string& out, const std::string& in,
     norm_type form)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     localization_backend_manager manager;
     if (!get_backend_manager(manager))
@@ -201,8 +206,9 @@ static bool normal_form(std::string& out, const std::string& in,
 
 bool to_lower(std::string& out, const std::string& in)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     localization_backend_manager manager;
     if (!get_backend_manager(manager))
@@ -216,8 +222,9 @@ bool to_lower(std::string& out, const std::string& in)
 
 bool to_upper(std::string& out, const std::string& in)
 {
-    if (in.empty())
-        return true;
+#ifndef WITH_ICU
+    return false;
+#endif
 
     localization_backend_manager manager;
     if (!get_backend_manager(manager))
@@ -230,6 +237,9 @@ bool to_upper(std::string& out, const std::string& in)
 }
 
 #endif // _MSC_VER
+
+// ICU dependency (ascii supported, otherwise false if WITH_ICU not defined).
+// ----------------------------------------------------------------------------
 
 bool to_lower(std::string& value)
 {
@@ -272,6 +282,9 @@ bool to_compatibility_decomposition(std::string& value)
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
 }
+
+// No ICU dependency.
+// ----------------------------------------------------------------------------
 
 bool is_unicode(char32_t point)
 {
@@ -319,8 +332,7 @@ bool is_diacritic(char32_t point)
         return false;
 
     for (size_t index = 0; index < char32_diacritics_count; ++index)
-        if (point >= char32_diacritics[index].first &&
-            point <= char32_diacritics[index].second)
+        if (is_contained(point, char32_diacritics[index]))
             return true;
 
     return false;
@@ -332,8 +344,7 @@ bool is_chinese_japanese_or_korean(char32_t point)
         return false;
 
     for (size_t index = 0; index < char32_chinese_japanese_korean_count; ++index)
-        if (point >= char32_chinese_japanese_korean[index].first &&
-            point <= char32_chinese_japanese_korean[index].second)
+        if (is_contained(point, char32_chinese_japanese_korean[index]))
             return true;
 
     return false;
@@ -367,7 +378,7 @@ std::string to_non_diacritic_form(const std::string& value)
     return to_utf8(points);
 }
 
-/// Compress ascii whitespace and remove ascii spaces between cjk characters.
+// Compress ascii whitespace and remove ascii spaces between cjk characters.
 std::string to_compressed_form(const std::string& value)
 {
     // Compress ascii whitespace to a single 0x20 between each utf32 token.
