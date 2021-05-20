@@ -117,6 +117,8 @@
     <ClCompile Include="..\..\..\..\test\formats\base_58.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\test\iostream\bit_stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\iostream\stream.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\opcode.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
@@ -128,6 +130,7 @@
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\math.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
@@ -180,6 +183,11 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
+    <ClCompile Include="..\..\..\..\test\network\thread.cpp" />
+    <ClCompile Include="..\..\..\..\test\serialization\deserialize.cpp" />
+    <ClCompile Include="..\..\..\..\test\serialization\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp" />
+    <ClCompile Include="..\..\..\..\test\serialization\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
@@ -190,21 +198,10 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\data_slice.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\deserialize.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\serialize.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\string.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
@@ -212,6 +209,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_receiver.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\witness_address.cpp" />
@@ -242,6 +240,8 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)test_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\property_tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />

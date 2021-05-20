@@ -77,6 +77,28 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/printer.cpp \
     src/config/script.cpp \
     src/config/transaction.cpp \
+    src/data/binary.cpp \
+    src/data/data.cpp \
+    src/data/data_slice.cpp \
+    src/data/string.cpp \
+    src/data/concurrency/conditional_lock.cpp \
+    src/data/concurrency/deadline.cpp \
+    src/data/concurrency/dispatcher.cpp \
+    src/data/concurrency/flush_lock.cpp \
+    src/data/concurrency/interprocess_lock.cpp \
+    src/data/concurrency/monitor.cpp \
+    src/data/concurrency/prioritized_mutex.cpp \
+    src/data/concurrency/scope_lock.cpp \
+    src/data/concurrency/sequencer.cpp \
+    src/data/concurrency/sequential_lock.cpp \
+    src/data/concurrency/socket.cpp \
+    src/data/concurrency/thread.cpp \
+    src/data/concurrency/threadpool.cpp \
+    src/data/concurrency/work.cpp \
+    src/data/iostream/istream_bit_reader.cpp \
+    src/data/iostream/istream_reader.cpp \
+    src/data/iostream/ostream_bit_writer.cpp \
+    src/data/iostream/ostream_writer.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
     src/formats/base_2048.cpp \
@@ -102,6 +124,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/math/elliptic_curve.cpp \
     src/math/golomb_coding.cpp \
     src/math/hash.cpp \
+    src/math/pseudo_random.cpp \
     src/math/ring_signature.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/secp256k1_initializer.hpp \
@@ -182,39 +205,16 @@ src_libbitcoin_system_la_SOURCES = \
     src/unicode/utf8_everywhere/utf8_ofstream.cpp \
     src/unicode/utf8_everywhere/utf8_ostream.cpp \
     src/unicode/utf8_everywhere/utf8_streambuf.cpp \
-    src/utility/binary.cpp \
-    src/utility/conditional_lock.cpp \
-    src/utility/data.cpp \
-    src/utility/data_slice.cpp \
-    src/utility/deadline.cpp \
-    src/utility/dispatcher.cpp \
-    src/utility/flush_lock.cpp \
-    src/utility/interprocess_lock.cpp \
-    src/utility/istream_bit_reader.cpp \
-    src/utility/istream_reader.cpp \
-    src/utility/monitor.cpp \
-    src/utility/neutrino_filter.cpp \
-    src/utility/ostream_bit_writer.cpp \
-    src/utility/ostream_writer.cpp \
-    src/utility/prioritized_mutex.cpp \
-    src/utility/property_tree.cpp \
-    src/utility/pseudo_random.cpp \
-    src/utility/scope_lock.cpp \
-    src/utility/sequencer.cpp \
-    src/utility/sequential_lock.cpp \
-    src/utility/socket.cpp \
-    src/utility/string.cpp \
-    src/utility/thread.cpp \
-    src/utility/threadpool.cpp \
-    src/utility/tiff.cpp \
-    src/utility/work.cpp \
     src/wallet/message.cpp \
+    src/wallet/neutrino_filter.cpp \
+    src/wallet/property_tree.cpp \
     src/wallet/addresses/bitcoin_uri.cpp \
     src/wallet/addresses/payment_address.cpp \
     src/wallet/addresses/qr_code.cpp \
     src/wallet/addresses/stealth_address.cpp \
     src/wallet/addresses/stealth_receiver.cpp \
     src/wallet/addresses/stealth_sender.cpp \
+    src/wallet/addresses/tiff.cpp \
     src/wallet/addresses/uri.cpp \
     src/wallet/addresses/witness_address.cpp \
     src/wallet/addresses/qrencode/bitstream.c \
@@ -329,6 +329,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/formats/base_58.cpp \
     test/formats/base_64.cpp \
     test/formats/base_85.cpp \
+    test/iostream/bit_stream.cpp \
+    test/iostream/stream.cpp \
     test/machine/number.cpp \
     test/machine/number.hpp \
     test/machine/opcode.cpp \
@@ -341,6 +343,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/hash.hpp \
     test/math/limits.cpp \
     test/math/math.cpp \
+    test/math/pseudo_random.cpp \
     test/math/ring_signature.cpp \
     test/math/siphash.cpp \
     test/math/siphash.hpp \
@@ -386,6 +389,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/message/transaction.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/network/thread.cpp \
+    test/serialization/deserialize.cpp \
+    test/serialization/endian.cpp \
+    test/serialization/serialize.cpp \
+    test/serialization/serializer.cpp \
     test/unicode/ascii.cpp \
     test/unicode/code_points.cpp \
     test/unicode/conversion.cpp \
@@ -394,22 +402,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/utf8_everywhere/utf8_istream.cpp \
     test/unicode/utf8_everywhere/utf8_ostream.cpp \
     test/utility/binary.cpp \
-    test/utility/bit_stream.cpp \
     test/utility/collection.cpp \
     test/utility/data.cpp \
     test/utility/data_slice.cpp \
-    test/utility/deserialize.cpp \
-    test/utility/endian.cpp \
-    test/utility/neutrino_filter.cpp \
-    test/utility/property_tree.cpp \
-    test/utility/pseudo_random.cpp \
-    test/utility/serialize.cpp \
-    test/utility/serializer.cpp \
-    test/utility/stream.cpp \
     test/utility/string.cpp \
-    test/utility/thread.cpp \
-    test/utility/tiff.cpp \
     test/wallet/message.cpp \
+    test/wallet/neutrino_filter.cpp \
+    test/wallet/property_tree.cpp \
     test/wallet/addresses/bitcoin_uri.cpp \
     test/wallet/addresses/checked.cpp \
     test/wallet/addresses/payment_address.cpp \
@@ -417,6 +416,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/addresses/stealth_address.cpp \
     test/wallet/addresses/stealth_receiver.cpp \
     test/wallet/addresses/stealth_sender.cpp \
+    test/wallet/addresses/tiff.cpp \
     test/wallet/addresses/uri.cpp \
     test/wallet/addresses/uri_reader.cpp \
     test/wallet/addresses/witness_address.cpp \
@@ -458,6 +458,8 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/error.hpp \
+    include/bitcoin/system/exceptions.hpp \
+    include/bitcoin/system/noncopyable.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/version.hpp
 
@@ -480,6 +482,35 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/stealth_record.hpp \
     include/bitcoin/system/chain/transaction.hpp \
     include/bitcoin/system/chain/witness.hpp
+
+include_bitcoin_system_concurrencydir = ${includedir}/bitcoin/system/concurrency
+include_bitcoin_system_concurrency_HEADERS = \
+    include/bitcoin/system/concurrency/asio.hpp \
+    include/bitcoin/system/concurrency/atomic.hpp \
+    include/bitcoin/system/concurrency/conditional_lock.hpp \
+    include/bitcoin/system/concurrency/deadline.hpp \
+    include/bitcoin/system/concurrency/decorator.hpp \
+    include/bitcoin/system/concurrency/delegates.hpp \
+    include/bitcoin/system/concurrency/dispatcher.hpp \
+    include/bitcoin/system/concurrency/enable_shared_from_base.hpp \
+    include/bitcoin/system/concurrency/flush_lock.hpp \
+    include/bitcoin/system/concurrency/handlers.hpp \
+    include/bitcoin/system/concurrency/interprocess_lock.hpp \
+    include/bitcoin/system/concurrency/monitor.hpp \
+    include/bitcoin/system/concurrency/pending.hpp \
+    include/bitcoin/system/concurrency/prioritized_mutex.hpp \
+    include/bitcoin/system/concurrency/resubscriber.hpp \
+    include/bitcoin/system/concurrency/scope_lock.hpp \
+    include/bitcoin/system/concurrency/sequencer.hpp \
+    include/bitcoin/system/concurrency/sequential_lock.hpp \
+    include/bitcoin/system/concurrency/socket.hpp \
+    include/bitcoin/system/concurrency/subscriber.hpp \
+    include/bitcoin/system/concurrency/synchronizer.hpp \
+    include/bitcoin/system/concurrency/thread.hpp \
+    include/bitcoin/system/concurrency/threadpool.hpp \
+    include/bitcoin/system/concurrency/timer.hpp \
+    include/bitcoin/system/concurrency/track.hpp \
+    include/bitcoin/system/concurrency/work.hpp
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \
@@ -508,6 +539,14 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/settings.hpp \
     include/bitcoin/system/config/transaction.hpp
 
+include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
+include_bitcoin_system_data_HEADERS = \
+    include/bitcoin/system/data/binary.hpp \
+    include/bitcoin/system/data/collection.hpp \
+    include/bitcoin/system/data/data.hpp \
+    include/bitcoin/system/data/data_slice.hpp \
+    include/bitcoin/system/data/string.hpp
+
 include_bitcoin_system_formatsdir = ${includedir}/bitcoin/system/formats
 include_bitcoin_system_formats_HEADERS = \
     include/bitcoin/system/formats/base_10.hpp \
@@ -518,10 +557,30 @@ include_bitcoin_system_formats_HEADERS = \
     include/bitcoin/system/formats/base_64.hpp \
     include/bitcoin/system/formats/base_85.hpp
 
+include_bitcoin_system_impl_concurrencydir = ${includedir}/bitcoin/system/impl/concurrency
+include_bitcoin_system_impl_concurrency_HEADERS = \
+    include/bitcoin/system/impl/concurrency/pending.ipp \
+    include/bitcoin/system/impl/concurrency/resubscriber.ipp \
+    include/bitcoin/system/impl/concurrency/subscriber.ipp \
+    include/bitcoin/system/impl/concurrency/track.ipp
+
+include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
+include_bitcoin_system_impl_data_HEADERS = \
+    include/bitcoin/system/impl/data/collection.ipp \
+    include/bitcoin/system/impl/data/data.ipp \
+    include/bitcoin/system/impl/data/data_slice.ipp
+
 include_bitcoin_system_impl_formatsdir = ${includedir}/bitcoin/system/impl/formats
 include_bitcoin_system_impl_formats_HEADERS = \
     include/bitcoin/system/impl/formats/base_16.ipp \
     include/bitcoin/system/impl/formats/base_58.ipp
+
+include_bitcoin_system_impl_iostreamdir = ${includedir}/bitcoin/system/impl/iostream
+include_bitcoin_system_impl_iostream_HEADERS = \
+    include/bitcoin/system/impl/iostream/istream_bit_reader.ipp \
+    include/bitcoin/system/impl/iostream/istream_reader.ipp \
+    include/bitcoin/system/impl/iostream/ostream_bit_writer.ipp \
+    include/bitcoin/system/impl/iostream/ostream_writer.ipp
 
 include_bitcoin_system_impl_log_featuresdir = ${includedir}/bitcoin/system/impl/log/features
 include_bitcoin_system_impl_log_features_HEADERS = \
@@ -544,25 +603,17 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/hash.ipp \
     include/bitcoin/system/impl/math/math.ipp
 
-include_bitcoin_system_impl_utilitydir = ${includedir}/bitcoin/system/impl/utility
-include_bitcoin_system_impl_utility_HEADERS = \
-    include/bitcoin/system/impl/utility/collection.ipp \
-    include/bitcoin/system/impl/utility/data.ipp \
-    include/bitcoin/system/impl/utility/data_slice.ipp \
-    include/bitcoin/system/impl/utility/deserialize.ipp \
-    include/bitcoin/system/impl/utility/deserializer.ipp \
-    include/bitcoin/system/impl/utility/endian.ipp \
-    include/bitcoin/system/impl/utility/istream_bit_reader.ipp \
-    include/bitcoin/system/impl/utility/istream_reader.ipp \
-    include/bitcoin/system/impl/utility/ostream_bit_writer.ipp \
-    include/bitcoin/system/impl/utility/ostream_writer.ipp \
-    include/bitcoin/system/impl/utility/pending.ipp \
-    include/bitcoin/system/impl/utility/property_tree.ipp \
-    include/bitcoin/system/impl/utility/resubscriber.ipp \
-    include/bitcoin/system/impl/utility/serialize.ipp \
-    include/bitcoin/system/impl/utility/serializer.ipp \
-    include/bitcoin/system/impl/utility/subscriber.ipp \
-    include/bitcoin/system/impl/utility/track.ipp
+include_bitcoin_system_impl_serializationdir = ${includedir}/bitcoin/system/impl/serialization
+include_bitcoin_system_impl_serialization_HEADERS = \
+    include/bitcoin/system/impl/serialization/deserialize.ipp \
+    include/bitcoin/system/impl/serialization/deserializer.ipp \
+    include/bitcoin/system/impl/serialization/endian.ipp \
+    include/bitcoin/system/impl/serialization/serialize.ipp \
+    include/bitcoin/system/impl/serialization/serializer.ipp
+
+include_bitcoin_system_impl_walletdir = ${includedir}/bitcoin/system/impl/wallet
+include_bitcoin_system_impl_wallet_HEADERS = \
+    include/bitcoin/system/impl/wallet/property_tree.ipp
 
 include_bitcoin_system_impl_wallet_addressesdir = ${includedir}/bitcoin/system/impl/wallet/addresses
 include_bitcoin_system_impl_wallet_addresses_HEADERS = \
@@ -572,6 +623,20 @@ include_bitcoin_system_impl_wallet_mnemonicsdir = ${includedir}/bitcoin/system/i
 include_bitcoin_system_impl_wallet_mnemonics_HEADERS = \
     include/bitcoin/system/impl/wallet/mnemonics/dictionaries.ipp \
     include/bitcoin/system/impl/wallet/mnemonics/dictionary.ipp
+
+include_bitcoin_system_iostreamdir = ${includedir}/bitcoin/system/iostream
+include_bitcoin_system_iostream_HEADERS = \
+    include/bitcoin/system/iostream/bit_reader.hpp \
+    include/bitcoin/system/iostream/bit_writer.hpp \
+    include/bitcoin/system/iostream/container_sink.hpp \
+    include/bitcoin/system/iostream/container_source.hpp \
+    include/bitcoin/system/iostream/iostream.hpp \
+    include/bitcoin/system/iostream/istream_bit_reader.hpp \
+    include/bitcoin/system/iostream/istream_reader.hpp \
+    include/bitcoin/system/iostream/ostream_bit_writer.hpp \
+    include/bitcoin/system/iostream/ostream_writer.hpp \
+    include/bitcoin/system/iostream/reader.hpp \
+    include/bitcoin/system/iostream/writer.hpp
 
 include_bitcoin_system_logdir = ${includedir}/bitcoin/system/log
 include_bitcoin_system_log_HEADERS = \
@@ -619,6 +684,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/math.hpp \
+    include/bitcoin/system/math/pseudo_random.hpp \
     include/bitcoin/system/math/ring_signature.hpp \
     include/bitcoin/system/math/siphash.hpp \
     include/bitcoin/system/math/stealth.hpp
@@ -666,6 +732,14 @@ include_bitcoin_system_message_HEADERS = \
     include/bitcoin/system/message/verack.hpp \
     include/bitcoin/system/message/version.hpp
 
+include_bitcoin_system_serializationdir = ${includedir}/bitcoin/system/serialization
+include_bitcoin_system_serialization_HEADERS = \
+    include/bitcoin/system/serialization/deserialize.hpp \
+    include/bitcoin/system/serialization/deserializer.hpp \
+    include/bitcoin/system/serialization/endian.hpp \
+    include/bitcoin/system/serialization/serialize.hpp \
+    include/bitcoin/system/serialization/serializer.hpp
+
 include_bitcoin_system_unicodedir = ${includedir}/bitcoin/system/unicode
 include_bitcoin_system_unicode_HEADERS = \
     include/bitcoin/system/unicode/ascii.hpp \
@@ -686,65 +760,11 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp
 
-include_bitcoin_system_utilitydir = ${includedir}/bitcoin/system/utility
-include_bitcoin_system_utility_HEADERS = \
-    include/bitcoin/system/utility/asio.hpp \
-    include/bitcoin/system/utility/atomic.hpp \
-    include/bitcoin/system/utility/binary.hpp \
-    include/bitcoin/system/utility/bit_reader.hpp \
-    include/bitcoin/system/utility/bit_writer.hpp \
-    include/bitcoin/system/utility/collection.hpp \
-    include/bitcoin/system/utility/conditional_lock.hpp \
-    include/bitcoin/system/utility/container_sink.hpp \
-    include/bitcoin/system/utility/container_source.hpp \
-    include/bitcoin/system/utility/data.hpp \
-    include/bitcoin/system/utility/data_slice.hpp \
-    include/bitcoin/system/utility/deadline.hpp \
-    include/bitcoin/system/utility/decorator.hpp \
-    include/bitcoin/system/utility/delegates.hpp \
-    include/bitcoin/system/utility/deserialize.hpp \
-    include/bitcoin/system/utility/deserializer.hpp \
-    include/bitcoin/system/utility/dispatcher.hpp \
-    include/bitcoin/system/utility/enable_shared_from_base.hpp \
-    include/bitcoin/system/utility/endian.hpp \
-    include/bitcoin/system/utility/exceptions.hpp \
-    include/bitcoin/system/utility/flush_lock.hpp \
-    include/bitcoin/system/utility/handlers.hpp \
-    include/bitcoin/system/utility/interprocess_lock.hpp \
-    include/bitcoin/system/utility/iostream.hpp \
-    include/bitcoin/system/utility/istream_bit_reader.hpp \
-    include/bitcoin/system/utility/istream_reader.hpp \
-    include/bitcoin/system/utility/monitor.hpp \
-    include/bitcoin/system/utility/neutrino_filter.hpp \
-    include/bitcoin/system/utility/noncopyable.hpp \
-    include/bitcoin/system/utility/ostream_bit_writer.hpp \
-    include/bitcoin/system/utility/ostream_writer.hpp \
-    include/bitcoin/system/utility/pending.hpp \
-    include/bitcoin/system/utility/prioritized_mutex.hpp \
-    include/bitcoin/system/utility/property_tree.hpp \
-    include/bitcoin/system/utility/pseudo_random.hpp \
-    include/bitcoin/system/utility/reader.hpp \
-    include/bitcoin/system/utility/resubscriber.hpp \
-    include/bitcoin/system/utility/scope_lock.hpp \
-    include/bitcoin/system/utility/sequencer.hpp \
-    include/bitcoin/system/utility/sequential_lock.hpp \
-    include/bitcoin/system/utility/serialize.hpp \
-    include/bitcoin/system/utility/serializer.hpp \
-    include/bitcoin/system/utility/socket.hpp \
-    include/bitcoin/system/utility/string.hpp \
-    include/bitcoin/system/utility/subscriber.hpp \
-    include/bitcoin/system/utility/synchronizer.hpp \
-    include/bitcoin/system/utility/thread.hpp \
-    include/bitcoin/system/utility/threadpool.hpp \
-    include/bitcoin/system/utility/tiff.hpp \
-    include/bitcoin/system/utility/timer.hpp \
-    include/bitcoin/system/utility/track.hpp \
-    include/bitcoin/system/utility/work.hpp \
-    include/bitcoin/system/utility/writer.hpp
-
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
-    include/bitcoin/system/wallet/message.hpp
+    include/bitcoin/system/wallet/message.hpp \
+    include/bitcoin/system/wallet/neutrino_filter.hpp \
+    include/bitcoin/system/wallet/property_tree.hpp
 
 include_bitcoin_system_wallet_addressesdir = ${includedir}/bitcoin/system/wallet/addresses
 include_bitcoin_system_wallet_addresses_HEADERS = \
@@ -754,7 +774,11 @@ include_bitcoin_system_wallet_addresses_HEADERS = \
     include/bitcoin/system/wallet/addresses/qr_code.hpp \
     include/bitcoin/system/wallet/addresses/stealth_address.hpp \
     include/bitcoin/system/wallet/addresses/stealth_receiver.hpp \
-    include/bitcoin/system/wallet/addresses/stealth_sender.hpp
+    include/bitcoin/system/wallet/addresses/stealth_sender.hpp \
+    include/bitcoin/system/wallet/addresses/tiff.hpp \
+    include/bitcoin/system/wallet/addresses/uri.hpp \
+    include/bitcoin/system/wallet/addresses/uri_reader.hpp \
+    include/bitcoin/system/wallet/addresses/witness_address.hpp
 
 include_bitcoin_system_wallet_keysdir = ${includedir}/bitcoin/system/wallet/keys
 include_bitcoin_system_wallet_keys_HEADERS = \
@@ -766,10 +790,7 @@ include_bitcoin_system_wallet_keys_HEADERS = \
     include/bitcoin/system/wallet/keys/encrypted_keys.hpp \
     include/bitcoin/system/wallet/keys/hd_private.hpp \
     include/bitcoin/system/wallet/keys/hd_public.hpp \
-    include/bitcoin/system/wallet/keys/mini_keys.hpp \
-    include/bitcoin/system/wallet/keys/uri.hpp \
-    include/bitcoin/system/wallet/keys/uri_reader.hpp \
-    include/bitcoin/system/wallet/keys/witness_address.hpp
+    include/bitcoin/system/wallet/keys/mini_keys.hpp
 
 include_bitcoin_system_wallet_mnemonicsdir = ${includedir}/bitcoin/system/wallet/mnemonics
 include_bitcoin_system_wallet_mnemonics_HEADERS = \

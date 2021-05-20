@@ -19,38 +19,47 @@
     <Filter Include="src\formats">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\machine">
+    <Filter Include="src\iostream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\math">
+    <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\message">
+    <Filter Include="src\math">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode">
+    <Filter Include="src\message">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\utility">
+    <Filter Include="src\network">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet">
+    <Filter Include="src\serialization">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
+    <Filter Include="src\unicode">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\unicode\utf8_everywhere">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics\dictionaries">
+    <Filter Include="src\utility">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\addresses">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\keys">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics\dictionaries">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +174,12 @@
     <ClCompile Include="..\..\..\..\test\formats\base_85.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\bit_stream.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\stream.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
@@ -196,6 +211,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\math.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\pseudo_random.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
@@ -330,6 +348,21 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\network\thread.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serialization\deserialize.cpp">
+      <Filter>src\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serialization\endian.cpp">
+      <Filter>src\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp">
+      <Filter>src\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serialization\serializer.cpp">
+      <Filter>src\serialization</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\settings.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -360,9 +393,6 @@
     <ClCompile Include="..\..\..\..\test\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\collection.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -372,37 +402,7 @@
     <ClCompile Include="..\..\..\..\test\utility\data_slice.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\deserialize.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\endian.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\serialize.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\stream.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\utility\string.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\thread.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\utility\tiff.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp">
@@ -424,6 +424,9 @@
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp">
@@ -479,6 +482,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <Filter>src\wallet\mnemonics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\property_tree.cpp">
+      <Filter>src\wallet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
