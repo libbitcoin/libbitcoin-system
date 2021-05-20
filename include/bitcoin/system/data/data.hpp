@@ -28,7 +28,7 @@
 #include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data_slice.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -117,6 +117,6 @@ BC_API data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve=0);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/data.ipp>
+#include <bitcoin/system/impl/data/data.ipp>
 
 #endif

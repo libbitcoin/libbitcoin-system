@@ -22,9 +22,9 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

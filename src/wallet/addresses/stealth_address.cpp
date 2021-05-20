@@ -27,9 +27,9 @@
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/utility/binary.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

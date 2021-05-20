@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CONCURRENCY_DELEGATES_HPP
 
 #include <functional>
-#include <bitcoin/system/utility/work.hpp>
+#include <bitcoin/system/concurrency/work.hpp>
 
 namespace libbitcoin {
 namespace system {

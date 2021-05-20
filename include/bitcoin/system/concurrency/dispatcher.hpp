@@ -26,13 +26,13 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/deadline.hpp>
-#include <bitcoin/system/utility/delegates.hpp>
-#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/synchronizer.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
-#include <bitcoin/system/utility/work.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/deadline.hpp>
+#include <bitcoin/system/concurrency/delegates.hpp>
+#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/concurrency/synchronizer.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
+#include <bitcoin/system/concurrency/work.hpp>
 
 namespace libbitcoin {
 namespace system {

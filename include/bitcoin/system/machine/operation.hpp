@@ -26,9 +26,9 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/script_pattern.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {

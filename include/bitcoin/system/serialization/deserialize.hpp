@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -67,6 +67,6 @@ bool deserialize(Value& out, const std::string& text);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/deserialize.ipp>
+#include <bitcoin/system/impl/serialization/deserialize.ipp>
 
 #endif

@@ -28,7 +28,7 @@
 #include <bitcoin/system/message/inventory_vector.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

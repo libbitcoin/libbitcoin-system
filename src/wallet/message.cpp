@@ -21,8 +21,8 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+#include <bitcoin/system/iostream/container_sink.hpp>
+#include <bitcoin/system/iostream/ostream_writer.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 
 namespace libbitcoin {

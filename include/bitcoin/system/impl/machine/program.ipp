@@ -31,7 +31,7 @@
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

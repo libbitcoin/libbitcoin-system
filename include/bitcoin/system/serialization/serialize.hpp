@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -71,6 +71,6 @@ std::string serialize(const Value& value, const std::string& fallback="");
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/serialize.ipp>
+#include <bitcoin/system/impl/serialization/serialize.ipp>
 
 #endif

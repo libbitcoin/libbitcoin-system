@@ -25,10 +25,10 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {

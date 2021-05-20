@@ -23,8 +23,8 @@
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

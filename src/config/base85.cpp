@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 #include <bitcoin/system/formats/base_85.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

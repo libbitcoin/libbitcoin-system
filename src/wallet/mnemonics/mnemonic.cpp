@@ -29,9 +29,9 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>

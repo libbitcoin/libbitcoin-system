@@ -27,7 +27,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/golomb_coding.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -19,12 +19,12 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/utility/neutrino_filter.hpp>
+#include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
 #include <bitcoin/system/math/golomb_coding.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

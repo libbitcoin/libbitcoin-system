@@ -23,7 +23,7 @@
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/serializer.hpp>
+#include <bitcoin/system/serialization/serializer.hpp>
 
 namespace libbitcoin {
 namespace system {

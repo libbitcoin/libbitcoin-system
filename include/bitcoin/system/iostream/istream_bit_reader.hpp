@@ -26,8 +26,8 @@
 #include <cstdint>
 #include <istream>
 #include <type_traits>
-#include <bitcoin/system/utility/bit_reader.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
+#include <bitcoin/system/iostream/bit_reader.hpp>
+#include <bitcoin/system/iostream/istream_reader.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -114,6 +114,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/istream_bit_reader.ipp>
+#include <bitcoin/system/impl/iostream/istream_bit_reader.ipp>
 
 #endif

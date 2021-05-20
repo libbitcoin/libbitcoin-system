@@ -24,8 +24,8 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

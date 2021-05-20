@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/wallet/keys/witness_address.hpp>
+#include <bitcoin/system/wallet/addresses/witness_address.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -28,11 +28,11 @@
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

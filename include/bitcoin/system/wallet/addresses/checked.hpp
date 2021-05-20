@@ -21,7 +21,7 @@
 
 #include <cstddef>
 #include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

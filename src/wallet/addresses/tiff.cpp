@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/utility/tiff.hpp>
+#include <bitcoin/system/wallet/addresses/tiff.hpp>
 
 #include <cstdint>
 #include <iostream>
 #include <cmath>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -29,8 +29,8 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
 
  // Cannot use a data_slice override as it is not deserializable.
 

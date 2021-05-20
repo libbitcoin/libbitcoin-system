@@ -367,6 +367,6 @@ BC_API bool property_tree(pt::ptree& out, const std::string& json);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/property_tree.ipp>
+#include <bitcoin/system/impl/wallet/property_tree.ipp>
 
 #endif

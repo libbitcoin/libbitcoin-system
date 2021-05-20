@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/utility/sequencer.hpp>
+#include <bitcoin/system/concurrency/sequencer.hpp>
 
 #include <utility>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {
 namespace system {

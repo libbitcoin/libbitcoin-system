@@ -22,10 +22,10 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/data_slice.hpp>
-#include <bitcoin/system/utility/endian.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

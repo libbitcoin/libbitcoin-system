@@ -30,12 +30,12 @@
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/endian.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
-#include <bitcoin/system/utility/serializer.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/serialization/serializer.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 

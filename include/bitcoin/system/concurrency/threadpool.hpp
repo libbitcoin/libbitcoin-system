@@ -25,9 +25,9 @@
 #include <functional>
 #include <thread>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {
 namespace system {

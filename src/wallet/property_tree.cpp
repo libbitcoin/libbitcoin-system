@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <bitcoin/system/utility/property_tree.hpp>
+#include <bitcoin/system/wallet/property_tree.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -35,7 +35,7 @@
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/utility/collection.hpp>
+#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

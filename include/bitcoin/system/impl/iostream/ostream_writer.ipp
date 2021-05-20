@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_OSTREAM_WRITER_IPP
 
 #include <cstddef>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

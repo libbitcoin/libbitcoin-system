@@ -28,8 +28,8 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/message/version.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
 
 namespace libbitcoin {
 namespace system {

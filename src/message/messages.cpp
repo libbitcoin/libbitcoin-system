@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

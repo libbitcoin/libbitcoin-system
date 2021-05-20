@@ -41,9 +41,9 @@
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/messages.hpp>
 #include <bitcoin/system/settings.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

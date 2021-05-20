@@ -25,8 +25,8 @@
 #include <memory>
 #include <vector>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -81,6 +81,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/pending.ipp>
+#include <bitcoin/system/impl/concurrency/pending.ipp>
 
 #endif

@@ -23,7 +23,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_BIT_WRITER_HPP
 
 #include <cstdint>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 // The bit writer operates from high to low order bits.
 // It reads and writes high bits first both in the operand and the buffer.

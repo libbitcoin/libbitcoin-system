@@ -23,8 +23,8 @@
 #include <ostream>
 #include <type_traits>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -101,6 +101,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/ostream_writer.ipp>
+#include <bitcoin/system/impl/iostream/ostream_writer.ipp>
 
 #endif

@@ -23,7 +23,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_BIT_READER_HPP
 
 #include <cstdint>
-#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
 
 // The bit reader operates from high to low order bits.
 // It reads and writes high bits first both in the operand and the buffer.

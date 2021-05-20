@@ -29,9 +29,9 @@
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

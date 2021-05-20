@@ -139,6 +139,6 @@ typedef std::initializer_list<data_slice> data_loaf;
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/data_slice.ipp>
+#include <bitcoin/system/impl/data/data_slice.ipp>
 
 #endif

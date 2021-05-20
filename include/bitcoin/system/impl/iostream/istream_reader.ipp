@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_READER_IPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_READER_IPP
 
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 #include "parse_encrypted_key.hpp"
 

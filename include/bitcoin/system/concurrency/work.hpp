@@ -25,11 +25,11 @@
 #include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/monitor.hpp>
-#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/sequencer.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/monitor.hpp>
+#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/concurrency/sequencer.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -21,7 +21,7 @@
 
 #include <iterator>
 #include <vector>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -142,6 +142,6 @@ Collection reverse(const Collection& source);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/collection.ipp>
+#include <bitcoin/system/impl/data/collection.ipp>
 
 #endif

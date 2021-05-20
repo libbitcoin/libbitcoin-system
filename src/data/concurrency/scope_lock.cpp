@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/utility/scope_lock.hpp>
+#include <bitcoin/system/concurrency/scope_lock.hpp>
 
 #include <memory>
-#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -22,8 +22,8 @@
 #include <cstddef>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/data_slice.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {

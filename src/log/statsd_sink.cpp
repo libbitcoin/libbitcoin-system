@@ -37,8 +37,8 @@
 #include <bitcoin/system/log/severity.hpp>
 #include <bitcoin/system/log/udp_client_sink.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
 
 namespace libbitcoin {
 namespace system {

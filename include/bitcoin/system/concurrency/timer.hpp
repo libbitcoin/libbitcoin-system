@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <time.h>
 #include <string>
-#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -25,7 +25,7 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/message/network_address.hpp>
-#include <bitcoin/system/utility/asio.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
 
 namespace libbitcoin {
 namespace system {

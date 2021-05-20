@@ -27,7 +27,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
-#include <bitcoin/system/wallet/keys/uri_reader.hpp>
+#include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace system {

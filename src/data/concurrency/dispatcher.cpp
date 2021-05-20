@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/utility/dispatcher.hpp>
+#include <bitcoin/system/concurrency/dispatcher.hpp>
 
 #include <memory>
 #include <string>
-#include <bitcoin/system/utility/threadpool.hpp>
-#include <bitcoin/system/utility/work.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
+#include <bitcoin/system/concurrency/work.hpp>
 
 namespace libbitcoin {
 namespace system {

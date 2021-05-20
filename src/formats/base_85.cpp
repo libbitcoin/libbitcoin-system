@@ -52,7 +52,7 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

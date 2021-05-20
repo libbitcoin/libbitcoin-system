@@ -26,7 +26,7 @@
 #include <ostream>
 #include <type_traits>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/bit_writer.hpp>
+#include <bitcoin/system/iostream/bit_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -118,6 +118,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/ostream_bit_writer.ipp>
+#include <bitcoin/system/impl/iostream/ostream_bit_writer.ipp>
 
 #endif

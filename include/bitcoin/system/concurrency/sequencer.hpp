@@ -22,10 +22,10 @@
 #include <functional>
 #include <memory>
 #include <queue>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/enable_shared_from_base.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-////#include <bitcoin/system/utility/track.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/enable_shared_from_base.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+////#include <bitcoin/system/concurrency/track.hpp>
 
 namespace libbitcoin {
 namespace system {

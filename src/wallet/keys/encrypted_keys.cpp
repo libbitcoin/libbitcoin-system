@@ -30,8 +30,8 @@
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include "parse_encrypted_keys/parse_encrypted_key.hpp"

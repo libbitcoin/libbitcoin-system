@@ -20,7 +20,7 @@
 
 #include <string>
 #include <bitcoin/system/unicode/conversion.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

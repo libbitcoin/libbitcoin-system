@@ -23,7 +23,7 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
-#include <bitcoin/system/utility/data_slice.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {

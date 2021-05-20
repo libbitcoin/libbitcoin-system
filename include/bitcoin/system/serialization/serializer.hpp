@@ -25,10 +25,10 @@
 #include <string>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/data.hpp>
-////#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/data/data.hpp>
+////#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -126,6 +126,6 @@ serializer<Iterator> make_unsafe_serializer(Iterator begin);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/serializer.ipp>
+#include <bitcoin/system/impl/serialization/serializer.ipp>
 
 #endif

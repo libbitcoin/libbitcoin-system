@@ -25,7 +25,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

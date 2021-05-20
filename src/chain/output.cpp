@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

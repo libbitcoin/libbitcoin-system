@@ -24,7 +24,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

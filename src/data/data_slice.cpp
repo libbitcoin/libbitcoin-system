@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/utility/data_slice.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 
 #include <array>
 #include <ostream>

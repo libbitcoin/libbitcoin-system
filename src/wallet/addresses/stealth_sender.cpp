@@ -21,8 +21,8 @@
 #include <cstdint>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/utility/binary.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

@@ -27,8 +27,8 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 // We built this because po::options_description.print() sucks.
 

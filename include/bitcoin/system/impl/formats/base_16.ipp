@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <string>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_FORMATS_BASE_58_IPP
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {

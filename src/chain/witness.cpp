@@ -31,10 +31,10 @@
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -23,11 +23,11 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/deserialize.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/iostream/container_sink.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/deserialize.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/data/string.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -25,7 +25,7 @@
 #include <iterator>
 #include <string>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {

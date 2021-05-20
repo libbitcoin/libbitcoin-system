@@ -23,7 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp>
 
 namespace libbitcoin {

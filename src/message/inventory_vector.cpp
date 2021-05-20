@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/message/inventory.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

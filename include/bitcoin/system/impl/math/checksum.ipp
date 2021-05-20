@@ -24,8 +24,8 @@
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/data_slice.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {
 namespace system {

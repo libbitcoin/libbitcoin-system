@@ -24,7 +24,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

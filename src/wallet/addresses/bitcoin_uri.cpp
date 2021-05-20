@@ -23,11 +23,11 @@
 #include <iostream>
 #include <map>
 #include <bitcoin/system/formats/base_10.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
-#include <bitcoin/system/wallet/keys/uri.hpp>
-#include <bitcoin/system/wallet/keys/uri_reader.hpp>
+#include <bitcoin/system/wallet/addresses/uri.hpp>
+#include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace system {

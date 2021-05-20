@@ -23,7 +23,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/data/binary.hpp>
 
 namespace libbitcoin {
 namespace system {

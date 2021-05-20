@@ -19,13 +19,13 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/utility/istream_bit_reader.hpp>
+#include <bitcoin/system/iostream/istream_bit_reader.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/endian.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

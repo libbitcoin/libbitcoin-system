@@ -21,7 +21,7 @@
 
 #include <istream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -53,6 +53,6 @@ byte_array<sizeof(Integer)> to_little_endian(Integer value);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/utility/endian.ipp>
+#include <bitcoin/system/impl/serialization/endian.ipp>
 
 #endif

@@ -23,7 +23,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

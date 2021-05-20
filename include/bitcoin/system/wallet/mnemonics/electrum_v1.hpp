@@ -22,9 +22,9 @@
 #include <cstddef>
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
-#include <bitcoin/system/wallet/keys/witness_address.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>

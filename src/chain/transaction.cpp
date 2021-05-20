@@ -38,8 +38,8 @@
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/iostream.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

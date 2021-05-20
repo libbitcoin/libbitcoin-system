@@ -35,7 +35,7 @@
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/settings.hpp>
-#include <bitcoin/system/utility/timer.hpp>
+#include <bitcoin/system/concurrency/timer.hpp>
 
 namespace libbitcoin {
 namespace system {

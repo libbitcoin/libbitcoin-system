@@ -23,8 +23,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

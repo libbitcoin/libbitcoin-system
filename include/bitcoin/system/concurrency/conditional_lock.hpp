@@ -21,7 +21,7 @@
 
 #include <memory>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/thread.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
 
 namespace libbitcoin {
 namespace system {

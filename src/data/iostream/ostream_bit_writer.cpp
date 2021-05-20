@@ -19,15 +19,15 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/utility/ostream_bit_writer.hpp>
+#include <bitcoin/system/iostream/ostream_bit_writer.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/utility/endian.hpp>
-#include <bitcoin/system/utility/reader.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
 
 namespace libbitcoin {
 namespace system {

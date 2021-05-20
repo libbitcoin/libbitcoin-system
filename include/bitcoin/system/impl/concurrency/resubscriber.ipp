@@ -24,10 +24,10 @@
 #include <string>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/utility/dispatcher.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
-////#include <bitcoin/system/utility/track.hpp>
+#include <bitcoin/system/concurrency/dispatcher.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
+////#include <bitcoin/system/concurrency/track.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -25,7 +25,7 @@
 #include <boost/regex.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -26,7 +26,7 @@
 #include <bitcoin/system/math/ec_point.hpp>
 #include <bitcoin/system/math/ec_scalar.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/serializer.hpp>
+#include <bitcoin/system/serialization/serializer.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 
 namespace libbitcoin {

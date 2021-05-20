@@ -36,9 +36,9 @@
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 namespace libbitcoin {
 namespace system {

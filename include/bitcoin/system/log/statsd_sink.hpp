@@ -22,7 +22,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/log/rotable_file.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
 
 namespace libbitcoin {
 namespace system {

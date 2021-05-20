@@ -23,12 +23,12 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/utility/asio.hpp>
-#include <bitcoin/system/utility/enable_shared_from_base.hpp>
-#include <bitcoin/system/utility/noncopyable.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/threadpool.hpp>
-////#include <bitcoin/system/utility/track.hpp>
+#include <bitcoin/system/concurrency/asio.hpp>
+#include <bitcoin/system/concurrency/enable_shared_from_base.hpp>
+#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/concurrency/threadpool.hpp>
+////#include <bitcoin/system/concurrency/track.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -20,8 +20,8 @@
 
 #include <sstream>
 #include <string>
-#include <bitcoin/system/utility/binary.hpp>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {

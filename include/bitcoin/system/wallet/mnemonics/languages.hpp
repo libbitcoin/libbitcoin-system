@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_LANGUAGES_HPP
 
 #include <string>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/string.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 

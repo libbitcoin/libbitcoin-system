@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <limits>
-#include <bitcoin/system/utility/exceptions.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
