@@ -48,8 +48,6 @@ namespace wallet {
 
 constexpr auto passphrase_prefix = "electrum";
 constexpr size_t hmac_iterations = 2048;
-
-constexpr size_t grind_limit = 0xffff;
 constexpr size_t minimum_two_factor_authentication_words = 20;
 static const auto seed_version = to_chunk("Seed version");
 
@@ -128,10 +126,8 @@ electrum::result electrum::grinder(const data_chunk& entropy,
 
     // This just grinds away until exhausted or prefix found.
     // On the first iteration the usable entropy is unchanged.
-    // On the first iteration one entropy byte may be discarded.
-    // On subsequent iterations size will be reduced from 512 bytes.
     // Previously discovered entropy round trips, matching on the first pass.
-    while (limit-- > 0u)
+    do
     {
         hash[entropy_size - 1u] &= padding_mask;
         words = encoder(hash, identifier);
@@ -146,6 +142,7 @@ electrum::result electrum::grinder(const data_chunk& entropy,
         hash = to_chunk(sha512_hash(hash));
         hash.resize(entropy_size);
     }
+    while (limit-- > 0u);
 
     return { {}, {}, start };
 }
@@ -428,8 +425,8 @@ electrum::electrum(const string_list& words, language identifier)
 }
 
 electrum::electrum(const data_chunk& entropy, seed_prefix prefix,
-    language identifier)
-  : electrum(from_entropy(entropy, prefix, identifier))
+    language identifier, size_t grind_limit)
+  : electrum(from_entropy(entropy, prefix, identifier, grind_limit))
 {
 }
 
@@ -440,8 +437,10 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 {
 }
 
+// To allow maximum iteration a caller should use max_uint32.
+// To test existing entropy a caller should use the default of zero.
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
-    language identifier)
+    language identifier, size_t grind_limit)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};

@@ -215,16 +215,16 @@ electrum_vector_list vectors
 
 // Menomics generated using the seed prefixer given the following paramters.
 
-// 17 null bytes, seed_prefix:standard, language::it, 341 iterations.
+// 17 null bytes, seed_prefix:standard, language::it, 340 iterations.
 const auto mnemonic_standard = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
 
-// 17 null bytes, seed_prefix:witness, language::it, 9545 iterations.
+// 17 null bytes, seed_prefix:witness, language::it, 9544 iterations.
 const auto mnemonic_witness = "mettere enzima ristoro revocato sobrio tizzone slitta croce crostata scatenare cardo tortora";
 
-// 17 null bytes, seed_prefix:two_factor_authentication, language::it, 8814 iterations.
+// 17 null bytes, seed_prefix:two_factor_authentication, language::it, 8813 iterations.
 const auto mnemonic_two_factor_authentication = "orfano verbale vessillo sabato furbo dito gallina asino delegare chiedere alettone ulisse";
 
-// 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 332 iterations.
+// 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 331 iterations.
 const auto mnemonic_two_factor_authentication_witness = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
 
 class accessor
@@ -324,9 +324,9 @@ public:
     }
 
     static electrum from_entropy(const data_chunk& entropy, seed_prefix prefix,
-        language identifier)
+        language identifier, uint32_t grind_limit=0)
     {
-        return electrum::from_entropy(entropy, prefix, identifier);
+        return electrum::from_entropy(entropy, prefix, identifier, grind_limit);
     }
 };
 
