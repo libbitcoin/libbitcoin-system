@@ -108,6 +108,39 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_default__always__invalid)
     BOOST_REQUIRE(!electrum_v1());
 }
 
+// construct copy
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_copy__always__expected)
+{
+    const auto sentence1 =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    electrum_v1 instance1(sentence1);
+    BOOST_REQUIRE(instance1);
+
+    electrum_v1 instance2(instance1);
+    BOOST_REQUIRE(instance2);
+
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence1);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
+    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+}
+
+// construct move (default)
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_move__always__expected)
+{
+    const auto sentence1 =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    electrum_v1 instance1(sentence1);
+    BOOST_REQUIRE(instance1);
+
+    electrum_v1 instance2(std::move(instance1));
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence1);
+}
+
 // construct sentence
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__empty_sentence__invalid)
@@ -269,6 +302,66 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy___always__valid_expe
     BOOST_REQUIRE_EQUAL(instance.entropy(), to_chunk(entropy));
 }
 
+// assign (default)
+
+BOOST_AUTO_TEST_CASE(electrum_v1__assign_copy__always__expected)
+{
+    const auto sentence1 =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    const electrum_v1 instance1(sentence1);
+    electrum_v1 instance2;
+    instance2 = instance1;
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
+    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__assign_move__always__expected)
+{
+    const auto sentence1 =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    electrum_v1 instance1(sentence1);
+    electrum_v1 instance2;
+    instance2 = std::move(instance1);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
+    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+}
+
+// in/equality (default)
+
+BOOST_AUTO_TEST_CASE(electrum_v1__equality__always__expected)
+{
+    const auto sentence1 =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    const electrum_v1 instance1(sentence1);
+    const electrum_v1 instance2(sentence1);
+    BOOST_REQUIRE(instance1 == instance2);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__inequality_move__always__expected)
+{
+    const auto sentence =
+        "blind faith blind faith blind faith blind faith blind faith blind faith";
+
+    const string_list words
+    {
+        "blind", "faith", "blind", "faith", "blind", "faith",
+        "blind", "faith", "blind", "faith", "blind", "faith",
+        "blind", "faith", "blind", "faith", "blind", "faith",
+        "blind", "faith", "blind", "faith", "blind", "faith"
+    };
+
+    const electrum_v1 instance1(sentence);
+    const electrum_v1 instance2(words);
+    BOOST_REQUIRE(instance1 != instance2);
+}
+
 // operator>>
 
 BOOST_AUTO_TEST_CASE(electrum_v1__deserialize___valid_whitespace__expected_trimmed)
@@ -282,6 +375,14 @@ BOOST_AUTO_TEST_CASE(electrum_v1__deserialize___valid_whitespace__expected_trimm
     BOOST_REQUIRE_EQUAL(instance.sentence(), expected);
 }
 
+BOOST_AUTO_TEST_CASE(electrum_v1__deserialize__invalid__invalid)
+{
+    std::istringstream in{ "foobar" };
+    electrum_v1 instance;
+    in >> instance;
+    BOOST_REQUIRE(!instance);
+}
+
 // operator<<
 
 BOOST_AUTO_TEST_CASE(electrum_v1__serialize___valid_whitespace__expected)
@@ -292,6 +393,15 @@ BOOST_AUTO_TEST_CASE(electrum_v1__serialize___valid_whitespace__expected)
     electrum_v1 instance(sentence);
     out << instance;
     BOOST_REQUIRE_EQUAL(out.str(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__serialize__invalid__invalid)
+{
+    std::ostringstream out;
+    electrum_v1 instance;
+    BOOST_REQUIRE(!instance);
+    out << instance;
+    BOOST_REQUIRE(out.str().empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
