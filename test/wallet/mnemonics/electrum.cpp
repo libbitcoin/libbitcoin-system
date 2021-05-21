@@ -835,7 +835,7 @@ BOOST_AUTO_TEST_CASE(electrum__to_seed__ascii_uppercased__expected)
 BOOST_AUTO_TEST_CASE(electrum__assign_copy__always__expected)
 {
     const auto vector1 = vectors[electrum_vector::chinese];
-    electrum instance1(vector1.mnemonic);
+    const electrum instance1(vector1.mnemonic);
     electrum instance2;
     instance2 = instance1;
     BOOST_REQUIRE(instance2);
@@ -861,8 +861,8 @@ BOOST_AUTO_TEST_CASE(electrum__assign_move__always__expected)
 BOOST_AUTO_TEST_CASE(electrum__equality__always__expected)
 {
     const auto vector1 = vectors[electrum_vector::chinese];
-    electrum instance1(vector1.mnemonic);
-    electrum instance2(vector1.mnemonic);
+    const electrum instance1(vector1.mnemonic);
+    const electrum instance2(vector1.mnemonic);
     BOOST_REQUIRE(instance1 == instance2);
 }
 
@@ -870,8 +870,8 @@ BOOST_AUTO_TEST_CASE(electrum__inequality_move__always__expected)
 {
     const auto vector1 = vectors[electrum_vector::chinese];
     const auto vector2 = vectors[electrum_vector::spanish];
-    electrum instance1(vector1.mnemonic);
-    electrum instance2(vector2.mnemonic);
+    const electrum instance1(vector1.mnemonic);
+    const electrum instance2(vector2.mnemonic);
     BOOST_REQUIRE(instance1 != instance2);
 }
 
