@@ -98,9 +98,13 @@ hd_private mnemonic::seeder(const string_list& words,
     // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
 
+    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+
     // Unlike Electrum, BIP39 does not perform any further normalization.
     if (!to_compatibility_decomposition(phrase))
         return {};
+
+    LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
     const auto data = to_chunk(system::join(words));

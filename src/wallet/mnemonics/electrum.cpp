@@ -156,12 +156,16 @@ hd_private electrum::seeder(const string_list& words,
     // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
 
+    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+
     // Conforms to the Unicode Standard for nfkd and case lowering.
     // seed = unicodedata.normalize('NFKD', seed)
     // Python 3 [but not 2] string.lower() conforms to the Unicode Standard.
     // seed = seed.lower()
     if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
         return {};
+
+    LCOV_EXCL_STOP()
 
     // Python's unicodedata.combining returns the canonical combining
     // class assigned to the character, which may or may not be a diacritic.
