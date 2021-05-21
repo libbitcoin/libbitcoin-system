@@ -19,12 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 
+#include <bitcoin/system/iostream/bit_reader.hpp>
 #include <bitcoin/system/iostream/container_source.hpp>
 #include <bitcoin/system/iostream/istream_bit_reader.hpp>
 #include <bitcoin/system/iostream/istream_reader.hpp>
+#include <bitcoin/system/iostream/reader.hpp>
 
+#include <bitcoin/system/iostream/bit_writer.hpp>
 #include <bitcoin/system/iostream/container_sink.hpp>
 #include <bitcoin/system/iostream/ostream_bit_writer.hpp>
 #include <bitcoin/system/iostream/ostream_writer.hpp>
+#include <bitcoin/system/iostream/writer.hpp>
 
 #endif

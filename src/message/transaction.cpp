@@ -23,7 +23,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/reader.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
