@@ -351,6 +351,22 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___invalid_language__invalid)
     BOOST_REQUIRE(!instance);
 }
 
+// to_seed
+
+BOOST_AUTO_TEST_CASE(electrum_v1__to_seed___invalid__invalid)
+{
+    electrum_v1 instance;
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(!instance.to_seed());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__to_seed___valid__valid)
+{
+    const electrum_v1 instance(sentence12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.to_seed());
+}
+
 // assign (default)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__assign_copy__always__expected)

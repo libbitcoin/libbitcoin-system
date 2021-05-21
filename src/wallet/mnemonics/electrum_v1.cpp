@@ -29,6 +29,7 @@
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {
@@ -234,6 +235,17 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
 
     // Save derived entropy and dictionary words, originals are discarded.
     return { decoder(tokens, lexicon), tokens, lexicon };
+}
+
+// public
+// ------------------------------------------------------------------------
+
+hd_private electrum_v1::to_seed(uint64_t chain) const
+{
+    if (!(*this))
+        return {};
+
+    return { entropy_, chain };
 }
 
 // operators

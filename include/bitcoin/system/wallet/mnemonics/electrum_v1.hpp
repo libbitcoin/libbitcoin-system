@@ -25,6 +25,7 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
+#include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -87,6 +88,9 @@ public:
     /// These constructors guarantee instance validity.
     electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
     electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
+
+    /// Generate the wallet seed from entropy.
+    hd_private to_seed(uint64_t chain=hd_private::mainnet) const;
 
     /// Serialized sentence.
     friend std::istream& operator>>(std::istream& in, electrum_v1& to);
