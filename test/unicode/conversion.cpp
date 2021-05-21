@@ -38,6 +38,15 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__ideographic_space__space)
     BOOST_REQUIRE_EQUAL(to_utf8(space), ideographic_space);
 }
 
+// to_utf<>
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf__invalid__empty)
+{
+    // Cause boost::locale::conv::utf_to_utf<>() to throw, which we suppress.
+    std::u32string invalid{ 0xffffffff };
+    BOOST_REQUIRE(to_utf8(invalid).empty());
+}
+
 // to_utf8 (wstring)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf8_16__empty__empty)
