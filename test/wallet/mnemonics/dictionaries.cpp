@@ -198,21 +198,37 @@ BOOST_AUTO_TEST_CASE(dictionaries__index2__none__empty)
     BOOST_REQUIRE(indexes.empty());
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__contains1__words__expected)
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__default_dictionary__expected)
 {
     BOOST_REQUIRE(instance.contains(test_words_en[0]) == language::en);
     BOOST_REQUIRE(instance.contains(test_words_es[1]) == language::es);
     BOOST_REQUIRE(instance.contains(test_words_ja[2]) == language::ja);
     BOOST_REQUIRE(instance.contains("foo") == language::none);
-    BOOST_REQUIRE(instance.contains("bar") == language::none);
     BOOST_REQUIRE(instance.contains("") == language::none);
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__contains1__overlapping_wordlists__expected)
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__explicit_dictionary__expected)
 {
-    // Order is not guaranteed, search can be parallelized.
+    BOOST_REQUIRE(instance.contains(test_words_ja[2], language::ja) == language::ja);
+    BOOST_REQUIRE(instance.contains("foo", language::none) == language::none);
+    BOOST_REQUIRE(instance.contains("", language::none) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__incorrect_explicit_dictionary__none)
+{
+    BOOST_REQUIRE(instance.contains(test_words_en[0], language::ja) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__invalid_explicit_dictionary__none)
+{
+    BOOST_REQUIRE(instance.contains(test_words_en[0], language::ko) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries__contains1__redundant_wordlists__expected)
+{
+    // Search order is guaranteed, returns first match.
     const auto lingo = instance.contains(test_words_zh_Hans[3]);
-    BOOST_REQUIRE(lingo == language::zh_Hans || lingo == language::zh_Hant);
+    BOOST_REQUIRE(lingo == language::zh_Hans);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__empty__none)
