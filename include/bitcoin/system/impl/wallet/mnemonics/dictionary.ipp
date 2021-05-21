@@ -86,6 +86,7 @@ string_list dictionary<Size>::at(const search& indexes) const
 template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const
 {
+    // std::find returns first match, order is guaranteed.
     // Standard wordlists are not sorted for c++ < operator, so cannot use a
     // binary_search (O(log2(n))) and instead must scan entire list (O(n)).
     const auto it = std::find(words_.begin(), words_.end(), word);

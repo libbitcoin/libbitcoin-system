@@ -34,6 +34,7 @@ namespace wallet {
 
 // Search container for a set of dictionaries with POD word lists.
 // POD dictionaries wrapper with per dictionary O(n) search and O(1) index.
+// Search order is guaranteed, always returns first match.
 template<size_t Count, size_t Size>
 class dictionaries
 {

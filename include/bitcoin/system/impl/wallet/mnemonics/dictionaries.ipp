@@ -111,6 +111,7 @@ language dictionaries<Count, Size>::contains(const std::string& word,
             identifier : language::none;
     }
 
+    // std::find_if returns first match, order is guaranteed.
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
         [&](const dictionary<Size>& dictionary)
         {
@@ -131,6 +132,7 @@ language dictionaries<Count, Size>::contains(const string_list& words,
             identifier : language::none;
     }
 
+    // std::find_if returns first match, order is guaranteed.
     const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
         [&](const dictionary<Size>& dictionary)
         {
@@ -147,6 +149,7 @@ template<size_t Count, size_t Size>
 typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(language identifier) const
 {
+    // std::find_if returns first match, order is guaranteed.
     return std::find_if(dictionaries_.begin(), dictionaries_.end(),
         [&](const dictionary<Size>& dictionary)
         {
@@ -158,6 +161,7 @@ template<size_t Count, size_t Size>
 typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(const std::string& name) const
 {
+    // std::find_if returns first match, order is guaranteed.
     return std::find_if(dictionaries_.begin(), dictionaries_.end(),
         [&](const dictionary<Size>& dictionary)
         {

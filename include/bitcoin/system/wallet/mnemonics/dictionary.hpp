@@ -34,6 +34,7 @@ namespace wallet {
 
 // Search container for a dictionary of lexically-sorted words.
 // POD dictionary wrapper with O(n) search and O(1) index.
+// Search order is guaranteed, always returns first match.
 template<size_t Size>
 class dictionary
 {
