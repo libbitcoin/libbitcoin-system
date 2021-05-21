@@ -50,6 +50,8 @@ namespace system {
 // Stream utilities.
 // ----------------------------------------------------------------------------
 
+LCOV_EXCL_START("Untestable but visually-verifiable section.")
+
 #ifdef _MSC_VER
 
 static void set_utf8_stdio(FILE* file)
@@ -113,6 +115,8 @@ void set_binary_stdout()
 {
     set_binary_stdio(stdout);
 }
+
+LCOV_EXCL_STOP()
 
 // C-style UTF8/UTF16 conversions.
 // ----------------------------------------------------------------------------
