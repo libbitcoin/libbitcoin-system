@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARY_ELECTRUM_V1_HPP
 #define LIBBITCOIN_SYSTEM_TEST_DICTIONARY_ELECTRUM_V1_HPP
 
+#include <algorithm>
+#include <cstddef>
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.
@@ -48,5 +50,41 @@ bool abnormal(const electrum_v1::dictionary::words& words)
 }
 
 #endif
+
+static bool intersects(const electrum_v1::dictionary::words& left,
+    const electrum_v1::dictionary::words& right)
+{
+    return std::any_of(left.begin(), left.end(), [&](const char test[])
+    {
+        return std::find(right.begin(), right.end(), test) != right.end();
+    });
+}
+
+static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
+    const electrum_v1::dictionary::words& right)
+{
+    return std::count_if(left.begin(), left.end(), [&](const char test[])
+    {
+        return std::find(right.begin(), right.end(), test) != right.end();
+    });
+}
+
+static bool intersects(const electrum_v1::dictionary::words& left,
+    const electrum::dictionary::words& right)
+{
+    return std::any_of(left.begin(), left.end(), [&](const char test[])
+    {
+        return std::find(right.begin(), right.end(), test) != right.end();
+    });
+}
+
+static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
+    const electrum::dictionary::words& right)
+{
+    return std::count_if(left.begin(), left.end(), [&](const char test[])
+    {
+        return std::find(right.begin(), right.end(), test) != right.end();
+    });
+}
 
 #endif

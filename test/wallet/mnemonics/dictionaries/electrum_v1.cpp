@@ -23,6 +23,28 @@ BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
 using namespace bc::system::wallet;
 
+const auto dictionary_count = 2u;
+const auto dictionary_size = 1626;
+const auto intersection_en_pt = 5;
+const auto intersection_en_electrum_en = 861;
+const auto intersection_en_electrum_es = 7;
+const auto intersection_en_electrum_fr = 50;
+const auto intersection_en_electrum_cs = 2;
+const auto intersection_en_electrum_pt = 1;
+const auto intersection_pt_electrum_en = 14;
+const auto intersection_pt_electrum_es = 69;
+const auto intersection_pt_electrum_it = 42;
+const auto intersection_pt_electrum_fr = 7;
+const auto intersection_pt_electrum_cs = 2;
+const auto intersection_pt_electrum_pt = 185;
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__count__all__expected)
+{
+    // Any new dictionary must be added below to guarantee lack of normalization.
+    // Failure to do so may lead to invalid seed generation, which is very bad.
+    BOOST_REQUIRE_MESSAGE(electrum_v1::dictionaries::count() == dictionary_count, "new dictionary");
+}
+
 #ifdef WITH_ICU
 
 // abnormal (requires ICU)
@@ -34,6 +56,39 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
 {
     BOOST_REQUIRE(!abnormal(electrum_v1::en));
     BOOST_REQUIRE(!abnormal(electrum_v1::pt));
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en_pt__expected)
+{
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::pt), intersection_en_pt);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en_electrum__expected)
+{
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::en), intersection_en_electrum_en);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::es), intersection_en_electrum_es);
+    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::it));
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::fr), intersection_en_electrum_fr);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::cs), intersection_en_electrum_cs);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::pt), intersection_en_electrum_pt);
+    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::ja));
+    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::ko));
+    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::zh_Hans));
+    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::zh_Hant));
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__pt_electrum__expected)
+{
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::en), intersection_pt_electrum_en);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::es), intersection_pt_electrum_es);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::it), intersection_pt_electrum_it);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::fr), intersection_pt_electrum_fr);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::cs), intersection_pt_electrum_cs);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::pt), intersection_pt_electrum_pt);
+    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::ja));
+    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::ko));
+    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hans));
+    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hant));
 }
 
 #endif
