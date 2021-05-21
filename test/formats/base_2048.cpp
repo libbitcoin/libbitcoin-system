@@ -22,6 +22,25 @@ BOOST_AUTO_TEST_SUITE(base_2048_tests)
 
 using namespace wallet;
 
+// decode_base2048
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048__vector0__expected)
+{
+    // []=>[]
+    const std::string decoded{};
+    const auto encoded = base16_chunk("");
+    BOOST_REQUIRE_EQUAL(decode_base2048(encoded), decoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__decode_base2048__vector1__expected)
+{
+    // [00000000][000ppppp]=>
+    // [00000000000]
+    const std::string decoded{ "abandon" };
+    const auto encoded = base16_chunk("00""00");
+    BOOST_REQUIRE_EQUAL(decode_base2048(encoded, language::en), decoded);
+}
+
 // decode_base2048_list
 
 BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector0__expected)
@@ -154,6 +173,29 @@ BOOST_AUTO_TEST_CASE(base_2048__decode_base2048_list__vector8__expected)
     };
     const auto encoded = base16_chunk("00000401003008014030""07");
     BOOST_REQUIRE_EQUAL(decode_base2048_list(encoded, language::ko), decoded);
+}
+
+// encode_base2048
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048__vector0__expected)
+{
+    // []=>[]
+    const std::string decoded{};
+    const auto encoded = base16_chunk("");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048(out, decoded));
+    BOOST_REQUIRE_EQUAL(out, encoded);
+}
+
+BOOST_AUTO_TEST_CASE(base_2048__encode_base2048__vector1__expected)
+{
+    // [00000000000]=>
+    // [00000000][000ppppp]
+    const std::string decoded{ "abandon" };
+    const auto encoded = base16_chunk("00""00");
+    data_chunk out;
+    BOOST_REQUIRE(encode_base2048(out, decoded));
+    BOOST_REQUIRE_EQUAL(out, encoded);
 }
 
 // encode_base2048_list
