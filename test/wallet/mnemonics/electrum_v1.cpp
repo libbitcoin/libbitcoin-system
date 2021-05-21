@@ -393,18 +393,16 @@ BOOST_AUTO_TEST_CASE(electrum_v1__inequality_move__always__expected)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__deserialize___valid_whitespace__expected_trimmed)
 {
-    const auto sentence = "\tblind \nfaith \vblind faith blind faith \x20 blind faith blind faith blind\f faith\r";
-    const auto expected = "blind faith blind faith blind faith blind faith blind faith blind faith";
-    std::istringstream in{ sentence };
+    std::istringstream in{ trimmable_sentence12 };
     electrum_v1 instance;
     in >> instance;
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), expected);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence12);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__deserialize__invalid__invalid)
 {
-    std::istringstream in{ "foobar" };
+    std::istringstream in{ sentence2 };
     electrum_v1 instance;
     in >> instance;
     BOOST_REQUIRE(!instance);
@@ -414,12 +412,10 @@ BOOST_AUTO_TEST_CASE(electrum_v1__deserialize__invalid__invalid)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__serialize___valid_whitespace__expected)
 {
-    const auto sentence = "\tblind \nfaith \vblind faith blind faith \x20 blind faith blind faith blind\f faith\r";
-    const auto expected = "blind faith blind faith blind faith blind faith blind faith blind faith";
     std::ostringstream out;
-    electrum_v1 instance(sentence);
+    electrum_v1 instance(trimmable_sentence12);
     out << instance;
-    BOOST_REQUIRE_EQUAL(out.str(), expected);
+    BOOST_REQUIRE_EQUAL(out.str(), sentence12);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__serialize__invalid__invalid)
@@ -429,6 +425,14 @@ BOOST_AUTO_TEST_CASE(electrum_v1__serialize__invalid__invalid)
     BOOST_REQUIRE(!instance);
     out << instance;
     BOOST_REQUIRE(out.str().empty());
+}
+
+// Round trip test vectors.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(electrum_v1)
+{
+    // TODO
 }
 
 BOOST_AUTO_TEST_SUITE_END()

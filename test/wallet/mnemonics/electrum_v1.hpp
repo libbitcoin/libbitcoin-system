@@ -23,7 +23,7 @@
 #include <vector>
 #include <bitcoin/system.hpp>
 
-struct electrum_v1_result
+struct electrum_v1_vector
 {
     std::string entropy;
     std::string mnemonic;
@@ -31,7 +31,67 @@ struct electrum_v1_result
     std::string seed;
 };
 
-typedef std::vector<electrum_v1_result> electrum_v1_result_list;
+typedef std::vector<electrum_v1_vector> electrum_v1_vectors;
+
+// Electrum Version1 mnemonic validation algorithm.
+// This was used to generate the test vectors below.
+//
+//words = [
+//"like",
+//"just",
+//  ...
+//"weapon",
+//"weary"
+//]
+// 
+//n = 1626
+//
+//def mn_encode( message ):
+//    out = []
+//    for i in range(len(message)//8):
+//        word = message[8*i:8*i+8]
+//        x = int(word, 16)
+//        w1 = (x%n)
+//        w2 = ((x//n) + w1)%n
+//        w3 = ((x//n//n) + w2)%n
+//        out += [ words[w1], words[w2], words[w3] ]
+//    return out
+//
+//def mn_decode( wlist ):
+//    out = ''
+//    for i in range(len(wlist)//3):
+//        word1, word2, word3 = wlist[3*i:3*i+3]
+//        w1 =  words.index(word1)
+//        w2 = (words.index(word2))%n
+//        w3 = (words.index(word3))%n
+//        x = w1 +n*((w2-w1)%n) +n*n*((w3-w2)%n)
+//        out += '%08x'%x
+//    return out
+//
+// print(mn_encode("c6e913bc397bef94c6e913bc397bef94"))
+// print(mn_decode(['blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith']))
+// ...
+// ['blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith']
+// c6e913bc397bef94c6e913bc397bef94
+
+electrum_v1_vectors vectors
+{
+    electrum_v1_vector
+    {
+        "blind faith blind faith blind faith blind faith blind faith blind faith",
+        "c6e913bc397bef94c6e913bc397bef94",
+        "",
+        ""
+    },
+    electrum_v1_vector
+    {
+        "blind faith blind faith blind faith blind faith blind faith blind faith "
+        "blind faith blind faith blind faith blind faith blind faith blind faith",
+        "c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94",
+        "",
+        ""
+    }
+};
 
 const auto sentence2 = "blind faith";
 
@@ -39,6 +99,11 @@ const auto sentence2 = "blind faith";
 const auto mixed_sentence12 =
     "abissinio faith blind faith blind faith "
     "blind faith blind faith blind faith";
+
+// trimmable whitespace
+const auto trimmable_sentence12 =
+    "\tblind \nfaith \vblind faith blind faith \x20 "
+    "blind faith blind faith blind\f faith\r";
 
 const auto sentence12 =
     "blind faith blind faith blind faith "
@@ -92,8 +157,5 @@ const string_list words26
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith"
 };
-
-
-// TODO: add Electrum v1 vectors.
 
 #endif
