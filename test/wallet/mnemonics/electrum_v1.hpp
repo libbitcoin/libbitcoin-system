@@ -35,6 +35,11 @@ typedef std::vector<electrum_v1_result> electrum_v1_result_list;
 
 const auto sentence2 = "blind faith";
 
+// mixed valid languages
+const auto mixed_sentence12 =
+    "abissinio faith blind faith blind faith "
+    "blind faith blind faith blind faith";
+
 const auto sentence12 =
     "blind faith blind faith blind faith "
     "blind faith blind faith blind faith";
@@ -56,6 +61,14 @@ const string_list words2
 {
     "blind", "faith"
 };
+
+// mixed valid languages
+const string_list mixed_words12
+{
+    "abissinio", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith"
+};
+
 
 const string_list words12
 {

@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(electrum_v1_tests)
 
 using namespace bc::system::wallet;
 
-// statics
+// contained_by
 
 BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__empty_any__true)
 {
@@ -48,6 +48,23 @@ BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__blind_faith__en)
     BOOST_REQUIRE(electrum_v1::contained_by(words2) == language::en);
 }
 
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__explicit_langauge__expected)
+{
+    BOOST_REQUIRE(electrum_v1::contained_by(words2, language::en) == language::en);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__incorrect_explicit_langauge__none)
+{
+    BOOST_REQUIRE(electrum_v1::contained_by(words2, language::pt) == language::none);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__invalid_explicit_langauge__none)
+{
+    BOOST_REQUIRE(electrum_v1::contained_by(words2, language::ko) == language::none);
+}
+
+// is_valid_dictionary
+
 BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_dictionary__contained__true)
 {
     BOOST_REQUIRE(electrum_v1::is_valid_dictionary(language::en));
@@ -67,6 +84,8 @@ BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_dictionary__uncontained__false)
     BOOST_REQUIRE(!electrum_v1::is_valid_dictionary(language::none));
 }
 
+// is_valid_entropy_size
+
 BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_entropy_size__valid__true)
 {
     BOOST_REQUIRE(electrum_v1::is_valid_entropy_size(16));
@@ -83,6 +102,8 @@ BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_entropy_size__invalid__false)
     BOOST_REQUIRE(!electrum_v1::is_valid_entropy_size(33));
     BOOST_REQUIRE(!electrum_v1::is_valid_entropy_size(64));
 }
+
+// is_valid_word_count
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_word_count__valid__true)
 {
@@ -170,6 +191,31 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__26_word_sentence__valid_ex
     BOOST_REQUIRE(instance.sentence().empty());
 }
 
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__explicit_language__valid_expected)
+{
+    electrum_v1 instance(sentence12, language::en);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence12);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__incorrect_language__invalid)
+{
+    electrum_v1 instance(sentence24, language::pt);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__invalid_language__invalid)
+{
+    electrum_v1 instance(sentence24, language::ko);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__mixed_sentence__invalid)
+{
+    electrum_v1 instance(mixed_sentence12, language::none);
+    BOOST_REQUIRE(!instance);
+}
+
 // construct words
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__empty__invalid)
@@ -203,6 +249,31 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__26_words__valid_expected)
     electrum_v1 instance(words26);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.words().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__explicit_language__valid_expected)
+{
+    electrum_v1 instance(words12, language::en);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.words(), words12);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__incorrect_language__invalid)
+{
+    electrum_v1 instance(words24, language::pt);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__invalid_language__invalid)
+{
+    electrum_v1 instance(words24, language::ko);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__mixed_words__invalid)
+{
+    electrum_v1 instance(mixed_words12, language::none);
+    BOOST_REQUIRE(!instance);
 }
 
 // construct entropy
@@ -262,6 +333,21 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy___always__valid_expe
     electrum_v1 instance(entropy);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE_EQUAL(instance.entropy(), to_chunk(entropy));
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___explicit_language__valid_expected)
+{
+    const data_chunk entropy(16, 0x42);
+    electrum_v1 instance(entropy, language::pt);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___invalid_language__invalid)
+{
+    const data_chunk entropy(16, 0x42);
+    electrum_v1 instance(entropy, language::ko);
+    BOOST_REQUIRE(!instance);
 }
 
 // assign (default)
