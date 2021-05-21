@@ -54,14 +54,14 @@ bool abnormal(const electrum_v1::dictionary::words& words)
 
 #endif
 
-static bool intersects(const electrum_v1::dictionary::words& left,
-    const electrum_v1::dictionary::words& right)
-{
-    return std::any_of(left.begin(), left.end(), [&](const char test[])
-    {
-        return std::find(right.begin(), right.end(), test) != right.end();
-    });
-}
+////static bool intersects(const electrum_v1::dictionary::words& left,
+////    const electrum_v1::dictionary::words& right)
+////{
+////    return std::any_of(left.begin(), left.end(), [&](const char test[])
+////    {
+////        return std::find(right.begin(), right.end(), test) != right.end();
+////    });
+////}
 
 static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
     const electrum_v1::dictionary::words& right)

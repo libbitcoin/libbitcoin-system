@@ -61,9 +61,16 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
 
 #endif
 
-BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en_pt__expected)
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en__expected)
 {
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::en), dictionary_size);
     BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::pt), intersection_en_pt);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__pt__expected)
+{
+    ////BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum_v1::en), intersection_en_pt);
+    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum_v1::pt), dictionary_size);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en_electrum__expected)
