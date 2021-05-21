@@ -109,14 +109,29 @@ BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_short_hash_abc_0_
     BOOST_REQUIRE(witness_address(null_short_hash, "abc", 0));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_hash_abc_0__valid)
+BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_short_hash_invalid_prefix_0__invalid)
 {
-    BOOST_REQUIRE(witness_address(null_hash, "abc", 0));
+    BOOST_REQUIRE(!witness_address(null_short_hash, "\x80", 0));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__short_hash_construct__null_short_hash__valid)
 {
     BOOST_REQUIRE(witness_address(null_short_hash));
+}
+
+BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_hash_abc_0__valid)
+{
+    BOOST_REQUIRE(witness_address(null_hash, "abc", 0));
+}
+
+BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_hash_invalid_prefix_0__invalid)
+{
+    BOOST_REQUIRE(!witness_address(null_hash, "\x80", 0));
+}
+
+BOOST_AUTO_TEST_CASE(witness_address__paramter_construct__null_hash__valid)
+{
+    BOOST_REQUIRE(witness_address(null_hash));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__ec_private_construct__uninitialized__invalid)
@@ -897,7 +912,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__invalid_checksum__payload_not_base
 }
 
 // Checksum calculated with uppercase form of HRP.
-// This example of valid "bech32" require an unversioned (and empty) payload, which
+// This example of valid "bech32" requires an unversioned (and empty) payload, which
 // requires exposure of bech32 internals and has no use case, so is not supported.
 // The payload length is limited by one more character in an implementation that requires a version.
 BOOST_AUTO_TEST_CASE(witness_address__bip173__invalid_checksum__payload_too_short)

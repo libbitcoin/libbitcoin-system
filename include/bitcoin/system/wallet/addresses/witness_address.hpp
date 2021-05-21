@@ -156,7 +156,7 @@ class BC_API witness_address
     program_type identifier() const;
     chain::script script() const;
 
-private:
+protected:
     witness_address(const std::string& prefix, uint8_t version,
         data_chunk&& program);
 
@@ -182,6 +182,7 @@ private:
     static witness_address from_script(const chain::script& script,
         const std::string& prefix);
 
+private:
     data_chunk program_;
     std::string prefix_;
     uint8_t version_;
