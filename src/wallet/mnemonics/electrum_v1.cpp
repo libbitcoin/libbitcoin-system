@@ -42,7 +42,7 @@ constexpr auto size0 = uint32_t{ 1u };
 constexpr auto size1 = static_cast<int32_t>(electrum_v1::dictionary::size());
 constexpr auto size2 = size1 * size1;
 
-// protected static
+// private static
 // ----------------------------------------------------------------------------
 
 const electrum_v1::dictionaries electrum_v1::dictionaries_
@@ -52,6 +52,9 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
         electrum_v1::dictionary{ language::pt, electrum_v1::pt }
     }
 };
+
+// protected static
+// ----------------------------------------------------------------------------
 
 // github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1669
 string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
