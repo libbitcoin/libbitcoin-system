@@ -87,11 +87,13 @@ std::string languages::to_delimiter(language identifier)
 
 std::string languages::join(const string_list& words, language identifier)
 {
+    // Language is specialized for joining in japanese.
     return system::join(words, to_delimiter(identifier));
 }
 
 string_list languages::split(const std::string& sentence, language)
 {
+    // Language is not currently specialized for splitting.
     return system::split(sentence, unicode_separators, unicode_whitespace);
 }
 
