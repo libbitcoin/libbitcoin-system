@@ -515,10 +515,6 @@ std::istream& operator>>(std::istream& in, electrum& to)
     std::istreambuf_iterator<char> begin(in), end;
     std::string value(begin, end);
     to = electrum(value);
-
-    if (!to)
-        throw istream_exception(value);
-
     return in;
 }
 
