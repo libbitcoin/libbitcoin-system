@@ -50,7 +50,7 @@ Integer floored_log2(Integer value);
 
 /// Obtain the integer base 2 power for given exponent (can overflow).
 template <typename Integer>
-Integer pow2(Integer exponent);
+Integer power2(Integer exponent);
 
 /// Obtain the integer power of given base for given exponent (can overflow).
 template <typename Integer>

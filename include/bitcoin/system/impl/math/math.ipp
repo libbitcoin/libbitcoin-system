@@ -60,7 +60,7 @@ Integer ceilinged_log2(Integer value)
 }
 
 template <typename Integer>
-Integer pow2(Integer exponent)
+Integer power2(Integer exponent)
 {
     return power(Integer{ 2 }, exponent);
 }

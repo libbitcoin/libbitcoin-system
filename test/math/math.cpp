@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_log2__powers_of_2__expected)
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_log2__pow2__identity)
 {
-    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(system::pow2(15)), 15);
+    BOOST_REQUIRE_EQUAL(system::ceilinged_log2(system::power2(15)), 15);
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_log2__power_2__identity)
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(math__floored_log2__powers_of_2__expected)
 
 BOOST_AUTO_TEST_CASE(math__floored_log2__pow2__identity)
 {
-    BOOST_REQUIRE_EQUAL(system::floored_log2(system::pow2(15)), 15);
+    BOOST_REQUIRE_EQUAL(system::floored_log2(system::power2(15)), 15);
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_log2__power_2__identity)
@@ -333,37 +333,37 @@ BOOST_AUTO_TEST_CASE(math__floored_log2__power_2__identity)
 
 BOOST_AUTO_TEST_CASE(math__pow2__0__1)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2(0), 1);
+    BOOST_REQUIRE_EQUAL(system::power2(0), 1);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__1__2)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2(1), 2);
+    BOOST_REQUIRE_EQUAL(system::power2(1), 2);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__negative_1__0)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2(-1), 1 / 2);
+    BOOST_REQUIRE_EQUAL(system::power2(-1), 1 / 2);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__negative_2__0)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2(-2), 1 / 4);
+    BOOST_REQUIRE_EQUAL(system::power2(-2), 1 / 4);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__negative_3__underflow)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2(-3), 0);
+    BOOST_REQUIRE_EQUAL(system::power2(-3), 0);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__15__0x8000)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2<uint16_t>(15), 0x8000);
+    BOOST_REQUIRE_EQUAL(system::power2<uint16_t>(15), 0x8000);
 }
 
 BOOST_AUTO_TEST_CASE(math__pow2__overflow__0)
 {
-    BOOST_REQUIRE_EQUAL(system::pow2<uint16_t>(16), 0);
+    BOOST_REQUIRE_EQUAL(system::power2<uint16_t>(16), 0);
 }
 
 // power
@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(math__power__overflow__expected)
 
 BOOST_AUTO_TEST_CASE(math__power__2_16__equals_pow2_16)
 {
-    BOOST_REQUIRE_EQUAL(system::power(2, 16), system::pow2(16));
+    BOOST_REQUIRE_EQUAL(system::power(2, 16), system::power2(16));
 }
 
 BOOST_AUTO_TEST_CASE(math__power__negative_1_0__1)
