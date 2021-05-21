@@ -54,6 +54,20 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/stealth_record.cpp \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
+    src/concurrency/conditional_lock.cpp \
+    src/concurrency/deadline.cpp \
+    src/concurrency/dispatcher.cpp \
+    src/concurrency/flush_lock.cpp \
+    src/concurrency/interprocess_lock.cpp \
+    src/concurrency/monitor.cpp \
+    src/concurrency/prioritized_mutex.cpp \
+    src/concurrency/scope_lock.cpp \
+    src/concurrency/sequencer.cpp \
+    src/concurrency/sequential_lock.cpp \
+    src/concurrency/socket.cpp \
+    src/concurrency/thread.cpp \
+    src/concurrency/threadpool.cpp \
+    src/concurrency/work.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -81,24 +95,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/data/data.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
-    src/data/concurrency/conditional_lock.cpp \
-    src/data/concurrency/deadline.cpp \
-    src/data/concurrency/dispatcher.cpp \
-    src/data/concurrency/flush_lock.cpp \
-    src/data/concurrency/interprocess_lock.cpp \
-    src/data/concurrency/monitor.cpp \
-    src/data/concurrency/prioritized_mutex.cpp \
-    src/data/concurrency/scope_lock.cpp \
-    src/data/concurrency/sequencer.cpp \
-    src/data/concurrency/sequential_lock.cpp \
-    src/data/concurrency/socket.cpp \
-    src/data/concurrency/thread.cpp \
-    src/data/concurrency/threadpool.cpp \
-    src/data/concurrency/work.cpp \
-    src/data/iostream/istream_bit_reader.cpp \
-    src/data/iostream/istream_reader.cpp \
-    src/data/iostream/ostream_bit_writer.cpp \
-    src/data/iostream/ostream_writer.cpp \
     src/formats/base_10.cpp \
     src/formats/base_16.cpp \
     src/formats/base_2048.cpp \
@@ -106,6 +102,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/formats/base_58.cpp \
     src/formats/base_64.cpp \
     src/formats/base_85.cpp \
+    src/iostream/istream_bit_reader.cpp \
+    src/iostream/istream_reader.cpp \
+    src/iostream/ostream_bit_writer.cpp \
+    src/iostream/ostream_writer.cpp \
     src/log/file_collector.cpp \
     src/log/file_collector_repository.cpp \
     src/log/file_counter_formatter.cpp \

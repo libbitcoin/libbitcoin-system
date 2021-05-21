@@ -106,6 +106,20 @@
       <ObjectFileName>$(IntDir)src_chain_transaction.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\conditional_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\deadline.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\dispatcher.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\flush_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\interprocess_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\monitor.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\prioritized_mutex.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\scope_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\sequencer.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\sequential_lock.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\socket.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\thread.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\threadpool.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\work.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
@@ -146,26 +160,8 @@
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\binary.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\conditional_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\deadline.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\dispatcher.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\flush_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\interprocess_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\monitor.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\prioritized_mutex.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\scope_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\sequencer.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\sequential_lock.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\socket.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\thread.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\threadpool.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\concurrency\work.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_slice.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\iostream\istream_bit_reader.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\iostream\istream_reader.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\iostream\ostream_bit_writer.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\iostream\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_10.cpp" />
@@ -175,6 +171,10 @@
     <ClCompile Include="..\..\..\..\src\formats\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_64.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\src\iostream\istream_bit_reader.cpp" />
+    <ClCompile Include="..\..\..\..\src\iostream\istream_reader.cpp" />
+    <ClCompile Include="..\..\..\..\src\iostream\ostream_bit_writer.cpp" />
+    <ClCompile Include="..\..\..\..\src\iostream\ostream_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_collector.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_counter_formatter.cpp" />

@@ -118,44 +118,44 @@
     <Filter Include="src\chain">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\config">
+    <Filter Include="src\concurrency">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\data">
+    <Filter Include="src\config">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\data\concurrency">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\data\iostream">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\formats">
+    <Filter Include="src\data">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\log">
+    <Filter Include="src\formats">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\machine">
+    <Filter Include="src\iostream">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\math">
+    <Filter Include="src\log">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\machine">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\math\external">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\message">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000A}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000A}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-00000000000F}</UniqueIdentifier>
@@ -224,6 +224,48 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\conditional_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\deadline.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\dispatcher.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\flush_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\interprocess_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\monitor.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\prioritized_mutex.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\scope_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\sequencer.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\sequential_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\socket.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\thread.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\threadpool.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\work.cpp">
+      <Filter>src\concurrency</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\authority.cpp">
       <Filter>src\config</Filter>
@@ -297,65 +339,11 @@
     <ClCompile Include="..\..\..\..\src\data\binary.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\conditional_lock.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\deadline.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\dispatcher.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\flush_lock.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\interprocess_lock.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\monitor.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\prioritized_mutex.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\scope_lock.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\sequencer.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\sequential_lock.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\socket.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\thread.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\threadpool.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\concurrency\work.cpp">
-      <Filter>src\data\concurrency</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_slice.cpp">
       <Filter>src\data</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\iostream\istream_bit_reader.cpp">
-      <Filter>src\data\iostream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\iostream\istream_reader.cpp">
-      <Filter>src\data\iostream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\iostream\ostream_bit_writer.cpp">
-      <Filter>src\data\iostream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\iostream\ostream_writer.cpp">
-      <Filter>src\data\iostream</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\string.cpp">
       <Filter>src\data</Filter>
@@ -383,6 +371,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\formats\base_85.cpp">
       <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\iostream\istream_bit_reader.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\iostream\istream_reader.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\iostream\ostream_bit_writer.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\iostream\ostream_writer.cpp">
+      <Filter>src\iostream</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\log\file_collector.cpp">
       <Filter>src\log</Filter>
