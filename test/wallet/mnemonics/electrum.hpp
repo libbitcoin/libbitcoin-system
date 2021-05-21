@@ -63,7 +63,7 @@ struct electrum_vector
 };
 
 // Reduce verbosity using these.
-typedef std::vector<electrum_vector> electrum_vector_list;
+typedef std::vector<electrum_vector> electrum_vectors;
 using name = electrum_vector::name;
 using prefix = electrum::seed_prefix;
 static const data_chunk no_password{};
@@ -79,7 +79,7 @@ static const std::string empty_password{};
 
 // github.com/spesmilo/electrum/blob/master/electrum/tests/test_mnemonic.py
 
-electrum_vector_list vectors
+electrum_vectors vectors
 {
     electrum_vector
     {
@@ -214,6 +214,72 @@ electrum_vector_list vectors
     }
 };
 
+// all three
+const string_list ambiguous_en_fr_v1
+{
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+// cry not french
+const string_list ambiguous_en_v1
+{
+    "cry", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+// fiasco (v1 pt) not en
+const string_list ambiguous_fr_v1_pt
+{
+    "fiasco", "fiasco", "fiasco", "fiasco", "fiasco", "fiasco",
+    "fiasco", "fiasco", "fiasco", "fiasco", "fiasco", "fiasco"
+};
+
+// cycle not v1
+const string_list ambiguous_en_fr
+{
+    "cycle", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+// difference only v1
+const string_list distinct_v1
+{
+    "difference", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+// differ only en
+const string_list distinct_en
+{
+    "differ", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+// différer only fr
+const string_list distinct_fr
+{
+    "différer", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+const string_list redundant_hans_hant
+{
+    "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
+};
+
+const string_list mixed_languages
+{
+    "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
+    "abdikace", "abandon", "abacate", "的", "歇", "above"
+};
+
+const string_list similar_words
+{
+    "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+    "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+};
+
 // The electrum test vectors do not include 2fa/2faw prefixes, so these are added.
 // Menomics generated using seed prefixer, with following paramters.
 
@@ -300,12 +366,7 @@ public:
         return electrum::usable_size(entropy);
     }
 
-    static bool is_valid_seed_prefix(seed_prefix prefix)
-    {
-        return electrum::is_valid_seed_prefix(prefix);
-    }
-
-    static bool is_valid_two_factor_authentication_size(size_t count)
+     static bool is_valid_two_factor_authentication_size(size_t count)
     {
         return electrum::is_valid_two_factor_authentication_size(count);
     }

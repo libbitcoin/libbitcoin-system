@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__null_entropy__match_first_iteration)
     // This is an example of grinding to find the desired prefix.
     const auto result = accessor::grinder(entropy, find, language::zh_Hans, 1000);
     BOOST_REQUIRE_NE(result.entropy, entropy);
-    BOOST_REQUIRE(electrum::is_version(result.words, find));
+    BOOST_REQUIRE(electrum::is_prefix(result.words, find));
 
     // The derivation is deterministic, always finds this result at 274 iterations.
     BOOST_REQUIRE_EQUAL(result.iterations, 273u);
@@ -199,11 +199,11 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__19_byte_spanish__match_first_iteration)
     const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, 10000);
     BOOST_REQUIRE(!result.entropy.empty());
     BOOST_REQUIRE_NE(result.entropy, vector.entropy);
-    BOOST_REQUIRE(electrum::is_version(result.words, vector.prefix));
+    BOOST_REQUIRE(electrum::is_prefix(result.words, vector.prefix));
     BOOST_REQUIRE_EQUAL(result.iterations, 41u);
 }
 
-BOOST_AUTO_TEST_CASE(electrum__grinder__not_found__empty_iterations_zero)
+BOOST_AUTO_TEST_CASE(electrum__grinder__not_found__iterations_expected)
 {
     const auto limit = 40u;
     const auto vector = vectors[6];
@@ -211,6 +211,16 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__not_found__empty_iterations_zero)
     const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, limit);
     BOOST_REQUIRE(result.entropy.empty());
     BOOST_REQUIRE(result.words.empty());
+    BOOST_REQUIRE_EQUAL(result.iterations, limit);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__grinder__prefix_none__not_found)
+{
+    const auto limit = 40u;
+
+    // This grinds to the limit but cannot match since "none" is not hexidecimal.
+    // The same holds for 'bip39' and 'old'. These are guarded in from_entropy().
+    const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::none, language::en, limit);
     BOOST_REQUIRE_EQUAL(result.iterations, limit);
 }
 
@@ -405,15 +415,8 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
     // There are 100 common words in en and fr dictionaries, but all of the
     // common words occupy a different index in their respective dictionaries.
     // No other dictionary pair exibits conflicting behavior.
-    const string_list ambiguous
-    {
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
-    };
-
-    // The words are in different positions in two dictionaries.
-    const auto english = accessor::from_words(ambiguous, language::en);
-    const auto french = accessor::from_words(ambiguous, language::fr);
+    const auto english = accessor::from_words(ambiguous_en_fr, language::en);
+    const auto french = accessor::from_words(ambiguous_en_fr, language::fr);
 
     // Explicit specification succeeds.
     BOOST_REQUIRE(english);
@@ -423,27 +426,15 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
     BOOST_REQUIRE_NE(english.entropy(), french.entropy());
 
     // So the language must be explicitly expecified.
-    BOOST_REQUIRE(!accessor::from_words(ambiguous, language::none));
+    BOOST_REQUIRE(!accessor::from_words(ambiguous_en_fr, language::none));
 
-    // But this is only required when all words conflict.
-
-    const string_list distinct_english
-    {
-        "differ", "fragile", "fragile", "fragile", "fragile", "fragile",
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
-    };
-
-    const auto english2 = accessor::from_words(distinct_english, language::none);
+    // But this is only required when all words conflict (11 of 12 conflits).
+    const auto english2 = accessor::from_words(distinct_en, language::none);
     BOOST_REQUIRE(english2);
     BOOST_REQUIRE_NE(english2.entropy(), english.entropy());
 
-    const string_list distinct_french
-    {
-        "différer", "fragile", "fragile", "fragile", "fragile", "fragile",
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
-    };
-
-    const auto french2 = accessor::from_words(distinct_french, language::none);
+    // But this is only required when all words conflict (11 of 12 conflits).
+    const auto french2 = accessor::from_words(distinct_fr, language::none);
     BOOST_REQUIRE(french2);
     BOOST_REQUIRE_NE(french2.entropy(), french.entropy());
 }
@@ -453,14 +444,8 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
     // There are 1275 common words in the zh_Hans and zh_Hant dictionaries, but
     // all common words occupy the same index in both dictionaries.
     // No other dictionary pair exibits this partial symmetry.
-    const string_list redundant
-    {
-        "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
-    };
-
-    // These words are in the same positions in both dictionaries.
-    const auto simplified = accessor::from_words(redundant, language::zh_Hans);
-    const auto traditional = accessor::from_words(redundant, language::zh_Hant);
+    const auto simplified = accessor::from_words(redundant_hans_hant, language::zh_Hans);
+    const auto traditional = accessor::from_words(redundant_hans_hant, language::zh_Hant);
 
     // Explicit specification succeeds.
     BOOST_REQUIRE(simplified);
@@ -470,7 +455,7 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
     BOOST_REQUIRE_EQUAL(simplified.entropy(), traditional.entropy());
 
     // So the language does not ever have to be explicitly expecified.
-    const auto none = accessor::from_words(redundant, language::none);
+    const auto none = accessor::from_words(redundant_hans_hant, language::none);
     BOOST_REQUIRE(none);
     BOOST_REQUIRE_EQUAL(none.entropy(), traditional.entropy());
     BOOST_REQUIRE_EQUAL(none.entropy(), simplified.entropy());
@@ -478,26 +463,14 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__mixed_languages__false)
 {
-    const string_list mixed
-    {
-        "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
-        "abdikace", "abandon", "abacate", "的", "歇", "above"
-    };
-
     // All words must be from one dictionary.
-    BOOST_REQUIRE(!accessor::from_words(mixed, language::none));
+    BOOST_REQUIRE(!accessor::from_words(mixed_languages, language::none));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__similar_words__false)
 {
-    const string_list similar
-    {
-        "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
-        "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
-    };
-
     // Normalization does not reduce á to a, false due to invalid prefix.
-    BOOST_REQUIRE(!accessor::from_words(similar, language::none));
+    BOOST_REQUIRE(!accessor::from_words(similar_words, language::none));
 }
 
 // from_entropy
@@ -557,23 +530,6 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__language_none__false)
     BOOST_REQUIRE(!accessor::from_entropy(vectors[6].entropy, prefix::standard, language::none, max_uint16));
 }
 
-// is_valid_seed_prefix
-
-BOOST_AUTO_TEST_CASE(electrum__is_valid_seed_prefix__invalid__false)
-{
-    BOOST_REQUIRE(!accessor::is_valid_seed_prefix(prefix::none));
-    BOOST_REQUIRE(!accessor::is_valid_seed_prefix(prefix::bip39));
-    BOOST_REQUIRE(!accessor::is_valid_seed_prefix(prefix::old));
-}
-
-BOOST_AUTO_TEST_CASE(electrum__is_valid_seed_prefix__valid__true)
-{
-    BOOST_REQUIRE(accessor::is_valid_seed_prefix(prefix::standard));
-    BOOST_REQUIRE(accessor::is_valid_seed_prefix(prefix::witness));
-    BOOST_REQUIRE(accessor::is_valid_seed_prefix(prefix::two_factor_authentication));
-    BOOST_REQUIRE(accessor::is_valid_seed_prefix(prefix::two_factor_authentication_witness));
-}
-
 // is_valid_two_factor_authentication_size
 
 BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__invalid__false)
@@ -608,32 +564,21 @@ BOOST_AUTO_TEST_CASE(electrum__contained_by__invalid__none)
 
 BOOST_AUTO_TEST_CASE(electrum__contained_by__ambiguous__expected)
 {
-    const string_list ambiguous
-    {
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
-        "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
-    };
-
     // contained_by returns the first matching language.
     // The only ambiguous set is en-fr (100 words).
     // So an en match should be explicitly tested against fr.
-    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::none) == language::en);
-    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::en) == language::en);
-    BOOST_REQUIRE(electrum::contained_by(ambiguous, language::fr) == language::fr);
+    BOOST_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::none) == language::en);
+    BOOST_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::en) == language::en);
+    BOOST_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::fr) == language::fr);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__contained_by__redundant__expected)
 {
-    const string_list redundant
-    {
-        "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
-    };
-
     // contained_by returns the first matching language.
     // The only redundant set is zh_Hans-zh_Hant (1275 words).
-    BOOST_REQUIRE(electrum::contained_by(redundant, language::none) == language::zh_Hans);
-    BOOST_REQUIRE(electrum::contained_by(redundant, language::zh_Hans) == language::zh_Hans);
-    BOOST_REQUIRE(electrum::contained_by(redundant, language::zh_Hant) == language::zh_Hant);
+    BOOST_REQUIRE(electrum::contained_by(redundant_hans_hant, language::none) == language::zh_Hans);
+    BOOST_REQUIRE(electrum::contained_by(redundant_hans_hant, language::zh_Hans) == language::zh_Hans);
+    BOOST_REQUIRE(electrum::contained_by(redundant_hans_hant, language::zh_Hant) == language::zh_Hant);
 }
 
 BOOST_AUTO_TEST_CASE(electrum__contained_by__japanese__expected)
@@ -693,61 +638,55 @@ BOOST_AUTO_TEST_CASE(electrum__is_valid_word_count__valid__true)
     BOOST_REQUIRE(electrum::is_valid_word_count(46));
 }
 
-// is_version
+// is_prefix
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__invalid_prefix__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__invalid_prefix__false)
 {
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_standard), prefix::none));
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_standard), prefix::bip39));
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_standard), prefix::old));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::none));
+    BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_standard), prefix::bip39));
+    BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_standard), prefix::old));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__valid_prefix__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid_prefix__true)
 {
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_standard), prefix::standard));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_witness), prefix::witness));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication), prefix::two_factor_authentication));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication_witness), prefix::two_factor_authentication_witness));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::standard));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_witness), prefix::witness));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication), prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication_witness), prefix::two_factor_authentication_witness));
 
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__two_factor_authentication_valid_size__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__two_factor_authentication_valid_size__true)
 {
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication12), prefix::two_factor_authentication));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication20), prefix::two_factor_authentication));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication21), prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication12), prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication20), prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication21), prefix::two_factor_authentication));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__two_factor_authentication_invalid_size__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__two_factor_authentication_invalid_size__false)
 {
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_two_factor_authentication11), prefix::two_factor_authentication));
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_two_factor_authentication13), prefix::two_factor_authentication));
-    BOOST_REQUIRE(!electrum::is_version(split(mnemonic_two_factor_authentication19), prefix::two_factor_authentication));
+    BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication11), prefix::two_factor_authentication));
+    BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication13), prefix::two_factor_authentication));
+    BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication19), prefix::two_factor_authentication));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__valid__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid__true)
 {
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_standard), prefix::standard));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_witness), prefix::witness));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication), prefix::two_factor_authentication));
-    BOOST_REQUIRE(electrum::is_version(split(mnemonic_two_factor_authentication_witness), prefix::two_factor_authentication_witness));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::standard));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_witness), prefix::witness));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication), prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication_witness), prefix::two_factor_authentication_witness));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__uppercased__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__uppercased__true)
 {
     const auto vector = vectors[electrum_vector::english];
-    BOOST_REQUIRE(electrum::is_version(split(ascii_to_upper(vector.mnemonic)), vector.prefix));
+    BOOST_REQUIRE(electrum::is_prefix(split(ascii_to_upper(vector.mnemonic)), vector.prefix));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_version__mixed__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__mixed__false)
 {
-    const string_list mixed
-    {
-        "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
-        "abdikace", "abandon", "abacate", "的", "歇", "above"
-    };
-
-    BOOST_REQUIRE(!electrum::is_version(mixed, prefix::witness));
+    BOOST_REQUIRE(!electrum::is_prefix(mixed_languages, prefix::witness));
 }
 
 // to_version
@@ -798,6 +737,211 @@ BOOST_AUTO_TEST_CASE(electrum__construct_move__always__expected)
     BOOST_REQUIRE_EQUAL(instance2.entropy(), vector1.entropy);
     BOOST_REQUIRE(instance2.prefix() == vector1.prefix);
 }
+
+// construct v1
+
+BOOST_AUTO_TEST_CASE(electrum__construct_v1__invalid__invalid_none)
+{
+    electrum_v1 v1("foobar");
+    electrum instance(v1);
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::none);
+    BOOST_REQUIRE(instance.lingo() == language::none);
+    BOOST_REQUIRE(instance.sentence().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_v1__valid__valid_old_en)
+{
+    electrum_v1 v1(distinct_v1);
+    electrum instance(v1);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::old);
+    BOOST_REQUIRE(instance.lingo() == language::en);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), join(distinct_v1));
+}
+
+// construct ambiguities
+
+BOOST_AUTO_TEST_CASE(electrum__construct__ambiguous_en_v1__valid_old_en)
+{
+    electrum instance(ambiguous_en_v1);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::old);
+    BOOST_REQUIRE(instance.lingo() == language::en);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), join(ambiguous_en_v1));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__ambiguous_fr_v1__valid_old_en)
+{
+    electrum instance(ambiguous_fr_v1_pt);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::old);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), join(ambiguous_fr_v1_pt));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__ambiguous_en_fr_v1__valid_old_en)
+{
+    electrum instance(ambiguous_en_fr_v1);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::old);
+    BOOST_REQUIRE(instance.lingo() == language::en);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), join(ambiguous_en_fr_v1));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__distinct_en__valid_prefix_none)
+{
+    electrum instance(distinct_en);
+    BOOST_REQUIRE(instance);
+
+    // This vector is unprefixed, which is valid and reflected here.
+    BOOST_REQUIRE(instance.prefix() == prefix::none);
+    BOOST_REQUIRE(instance.lingo() == language::en);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), join(distinct_en));
+}
+
+// construct 2fa hack
+
+BOOST_AUTO_TEST_CASE(electrum__construct__mnemonic_two_factor_authentication12__valid)
+{
+    electrum instance(mnemonic_two_factor_authentication12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication12);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__mnemonic_two_factor_authentication13__valid_none)
+{
+    electrum instance(mnemonic_two_factor_authentication13);
+    BOOST_REQUIRE(instance);
+
+    // The 2fa prefix is not considered because of the 2fa hack.
+    BOOST_REQUIRE(instance.prefix() == prefix::none);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication13);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__mnemonic_two_factor_authentication19__valid_none)
+{
+    electrum instance(mnemonic_two_factor_authentication19);
+    BOOST_REQUIRE(instance);
+
+    // The 2fa prefix is not considered because of the 2fa hack.
+    BOOST_REQUIRE(instance.prefix() == prefix::none);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication19);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__mnemonic_two_factor_authentication20__valid)
+{
+    electrum instance(mnemonic_two_factor_authentication20);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication20);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct__mnemonic_two_factor_authentication21__valid)
+{
+    electrum instance(mnemonic_two_factor_authentication21);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication);
+    BOOST_REQUIRE(instance.lingo() == language::pt);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication21);
+}
+
+// construct words
+
+BOOST_AUTO_TEST_CASE(electrum__construct_words__incorrect_language__invalid)
+{
+    electrum instance(split(mnemonic_standard), language::ko);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_words__mnemonic_standard__valid)
+{
+    electrum instance(split(mnemonic_standard), language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::standard);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_standard);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_words__mnemonic_witness__valid)
+{
+    electrum instance(split(mnemonic_witness), language::none);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::witness);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_witness);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_words__mnemonic_two_factor_authentication__valid)
+{
+    electrum instance(split(mnemonic_two_factor_authentication));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_words__mnemonic_two_factor_authentication_witness__valid)
+{
+    electrum instance(split(mnemonic_two_factor_authentication_witness));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication_witness);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication_witness);
+}
+
+// construct mnemonic
+
+BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__incorrect_language__invalid)
+{
+    electrum instance(mnemonic_standard, language::ja);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_standard__valid)
+{
+    electrum instance(mnemonic_standard, language::it);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::standard);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_standard);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_witness__valid)
+{
+    electrum instance(mnemonic_witness, language::none);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::witness);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_witness);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_two_factor_authentication__valid)
+{
+    electrum instance(mnemonic_two_factor_authentication);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_two_factor_authentication_witness__valid)
+{
+    electrum instance(mnemonic_two_factor_authentication_witness);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication_witness);
+    BOOST_REQUIRE(instance.lingo() == language::it);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication_witness);
+}
+
+// construct entropy
+
+// to_prefix
 
 // to_seed
 
@@ -918,9 +1062,6 @@ BOOST_AUTO_TEST_CASE(electrum__serialize__invalid__invalid)
     out << instance;
     BOOST_REQUIRE(out.str().empty());
 }
-
-// grinder (need to retest once electrum_v1/mnemonic are enabled/tested)
-// to_prefix (test once electrum_v1/mnemonic are enabled/tested)
 
 // Standard test vectors.
 // ----------------------------------------------------------------------------

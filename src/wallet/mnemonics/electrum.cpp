@@ -128,17 +128,17 @@ electrum::result electrum::grinder(const data_chunk& entropy,
     const auto padding_mask = 0xff << unused_bits(hash);
 
     // This just grinds away until exhausted or prefix found.
-    // On the first iteration the usable entropy is unchanged.
-    // Previously discovered entropy round trips, matching on the first pass.
+    // Previously discovered entropy round-trips, matching on the first pass.
     do
     {
         hash[entropy_size - 1u] &= padding_mask;
         words = encoder(hash, identifier);
 
-        // TODO: enable once electrum_v1 and mnemonic are tested.
-        // Avoid collisions with Electrum v1 and BIP39 mnemonics.
-        ////if (!electrum_v1(words, identifier) && !mnemonic(words) &&...
-        if (is_version(words, prefix))
+        // Avoid collisions with Electrum v1 (en) and BIP39 mnemonics.
+        // Five electrum languages contain electrum_v1 english words.
+        // Collision with a mnemonic checksum is unlikely but possible.
+        if (!electrum_v1(words, language::en) && !mnemonic(words) &&
+            validator(words, prefix))
             return { hash, words, start - limit };
 
         // This replaces Electrum's prng with determinism.
@@ -198,21 +198,23 @@ hd_private electrum::seeder(const string_list& words,
     return { part.first, part.second, chain };
 }
 
+// This does not check for electrum_v1 or mnemonic.
 electrum::seed_prefix electrum::prefixer(const string_list& words)
 {
     // Words are in normal form, even without ICU.
-    if (is_version(words, seed_prefix::standard))
+    if (is_prefix(words, seed_prefix::standard))
         return seed_prefix::standard;
-    if (is_version(words, seed_prefix::witness))
+    if (is_prefix(words, seed_prefix::witness))
         return seed_prefix::witness;
-    if (is_version(words, seed_prefix::two_factor_authentication))
+    if (is_prefix(words, seed_prefix::two_factor_authentication))
         return seed_prefix::two_factor_authentication;
-    if (is_version(words, seed_prefix::two_factor_authentication_witness))
+    if (is_prefix(words, seed_prefix::two_factor_authentication_witness))
         return seed_prefix::two_factor_authentication_witness;
 
     return seed_prefix::none;
 }
 
+// This cannot match electrum_v1 or mnemonic.
 bool electrum::validator(const string_list& words, seed_prefix prefix)
 {
     // Words are in normal (lower, nfkd) form, even without ICU.
@@ -313,20 +315,6 @@ bool electrum::is_valid_word_count(size_t count)
         count <= word_count(strength_maximum);
 }
 
-bool electrum::is_valid_seed_prefix(seed_prefix prefix)
-{
-    switch (prefix)
-    {
-        case seed_prefix::standard:
-        case seed_prefix::witness:
-        case seed_prefix::two_factor_authentication:
-        case seed_prefix::two_factor_authentication_witness:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool electrum::is_valid_two_factor_authentication_size(size_t count)
 {
     // In Electrum 2.7, there was a breaking change in key derivation for
@@ -337,10 +325,13 @@ bool electrum::is_valid_two_factor_authentication_size(size_t count)
         count >= minimum_two_factor_authentication_words;
 }
 
-bool electrum::is_version(const string_list& words, seed_prefix prefix)
+bool electrum::is_prefix(const string_list& words, seed_prefix prefix)
 {
-    if (!is_valid_seed_prefix(prefix))
-        return false;
+    if (prefix == seed_prefix::old)
+        return electrum_v1(words, language::en);
+
+    if (prefix == seed_prefix::bip39)
+        return mnemonic(words);
 
     // HACK: see comment in is_valid_two_factor_authentication_size.
     if (prefix == seed_prefix::two_factor_authentication &&
@@ -352,24 +343,16 @@ bool electrum::is_version(const string_list& words, seed_prefix prefix)
 
     // Tokens are accepted if they are contained by any single dictionary.
     if (contained_by(tokens) == language::none)
-        return {};
+        return prefix == seed_prefix::none;
 
-    return validator(tokens, prefix);
+    return validator(tokens, prefix) || prefix == seed_prefix::none;
 }
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
 {
-    // Electrum rejects seed creation when a seed would conflict with v1.
-    // So if it validates under electrum v1 it cannot be a v2 seed.
-    // This is possible given dictionary overlap and 12 or 24 words.
-    // Any set of 12 or 24 words in the v1 dictionary will validate.
-    if (electrum_v1(words))
+    if (electrum_v1(words, language::en))
         return seed_prefix::old;
 
-    // Electrum rejects seed creation when a seed would conflict with bip39.
-    // So if it validates under bip39/mnemonic it cannot be a v2 seed.
-    // Possible given shared dictionaries and 12, 15, 18, 21, or 24 words.
-    // But a bip39/mnemonic seed (words) incorporates a checksum, so unlikely.
     if (mnemonic(words))
         return seed_prefix::bip39;
 
@@ -378,7 +361,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
 
     // Tokens are accepted if they are contained by any single dictionary.
     if (contained_by(tokens) == language::none)
-        return {};
+        return seed_prefix::none;
 
     return prefixer(words);
 }
@@ -418,6 +401,13 @@ electrum::electrum(const electrum& other)
 {
 }
 
+electrum::electrum(const electrum_v1& old)
+  : electrum_v1(old), prefix_(seed_prefix::old)
+{
+    if (!(*this))
+        prefix_ = seed_prefix::none;
+}
+
 electrum::electrum(const std::string& sentence, language identifier)
   : electrum(split(sentence, identifier), identifier)
 {
@@ -448,15 +438,25 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     language identifier, size_t grind_limit)
 {
-    if (!is_valid_entropy_size(entropy.size()))
+    // This would fail after grinding to limit.
+    if (prefix == seed_prefix::none)
         return {};
 
-    if (!is_valid_seed_prefix(prefix))
+    // Use mnemonic class.
+    if (prefix == seed_prefix::bip39)
+        return {};
+
+    // Allows electrum_v1 entropy sizes.
+    if (prefix == seed_prefix::old)
+        return { entropy };
+
+    if (!is_valid_entropy_size(entropy.size()))
         return {};
 
     if (!dictionaries_.exists(identifier))
         return {};
 
+    // If prefix is 'none' this will return the first non-prefixed result.
     const auto result = grinder(entropy, prefix, identifier, grind_limit);
 
     // Not your lucky day.
@@ -464,13 +464,18 @@ electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
         return {};
 
     // Save derived words and ground entropy, original is discarded.
-    return { result.entropy, result.words, identifier, prefixer(result.words) };
+    return { result.entropy, result.words, identifier, prefix };
 }
 
 electrum electrum::from_words(const string_list& words, language identifier)
 {
     if (!is_valid_word_count(words.size()))
         return {};
+
+    // Prioritizes electrum_v1 as electrum cannot generate v1 mnemonics.
+    electrum_v1 old{ words, identifier };
+    if (old)
+        return old;
 
     // Normalize to improve chance of dictionary matching.
     const auto tokens = try_normalize(words);
@@ -488,6 +493,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
         contained_by(tokens, language::fr) == language::fr)
         return {};
 
+    // This will be identified as a valid bip39 if the checksum validates.
     // Save derived entropy and dictionary words, originals are discarded.
     return { decoder(tokens, lexicon), tokens, lexicon, prefixer(tokens) };
 }

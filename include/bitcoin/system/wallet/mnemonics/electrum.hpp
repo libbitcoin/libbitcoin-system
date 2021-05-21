@@ -94,7 +94,7 @@ public:
 
     /// Returns false if prefix is 'old', 'bip39' or 'none'.
     /// Returns true if the seed of the words has the given prefix.
-    static bool is_version(const string_list& words, seed_prefix prefix);
+    static bool is_prefix(const string_list& words, seed_prefix prefix);
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
@@ -108,6 +108,7 @@ public:
     /// The default instance is initialized invalid, but can be assigned to.
     electrum();
     electrum(const electrum& other);
+    electrum(const electrum_v1& old);
 
     /// Validity and prefix should be checked after construction.
     /// Any valid length of words from a single dictionay will succeed.
@@ -171,7 +172,6 @@ protected:
     electrum(const data_chunk& entropy, const string_list& words,
         language identifier, seed_prefix prefix);
 
-    static bool is_valid_seed_prefix(seed_prefix prefix);
     static bool is_valid_two_factor_authentication_size(size_t count);
 
     static result grinder(const data_chunk& entropy, seed_prefix prefix,
