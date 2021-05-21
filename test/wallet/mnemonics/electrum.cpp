@@ -532,6 +532,13 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__previous_entropy_zero_grind__true)
     BOOST_REQUIRE(accessor::from_entropy(vector.entropy, vector.prefix, vector.lingo, 0));
 }
 
+BOOST_AUTO_TEST_CASE(electrum__from_entropy__invalid_language__false)
+{
+    const auto vector = vectors[6];
+    BOOST_REQUIRE(!accessor::from_entropy(vector.entropy, vector.prefix, language::none, 0));
+}
+
+
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__language_none__false)
 {
     // A mnemonic cannot be created without a specified dictionary.
