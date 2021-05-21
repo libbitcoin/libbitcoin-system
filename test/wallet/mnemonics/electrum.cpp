@@ -18,6 +18,7 @@
  */
 #include "../../test.hpp"
 #include "electrum.hpp"
+#include <utility>
 
 BOOST_AUTO_TEST_SUITE(electrum_tests)
 
@@ -595,7 +596,7 @@ BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__valid__t
     BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(21));
 }
 
-// Public methods.
+// Public static.
 // ----------------------------------------------------------------------------
 
 // contained_by
@@ -762,6 +763,42 @@ BOOST_AUTO_TEST_CASE(electrum__to_version__all__expected)
     BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::none), "none");
 }
 
+// Public non-static.
+// ----------------------------------------------------------------------------
+
+// construct default
+
+BOOST_AUTO_TEST_CASE(electrum__construct_default__always__invalid)
+{
+    BOOST_REQUIRE(!electrum());
+}
+
+// construct copy
+
+BOOST_AUTO_TEST_CASE(electrum__construct_copy__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::chinese];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2(instance1);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), vector1.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector1.entropy);
+    BOOST_REQUIRE(instance2.prefix() == vector1.prefix);
+}
+
+// construct move (default)
+
+BOOST_AUTO_TEST_CASE(electrum__construct_move__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::spanish3];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2(std::move(instance1));
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), vector1.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector1.entropy);
+    BOOST_REQUIRE(instance2.prefix() == vector1.prefix);
+}
+
 // to_seed
 
 BOOST_AUTO_TEST_CASE(electrum__to_seed__invalid__invalid)
@@ -793,6 +830,51 @@ BOOST_AUTO_TEST_CASE(electrum__to_seed__ascii_uppercased__expected)
     BOOST_REQUIRE_EQUAL(seed, vector.to_hd());
 }
 
+// assign (default)
+
+BOOST_AUTO_TEST_CASE(electrum__assign_copy__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::chinese];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2;
+    instance2 = instance1;
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), vector1.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector1.entropy);
+    BOOST_REQUIRE(instance2.prefix() == vector1.prefix);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__assign_move__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::spanish3];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2;
+    instance2 = std::move(instance1);
+    BOOST_REQUIRE(instance2);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), vector1.mnemonic);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), vector1.entropy);
+    BOOST_REQUIRE(instance2.prefix() == vector1.prefix);
+}
+
+// in/equality (default)
+
+BOOST_AUTO_TEST_CASE(electrum__equality__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::chinese];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2(vector1.mnemonic);
+    BOOST_REQUIRE(instance1 == instance2);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__inequality_move__always__expected)
+{
+    const auto vector1 = vectors[electrum_vector::chinese];
+    const auto vector2 = vectors[electrum_vector::spanish];
+    electrum instance1(vector1.mnemonic);
+    electrum instance2(vector2.mnemonic);
+    BOOST_REQUIRE(instance1 != instance2);
+}
+
 // operator>>
 
 BOOST_AUTO_TEST_CASE(electrum__deserialize__valid__expected)
@@ -808,6 +890,14 @@ BOOST_AUTO_TEST_CASE(electrum__deserialize__valid__expected)
     BOOST_REQUIRE_EQUAL(instance.sentence(), join(split(vector.mnemonic), ideographic_space));
 }
 
+BOOST_AUTO_TEST_CASE(electrum__deserialize__invalid__invalid)
+{
+    std::istringstream in{ "foobar" };
+    electrum instance;
+    in >> instance;
+    BOOST_REQUIRE(!instance);
+}
+
 // operator<<
 
 BOOST_AUTO_TEST_CASE(electrum__serialize__valid__expected)
@@ -820,8 +910,15 @@ BOOST_AUTO_TEST_CASE(electrum__serialize__valid__expected)
     BOOST_REQUIRE_EQUAL(out.str(), vector.mnemonic);
 }
 
-// TODO:
-// electrum(default, copy, invalid words/entropy, entropy(>0), protected)
+BOOST_AUTO_TEST_CASE(electrum__serialize__invalid__invalid)
+{
+    std::ostringstream out;
+    electrum instance;
+    BOOST_REQUIRE(!instance);
+    out << instance;
+    BOOST_REQUIRE(out.str().empty());
+}
+
 // grinder (need to retest once electrum_v1/mnemonic are enabled/tested)
 // to_prefix (test once electrum_v1/mnemonic are enabled/tested)
 
