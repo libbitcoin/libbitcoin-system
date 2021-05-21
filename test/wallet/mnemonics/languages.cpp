@@ -22,6 +22,7 @@
 
 BOOST_AUTO_TEST_SUITE(languages_tests)
 
+using namespace test::mnemonics_languages;
 using namespace bc::system::wallet;
 
 // statics

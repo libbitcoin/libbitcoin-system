@@ -27,6 +27,9 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
+namespace test {
+namespace dictionaries_electrum_v1 {
+
 #ifdef WITH_ICU
 
 ////ptrdiff_t abnormals(const electrum_v1::dictionary::words& words)
@@ -86,5 +89,8 @@ static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
         return std::find(right.begin(), right.end(), test) != right.end();
     });
 }
+
+} // dictionaries_electrum_v1
+} // test
 
 #endif

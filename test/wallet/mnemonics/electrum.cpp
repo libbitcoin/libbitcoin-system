@@ -22,6 +22,7 @@
 
 BOOST_AUTO_TEST_SUITE(electrum_tests)
 
+using namespace test::mnemonics_electrum;
 using namespace bc::system::wallet;
 using prefix = electrum::seed_prefix;
 
@@ -954,9 +955,16 @@ BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_two_factor_authentic
     BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication_witness);
 }
 
-// construct entropy
-
-// to_prefix
+// TODO:
+// construct entropy (all)
+// to_prefix (all)
+// is_prefix (add old/bip39 vectors)
+// grinder: grind on mnemonics and electrum_v1 to find conflict test vectors.
+// It's very possible that a BIP3-created mnemonic may conflict with electrum,
+// but harder to create in the other direction.
+// Review coveralls for gaps.
+// Test electrum_v1 round trip constructions.
+// Test mnemonic.
 
 // to_seed
 

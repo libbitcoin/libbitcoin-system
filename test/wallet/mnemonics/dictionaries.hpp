@@ -26,6 +26,9 @@
  // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system::wallet;
 
+namespace test {
+namespace mnemonics_dictionaries {
+
 const size_t test_dictionary_size = 10;
 typedef std::array<const char*, test_dictionary_size> test_words;
 typedef wallet::dictionary<test_dictionary_size> test_dictionary;
@@ -122,5 +125,8 @@ const test_dictionaries instance
         test_dictionary{ language::zh_Hant, test_words_zh_Hant }
     }
 };
+
+} // namespace mnemonics_dictionaries
+} // namespace test
 
 #endif

@@ -22,6 +22,7 @@
 
 BOOST_AUTO_TEST_SUITE(electrum_v1_tests)
 
+using namespace test::mnemonics_electrum_v1;
 using namespace bc::system::wallet;
 
 // contained_by

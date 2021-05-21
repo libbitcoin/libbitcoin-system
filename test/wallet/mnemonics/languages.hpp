@@ -25,6 +25,9 @@
  // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system::wallet;
 
+namespace test {
+namespace mnemonics_languages {
+
 const size_t test_dictionary_size = 10;
 typedef std::array<const char*, test_dictionary_size> test_words;
 
@@ -112,5 +115,8 @@ public:
 private:
     std::string value_;
 };
+
+} // mnemonics_languages
+} // test
 
 #endif

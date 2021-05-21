@@ -24,6 +24,7 @@
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
+using namespace test::mnemonics_mnemonic;
 using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__trezor_vectors__success)

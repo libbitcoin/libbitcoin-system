@@ -23,6 +23,9 @@
 #include <vector>
 #include <bitcoin/system.hpp>
 
+namespace test {
+namespace mnemonics_mnemonic {
+
  // BIP39
  // Since the vast majority of BIP39 wallets supports only the English wordlist,
  // it is strongly discouraged to use non-English wordlists for generating the 
@@ -394,5 +397,8 @@ const mnemonic_result_list mnemonic_bip39jp_jp_vectors
         }
     }
 };
+
+} // mnemonics_mnemonic
+} // test
 
 #endif

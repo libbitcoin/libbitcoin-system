@@ -19,8 +19,9 @@
 #include "../../../test.hpp"
 #include "mnemonic.hpp"
 
-BOOST_AUTO_TEST_SUITE(dictionaries_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_mnemonic_tests)
 
+using namespace test::dictionaries_mnemonic;
 using namespace bc::system::wallet;
 
 const auto dictionary_count = 10u;

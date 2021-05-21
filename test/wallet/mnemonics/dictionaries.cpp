@@ -21,6 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(dictionaries_tests)
 
+using namespace test::mnemonics_dictionaries;
 using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(dictionaries__count__42__42)

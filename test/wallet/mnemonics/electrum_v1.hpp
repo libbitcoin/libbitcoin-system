@@ -23,6 +23,9 @@
 #include <vector>
 #include <bitcoin/system.hpp>
 
+namespace test {
+namespace mnemonics_electrum_v1 {
+
 struct electrum_v1_vector
 {
     std::string entropy;
@@ -157,5 +160,8 @@ const string_list words26
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith"
 };
+
+} // mnemonics_electrum_v1
+} // test
 
 #endif

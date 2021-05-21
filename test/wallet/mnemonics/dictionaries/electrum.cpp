@@ -19,8 +19,9 @@
 #include "../../../test.hpp"
 #include "electrum.hpp"
 
-BOOST_AUTO_TEST_SUITE(dictionaries_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_electrum_tests)
 
+using namespace test::dictionaries_electrum;
 using namespace bc::system::wallet;
 
 const auto dictionary_count = 10u;

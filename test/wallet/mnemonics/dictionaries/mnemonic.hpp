@@ -27,6 +27,9 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
+namespace test {
+namespace dictionaries_mnemonic {
+
 static ptrdiff_t intersection(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
@@ -104,5 +107,8 @@ static bool abnormal(const mnemonic::dictionary::words& words)
 }
 
 #endif
+
+} // dictionaries_mnemonic
+} // test
 
 #endif

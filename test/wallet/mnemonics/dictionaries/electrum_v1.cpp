@@ -19,8 +19,9 @@
 #include "../../../test.hpp"
 #include "electrum_v1.hpp"
 
-BOOST_AUTO_TEST_SUITE(dictionaries_tests)
+BOOST_AUTO_TEST_SUITE(dictionaries_electrum_v1_tests)
 
+using namespace test::dictionaries_electrum_v1;
 using namespace bc::system::wallet;
 
 const auto dictionary_count = 2u;
@@ -58,6 +59,8 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
     BOOST_REQUIRE(!abnormal(electrum_v1::pt));
 }
 
+#endif
+
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en_pt__expected)
 {
     BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::pt), intersection_en_pt);
@@ -90,7 +93,5 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__pt_electrum__expec
     BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hans));
     BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hant));
 }
-
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

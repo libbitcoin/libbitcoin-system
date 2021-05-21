@@ -27,6 +27,9 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
+namespace test {
+namespace dictionaries_electrum {
+
 ////static ptrdiff_t compressions(const electrum::dictionary::words& words)
 ////{
 ////    return std::count_if(words.begin(), words.end(), [&](const char test[])
@@ -4209,5 +4212,8 @@ const electrum::dictionary::words electrum_ja
         "われる"
     }
 };
+
+} // dictionaries_electrum
+} // test
 
 #endif

@@ -21,6 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(dictionary_tests)
 
+using namespace test::mnemonics_dictionary;
 using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(dictionary__size__42__42)

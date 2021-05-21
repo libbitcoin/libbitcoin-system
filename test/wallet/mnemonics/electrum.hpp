@@ -27,6 +27,9 @@
 using namespace bc::system;
 using namespace bc::system::wallet;
 
+namespace test {
+namespace mnemonics_electrum {
+
 // Structure for holding each test vector.
 struct electrum_vector
 {
@@ -414,5 +417,8 @@ public:
         return electrum::from_entropy(entropy, prefix, identifier, grind_limit);
     }
 };
+
+} // mnemonics_electrum
+} // test
 
 #endif
