@@ -48,17 +48,17 @@ BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__blind_faith__en)
     BOOST_REQUIRE(electrum_v1::contained_by(words2) == language::en);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__explicit_langauge__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__explicit_language__expected)
 {
     BOOST_REQUIRE(electrum_v1::contained_by(words2, language::en) == language::en);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__incorrect_explicit_langauge__none)
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__incorrect_explicit_language__none)
 {
     BOOST_REQUIRE(electrum_v1::contained_by(words2, language::pt) == language::none);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__invalid_explicit_langauge__none)
+BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__invalid_explicit_language__none)
 {
     BOOST_REQUIRE(electrum_v1::contained_by(words2, language::ko) == language::none);
 }
