@@ -96,6 +96,7 @@ electrum_v1_vectors vectors
     }
 };
 
+// invalid for length
 const auto sentence2 = "blind faith";
 
 // mixed valid languages
@@ -118,6 +119,7 @@ const auto sentence24 =
     "blind faith blind faith blind faith "
     "blind faith blind faith blind faith";
 
+// invalid for length
 const auto sentence26 =
     "blind faith blind faith blind faith "
     "blind faith blind faith blind faith "
@@ -125,6 +127,7 @@ const auto sentence26 =
     "blind faith blind faith blind faith "
     "blind faith";
 
+// invalid for length
 const string_list words2
 {
     "blind", "faith"
@@ -152,6 +155,7 @@ const string_list words24
     "blind", "faith", "blind", "faith", "blind", "faith"
 };
 
+// invalid for length
 const string_list words26
 {
     "blind", "faith", "blind", "faith", "blind", "faith",
