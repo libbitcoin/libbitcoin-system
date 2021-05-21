@@ -506,9 +506,17 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__high_byte_count__true)
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__invalid_prefixes__false)
 {
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::old, language::en, max_uint16));
     BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::bip39, language::en, max_uint16));
     BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::none, language::en, max_uint16));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_entropy__v1_prefix__expected)
+{
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(15, 0x42), prefix::old, language::en, max_uint16));
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(16, 0x42), prefix::old, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::old, language::en, max_uint16));
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(32, 0x42), prefix::old, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(33, 0x42), prefix::old, language::en, max_uint16));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__valid_entropy_but_prefix_not_found__false)
