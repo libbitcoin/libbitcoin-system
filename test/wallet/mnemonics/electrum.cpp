@@ -394,6 +394,11 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__two_factor_authentication_witness_ita
     BOOST_REQUIRE(instance.prefix() == prefix::two_factor_authentication_witness);
 }
 
+BOOST_AUTO_TEST_CASE(electrum__from_words__incorrect_explicit_language__false)
+{
+    BOOST_REQUIRE(!accessor::from_words(split(mnemonic_witness), language::ko));
+}
+
 BOOST_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
 {
     // There are 100 common words in en and fr dictionaries, but all of the
@@ -490,7 +495,7 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__similar_words__false)
         "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
     };
 
-    // Normalization does not reduce á to a.
+    // Normalization does not reduce á to a, false due to invalid prefix.
     BOOST_REQUIRE(!accessor::from_words(similar, language::none));
 }
 
@@ -530,6 +535,11 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__invalid_prefixes__false)
     BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::old, language::en, max_uint16));
     BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::bip39, language::en, max_uint16));
     BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::none, language::en, max_uint16));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__from_entropy__valid_entropy_but_prefix_not_found__false)
+{
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::standard, language::en, 0));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__previous_entropy_zero_grind__true)
