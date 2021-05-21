@@ -97,7 +97,7 @@ checked<Prefix, Payload, Checksum>::operator=(checked&& other)
 
     // This may be an invalid instance (if value is unchecked).
     value_ = std::move(other.value_);
-    return (*this);
+    return *this;
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
@@ -109,7 +109,7 @@ checked<Prefix, Payload, Checksum>::operator=(const checked& other)
 
     // This may be an invalid instance (if value is unchecked).
     value_ = other.value_;
-    return (*this);
+    return *this;
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>

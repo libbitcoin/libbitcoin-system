@@ -117,18 +117,20 @@ BOOST_AUTO_TEST_CASE(checked__move_construct__long__valid)
 BOOST_AUTO_TEST_CASE(checked__copy_assign__short__valid)
 {
     const short_checked instance(short_valid_value);
-    const short_checked copy = instance;
+    short_checked copy;
+    copy = instance;
     BOOST_REQUIRE(copy);
 }
 
 BOOST_AUTO_TEST_CASE(checked__move_assign__short__valid)
 {
     short_checked instance(short_valid_value);
-    const short_checked copy = std::move(instance);
+    short_checked copy;
+    copy = std::move(instance);
     BOOST_REQUIRE(copy);
 }
 
-// Whiney compiler.
+// Whiney compiler (can't test self-assign).
 ////BOOST_AUTO_TEST_CASE(checked__copy_assign_self__short__valid)
 ////{
 ////    short_checked instance(short_valid_value);
@@ -136,7 +138,7 @@ BOOST_AUTO_TEST_CASE(checked__move_assign__short__valid)
 ////    BOOST_REQUIRE(instance);
 ////}
 
-// Whiney compiler.
+// Whiney compiler (can't test self-assign).
 ////BOOST_AUTO_TEST_CASE(checked__move_assign_self__short__valid)
 ////{
 ////    short_checked instance(short_valid_value);
