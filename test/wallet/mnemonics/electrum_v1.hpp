@@ -33,6 +33,54 @@ struct electrum_v1_result
 
 typedef std::vector<electrum_v1_result> electrum_v1_result_list;
 
+const auto sentence2 = "blind faith";
+
+const auto sentence12 =
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith";
+
+const auto sentence24 =
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith";
+
+const auto sentence26 =
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith "
+    "blind faith blind faith blind faith "
+    "blind faith";
+
+const string_list words2
+{
+    "blind", "faith"
+};
+
+const string_list words12
+{
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith"
+};
+
+const string_list words24
+{
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith"
+};
+
+const string_list words26
+{
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith", "blind", "faith", "blind", "faith",
+    "blind", "faith"
+};
+
+
 // TODO: add Electrum v1 vectors.
 
 #endif

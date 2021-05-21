@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__yellow_lotus__none)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__contained_by__blind_faith__en)
 {
-    BOOST_REQUIRE(electrum_v1::contained_by({ "blind", "faith" }) == language::en);
+    BOOST_REQUIRE(electrum_v1::contained_by(words2) == language::en);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_dictionary__contained__true)
@@ -112,16 +112,13 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_default__always__invalid)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_copy__always__expected)
 {
-    const auto sentence1 =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-
-    electrum_v1 instance1(sentence1);
+    electrum_v1 instance1(sentence12);
     BOOST_REQUIRE(instance1);
 
     electrum_v1 instance2(instance1);
     BOOST_REQUIRE(instance2);
 
-    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence1);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence12);
     BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
     BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
 }
@@ -130,15 +127,12 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_copy__always__expected)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_move__always__expected)
 {
-    const auto sentence1 =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-
-    electrum_v1 instance1(sentence1);
+    electrum_v1 instance1(sentence12);
     BOOST_REQUIRE(instance1);
 
     electrum_v1 instance2(std::move(instance1));
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence1);
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence12);
 }
 
 // construct sentence
@@ -150,37 +144,28 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__empty_sentence__invalid)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__2_word_sentence__invalid_empty)
 {
-    electrum_v1 instance("blind faith");
+    electrum_v1 instance(sentence2);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.sentence().empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__12_word_sentence__valid_expected)
 {
-    const auto sentence =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-    electrum_v1 instance(sentence);
+    electrum_v1 instance(sentence12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence12);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__24_word_sentence__valid_expected)
 {
-    const auto sentence =
-        "blind faith blind faith blind faith blind faith blind faith blind faith "
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-    electrum_v1 instance(sentence);
+    electrum_v1 instance(sentence24);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence);
+    BOOST_REQUIRE_EQUAL(instance.sentence(), sentence24);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__26_word_sentence__valid_expected)
 {
-    const auto sentence =
-        "blind faith blind faith blind faith blind faith blind faith blind faith "
-        "blind faith blind faith blind faith blind faith blind faith blind faith "
-        "blind faith";
-    electrum_v1 instance(sentence);
+    electrum_v1 instance(words26);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.sentence().empty());
 }
@@ -194,51 +179,28 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__empty__invalid)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__2_words__invalid)
 {
-    electrum_v1 instance("blind faith");
+    electrum_v1 instance(sentence2);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.words().empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__12_words__valid_expected)
 {
-    const string_list words
-    {
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith"
-    };
-
-    electrum_v1 instance(words);
+    electrum_v1 instance(words12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.words(), words);
+    BOOST_REQUIRE_EQUAL(instance.words(), words12);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__24_words__valid_expected)
 {
-    const string_list words
-    {
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith"
-    };
-
-    electrum_v1 instance(words);
+    electrum_v1 instance(words24);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.words(), words);
+    BOOST_REQUIRE_EQUAL(instance.words(), words24);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__26_words__valid_expected)
 {
-    const string_list words
-    {
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith"
-    };
-
-    electrum_v1 instance(words);
+    electrum_v1 instance(words26);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.words().empty());
 }
@@ -306,10 +268,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy___always__valid_expe
 
 BOOST_AUTO_TEST_CASE(electrum_v1__assign_copy__always__expected)
 {
-    const auto sentence1 =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-
-    const electrum_v1 instance1(sentence1);
+    const electrum_v1 instance1(sentence12);
     electrum_v1 instance2;
     instance2 = instance1;
     BOOST_REQUIRE(instance2);
@@ -320,45 +279,27 @@ BOOST_AUTO_TEST_CASE(electrum_v1__assign_copy__always__expected)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__assign_move__always__expected)
 {
-    const auto sentence1 =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-
-    electrum_v1 instance1(sentence1);
+    electrum_v1 instance1(sentence12);
     electrum_v1 instance2;
     instance2 = std::move(instance1);
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.sentence(), instance1.sentence());
-    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
-    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+    BOOST_REQUIRE_EQUAL(instance2.sentence(), sentence12);
 }
 
 // in/equality (default)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__equality__always__expected)
 {
-    const auto sentence1 =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
-
-    const electrum_v1 instance1(sentence1);
-    const electrum_v1 instance2(sentence1);
+    const electrum_v1 instance1(sentence12);
+    const electrum_v1 instance2(words12);
     BOOST_REQUIRE(instance1 == instance2);
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__inequality_move__always__expected)
 {
-    const auto sentence =
-        "blind faith blind faith blind faith blind faith blind faith blind faith";
 
-    const string_list words
-    {
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith",
-        "blind", "faith", "blind", "faith", "blind", "faith"
-    };
-
-    const electrum_v1 instance1(sentence);
-    const electrum_v1 instance2(words);
+    const electrum_v1 instance1(sentence12);
+    const electrum_v1 instance2(words24);
     BOOST_REQUIRE(instance1 != instance2);
 }
 
