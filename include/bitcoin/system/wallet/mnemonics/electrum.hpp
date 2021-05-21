@@ -115,7 +115,7 @@ public:
     electrum(const std::string& sentence, language identifier=language::none);
 
     /// By default this only verifies entropy against the prefix.
-    /// Set the grind limit to allow it to iterate to match the prefix.
+    /// Set grind limit to allow entropy mutation for prefix discovery.
     /// The instance will be invalid if the prefix was not found/matched.
     electrum(const data_chunk& entropy, seed_prefix prefix, language lexicon,
         size_t grind_limit=0);

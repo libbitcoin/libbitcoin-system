@@ -437,8 +437,7 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// To allow maximum iteration a caller should use max_uint32.
-// To test existing entropy a caller should use the default of zero.
+// To test existing entropy a caller should set grind_limit to zero (default).
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     language identifier, size_t grind_limit)
 {
