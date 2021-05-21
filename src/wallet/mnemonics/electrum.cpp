@@ -122,15 +122,22 @@ electrum::result electrum::grinder(const data_chunk& entropy,
     data_chunk hash(entropy);
     const auto start = limit;
 
-    // Normalize entropy to the wordlist by managing its pad bits.
+    // Remove unusable entropy bytes.
     const auto entropy_size = usable_size(hash);
     hash.resize(entropy_size);
+
+    // Create a byte mask for zeroizing entropy pad bits.
     const auto padding_mask = 0xff << unused_bits(hash);
 
     // This just grinds away until exhausted or prefix found.
-    // Previously discovered entropy round-trips, matching on the first pass.
+    // Previously-discovered entropy round-trips, matching on the first pass.
     do
     {
+        // Normalize entropy to the wordlist by managing its pad bits.
+        // Electrum pads to the left, but entropy is a private format for
+        // electrum and public for bip39, so we use the bip39/mnemonic format.
+        // This results in any electrum entropy/prefix value producing the same
+        // words as that same entropy/checksum value in bip39/mnemonic.
         hash[entropy_size - 1u] &= padding_mask;
         words = encoder(hash, identifier);
 
