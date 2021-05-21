@@ -233,7 +233,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
         return {};
 
     // Save derived entropy and dictionary words, originals are discarded.
-    return { decoder(tokens, lexicon), tokens, identifier };
+    return { decoder(tokens, lexicon), tokens, lexicon };
 }
 
 // operators
