@@ -685,7 +685,8 @@ BOOST_AUTO_TEST_CASE(witness_address__assignment__copied__expected)
 {
     const auto address = "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9e75rs";
     const witness_address instance1{ address };
-    const witness_address instance2 = instance1;
+    witness_address instance2;
+    instance2 = instance1;
     BOOST_REQUIRE_EQUAL(instance2.encoded(), address);
 }
 
@@ -693,7 +694,8 @@ BOOST_AUTO_TEST_CASE(witness_address__assignment__moved__expected)
 {
     const auto address = "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9e75rs";
     witness_address instance1{ address };
-    const witness_address instance2 = std::move(instance1);
+    witness_address instance2;
+    instance2 = std::move(instance1);
     BOOST_REQUIRE_EQUAL(instance2.encoded(), address);
 }
 
