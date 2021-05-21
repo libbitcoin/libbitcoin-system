@@ -87,6 +87,9 @@ const electrum::dictionaries electrum::dictionaries_
     }
 };
 
+// protected static
+// ----------------------------------------------------------------------------
+
 // Entropy is an entirely private (internal) format.
 string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
@@ -221,9 +224,6 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
     const auto seed = encode_base16(hmac_sha512_hash(data, seed_version));
     return starts_with(seed, to_version(prefix));
 }
-
-// protected static
-// ----------------------------------------------------------------------------
 
 size_t electrum::entropy_bits(const data_slice& entropy)
 {
@@ -440,6 +440,9 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
   : electrum_v1(entropy, words, identifier), prefix_(prefix)
 {
 }
+
+// protected
+// ----------------------------------------------------------------------------
 
 // To test existing entropy a caller should set grind_limit to zero (default).
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,

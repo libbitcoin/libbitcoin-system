@@ -69,6 +69,9 @@ const mnemonic::dictionaries mnemonic::dictionaries_
     }
 };
 
+// protected static
+// ----------------------------------------------------------------------------
+
 // Entropy requires wordlist mapping because of the checksum.
 string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
@@ -115,9 +118,6 @@ hd_private mnemonic::seeder(const string_list& words,
     // The object will be false if the secret (left) does not ec verify.
     return hd_private(part.first, part.second, chain);
 }
-
-// protected static
-// ----------------------------------------------------------------------------
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
 {
@@ -218,7 +218,7 @@ mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// private methods
+// protected
 // ----------------------------------------------------------------------------
 
 mnemonic mnemonic::from_entropy(const data_chunk& entropy, language identifier)
@@ -285,10 +285,6 @@ std::istream& operator>>(std::istream& in, mnemonic& to)
     std::istreambuf_iterator<char> begin(in), end;
     std::string value(begin, end);
     to = mnemonic(value);
-
-    if (!to)
-        throw istream_exception(value);
-
     return in;
 }
 

@@ -126,7 +126,6 @@ protected:
     mnemonic(const data_chunk& entropy, const string_list& words,
         language identifier);
 
-private:
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
     static hd_private seeder(const string_list& words,
@@ -135,6 +134,7 @@ private:
     static mnemonic from_entropy(const data_chunk& entropy, language identifier);
     static mnemonic from_words(const string_list& words, language identifier);
 
+private:
     // All Electrum v1 dictionaries, from <dictionaries/mnemonic.cpp>.
     static const dictionaries dictionaries_;
 };

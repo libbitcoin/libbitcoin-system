@@ -42,7 +42,7 @@ constexpr auto size0 = uint32_t{ 1u };
 constexpr auto size1 = static_cast<int32_t>(electrum_v1::dictionary::size());
 constexpr auto size2 = size1 * size1;
 
-// private static
+// protected static
 // ----------------------------------------------------------------------------
 
 const electrum_v1::dictionaries electrum_v1::dictionaries_
@@ -107,9 +107,6 @@ data_chunk electrum_v1::decoder(const string_list& words, language identifier)
     sink.flush();
     return entropy;
 }
-
-// protected static
-// ----------------------------------------------------------------------------
 
 size_t electrum_v1::entropy_bits(const data_slice& entropy)
 {
@@ -200,7 +197,7 @@ electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// private methods
+// protected
 // ----------------------------------------------------------------------------
 
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
@@ -244,10 +241,6 @@ std::istream& operator>>(std::istream& in, electrum_v1& to)
     std::istreambuf_iterator<char> begin(in), end;
     std::string value(begin, end);
     to = electrum_v1(value);
-
-    if (!to)
-        throw istream_exception(value);
-
     return in;
 }
 
