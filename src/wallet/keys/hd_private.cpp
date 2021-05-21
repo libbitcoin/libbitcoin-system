@@ -56,8 +56,8 @@ hd_private::hd_private(const hd_private& other)
 {
 }
 
-hd_private::hd_private(const data_chunk& seed, uint64_t prefixes)
-  : hd_private(from_seed(seed, prefixes))
+hd_private::hd_private(const data_chunk& entropy, uint64_t prefixes)
+  : hd_private(from_entropy(entropy, prefixes))
 {
 }
 
@@ -99,7 +99,7 @@ hd_private::hd_private(const std::string& encoded, uint64_t prefixes)
 
 hd_private::hd_private(const ec_secret& secret,
     const hd_chain_code& chain_code, uint64_t prefixes)
-  : hd_public(from_new(secret, chain_code, prefixes)),
+  : hd_public(from_private(secret, chain_code, prefixes)),
     secret_(secret)
 {
 }
@@ -115,7 +115,7 @@ hd_private::hd_private(const ec_secret& secret,
 // Factories.
 // ----------------------------------------------------------------------------
 
-hd_private hd_private::from_new(const ec_secret& secret,
+hd_private hd_private::from_private(const ec_secret& secret,
     const hd_chain_code& chain_code, uint64_t prefixes)
 {
     // The key is invalid if parse256(IL) >= n or 0:
@@ -133,11 +133,12 @@ hd_private hd_private::from_new(const ec_secret& secret,
     return hd_private(secret, chain_code, master);
 }
 
-hd_private hd_private::from_seed(const data_slice& seed, uint64_t prefixes)
+hd_private hd_private::from_entropy(const data_slice& entropy,
+    uint64_t prefixes)
 {
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
-    const auto intermediate = split(hmac_sha512_hash(seed, magic));
+    const auto intermediate = split(hmac_sha512_hash(entropy, magic));
 
     return hd_private(intermediate.first, intermediate.second, prefixes);
 }
