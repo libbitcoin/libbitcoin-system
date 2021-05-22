@@ -113,10 +113,9 @@ hd_private mnemonic::seeder(const string_list& words,
     const auto data = to_chunk(system::join(words));
     const auto salt = to_chunk(passphrase_prefix + phrase);
     const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
-    const auto part = system::split(seed);
 
-    // The object will be false if the secret (left) does not ec verify.
-    return hd_private(part.first, part.second, chain);
+    // The object will be false if the generated secret does not ec verify.
+    return { to_chunk(seed), chain };
 }
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
@@ -240,7 +239,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
 
     // Normalize to improve chance of dictionary matching.
     const auto tokens = try_normalize(words);
-    const auto lexicon = contained_by(words, identifier);
+    const auto lexicon = contained_by(tokens, identifier);
 
     if (lexicon == language::none)
         return {};
@@ -254,7 +253,7 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
         contained_by(tokens, language::fr) == language::fr)
         return {};
 
-    const auto entropy = decoder(tokens, identifier);
+    const auto entropy = decoder(tokens, lexicon);
 
     // Checksum verification failed.
     if (entropy.empty())
