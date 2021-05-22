@@ -102,11 +102,11 @@ string_list languages::try_normalize(const string_list& words)
 {
     string_list normal(words.size());
 
+    // This is only used for dictionary matching.
+    // All dictionaries are confirmed via test cases to be lower/nfkd.
     std::transform(words.begin(), words.end(), normal.begin(),
         [](const std::string& word)
         {
-            // This is only used for dictionary matching.
-            // All dictionaries are confirmed via test cases to be lower/nfkd.
             auto token = ascii_to_lower(trim_copy(word, unicode_whitespace));
             to_compatibility_decomposition(token);
             to_lower(token);

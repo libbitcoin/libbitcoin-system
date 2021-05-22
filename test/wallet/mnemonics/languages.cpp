@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(languages__split__korean_non_separator_whitespace_delimited
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ko), expected);
 }
 
-// Langauge splitting applies all unicode separator characters.
+// Language splitting applies all unicode separator characters.
 BOOST_AUTO_TEST_CASE(languages__split__japanese_ascii_space_delimited__split)
 {
     const string_list expected
