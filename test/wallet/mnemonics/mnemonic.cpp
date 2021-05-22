@@ -19,138 +19,172 @@
 #include "../../test.hpp"
 #include "mnemonic.hpp"
 
- // Disabled until rebuilt.
-#ifdef DISABLED_TESTS
+using namespace test::mnemonics_mnemonic;
+using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
 using namespace test::mnemonics_mnemonic;
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__trezor_vectors__success)
-{
-    for (const auto& vector: mnemonic_trezor_en_vectors)
-    {
-        data_chunk entropy;
-        BOOST_REQUIRE(decode_base16(entropy, vector.entropy));
-        mnemonic instance(entropy);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE(instance.lexicon() == reference::en);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.words(), split(vector.mnemonic));
-        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
+// construct (mnemonic) 
 
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__empty__false)
+{
+    BOOST_REQUIRE(!mnemonic(""));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__misspelled__false)
+{
+    BOOST_REQUIRE(!mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon aboot"));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__short__false)
+{
+    BOOST_REQUIRE(!mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon"));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__bad_checksum__false)
+{
+    BOOST_REQUIRE(!mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon one"));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__incorrect_language__false)
+{
+    BOOST_REQUIRE(!mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon agent", language::zh_Hant));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__correct_language__true)
+{
+    BOOST_REQUIRE(mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon agent", language::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_mnemonic__any_language__true)
+{
+    BOOST_REQUIRE(mnemonic(
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon abandon "
+        "abandon abandon abandon abandon abandon agent", language::none));
+}
+
+// BIP39 vectors
+
+BOOST_AUTO_TEST_CASE(mnemonic__verify_vector__sizes__expected)
+{
+    BOOST_REQUIRE_EQUAL(vectors_en.size(), 24u);
+    BOOST_REQUIRE_EQUAL(vectors_ja.size(), 24u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__verify_vector__denormalization__expected)
+{
+    BOOST_REQUIRE_EQUAL(abnormals(vectors_en, ascii_space), 0u);
+
+    // When WITH_ICU is undefined normalization cannot be verified.
 #ifdef WITH_ICU
-        const auto seed = instance.to_seed(vector.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
+    BOOST_REQUIRE_EQUAL(abnormals(vectors_ja, ideographic_space), 22u);
+#else
+    BOOST_REQUIRE_EQUAL(abnormals(vectors_ja, ideographic_space), 0u);
 #endif
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__verify_vector__ja_delimiters__single_ideographic_space)
+{
+    for (const auto& vector: vectors_ja)
+    {
+        // Not ascii delimited.
+        BOOST_REQUIRE_EQUAL(split(vector.mnemonic).size(), 1u);
+
+        // Only ideographic_space delimited and no other unicode whitespace.
+        const auto words = split(vector.mnemonic, { ideographic_space }, unicode_whitespace);
+        BOOST_REQUIRE_EQUAL(join(words, ideographic_space), vector.mnemonic);
+        BOOST_REQUIRE(words.size() >= 12u);
     }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__japanese_vectors__success)
+// No need to verify "seed" (mnemonic internals) as long as they match the hd keys.
+BOOST_AUTO_TEST_CASE(mnemonic__verify_vector__seeds__match_hd_keys)
 {
-    for (const auto& vector: mnemonic_bip39jp_jp_vectors)
+    for (const auto& vector: vectors_ja)
     {
-        data_chunk entropy;
-        BOOST_REQUIRE(decode_base16(entropy, vector.entropy));
-        mnemonic instance(entropy, reference::ja);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE(instance.lexicon() == reference::ja);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.words(), split_regex(vector.mnemonic, mnemonic::ideographic_space));
-        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
-
-#ifdef WITH_ICU
-        const auto seed = instance.to_seed(vector.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
-#endif
+        // The seed is hex encoded input to BIP32 key generation.
+        // The key is constructed from BIP32 encoding, e.g. "xprv..."
+        BOOST_REQUIRE_EQUAL(hd_private(vector.seed()), vector.hd_key());
     }
 }
 
-// construct2
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__trezor_vectors__success)
+BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_en__expected)
 {
-    for (const auto& vector: mnemonic_trezor_en_vectors)
+    for (const auto& vector: vectors_en)
+    {
+        mnemonic instance(vector.entropy());
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lingo() == language::en);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.sentence());
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.hd_key());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_en__expected)
+{
+    for (const auto& vector : vectors_en)
     {
         mnemonic instance(vector.mnemonic);
         BOOST_REQUIRE(instance);
-        BOOST_REQUIRE(instance.lexicon() == reference::en);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.words(), split(vector.mnemonic));
-        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
-
-#ifdef WITH_ICU
-        const auto seed = instance.to_seed(vector.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
-#endif
+        BOOST_REQUIRE(instance.lingo() == language::en);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.sentence());
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.hd_key());
     }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__japanese_vectors__success)
+#ifdef WITH_ICU
+
+// Passphrases are all ascii, but 22 of 24 mnemonics are denormalized, so these
+// will fail when WITH_ICU is undefined.
+
+BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_ja__expected)
 {
-    for (const auto& vector: mnemonic_bip39jp_jp_vectors)
+    for (const auto& vector: vectors_ja)
     {
-        mnemonic instance(vector.mnemonic, reference::ja);
+        mnemonic instance(vector.entropy(), language::ja);
         BOOST_REQUIRE(instance);
-        BOOST_REQUIRE(instance.lexicon() == reference::ja);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.words(), split_regex(vector.mnemonic, mnemonic::ideographic_space));
-        BOOST_REQUIRE_EQUAL(encode_base16(instance.entropy()), vector.entropy);
-
-#ifdef WITH_ICU
-        const auto seed = instance.to_seed(vector.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
-        BOOST_REQUIRE_EQUAL(hd_private(seed).encoded(), vector.hd_private_key);
-#endif
+        BOOST_REQUIRE(instance.lingo() == language::ja);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.hd_key());
     }
 }
 
-// construct (pathological) 
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__misspelled_en__false)
+BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_ja__expected)
 {
-    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon aboot", reference::en));
+    for (const auto& vector: vectors_ja)
+    {
+        mnemonic instance(vector.mnemonic);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE(instance.lingo() == language::ja);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE_EQUAL(instance.to_seed(vector.passphrase), vector.hd_key());
+    }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_one_en__false)
-{
-    BOOST_REQUIRE(!mnemonic("one", reference::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_two_en__false)
-{
-    BOOST_REQUIRE(!mnemonic("one two", reference::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__length_eleven_en__false)
-{
-    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon", reference::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__bad_checksum_en__false)
-{
-    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one", reference::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__incorrect_language__false)
-{
-    BOOST_REQUIRE(!mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::zh_Hant));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__correct_language__true)
-{
-    BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent", reference::en));
-}
-
-BOOST_AUTO_TEST_CASE(mnemonic__construct1__any_language__true)
-{
-    BOOST_REQUIRE(mnemonic("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"));
-}
+#endif // WITH_ICU
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif // DISABLED_TESTS
