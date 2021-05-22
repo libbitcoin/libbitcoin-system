@@ -252,33 +252,33 @@ BOOST_AUTO_TEST_CASE(electrum__seeder__ascii_passphrase_testnet__expected_hd_key
     BOOST_REQUIRE_EQUAL(result.encoded(), "tprv8ZgxMBicQKsPe7MSEsjnDK1Xtkd7pijqy5sxgvufx7t4f9YbgxYGr5meJBPYDGJ3LSR6CCGJgtRfCs8XG6LqQcPvbgZX1EeNFPJTiGTAqkt");
 }
 
-// prefixer
-
-BOOST_AUTO_TEST_CASE(electrum__prefixer__none__expected)
-{
-    // All invalid wordlists or failures to match will produce 'none' (other enums unreachable).
-    BOOST_REQUIRE(accessor::prefixer({ "bogus" }) == prefix::none);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__prefixer__standard__expected)
-{
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_standard)) == prefix::standard);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__prefixer__witness__expected)
-{
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_witness)) == prefix::witness);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication__expected)
-{
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication)) == prefix::two_factor_authentication);
-}
-
-BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication_witness__expected)
-{
-    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication_witness)) == prefix::two_factor_authentication_witness);
-}
+////// prefixer
+////
+////BOOST_AUTO_TEST_CASE(electrum__prefixer__none__expected)
+////{
+////    // All invalid wordlists or failures to match will produce 'none' (other enums unreachable).
+////    BOOST_REQUIRE(accessor::prefixer({ "bogus" }) == prefix::none);
+////}
+////
+////BOOST_AUTO_TEST_CASE(electrum__prefixer__standard__expected)
+////{
+////    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_standard)) == prefix::standard);
+////}
+////
+////BOOST_AUTO_TEST_CASE(electrum__prefixer__witness__expected)
+////{
+////    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_witness)) == prefix::witness);
+////}
+////
+////BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication__expected)
+////{
+////    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication)) == prefix::two_factor_authentication);
+////}
+////
+////BOOST_AUTO_TEST_CASE(electrum__prefixer__two_factor_authentication_witness__expected)
+////{
+////    BOOST_REQUIRE(accessor::prefixer(split(mnemonic_two_factor_authentication_witness)) == prefix::two_factor_authentication_witness);
+////}
 
 // validator
 
@@ -476,48 +476,46 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__similar_words__false)
 
 // from_entropy
 
-// This grinds, so tests may be slow, depending on entropy.
-
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__empty__false)
 {
-    BOOST_REQUIRE(!accessor::from_entropy({}, prefix::standard, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy({}, prefix::standard, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__low_byte_count__false)
 {
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(16, 0x42), prefix::standard, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(16, 0x42), prefix::standard, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__minimum_byte_count__true)
 {
-    // This grinds, so tests may be slow, but is alway the same.
-    BOOST_REQUIRE(accessor::from_entropy(data_chunk(17, 0x42), prefix::standard, language::en, max_uint16));
+    // This grinds, so tests may be slow, but is always the same.
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(17, 0x42), prefix::standard, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__maximum_byte_count__true)
 {
-    // This grinds, so tests may be slow, but is alway the same.
-    BOOST_REQUIRE(accessor::from_entropy(data_chunk(64, 0x42), prefix::standard, language::en, max_uint16));
+    // This grinds, so tests may be slow, but is always the same.
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(64, 0x42), prefix::standard, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__high_byte_count__true)
 {
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(65, 0x42), prefix::standard, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(65, 0x42), prefix::standard, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__invalid_prefixes__false)
 {
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::bip39, language::en, max_uint16));
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::none, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::bip39, language::en, max_uint32));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::none, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__v1_prefix__expected)
 {
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(15, 0x42), prefix::old, language::en, max_uint16));
-    BOOST_REQUIRE(accessor::from_entropy(data_chunk(16, 0x42), prefix::old, language::en, max_uint16));
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::old, language::en, max_uint16));
-    BOOST_REQUIRE(accessor::from_entropy(data_chunk(32, 0x42), prefix::old, language::en, max_uint16));
-    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(33, 0x42), prefix::old, language::en, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(15, 0x42), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(16, 0x42), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(17, 0x42), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(accessor::from_entropy(data_chunk(32, 0x42), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(33, 0x42), prefix::old, language::en, max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__valid_entropy_but_prefix_not_found__false)
@@ -543,30 +541,39 @@ BOOST_AUTO_TEST_CASE(electrum__from_entropy__invalid_language__false)
 BOOST_AUTO_TEST_CASE(electrum__from_entropy__language_none__false)
 {
     // A mnemonic cannot be created without a specified dictionary.
-    BOOST_REQUIRE(!accessor::from_entropy(vectors[6].entropy, prefix::standard, language::none, max_uint16));
+    BOOST_REQUIRE(!accessor::from_entropy(vectors[6].entropy, prefix::standard, language::none, max_uint32));
 }
 
-// is_valid_two_factor_authentication_size
+// is_conflict(words)
+// to_conflict(words)
+// normalized_to_prefix(words)
+// normalized_is_prefix(words, prefix)
+// is_ambiguous(count, prefix)
+// is_ambiguous(words, requested, derived)
+// to_prefix(sentence)
+// is_prefix(sentence, prefix)
 
-BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__invalid__false)
-{
-    // count == word_count(strength_minimum) ||...
-    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(11));
-    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(13));
-
-    // ...count >= minimum_two_factor_authentication_words
-    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(19));
-}
-
-BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__valid__true)
-{
-    // count == word_count(strength_minimum) ||...
-    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(12));
-
-    // ...count >= minimum_two_factor_authentication_words
-    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(20));
-    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(21));
-}
+////// is_valid_two_factor_authentication_size
+////
+////BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__invalid__false)
+////{
+////    // count == word_count(strength_minimum) ||...
+////    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(11));
+////    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(13));
+////
+////    // ...count >= minimum_two_factor_authentication_words
+////    BOOST_REQUIRE(!accessor::is_valid_two_factor_authentication_size(19));
+////}
+////
+////BOOST_AUTO_TEST_CASE(electrum__is_valid_two_factor_authentication_size__valid__true)
+////{
+////    // count == word_count(strength_minimum) ||...
+////    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(12));
+////
+////    // ...count >= minimum_two_factor_authentication_words
+////    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(20));
+////    BOOST_REQUIRE(accessor::is_valid_two_factor_authentication_size(21));
+////}
 
 // Public static.
 // ----------------------------------------------------------------------------
@@ -654,16 +661,16 @@ BOOST_AUTO_TEST_CASE(electrum__is_valid_word_count__valid__true)
     BOOST_REQUIRE(electrum::is_valid_word_count(46));
 }
 
-// is_prefix
+// is_prefix (TODO: add old/bip39 vectors)
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__invalid_prefix__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__invalid_prefix__false)
 {
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::none));
     BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_standard), prefix::bip39));
     BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_standard), prefix::old));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid_prefix__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__valid_prefix__true)
 {
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::standard));
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_witness), prefix::witness));
@@ -672,21 +679,21 @@ BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid_prefix__true)
 
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__two_factor_authentication_valid_size__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__two_factor_authentication_valid_size__true)
 {
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication12), prefix::two_factor_authentication));
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication20), prefix::two_factor_authentication));
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication21), prefix::two_factor_authentication));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__two_factor_authentication_invalid_size__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__two_factor_authentication_invalid_size__false)
 {
     BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication11), prefix::two_factor_authentication));
     BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication13), prefix::two_factor_authentication));
     BOOST_REQUIRE(!electrum::is_prefix(split(mnemonic_two_factor_authentication19), prefix::two_factor_authentication));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__valid__true)
 {
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_standard), prefix::standard));
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_witness), prefix::witness));
@@ -694,15 +701,37 @@ BOOST_AUTO_TEST_CASE(electrum__is_prefix__valid__true)
     BOOST_REQUIRE(electrum::is_prefix(split(mnemonic_two_factor_authentication_witness), prefix::two_factor_authentication_witness));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__uppercased__true)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__uppercased__true)
 {
     const auto vector = vectors[electrum_vector::english];
     BOOST_REQUIRE(electrum::is_prefix(split(ascii_to_upper(vector.mnemonic)), vector.prefix));
 }
 
-BOOST_AUTO_TEST_CASE(electrum__is_prefix__mixed__false)
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_words__mixed__false)
 {
     BOOST_REQUIRE(!electrum::is_prefix(mixed_languages, prefix::witness));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__is_prefix_sentence__valid__true)
+{
+    BOOST_REQUIRE(electrum::is_prefix(mnemonic_standard, prefix::standard));
+    BOOST_REQUIRE(electrum::is_prefix(mnemonic_witness, prefix::witness));
+    BOOST_REQUIRE(electrum::is_prefix(mnemonic_two_factor_authentication, prefix::two_factor_authentication));
+    BOOST_REQUIRE(electrum::is_prefix(mnemonic_two_factor_authentication_witness, prefix::two_factor_authentication_witness));
+}
+
+// to_prefix1/2 (all)
+
+// TODO: grind on mnemonics and electrum_v1 to find conflict test vectors.
+// It's very possible that a BIP3-created mnemonic may conflict with electrum,
+// but harder to create in the other direction.
+
+BOOST_AUTO_TEST_CASE(electrum__to_prefix_words__todo__todo)
+{
+}
+
+BOOST_AUTO_TEST_CASE(electrum__to_prefix_sentence__todo__todo)
+{
 }
 
 // to_version
@@ -955,24 +984,103 @@ BOOST_AUTO_TEST_CASE(electrum__construct_mnemonic__mnemonic_two_factor_authentic
     BOOST_REQUIRE_EQUAL(instance.sentence(), mnemonic_two_factor_authentication_witness);
 }
 
-// TODO:
-// construct entropy (all)
-// to_prefix (all)
-// is_prefix (add old/bip39 vectors)
-// grinder: grind on mnemonics and electrum_v1 to find conflict test vectors.
-// It's very possible that a BIP3-created mnemonic may conflict with electrum,
-// but harder to create in the other direction.
-// Review coveralls for gaps.
-// Test electrum_v1 round trip constructions.
-// Test mnemonic.
+// construct entropy
 
-// to_seed
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__empty__false)
+{
+    BOOST_REQUIRE(!electrum({}, prefix::standard, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__low_byte_count__false)
+{
+    BOOST_REQUIRE(!electrum(data_chunk(16, 0x42), prefix::standard, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__minimum_byte_count__true)
+{
+    // This grinds, so tests may be slow, but is always the same.
+    BOOST_REQUIRE(electrum(data_chunk(17, 0x42), prefix::standard, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__maximum_byte_count__true)
+{
+    // This grinds, so tests may be slow, but is always the same.
+    BOOST_REQUIRE(electrum(data_chunk(64, 0x42), prefix::standard, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__high_byte_count__false)
+{
+    BOOST_REQUIRE(!electrum(data_chunk(65, 0x42), prefix::standard, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__invalid_prefixes__false)
+{
+    BOOST_REQUIRE(!electrum(data_chunk(17, 0x42), prefix::bip39, language::en, max_uint32));
+    BOOST_REQUIRE(!electrum(data_chunk(17, 0x42), prefix::none, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__prefix_old__expected)
+{
+    BOOST_REQUIRE(!electrum(data_chunk(15, 0x00), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(electrum(data_chunk(16, 0x00), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(!electrum(data_chunk(17, 0x00), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(electrum(data_chunk(32, 0x00), prefix::old, language::en, max_uint32));
+    BOOST_REQUIRE(!electrum(data_chunk(33, 0x00), prefix::old, language::en, max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__valid_entropy_but_prefix_not_found__false)
+{
+    BOOST_REQUIRE(!electrum(data_chunk(17, 0x42), prefix::standard, language::en, 0));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__previous_entropy_zero_grind__true)
+{
+    const auto vector = vectors[6];
+
+    // Previous entropy round trips without grinding.
+    BOOST_REQUIRE(electrum(vector.entropy, vector.prefix, vector.lingo, 0));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__invalid_language__false)
+{
+    const auto vector = vectors[6];
+    BOOST_REQUIRE(!electrum(vector.entropy, vector.prefix, language::none, 0));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__construct_entropy__language_none__false)
+{
+    // A mnemonic cannot be created without a specified dictionary.
+    BOOST_REQUIRE(!electrum(vectors[6].entropy, prefix::standard, language::none, max_uint32));
+}
+
+// to_seed (TODO: invalid, bip39, old, none)
 
 BOOST_AUTO_TEST_CASE(electrum__to_seed__invalid__invalid)
 {
     electrum instance;
     BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(!instance.to_seed("passphrase", 42));
+    BOOST_REQUIRE(!instance.to_seed());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__to_seed__prefix_none__invalid)
+{
+    electrum instance(mnemonic_two_factor_authentication19);
+    BOOST_REQUIRE(instance);
+
+    // The 2fa prefix is 'none' (considered unprefixed) because of the 2fa hack.
+    BOOST_REQUIRE(instance.prefix() == prefix::none);
+    BOOST_REQUIRE(!instance.to_seed());
+}
+
+BOOST_AUTO_TEST_CASE(electrum__to_seed__prefix_bip39__invalid)
+{
+    // Valid (non-electrum/electrum_v1) BIP39 entropy from Trezor test vectors.
+    electrum instance("legal winner thank year wave sausage worth useful legal winner thank yellow");
+    BOOST_REQUIRE(instance);
+
+    // TODO: mnemonic decoder failure.
+    BOOST_REQUIRE(instance.prefix() == prefix::bip39);
+    BOOST_REQUIRE(!instance.to_seed());
 }
 
 BOOST_AUTO_TEST_CASE(electrum__to_seed__ascii__expected)

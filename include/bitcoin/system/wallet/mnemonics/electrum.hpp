@@ -92,15 +92,17 @@ public:
     /// Valid word counts (12 to 46 words).
     static bool is_valid_word_count(size_t count);
 
-    /// Returns false if prefix is 'old', 'bip39' or 'none'.
     /// Returns true if the seed of the words has the given prefix.
+    /// Will also match 'old', 'bip39' and 'none', as specified.
     static bool is_prefix(const string_list& words, seed_prefix prefix);
+    static bool is_prefix(const std::string& sentence, seed_prefix prefix);
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
     /// Otherwise words must be prenormalized if WITH_ICU undefind.
     /// A prefix other than 'none' implies the words represent a valid seed.
     static seed_prefix to_prefix(const string_list& words);
+    static seed_prefix to_prefix(const std::string& sentence);
 
     /// Obtain the version corresponding to the enumeration value.
     static std::string to_version(seed_prefix prefix);
@@ -172,16 +174,23 @@ protected:
     electrum(const data_chunk& entropy, const string_list& words,
         language identifier, seed_prefix prefix);
 
-    static bool is_valid_two_factor_authentication_size(size_t count);
+    static bool is_conflict(const string_list& words);
+    static seed_prefix to_conflict(const string_list& words);
 
-    static result grinder(const data_chunk& entropy, seed_prefix prefix,
-        language identifier, size_t limit);
+    static seed_prefix normalized_to_prefix(const string_list& words);
+    static bool normalized_is_prefix(const string_list& words,
+        seed_prefix prefix);
+
+    static bool is_ambiguous(size_t count, seed_prefix prefix);
+    static bool is_ambiguous(const string_list& words, language requested,
+        language derived);
+
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
     static hd_private seeder(const string_list& words,
         const std::string& passphrase, uint64_t chain);
-
-    static seed_prefix prefixer(const string_list& words);
+    static result grinder(const data_chunk& entropy, seed_prefix prefix,
+        language identifier, size_t limit);
     static bool validator(const string_list& words, seed_prefix prefix);
 
     static electrum from_words(const string_list& words, language identifier);

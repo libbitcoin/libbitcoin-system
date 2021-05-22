@@ -30,7 +30,6 @@ using namespace bc::system::wallet;
 namespace test {
 namespace mnemonics_electrum {
 
-// Structure for holding each test vector.
 struct electrum_vector
 {
     typedef enum name
@@ -55,12 +54,11 @@ struct electrum_vector
     data_chunk entropy;
     std::string passphrase;
     data_chunk passphrase_chunk;
-    long_hash hd_seed;
+    long_hash hd_seceret_and_chaincode;
 
     hd_private to_hd() const
     {
-        // Split hd seed into secret and chaincode.
-        const auto part = system::split(hd_seed);
+        const auto part = system::split(hd_seceret_and_chaincode);
         return { part.first, part.second, hd_private::mainnet };
     }
 };
@@ -369,11 +367,6 @@ public:
         return electrum::usable_size(entropy);
     }
 
-     static bool is_valid_two_factor_authentication_size(size_t count)
-    {
-        return electrum::is_valid_two_factor_authentication_size(count);
-    }
-
     static result grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit)
     {
@@ -394,11 +387,6 @@ public:
         const std::string& passphrase, uint64_t chain)
     {
         return electrum::seeder(words, passphrase, chain);
-    }
-
-    static seed_prefix prefixer(const string_list& words)
-    {
-        return electrum::prefixer(words);
     }
 
     static bool validator(const string_list& words, seed_prefix prefix)

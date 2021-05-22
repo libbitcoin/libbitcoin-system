@@ -90,19 +90,82 @@ const electrum::dictionaries electrum::dictionaries_
 // protected static
 // ----------------------------------------------------------------------------
 
-// Entropy is an entirely private (internal) format.
+// Electrum entropy is an entirely private (internal) format.
 string_list electrum::encoder(const data_chunk& entropy, language identifier)
 {
     // Bytes are the base2048 encoding, so this is byte decoding.
     return decode_base2048_list(entropy, identifier);
 }
 
-// Entropy is an entirely private (internal) format.
+// Electrum entropy is an entirely private (internal) format.
 data_chunk electrum::decoder(const string_list& words, language identifier)
 {
     // Words are the base2048 decoding, so this is word encoding.
     data_chunk out;
     return encode_base2048_list(out, words, identifier) ? out : data_chunk{};
+}
+
+// Electrum uses the same normalization function for words and passphrases.
+// Passpharse entropy loss from lowering (and normalizing) should be considered.
+// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
+hd_private electrum::seeder(const string_list& words,
+    const std::string& passphrase, uint64_t chain)
+{
+    // Passphrase is limited to ascii (normal) if WITH_ICU undefined.
+    auto phrase = passphrase;
+
+    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+
+    // Conforms to the Unicode Standard for nfkd and case lowering (ICU).
+    // ------------------------------------------------------------------------
+    // seed = unicodedata.normalize('NFKD', seed)
+    // seed = seed.lower()
+    // ------------------------------------------------------------------------
+    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
+        return {};
+
+    LCOV_EXCL_STOP()
+
+    // Python's unicodedata.combining returns the canonical combining
+    // class assigned to the character (which may or may not be a diacritic).
+    // Libbitcoin sources use the same internal implementation as Python.
+    // ------------------------------------------------------------------------
+    // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
+    // ------------------------------------------------------------------------
+    // Remove combining class characters (from the nfkd form converted above).
+    phrase = to_non_combining_form(phrase);
+
+    // Python string.whitespace represents the 6 ascii/C whitespace chars:
+    // print(string.whitespace) => 09 0d 0a 0b 0c 0d 0a 20 (two duplicates).
+    // Libbitcoin uses the CJK intervals from Electrum sources.
+    // ------------------------------------------------------------------------
+    // seed = u''.join([seed[i] for i in range(len(seed))
+    //    if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and
+    //       is_CJK(seed[i+1]))])
+    // ------------------------------------------------------------------------
+    // Compress ascii whitespace and remove ascii spaces between cjk characters.
+    phrase = to_compressed_form(phrase);
+
+    // Python unicode splits on all unicode separators:
+    // print(u'x\u3000y z'.split()) => [u'x', u'y', u'z']
+    // Electrum joins with an ascii space (0x20) as confirmed by test results.
+    // ------------------------------------------------------------------------
+    // seed = u' '.join(seed.split())
+    // ------------------------------------------------------------------------
+    // Words are normal (lower, nfkd) form even without ICU (dictionary-match).
+    auto sentence = system::join(words);
+    sentence = to_non_combining_form(sentence);
+    sentence = to_compressed_form(sentence);
+
+    const auto data = to_chunk(sentence);
+    const auto salt = to_chunk(passphrase_prefix + phrase);
+    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
+
+    // Electrum bypasses a BIP32 step, splitting directly to secret/chaincode.
+    const auto part = system::split(seed);
+
+    // The object will be false if the secret (part.first) does not ec verify.
+    return { part.first, part.second, chain };
 }
 
 // Electrum also grinds randoms on a sequential nonce until the entropy is high
@@ -142,10 +205,7 @@ electrum::result electrum::grinder(const data_chunk& entropy,
         words = encoder(hash, identifier);
 
         // Avoid collisions with Electrum v1 (en) and BIP39 mnemonics.
-        // Five electrum languages contain electrum_v1 english words.
-        // Collision with a mnemonic checksum is unlikely but possible.
-        if (!electrum_v1(words, language::en) && !mnemonic(words) &&
-            validator(words, prefix))
+        if (!is_conflict(words) && validator(words, prefix))
             return { hash, words, start - limit };
 
         // This replaces Electrum's prng with determinism.
@@ -155,70 +215,6 @@ electrum::result electrum::grinder(const data_chunk& entropy,
     while (limit-- > 0u);
 
     return { {}, {}, start };
-}
-
-// Electrum uses the same normalization function for words and passphrases.
-// Passpharse entropy loss from lowering (and normalizing) should be considered.
-// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
-hd_private electrum::seeder(const string_list& words,
-    const std::string& passphrase, uint64_t chain)
-{
-    // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
-    auto phrase = passphrase;
-
-    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
-
-    // Conforms to the Unicode Standard for nfkd and case lowering.
-    // seed = unicodedata.normalize('NFKD', seed)
-    // Python 3 [but not 2] string.lower() conforms to the Unicode Standard.
-    // seed = seed.lower()
-    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
-        return {};
-
-    LCOV_EXCL_STOP()
-
-    // Python's unicodedata.combining returns the canonical combining
-    // class assigned to the character, which may or may not be a diacritic.
-    // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
-    // Remove combining class characters (from the nfkd form converted above).
-    phrase = to_non_combining_form(phrase);
-
-    // Python splits on the 6 ascii/C whitespace chars and compresses.
-    // seed = u' '.join(seed.split())
-    // Python string.whitespace represents the 6 ascii/C whitespace chars.
-    // seed = u''.join([seed[i] for i in range(len(seed))
-    // if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and is_CJK(seed[i+1]))])
-    // Compress ascii whitespace and remove ascii spaces between cjk characters.
-    phrase = to_compressed_form(phrase);
-
-    // Words are in normal (lower, nfkd) form, even without ICU.
-    auto sentence = system::join(words);
-    sentence = to_non_combining_form(sentence);
-    sentence = to_compressed_form(sentence);
-
-    const auto data = to_chunk(sentence);
-    const auto salt = to_chunk(passphrase_prefix + phrase);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
-    const auto part = system::split(seed);
-
-    // The object will be false if the secret (left) does not ec verify.
-    return { part.first, part.second, chain };
-}
-
-// This does not check for electrum_v1 or mnemonic.
-electrum::seed_prefix electrum::prefixer(const string_list& words)
-{
-    // Words are in normal form, even without ICU.
-    if (is_prefix(words, seed_prefix::standard))
-        return seed_prefix::standard;
-    if (is_prefix(words, seed_prefix::witness))
-        return seed_prefix::witness;
-    if (is_prefix(words, seed_prefix::two_factor_authentication))
-        return seed_prefix::two_factor_authentication;
-    if (is_prefix(words, seed_prefix::two_factor_authentication_witness))
-        return seed_prefix::two_factor_authentication_witness;
-
-    return seed_prefix::none;
 }
 
 // This cannot match electrum_v1 or mnemonic.
@@ -233,6 +229,9 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
     const auto seed = encode_base16(hmac_sha512_hash(data, seed_version));
     return starts_with(seed, to_version(prefix));
 }
+
+// protected static
+// ----------------------------------------------------------------------------
 
 size_t electrum::entropy_bits(const data_slice& entropy)
 {
@@ -287,6 +286,93 @@ size_t electrum::usable_size(const data_slice& entropy)
     return entropy.size() - unused_bytes(entropy);
 }
 
+// protected static
+// ----------------------------------------------------------------------------
+
+bool electrum::is_ambiguous(size_t count, seed_prefix prefix)
+{
+    // HACK: github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L258
+    // In Electrum 2.7, there was a breaking change in key derivation for
+    // two_factor_authentication. Unfortunately the seed prefix was reused,
+    // and now we can only distinguish them based on number of words. :(
+    if (prefix != seed_prefix::two_factor_authentication)
+        return false;
+
+    return
+        count != word_count(strength_minimum) &&
+        count < minimum_two_factor_authentication_words;
+}
+
+bool electrum::is_ambiguous(const string_list& words, language requested,
+    language derived)
+{
+    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // If matches en and unspecified then check fr, since en is searched first.
+    return
+        derived == language::en &&
+        requested == language::none &&
+        contained_by(words, language::fr) == language::fr;
+}
+
+bool electrum::is_conflict(const string_list& words)
+{
+    return to_conflict(words) != seed_prefix::none;
+}
+
+electrum::seed_prefix electrum::to_conflict(const string_list& words)
+{
+    // Electrum only considers english for electrum_v1 conflicts.
+    // Five electrum languages contain electrum_v1 english words.
+    if (electrum_v1(words, language::en))
+        return seed_prefix::old;
+
+    // Generating a mnemonic checksum is unlikely but possible. But a generated
+    // mnemonic (with valid checksum) can more easily match an electrum prefix.
+    if (mnemonic(words))
+        return seed_prefix::bip39;
+
+    return seed_prefix::none;
+}
+
+bool electrum::normalized_is_prefix(const string_list& words, seed_prefix prefix)
+{
+    if (prefix == seed_prefix::old)
+        return electrum_v1(words, language::en);
+
+    if (prefix == seed_prefix::bip39)
+        return mnemonic(words);
+
+    // HACK: 2fa prefix ambiguity.
+    if (is_ambiguous(words.size(), prefix))
+        return false;
+
+    if (validator(words, prefix))
+        return true;
+
+    return prefix == seed_prefix::none;
+}
+
+electrum::seed_prefix electrum::normalized_to_prefix(const string_list& words)
+{
+    const auto conflict = to_conflict(words);
+
+    // Prioritize conflicts since electrum doesn't generate them.
+    if (conflict != seed_prefix::none)
+        return conflict;
+
+    // Words are in normal form, even without ICU.
+    if (normalized_is_prefix(words, seed_prefix::standard))
+        return seed_prefix::standard;
+    if (normalized_is_prefix(words, seed_prefix::witness))
+        return seed_prefix::witness;
+    if (normalized_is_prefix(words, seed_prefix::two_factor_authentication))
+        return seed_prefix::two_factor_authentication;
+    if (normalized_is_prefix(words, seed_prefix::two_factor_authentication_witness))
+        return seed_prefix::two_factor_authentication_witness;
+
+    return seed_prefix::none;
+}
+
 // public static
 // ----------------------------------------------------------------------------
 
@@ -300,18 +386,18 @@ bool electrum::is_valid_dictionary(language identifier)
     return dictionaries_.exists(identifier);
 }
 
-// Electrum has no explicit minimum or maximum strengths.
-// Upper bounds here are based on use of a 512 bit hash function
-// in grind() and transportation of entropy in byte vectors.
-// A 64 byte seed (512 / 11) is 46 words (6 unused bits).
-// This limits strength to 506 bits (BIP39 is 256).
-// Lower bounds here are based on seed strength.
-// A 132 bit (exactly 12 word) seed is the Electrum default.
-// A 128 bit seed is the BIP39 minium, but this 11 Electrum words.
-// So our limits are 132 to 506 bits (12 to 46) words.
-
 bool electrum::is_valid_entropy_size(size_t size)
 {
+    // Electrum has no explicit minimum or maximum strengths.
+    // Upper bounds here are based on use of a 512 bit hash function
+    // in grind() and transportation of entropy in byte vectors.
+    // A 64 byte seed (512 / 11) is 46 words (6 unused bits).
+    // This limits strength to 506 bits (BIP39 is 256).
+    // Lower bounds here are based on seed strength.
+    // A 132 bit (exactly 12 word) seed is the Electrum default.
+    // A 128 bit seed is the BIP39 minium, but this 11 Electrum words.
+    // So our limits are 132 to 506 bits (12 to 46) words.
+
     return size >= entropy_size(strength_minimum) &&
         size <= entropy_size(strength_maximum);
 }
@@ -322,29 +408,8 @@ bool electrum::is_valid_word_count(size_t count)
         count <= word_count(strength_maximum);
 }
 
-bool electrum::is_valid_two_factor_authentication_size(size_t count)
-{
-    // In Electrum 2.7, there was a breaking change in key derivation for
-    // two_factor_authentication. Unfortunately the seed prefix was reused,
-    // and now we can only distinguish them based on number of words. :(
-    // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L258
-    return count == word_count(strength_minimum) ||
-        count >= minimum_two_factor_authentication_words;
-}
-
 bool electrum::is_prefix(const string_list& words, seed_prefix prefix)
 {
-    if (prefix == seed_prefix::old)
-        return electrum_v1(words, language::en);
-
-    if (prefix == seed_prefix::bip39)
-        return mnemonic(words);
-
-    // HACK: see comment in is_valid_two_factor_authentication_size.
-    if (prefix == seed_prefix::two_factor_authentication &&
-        !is_valid_two_factor_authentication_size(words.size()))
-        return false;
-
     // Normalize to improve chance of dictionary matching.
     const auto tokens = try_normalize(words);
 
@@ -352,17 +417,16 @@ bool electrum::is_prefix(const string_list& words, seed_prefix prefix)
     if (contained_by(tokens) == language::none)
         return prefix == seed_prefix::none;
 
-    return validator(tokens, prefix) || prefix == seed_prefix::none;
+    return normalized_is_prefix(tokens, prefix);
+}
+
+bool electrum::is_prefix(const std::string& sentence, seed_prefix prefix)
+{
+    return is_prefix(split(sentence, language::none), prefix);
 }
 
 electrum::seed_prefix electrum::to_prefix(const string_list& words)
 {
-    if (electrum_v1(words, language::en))
-        return seed_prefix::old;
-
-    if (mnemonic(words))
-        return seed_prefix::bip39;
-
     // Normalize to improve chance of dictionary matching.
     const auto tokens = try_normalize(words);
 
@@ -370,7 +434,12 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words)
     if (contained_by(tokens) == language::none)
         return seed_prefix::none;
 
-    return prefixer(words);
+    return normalized_to_prefix(words);
+}
+
+electrum::seed_prefix electrum::to_prefix(const std::string& sentence)
+{
+    return to_prefix(split(sentence, language::none));
 }
 
 std::string electrum::to_version(seed_prefix prefix)
@@ -436,7 +505,7 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// protected
+// protected static
 // ----------------------------------------------------------------------------
 
 // To test existing entropy a caller should set grind_limit to zero (default).
@@ -459,6 +528,10 @@ electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
         return {};
 
     if (!dictionaries_.exists(identifier))
+        return {};
+
+    // HACK: 2fa ambiguity.
+    if (is_ambiguous(word_count(entropy), prefix))
         return {};
 
     // If prefix is 'none' this will return the first non-prefixed result.
@@ -492,15 +565,17 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    // HACK: There are 100 same words in en/fr, all with distinct indexes.
-    // If unspecified and matches en then check fr, since en is searched first.
-    if (identifier == language::none && lexicon == language::en &&
-        contained_by(tokens, language::fr) == language::fr)
+    // HACK: en-fr dictionary ambiguity.
+    if (is_ambiguous(tokens, identifier, lexicon))
         return {};
 
-    // This will be identified as a valid bip39 if the checksum validates.
+    // Above prioritizes electrum matching, but if that fails then this will
+    // be identified as a valid bip39 if the checksum validates. This is likely
+    // in the case where a valid bip39 mnemonic is passed via the constructor.
+    const auto prefix = normalized_to_prefix(tokens);
+
     // Save derived entropy and dictionary words, originals are discarded.
-    return { decoder(tokens, lexicon), tokens, lexicon, prefixer(tokens) };
+    return { decoder(tokens, lexicon), tokens, lexicon, prefix };
 }
 
 // public
@@ -514,9 +589,15 @@ electrum::seed_prefix electrum::prefix() const
 hd_private electrum::to_seed(const std::string& passphrase,
     uint64_t chain) const
 {
-    // Preclude derivation from an invalid object state.
     if (!(*this))
         return {};
+
+    if (prefix_ == seed_prefix::none || prefix_ == seed_prefix::bip39)
+        return {};
+
+    if (prefix_ == seed_prefix::old)
+        return passphrase.empty() ?
+            electrum_v1::to_seed(chain) : hd_private{};
 
     return seeder(words(), passphrase, chain);
 }
