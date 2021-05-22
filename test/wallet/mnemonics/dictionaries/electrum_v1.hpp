@@ -38,6 +38,7 @@ namespace dictionaries_electrum_v1 {
 ////    {
 ////        std::string copy = test;
 ////        to_compatibility_decomposition(copy);
+////        to_lower(copy);
 ////        return test != copy;
 ////    });
 ////}
@@ -48,6 +49,7 @@ bool abnormal(const electrum_v1::dictionary::words& words)
     {
         std::string copy = test;
         to_compatibility_decomposition(copy);
+        to_lower(copy);
         return test != copy;
     });
 }

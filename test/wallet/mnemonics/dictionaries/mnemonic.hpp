@@ -92,6 +92,7 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 ////    {
 ////        std::string copy = test;
 ////        to_compatibility_decomposition(copy);
+////        to_lower(copy);
 ////        return test != copy;
 ////    });
 ////}
@@ -102,6 +103,7 @@ static bool abnormal(const mnemonic::dictionary::words& words)
     {
         std::string copy = test;
         to_compatibility_decomposition(copy);
+        to_lower(copy);
         return test != copy;
     });
 }
