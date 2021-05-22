@@ -100,10 +100,20 @@ string_list languages::split(const std::string& sentence, language)
 // protected
 string_list languages::try_normalize(const string_list& words)
 {
-    auto sentence = ascii_to_lower(system::join(words));
-    to_compatibility_decomposition(sentence);
-    to_lower(sentence);
-    return system::split(sentence);
+    string_list normal(words.size());
+
+    std::transform(words.begin(), words.end(), normal.begin(),
+        [](const std::string& word)
+        {
+            // This is only used for dictionary matching.
+            // All dictionaries are confirmed via test cases to be lower/nfkd.
+            auto token = ascii_to_lower(trim_copy(word, unicode_whitespace));
+            to_compatibility_decomposition(token);
+            to_lower(token);
+            return token;
+        });
+
+    return normal;
 }
 
 // protected constructors
