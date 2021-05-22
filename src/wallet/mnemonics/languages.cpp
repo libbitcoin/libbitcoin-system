@@ -54,7 +54,6 @@ static const language_map map
     { language::zh_Hant, "zh_Hant" }
 };
 
-
 // static methods
 // ----------------------------------------------------------------------------
 
