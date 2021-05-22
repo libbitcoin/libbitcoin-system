@@ -284,7 +284,7 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 // This call requires an ICU build, the other excluded calls are dependencies.
 static data_chunk normal(const std::string& passphrase)
 {
-    std::string copy = passphrase;
+    auto copy = passphrase;
     return to_canonical_composition(copy) ? to_chunk(copy) : data_chunk{};
 }
 
