@@ -34,7 +34,7 @@ namespace wallet {
 // local definitions
 // ----------------------------------------------------------------------------
 
-typedef std::map<language, std::string> language_map;
+typedef std::map<language, const char*> language_map;
 
 // All languages, dictionary-independent.
 // Dictionaries are collections of words in one of these languages.
