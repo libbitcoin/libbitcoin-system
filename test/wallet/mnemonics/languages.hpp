@@ -79,7 +79,7 @@ const test_words test_words_zh_Hant
     }
 };
 
-// languages is a protected class, provide test accesss.
+// Test wrapper for access to protected methods.
 class accessor
   : public languages
 {
@@ -100,13 +100,12 @@ public:
     {
     }
 
-    // Expose protected method.
     static string_list try_normalize(const string_list& words)
     {
         return languages::try_normalize(words);
     }
 
-    // Verify assignment and copy construction with derived member.
+    // To verify assignment and copy construction with derived member.
     const std::string& value() const
     {
         return value_;

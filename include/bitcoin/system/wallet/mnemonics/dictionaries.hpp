@@ -39,6 +39,7 @@ template<size_t Count, size_t Size>
 class dictionaries
 {
 public:
+    /// Use system::cast to convert between search and result.
     typedef typename dictionary<Size>::search search;
     typedef typename dictionary<Size>::result result;
     typedef std::array<dictionary<Size>, Count> list;
