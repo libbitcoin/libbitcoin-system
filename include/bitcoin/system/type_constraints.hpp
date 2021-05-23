@@ -19,21 +19,29 @@
 #ifndef LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 #define LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+// Borrowing enable_if_t from c++14.
+// en.cppreference.com/w/cpp/types/enable_if
+template<bool Bool, class Type = void>
+using enable_if_type = typename std::enable_if<Bool, Type>::type;
+
+#define IS_DERIVED(Base, Type) \
+enable_if_type<std::is_base_of<Base, Type>::value, bool> = true
+
+// Derive from 'noncopyable' to preclude copy construct and assign semantics in
+// the derived class. Move semantics are preserved if they are defined.
 class BC_API noncopyable
 {
 public:
     noncopyable(const noncopyable&) = delete;
     void operator=(const noncopyable&) = delete;
-
 protected:
-    noncopyable()
-    {
-    }
+    noncopyable() {}
 };
 
 } // namespace system

@@ -459,8 +459,8 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/error.hpp \
     include/bitcoin/system/exceptions.hpp \
-    include/bitcoin/system/noncopyable.hpp \
     include/bitcoin/system/settings.hpp \
+    include/bitcoin/system/type_constraints.hpp \
     include/bitcoin/system/version.hpp
 
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain

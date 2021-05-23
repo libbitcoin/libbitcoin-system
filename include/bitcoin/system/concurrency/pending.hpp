@@ -26,7 +26,7 @@
 #include <vector>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
-#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

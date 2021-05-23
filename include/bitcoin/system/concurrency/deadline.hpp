@@ -28,7 +28,7 @@
 #include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
 ////#include <bitcoin/system/concurrency/track.hpp>
-#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

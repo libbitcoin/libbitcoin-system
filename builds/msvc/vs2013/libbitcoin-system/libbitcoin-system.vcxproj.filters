@@ -1292,9 +1292,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\version.hpp">
       <Filter>include\bitcoin\system\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\noncopyable.hpp">
-      <Filter>include\bitcoin\system</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\deserialize.hpp">
       <Filter>include\bitcoin\system\serialization</Filter>
     </ClInclude>
@@ -1311,6 +1308,9 @@
       <Filter>include\bitcoin\system\serialization</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\settings.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\type_constraints.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp">

@@ -26,7 +26,7 @@
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

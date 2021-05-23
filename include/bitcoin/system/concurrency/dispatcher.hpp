@@ -32,7 +32,7 @@
 #include <bitcoin/system/concurrency/synchronizer.hpp>
 #include <bitcoin/system/concurrency/threadpool.hpp>
 #include <bitcoin/system/concurrency/work.hpp>
-#include <bitcoin/system/noncopyable.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

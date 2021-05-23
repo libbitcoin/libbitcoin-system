@@ -494,13 +494,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\version.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\noncopyable.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\deserialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\deserializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\endian.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\serialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serialization\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\settings.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\type_constraints.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\code_points.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\conversion.hpp" />
