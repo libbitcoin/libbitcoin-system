@@ -88,6 +88,10 @@ Dividend ceilinged_modulo(Dividend dividend, Divisor divisor)
         divisor + truncated_modulo(dividend, divisor);
 }
 
+// TODO: this fails on negating an unsigned type.
+// TODO: in that case the other operand should be negated.
+// TODO: the negative check can be eliminated by type constraints.
+// TODO: that can also provide the differentiation to resolve this issue.
 template <typename Dividend, typename Divisor>
 Dividend floored_modulo(Dividend dividend, Divisor divisor)
 {
