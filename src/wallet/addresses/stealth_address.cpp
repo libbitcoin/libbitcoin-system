@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -28,6 +29,7 @@
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/exceptions.hpp>
 
@@ -138,11 +140,11 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
     std::copy_n(scan_key_begin, ec_compressed_size, scan_key.begin());
 
     // [N:1]
-    auto number_spend_pubkeys = *iterator;
+    auto spend_keys_count = *iterator;
     ++iterator;
 
     // Adjust and retest required size. for pubkey list.
-    required_size += number_spend_pubkeys * ec_compressed_size;
+    required_size += spend_keys_count * ec_compressed_size;
     if (decoded.size() < required_size)
         return {};
 
@@ -153,10 +155,10 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
     // [spend_pubkey_1:33]..[spend_pubkey_N:33]
     ec_compressed point;
-    for (auto key = 0; key < number_spend_pubkeys; ++key)
+    for (auto key = 0; key < spend_keys_count; ++key)
     {
         auto spend_key_begin = iterator;
-        iterator += ec_compressed_size;
+        std::advance(iterator, ec_compressed_size);
         std::copy_n(spend_key_begin, ec_compressed_size, point.begin());
         spend_keys.push_back(point);
     }
@@ -172,7 +174,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
     // [prefix:prefix_number_bits / 8, round up]
     ++iterator;
-    const auto filter_bytes = (filter_bits + (byte_bits - 1)) / byte_bits;
+    const auto filter_bytes = ceilinged_divide(filter_bits, byte_bits);
 
     // Adjust and retest required size.
     required_size += filter_bytes;
@@ -180,7 +182,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
         return {};
 
     // Deserialize the filter bytes/blocks.
-    const data_chunk raw_filter(iterator, iterator + filter_bytes);
+    const data_chunk raw_filter(iterator, std::next(iterator, filter_bytes));
     const binary filter(filter_bits, raw_filter);
     return { filter, scan_key, spend_keys, signatures, version };
 }
