@@ -65,7 +65,6 @@ public:
 
     static uint32_t to_prefix(uint64_t prefixes)
     {
-        // Recover public prefix.
         return prefixes & 0x00000000ffffffff;
     }
 

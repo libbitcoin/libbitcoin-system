@@ -34,6 +34,8 @@ namespace system {
 namespace wallet {
 
 /// An extended private key, as defined by BIP32.
+/// Additional prefix codes are documented in SLIP132.
+/// github.com/satoshilabs/slips/blob/master/slip-0132.md
 class BC_API hd_private
   : public hd_public
 {
@@ -43,14 +45,12 @@ public:
 
     static uint32_t to_prefix(uint64_t prefixes)
     {
-        // Recover private prefix.
         return prefixes >> 32;
     }
 
     static uint64_t to_prefixes(uint32_t private_prefix,
         uint32_t public_prefix)
     {
-        // Combine prefixes.
         return uint64_t(private_prefix) << 32 | public_prefix;
     }
 
@@ -97,14 +97,12 @@ public:
 private:
     /// Factories.
     static hd_private from_entropy(const data_slice& seed, uint64_t prefixes);
-    static hd_private from_key(const hd_key& decoded, uint32_t prefix);
-    static hd_private from_key(const hd_key& decoded, uint64_t public_prefix);
+    static hd_private from_key(const hd_key& decoded, uint32_t public_prefix);
+    static hd_private from_key(const hd_key& decoded, uint64_t prefixes);
     static hd_private from_private(const ec_secret& secret,
         const hd_chain_code& chain_code, uint64_t prefixes);
-    static hd_private from_string(const std::string& encoded,
-        uint32_t public_prefix);
-    static hd_private from_string(const std::string& encoded,
-        uint64_t prefixes);
+    static hd_private from_string(const std::string& encoded, uint32_t public_prefix);
+    static hd_private from_string(const std::string& encoded, uint64_t prefixes);
 
     hd_private(const ec_secret& secret, const hd_chain_code& chain_code,
         const hd_lineage& lineage);

@@ -66,16 +66,9 @@ hd_private::hd_private(const hd_key& private_key)
   : hd_private(from_key(private_key, hd_public::mainnet))
 {
 }
-
-// This reads the private version and sets the public to mainnet.
-hd_private::hd_private(const std::string& encoded)
-    : hd_private(from_string(encoded, hd_public::mainnet))
-{
-}
-
 // This reads the private version and sets the public.
-hd_private::hd_private(const hd_key& private_key, uint32_t prefix)
-  : hd_private(from_key(private_key, prefix))
+hd_private::hd_private(const hd_key& private_key, uint32_t public_prefix)
+  : hd_private(from_key(private_key, public_prefix))
 {
 }
 
@@ -85,9 +78,15 @@ hd_private::hd_private(const hd_key& private_key, uint64_t prefixes)
 {
 }
 
+// This reads the private version and sets the public to mainnet.
+hd_private::hd_private(const std::string& encoded)
+  : hd_private(from_string(encoded, hd_public::mainnet))
+{
+}
+
 // This reads the private version and sets the public.
-hd_private::hd_private(const std::string& encoded, uint32_t prefix)
-  : hd_private(from_string(encoded, prefix))
+hd_private::hd_private(const std::string& encoded, uint32_t public_prefix)
+  : hd_private(from_string(encoded, public_prefix))
 {
 }
 
