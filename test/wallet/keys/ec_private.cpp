@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(ec_private__decode_wif__compressed__true)
 {
     const ec_private secret(WIF_COMPRESSED);
     BOOST_REQUIRE_EQUAL(encode_base16(secret.secret()), SECRET);
-    BOOST_REQUIRE_EQUAL(secret.version(), 0x8000);
+    BOOST_REQUIRE_EQUAL(secret.versions(), 0x8000);
     BOOST_REQUIRE(secret.compressed());
 }
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(ec_private__decode_wif__uncompressed__false)
 {
     const ec_private secret(WIF_UNCOMPRESSED);
     BOOST_REQUIRE_EQUAL(encode_base16(secret.secret()), SECRET);
-    BOOST_REQUIRE_EQUAL(secret.version(), 0x8000);
+    BOOST_REQUIRE_EQUAL(secret.versions(), 0x8000);
     BOOST_REQUIRE(!secret.compressed());
 }
 

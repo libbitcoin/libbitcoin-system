@@ -60,40 +60,37 @@ public:
     // WIF carries a compression flag for payment address generation but
     // assumes a mapping to payment address version. This is insufficient
     // as a parameterized mapping is required, so we use the same technique as
-    // with hd keys, merging the two necessary values into one version.
+    // with hd keys, merging the two necessary values into one.
     static const uint16_t mainnet;
     static const uint16_t testnet;
 
-    static uint8_t to_address_prefix(uint16_t version)
+    static uint8_t to_address_version(uint16_t versions)
     {
-        // Recover address prefix.
-        return version & 0x00ff;
+        return versions & 0x00ff;
     }
 
-    static uint8_t to_wif_prefix(uint16_t version)
+    static uint8_t to_wif_version(uint16_t versions)
     {
-        // Recover wif prefix.
-        return version >> 8;
+        return versions >> 8;
     }
 
-    static uint16_t to_version(uint8_t address, uint8_t wif)
+    static uint16_t to_versions(uint8_t address, uint8_t wif)
     {
-        // Combine prefixes.
         return uint16_t(wif) << 8 | address;
     }
 
     /// Constructors.
     ec_private();
     ec_private(const ec_private& other);
-    ec_private(const ec_scalar& scalar, uint8_t version=mainnet_p2kh);
-    ec_private(const data_chunk& seed, uint8_t version=mainnet_p2kh);
-    ec_private(const std::string& wif, uint8_t version=mainnet_p2kh);
-    ec_private(const wif_compressed& wif, uint8_t version=mainnet_p2kh);
-    ec_private(const wif_uncompressed& wif, uint8_t version=mainnet_p2kh);
+    ec_private(const ec_scalar& scalar, uint8_t address=mainnet_p2kh);
+    ec_private(const data_chunk& entropy, uint8_t address=mainnet_p2kh);
+    ec_private(const std::string& wif, uint8_t address=mainnet_p2kh);
+    ec_private(const wif_compressed& wif, uint8_t address=mainnet_p2kh);
+    ec_private(const wif_uncompressed& wif, uint8_t address=mainnet_p2kh);
 
     /// The version is 16 bits. The most significant byte is the WIF prefix and
     /// the least significant byte is the address perfix. 0x8000 by default.
-    ec_private(const ec_secret& secret, uint16_t version=mainnet,
+    ec_private(const ec_secret& secret, uint16_t versions=mainnet,
         bool compress=true);
 
     /// Operators.
@@ -111,7 +108,7 @@ public:
     std::string encoded() const;
 
     /// Accessors.
-    uint16_t version() const;
+    uint16_t versions() const;
     uint8_t payment_version() const;
     uint8_t wif_version() const;
     bool compressed() const;
@@ -125,15 +122,17 @@ private:
     static bool is_wif(const data_slice& decoded);
 
     /// Factories.
-    static ec_private from_seed(const data_chunk& seed, uint8_t address_version);
-    static ec_private from_string(const std::string& wif, uint8_t version);
-    static ec_private from_compressed(const wif_compressed& wif, uint8_t version);
-    static ec_private from_uncompressed(const wif_uncompressed& wif, uint8_t version);
+    static ec_private from_string(const std::string& wif, uint8_t address);
+    static ec_private from_entropy(const data_chunk& entropy, uint8_t address);
+    static ec_private from_compressed(const wif_compressed& wif,
+        uint8_t address);
+    static ec_private from_uncompressed(const wif_uncompressed& wif,
+        uint8_t address);
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.
     bool compress_;
-    uint16_t version_;
+    uint16_t versions_;
 };
 
 } // namespace wallet

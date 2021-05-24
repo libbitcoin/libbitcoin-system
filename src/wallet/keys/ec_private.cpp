@@ -41,51 +41,50 @@ const uint8_t ec_private::compressed_sentinel = 0x01;
 
 const uint8_t ec_private::mainnet_wif = 0x80;
 const uint8_t ec_private::mainnet_p2kh = 0x00;
-const uint16_t ec_private::mainnet = to_version(mainnet_p2kh, mainnet_wif);
+const uint16_t ec_private::mainnet = to_versions(mainnet_p2kh, mainnet_wif);
 
 const uint8_t ec_private::testnet_wif = 0xef;
 const uint8_t ec_private::testnet_p2kh = 0x6f;
-const uint16_t ec_private::testnet = to_version(testnet_p2kh, testnet_wif);
-
-// TODO: review construction for consistency WRT version/address_version.
+const uint16_t ec_private::testnet = to_versions(testnet_p2kh, testnet_wif);
 
 ec_private::ec_private()
   : ec_private(ec_scalar{})
 {
 }
 
-ec_private::ec_private(const ec_scalar& scalar, uint8_t address_version)
-  : ec_scalar(scalar), compress_(true), version_(address_version)
+ec_private::ec_private(const ec_scalar& scalar, uint8_t address)
+  : ec_scalar(scalar), compress_(true), versions_(address)
 {
 }
 
 ec_private::ec_private(const ec_private& other)
-  : ec_scalar(other), compress_(other.compress_), version_(other.version_)
+  : ec_scalar(other), compress_(other.compress_), versions_(other.versions_)
 {
 }
 
-ec_private::ec_private(const data_chunk& seed, uint8_t address_version)
-  : ec_private(from_seed(seed, address_version))
+ec_private::ec_private(const data_chunk& entropy, uint8_t address)
+  : ec_private(from_entropy(entropy, address))
 {
 }
 
-ec_private::ec_private(const std::string& wif, uint8_t address_version)
-  : ec_private(from_string(wif, address_version))
+ec_private::ec_private(const std::string& wif, uint8_t address)
+  : ec_private(from_string(wif, address))
 {
 }
 
-ec_private::ec_private(const wif_compressed& wif, uint8_t address_version)
-  : ec_private(from_compressed(wif, address_version))
+ec_private::ec_private(const wif_compressed& wif, uint8_t address)
+  : ec_private(from_compressed(wif, address))
 {
 }
 
-ec_private::ec_private(const wif_uncompressed& wif, uint8_t address_version)
-  : ec_private(from_uncompressed(wif, address_version))
+ec_private::ec_private(const wif_uncompressed& wif, uint8_t address)
+  : ec_private(from_uncompressed(wif, address))
 {
 }
 
-ec_private::ec_private(const ec_secret& secret, uint16_t version, bool compress)
-  : ec_scalar(secret), compress_(compress), version_(version)
+ec_private::ec_private(const ec_secret& secret, uint16_t versions,
+    bool compress)
+  : ec_scalar(secret), compress_(compress), versions_(versions)
 {
 }
 
@@ -108,52 +107,52 @@ bool ec_private::is_wif(const data_slice& decoded)
 // Factories.
 // ----------------------------------------------------------------------------
 
-ec_private ec_private::from_seed(const data_chunk& seed,
-    uint8_t address_version)
-{
-    // This technique ensures consistent secrets with BIP32 from a given seed.
-    const hd_private key(seed);
-
-    // The key is invalid if parse256(IL) >= n or 0:
-    if (!key)
-        return {};
-
-    return { key.secret(), address_version, true };
-}
-
 ec_private ec_private::from_string(const std::string& wif,
-    uint8_t address_version)
+    uint8_t address)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, wif) || !is_wif(decoded))
         return {};
 
     if (decoded.size() == wif_compressed_size)
-        return { to_array<wif_compressed_size>(decoded), address_version };
+        return { to_array<wif_compressed_size>(decoded), address };
 
-    return { to_array<wif_uncompressed_size>(decoded), address_version };
+    return { to_array<wif_uncompressed_size>(decoded), address };
 }
 
 ec_private ec_private::from_compressed(const wif_compressed& wif,
-    uint8_t address_version)
+    uint8_t address)
 {
     if (!is_wif(wif))
         return {};
 
-    const auto version = to_version(address_version, wif.front());
+    const auto versions = to_versions(address, wif.front());
     const auto secret = slice<1u, ec_secret_size + 1u>(wif);
-    return { secret, version, true };
+    return { secret, versions, true };
 }
 
 ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
-    uint8_t address_version)
+    uint8_t address)
 {
     if (!is_wif(wif))
         return {};
 
-    const auto version = to_version(address_version, wif.front());
+    const auto versions = to_versions(address, wif.front());
     const auto secret = slice<1u, ec_secret_size + 1u>(wif);
-    return { secret, version, false };
+    return { secret, versions, false };
+}
+
+ec_private ec_private::from_entropy(const data_chunk& entropy,
+    uint8_t version)
+{
+    // This technique ensures consistent secrets with BIP32 from a given seed.
+    const hd_private key(entropy);
+
+    // The key is invalid if parse256(IL) >= n or 0:
+    if (!key)
+        return {};
+
+    return { key.secret(), version, true };
 }
 
 // Serializer.
@@ -183,19 +182,19 @@ std::string ec_private::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-uint16_t ec_private::version() const
+uint16_t ec_private::versions() const
 {
-    return version_;
+    return versions_;
 }
 
 uint8_t ec_private::payment_version() const
 {
-    return to_address_prefix(version_);
+    return to_address_version(versions_);
 }
 
 uint8_t ec_private::wif_version() const
 {
-    return to_wif_prefix(version_);
+    return to_wif_version(versions_);
 }
 
 bool ec_private::compressed() const
@@ -242,7 +241,7 @@ bool ec_private::operator<(const ec_private& other) const
 bool ec_private::operator==(const ec_private& other) const
 {
     return
-        compress_ == other.compress_ && version_ == other.version_ &&
+        compress_ == other.compress_ && versions_ == other.versions_ &&
         secret() == other.secret();
 }
 
@@ -277,7 +276,7 @@ void swap(ec_private& left, ec_private& right)
     // Must be unqualified (no std namespace).
     swap(static_cast<ec_scalar&>(left), static_cast<ec_scalar&>(right));
     swap(left.compress_, right.compress_);
-    swap(left.version_, right.version_);
+    swap(left.versions_, right.versions_);
 }
 
 } // namespace wallet
