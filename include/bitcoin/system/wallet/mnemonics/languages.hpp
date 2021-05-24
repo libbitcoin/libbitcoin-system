@@ -19,10 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_LANGUAGES_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_LANGUAGES_HPP
 
+#include <iostream>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/string.hpp>
+////#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
@@ -97,6 +100,26 @@ protected:
     string_list words_;
     language identifier_;
 };
+
+template <class Type, IS_DERIVED(languages, Type)>
+std::istream& operator>>(std::istream& in, Type& out)
+{
+    std::istreambuf_iterator<char> begin(in), end;
+    const auto value = std::string(begin, end);
+    out = Type(value);
+
+    ////if (!out)
+    ////    throw istream_exception(value);
+
+    return in;
+}
+
+template <class Type, IS_DERIVED(languages, Type)>
+std::ostream& operator<<(std::ostream& out, const Type& in)
+{
+    out << in.sentence();
+    return out;
+}
 
 } // namespace wallet
 } // namespace system
