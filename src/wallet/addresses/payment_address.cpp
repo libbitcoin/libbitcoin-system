@@ -140,9 +140,7 @@ payment_address payment_address::from_script(const chain::script& script,
     if (!script.is_valid())
         return {};
 
-    // Working around VC++ CTP compiler break here.
-    const auto data = script.to_data(false);
-    return { bitcoin_short_hash(data), prefix };
+    return { bitcoin_short_hash(script.to_data(false)), prefix };
 }
 
 // Cast operators.
