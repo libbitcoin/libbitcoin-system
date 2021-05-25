@@ -176,7 +176,7 @@ data_chunk serialize(uint32_t version, const Message& packet,
     message.reserve(message_size);
     auto payload = packet.to_data(version);
     message = heading(magic, Message::command, payload).to_data();
-    return extend_data(message, std::move(payload));
+    return extend(message, std::move(payload));
 }
 
 /// Compute an internal representation of the message checksum.

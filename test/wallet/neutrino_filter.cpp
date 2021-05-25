@@ -810,7 +810,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
 
-    extend_data(raw_block, to_chunk(base16_literal(
+    extend(raw_block, to_chunk(base16_literal(
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -2118,7 +2118,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
 
-    extend_data(raw_block, to_chunk(base16_literal(
+    extend(raw_block, to_chunk(base16_literal(
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"

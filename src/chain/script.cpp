@@ -490,7 +490,7 @@ inline hash_digest signature_hash(const transaction& tx, uint32_t sighash_type)
 
     // TODO: pass overallocated stream buffer to serializer (optimization).
     auto serialized = tx.to_data(true, false);
-    extend_data(serialized, to_little_endian(sighash_type));
+    extend(serialized, to_little_endian(sighash_type));
     return bitcoin_hash(serialized);
 }
 

@@ -233,30 +233,50 @@ BOOST_AUTO_TEST_CASE(data__build_chunk__extra_reserve__expected_size_and_capacit
     BOOST_REQUIRE_EQUAL(result.size(), 2u + 1u + 3u);
 }
 
-// extend_data
+// splice data_chunk
 
-BOOST_AUTO_TEST_CASE(data__extend_data1__copy_twice__expected)
+BOOST_AUTO_TEST_CASE(data__splice__empty__empty)
+{
+    const auto result = splice(data_chunk{}, {});
+    BOOST_REQUIRE(result.empty());
+}
+
+BOOST_AUTO_TEST_CASE(data__splice__not_empty__expected_size_and_capacity)
+{
+    const auto result = splice(data_chunk{ 1, 2 }, { 3, 4, 5 });
+    BOOST_REQUIRE_EQUAL(result[0], 1u);
+    BOOST_REQUIRE_EQUAL(result[1], 2u);
+    BOOST_REQUIRE_EQUAL(result[2], 3u);
+    BOOST_REQUIRE_EQUAL(result[3], 4u);
+    BOOST_REQUIRE_EQUAL(result[4], 5u);
+    BOOST_REQUIRE_EQUAL(result.capacity(), 2u + 3u);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u + 3u);
+}
+
+// extend
+
+BOOST_AUTO_TEST_CASE(data__extend1__copy_twice__expected)
 {
     const uint8_t expected = 24;
     data_chunk buffer1{ 0 };
-    extend_data(buffer1, null_hash);
+    extend(buffer1, null_hash);
     data_chunk buffer2{ expected };
-    extend_data(buffer1, buffer2);
-    extend_data(buffer1, null_hash);
+    extend(buffer1, buffer2);
+    extend(buffer1, null_hash);
     BOOST_REQUIRE_EQUAL(buffer1.size(), 2u * hash_size + 2u);
     BOOST_REQUIRE_EQUAL(buffer1[hash_size + 1], expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__extend_data2__move_twice__expected)
+BOOST_AUTO_TEST_CASE(data__extend2__move_twice__expected)
 {
     const uint8_t expected = 24;
     auto hash1 = null_hash;
     auto hash2 = null_hash;
     data_chunk buffer1{ 0 };
-    extend_data(buffer1, std::move(hash1));
+    extend(buffer1, std::move(hash1));
     data_chunk buffer2{ expected };
-    extend_data(buffer1, std::move(buffer2));
-    extend_data(buffer1, std::move(hash2));
+    extend(buffer1, std::move(buffer2));
+    extend(buffer1, std::move(hash2));
     BOOST_REQUIRE_EQUAL(buffer1.size(), 2u * hash_size + 2u);
     BOOST_REQUIRE_EQUAL(buffer1[hash_size + 1], expected);
 }

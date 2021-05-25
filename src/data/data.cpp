@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/data/data.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/data/data_slice.hpp>
@@ -51,6 +52,15 @@ data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve)
 
     for (const auto& slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
+
+    return out;
+}
+
+data_chunk splice(const data_slice& left, const data_slice& right)
+{
+    data_chunk out(left.size() + right.size());
+    std::copy(right.begin(), right.end(),
+        std::copy(left.begin(), left.end(), out.begin()));
 
     return out;
 }

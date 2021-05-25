@@ -61,8 +61,8 @@ byte_array<Size> build_array(const data_loaf& slices)
     return out;
 }
 
-template <class Target, class Extension>
-Target& extend_data(Target& target, const Extension& extension)
+template <class Target>
+Target& extend(Target& target, const data_slice& extension)
 {
     target.insert(std::end(target), std::begin(extension),
         std::end(extension));
@@ -71,7 +71,7 @@ Target& extend_data(Target& target, const Extension& extension)
 }
 
 template <class Target, class Extension>
-Target& extend_data(Target& target, Extension&& extension)
+Target& extend(Target& target, Extension&& extension)
 {
     target.insert(std::end(target),
         std::make_move_iterator(std::begin(extension)),
@@ -93,14 +93,23 @@ template <size_t Left, size_t Right>
 byte_array<Left + Right> splice(const byte_array<Left>& left,
     const byte_array<Right>& right)
 {
-    return build_array<Left + Right>({ left, right });
+    byte_array<Left + Right> out;
+    std::copy(right.begin(), right.end(),
+        std::copy(left.begin(), left.end(), out.begin()));
+
+    return out;
 }
 
 template <size_t Left, size_t Middle, size_t Right>
 byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
     const byte_array<Middle>& middle, const byte_array<Right>& right)
 {
-    return build_array<Left + Middle + Right>({ left, middle, right });
+    byte_array<Left + Middle + Right> out;
+    std::copy(right.begin(), right.end(),
+        std::copy(middle.begin(), middle.end(),
+            std::copy(left.begin(), left.end(), out.begin())));
+
+    return out;
 }
 
 template <size_t Size>

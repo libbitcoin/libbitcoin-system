@@ -63,7 +63,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 {
     static const auto magic = to_chunk(std::string("Stealth seed"));
-    auto nonced_seed = build_chunk({ to_array(0), seed });
+    auto nonced_seed = splice({ 0 }, seed);
     ec_compressed point;
 
     // Iterate up to 255 times before giving up on finding a valid key pair.

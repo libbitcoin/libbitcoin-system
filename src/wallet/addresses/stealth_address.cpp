@@ -273,7 +273,7 @@ data_chunk stealth_address::to_chunk() const
     data_chunk address;
     address.push_back(version());
     address.push_back(options());
-    extend_data(address, scan_key_);
+    extend(address, scan_key_);
 
     // Spend_pubkeys must have been guarded against a max size of 255.
     auto number_spend_pubkeys = static_cast<uint8_t>(spend_keys_.size());
@@ -287,7 +287,7 @@ data_chunk stealth_address::to_chunk() const
     // Serialize the spend keys, excluding any that match the scan key.
     for (const auto& key: spend_keys_)
         if (key != scan_key_)
-            extend_data(address, key);
+            extend(address, key);
 
     address.push_back(signatures_);
 
@@ -297,7 +297,7 @@ data_chunk stealth_address::to_chunk() const
 
     // Serialize the prefix bytes/blocks.
     address.push_back(prefix_number_bits);
-    extend_data(address, filter_.blocks());
+    extend(address, filter_.blocks());
 
     append_checksum(address);
     return address;

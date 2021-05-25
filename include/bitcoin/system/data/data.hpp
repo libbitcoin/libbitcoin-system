@@ -55,33 +55,33 @@ inline uint8_t to_byte(char character);
 template <size_t Size>
 byte_array<Size> to_array(const data_slice& bytes);
 
-/// Concatenate several data slices into a single fixed size array.
+/// Concatenate several data slices into a single array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
 byte_array<Size> build_array(const data_loaf& slices);
 
 /// Extend insertable target by copying extension.
-template <class Target, class Extension>
-Target& extend_data(Target& target, const Extension& extension);
+template <class Target>
+Target& extend(Target& target, const data_slice& extension);
 
 /// Extend insertable target by moving extension.
 template <class Target, class Extension>
-Target& extend_data(Target& target, Extension&& extension);
+Target& extend(Target& target, Extension&& extension);
 
-/// Extract a subarray from start position with length end minus start.
+/// Extract a byte subarray from start position with length end minus start.
 template <size_t Start, size_t End, size_t Size>
 byte_array<End - Start> slice(const byte_array<Size>& bytes);
 
-/// Break an evenly-sized array array into two equal length parts.
+/// Break an evenly-sized byte array array into two equal length parts.
 template <size_t Size>
 split_parts<Size / 2u> split(const byte_array<Size>& bytes);
 
-/// Concatenate two arrays into a new array.
+/// Concatenate two byte arrays into a new array.
 template <size_t Left, size_t Right>
 byte_array<Left + Right> splice(const byte_array<Left>& left,
     const byte_array<Right>& right);
 
-/// Concatenate three arrays into a new array.
+/// Concatenate three byte arrays into a new array.
 template <size_t Left, size_t Middle, size_t Right>
 byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
     const byte_array<Middle>& middle, const byte_array<Right>& right);
@@ -113,6 +113,9 @@ BC_API data_chunk to_chunk(const data_slice& bytes);
 /// Concatenate several data slices into a single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
 BC_API data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve=0);
+
+/// Concatenate two data_slices into a single data chunk.
+BC_API data_chunk splice(const data_slice& left, const data_slice& right);
 
 } // namespace system
 } // namespace libbitcoin

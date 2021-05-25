@@ -191,10 +191,10 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
             return false;
 
         // Add this ring to e0
-        extend_data(e0_data, last_R.point());
+        extend(e0_data, last_R.point());
     }
 
-    extend_data(e0_data, digest);
+    extend(e0_data, digest);
     out.challenge = sha256_hash(e0_data);
     return true;
 }
@@ -311,11 +311,11 @@ hash_digest digest(const data_slice& message, const key_rings& rings)
 
     data_chunk data;
     data.reserve(size);
-    extend_data(data, message);
+    extend(data, message);
 
     for (const auto& ring: rings)
         for (const auto& key: ring)
-            extend_data(data, key);
+            extend(data, key);
 
     return sha256_hash(data);
 }
@@ -373,10 +373,10 @@ bool verify(const key_rings& rings, const hash_digest& digest,
             return false;
 
         // Add this ring to e0.
-        extend_data(e0_data, last_R.point());
+        extend(e0_data, last_R.point());
     }
 
-    extend_data(e0_data, digest);
+    extend(e0_data, digest);
 
     // Hash data to produce e0 value.
     const auto e0_hash = sha256_hash(e0_data);

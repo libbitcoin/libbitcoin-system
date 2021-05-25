@@ -49,7 +49,7 @@ data_chunk append_checksum(const data_loaf& slices)
 void append_checksum(data_chunk& data)
 {
     const auto check = bitcoin_checksum(data);
-    extend_data(data, to_little_endian<uint32_t>(check));
+    extend(data, to_little_endian<uint32_t>(check));
     BITCOIN_ASSERT(verify_checksum(data));
 }
 
