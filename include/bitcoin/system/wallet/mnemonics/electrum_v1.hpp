@@ -122,7 +122,7 @@ protected:
     {
         data_chunk entropy;
         bit_vector overflows;
-        data_chunk overflowed_entropy() const;
+        std::string hacked_entropy() const;
     } result;
 
     /// Constructors.

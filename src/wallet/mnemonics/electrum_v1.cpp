@@ -159,18 +159,38 @@ electrum_v1::result electrum_v1::decoder(const string_list& words,
     return { entropy, overflows };
 }
 
-data_chunk electrum_v1::result::overflowed_entropy() const
+// Electrum hashes the base16 encoded ascii text of the seed.
+std::string electrum_v1::result::hacked_entropy() const
 {
-    // TODO: determine if return type should be string (base16 encoded).
-    // TODO: modify return value for overflow bug.
-    return entropy;
+    // overflows is empty for entropy constructions.
+    if (overflows.empty())
+        return encode_base16(entropy);
+
+    // overflows.size() is always equal to the numer of uint32_t's in entropy.
+    BITCOIN_ASSERT(overflows.size() * sizeof(uint32_t) == entropy.size());
+
+    std::string out;
+    data_source source(entropy);
+    istream_reader reader(source);
+
+    // See comments above on electrum v1 decoder overflow bug.
+    // This inserts any overflow bits while converting entropy to text.
+    auto it = overflows.begin();
+    while (!reader.is_exhausted())
+    {
+        // This is a big-endian read of a big-endian byte stream.
+        const auto value = reader.read_bytes(sizeof(uint32_t));
+        out.append((*it++ ? "1" : "") + encode_base16(value));
+    }
+
+    return out;
 }
 
 // electrum/keystore.py#L692
 hash_digest electrum_v1::strecher(const result& result)
 {
-    // Denormalize entropy for overflow bug.
-    const auto entropy = result.overflowed_entropy();
+    // Compensate for overflows, convert to base16, and then to bytes.
+    const auto entropy = to_chunk(result.hacked_entropy());
 
     auto streched = entropy;
     for (size_t i = 0; i < stretch_iterations; ++i)

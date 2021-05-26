@@ -70,11 +70,6 @@ struct electrum_v1_vector
     {
         return split(entropy_mnemonic());
     }
-
-    ec_uncompressed entropy_key() const
-    {
-        return is_overflow() ? key : ec_uncompressed{};
-    }
 };
 
 typedef std::vector<electrum_v1_vector> electrum_v1_vectors;
@@ -87,8 +82,10 @@ electrum_v1_vectors vectors_electrum
         // github.com/spesmilo/electrum/issues/3149
         language::en,
         "hurry idiot prefer sunset mention mist jaw inhale impossible kingdom rare squeeze",
+        // This entropy is trimmed for overflow, does not round trip.
         base16_chunk("025d2f2d00503691003ca78900ca155c"),
-        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+        // This mpk is internally generated, adjusted for overflow.
+        base16_array("04""0d6d957236f4e64467cbc4d3e835955eaea1c6f20232d549d0ba4475f4adb30509f5b04df03b3827c344734185fee0b3e7a978d8f40b2a25e35248c19be79799"),
         btc_mainnet_p2kh,
         // [025d2f2d][00503691][(1)003ca789][00ca155c]
         overflow_bits{ false, false, true, false },
@@ -99,7 +96,9 @@ electrum_v1_vectors vectors_electrum
         // electrum/tests/test_wallet_vertical.py
         language::en,
         "alone body father children lead goodbye phone twist exist grass kick join",
+        // This entropy is trimmed for overflow, does not round trip.
         base16_chunk("14039a7400162d9d0cc3c31f00168ddc"),
+        // This is the reference mpk for the invalid seed, not the trimmed entropy.
         base16_array("04""cd805ed20aec61c7a8b409c121c6ba60a9221f46d20edbc2be83ebd91460e97937cd7d782e77c1cb08364c6bc1c98bc040fdad53f22f29f7d3a85c8e51f9c875"),
         btc_mainnet_p2kh,
         // [14039a74][(1)00162d9d][0cc3c31f][(1)00168ddc]
