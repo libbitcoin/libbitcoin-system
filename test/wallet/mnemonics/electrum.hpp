@@ -70,7 +70,7 @@ struct electrum_vector
     hd_private to_hd() const
     {
         const auto part = system::split(seed);
-        return { part.first, part.second, btc_mainnet_p2kh.hd_prefixes };
+        return { part.first, part.second, btc_mainnet_p2kh.hd_prefixes() };
     }
 };
 
