@@ -27,9 +27,9 @@ using namespace bc::system::wallet;
 const auto dictionary_count = 10u;
 
 // The french combining diacritics are in nfkd (normal) form.
-const auto accents_es = 334;
-const auto accents_fr = 366;
-const auto accents_ja = 644;
+const auto combinings_es = 334;
+const auto combinings_fr = 366;
+const auto combinings_ja = 644;
 
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__count__all__expected)
 {
@@ -57,18 +57,21 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
 #ifdef WITH_ICU
 const auto abnormals_es = 334;
 const auto abnormals_ja = 644;
+const auto divergences_es = 334;
+const auto divergences_ja = 644;
 #else
 const auto abnormals_es = 0;
 const auto abnormals_ja = 0;
+const auto divergences_es = 334;
+const auto divergences_ja = 644;
 #endif
 
 // abnormal (requires ICU)
 
 // These dictionaries from the electrum repo are not in nfkd form.
 // But the others are identical to BIP39 dictionaries.
-// We do not use these with in electrum sources, we use BIP39 words.
-// This test verifies that the differences are only in nfkd normalization.
-// All of the abnormals are diacritics.
+// We do not use these words with in electrum sources, we use BIP39 words.
+// This verifies the number of abnormals in the two divergent dictionaries.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__abnormal__unused_words__false)
 {
     // The result is definitive only when WITH_ICU is defined.
@@ -76,27 +79,28 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__abnormal__unused_words__false)
     BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }
 
-// This verifies that divergence is limited to the expected difference in form.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__diverges__unused_words__false)
+// This verifies that the differences are only in nfkd normalization.
+// Otherwise there may be differences in word value and/or position.
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__divergences__unused_words__false)
 {
-    BOOST_REQUIRE(!diverged(electrum::es, electrum_es));
-    BOOST_REQUIRE(!diverged(electrum::ja, electrum_ja));
+    BOOST_REQUIRE_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
+    BOOST_REQUIRE_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
 }
 
 // combined
 
 // The spanish, french and japanese dictionaries contain combining diacritics.
 // This requires combinings removal in these (only) for wordlist-based seedings.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__accents__accented_words__true)
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__combinings__combininged_words__true)
 {
-    BOOST_REQUIRE_EQUAL(combinings(electrum::es), accents_es);
-    BOOST_REQUIRE_EQUAL(combinings(electrum::fr), accents_fr);
-    BOOST_REQUIRE_EQUAL(combinings(electrum::ja), accents_ja);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::es), combinings_es);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::fr), combinings_fr);
+    BOOST_REQUIRE_EQUAL(combinings(electrum::ja), combinings_ja);
 }
 
 // No words in these dictionaries contain combining diacritics.
 // So there is no need to normalize combinings these for wordlist-based seedings.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__accented__not_accented_words__false)
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__combininged__not_combininged_words__false)
 {
     BOOST_REQUIRE(!combined(electrum::en));
     BOOST_REQUIRE(!combined(electrum::it));

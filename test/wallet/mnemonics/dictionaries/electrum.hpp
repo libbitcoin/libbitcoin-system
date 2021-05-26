@@ -54,23 +54,23 @@ static bool combined(const electrum::dictionary::words& words)
     });
 }
 
-static bool diverged(const mnemonic::dictionary::words& normal,
-    const mnemonic::dictionary::words& test)
+static ptrdiff_t divergences(const mnemonic::dictionary::words& normal,
+    const electrum::dictionary::words& test)
 {
-    auto it = normal.begin();
-    for (const auto& word: test)
+    ptrdiff_t count = 0;
+    auto it = test.begin();
+    std::for_each(normal.begin(), normal.end(), [&](const char test[])
     {
-        std::string copy = word;
+        std::string copy = test;
         to_compatibility_decomposition(copy);
         to_lower(copy);
-        if (*it++ != copy)
-            return true;
-    }
+        count += (*it++ != copy ? 1 : 0);
+    });
 
-    return false;
+    return count;
 }
 
-static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
+static ptrdiff_t abnormals(const electrum::dictionary::words& words)
 {
     return std::count_if(words.begin(), words.end(), [&](const char test[])
     {
