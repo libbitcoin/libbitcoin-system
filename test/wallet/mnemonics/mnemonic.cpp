@@ -62,12 +62,11 @@ BOOST_AUTO_TEST_CASE(mnemonic__contained_by__redundant__expected)
     BOOST_REQUIRE(mnemonic::contained_by(redundant_hans_hant, language::zh_Hant) == language::zh_Hant);
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__contained_by__japanese__expected)
+BOOST_AUTO_TEST_CASE(mnemonic__contained_by__contained__expected)
 {
-    const auto words = vectors_ja[0].words();
-    BOOST_REQUIRE(mnemonic::contained_by(words, language::ja) == language::ja);
-    BOOST_REQUIRE(mnemonic::contained_by(words, language::none) == language::ja);
-    BOOST_REQUIRE(mnemonic::contained_by(words, language::ko) == language::none);
+    const auto words = vectors_en[23].words();
+    BOOST_REQUIRE(mnemonic::contained_by(words, language::en) == language::en);
+    BOOST_REQUIRE(mnemonic::contained_by(words, language::none) == language::en);
 }
 
 // is_valid_dictionary
@@ -408,6 +407,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__to_key___network__expected)
     BOOST_REQUIRE(starts_with(instance.to_key("bar", btc_testnet_p2kh).encoded(), "tprv"));
 }
 
+// to_seed
+
+BOOST_AUTO_TEST_CASE(mnemonic__to_seed___todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
 #endif // PUBLIC_METHODS
 
 #ifdef OPERATORS
@@ -507,10 +513,11 @@ BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__sizes__expected)
 
 BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__denormalization__expected)
 {
-    const auto abnormals_en = 0;
 #ifdef WITH_ICU
+    const auto abnormals_en = 0;
     const auto abnormals_ja = 22u;
 #else
+    const auto abnormals_en = 0;
     const auto abnormals_ja = 0;
 #endif
     // When WITH_ICU is undefined normalization cannot be verified.
@@ -566,7 +573,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_en__expected)
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_en__expected)
 {
-    for (const auto& vector : vectors_en)
+    for (const auto& vector: vectors_en)
     {
         const mnemonic instance(vector.mnemonic);
         BOOST_REQUIRE(instance);
@@ -586,12 +593,12 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_ja__expected)
         BOOST_REQUIRE(instance);
         BOOST_REQUIRE(instance.lingo() == language::ja);
         BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy());
-        BOOST_REQUIRE_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
 #ifdef WITH_ICU
-        // Passphrases are all ascii, but 22 of 24 mnemonics are denormalized, so this
-        // will fail when WITH_ICU is undefined.
+        // Passphrases are all non-ascii, but 22 of 24 mnemonics are
+        // denormalized, so this will fail when WITH_ICU is undefined.
         BOOST_REQUIRE_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
         BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
 #endif
     }
 }
