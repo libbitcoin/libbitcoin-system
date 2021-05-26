@@ -206,6 +206,39 @@ BOOST_AUTO_TEST_CASE(collection__is_distinct__nondistinct__false)
     BOOST_REQUIRE(!is_distinct(std::move(set)));
 }
 
+// is_sorted
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__empty__true)
+{
+    data_chunk set{};
+    BOOST_REQUIRE(is_sorted(set));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__single__true)
+{
+    data_chunk set{ 42 };
+    BOOST_REQUIRE(is_sorted(set));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_distinct__true)
+{
+    data_chunk set{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(is_sorted(set));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_non_distinct__true)
+{
+    data_chunk set{ 0, 2, 2, 6, 8 };
+    BOOST_REQUIRE(is_sorted(set));
+}
+
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
+{
+    data_chunk set{ 0, 2, 4, 2, 8 };
+    BOOST_REQUIRE(!is_sorted(set));
+}
+
 // move_append
 
 BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__both_empty)

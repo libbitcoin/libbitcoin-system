@@ -26,6 +26,7 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -36,12 +37,15 @@ namespace system {
 template <typename Element, typename Container>
 int binary_search(const Container& list, const Element& value)
 {
+    const auto size = list.size();
+    BITCOIN_ASSERT(is_sorted(list));
+
     // Guard right cast.
-    if (list.size() > static_cast<size_t>(max_int32))
+    if (size > static_cast<size_t>(max_int32))
         return -1;
 
     int left = 0;
-    int right = static_cast<int>(list.size()) - 1;
+    int right = static_cast<int>(size) - 1;
 
     while (left <= right)
     {
@@ -123,6 +127,12 @@ bool is_distinct(std::vector<Element>&& list)
 {
     std::sort(list.begin(), list.end());
     return std::unique(list.begin(), list.end()) == list.end();
+}
+
+template <typename Container>
+bool is_sorted(const Container& list)
+{
+    return std::is_sorted(std::begin(list), std::end(list));
 }
 
 template <typename Type>
