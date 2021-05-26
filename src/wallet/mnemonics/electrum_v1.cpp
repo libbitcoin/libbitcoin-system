@@ -38,6 +38,12 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
+// Guard: decoder 'value' cannot exceed 0x1003ca7a7, safe in int64_t but can
+// overflow int32_t/uint32_t. Only one bit (0x[1][003ca7a7]) can overflow.
+// So we upcast indexes to int64 and later check the result for overflow.
+static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
+    0x1003ca7a7, "upper bound on electrum_v1 decoded triplet");
+
 // local constants
 // ----------------------------------------------------------------------------
 
@@ -58,6 +64,28 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
         electrum_v1::dictionary{ language::pt, electrum_v1::pt }
     }
 };
+
+// Decoder Overflow Bug
+// ============================================================================
+// github.com/spesmilo/electrum/issues/3149
+// "While (32-long) hex seeds necessarily map to (12-long) seed
+// words/"mnemonics", the inverse is not always true. For example, 'hurry idiot
+// prefer sunset mention mist jaw inhale impossible kingdom rare squeeze'
+// maps to 025d2f2d005036911003ca78900ca155c (33 chars)."
+// By word triplet this is: [025d2f2d][00503691][1003ca789][00ca155c], where
+// 'jaw inhale impossible' maps to 1003ca789 (33 bits, overflowing uint32).
+// It is the distance between words that creates the overflow.
+// Electrum v1 failed to catch this overflow, so "old seed" checks presently
+// allow it, despite the invalidity. In other words, any list of 12/24 electrum
+// v1 (en) words is considered valid v1 by later versions of electrum. It
+// passes the decoded entropy to the strecher, creating the master private key
+// despite the error. These seed words cannot be recovered from entropy as the
+// encoding algorithm only parses 32 bits of entropy for each word triplet.
+// But electrum itself cannot round trip these seeds, so we do not support it.
+// Electrum concatenates hex characters for each triplet.
+// The result can be an odd number of characters (9 total max).
+// print('%08x' % x) emits >= 8 hex characters, and can be odd length.
+// ============================================================================
 
 // protected static (coders)
 // ----------------------------------------------------------------------------
@@ -91,34 +119,6 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
     return words;
 }
 
-// Decoder Overflow Bug
-// ============================================================================
-// github.com/spesmilo/electrum/issues/3149
-// "While (32-long) hex seeds necessarily map to (12-long) seed
-// words/"mnemonics", the inverse is not always true. For example, 'hurry idiot
-// prefer sunset mention mist jaw inhale impossible kingdom rare squeeze'
-// maps to 025d2f2d005036911003ca78900ca155c (33 chars)."
-// By word triplet this is: [025d2f2d][00503691][1003ca789][00ca155c], where
-// 'jaw inhale impossible' maps to 1003ca789 (33 bits, overflowing uint32).
-// It is the distance between words that creates the overflow.
-// Electrum v1 failed to catch this overflow, so "old seed" checks presently
-// allow it, despite the invalidity. In other words, any list of 12/24 electrum
-// v1 (en) words is considered valid v1 by later versions of electrum. It
-// passes the decoded entropy to the strecher, creating the master private key
-// despite the error. These seed words cannot be recovered from entropy as the
-// encoding algorithm only parses 32 bits of entropy for each word triplet.
-// But electrum itself cannot round trip these seeds, so we do not support it.
-// Electrum concatenates hex characters for each triplet.
-// The result can be an odd number of characters (9 total max).
-// print('%08x' % x) emits >= 8 hex characters, and can be odd length.
-// ============================================================================
-
-// Guard: below 'value' cannot exceed 0x1003ca7a7, safe in int64_t but can
-// overflow int32_t/uint32_t. Only one bit (0x[1][003ca7a7]) can overflow.
-// So we upcast indexes to int64 and later check the result for overflow.
-static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
-    0x1003ca7a7, "upper bound on electrum_v1 decoded triplet");
-
 // electrum/old_mnemonic.py#L1682
 electrum_v1::result electrum_v1::decoder(const string_list& words,
     language identifier)
@@ -127,13 +127,15 @@ electrum_v1::result electrum_v1::decoder(const string_list& words,
     entropy.reserve(entropy_size(words));
     data_sink sink(entropy);
     ostream_writer writer(sink);
+
+    // See comments above on electrum v1 decoder overflow bug.
     bit_vector overflows(words.size() / word_multiple);
     auto overflow = overflows.begin();
 
     // Word count and dictionary membership must have been validated.
     for (auto word = words.begin(); word != words.end();)
     {
-        // Electrum modulos these indexes by size1, which are nops.
+        // Electrum modulos two and tri by size1, which is a nop.
         const int64_t one = dictionaries_.index(*word++, identifier);
         const int64_t two = dictionaries_.index(*word++, identifier);
         const int64_t tri = dictionaries_.index(*word++, identifier);
