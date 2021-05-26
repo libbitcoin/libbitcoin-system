@@ -203,6 +203,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/unicode/utf8_everywhere/utf8_ofstream.cpp \
     src/unicode/utf8_everywhere/utf8_ostream.cpp \
     src/unicode/utf8_everywhere/utf8_streambuf.cpp \
+    src/wallet/context.cpp \
     src/wallet/message.cpp \
     src/wallet/neutrino_filter.cpp \
     src/wallet/property_tree.cpp \
@@ -404,6 +405,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/utf8_everywhere/utf8_environment.cpp \
     test/unicode/utf8_everywhere/utf8_istream.cpp \
     test/unicode/utf8_everywhere/utf8_ostream.cpp \
+    test/wallet/context.cpp \
     test/wallet/message.cpp \
     test/wallet/neutrino_filter.cpp \
     test/wallet/property_tree.cpp \
@@ -760,6 +762,7 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
 
 include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
+    include/bitcoin/system/wallet/context.hpp \
     include/bitcoin/system/wallet/message.hpp \
     include/bitcoin/system/wallet/neutrino_filter.hpp \
     include/bitcoin/system/wallet/property_tree.hpp

@@ -211,6 +211,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\witness_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\context.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />

@@ -208,6 +208,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
+#include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/message.hpp>
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 #include <bitcoin/system/wallet/property_tree.hpp>
