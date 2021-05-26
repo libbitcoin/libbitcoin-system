@@ -24,6 +24,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -152,7 +153,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     const auto size = static_cast<uint32_t>(data.size());
 
     // The width > 0 and therefore row_bytes > 0.
-    const auto row_bytes = (width + (byte_bits - 1u)) / byte_bits;
+    const auto row_bytes = ceilinged_divide(width, byte_bits);
 
     // Each row is the same width, so there must be no remainder.
     if (size % row_bytes != 0u)

@@ -25,6 +25,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 #include "qrencode/qrencode.h"
@@ -181,7 +182,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     const auto height = static_cast<size_t>(height_coded);
 
     // Horizontal margins and full row copies can be done bytewise.
-    const auto row_bytes = (width + (byte_bits - 1u)) / byte_bits;
+    const auto row_bytes = ceilinged_divide(width, byte_bits);
     const auto row_margin = data_chunk(row_bytes, pixels_off);
 
     // Bound: (2^16 - 1)^2 < 2^32 or (2^32 - 1)^2 < 2^64.
