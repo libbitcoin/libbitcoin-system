@@ -73,8 +73,7 @@ const mnemonic::dictionaries mnemonic::dictionaries_
 string_list mnemonic::encoder(const data_chunk& entropy, language identifier)
 {
     // Bytes are the base2048 encoding, so this is byte decoding.
-    const auto checksum = data_chunk{ checksum_byte(entropy) };
-    const auto buffer = build_chunk({ entropy, checksum });
+    const auto buffer = splice(entropy, { checksum_byte(entropy) });
     return decode_base2048_list(buffer, identifier);
 }
 
@@ -107,9 +106,8 @@ long_hash mnemonic::seeder(const string_list& words,
     LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
-    const auto data = to_chunk(system::join(words));
-    const auto salt = to_chunk(passphrase_prefix + phrase);
-    return pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
+    return pkcs5_pbkdf2_hmac_sha512(system::join(words),
+        passphrase_prefix + phrase, hmac_iterations);
 }
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
@@ -289,8 +287,8 @@ hd_private mnemonic::to_key(const std::string& passphrase,
     if (!(*this))
         return {};
 
-    // The key will be false if the secret does not ec verify.
-    return { to_chunk(to_seed(passphrase)), context.hd_prefixes };
+    // The key will be invalid if the secret does not ec verify.
+    return { to_chunk(to_seed(passphrase)), context.hd_prefixes() };
 }
 
 } // namespace wallet

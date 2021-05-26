@@ -94,8 +94,10 @@ static ptrdiff_t abnormals(const mnemonic_vectors& vectors,
         });
 }
 
+// BIP39 - English
+// 'The passphrase "TREZOR" is used for all vectors.'
+// github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 // github.com/trezor/python-mnemonic/blob/master/vectors.json
-
 const mnemonic_vectors vectors_en
 {
     {
@@ -273,15 +275,13 @@ const mnemonic_vectors vectors_en
 // Checksum verification must accommodate input of ideographic spaces.
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 // github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
-// 22 of 24 BIP39 japanese test vectors are not nfkd normalized.
+// 22 of 24 BIP39 japanese vectors are (intentionally) not nfkd normalized.
+// The last word of the first vector is not nfkd normalized (exmaple).
 const mnemonic_vectors vectors_ja
 {
     {
         {
             "00000000000000000000000000000000",
-            // Normalized (last word):
-            ////"あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
-            // Denormalized (last word):
             "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
             "㍍ガバヴァぱばぐゞちぢ十人十色",
             "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55",
