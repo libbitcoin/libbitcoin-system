@@ -155,11 +155,10 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
 {
     // Words are in normal (lower, nfkd) form, even without ICU.
     auto sentence = system::join(words);
-    sentence = to_non_diacritic_form(sentence);
+    sentence = to_non_combining_form(sentence);
     sentence = to_compressed_form(sentence);
 
-    const auto data = to_chunk(sentence);
-    const auto seed = encode_base16(hmac_sha512_hash(data, seed_version));
+    const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
     return starts_with(seed, to_version(prefix));
 }
 
@@ -400,7 +399,7 @@ bool electrum::is_valid_word_count(size_t count)
         count <= word_count(strength_maximum);
 }
 
-bool electrum::is_seedable(seed_prefix prefix) const
+bool electrum::is_seedable(seed_prefix prefix)
 {
     // Only seed from native entropy.
     switch (prefix)
@@ -557,7 +556,7 @@ electrum electrum::from_words(const string_list& words, language identifier)
     if (!is_valid_word_count(words.size()))
         return {};
 
-    // Prioritizes electrum_v1 as electrum cannot generate v1 mnemonics.
+    // Prioritizes electrum_v1 (en) as electrum cannot generate the conflict.
     electrum_v1 old{ words, identifier };
     if (old)
         return old;
@@ -616,8 +615,22 @@ hd_private electrum::to_key(const std::string& passphrase,
     // Bypass a BIP32 step, splitting directly to secret/chaincode.
     const auto halves = system::split(to_seed(passphrase));
 
-    // The key will be false if the secret (part.first) does not ec verify.
-    return { halves.first, halves.second, context.hd_prefixes };
+    // The key will be invalid if the secret (part.first) does not ec verify.
+    return { halves.first, halves.second, context.hd_prefixes() };
+}
+
+// static public (conversions)
+// ----------------------------------------------------------------------------
+
+hd_private electrum::to_key(const long_hash& seed, const context& context)
+{
+    const auto halves = system::split(seed);
+    return { halves.first, halves.second, context.hd_prefixes() };
+}
+
+long_hash electrum::to_seed(const hd_private& key)
+{
+    return splice(key.secret(), key.chain_code());
 }
 
 } // namespace wallet

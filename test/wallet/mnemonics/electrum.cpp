@@ -210,17 +210,18 @@ BOOST_AUTO_TEST_CASE(electrum__to_prefix_sentence__todo__todo)
     BOOST_REQUIRE(TODO_TESTS);
 }
 
-// to_version
+// to_key
 
-BOOST_AUTO_TEST_CASE(electrum__to_version__all__expected)
+BOOST_AUTO_TEST_CASE(electrum__to_key__todo__todo)
 {
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::old), "old");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::bip39), "bip39");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::standard), "01");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::witness), "100");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::two_factor_authentication), "101");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::two_factor_authentication_witness), "102");
-    BOOST_REQUIRE_EQUAL(electrum::to_version(prefix::none), "none");
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// to_seed
+
+BOOST_AUTO_TEST_CASE(electrum__to_seed__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
 }
 
 #endif // PUBLIC_STATIC
@@ -293,7 +294,7 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__18_byte_spanish__match_first_iteration)
     const auto words = split(vector.mnemonic);
 
     // This is an example of an unused leading byte having no entropy contribution.
-    const auto entropy = build_chunk({data_chunk{ 0x00 }, vector.entropy });
+    const auto entropy = splice({ 0x00 }, vector.entropy);
     const auto result = accessor::grinder(vector.entropy, vector.prefix, vector.lingo, 42);
     BOOST_REQUIRE_EQUAL(result.entropy, vector.entropy);
     BOOST_REQUIRE_EQUAL(result.words, words);
@@ -306,7 +307,7 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__19_byte_spanish__match_first_iteration)
     const auto words = split(vector.mnemonic);
 
     // This is an example of usable additional bytes having an entropy contribution.
-    const auto entropy = build_chunk({ data_chunk{ 0x00, 0x00 }, vector.entropy });
+    const auto entropy = splice({ 0x00, 0x00 }, vector.entropy);
     const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, 10000);
     BOOST_REQUIRE(!result.entropy.empty());
     BOOST_REQUIRE_NE(result.entropy, vector.entropy);
@@ -318,7 +319,7 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__not_found__iterations_expected)
 {
     const auto limit = 40u;
     const auto vector = vectors[6];
-    const auto entropy = build_chunk({ data_chunk{ 0x00, 0x00 }, vector.entropy });
+    const auto entropy = splice({ 0x00, 0x00 }, vector.entropy);
     const auto result = accessor::grinder(entropy, vector.prefix, vector.lingo, limit);
     BOOST_REQUIRE(result.entropy.empty());
     BOOST_REQUIRE(result.words.empty());
@@ -342,7 +343,7 @@ BOOST_AUTO_TEST_CASE(electrum__seeder__non_ascii_passphrase__expected)
 #ifdef WITH_ICU
     BOOST_REQUIRE_NE(accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん"), null_long_hash);
 #else
-    // WITH_ICU undefined is the only seeder failure condition.
+    // WITH_ICU undefined with non-ascii words is the only seeder failure condition.
     BOOST_REQUIRE_EQUAL(accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん"), null_long_hash);
 #endif
 }
@@ -578,6 +579,36 @@ BOOST_AUTO_TEST_CASE(electrum__normalized_to_prefix__unambiguous_valid_not_none_
 BOOST_AUTO_TEST_CASE(electrum__normalized_to_prefix__unambiguous_valid_none__true)
 {
     BOOST_REQUIRE(TODO_TESTS);
+}
+
+// is_seedable
+
+BOOST_AUTO_TEST_CASE(electrum__is_seedable__not_seedable__false)
+{
+    BOOST_REQUIRE(!accessor::is_seedable(prefix::old));
+    BOOST_REQUIRE(!accessor::is_seedable(prefix::bip39));
+    BOOST_REQUIRE(!accessor::is_seedable(prefix::none));
+}
+
+BOOST_AUTO_TEST_CASE(electrum__is_seedable__seedable__true)
+{
+    BOOST_REQUIRE(accessor::is_seedable(prefix::standard));
+    BOOST_REQUIRE(accessor::is_seedable(prefix::witness));
+    BOOST_REQUIRE(accessor::is_seedable(prefix::two_factor_authentication));
+    BOOST_REQUIRE(accessor::is_seedable(prefix::two_factor_authentication_witness));
+}
+
+// to_version
+
+BOOST_AUTO_TEST_CASE(electrum__to_version__all__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::old), "old");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::bip39), "bip39");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::standard), "01");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::witness), "100");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::two_factor_authentication), "101");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::two_factor_authentication_witness), "102");
+    BOOST_REQUIRE_EQUAL(accessor::to_version(prefix::none), "none");
 }
 
 // factories
@@ -1231,6 +1262,13 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_passphrase_testnet__expected_hd_key
     const electrum instance(split(vectors[7].mnemonic));
     const auto result = instance.to_key("Did you ever hear the tragedy of Darth Plagueis the Wise?", btc_testnet_p2kh);
     BOOST_REQUIRE_EQUAL(result.encoded(), "tprv8ZgxMBicQKsPe7MSEsjnDK1Xtkd7pijqy5sxgvufx7t4f9YbgxYGr5meJBPYDGJ3LSR6CCGJgtRfCs8XG6LqQcPvbgZX1EeNFPJTiGTAqkt");
+}
+
+// to_seed
+
+BOOST_AUTO_TEST_CASE(electrum__to_seed__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
 }
 
 #endif // PUBLIC_METHODS

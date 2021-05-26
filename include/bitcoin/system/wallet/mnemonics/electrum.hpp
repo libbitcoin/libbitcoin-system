@@ -95,6 +95,7 @@ public:
 
     /// Returns true if the seed of the words has the given prefix.
     /// Will also match 'old', 'bip39' and 'none', as specified.
+    /// Non-ascii words must be nfkd/lower prenormalized if WITH_ICU undefind.
     static bool is_prefix(const string_list& words, seed_prefix prefix);
     static bool is_prefix(const std::string& sentence, seed_prefix prefix);
 
@@ -105,8 +106,17 @@ public:
     static seed_prefix to_prefix(const string_list& words);
     static seed_prefix to_prefix(const std::string& sentence);
 
-    /// Obtain the version corresponding to the enumeration value.
-    static std::string to_version(seed_prefix prefix);
+    /// Convert a raw for "root seed" to its hd form.
+    /// The "root seed" is also referred to by electrum as the "master key".
+    /// There is no way to determine if this is a valid "root seed".
+    /// The prefix cannot be verified, which requires the "recovery seed".
+    static hd_private to_key(const long_hash& seed, const context& context);
+
+    /// Convert an hd form "root seed" to its raw form (loses context).
+    /// The "root seed" is also referred to by electrum as the "master key".
+    /// There is no way to determine if this is a valid "root seed".
+    /// The prefix cannot be verified, which requires the "recovery seed".
+    static long_hash to_seed(const hd_private& key);
 
     electrum();
     electrum(const electrum& other);
@@ -129,15 +139,18 @@ public:
     /// The prefix indicates the intended use of the seed.
     seed_prefix prefix() const;
 
-    /// Derive raw form "wallet seed" from mnemonic entropy and passphrase.
+    /// Derive raw form "root seed" from mnemonic entropy and passphrase.
+    /// The "root seed" is also referred to by electrum as the "master key".
     /// Returns null result if current prefix is 'none', 'bip39, or 'old'.
     /// Returns null result with non-ascii passphrase and WITH_ICU undefind.
     long_hash to_seed(const std::string& passphrase="") const;
 
-    /// Derive hd form "wallet seed" from mnemonic entropy and passphrase.
-    /// hd_private.point() is the "master public key".
+    /// Derive hd form "root seed" from mnemonic entropy and passphrase.
+    /// The "root seed" is also referred to by electrum as the "master key".
+    /// Context affects the hd form but does not affect the contained seed.
+    /// hd_private.point() is the compressed "master public key".
     /// hd_private.secret() is the "master private key".
-    /// hd_private.secret() + .chain_code() is the raw form "wallet seed".
+    /// hd_private.secret() + .chain_code() is the raw form "root seed".
     /// Returns invalid result if current prefix is 'none', 'bip39, or 'old'.
     /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_key(const std::string& passphrase="",
@@ -193,7 +206,8 @@ protected:
     static bool is_ambiguous(const string_list& words, language requested,
         language derived);
 
-    bool is_seedable(seed_prefix prefix) const;
+    static bool is_seedable(seed_prefix prefix);
+    static std::string to_version(seed_prefix prefix);
 
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);

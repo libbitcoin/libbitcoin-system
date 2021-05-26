@@ -128,6 +128,8 @@ static ptrdiff_t abnormals(const electrum_vectors& vectors,
 // Electrum tests cases show 20 bytes of entropy where there is only 17 usable.
 // This may be an intial seed for grinding over the prng.
 
+// TODO: add vertical vectors
+// github.com/spesmilo/electrum/blob/master/electrum/tests/test_wallet_vertical.py
 // github.com/spesmilo/electrum/blob/master/electrum/tests/test_mnemonic.py
 
 const electrum_vectors vectors
@@ -455,6 +457,16 @@ public:
         language derived)
     {
         return electrum::is_ambiguous(words, requested, derived);
+    }
+
+    static bool is_seedable(seed_prefix prefix)
+    {
+        return electrum::is_seedable(prefix);
+    }
+
+    static std::string to_version(seed_prefix prefix)
+    {
+        return electrum::to_version(prefix);
     }
 
     static string_list encoder(const data_chunk& entropy, language identifier)
