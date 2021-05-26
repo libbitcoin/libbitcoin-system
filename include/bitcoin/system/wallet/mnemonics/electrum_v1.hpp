@@ -20,11 +20,14 @@
 #define LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_ELECTRUM_V1_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
+#include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
@@ -79,24 +82,30 @@ public:
     /// This instance is initialized invalid, but can be assigned to.
     electrum_v1();
 
-    /// The instance should be tested for validity when using these.
     electrum_v1(const electrum_v1& other);
+
+    /// Construct from the "recovery seed" (mnemonic phrase or entropy).
+    /// Validity should be checked after construction.
     electrum_v1(const std::string& sentence, language identifier=language::none);
     electrum_v1(const string_list& words, language identifier=language::none);
     electrum_v1(const data_chunk& entropy, language identifier=language::en);
-
-    /// These constructors guarantee instance validity.
     electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
     electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
 
-    /// Generate the wallet seed from entropy.
-    hd_private to_seed(uint64_t chain=hd_private::mainnet) const;
+    /// Derive the "wallet seed" from mnemonic entropy.
+    /// The wallet seed is also the wallet "master private key".
+    /// ec_private.point() is the wallet "master public key".
+    ec_private to_seed(const context& context=btc_mainnet_p2kh) const;
 
-    /// Serialized sentence.
-    friend std::istream& operator>>(std::istream& in, electrum_v1& to);
-    friend std::ostream& operator<<(std::ostream& out, const electrum_v1& of);
+    /// Derive the hd root private key from the wallet seed.
+    /// The original seed cannot be obtained from the key.
+    hd_private to_key(const context& context=btc_mainnet_p2kh) const;
 
 protected:
+    /// Constructors.
+    electrum_v1(const data_chunk& entropy, const string_list& words,
+        language identifier);
+
     /// Map entropy to entropy bit count (128 or 256 bits).
     static size_t entropy_bits(const data_slice& entropy);
 
@@ -109,12 +118,9 @@ protected:
     /// Map entropy size to word count (12 or 24 words).
     static size_t word_count(const data_slice& entropy);
 
-    /// Constructors.
-    electrum_v1(const data_chunk& entropy, const string_list& words,
-        language identifier);
-
     static data_chunk decoder(const string_list& words, language identifier);
     static string_list encoder(const data_chunk& entropy, language identifier);
+    static ec_secret strecher(const data_chunk& entropy);
 
     electrum_v1 from_entropy(const data_chunk& entropy, language identifier) const;
     electrum_v1 from_words(const string_list& words, language identifier) const;

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARY_MNEMONIC_HPP
-#define LIBBITCOIN_SYSTEM_TEST_DICTIONARY_MNEMONIC_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_MNEMONIC_HPP
+#define LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_MNEMONIC_HPP
 
 #include <algorithm>
 #include <cstddef>
@@ -67,36 +67,6 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
     return count;
 }
 
-////static bool deviates(const mnemonic::dictionary::words& left,
-////    const mnemonic::dictionary::words& right)
-////{
-////    for (auto outer = left.begin(); outer != left.end(); ++outer)
-////    {
-////        const auto inner = std::find(right.begin(), right.end(), *outer);
-////        if (inner != right.end())
-////        {
-////            const auto inner_index = std::distance(right.begin(), inner);
-////            const auto outer_index = std::distance(left.begin(), outer);
-////            if (inner_index != outer_index) return true;
-////        }
-////    }
-////
-////    return false;
-////}
-
-#ifdef WITH_ICU
-
-////static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
-////{
-////    return std::count_if(words.begin(), words.end(), [&](const char test[])
-////    {
-////        std::string copy = test;
-////        to_compatibility_decomposition(copy);
-////        to_lower(copy);
-////        return test != copy;
-////    });
-////}
-
 static bool abnormal(const mnemonic::dictionary::words& words)
 {
     return std::all_of(words.begin(), words.end(), [&](const char test[])
@@ -107,8 +77,6 @@ static bool abnormal(const mnemonic::dictionary::words& words)
         return test != copy;
     });
 }
-
-#endif
 
 } // dictionaries_mnemonic
 } // test

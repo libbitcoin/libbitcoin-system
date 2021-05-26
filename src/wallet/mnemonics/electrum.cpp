@@ -18,22 +18,18 @@
  */
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 
-#include <algorithm>
+#include <cstddef>
 #include <cstdint>
-#include <iostream>
-#include <iterator>
 #include <string>
-#include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
+#include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -87,7 +83,7 @@ const electrum::dictionaries electrum::dictionaries_
     }
 };
 
-// protected static
+// protected static (coders)
 // ----------------------------------------------------------------------------
 
 // Electrum entropy is an entirely private (internal) format.
@@ -103,69 +99,6 @@ data_chunk electrum::decoder(const string_list& words, language identifier)
     // Words are the base2048 decoding, so this is word encoding.
     data_chunk out;
     return encode_base2048_list(out, words, identifier) ? out : data_chunk{};
-}
-
-// Electrum uses the same normalization function for words and passphrases.
-// Passpharse entropy loss from lowering (and normalizing) should be considered.
-// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
-hd_private electrum::seeder(const string_list& words,
-    const std::string& passphrase, uint64_t chain)
-{
-    // Passphrase is limited to ascii (normal) if WITH_ICU undefined.
-    auto phrase = passphrase;
-
-    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
-
-    // Conforms to the Unicode Standard for nfkd and case lowering (ICU).
-    // ------------------------------------------------------------------------
-    // seed = unicodedata.normalize('NFKD', seed)
-    // seed = seed.lower()
-    // ------------------------------------------------------------------------
-    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
-        return {};
-
-    LCOV_EXCL_STOP()
-
-    // Python's unicodedata.combining returns the canonical combining
-    // class assigned to the character (which may or may not be a diacritic).
-    // Libbitcoin sources use the same internal implementation as Python.
-    // ------------------------------------------------------------------------
-    // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
-    // ------------------------------------------------------------------------
-    // Remove combining class characters (from the nfkd form converted above).
-    phrase = to_non_combining_form(phrase);
-
-    // Python string.whitespace represents the 6 ascii/C whitespace chars:
-    // print(string.whitespace) => 09 0d 0a 0b 0c 0d 0a 20 (two duplicates).
-    // Libbitcoin uses the CJK intervals from Electrum sources.
-    // ------------------------------------------------------------------------
-    // seed = u''.join([seed[i] for i in range(len(seed))
-    //    if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and
-    //       is_CJK(seed[i+1]))])
-    // ------------------------------------------------------------------------
-    // Compress ascii whitespace and remove ascii spaces between cjk characters.
-    phrase = to_compressed_form(phrase);
-
-    // Python unicode splits on all unicode separators:
-    // print(u'x\u3000y z'.split()) => [u'x', u'y', u'z']
-    // Electrum joins with an ascii space (0x20) as confirmed by test results.
-    // ------------------------------------------------------------------------
-    // seed = u' '.join(seed.split())
-    // ------------------------------------------------------------------------
-    // Words are normal (lower, nfkd) form even without ICU (dictionary-match).
-    auto sentence = system::join(words);
-    sentence = to_non_combining_form(sentence);
-    sentence = to_compressed_form(sentence);
-
-    const auto data = to_chunk(sentence);
-    const auto salt = to_chunk(passphrase_prefix + phrase);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
-
-    // Electrum bypasses a BIP32 step, splitting directly to secret/chaincode.
-    const auto part = system::split(seed);
-
-    // The object will be false if the secret (part.first) does not ec verify.
-    return { part.first, part.second, chain };
 }
 
 // Electrum also grinds randoms on a sequential nonce until the entropy is high
@@ -230,7 +163,66 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
     return starts_with(seed, to_version(prefix));
 }
 
-// protected static
+// Electrum uses the same normalization function for words and passphrases.
+// Passpharse entropy loss from lowering (and normalizing) should be considered.
+// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
+long_hash electrum::seeder(const string_list& words,
+    const std::string& passphrase)
+{
+    // Passphrase is limited to ascii (normal) if WITH_ICU undefined.
+    auto phrase = passphrase;
+
+    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+
+    // TODO: replace the ICU lib dependency with Python's unicodedata. 
+    // Conforms to the Unicode Standard for nfkd and case lowering (ICU lib).
+    // ------------------------------------------------------------------------
+    // seed = unicodedata.normalize('NFKD', seed)
+    // seed = seed.lower()
+    // ------------------------------------------------------------------------
+    // These can only return false if non-ascii phrase and WITH_ICU undefined.
+    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
+        return {};
+
+    LCOV_EXCL_STOP()
+
+    // Python's unicodedata.combining returns true if the character is of the
+    // canonical combining class (which may or may not be a diacritic).
+    // Libbitcoin uses Python's unicodedata implementation for consistency.
+    // ------------------------------------------------------------------------
+    // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
+    // ------------------------------------------------------------------------
+    // Remove combining class characters (from the nfkd form converted above).
+    phrase = to_non_combining_form(phrase);
+
+    // Python string.whitespace represents the 6 ascii/C whitespace chars:
+    // print(string.whitespace) => 09 0d 0a 0b 0c 0d 0a 20 (two duplicates).
+    // Libbitcoin uses CJK intervals from Electrum sources for consistency.
+    // ------------------------------------------------------------------------
+    // seed = u''.join([seed[i] for i in range(len(seed))
+    //    if not (seed[i] in string.whitespace and is_CJK(seed[i-1]) and
+    //       is_CJK(seed[i+1]))])
+    // ------------------------------------------------------------------------
+    // Compress ascii whitespace and remove ascii spaces between cjk characters.
+    phrase = to_compressed_form(phrase);
+
+    // Python unicode splits on all unicode separators:
+    // print(u'x\u3000y z'.split()) => [u'x', u'y', u'z']
+    // Electrum joins with an ascii space (0x20) as confirmed by test results.
+    // ------------------------------------------------------------------------
+    // seed = u' '.join(seed.split())
+    // ------------------------------------------------------------------------
+    // Words are normal (lower, nfkd) form even without ICU (dictionary-match).
+    auto sentence = system::join(words);
+    sentence = to_non_combining_form(sentence);
+    sentence = to_compressed_form(sentence);
+
+    const auto data = to_chunk(sentence);
+    const auto salt = to_chunk(passphrase_prefix + phrase);
+    return pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
+}
+
+// protected static (sizers)
 // ----------------------------------------------------------------------------
 
 size_t electrum::entropy_bits(const data_slice& entropy)
@@ -286,7 +278,7 @@ size_t electrum::usable_size(const data_slice& entropy)
     return entropy.size() - unused_bytes(entropy);
 }
 
-// protected static
+// protected static (checkers)
 // ----------------------------------------------------------------------------
 
 bool electrum::is_ambiguous(size_t count, seed_prefix prefix)
@@ -408,6 +400,21 @@ bool electrum::is_valid_word_count(size_t count)
         count <= word_count(strength_maximum);
 }
 
+bool electrum::is_seedable(seed_prefix prefix) const
+{
+    // Only seed from native entropy.
+    switch (prefix)
+    {
+        case seed_prefix::standard:
+        case seed_prefix::witness:
+        case seed_prefix::two_factor_authentication:
+        case seed_prefix::two_factor_authentication_witness:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool electrum::is_prefix(const string_list& words, seed_prefix prefix)
 {
     // Normalize to improve chance of dictionary matching.
@@ -505,7 +512,7 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// protected static
+// protected static (factories)
 // ----------------------------------------------------------------------------
 
 // To test existing entropy a caller should set grind_limit to zero (default).
@@ -586,37 +593,31 @@ electrum::seed_prefix electrum::prefix() const
     return prefix_;
 }
 
-hd_private electrum::to_seed(const std::string& passphrase,
-    uint64_t chain) const
+long_hash electrum::to_seed(const std::string& passphrase) const
 {
     if (!(*this))
         return {};
 
-    if (prefix_ == seed_prefix::none || prefix_ == seed_prefix::bip39)
+    if (!is_seedable(prefix_))
         return {};
 
-    if (prefix_ == seed_prefix::old)
-        return passphrase.empty() ?
-            electrum_v1::to_seed(chain) : hd_private{};
-
-    return seeder(words(), passphrase, chain);
+    return seeder(words(), passphrase);
 }
 
-// operators
-// ------------------------------------------------------------------------
-
-std::istream& operator>>(std::istream& in, electrum& to)
+hd_private electrum::to_key(const std::string& passphrase,
+    const context& context) const
 {
-    std::istreambuf_iterator<char> begin(in), end;
-    std::string value(begin, end);
-    to = electrum(value);
-    return in;
-}
+    if (!(*this))
+        return {};
 
-std::ostream& operator<<(std::ostream& out, const electrum& of)
-{
-    out << of.sentence();
-    return out;
+    if (!is_seedable(prefix_))
+        return {};
+
+    // Bypass a BIP32 step, splitting directly to secret/chaincode.
+    const auto halves = system::split(to_seed(passphrase));
+
+    // The key will be false if the secret (part.first) does not ec verify.
+    return { halves.first, halves.second, context.hd_prefixes };
 }
 
 } // namespace wallet

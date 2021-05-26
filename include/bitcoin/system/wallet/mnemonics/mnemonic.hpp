@@ -26,8 +26,8 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
-#include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -82,25 +82,35 @@ public:
     /// Valid word counts (12, 15, 18, 21, or 24 words).
     static bool is_valid_word_count(size_t count);
 
-    /// This instance is initialized invalid, but can be assigned to.
     mnemonic();
-
-    /// The instance should be tested for validity after construction.
     mnemonic(const mnemonic& other);
+
+    /// wiki.trezor.io/recovery_seed
+    /// Construct from the "recovery seed" (mnemonic phrase or entropy).
+    /// Validity and should be checked after construction.
     mnemonic(const std::string& sentence, language identifier=language::none);
     mnemonic(const string_list& words, language identifier=language::none);
     mnemonic(const data_chunk& entropy, language identifier=language::en);
 
-    /// The seed derived from mnemonic entropy and an optional passphrase.
-    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
-    hd_private to_seed(const std::string& passphrase="",
-        uint64_t chain=hd_private::mainnet) const;
+    /// wiki.trezor.io/recovery_seed
+    /// Derive the "master binary seed" from the "recovery seed" and passphrase.
+    /// Returns null result with non-ascii passphrase and WITH_ICU undefind.
+    long_hash to_seed(const std::string& passphrase="") const;
 
-    /// Serialized sentence.
-    friend std::istream& operator>>(std::istream& in, mnemonic& to);
-    friend std::ostream& operator<<(std::ostream& out, const mnemonic& of);
+    /// wiki.trezor.io/account_private_key
+    /// Derive the "account private key" from the "master binary seed".
+    /// This is also known as the wallet "root key" or "master private key".
+    /// hd_private.point() is the wallet "master public key".
+    /// The "master binary seed" cannot be obtained from the key.
+    /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
+    hd_private to_key(const std::string& passphrase="",
+        const context& context=btc_mainnet_p2kh) const;
 
 protected:
+    // Constructors.
+    mnemonic(const data_chunk& entropy, const string_list& words,
+        language identifier);
+
     /// Derive the checksum byte from entropy, stored in high order bits.
     static uint8_t checksum_byte(const data_slice& entropy);
 
@@ -122,14 +132,13 @@ protected:
     /// Map entropy size to word count (12, 15, 18, 21, or 24 words).
     static size_t word_count(const data_slice& entropy);
 
-    // Constructors.
-    mnemonic(const data_chunk& entropy, const string_list& words,
-        language identifier);
+    static bool is_ambiguous(const string_list& words, language requested,
+        language derived);
 
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
-    static hd_private seeder(const string_list& words,
-        const std::string& passphrase, uint64_t chain);
+    static long_hash seeder(const string_list& words,
+        const std::string& passphrase);
 
     static mnemonic from_entropy(const data_chunk& entropy, language identifier);
     static mnemonic from_words(const string_list& words, language identifier);

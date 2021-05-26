@@ -19,8 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 #define LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 
-#include "../../test.hpp"
+#include <algorithm>
+#include <cstddef>
 #include <string>
+#include <array>
+#include <vector>
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.
@@ -54,12 +57,47 @@ struct electrum_vector
     data_chunk entropy;
     std::string passphrase;
     data_chunk passphrase_chunk;
-    long_hash hd_seceret_and_chaincode;
+    long_hash seed;
+
+    // Standardize sentence delimiters (for output comparison only).
+    std::string sentence(language lingo) const
+    {
+        const auto is_japanese = (lingo == language::ja);
+        const auto space = is_japanese ? ideographic_space : ascii_space;
+        return join(split(mnemonic), space);
+    }
 
     hd_private to_hd() const
     {
-        const auto part = system::split(hd_seceret_and_chaincode);
-        return { part.first, part.second, hd_private::mainnet };
+        const auto part = system::split(seed);
+        return { part.first, part.second, btc_mainnet_p2kh.hd_prefixes };
+    }
+};
+
+const std::array<electrum_vector::name, 5> ascii_passphrase_vector_names
+{
+    {
+        electrum_vector::english,
+        electrum_vector::english_with_passphrase,
+        electrum_vector::japanese,
+        electrum_vector::chinese,
+        electrum_vector::spanish
+    }
+};
+
+const std::array<electrum_vector::name, 10> all_vector_names
+{
+    {
+        electrum_vector::english,
+        electrum_vector::english_with_passphrase,
+        electrum_vector::japanese,
+        electrum_vector::japanese_with_passphrase,
+        electrum_vector::chinese,
+        electrum_vector::chinese_with_passphrase,
+        electrum_vector::spanish,
+        electrum_vector::spanish_with_passphrase,
+        electrum_vector::spanish2,
+        electrum_vector::spanish3
     }
 };
 
@@ -67,20 +105,32 @@ struct electrum_vector
 typedef std::vector<electrum_vector> electrum_vectors;
 using name = electrum_vector::name;
 using prefix = electrum::seed_prefix;
-static const data_chunk no_password{};
-static const std::string empty_password{};
+static const data_chunk no_passphrase{};
+static const std::string empty_passphrase{};
+
+static ptrdiff_t abnormals(const electrum_vectors& vectors,
+    const std::string& delimiter)
+{
+    return std::count_if(vectors.begin(), vectors.end(),
+        [&](const electrum_vector& test)
+    {
+        // Must remove the ideographic_space before nfkd normalization.
+        auto copy = join(split(test.mnemonic, delimiter));
+        copy = ascii_to_lower(copy);
+        to_compatibility_decomposition(copy);
+        to_lower(copy);
+        return test.mnemonic != join(split(copy), delimiter);
+    });
+}
 
 // All mnemonics here are 12 words.
 // Japanese mnemonics are ascii space delimited (not ideographic space).
-// Electrum tests cases show 20 bytes of entropy where there is only 17:
-// 12 words * 11 bits per word = 132 bits
-// 132 bits / 8 bits per byte = 16.5 bytes (requiring 17)
-// Entropy is an entirely internal format to Electrum encoding, so this more
-// curious than material. Original test vector entropy is commented out below.
+// Electrum tests cases show 20 bytes of entropy where there is only 17 usable.
+// This may be an intial seed for grinding over the prng.
 
 // github.com/spesmilo/electrum/blob/master/electrum/tests/test_mnemonic.py
 
-electrum_vectors vectors
+const electrum_vectors vectors
 {
     electrum_vector
     {
@@ -91,8 +141,8 @@ electrum_vectors vectors
         prefix::witness,
         base16_chunk("fb0a779f83feddb0e39aa0dde898cc3840"),
         //// base16_chunk(""),
-        empty_password,
-        no_password,
+        empty_passphrase,
+        no_passphrase,
         base16_array("aac2a6302e48577ab4b46f23dbae0774e2e62c796f797d0a1b5faeb528301e3064342dafb79069e7c4c6b8c38ae11d7a973bec0d4f70626f8cc5184a8d0b0756")
     },
     electrum_vector
@@ -117,8 +167,8 @@ electrum_vectors vectors
         prefix::standard,
         base16_chunk("adba0594f0b9acb348d16d1e6858a3ad90"),
         //// base16_chunk("1938439226660562861250521787963972783469"),
-        empty_password,
-        no_password,
+        empty_passphrase,
+        no_passphrase,
         base16_array("d3eaf0e44ddae3a5769cb08a26918e8b308258bcb057bb704c6f69713245c0b35cb92c03df9c9ece5eff826091b4e74041e010b701d44d610976ce8bfb66a8ad")
     },
     electrum_vector
@@ -143,8 +193,8 @@ electrum_vectors vectors
         prefix::witness,
         base16_chunk("39778b3f92e2bd695d31a0ced46be44870"),
         //// base16_chunk("3083737086352778425940060465574397809099"),
-        empty_password,
-        no_password,
+        empty_passphrase,
+        no_passphrase,
         base16_array("0b9077db7b5a50dbb6f61821e2d35e255068a5847e221138048a20e12d80b673ce306b6fe7ac174ebc6751e11b7037be6ee9f17db8040bb44f8466d519ce2abf")
     },
     electrum_vector
@@ -169,8 +219,8 @@ electrum_vectors vectors
         prefix::standard,
         base16_chunk("09fcd376fba69d5b6ebc5437f6f7d9d070"),
         //// base16_chunk("3423992296655289706780599506247192518735"),
-        empty_password,
-        no_password,
+        empty_passphrase,
+        no_passphrase,
         base16_array("18bffd573a960cc775bbd80ed60b7dc00bc8796a186edebe7fc7cf1f316da0fe937852a969c5c79ded8255cdf54409537a16339fbe33fb9161af793ea47faa7a")
     },
     electrum_vector
@@ -196,8 +246,8 @@ electrum_vectors vectors
         base16_chunk("4eab005dbd669c503b59df2bd7be988a80"),
         // one char short in original, padded left.
         //// base16_chunk("0448346710104003081119421156750490206837"),
-        empty_password,
-        no_password,
+        empty_passphrase,
+        no_passphrase,
         base16_array("001ebce6bfde5851f28a0d44aae5ae0c762b600daf3b33fc8fc630aee0d207646b6f98b18e17dfe3be0a5efe2753c7cdad95860adbbb62cecad4dedb88e02a64")
     },
     electrum_vector
@@ -215,66 +265,69 @@ electrum_vectors vectors
     }
 };
 
-// all three
+// ambiguous between fr, en and v1 en
 const string_list ambiguous_en_fr_v1
 {
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
-// cry not french
+// "cry" not fr
 const string_list ambiguous_en_v1
 {
     "cry", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
-// fiasco (v1 pt) not en
-const string_list ambiguous_fr_v1_pt
+// "fiasco" not en
+const string_list ambiguous_fr_pt_v1
 {
     "fiasco", "fiasco", "fiasco", "fiasco", "fiasco", "fiasco",
     "fiasco", "fiasco", "fiasco", "fiasco", "fiasco", "fiasco"
 };
 
-// cycle not v1
+// "cycle" not v1
 const string_list ambiguous_en_fr
 {
     "cycle", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
-// difference only v1
+// "difference" only v1
 const string_list distinct_v1
 {
     "difference", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
-// differ only en
+// "differ" only en
 const string_list distinct_en
 {
     "differ", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
-// différer only fr
+// "différer" only fr
 const string_list distinct_fr
 {
     "différer", "fragile", "fragile", "fragile", "fragile", "fragile",
     "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
 };
 
+// valid
 const string_list redundant_hans_hant
 {
     "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
 };
 
-const string_list mixed_languages
+// invalid
+const string_list mixed_words
 {
     "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
     "abdikace", "abandon", "abacate", "的", "歇", "above"
 };
 
+// invalid
 const string_list similar_words
 {
     "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
@@ -322,6 +375,12 @@ class accessor
   : public electrum
 {
 public:
+    accessor(const data_chunk& entropy, const string_list& words,
+        language identifier, seed_prefix prefix)
+      : electrum(entropy, words, identifier, prefix)
+    {
+    }
+
     static size_t entropy_bits(const data_slice& entropy)
     {
         return electrum::entropy_bits(entropy);
@@ -367,10 +426,35 @@ public:
         return electrum::usable_size(entropy);
     }
 
-    static result grinder(const data_chunk& entropy, seed_prefix prefix,
-        language identifier, size_t limit)
+    static bool is_conflict(const string_list& words)
     {
-        return electrum::grinder(entropy, prefix, identifier, limit);
+        return electrum::is_conflict(words);
+    }
+
+    static seed_prefix to_conflict(const string_list& words)
+    {
+        return electrum::to_conflict(words);
+    }
+
+    static seed_prefix normalized_to_prefix(const string_list& words)
+    {
+        return electrum::normalized_to_prefix(words);
+    }
+    static bool normalized_is_prefix(const string_list& words,
+        seed_prefix prefix)
+    {
+        return electrum::normalized_is_prefix(words, prefix);
+    }
+
+    static bool is_ambiguous(size_t count, seed_prefix prefix)
+    {
+        return electrum::is_ambiguous(count, prefix);
+    }
+
+    static bool is_ambiguous(const string_list& words, language requested,
+        language derived)
+    {
+        return electrum::is_ambiguous(words, requested, derived);
     }
 
     static string_list encoder(const data_chunk& entropy, language identifier)
@@ -383,10 +467,16 @@ public:
         return electrum::decoder(words, identifier);
     }
 
-    static hd_private seeder(const string_list& words,
-        const std::string& passphrase, uint64_t chain)
+    static long_hash seeder(const string_list& words,
+        const std::string& passphrase)
     {
-        return electrum::seeder(words, passphrase, chain);
+        return electrum::seeder(words, passphrase);
+    }
+
+    static result grinder(const data_chunk& entropy, seed_prefix prefix,
+        language identifier, size_t limit)
+    {
+        return electrum::grinder(entropy, prefix, identifier, limit);
     }
 
     static bool validator(const string_list& words, seed_prefix prefix)

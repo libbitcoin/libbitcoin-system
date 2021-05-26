@@ -19,30 +19,21 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
 #define LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
 
+#include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <bitcoin/system.hpp>
 
-namespace test {
-namespace mnemonics_mnemonic {
-
-// Avoid using namespace in shared headers, but okay here.
+ // Avoid using namespace in shared headers, but okay here.
 using namespace bc::system;
 using namespace bc::system::wallet;
 
- // BIP39
- // Since the vast majority of BIP39 wallets supports only the English wordlist,
- // it is strongly discouraged to use non-English wordlists for generating the 
- // mnemonic sentences.
- // github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#wordlists
+namespace test {
+namespace mnemonics_mnemonic {
 
 struct mnemonic_vector
 {
-    typedef enum name
-    {
-        english
-    } name;
-
     std::string entropy_;
     std::string mnemonic;
     std::string passphrase;
@@ -56,24 +47,24 @@ struct mnemonic_vector
         return out;
     }
 
-    data_chunk seed() const
+    long_hash seed() const
     {
-        data_chunk out;
+        long_hash out;
         decode_base16(out, seed_);
         return out;
     }
 
-    // Normalize vector, not seed-critical (dictionary match only).
+    // Normalize vector (for output comparison only).
     string_list words() const
     {
         return split(sentence());
     }
 
-    // Normalize vector, not seed-critical (dictionary match only).
+    // Normalize sentence (for output comparison only).
     std::string sentence(const std::string& separator=ascii_space) const
     {
         // Must remove the ideographic_space before nfkd normalization.
-        auto copy = join(split(mnemonic, separator));
+        auto copy = join(split(mnemonic, unicode_separators, {}));
         copy = ascii_to_lower(copy);
         to_compatibility_decomposition(copy);
         to_lower(copy);
@@ -104,6 +95,7 @@ static ptrdiff_t abnormals(const mnemonic_vectors& vectors,
 }
 
 // github.com/trezor/python-mnemonic/blob/master/vectors.json
+
 const mnemonic_vectors vectors_en
 {
     {
@@ -457,6 +449,158 @@ const mnemonic_vectors vectors_ja
             "xprv9s21ZrQH143K2qVq43Phs1xyVc6jSxXHWJ6CDJjod3cgyEin7hgeQV6Dkw6s1LSfMYxoah4bPAnW4wmXfDUS9ghBEM18xoY634CBtX8HPrA"
         }
     }
+};
+
+// invalid (length)
+const string_list words11
+{
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon"
+};
+
+// invalid (checksum)
+const string_list invalid_checksum_words12
+{
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "one"
+};
+
+// invalid (dictionary)
+const string_list invalid_misspelled_words12
+{
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "aboot"
+};
+
+// valid
+const string_list words12
+{
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "about"
+};
+
+// valid
+const string_list words24
+{
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon",
+    "abandon", "abandon", "abandon", "abandon", "abandon", "art"
+};
+
+// invalid (checksum)
+const string_list ambiguous_en_fr
+{
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile",
+    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+};
+
+////// invalid (checksum) - "differ" only en
+////const string_list distinct_en
+////{
+////    "differ", "fragile", "fragile", "fragile", "fragile", "fragile",
+////    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+////};
+////
+////// invalid (checksum) - "différer" only fr
+////const string_list distinct_fr
+////{
+////    "différer", "fragile", "fragile", "fragile", "fragile", "fragile",
+////    "fragile", "fragile", "fragile", "fragile", "fragile", "fragile"
+////};
+
+// invalid (checksum)
+const string_list redundant_hans_hant
+{
+    "的", "一", "是", "在", "不", "的", "一", "是", "在", "不", "的", "一", "是"
+};
+
+////// invalid (mixed dictionaries)
+////const string_list mixed_words
+////{
+////    "below", "가격", "あいこくしん", "abaisser", "abaco", "ábaco",
+////    "abdikace", "abandon", "abacate", "的", "歇", "above"
+////};
+////
+////// invalid (mixed dictionaries)
+////const string_list similar_words
+////{
+////    "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+////    "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
+////};
+
+// Test wrapper for access to protected methods.
+class accessor
+  : public mnemonic
+{
+public:
+    accessor(const data_chunk& entropy, const string_list& words,
+        language identifier)
+      : mnemonic(entropy, words, identifier)
+    {
+    }
+
+    static uint8_t checksum_byte(const data_slice& entropy)
+    {
+        return mnemonic::checksum_byte(entropy);
+    }
+
+    static size_t checksum_bits(const data_slice& entropy)
+    {
+        return mnemonic::checksum_bits(entropy);
+    }
+
+    static size_t checksum_bits(const string_list& words)
+    {
+        return mnemonic::checksum_bits(words);
+    }
+
+    static size_t entropy_bits(const data_slice& entropy)
+    {
+        return mnemonic::entropy_bits(entropy);
+    }
+
+    static size_t entropy_bits(const string_list& words)
+    {
+        return mnemonic::entropy_bits(words);
+    }
+
+    static size_t entropy_size(const string_list& words)
+    {
+        return mnemonic::entropy_size(words);
+    }
+
+    static size_t word_count(const data_slice& entropy)
+    {
+        return mnemonic::word_count(entropy);
+    }
+
+    static string_list encoder(const data_chunk& entropy, language identifier)
+    {
+        return mnemonic::encoder(entropy, identifier);
+    }
+
+    static data_chunk decoder(const string_list& words, language identifier)
+    {
+        return mnemonic::decoder(words, identifier);
+    }
+
+    static long_hash seeder(const string_list& words,
+        const std::string& passphrase)
+    {
+        return mnemonic::seeder(words, passphrase);
+    }
+
+    static mnemonic from_entropy(const data_chunk& entropy, language identifier)
+    {
+        return mnemonic::from_entropy(entropy, identifier);
+    }
+
+    static mnemonic from_words(const string_list& words, language identifier)
+    {
+        return mnemonic::from_words(words, identifier);
+    }
+
 };
 
 } // mnemonics_mnemonic

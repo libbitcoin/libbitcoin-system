@@ -46,20 +46,18 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__count__all__expected)
     BOOST_REQUIRE_MESSAGE(electrum_v1::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
-#ifdef WITH_ICU
-
-// abnormal (requires ICU)
+// abnormal (requires WITH_ICU)
 
 // These dictionaries are in normal form.
 // So there is no need to nfkd normalize these for wordlist-based seedings.
 // This also removes the ICU dependency for these language.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
 {
+    // The result is definitive only when WITH_ICU is defined.
     BOOST_REQUIRE(!abnormal(electrum_v1::en));
     BOOST_REQUIRE(!abnormal(electrum_v1::pt));
 }
 
-#endif
 
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en__expected)
 {

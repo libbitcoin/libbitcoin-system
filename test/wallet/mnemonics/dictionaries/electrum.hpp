@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARY_ELECTRUM_HPP
-#define LIBBITCOIN_SYSTEM_TEST_DICTIONARY_ELECTRUM_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_ELECTRUM_HPP
+#define LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_ELECTRUM_HPP
 
 #include <algorithm>
 #include <cstddef>
@@ -29,14 +29,6 @@ using namespace bc::system::wallet;
 
 namespace test {
 namespace dictionaries_electrum {
-
-////static ptrdiff_t compressions(const electrum::dictionary::words& words)
-////{
-////    return std::count_if(words.begin(), words.end(), [&](const char test[])
-////    {
-////        return test != to_compressed_form(test);
-////    });
-////}
 
 static bool compressed(const electrum::dictionary::words& words)
 {
@@ -61,8 +53,6 @@ static bool combined(const electrum::dictionary::words& words)
         return test != to_non_combining_form(test);
     });
 }
-
-#ifdef WITH_ICU
 
 static bool diverged(const mnemonic::dictionary::words& normal,
     const mnemonic::dictionary::words& test)
@@ -90,19 +80,6 @@ static ptrdiff_t abnormals(const mnemonic::dictionary::words& words)
         return test != copy;
     });
 }
-
-////static bool abnormal(const mnemonic::dictionary::words& words)
-////{
-////    return std::all_of(words.begin(), words.end(), [&](const char test[])
-////    {
-////        std::string copy = test;
-////        to_compatibility_decomposition(copy);
-////        to_lower(copy);
-////        return test != copy;
-////    });
-////}
-
-#endif
 
 // This differs from BIP39 in nfkd normalization.
 // This was normalized after publication, so probably not updated.

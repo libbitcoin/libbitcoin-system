@@ -18,17 +18,17 @@
  */
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 
-#include <cstdint>
 #include <cstddef>
-#include <iterator>
+#include <cstdint>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
@@ -39,8 +39,9 @@ namespace wallet {
 // local constants
 // ----------------------------------------------------------------------------
 
-constexpr auto size0 = uint32_t{ 1u };
-constexpr auto size1 = static_cast<int32_t>(electrum_v1::dictionary::size());
+constexpr size_t stretch_iterations = 100000;
+constexpr auto size0 = uint32_t{ 1 };
+constexpr auto size1 = static_cast<uint32_t>(electrum_v1::dictionary::size());
 constexpr auto size2 = size1 * size1;
 
 // private static
@@ -54,10 +55,10 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
     }
 };
 
-// protected static
+// protected static (coders)
 // ----------------------------------------------------------------------------
 
-// github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1669
+// electrum/old_mnemonic.py#L1669
 string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 {
     string_list words;
@@ -68,9 +69,9 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
     // Entropy size and dictionary existence must have been validated.
     while (!reader.is_exhausted())
     {
-        // TODO: verify endianness.
         const auto value = reader.read_4_bytes_little_endian();
 
+        // Pos quotient integer div/mod is floor in c++ and python[2/3].
         const auto one = (value / size0 + 0x0) % size1;
         const auto two = (value / size1 + one) % size1;
         const auto tri = (value / size2 + two) % size1;
@@ -83,7 +84,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
     return words;
 }
 
-// github.com/spesmilo/electrum/blob/1d8b1ef69897ccb94f337a10993ca5d2b7a46741/electrum/old_mnemonic.py#L1682
+// electrum/old_mnemonic.py#L1682
 data_chunk electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
@@ -98,12 +99,13 @@ data_chunk electrum_v1::decoder(const string_list& words, language identifier)
         const auto two = dictionaries_.index(*word++, identifier);
         const auto tri = dictionaries_.index(*word++, identifier);
 
+        // Neg quotient integer div/mod is ceil in c++ and floor in python[2/3].
         const auto value =
             floored_modulo(one - 0x0, size1) * size0 +
             floored_modulo(two - one, size1) * size1 +
             floored_modulo(tri - two, size1) * size2;
 
-        // TODO: verify endianness.
+        // Floored modulo with positive divisor is always positive.
         // Bound: max value is word1[size-1], word2[0], word3[size-1] (safe).
         writer.write_4_bytes_little_endian(static_cast<uint32_t>(value));
     }
@@ -111,6 +113,18 @@ data_chunk electrum_v1::decoder(const string_list& words, language identifier)
     sink.flush();
     return entropy;
 }
+
+hash_digest electrum_v1::strecher(const data_chunk& entropy)
+{
+    auto streched = entropy;
+    for (size_t i = 0; i < stretch_iterations; ++i)
+        streched = sha256_hash_chunk(build_chunk({ streched, entropy }));
+
+    return to_array<hash_size>(streched);
+}
+
+// protected static (sizers)
+// ----------------------------------------------------------------------------
 
 size_t electrum_v1::entropy_bits(const data_slice& entropy)
 {
@@ -201,7 +215,7 @@ electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// protected
+// protected static (factories)
 // ----------------------------------------------------------------------------
 
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
@@ -237,32 +251,24 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
     return { decoder(tokens, lexicon), tokens, lexicon };
 }
 
-// public
-// ------------------------------------------------------------------------
+// public methods
+// ----------------------------------------------------------------------------
 
-hd_private electrum_v1::to_seed(uint64_t chain) const
+ec_private electrum_v1::to_seed(const context& context) const
 {
     if (!(*this))
         return {};
 
-    return { entropy_, chain };
+    return { ec_scalar{ strecher(entropy_) } };
 }
 
-// operators
-// ------------------------------------------------------------------------
-
-std::istream& operator>>(std::istream& in, electrum_v1& to)
+hd_private electrum_v1::to_key(const context& context) const
 {
-    std::istreambuf_iterator<char> begin(in), end;
-    std::string value(begin, end);
-    to = electrum_v1(value);
-    return in;
-}
+    if (!(*this))
+        return {};
 
-std::ostream& operator<<(std::ostream& out, const electrum_v1& of)
-{
-    out << of.sentence();
-    return out;
+    // The key will be false if the secret does not ec verify.
+    return { to_chunk(to_seed().secret()), context.hd_prefixes };
 }
 
 } // namespace wallet

@@ -55,10 +55,12 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
 }
 
 #ifdef WITH_ICU
-
-// All of the abnormals are diacritics.
 const auto abnormals_es = 334;
 const auto abnormals_ja = 644;
+#else
+const auto abnormals_es = 0;
+const auto abnormals_ja = 0;
+#endif
 
 // abnormal (requires ICU)
 
@@ -66,8 +68,10 @@ const auto abnormals_ja = 644;
 // But the others are identical to BIP39 dictionaries.
 // We do not use these with in electrum sources, we use BIP39 words.
 // This test verifies that the differences are only in nfkd normalization.
+// All of the abnormals are diacritics.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__abnormal__unused_words__false)
 {
+    // The result is definitive only when WITH_ICU is defined.
     BOOST_REQUIRE_EQUAL(abnormals(electrum_es), abnormals_es);
     BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }
@@ -78,8 +82,6 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__diverges__unused_words__false)
     BOOST_REQUIRE(!diverged(electrum::es, electrum_es));
     BOOST_REQUIRE(!diverged(electrum::ja, electrum_ja));
 }
-
-#endif
 
 // combined
 

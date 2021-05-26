@@ -20,18 +20,15 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
-#include <iterator>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
+#include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -69,7 +66,7 @@ const mnemonic::dictionaries mnemonic::dictionaries_
     }
 };
 
-// protected static
+// protected static (coders)
 // ----------------------------------------------------------------------------
 
 // Entropy requires wordlist mapping because of the checksum.
@@ -95,8 +92,8 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
 }
 
-hd_private mnemonic::seeder(const string_list& words,
-    const std::string& passphrase, uint64_t chain)
+long_hash mnemonic::seeder(const string_list& words,
+    const std::string& passphrase)
 {
     // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
@@ -112,10 +109,7 @@ hd_private mnemonic::seeder(const string_list& words,
     // Words are in normal (lower, nfkd) form, even without ICU.
     const auto data = to_chunk(system::join(words));
     const auto salt = to_chunk(passphrase_prefix + phrase);
-    const auto seed = pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
-
-    // The object will be false if the generated secret does not ec verify.
-    return { to_chunk(seed), chain };
+    return pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
 }
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy)
@@ -126,6 +120,9 @@ uint8_t mnemonic::checksum_byte(const data_slice& entropy)
     const auto checksum_mask = max_uint8 << mask_bits;
     return sha256_hash(entropy).front() & checksum_mask;
 }
+
+// protected static (sizers)
+// ----------------------------------------------------------------------------
 
 size_t mnemonic::checksum_bits(const data_slice& entropy)
 {
@@ -155,6 +152,20 @@ size_t mnemonic::entropy_size(const string_list& words)
 size_t mnemonic::word_count(const data_slice& entropy)
 {
     return (entropy_bits(entropy) + checksum_bits(entropy)) / index_bits;
+}
+
+// protected static (checkers)
+// ----------------------------------------------------------------------------
+
+bool mnemonic::is_ambiguous(const string_list& words, language requested,
+    language derived)
+{
+    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // If matches en and unspecified then check fr, since en is searched first.
+    return
+        derived == language::en &&
+        requested == language::none &&
+        contained_by(words, language::fr) == language::fr;
 }
 
 // public static
@@ -217,7 +228,7 @@ mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
 {
 }
 
-// protected
+// protected (factories)
 // ----------------------------------------------------------------------------
 
 mnemonic mnemonic::from_entropy(const data_chunk& entropy, language identifier)
@@ -247,10 +258,8 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     if (identifier != language::none && lexicon != identifier)
         return {};
 
-    // HACK: There are 100 same words in en/fr, all with distinct indexes.
-    // If unspecified and matches en then check fr, since en is searched first.
-    if (identifier == language::none && lexicon == language::en &&
-        contained_by(tokens, language::fr) == language::fr)
+    // HACK: en-fr dictionary ambiguity.
+    if (is_ambiguous(tokens, identifier, lexicon))
         return {};
 
     const auto entropy = decoder(tokens, lexicon);
@@ -263,34 +272,25 @@ mnemonic mnemonic::from_words(const string_list& words, language identifier)
     return { entropy, tokens, lexicon };
 }
 
-// public
+// public methods
 // ----------------------------------------------------------------------------
 
-hd_private mnemonic::to_seed(const std::string& passphrase,
-    uint64_t chain) const
+long_hash mnemonic::to_seed(const std::string& passphrase) const
 {
-    // Preclude derivation from an invalid object state.
     if (!(*this))
         return {};
 
-    return seeder(words(), passphrase, chain);
+    return seeder(words(), passphrase);
 }
 
-// operators
-// ------------------------------------------------------------------------
-
-std::istream& operator>>(std::istream& in, mnemonic& to)
+hd_private mnemonic::to_key(const std::string& passphrase,
+    const context& context) const
 {
-    std::istreambuf_iterator<char> begin(in), end;
-    std::string value(begin, end);
-    to = mnemonic(value);
-    return in;
-}
+    if (!(*this))
+        return {};
 
-std::ostream& operator<<(std::ostream& out, const mnemonic& of)
-{
-    out << of.sentence();
-    return out;
+    // The key will be false if the secret does not ec verify.
+    return { to_chunk(to_seed(passphrase)), context.hd_prefixes };
 }
 
 } // namespace wallet
