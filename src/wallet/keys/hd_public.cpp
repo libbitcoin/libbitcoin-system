@@ -39,6 +39,12 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
+// Assumptions inherent in the implementation.
+static_assert(ec_secret_size == hd_chain_code_size,
+    "secret_size != chain_code_size");
+static_assert(long_hash_size == ec_secret_size + hd_chain_code_size,
+    "secret_size + chain_code_size != long_hash_size");
+
 const uint32_t hd_public::mainnet = 0x0488b21e;
 const uint32_t hd_public::testnet = 0x043587cf;
 
