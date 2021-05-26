@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__empty__zero)
 
 // utf8_remainder_size
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes___zero)
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("a", 1), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("ab", 2), 0u);
@@ -46,14 +46,14 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes___zero)
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("abcdef", 6), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__whole_characters___zero)
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__whole_characters__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF\xbf", 2), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF\xbf\xbf", 3), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf\xbf", 4), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes___expected)
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes__expected)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF", 1), 1u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF", 1), 1u);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes___ex
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf", 3), 3u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__invalid_leading_bytes___zero)
+BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__invalid_leading_bytes__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf", 1), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf\xbf", 2), 0u);

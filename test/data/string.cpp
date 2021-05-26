@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(string__split1__one_delimiter__left_trimmed_and_compressed)
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
-BOOST_AUTO_TEST_CASE(string__split1__one_delimiter___right_trimmed_and_compressed)
+BOOST_AUTO_TEST_CASE(string__split1__one_delimiter__right_trimmed_and_compressed)
 {
     const std::string value{ "abc \t\r\n" };
     const string_list expected{ "abc" };
@@ -166,14 +166,14 @@ BOOST_AUTO_TEST_CASE(string__split2__four_ideographic_space_delimiters__trimmed_
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space), expected);
 }
 
-BOOST_AUTO_TEST_CASE(string__split3__one_delimiter__untrimmed)
+BOOST_AUTO_TEST_CASE(string__split3__one_delimiter_left__untrimmed)
 {
     const std::string value{ "\t\r\n abc" };
     const string_list expected{ "\t\r\n", "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value, ascii_space, false), expected);
 }
 
-BOOST_AUTO_TEST_CASE(string__split3__one_delimiter___untrimmed)
+BOOST_AUTO_TEST_CASE(string__split3__one_delimiter_right__untrimmed)
 {
     const std::string value{ "abc \t\r\n" };
     const string_list expected{ "abc", "\t\r\n" };
@@ -249,14 +249,14 @@ BOOST_AUTO_TEST_CASE(string__trim__empty__empty)
     BOOST_REQUIRE_EQUAL(value, "");
 }
 
-BOOST_AUTO_TEST_CASE(string__trim___no_whitespace__unchanged)
+BOOST_AUTO_TEST_CASE(string__trim__no_whitespace__unchanged)
 {
     std::string value{ "abcdefghij" };
     const auto expected = value;
     BOOST_REQUIRE_EQUAL(value, value);
 }
 
-BOOST_AUTO_TEST_CASE(string__trim___all_whitespace__empty)
+BOOST_AUTO_TEST_CASE(string__trim__all_whitespace__empty)
 {
     std::string value{ " \t\n\v\f\r " };
     system::trim(value);

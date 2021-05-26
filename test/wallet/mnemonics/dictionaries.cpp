@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(dictionaries__index1__valid_words__expected)
     BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant[4], language::zh_Hant), 4);
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__index1__incorrect_identifiers___not_found)
+BOOST_AUTO_TEST_CASE(dictionaries__index1__incorrect_identifiers__not_found)
 {
     BOOST_REQUIRE_EQUAL(instance.index(test_words_en[0], language::zh_Hant), -1);
     BOOST_REQUIRE_EQUAL(instance.index(test_words_es[1], language::ja), -1);
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(dictionaries__index1__incorrect_identifiers___not_found)
     BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant[4], language::en), -1);
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries__index1__overlapping_wordlists___expected)
+BOOST_AUTO_TEST_CASE(dictionaries__index1__overlapping_wordlists__expected)
 {
     // Order does not matter since these words overlap in the same position.
     BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans[3], language::zh_Hant), 3);

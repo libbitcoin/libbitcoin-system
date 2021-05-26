@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(deserialize__uint8__uint8__base10)
     BOOST_REQUIRE_EQUAL(out, 0xff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint8__uchar___base10)
+BOOST_AUTO_TEST_CASE(deserialize__uint8__uchar__base10)
 {
     unsigned char out;
     BOOST_REQUIRE(deserialize(out, "0"));

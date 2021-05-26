@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(serialize__uint8__uint8__base10)
 }
 
 // The uint8_t override picks up unsigned char.
-BOOST_AUTO_TEST_CASE(serialize__uint8__uchar___base10)
+BOOST_AUTO_TEST_CASE(serialize__uint8__uchar__base10)
 {
     unsigned char value = 0;
     BOOST_REQUIRE_EQUAL(serialize(value), "0");
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(serialize__uint8__uchar___base10)
     BOOST_REQUIRE_EQUAL(serialize(value), "255");
 }
 
-BOOST_AUTO_TEST_CASE(serialize__uint8__ostream___base10)
+BOOST_AUTO_TEST_CASE(serialize__uint8__ostream__base10)
 {
     const uint8_t value = 0xff;
     std::ostringstream out;
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(string__array__string_padded__text_delimited_untrimmed)
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
-BOOST_AUTO_TEST_CASE(string__array__string_empty___text_delimited_default_fallback)
+BOOST_AUTO_TEST_CASE(string__array__string_empty__text_delimited_default_fallback)
 {
     const std::array<const char*, 3> value{ { "foo", "", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(string__vector__string_padded__text_delimited_untrimmed)
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
-BOOST_AUTO_TEST_CASE(string__vector__string_empty___text_delimited_default_fallback)
+BOOST_AUTO_TEST_CASE(string__vector__string_empty__text_delimited_default_fallback)
 {
     const std::vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");

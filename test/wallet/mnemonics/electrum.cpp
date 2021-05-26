@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__todo__todo)
 
 // to_seed
 
-BOOST_AUTO_TEST_CASE(electrum__to_seed__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum__to_seed__todo1__todo)
 {
     BOOST_REQUIRE(TODO_TESTS);
 }
@@ -1266,7 +1266,7 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_passphrase_testnet__expected_hd_key
 
 // to_seed
 
-BOOST_AUTO_TEST_CASE(electrum__to_seed__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum__to_seed__todo2__todo)
 {
     BOOST_REQUIRE(TODO_TESTS);
 }

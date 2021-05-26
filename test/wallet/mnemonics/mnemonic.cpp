@@ -385,21 +385,21 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_protected__not_empty__expected)
 
 // to_key
 
-BOOST_AUTO_TEST_CASE(mnemonic__to_key___invalid__invalid)
+BOOST_AUTO_TEST_CASE(mnemonic__to_key__invalid__invalid)
 {
     const mnemonic instance;
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(!instance.to_key());
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__to_key___valid__valid)
+BOOST_AUTO_TEST_CASE(mnemonic__to_key__valid__valid)
 {
     const mnemonic instance(words12);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.to_key());
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic__to_key___network__expected)
+BOOST_AUTO_TEST_CASE(mnemonic__to_key__network__expected)
 {
     const mnemonic instance(words12);
     BOOST_REQUIRE(instance);
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__to_key___network__expected)
 
 // to_seed
 
-BOOST_AUTO_TEST_CASE(mnemonic__to_seed___todo__todo)
+BOOST_AUTO_TEST_CASE(mnemonic__to_seed__todo__todo)
 {
     BOOST_REQUIRE(TODO_TESTS);
 }
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__inequality__always__expected)
 
 // operator>>
 
-BOOST_AUTO_TEST_CASE(mnemonic__deserialize___valid_whitespace__expected_trimmed)
+BOOST_AUTO_TEST_CASE(mnemonic__deserialize__valid_whitespace__expected_trimmed)
 {
     std::istringstream in{ join(words12) };
     mnemonic instance;
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(emnemonic__deserialize__invalid__invalid)
 
 // operator<<
 
-BOOST_AUTO_TEST_CASE(mnemonic__serialize___valid_whitespace__expected)
+BOOST_AUTO_TEST_CASE(mnemonic__serialize__valid_whitespace__expected)
 {
     std::ostringstream out;
     const mnemonic instance(words12);
