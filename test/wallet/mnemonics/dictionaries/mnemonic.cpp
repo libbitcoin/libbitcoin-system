@@ -24,6 +24,10 @@ BOOST_AUTO_TEST_SUITE(dictionaries_mnemonic_tests)
 using namespace test::dictionaries_mnemonic;
 using namespace bc::system::wallet;
 
+// TODO: write tests for dictionary sort.
+// TODO: store sorted flag in each dictionary definition.
+// TODO: optimize language.ipp to use binary_search when sorted.
+
 const auto dictionary_count = 10u;
 const auto dictionary_size = 2048;
 const auto deviations_en_fr = 100;
