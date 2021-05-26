@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/formats/base_58.hpp>
 
+#include <algorithm>
 #include <bitcoin/system/assert.hpp>
 
 namespace libbitcoin {
@@ -28,7 +29,7 @@ const std::string base58_chars =
 
 bool is_base58(const char ch)
 {
-    // This works because the base58 characters happen to be in sorted order
+    // The base58 character list is lexically sorted.
     return std::binary_search(base58_chars.begin(), base58_chars.end(), ch);
 }
 

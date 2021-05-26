@@ -20,34 +20,62 @@
 
 BOOST_AUTO_TEST_SUITE(base_58_tests)
 
-void encdec_test(const std::string& hex, const std::string& encoded)
+void encode_decode_test(const std::string& base16, const std::string& encoded)
 {
     data_chunk data, decoded;
-    BOOST_REQUIRE(decode_base16(data, hex));
+    BOOST_REQUIRE(decode_base16(data, base16));
     BOOST_REQUIRE_EQUAL(encode_base58(data), encoded);
     BOOST_REQUIRE(decode_base58(decoded, encoded));
     BOOST_REQUIRE(decoded == data);
 }
 
-BOOST_AUTO_TEST_CASE(base58_test)
+// is_base58
+
+BOOST_AUTO_TEST_CASE(base58__is_base58__valid__true)
 {
-    encdec_test("", "");
-    encdec_test("61", "2g");
-    encdec_test("626262", "a3gV");
-    encdec_test("636363", "aPEr");
-    encdec_test("73696d706c792061206c6f6e6720737472696e67", "2cFupjhnEsSn59qHXstmK2ffpLv2");
-    encdec_test("00eb15231dfceb60925886b67d065299925915aeb172c06647", "1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L");
-    encdec_test("516b6fcd0f", "ABnLTmg");
-    encdec_test("bf4f89001e670274dd", "3SEo3LWLoPntC");
-    encdec_test("572e4794", "3EFU7m");
-    encdec_test("ecac89cad93923c02321", "EJDM8drfXA6uyA");
-    encdec_test("10c8511e", "Rt5zm");
-    encdec_test("00000000000000000000", "1111111111");
+    const std::string base58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    for (char character: base58)
+    {
+        BOOST_REQUIRE(is_base58(character));
+    }
 }
 
-BOOST_AUTO_TEST_CASE(base58_address_test)
+BOOST_AUTO_TEST_CASE(base58__is_base58__invalid__false)
 {
-    const data_chunk pubkey
+    const std::string non_base58 = "0OIl+- //#";
+    for (char character: non_base58)
+    {
+        BOOST_REQUIRE(!is_base58(character));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(base58__is_base58__literals__expected)
+{
+    BOOST_REQUIRE(is_base58("abcdjkk11"));
+    BOOST_REQUIRE(!is_base58("abcdjkk011"));
+}
+
+// encode_base58 / decode_base58
+
+BOOST_AUTO_TEST_CASE(base58__encode_base58__various_round_trip__expected)
+{
+    encode_decode_test("", "");
+    encode_decode_test("61", "2g");
+    encode_decode_test("626262", "a3gV");
+    encode_decode_test("636363", "aPEr");
+    encode_decode_test("73696d706c792061206c6f6e6720737472696e67", "2cFupjhnEsSn59qHXstmK2ffpLv2");
+    encode_decode_test("00eb15231dfceb60925886b67d065299925915aeb172c06647", "1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L");
+    encode_decode_test("516b6fcd0f", "ABnLTmg");
+    encode_decode_test("bf4f89001e670274dd", "3SEo3LWLoPntC");
+    encode_decode_test("572e4794", "3EFU7m");
+    encode_decode_test("ecac89cad93923c02321", "EJDM8drfXA6uyA");
+    encode_decode_test("10c8511e", "Rt5zm");
+    encode_decode_test("00000000000000000000", "1111111111");
+}
+
+BOOST_AUTO_TEST_CASE(base58__decode_base58__address_round_trip__expected)
+{
+    const data_chunk checked
     {
         {
             0x00, 0x5c, 0xc8, 0x7f, 0x4a, 0x3f, 0xdf, 0xe3,
@@ -56,35 +84,16 @@ BOOST_AUTO_TEST_CASE(base58_address_test)
             0x64
         }
     };
-    std::string address = "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT";
-    BOOST_REQUIRE(encode_base58(pubkey) == address);
+    const auto address = "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT";
+    BOOST_REQUIRE_EQUAL(encode_base58(checked), address);
+
     data_chunk decoded;
     BOOST_REQUIRE(decode_base58(decoded, address));
-    BOOST_REQUIRE(decoded == pubkey);
+    BOOST_REQUIRE_EQUAL(decoded, checked);
 }
 
-BOOST_AUTO_TEST_CASE(is_b58)
+BOOST_AUTO_TEST_CASE(base58__decode_base58__array__expected)
 {
-    const std::string base58_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    for (char ch: base58_chars)
-    {
-        BOOST_REQUIRE(is_base58(ch));
-    }
-
-    const std::string non_base58_chars = "0OIl+- //#";
-    for (char ch: non_base58_chars)
-    {
-        BOOST_REQUIRE(!is_base58(ch));
-    }
-
-    BOOST_REQUIRE(is_base58("abcdjkk11"));
-    BOOST_REQUIRE(!is_base58("abcdjkk011"));
-}
-
-BOOST_AUTO_TEST_CASE(base58_array_test)
-{
-    byte_array<25> converted;
-    BOOST_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
     const byte_array<25> expected
     {
         {
@@ -94,7 +103,9 @@ BOOST_AUTO_TEST_CASE(base58_array_test)
             0x64
         }
     };
-    BOOST_REQUIRE(converted == expected);
+    byte_array<25> converted;
+    BOOST_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
+    BOOST_REQUIRE_EQUAL(converted, expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
