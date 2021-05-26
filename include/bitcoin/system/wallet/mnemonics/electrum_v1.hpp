@@ -28,7 +28,7 @@
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
-#include <bitcoin/system/wallet/keys/hd_private.hpp>
+#include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -46,6 +46,7 @@ class BC_API electrum_v1
 public:
     typedef wallet::dictionary<1626> dictionary;
     typedef wallet::dictionaries<2, dictionary::size()> dictionaries;
+    typedef std::vector<bool> bit_vector;
 
     /// Publish Electrum v1 word lists.
     static const dictionary::words en;
@@ -79,9 +80,7 @@ public:
     /// Valid word counts (12 or 24 words).
     static bool is_valid_word_count(size_t count);
 
-    /// This instance is initialized invalid, but can be assigned to.
     electrum_v1();
-
     electrum_v1(const electrum_v1& other);
 
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).
@@ -92,18 +91,44 @@ public:
     electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
     electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
 
-    /// Derive the "wallet seed" from mnemonic entropy.
-    /// The wallet seed is also the wallet "master private key".
-    /// ec_private.point() is the wallet "master public key".
+    /// Derive the "wallet seed"/"master private key" from mnemonic entropy.
+    /// ec_private.secret() is the "wallet seed"/"master private key".
+    /// ec_private.to_public().point() is the compressed "master public key".
+    /// Context sets the version byte for derived payment addresses.
     ec_private to_seed(const context& context=btc_mainnet_p2kh) const;
 
-    /// Derive the hd root private key from the wallet seed.
-    /// The original seed cannot be obtained from the key.
-    hd_private to_key(const context& context=btc_mainnet_p2kh) const;
+    /// Derive the wallet "master public key" from entropy.
+    /// ec_public.point() is the compressed "master public key".
+    /// Context sets the version byte for derived payment addresses.
+    ec_public to_public_key(const context& context=btc_mainnet_p2kh) const;
+
+    /// True if the mnemonic words were incorrectly generated.
+    /// An overflow not affect the validity of the object.
+    /// If true then entropy will not round trip, but the seed is considered
+    /// valid by Electrum (for reasons of backward compatibility). This can only
+    /// result from manually-generated menmonics, which were inadvertently
+    /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
+    bool is_overflow() const;
+
+    /// One overflow flag for each word triplet. If is_overflow is false then
+    /// is all false. Can be used to contruct actual entropy by prepending 0x1
+    /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
+    /// populated to the length [word-count / word_multiple] if the instance is
+    /// word-initialized and valid, otherwise the value is empty.
+    const bit_vector& overflows() const;
 
 protected:
+    typedef struct
+    {
+        data_chunk entropy;
+        bit_vector overflows;
+        data_chunk overflowed_entropy() const;
+    } result;
+
     /// Constructors.
     electrum_v1(const data_chunk& entropy, const string_list& words,
+        language identifier);
+    electrum_v1(const result& result, const string_list& words,
         language identifier);
 
     /// Map entropy to entropy bit count (128 or 256 bits).
@@ -118,9 +143,9 @@ protected:
     /// Map entropy size to word count (12 or 24 words).
     static size_t word_count(const data_slice& entropy);
 
-    static data_chunk decoder(const string_list& words, language identifier);
+    static result decoder(const string_list& words, language identifier);
     static string_list encoder(const data_chunk& entropy, language identifier);
-    static ec_secret strecher(const data_chunk& entropy);
+    static ec_secret strecher(const result& result);
 
     electrum_v1 from_entropy(const data_chunk& entropy, language identifier) const;
     electrum_v1 from_words(const string_list& words, language identifier) const;
@@ -128,6 +153,9 @@ protected:
 private:
     // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.
     static const dictionaries dictionaries_;
+
+    // Retain the overflow state for a manually-generated mnemonic. 
+    bit_vector overflows_;
 };
 
 } // namespace wallet

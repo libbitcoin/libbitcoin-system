@@ -31,196 +31,195 @@ using namespace bc::system::wallet;
 namespace test {
 namespace mnemonics_electrum_v1 {
 
+typedef electrum_v1::bit_vector overflow_bits;
+
 struct electrum_v1_vector
 {
     language lingo;
     std::string mnemonic;
     data_chunk entropy;
-    std::string key;
+    ec_uncompressed key;
     context network;
+
+    string_list words() const
+    {
+        return split(mnemonic);
+    }
+
+    // Overflow bug testing.
+
+    overflow_bits overflows_;
+    std::string overflow_mnemonic_;
+
+    bool is_overflow() const
+    {
+        return !overflow_mnemonic_.empty();
+    }
+
+    overflow_bits overflows() const
+    {
+        return is_overflow() ? overflows_ : overflow_bits(words().size() / 3u);
+    }
+
+    std::string entropy_mnemonic() const
+    {
+        return is_overflow() ? overflow_mnemonic_ : mnemonic;
+    }
+
+    string_list entropy_words() const
+    {
+        return split(entropy_mnemonic());
+    }
+
+    ec_uncompressed entropy_key() const
+    {
+        return is_overflow() ? key : ec_uncompressed{};
+    }
 };
 
 typedef std::vector<electrum_v1_vector> electrum_v1_vectors;
 
-// Electrum v1 mnemonic validation algorithm (from Electrum).
-// github.com/spesmilo/electrum/blob/master/electrum/old_mnemonic.py
-// This was used to generate the test vectors below.
-//
-//words = [
-//"like",
-//"just",
-//  ...
-//"weapon",
-//"weary"
-//]
-// 
-//n = 1626
-//
-//def mn_encode( message ):
-//    out = []
-//    for i in range(len(message)/8):
-//        word = message[8*i:8*i+8]
-//        x = int(word, 16)
-//        w1 = (x%n)
-//        w2 = ((x/n) + w1)%n
-//        w3 = ((x/n/n) + w2)%n
-//        out += [ words[w1], words[w2], words[w3] ]
-//    return out
-//
-//def mn_decode( wlist ):
-//    out = ''
-//    for i in range(len(wlist)/3):
-//        word1, word2, word3 = wlist[3*i:3*i+3]
-//        w1 =  words.index(word1)
-//        w2 = (words.index(word2))%n
-//        w3 = (words.index(word3))%n
-//        x = w1 +n*((w2-w1)%n) +n*n*((w3-w2)%n)
-//        out += '%08x'%x
-//    return out
-//
-// print(mn_encode("c6e913bc397bef94c6e913bc397bef94"))
-// print(mn_decode(['blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith']))
-// ...
-// ['blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith', 'blind', 'faith']
-// c6e913bc397bef94c6e913bc397bef94
-
-const auto mnemonic =
-    "powerful random nobody notice nothing important "
-    "anyway look away hidden message over";
-
-const auto master_public_key = "04"
-    "e9d4b7866dd1e91c862aebf62a49548c7dbf7bcc6e4b7b8c9da820c7737968df"
-    "9c09d5a3e271dc814a29981f81b3faaf2737b551ef5dcc6189cf0f8252c442b3";
-
-// Wrapper avoids static initialization race between vectors and hd_private.
-electrum_v1_vectors vectors()
+// Vectors verified using: electrum/old_mnemonic.py
+electrum_v1_vectors vectors_electrum
 {
-
-    static const electrum_v1_vectors delayed_initialize_vectors
+    electrum_v1_vector
     {
-        electrum_v1_vector
-        {
-            // electrum/tests/test_wallet_vertical.py#L153
-            // electrum/tests/test_wallet_vertical.py#L2952
-            // mpk: e9d4b7866dd1e91c862aebf62a49548c7dbf7bcc6e4b7b8c9da820c7737968df9c09d5a3e271dc814a29981f81b3faaf2737b551ef5dcc6189cf0f8252c442b3
-            language::en,
-            "powerful random nobody notice nothing important anyway look away hidden message over",
-            base16_chunk("e440b7ac4913c354f1c8d7011ccc9764"),
-            "xprv9s21ZrQH143K2d2hyk2XNBAcwpHuLKp12yifaDbS3dT2Ed9FB969CBr2uUyuYnvu3nUiWv7cWXWC36rHxZ5JQjkACk8jMBDfupZ8cRhNeRS",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            // electrum/tests/test_wallet_vertical.py#L2210
-            // mpk: cd805ed20aec61c7a8b409c121c6ba60a9221f46d20edbc2be83ebd91460e97937cd7d782e77c1cb08364c6bc1c98bc040fdad53f22f29f7d3a85c8e51f9c875
-            language::en,
-            "alone body father children lead goodbye phone twist exist grass kick join",
-            base16_chunk("749a03149d2d16001fc3c30cdc8d1600"),
-            // backfilled:
-            "xprv9s21ZrQH143K3YSbAXLMPCzJso5QAarQksAGc5rQCyZCBfw4Rj2PqVLFNgezSBhktYkiL3Ta2stLPDF9yZtLMaxk6Spiqh3DNFG8p8MVeEC",
-            btc_mainnet_p2kh
-        },
+        // github.com/spesmilo/electrum/issues/3149
+        language::en,
+        "hurry idiot prefer sunset mention mist jaw inhale impossible kingdom rare squeeze",
+        base16_chunk("025d2f2d00503691003ca78900ca155c"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+        btc_mainnet_p2kh,
+        // [025d2f2d][00503691][(1)003ca789][00ca155c]
+        overflow_bits{ false, false, true, false },
+        "hurry idiot prefer sunset mention mist ship baby bright kingdom rare squeeze",
+    },
+    electrum_v1_vector
+    {
+        // electrum/tests/test_wallet_vertical.py
+        language::en,
+        "alone body father children lead goodbye phone twist exist grass kick join",
+        base16_chunk("14039a7400162d9d0cc3c31f00168ddc"),
+        base16_array("04""cd805ed20aec61c7a8b409c121c6ba60a9221f46d20edbc2be83ebd91460e97937cd7d782e77c1cb08364c6bc1c98bc040fdad53f22f29f7d3a85c8e51f9c875"),
+        btc_mainnet_p2kh,
+        // [14039a74][(1)00162d9d][0cc3c31f][(1)00168ddc]
+        overflow_bits{ false, true, false, true },
+        "alone body father alas forgot forgot phone twist exist ask unable unable"
+    },
+    electrum_v1_vector
+    {
+        // electrum/tests/test_wallet_vertical.py
+        language::en,
+        "powerful random nobody notice nothing important anyway look away hidden message over",
+        base16_chunk("acb740e454c3134901d7c8f16497cc1c"),
+        base16_array("04""e9d4b7866dd1e91c862aebf62a49548c7dbf7bcc6e4b7b8c9da820c7737968df9c09d5a3e271dc814a29981f81b3faaf2737b551ef5dcc6189cf0f8252c442b3"),
+        btc_mainnet_p2kh,
+        // [acb740e4][54c31349][01d7c8f1][6497cc1c]
+        overflow_bits{ false, false, false, false },
+        ""
+    }
+};
 
-        electrum_v1_vector
-        {
-            language::en,
-            "like like like like like like like like like like like like",
-            base16_chunk("00000000000000000000000000000000"),
-            "xprv9s21ZrQH143K2JbpEjGU94NcdKSASB7LuXvJCTsxuENcGN1nVG7QjMnBZ6zZNcJaiJogsRaLaYFFjs48qt4Fg7y1GnmrchQt1zFNu6QVnta",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "like like like like like like like like like like like like like like like like like like like like like like like like",
-            base16_chunk("0000000000000000000000000000000000000000000000000000000000000000"),
-            "tprv8ZgxMBicQKsPe2MzCEmfUKuUyaerdtY5tR54SKCw3jKsmrjXixa4NFZTqjDvntbEnZPBL861gQ1FNQCDGaCBEpH7iZNWUHqexCgDRha6qRu",
-            btc_testnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "fail husband howl fail husband howl fail husband howl fail husband howl",
-            base16_chunk("ffffffffffffffffffffffffffffffff"),
-            "xprv9s21ZrQH143K4QPkuYJSfBgCeAp1QAfdjrncnwaxixCaDVHtRXN54iV7zfpHTRWGgGCVgun35Jgq2BwoAboDrvyMU1YEmd4LPawcbJiHJ2G",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl",
-            base16_chunk("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-            "tprv8ZgxMBicQKsPd832P7W6TgCXujftB87yVhuambjjoo77bVjG3E1StNnyGrmLuLtM3NDMt7rohJXC56iDHGiDmugobkBfpwqyXYbzUD6LQ9A",
-            btc_testnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "foe foe foe foe foe foe foe foe foe foe foe foe",
-            base16_chunk("30060000300600003006000030060000"),
-            "xprv9s21ZrQH143K3ntSzz7MWLryYLSLJQcQKBFdEewciQJ4j3jTaTLH9i1ypqZCkgEPRo4j2uSp4NUAETaV9BKT5HCcnaC5beD8QsruYwAETh9",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe",
-            base16_chunk("3006000030060000300600003006000030060000300600003006000030060000"),
-            "tprv8ZgxMBicQKsPcvKG7ngskjC2xoLQ3QtRdFAmLv8U2grMWc5NGDbaPcZNCPMyXM5vHqSXc5tchthxW8DLkpFsH6bvpHRzrRhnhv8uXvAKePF",
-            btc_testnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::pt,
-            "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
-            base16_chunk("30060000300600003006000030060000"),
-            "xprv9s21ZrQH143K3ntSzz7MWLryYLSLJQcQKBFdEewciQJ4j3jTaTLH9i1ypqZCkgEPRo4j2uSp4NUAETaV9BKT5HCcnaC5beD8QsruYwAETh9",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::pt,
-            "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
-            base16_chunk("3006000030060000300600003006000030060000300600003006000030060000"),
-            "tprv8ZgxMBicQKsPcvKG7ngskjC2xoLQ3QtRdFAmLv8U2grMWc5NGDbaPcZNCPMyXM5vHqSXc5tchthxW8DLkpFsH6bvpHRzrRhnhv8uXvAKePF",
-            btc_testnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "blind faith blind faith blind faith blind faith blind faith blind faith",
-            base16_chunk("bc13e9c694ef7b39bc13e9c694ef7b39"),
-            "xprv9s21ZrQH143K3hSVhNZzLwbs5wVLEePFhqMYDnE8gY1uN4teV9J7dzQv4BPx4mCnqBeuj9YDPYMnKs1gEJ7qRs5EycGxYBANzgFbJjEd1Bx",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::en,
-            "blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith",
-            base16_chunk("bc13e9c694ef7b39bc13e9c694ef7b39bc13e9c694ef7b39bc13e9c694ef7b39"),
-            "tprv8ZgxMBicQKsPePuBrXpFdiwWBLB5kC486mKYg57DghzrSK4WKapEGFYo7e94XzjxQPq5jwM7p4nswPQyBgPEysBtwWp4sBqbUuzMEZPT1qB",
-            btc_testnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::pt,
-            "gear ansioso medusa bicuspide lauto ciatico jesus doping iceberg empuxo harpista feixe",
-            base16_chunk("5089bd85f14b53a3db987b362240fcea"),
-            "xprv9s21ZrQH143K2fdDmJuESB5D5PmTSk5pvFUmt15LdJTxFXD6PB84GyQMfZZq3kmYPX9HGeNtp238i1UMWbLmvU7q2aQWf524kjF1E9a5MvF",
-            btc_mainnet_p2kh
-        },
-        electrum_v1_vector
-        {
-            language::pt,
-            "gear ansioso medusa bicuspide lauto ciatico jesus doping iceberg empuxo harpista feixe gear ansioso medusa bicuspide lauto ciatico jesus doping iceberg empuxo harpista feixe",
-            base16_chunk("5089bd85f14b53a3db987b362240fcea5089bd85f14b53a3db987b362240fcea"),
-            "tprv8ZgxMBicQKsPdzodqoReoGJPeBhMXcJ5DBp9yPZby5zC4axqffvzgLCcRcFGzcXCFJiUNN7K6k5LKSJhwFtDCFNtv2m1tByGusiU2wDc2iW",
-            btc_testnet_p2kh
-        }
-    };
-
-    return delayed_initialize_vectors;
-}
+// Vectors generated using: electrum/old_mnemonic.py
+electrum_v1_vectors vectors_local
+{
+    electrum_v1_vector
+    {
+        // Minium value and length entropy.
+        language::en,
+        "like like like like like like like like like like like like",
+        base16_chunk("00000000000000000000000000000000"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Minium value and maximum length entropy.
+        language::en,
+        "like like like like like like like like like like like like like like like like like like like like like like like like",
+        base16_chunk("0000000000000000000000000000000000000000000000000000000000000000"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Maximum value for minimum length entropy.
+        language::en,
+        "fail husband howl fail husband howl fail husband howl fail husband howl",
+        base16_chunk("ffffffffffffffffffffffffffffffff"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Maximum value and maximum length entropy.
+        language::en,
+        "fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl",
+        base16_chunk("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Same words will never overflow (no distance).
+        language::en,
+        "foe foe foe foe foe foe foe foe foe foe foe foe",
+        base16_chunk("00000630000006300000063000000630"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Double length of previous.
+        language::en,
+        "foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe",
+        base16_chunk("0000063000000630000006300000063000000630000006300000063000000630"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Half of previous, switch to pt.
+        language::pt,
+        "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
+        base16_chunk("00000630000006300000063000000630"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Double length of previous.
+        language::pt,
+        "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
+        base16_chunk("0000063000000630000006300000063000000630000006300000063000000630"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // This was a lucky guess non-overflow, words are close together.
+        language::en,
+        "blind faith blind faith blind faith blind faith blind faith blind faith",
+        base16_chunk("c6e913bc397bef94c6e913bc397bef94"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Double length of previous.
+        language::en,
+        "blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith",
+        base16_chunk("c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Another lucky guess non-overflow.
+        language::pt,
+        "gear ansioso medusa bicuspide lauto ciatico jesus doping iceberg empuxo harpista feixe",
+        base16_chunk("85bd8950a3534bf1367b98dbeafc4022"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    },
+    electrum_v1_vector
+    {
+        // Double length of previous and switch to en.
+        language::en,
+        "bite start agree mother buy dear swallow carry knock parent gift offer bite start agree mother buy dear swallow carry knock parent gift offer",
+        base16_chunk("85bd8950a3534bf1367b98dbeafc402285bd8950a3534bf1367b98dbeafc4022"),
+        base16_array("04""00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+    } 
+};
 
 // invalid for length
 const string_list words2
@@ -235,20 +234,27 @@ const string_list mixed_words12
     "blind", "faith", "blind", "faith", "blind", "faith"
 };
 
-// valid
+// valid (non-overflow)
 const string_list words12
 {
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith", "blind", "faith", "blind", "faith"
 };
 
-// valid
+// valid (non-overflow)
 const string_list words24
 {
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith", "blind", "faith", "blind", "faith",
     "blind", "faith", "blind", "faith", "blind", "faith"
+};
+
+// valid (two overflows)
+const string_list two_overflows12
+{
+    "blind", "faith", "blind", "jaw", "inhale", "impossible",
+    "blind", "faith", "blind", "jaw", "inhale", "impossible"
 };
 
 // invalid for length
@@ -292,22 +298,26 @@ public:
         return electrum_v1::word_count(entropy);
     }
 
-    static data_chunk decoder(const string_list& words, language identifier)
+    static electrum_v1::result decoder(const string_list& words,
+        language identifier)
     {
         return electrum_v1::decoder(words, identifier);
     }
 
-    static string_list encoder(const data_chunk& entropy, language identifier)
+    static string_list encoder(const data_chunk& entropy,
+        language identifier)
     {
         return electrum_v1::encoder(entropy, identifier);
     }
 
-    electrum_v1 from_entropy(const data_chunk& entropy, language identifier) const
+    electrum_v1 from_entropy(const data_chunk& entropy,
+        language identifier) const
     {
         return electrum_v1::from_entropy(entropy, identifier);
     }
 
-    electrum_v1 from_words(const string_list& words, language identifier) const
+    electrum_v1 from_words(const string_list& words,
+        language identifier) const
     {
         return electrum_v1::from_words(words, identifier);
     }

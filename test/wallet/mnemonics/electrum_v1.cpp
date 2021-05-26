@@ -361,12 +361,12 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_words__mixed_words__invalid)
 
 // construct entropy
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___empty__invalid)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__empty__invalid)
 {
     BOOST_REQUIRE(!electrum_v1(data_chunk{}));
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___8_bytes__invalid)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__8_bytes__invalid)
 {
     const data_chunk entropy(8, 0x42);
     electrum_v1 instance(entropy);
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___8_bytes__invalid)
     BOOST_REQUIRE(instance.entropy().empty());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___16_bytes__valid_expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__16_bytes__valid_expected)
 {
     const data_chunk entropy(16, 0x42);
     electrum_v1 instance(entropy);
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___16_bytes__valid_expected)
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___32_bytes__valid_expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__32_bytes__valid_expected)
 {
     const data_chunk entropy(32, 0x42);
     electrum_v1 instance(entropy);
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___32_bytes__valid_expected)
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___64_bytes__invalid)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__64_bytes__invalid)
 {
     const data_chunk entropy(64, 0x42);
     electrum_v1 instance(entropy);
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___64_bytes__invalid)
     BOOST_REQUIRE(instance.entropy().empty());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___explicit_language__valid_expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__explicit_language__valid_expected)
 {
     const data_chunk entropy(16, 0x42);
     electrum_v1 instance(entropy, language::pt);
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___explicit_language__valid_e
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy___invalid_language__invalid)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__invalid_language__invalid)
 {
     const data_chunk entropy(16, 0x42);
     electrum_v1 instance(entropy, language::ko);
@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_minimum_entropy__always__valid_expec
 
 // construct maximum_entropy
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy___always__valid_expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy__always__valid_expected)
 {
     const electrum_v1::maximum_entropy entropy{ 0x42 };
     electrum_v1 instance(entropy);
@@ -433,9 +433,9 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy___always__valid_expe
     BOOST_REQUIRE_EQUAL(instance.entropy(), to_chunk(entropy));
 }
 
-// construct protected
+// construct protected entropy
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected__empty__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_entropy__empty__expected)
 {
     const accessor instance({}, {}, language::ja);
     BOOST_REQUIRE(!instance);
@@ -444,7 +444,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected__empty__expected)
     BOOST_REQUIRE(instance.lingo() == language::ja);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected__not_empty__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_entropy__not_empty__expected)
 {
     const data_chunk entropy(5, 0x42);
     const string_list words(5, "word");
@@ -455,33 +455,141 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected__not_empty__expected)
     BOOST_REQUIRE(instance.lingo() == language::ja);
 }
 
+// construct protected result
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_result__todo__todo)
+{
+    // Also update other constructor tests to verify overflow.
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
 #endif // CONSTRUCTORS
 
 #ifdef PUBLIC_METHODS
 
-// to_key
+// to_public_key
 
-BOOST_AUTO_TEST_CASE(electrum_v1__to_key___invalid__invalid)
+BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__invalid__invalid)
 {
     electrum_v1 instance;
     BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(!instance.to_key());
+    BOOST_REQUIRE(!instance.to_public_key());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__to_key___valid__valid)
+BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__valid__default_context__valid)
 {
     const electrum_v1 instance(words12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.to_key());
+    BOOST_REQUIRE(instance.to_public_key());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__to_key___network__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__valid_explicit_context__valid)
 {
     const electrum_v1 instance(words12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(starts_with(instance.to_key().encoded(), "xprv"));
-    BOOST_REQUIRE(starts_with(instance.to_key(btc_mainnet_p2kh).encoded(), "xprv"));
-    BOOST_REQUIRE(starts_with(instance.to_key(btc_testnet_p2kh).encoded(), "tprv"));
+    BOOST_REQUIRE(instance.to_public_key(btc_mainnet_p2kh));
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// to_seed
+
+BOOST_AUTO_TEST_CASE(electrum_v1__to_seed__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// is_overflow
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy_invalid__false)
+{
+    const electrum_v1 instance(data_chunk{});
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(!instance.is_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy__false)
+{
+    const electrum_v1 instance(data_chunk(16, 0x00));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.is_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__false)
+{
+    const electrum_v1 instance(words2);
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(!instance.is_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_not_overflowed__false)
+{
+    const electrum_v1 instance(words12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.is_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_overflowed__true)
+{
+    const electrum_v1 instance(two_overflows12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.is_overflow());
+}
+
+// overflows
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
+{
+    const electrum_v1 instance(data_chunk{});
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
+{
+    const electrum_v1 instance(data_chunk(32, 0x00));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__empty)
+{
+    const electrum_v1 instance(words2);
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
+{
+    const electrum_v1 instance(words24);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.is_overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 24u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(!overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(!overflows[3]);
+    BOOST_REQUIRE(!overflows[4]);
+    BOOST_REQUIRE(!overflows[5]);
+    BOOST_REQUIRE(!overflows[6]);
+    BOOST_REQUIRE(!overflows[7]);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
+{
+    const electrum_v1 instance(two_overflows12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.is_overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 12u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(overflows[3]);
 }
 
 #endif // PUBLIC_METHODS
@@ -536,7 +644,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__inequality_move__always__expected)
 
 // operator>>
 
-BOOST_AUTO_TEST_CASE(electrum_v1__deserialize___valid__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__deserialize__valid__expected)
 {
     std::istringstream in{ join(words12) };
     electrum_v1 instance;
@@ -555,7 +663,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__deserialize__invalid__invalid)
 
 // operator<<
 
-BOOST_AUTO_TEST_CASE(electrum_v1__serialize___valid__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__serialize__valid__expected)
 {
     std::ostringstream out;
     electrum_v1 instance(words12);
@@ -576,344 +684,72 @@ BOOST_AUTO_TEST_CASE(electrum_v1__serialize__invalid__invalid)
 
 #ifdef VERIFIED_VECTORS
 
-// We generated these vectors, so there is no need for vector verifications.
-
-////BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors__expected)
-////{
-////    for (const auto& vector: vectors())
-////    {
-////        const electrum_v1 instance(vector.mnemonic, vector.lingo);
-////        BOOST_REQUIRE(instance);
-////        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-////        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-////        BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    ////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-////    }
-////}
-
-////BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors__expected)
-////{
-////    for (const auto& vector: vectors())
-////    {
-////        const electrum_v1 instance(vector.entropy, vector.lingo);
-////        BOOST_REQUIRE(instance);
-////        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-////        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-////        BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    ////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-////    }
-////}
-
-// sentence
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors0__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_electrum__expected)
 {
-    const auto vector = vectors()[0];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
+    for (const auto& vector: vectors_electrum)
+    {
+        const electrum_v1 instance(vector.mnemonic, vector.lingo);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+        ////BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.key);
+
+        // Verify overflows when testing wordlists.
+        BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
+        BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
+    }
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors1__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors_electrum__expected)
 {
-    const auto vector = vectors()[1];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
+    for (const auto& vector: vectors_electrum)
+    {
+        const electrum_v1 instance(vector.entropy, vector.lingo);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+
+        // Use overflow expectations when testing from entropy.
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.entropy_words());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.entropy_mnemonic());
+        ////BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.entropy_key());
+    }
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors2__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_local__expected)
 {
-    const auto vector = vectors()[2];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
+    for (const auto& vector: vectors_local)
+    {
+        const electrum_v1 instance(vector.mnemonic, vector.lingo);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
+        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+        ////BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.key);
+
+        // Verify overflows when testing wordlists.
+        BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
+        BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
+    }
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors3__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors_local__expected)
 {
-    const auto vector = vectors()[3];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
+    for (const auto& vector: vectors_local)
+    {
+        const electrum_v1 instance(vector.entropy, vector.lingo);
+        BOOST_REQUIRE(instance);
+        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
+        BOOST_REQUIRE(instance.lingo() == vector.lingo);
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors4__expected)
-{
-    const auto vector = vectors()[4];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors5__expected)
-{
-    const auto vector = vectors()[5];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors6__expected)
-{
-    const auto vector = vectors()[6];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors7__expected)
-{
-    const auto vector = vectors()[7];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors8__expected)
-{
-    const auto vector = vectors()[8];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors9__expected)
-{
-    const auto vector = vectors()[9];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors10__expected)
-{
-    const auto vector = vectors()[10];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors11__expected)
-{
-    const auto vector = vectors()[11];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors12__expected)
-{
-    const auto vector = vectors()[12];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors13__expected)
-{
-    const auto vector = vectors()[13];
-    const electrum_v1 instance(vector.mnemonic, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-// entropy
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors0__expected)
-{
-    const auto vector = vectors()[0];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-////BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors1__expected)
-////{
-////    const auto vector = vectors()[1];
-////    const electrum_v1 instance(vector.entropy, vector.lingo);
-////    BOOST_REQUIRE(instance);
-////    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-////    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-////    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-////}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors2__expected)
-{
-    const auto vector = vectors()[2];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors3__expected)
-{
-    const auto vector = vectors()[3];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors4__expected)
-{
-    const auto vector = vectors()[4];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors5__expected)
-{
-    const auto vector = vectors()[5];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors6__expected)
-{
-    const auto vector = vectors()[6];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors7__expected)
-{
-    const auto vector = vectors()[7];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors8__expected)
-{
-    const auto vector = vectors()[8];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors9__expected)
-{
-    const auto vector = vectors()[9];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors10__expected)
-{
-    const auto vector = vectors()[10];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors11__expected)
-{
-    const auto vector = vectors()[11];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors12__expected)
-{
-    const auto vector = vectors()[12];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors13__expected)
-{
-    const auto vector = vectors()[13];
-    const electrum_v1 instance(vector.entropy, vector.lingo);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-    BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-    BOOST_REQUIRE(instance.lingo() == vector.lingo);
-////    BOOST_REQUIRE_EQUAL(instance.to_key(vector.network).encoded(), vector.key);
+        // Use overflow expectations when testing from entropy.
+        BOOST_REQUIRE_EQUAL(instance.words(), vector.entropy_words());
+        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.entropy_mnemonic());
+        ////BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.entropy_key());
+    }
 }
 
 #endif // VERIFIED_VECTORS
