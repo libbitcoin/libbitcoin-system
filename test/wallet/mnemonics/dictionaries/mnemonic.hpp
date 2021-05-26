@@ -33,19 +33,23 @@ namespace dictionaries_mnemonic {
 static ptrdiff_t intersection(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
-    return std::count_if(left.begin(), left.end(), [&](const char test[])
-    {
-        return std::find(right.begin(), right.end(), test) != right.end();
-    });
+    return std::count_if(left.word.begin(), left.word.end(),
+        [&](const char test[])
+        {
+            return std::find(right.word.begin(), right.word.end(), test) !=
+                right.word.end();
+        });
 }
 
 static bool intersects(const mnemonic::dictionary::words& left,
     const mnemonic::dictionary::words& right)
 {
-    return std::any_of(left.begin(), left.end(), [&](const char test[])
-    {
-        return std::find(right.begin(), right.end(), test) != right.end();
-    });
+    return std::any_of(left.word.begin(), left.word.end(),
+        [&](const char test[])
+        {
+            return std::find(right.word.begin(), right.word.end(), test) !=
+                right.word.end();
+        });
 }
 
 static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
@@ -53,13 +57,15 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 {
     ptrdiff_t count = 0;
 
-    for (auto outer = left.begin(); outer != left.end(); ++outer)
+    for (auto outer = left.word.begin(); outer != left.word.end(); ++outer)
     {
-        const auto inner = std::find(right.begin(), right.end(), *outer);
-        if (inner != right.end())
+        const auto inner = std::find(right.word.begin(), right.word.end(),
+            *outer);
+
+        if (inner != right.word.end())
         {
-            const auto inner_index = std::distance(right.begin(), inner);
-            const auto outer_index = std::distance(left.begin(), outer);
+            const auto inner_index = std::distance(right.word.begin(), inner);
+            const auto outer_index = std::distance(left.word.begin(), outer);
             count += (inner_index == outer_index ? 0 : 1);
         }
     }
@@ -69,13 +75,27 @@ static ptrdiff_t deviation(const mnemonic::dictionary::words& left,
 
 static bool abnormal(const mnemonic::dictionary::words& words)
 {
-    return std::all_of(words.begin(), words.end(), [&](const char test[])
-    {
-        std::string copy = test;
-        to_compatibility_decomposition(copy);
-        to_lower(copy);
-        return test != copy;
-    });
+    return std::all_of(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            std::string copy = test;
+            to_compatibility_decomposition(copy);
+            to_lower(copy);
+            return test != copy;
+        });
+}
+
+static bool sorted(const mnemonic::dictionary::words& words)
+{
+    // Convert dictionary to string, otherwise pointers are compared.
+    string_list tokens(mnemonic::dictionary::size());
+    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
+        [](const char* token)
+        {
+            return token;
+        });
+
+    return is_sorted(tokens);
 }
 
 } // dictionaries_mnemonic

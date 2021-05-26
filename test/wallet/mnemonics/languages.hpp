@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_LANGUAGES_HPP
 #define LIBBITCOIN_SYSTEM_TEST_LANGUAGES_HPP
 
-#include <array>
 #include <bitcoin/system.hpp>
 
  // Avoid using namespace in shared headers, but okay here.
@@ -29,10 +28,11 @@ namespace test {
 namespace mnemonics_languages {
 
 const size_t test_dictionary_size = 10;
-typedef std::array<const char*, test_dictionary_size> test_words;
+typedef dictionary<test_dictionary_size>::words test_words;
 
 const test_words test_words_es
 {
+    true,
     {
         "ábaco",
         "abdomen",
@@ -49,6 +49,7 @@ const test_words test_words_es
 
 const test_words test_words_zh_Hans
 {
+    true,
     {
         "的",
         "一",
@@ -65,6 +66,7 @@ const test_words test_words_zh_Hans
 
 const test_words test_words_zh_Hant
 {
+    true,
     {
         "的",
         "一",

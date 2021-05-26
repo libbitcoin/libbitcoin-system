@@ -32,40 +32,60 @@ namespace dictionaries_electrum_v1 {
 
 bool abnormal(const electrum_v1::dictionary::words& words)
 {
-    return std::all_of(words.begin(), words.end(), [&](const char test[])
-    {
-        std::string copy = test;
-        to_compatibility_decomposition(copy);
-        to_lower(copy);
-        return test != copy;
-    });
+    return std::all_of(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            std::string copy = test;
+            to_compatibility_decomposition(copy);
+            to_lower(copy);
+            return test != copy;
+        });
 }
 
 static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
     const electrum_v1::dictionary::words& right)
 {
-    return std::count_if(left.begin(), left.end(), [&](const char test[])
-    {
-        return std::find(right.begin(), right.end(), test) != right.end();
-    });
-}
+    return std::count_if(left.word.begin(), left.word.end(),
+        [&](const char test[])
+        {
+            return std::find(right.word.begin(), right.word.end(), test) !=
+                right.word.end();
+        });
+    }
 
 static bool intersects(const electrum_v1::dictionary::words& left,
     const electrum::dictionary::words& right)
 {
-    return std::any_of(left.begin(), left.end(), [&](const char test[])
-    {
-        return std::find(right.begin(), right.end(), test) != right.end();
-    });
+    return std::any_of(left.word.begin(), left.word.end(),
+        [&](const char test[])
+        {
+            return std::find(right.word.begin(), right.word.end(), test) !=
+                right.word.end();
+        });
 }
 
 static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
     const electrum::dictionary::words& right)
 {
-    return std::count_if(left.begin(), left.end(), [&](const char test[])
+    return std::count_if(left.word.begin(), left.word.end(),
+        [&](const char test[])
     {
-        return std::find(right.begin(), right.end(), test) != right.end();
+        return std::find(right.word.begin(), right.word.end(), test) !=
+            right.word.end();
     });
+}
+
+static bool sorted(const electrum_v1::dictionary::words& words)
+{
+    // Convert dictionary to string, otherwise pointers are compared.
+    string_list tokens(mnemonic::dictionary::size());
+    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
+        [](const char* token)
+    {
+        return token;
+    });
+
+    return is_sorted(tokens);
 }
 
 } // dictionaries_electrum_v1

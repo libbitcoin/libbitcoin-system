@@ -61,42 +61,42 @@ BOOST_AUTO_TEST_CASE(dictionary__name__empty__expected)
 
 BOOST_AUTO_TEST_CASE(dictionary__at1__indexes__expected)
 {
-    BOOST_REQUIRE_EQUAL(instance.at(0), test_words_es[0]);
-    BOOST_REQUIRE_EQUAL(instance.at(1), test_words_es[1]);
-    BOOST_REQUIRE_EQUAL(instance.at(2), test_words_es[2]);
-    BOOST_REQUIRE_EQUAL(instance.at(3), test_words_es[3]);
-    BOOST_REQUIRE_EQUAL(instance.at(4), test_words_es[4]);
-    BOOST_REQUIRE_EQUAL(instance.at(5), test_words_es[5]);
-    BOOST_REQUIRE_EQUAL(instance.at(6), test_words_es[6]);
-    BOOST_REQUIRE_EQUAL(instance.at(7), test_words_es[7]);
-    BOOST_REQUIRE_EQUAL(instance.at(8), test_words_es[8]);
-    BOOST_REQUIRE_EQUAL(instance.at(9), test_words_es[9]);
+    BOOST_REQUIRE_EQUAL(instance.at(0), test_words_es.word[0]);
+    BOOST_REQUIRE_EQUAL(instance.at(1), test_words_es.word[1]);
+    BOOST_REQUIRE_EQUAL(instance.at(2), test_words_es.word[2]);
+    BOOST_REQUIRE_EQUAL(instance.at(3), test_words_es.word[3]);
+    BOOST_REQUIRE_EQUAL(instance.at(4), test_words_es.word[4]);
+    BOOST_REQUIRE_EQUAL(instance.at(5), test_words_es.word[5]);
+    BOOST_REQUIRE_EQUAL(instance.at(6), test_words_es.word[6]);
+    BOOST_REQUIRE_EQUAL(instance.at(7), test_words_es.word[7]);
+    BOOST_REQUIRE_EQUAL(instance.at(8), test_words_es.word[8]);
+    BOOST_REQUIRE_EQUAL(instance.at(9), test_words_es.word[9]);
     BOOST_REQUIRE_EQUAL(instance.at(10), "");
 }
 
 BOOST_AUTO_TEST_CASE(dictionary__at2__indexes__expected)
 {
     const auto words = instance.at({ 0, 2, 4, 6, 8, 10 });
-    BOOST_REQUIRE_EQUAL(words[0], test_words_es[0]);
-    BOOST_REQUIRE_EQUAL(words[1], test_words_es[2]);
-    BOOST_REQUIRE_EQUAL(words[2], test_words_es[4]);
-    BOOST_REQUIRE_EQUAL(words[3], test_words_es[6]);
-    BOOST_REQUIRE_EQUAL(words[4], test_words_es[8]);
+    BOOST_REQUIRE_EQUAL(words[0], test_words_es.word[0]);
+    BOOST_REQUIRE_EQUAL(words[1], test_words_es.word[2]);
+    BOOST_REQUIRE_EQUAL(words[2], test_words_es.word[4]);
+    BOOST_REQUIRE_EQUAL(words[3], test_words_es.word[6]);
+    BOOST_REQUIRE_EQUAL(words[4], test_words_es.word[8]);
     BOOST_REQUIRE_EQUAL(words[5], "");
 }
 
 BOOST_AUTO_TEST_CASE(dictionary__index1__words__expected)
 {
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[0]), 0);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[1]), 1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[2]), 2);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[3]), 3);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[4]), 4);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[5]), 5);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[6]), 6);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[7]), 7);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[8]), 8);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[9]), 9);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[0]), 0);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[1]), 1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[2]), 2);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[3]), 3);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[4]), 4);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[5]), 5);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[6]), 6);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[7]), 7);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[8]), 8);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[9]), 9);
     BOOST_REQUIRE_EQUAL(instance.index(""), -1);
 }
 
@@ -104,11 +104,11 @@ BOOST_AUTO_TEST_CASE(dictionary__index2__words__expected)
 {
     const auto indexes = instance.index(
     {
-        test_words_es[0],
-        test_words_es[2],
-        test_words_es[4],
-        test_words_es[6],
-        test_words_es[8],
+        test_words_es.word[0],
+        test_words_es.word[2],
+        test_words_es.word[4],
+        test_words_es.word[6],
+        test_words_es.word[8],
         ""
     });
     BOOST_REQUIRE_EQUAL(indexes[0], 0);
@@ -121,16 +121,16 @@ BOOST_AUTO_TEST_CASE(dictionary__index2__words__expected)
 
 BOOST_AUTO_TEST_CASE(dictionary__contains1__words__expected)
 {
-    BOOST_REQUIRE(instance.contains(test_words_es[0]));
-    BOOST_REQUIRE(instance.contains(test_words_es[1]));
-    BOOST_REQUIRE(instance.contains(test_words_es[2]));
-    BOOST_REQUIRE(instance.contains(test_words_es[3]));
-    BOOST_REQUIRE(instance.contains(test_words_es[4]));
-    BOOST_REQUIRE(instance.contains(test_words_es[5]));
-    BOOST_REQUIRE(instance.contains(test_words_es[6]));
-    BOOST_REQUIRE(instance.contains(test_words_es[7]));
-    BOOST_REQUIRE(instance.contains(test_words_es[8]));
-    BOOST_REQUIRE(instance.contains(test_words_es[9]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[0]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[1]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[2]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[3]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[4]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[5]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[6]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[7]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[8]));
+    BOOST_REQUIRE(instance.contains(test_words_es.word[9]));
     BOOST_REQUIRE(!instance.contains("foo"));
     BOOST_REQUIRE(!instance.contains("bar"));
     BOOST_REQUIRE(!instance.contains(""));
@@ -145,11 +145,11 @@ BOOST_AUTO_TEST_CASE(dictionary__contains2__valid_words__true)
 {
     BOOST_REQUIRE(instance.contains(
     {
-        test_words_es[0],
-        test_words_es[2],
-        test_words_es[4],
-        test_words_es[6],
-        test_words_es[8]
+        test_words_es.word[0],
+        test_words_es.word[2],
+        test_words_es.word[4],
+        test_words_es.word[6],
+        test_words_es.word[8]
     }));
 }
 
@@ -157,11 +157,11 @@ BOOST_AUTO_TEST_CASE(dictionary__contains2__invalid_word__false)
 {
     BOOST_REQUIRE(!instance.contains(
     {
-        test_words_es[0],
-        test_words_es[2],
+        test_words_es.word[0],
+        test_words_es.word[2],
         "foo",
-        test_words_es[6],
-        test_words_es[8]
+        test_words_es.word[6],
+        test_words_es.word[8]
     }));
 }
 

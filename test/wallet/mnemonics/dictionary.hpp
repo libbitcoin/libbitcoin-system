@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARY_HPP
 #define LIBBITCOIN_SYSTEM_TEST_DICTIONARY_HPP
 
-#include <array>
 #include <cstddef>
 #include <bitcoin/system.hpp>
 
@@ -30,11 +29,12 @@ namespace test {
 namespace mnemonics_dictionary {
 
 const size_t test_dictionary_size = 10;
-typedef std::array<const char*, test_dictionary_size> test_words;
+typedef dictionary<test_dictionary_size>::words test_words;
 
 // First 10 words of BIP39 es, first word not sorted for C compare (<).
 const test_words test_words_es
 {
+    false,
     {
         "ábaco",
         "abdomen",

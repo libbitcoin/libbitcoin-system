@@ -32,59 +32,78 @@ namespace dictionaries_electrum {
 
 static bool compressed(const electrum::dictionary::words& words)
 {
-    return std::any_of(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_compressed_form(test);
-    });
+    return std::any_of(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            return test != to_compressed_form(test);
+        });
 }
 
 static ptrdiff_t combinings(const electrum::dictionary::words& words)
 {
-    return std::count_if(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_non_combining_form(test);
-    });
+    return std::count_if(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            return test != to_non_combining_form(test);
+        });
 }
 
 static bool combined(const electrum::dictionary::words& words)
 {
-    return std::any_of(words.begin(), words.end(), [&](const char test[])
-    {
-        return test != to_non_combining_form(test);
-    });
+    return std::any_of(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            return test != to_non_combining_form(test);
+        });
 }
 
 static ptrdiff_t divergences(const mnemonic::dictionary::words& normal,
     const electrum::dictionary::words& test)
 {
     ptrdiff_t count = 0;
-    auto it = test.begin();
-    std::for_each(normal.begin(), normal.end(), [&](const char test[])
-    {
-        std::string copy = test;
-        to_compatibility_decomposition(copy);
-        to_lower(copy);
-        count += (*it++ != copy ? 1 : 0);
-    });
+    auto it = test.word.begin();
+    std::for_each(normal.word.begin(), normal.word.end(),
+        [&](const char test[])
+        {
+            std::string copy = test;
+            to_compatibility_decomposition(copy);
+            to_lower(copy);
+            count += (*it++ != copy ? 1 : 0);
+        });
 
     return count;
 }
 
 static ptrdiff_t abnormals(const electrum::dictionary::words& words)
 {
-    return std::count_if(words.begin(), words.end(), [&](const char test[])
+    return std::count_if(words.word.begin(), words.word.end(),
+        [&](const char test[])
+        {
+            std::string copy = test;
+            to_compatibility_decomposition(copy);
+            to_lower(copy);
+            return test != copy;
+        });
+}
+
+static bool sorted(const electrum::dictionary::words& words)
+{
+    // Convert dictionary to string, otherwise pointers are compared.
+    string_list tokens(mnemonic::dictionary::size());
+    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
+        [](const char* token)
     {
-        std::string copy = test;
-        to_compatibility_decomposition(copy);
-        to_lower(copy);
-        return test != copy;
+        return token;
     });
+
+    return is_sorted(tokens);
 }
 
 // This differs from BIP39 in nfkd normalization.
 // This was normalized after publication, so probably not updated.
 const electrum::dictionary::words electrum_es
 {
+    false,
     {
         "ábaco",
         "abdomen",
@@ -2141,6 +2160,7 @@ const electrum::dictionary::words electrum_es
 // This was normalized after publication, so probably not updated.
 const electrum::dictionary::words electrum_ja
 {
+    false,
     {
         "あいこくしん",
         "あいさつ",

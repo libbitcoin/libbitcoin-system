@@ -42,16 +42,22 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__count__all__expected)
 // This test ensures electrum dictionaries are a subset of mnemonic dictionaries.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
 {
-    BOOST_REQUIRE_EQUAL(electrum::en, mnemonic::en);
-    BOOST_REQUIRE_EQUAL(electrum::es, mnemonic::es);
-    BOOST_REQUIRE_EQUAL(electrum::it, mnemonic::it);
-    BOOST_REQUIRE_EQUAL(electrum::fr, mnemonic::fr);
-    BOOST_REQUIRE_EQUAL(electrum::cs, mnemonic::cs);
-    BOOST_REQUIRE_EQUAL(electrum::pt, mnemonic::pt);
-    BOOST_REQUIRE_EQUAL(electrum::ja, mnemonic::ja);
-    BOOST_REQUIRE_EQUAL(electrum::ko, mnemonic::ko);
-    BOOST_REQUIRE_EQUAL(electrum::zh_Hans, mnemonic::zh_Hans);
-    BOOST_REQUIRE_EQUAL(electrum::zh_Hant, mnemonic::zh_Hant);
+    BOOST_REQUIRE_EQUAL(electrum::en.word, mnemonic::en.word);
+    BOOST_REQUIRE_EQUAL(electrum::es.word, mnemonic::es.word);
+    BOOST_REQUIRE_EQUAL(electrum::it.word, mnemonic::it.word);
+    BOOST_REQUIRE_EQUAL(electrum::fr.word, mnemonic::fr.word);
+    BOOST_REQUIRE_EQUAL(electrum::cs.word, mnemonic::cs.word);
+    BOOST_REQUIRE_EQUAL(electrum::pt.word, mnemonic::pt.word);
+    BOOST_REQUIRE_EQUAL(electrum::ja.word, mnemonic::ja.word);
+    BOOST_REQUIRE_EQUAL(electrum::ko.word, mnemonic::ko.word);
+    BOOST_REQUIRE_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
+    BOOST_REQUIRE_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__sorted__unused_words__true)
+{
+    BOOST_REQUIRE(sorted(electrum::en) && electrum::en.sorted);
+    BOOST_REQUIRE(sorted(electrum::pt) && electrum::pt.sorted);
 }
 
 #ifdef WITH_ICU

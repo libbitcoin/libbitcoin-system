@@ -41,7 +41,7 @@ class dictionary
 public:
     typedef std::vector<size_t> search;
     typedef std::vector<int32_t> result;
-    typedef std::array<const char*, Size> words;
+    typedef struct { bool sorted; std::array<const char*, Size> word; } words;
     static_assert(Size <= static_cast<size_t>(max_int32), "dictionary");
 
     /// The number of words in the dictionary.

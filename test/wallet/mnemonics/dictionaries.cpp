@@ -90,11 +90,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__to_name__invalid_identifier__empty)
 
 BOOST_AUTO_TEST_CASE(dictionaries__at1__valid_languages__expected)
 {
-    BOOST_REQUIRE_EQUAL(instance.at(0, language::en), test_words_en[0]);
-    BOOST_REQUIRE_EQUAL(instance.at(1, language::es), test_words_es[1]);
-    BOOST_REQUIRE_EQUAL(instance.at(2, language::ja), test_words_ja[2]);
-    BOOST_REQUIRE_EQUAL(instance.at(3, language::zh_Hans), test_words_zh_Hans[3]);
-    BOOST_REQUIRE_EQUAL(instance.at(4, language::zh_Hant), test_words_zh_Hant[4]);
+    BOOST_REQUIRE_EQUAL(instance.at(0, language::en), test_words_en.word[0]);
+    BOOST_REQUIRE_EQUAL(instance.at(1, language::es), test_words_es.word[1]);
+    BOOST_REQUIRE_EQUAL(instance.at(2, language::ja), test_words_ja.word[2]);
+    BOOST_REQUIRE_EQUAL(instance.at(3, language::zh_Hans), test_words_zh_Hans.word[3]);
+    BOOST_REQUIRE_EQUAL(instance.at(4, language::zh_Hant), test_words_zh_Hant.word[4]);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__at1__invalid_language__empty)
@@ -110,11 +110,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__at1__invalid_index__empty)
 BOOST_AUTO_TEST_CASE(dictionaries__at2__zh_Hans__expected)
 {
     const auto words = instance.at({ 0, 2, 4, 6, 8, 10 }, language::zh_Hans);
-    BOOST_REQUIRE_EQUAL(words[0], test_words_zh_Hans[0]);
-    BOOST_REQUIRE_EQUAL(words[1], test_words_zh_Hans[2]);
-    BOOST_REQUIRE_EQUAL(words[2], test_words_zh_Hans[4]);
-    BOOST_REQUIRE_EQUAL(words[3], test_words_zh_Hans[6]);
-    BOOST_REQUIRE_EQUAL(words[4], test_words_zh_Hans[8]);
+    BOOST_REQUIRE_EQUAL(words[0], test_words_zh_Hans.word[0]);
+    BOOST_REQUIRE_EQUAL(words[1], test_words_zh_Hans.word[2]);
+    BOOST_REQUIRE_EQUAL(words[2], test_words_zh_Hans.word[4]);
+    BOOST_REQUIRE_EQUAL(words[3], test_words_zh_Hans.word[6]);
+    BOOST_REQUIRE_EQUAL(words[4], test_words_zh_Hans.word[8]);
     BOOST_REQUIRE_EQUAL(words[5], "");
 }
 
@@ -126,32 +126,32 @@ BOOST_AUTO_TEST_CASE(dictionaries__at2__none__empty)
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__valid_words__expected)
 {
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_en[0], language::en), 0);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[1], language::es), 1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja[2], language::ja), 2);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans[3], language::zh_Hans), 3);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant[4], language::zh_Hant), 4);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_en.word[0], language::en), 0);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[1], language::es), 1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja.word[2], language::ja), 2);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans.word[3], language::zh_Hans), 3);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant.word[4], language::zh_Hant), 4);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__incorrect_identifiers__not_found)
 {
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_en[0], language::zh_Hant), -1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_es[1], language::ja), -1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja[2], language::zh_Hans), -1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans[3], language::es), -1);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant[4], language::en), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_en.word[0], language::zh_Hant), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_es.word[1], language::ja), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja.word[2], language::zh_Hans), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans.word[3], language::es), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant.word[4], language::en), -1);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__overlapping_wordlists__expected)
 {
     // Order does not matter since these words overlap in the same position.
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans[3], language::zh_Hant), 3);
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant[3], language::zh_Hans), 3);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hans.word[3], language::zh_Hant), 3);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_zh_Hant.word[3], language::zh_Hans), 3);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__invalid_identifier__not_found)
 {
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_en[0], language::ko), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_en.word[0], language::ko), -1);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__invalid_word__not_found)
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(dictionaries__index1__invalid_word__not_found)
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__none_with_valid_word__not_found)
 {
-    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja[0], language::none), -1);
+    BOOST_REQUIRE_EQUAL(instance.index(test_words_ja.word[0], language::none), -1);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__index1__none_with_invalid_word__not_found)
@@ -173,12 +173,12 @@ BOOST_AUTO_TEST_CASE(dictionaries__index2__words__expected)
 {
     const auto indexes = instance.index(
     {
-        test_words_es[0],
-        test_words_es[2],
-        test_words_es[4],
-        test_words_es[6],
-        test_words_es[8],
-        test_words_zh_Hant[3]
+        test_words_es.word[0],
+        test_words_es.word[2],
+        test_words_es.word[4],
+        test_words_es.word[6],
+        test_words_es.word[8],
+        test_words_zh_Hant.word[3]
     }, language::es);
     BOOST_REQUIRE_EQUAL(indexes[0], 0);
     BOOST_REQUIRE_EQUAL(indexes[1], 2);
@@ -192,43 +192,43 @@ BOOST_AUTO_TEST_CASE(dictionaries__index2__none__empty)
 {
     const auto indexes = instance.index(
     {
-        test_words_es[0],
-        test_words_es[1],
-        test_words_es[2]
+        test_words_es.word[0],
+        test_words_es.word[1],
+        test_words_es.word[2]
     }, language::none);
     BOOST_REQUIRE(indexes.empty());
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__default_dictionary__expected)
 {
-    BOOST_REQUIRE(instance.contains(test_words_en[0]) == language::en);
-    BOOST_REQUIRE(instance.contains(test_words_es[1]) == language::es);
-    BOOST_REQUIRE(instance.contains(test_words_ja[2]) == language::ja);
+    BOOST_REQUIRE(instance.contains(test_words_en.word[0]) == language::en);
+    BOOST_REQUIRE(instance.contains(test_words_es.word[1]) == language::es);
+    BOOST_REQUIRE(instance.contains(test_words_ja.word[2]) == language::ja);
     BOOST_REQUIRE(instance.contains("foo") == language::none);
     BOOST_REQUIRE(instance.contains("") == language::none);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__explicit_dictionary__expected)
 {
-    BOOST_REQUIRE(instance.contains(test_words_ja[2], language::ja) == language::ja);
+    BOOST_REQUIRE(instance.contains(test_words_ja.word[2], language::ja) == language::ja);
     BOOST_REQUIRE(instance.contains("foo", language::none) == language::none);
     BOOST_REQUIRE(instance.contains("", language::none) == language::none);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__incorrect_explicit_dictionary__none)
 {
-    BOOST_REQUIRE(instance.contains(test_words_en[0], language::ja) == language::none);
+    BOOST_REQUIRE(instance.contains(test_words_en.word[0], language::ja) == language::none);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__invalid_explicit_dictionary__none)
 {
-    BOOST_REQUIRE(instance.contains(test_words_en[0], language::ko) == language::none);
+    BOOST_REQUIRE(instance.contains(test_words_en.word[0], language::ko) == language::none);
 }
 
 BOOST_AUTO_TEST_CASE(dictionaries__contains1__redundant_wordlists__expected)
 {
     // Search order is guaranteed, returns first match.
-    const auto lingo = instance.contains(test_words_zh_Hans[3]);
+    const auto lingo = instance.contains(test_words_zh_Hans.word[3]);
     BOOST_REQUIRE(lingo == language::zh_Hans);
 }
 
@@ -241,11 +241,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains2__valid_words__expected)
 {
     BOOST_REQUIRE(instance.contains(
     {
-        test_words_es[0],
-        test_words_es[2],
-        test_words_es[4],
-        test_words_es[6],
-        test_words_es[8]
+        test_words_es.word[0],
+        test_words_es.word[2],
+        test_words_es.word[4],
+        test_words_es.word[6],
+        test_words_es.word[8]
     }, language::es) == language::es);
 }
 
@@ -253,11 +253,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains2__valid_words_none__expected)
 {
     BOOST_REQUIRE(instance.contains(
     {
-        test_words_es[1],
-        test_words_es[3],
-        test_words_es[5],
-        test_words_es[7],
-        test_words_es[9]
+        test_words_es.word[1],
+        test_words_es.word[3],
+        test_words_es.word[5],
+        test_words_es.word[7],
+        test_words_es.word[9]
     }, language::none) == language::es);
 }
 
@@ -265,11 +265,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains2__inconsistent_words_none__none)
 {
     BOOST_REQUIRE(instance.contains(
     {
-        test_words_es[1],
-        test_words_es[3],
-        test_words_zh_Hant[5],
-        test_words_es[7],
-        test_words_es[9]
+        test_words_es.word[1],
+        test_words_es.word[3],
+        test_words_zh_Hant.word[5],
+        test_words_es.word[7],
+        test_words_es.word[9]
     }, language::none) == language::none);
 }
 
@@ -277,11 +277,11 @@ BOOST_AUTO_TEST_CASE(dictionaries__contains2__mismatched_identifier__none)
 {
     BOOST_REQUIRE(instance.contains(
     {
-        test_words_es[1],
-        test_words_es[3],
-        test_words_es[5],
-        test_words_es[7],
-        test_words_es[9]
+        test_words_es.word[1],
+        test_words_es.word[3],
+        test_words_es.word[5],
+        test_words_es.word[7],
+        test_words_es.word[9]
     }, language::ja) == language::none);
 }
 

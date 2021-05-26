@@ -25,6 +25,7 @@ namespace wallet {
 // github.com/spesmilo/electrum/blob/master/electrum/old_mnemonic.py
 const electrum_v1::dictionary::words electrum_v1::en
 {
+    false,
     {
         "like",
         "just",
@@ -1658,6 +1659,7 @@ const electrum_v1::dictionary::words electrum_v1::en
 // github.com/spesmilo/electrum/blob/master/electrum/wordlist/portuguese.txt
 const electrum_v1::dictionary::words electrum_v1::pt
 {
+    false,
     {
         "abaular",
         "abdominal",

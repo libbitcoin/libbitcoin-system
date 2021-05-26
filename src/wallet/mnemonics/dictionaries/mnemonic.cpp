@@ -27,6 +27,7 @@ namespace wallet {
 
 const mnemonic::dictionary::words mnemonic::en
 {
+    true,
     {
         "abandon",
         "ability",
@@ -2081,6 +2082,7 @@ const mnemonic::dictionary::words mnemonic::en
 
 const mnemonic::dictionary::words mnemonic::es
 {
+    false,
     {
         "ábaco",
         "abdomen",
@@ -4135,6 +4137,7 @@ const mnemonic::dictionary::words mnemonic::es
 
 const mnemonic::dictionary::words mnemonic::it
 {
+    true,
     {
         "abaco",
         "abbaglio",
@@ -6189,6 +6192,7 @@ const mnemonic::dictionary::words mnemonic::it
 
 const mnemonic::dictionary::words mnemonic::fr
 {
+    false,
     {
         "abaisser",
         "abandon",
@@ -8243,6 +8247,7 @@ const mnemonic::dictionary::words mnemonic::fr
 
 const mnemonic::dictionary::words mnemonic::cs
 {
+    false,
     {
         "abdikace",
         "abeceda",
@@ -10297,6 +10302,7 @@ const mnemonic::dictionary::words mnemonic::cs
 
 const mnemonic::dictionary::words mnemonic::pt
 {
+    true,
     {
         "abacate",
         "abaixo",
@@ -12351,6 +12357,7 @@ const mnemonic::dictionary::words mnemonic::pt
 
 const mnemonic::dictionary::words mnemonic::ja
 {
+    false,
     {
         "あいこくしん",
         "あいさつ",
@@ -14405,6 +14412,7 @@ const mnemonic::dictionary::words mnemonic::ja
 
 const mnemonic::dictionary::words mnemonic::ko
 {
+    true,
     {
         "가격",
         "가끔",
@@ -16459,6 +16467,7 @@ const mnemonic::dictionary::words mnemonic::ko
 
 const mnemonic::dictionary::words mnemonic::zh_Hans
 {
+    false,
     {
         "的",
         "一",
@@ -18513,6 +18522,7 @@ const mnemonic::dictionary::words mnemonic::zh_Hans
 
 const mnemonic::dictionary::words mnemonic::zh_Hant
 {
+    false,
     {
         "的",
         "一",

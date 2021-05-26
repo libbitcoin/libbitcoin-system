@@ -46,6 +46,12 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__count__all__expected)
     BOOST_REQUIRE_MESSAGE(electrum_v1::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__sorted__sorted__false)
+{
+    BOOST_REQUIRE(!sorted(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_REQUIRE(!sorted(electrum_v1::en) && !electrum_v1::en.sorted);
+}
+
 // abnormal (requires WITH_ICU)
 
 // These dictionaries are in normal form.

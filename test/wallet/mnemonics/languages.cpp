@@ -83,17 +83,17 @@ BOOST_AUTO_TEST_CASE(languages__to_delimiter__japanese__ideographic_space)
 BOOST_AUTO_TEST_CASE(languages__join__korean__space_delimited)
 {
     const auto expected =
-        std::string(test_words_zh_Hant[0]) + ascii_space +
-        test_words_es[1] + ascii_space +
-        test_words_zh_Hant[2] + ascii_space +
-        test_words_es[3];
+        std::string(test_words_zh_Hant.word[0]) + ascii_space +
+        test_words_es.word[1] + ascii_space +
+        test_words_zh_Hant.word[2] + ascii_space +
+        test_words_es.word[3];
 
     const string_list words
     {
-        test_words_zh_Hant[0],
-        test_words_es[1],
-        test_words_zh_Hant[2],
-        test_words_es[3]
+        test_words_zh_Hant.word[0],
+        test_words_es.word[1],
+        test_words_zh_Hant.word[2],
+        test_words_es.word[3]
     };
 
     BOOST_REQUIRE_EQUAL(languages::join(words, language::ko), expected);
@@ -102,17 +102,17 @@ BOOST_AUTO_TEST_CASE(languages__join__korean__space_delimited)
 BOOST_AUTO_TEST_CASE(languages__join__japanese__ideographic_space_delimited)
 {
     const auto expected =
-        std::string(test_words_zh_Hant[0]) + ideographic_space +
-        test_words_es[1] + ideographic_space +
-        test_words_zh_Hant[2] + ideographic_space +
-        test_words_es[3];
+        std::string(test_words_zh_Hant.word[0]) + ideographic_space +
+        test_words_es.word[1] + ideographic_space +
+        test_words_zh_Hant.word[2] + ideographic_space +
+        test_words_es.word[3];
 
     const string_list words
     {
-        test_words_zh_Hant[0],
-        test_words_es[1],
-        test_words_zh_Hant[2],
-        test_words_es[3]
+        test_words_zh_Hant.word[0],
+        test_words_es.word[1],
+        test_words_zh_Hant.word[2],
+        test_words_es.word[3]
     };
 
     BOOST_REQUIRE_EQUAL(languages::join(words, language::ja), expected);
@@ -122,17 +122,17 @@ BOOST_AUTO_TEST_CASE(languages__split__korean_ascii_space_delimited__split)
 {
     const string_list expected
     {
-        test_words_zh_Hans[0],
-        test_words_es[1],
-        test_words_zh_Hans[2],
-        test_words_es[3]
+        test_words_zh_Hans.word[0],
+        test_words_es.word[1],
+        test_words_zh_Hans.word[2],
+        test_words_es.word[3]
     };
 
     const auto sentence =
-        std::string(test_words_zh_Hans[0]) + ascii_space +
-        test_words_es[1] + ascii_space +
-        test_words_zh_Hans[2] + ascii_space +
-        test_words_es[3];
+        std::string(test_words_zh_Hans.word[0]) + ascii_space +
+        test_words_es.word[1] + ascii_space +
+        test_words_zh_Hans.word[2] + ascii_space +
+        test_words_es.word[3];
 
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ko), expected);
 }
@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(languages__split__korean_ascii_space_delimited__split)
 BOOST_AUTO_TEST_CASE(languages__split__korean_non_separator_whitespace_delimited__unsplit)
 {
     const auto sentence =
-        std::string(test_words_zh_Hans[0]) + '\t' +
-        test_words_es[1] + '\f' +
-        test_words_zh_Hans[2] + '\n' +
-        test_words_es[3];
+        std::string(test_words_zh_Hans.word[0]) + '\t' +
+        test_words_es.word[1] + '\f' +
+        test_words_zh_Hans.word[2] + '\n' +
+        test_words_es.word[3];
 
     const string_list expected{ sentence };
 
@@ -156,17 +156,17 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ascii_space_delimited__split)
 {
     const string_list expected
     {
-        test_words_zh_Hant[0],
-        test_words_es[1],
-        test_words_zh_Hant[2],
-        test_words_es[3]
+        test_words_zh_Hant.word[0],
+        test_words_es.word[1],
+        test_words_zh_Hant.word[2],
+        test_words_es.word[3]
     };
 
     const auto sentence =
-        std::string(test_words_zh_Hans[0]) + ascii_space +
-        test_words_es[1] + ascii_space +
-        test_words_zh_Hans[2] + ascii_space +
-        test_words_es[3];
+        std::string(test_words_zh_Hans.word[0]) + ascii_space +
+        test_words_es.word[1] + ascii_space +
+        test_words_zh_Hans.word[2] + ascii_space +
+        test_words_es.word[3];
 
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
 }
@@ -175,17 +175,17 @@ BOOST_AUTO_TEST_CASE(languages__split__japanese_ideographic_space_space_delimite
 {
     const string_list expected
     {
-        test_words_zh_Hans[0],
-        test_words_es[1],
-        test_words_zh_Hans[2],
-        test_words_es[3]
+        test_words_zh_Hans.word[0],
+        test_words_es.word[1],
+        test_words_zh_Hans.word[2],
+        test_words_es.word[3]
     };
 
     const auto sentence =
-        std::string(test_words_zh_Hans[0]) + ideographic_space +
-        test_words_es[1] + ideographic_space +
-        test_words_zh_Hans[2] + ideographic_space +
-        test_words_es[3];
+        std::string(test_words_zh_Hans.word[0]) + ideographic_space +
+        test_words_es.word[1] + ideographic_space +
+        test_words_zh_Hans.word[2] + ideographic_space +
+        test_words_es.word[3];
 
     BOOST_REQUIRE_EQUAL(languages::split(sentence, language::ja), expected);
 }

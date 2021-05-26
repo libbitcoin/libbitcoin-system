@@ -64,7 +64,7 @@ std::string dictionary<Size>::name() const
 template <size_t Size>
 std::string dictionary<Size>::at(size_t index) const
 {
-    return index < size() ? words_[index] : "";
+    return index < size() ? words_.word[index] : "";
 }
 
 template <size_t Size>
@@ -86,12 +86,14 @@ string_list dictionary<Size>::at(const search& indexes) const
 template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const
 {
+    // Dictionary sort is configured on each dictionary, verified by tests.
+    if (words_.sorted)
+        return binary_search(words_.word, word);
+
     // std::find returns first match, order is guaranteed.
-    // Standard wordlists are not sorted for c++ < operator, so cannot use a
-    // binary_search (O(log2(n))) and instead must scan entire list (O(n)).
-    const auto it = std::find(words_.begin(), words_.end(), word);
-    return it == words_.end() ? -1 : 
-        static_cast<int32_t>(std::distance(words_.begin(), it));
+    const auto it = std::find(words_.word.begin(), words_.word.end(), word);
+    return it == words_.word.end() ? -1 : 
+        static_cast<int32_t>(std::distance(words_.word.begin(), it));
 }
 
 template <size_t Size>

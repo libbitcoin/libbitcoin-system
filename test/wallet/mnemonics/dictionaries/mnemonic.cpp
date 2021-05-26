@@ -42,6 +42,24 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__count__all__expected)
     BOOST_REQUIRE_MESSAGE(mnemonic::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__sorted__true)
+{
+    BOOST_REQUIRE(sorted(mnemonic::en) && mnemonic::en.sorted);
+    BOOST_REQUIRE(sorted(mnemonic::it) && mnemonic::it.sorted);
+    BOOST_REQUIRE(sorted(mnemonic::pt) && mnemonic::pt.sorted);
+    BOOST_REQUIRE(sorted(mnemonic::ko) && mnemonic::ko.sorted);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__unsorted__false)
+{
+    BOOST_REQUIRE(!sorted(mnemonic::es) && !mnemonic::es.sorted);
+    BOOST_REQUIRE(!sorted(mnemonic::fr) && !mnemonic::fr.sorted);
+    BOOST_REQUIRE(!sorted(mnemonic::cs) && !mnemonic::cs.sorted);
+    BOOST_REQUIRE(!sorted(mnemonic::ja) && !mnemonic::ja.sorted);
+    BOOST_REQUIRE(!sorted(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BOOST_REQUIRE(!sorted(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+}
+
 // abnormal (requires WITH_ICU)
 
 // These dictionaries are in normal form.
