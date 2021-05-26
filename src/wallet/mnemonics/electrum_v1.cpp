@@ -107,6 +107,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 // passes the decoded entropy to the strecher, creating the master private key
 // despite the error. These seed words cannot be recovered from entropy as the
 // encoding algorithm only parses 32 bits of entropy for each word triplet.
+// But electrum itself cannot round trip these seeds, so we do not support it.
 // Electrum concatenates hex characters for each triplet.
 // The result can be an odd number of characters (9 total max).
 // print('%08x' % x) emits >= 8 hex characters, and can be odd length.

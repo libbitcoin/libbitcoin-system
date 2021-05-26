@@ -103,7 +103,7 @@ public:
     ec_public to_public_key(const context& context=btc_mainnet_p2kh) const;
 
     /// True if the mnemonic words were incorrectly generated.
-    /// An overflow not affect the validity of the object.
+    /// An overflow does not affect the validity of the object.
     /// If true then entropy will not round trip, but the seed is considered
     /// valid by Electrum (for reasons of backward compatibility). This can only
     /// result from manually-generated menmonics, which were inadvertently
