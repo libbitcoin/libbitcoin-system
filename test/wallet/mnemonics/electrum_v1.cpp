@@ -694,11 +694,11 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_electrum__expected
         BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
         BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
         BOOST_REQUIRE(instance.lingo() == vector.lingo);
-        BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.key);
 
         // Verify overflows when testing wordlists.
         BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
         BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
+        BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.key);
     }
 }
 
@@ -727,11 +727,11 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_local__expected)
         BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
         BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
         BOOST_REQUIRE(instance.lingo() == vector.lingo);
-        BOOST_CHECK_EQUAL(instance.to_public_key(vector.network), vector.key);
 
         // Verify overflows when testing wordlists.
         BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
         BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
+        BOOST_CHECK_EQUAL(instance.to_public_key(vector.network), vector.key);
     }
 }
 
