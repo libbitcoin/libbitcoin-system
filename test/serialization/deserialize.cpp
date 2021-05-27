@@ -63,6 +63,12 @@ BOOST_AUTO_TEST_CASE(deserialize__string__istream_padded__untrimmed)
 
 // The template specialization must be observed before the template
 // or the specialization will be lost and this will return char value.
+BOOST_AUTO_TEST_CASE(deserialize__uint8__empty__false)
+{
+    uint8_t out;
+    BOOST_REQUIRE(!deserialize(out, ""));
+}
+
 BOOST_AUTO_TEST_CASE(deserialize__uint8__uint8__base10)
 {
     uint8_t out;
