@@ -485,7 +485,7 @@ public:
         return electrum::seeder(words, passphrase);
     }
 
-    static result grinder(const data_chunk& entropy, seed_prefix prefix,
+    static grinding grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit)
     {
         return electrum::grinder(entropy, prefix, identifier, limit);

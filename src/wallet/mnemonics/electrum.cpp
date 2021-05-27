@@ -111,7 +111,7 @@ data_chunk electrum::decoder(const string_list& words, language identifier)
 // The Electrum prng minimum value technique sacrifices 11 bits of entropy by
 // discarding any prng value that is below 2^(strength-11).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L190-L205
-electrum::result electrum::grinder(const data_chunk& entropy,
+electrum::grinding electrum::grinder(const data_chunk& entropy,
     seed_prefix prefix, language identifier, size_t limit)
 {
     string_list words;
@@ -541,14 +541,14 @@ electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
         return {};
 
     // If prefix is 'none' this will return the first non-prefixed result.
-    const auto result = grinder(entropy, prefix, identifier, grind_limit);
+    const auto grinding = grinder(entropy, prefix, identifier, grind_limit);
 
     // Not your lucky day.
-    if (result.words.empty())
+    if (grinding.words.empty())
         return {};
 
     // Save derived words and ground entropy, original is discarded.
-    return { result.entropy, result.words, identifier, prefix };
+    return { grinding.entropy, grinding.words, identifier, prefix };
 }
 
 electrum electrum::from_words(const string_list& words, language identifier)

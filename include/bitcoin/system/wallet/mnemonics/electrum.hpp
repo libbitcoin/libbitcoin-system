@@ -40,6 +40,10 @@ namespace system {
 namespace wallet {
 
 /// A wallet mnemonic, as defined by the second Electrum implementation.
+/// Generates menemonic with desired prefix from entropy.
+/// Converts menemonic to entropy and prefix.
+/// Converts entropy and valid prefix to menemonic.
+/// Derives master keys from menemonic or entropy, and optional passphrase.
 class BC_API electrum
   : public electrum_v1
 {
@@ -162,7 +166,7 @@ protected:
         data_chunk entropy;
         string_list words;
         size_t iterations;
-    } result;
+    } grinding;
 
     /// Constructors.
     electrum(const data_chunk& entropy, const string_list& words,
@@ -211,7 +215,7 @@ protected:
 
     static string_list encoder(const data_chunk& entropy, language identifier);
     static data_chunk decoder(const string_list& words, language identifier);
-    static result grinder(const data_chunk& entropy, seed_prefix prefix,
+    static grinding grinder(const data_chunk& entropy, seed_prefix prefix,
         language identifier, size_t limit);
     static bool validator(const string_list& words, seed_prefix prefix);
     static long_hash seeder(const string_list& words,
