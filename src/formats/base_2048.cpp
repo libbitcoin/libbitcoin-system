@@ -26,6 +26,12 @@
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
 
+// base2048
+// Base 2048 is an ascii data encoding with a domain of 2048 symbols (words).
+// 2048 is 2^11 so this is a 11<=>8 bit mapping.
+// The 5 bit encoding (words) is authoritative as byte encoding is padded.
+// Invalid padding results in a decoding error.
+
 namespace libbitcoin {
 namespace system {
 

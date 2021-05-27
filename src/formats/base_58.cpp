@@ -21,6 +21,10 @@
 #include <algorithm>
 #include <bitcoin/system/assert.hpp>
 
+// base58
+// Base 58 is an ascii data encoding with a domain of 58 symbols (characters).
+// 58 is not a power of 2 so base58 is not a bit mapping.
+
 namespace libbitcoin {
 namespace system {
 

@@ -26,6 +26,12 @@
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 
+// base32
+// Base 32 is an ascii data encoding with a domain of 32 symbols (characters).
+// 32 is 2^5 so this is a 5<=>8 bit mapping.
+// The 5 bit encoding is authoritative as byte encoding is padded.
+// Invalid padding results in a decoding error.
+
 namespace libbitcoin {
 namespace system {
 

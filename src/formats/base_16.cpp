@@ -24,6 +24,14 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 
+// base16 (hexidecimal):
+// Base 16 is an ascii data encoding with a domain of 16 symbols (characters).
+// 16 is 2^4 so base16 is a 4<=>4 bit mapping.
+// Invalid padding in byte packing is not detectable as it is byte-aligned.
+// So this implementation is limited to an 8<=>8 bit mapping.
+// There is no need for bit streaming or padding, and both sides are
+// authoritative. Therefore base16 is our canonical byte encoding.
+
 namespace libbitcoin {
 namespace system {
 

@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
     BOOST_REQUIRE_EQUAL(result, expected); \
 }
 
-#define TEST_AMOUNT_NEGATIVE(NAME, ...) \
+#define TEST_AMOUNT_FAIL(NAME, ...) \
 BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
 { \
     uint64_t result; \
@@ -56,6 +56,11 @@ TEST_AMOUNT(max_money, settings(config::settings::regtest).max_money(), "14999.9
 TEST_AMOUNT(overflow_max_money, settings(config::settings::regtest).max_money() + 1, "14999.99998351", btc_decimal_places)
 
 // Decimal points:
+TEST_AMOUNT(point, 0, ".")
+TEST_AMOUNT(point_only, 0, ".")
+TEST_AMOUNT(point_zero, 0, ".0")
+TEST_AMOUNT(zero_point, 0, "0.")
+TEST_AMOUNT(zero_point_zero, 0, "0.0")
 TEST_AMOUNT(pure_integer, 42, "42.0", 0)
 TEST_AMOUNT(no_decimal, 1000000, "10", mbtc_decimal_places)
 TEST_AMOUNT(normal_decimal, 420000, "4.2", mbtc_decimal_places)
@@ -63,26 +68,28 @@ TEST_AMOUNT(leading_decimal, 50000, ".5", mbtc_decimal_places)
 TEST_AMOUNT(trailing_decial, 500000, "5.", mbtc_decimal_places)
 TEST_AMOUNT(extra_zeros, 1002000, "010.020", mbtc_decimal_places)
 TEST_AMOUNT(harmless_zeros, 1, "0.0000100", mbtc_decimal_places)
-TEST_AMOUNT(decimal_point_only, 0, ".")
 
 // Rounding:
+TEST_AMOUNT(empty, 0, "")
 TEST_AMOUNT(pure_integer_rounding, 1, ".1", 0, false)
 TEST_AMOUNT(rounding, 11, "0.101", ubtc_decimal_places, false)
 TEST_AMOUNT(rounding_carry, 1000, "9.991", ubtc_decimal_places, false)
 TEST_AMOUNT(zero_past_max, max_uint64, "18446744073709551615.0")
 
 // Format errors:
-TEST_AMOUNT_NEGATIVE(lexical_cast_fail, "0.-1")
-TEST_AMOUNT_NEGATIVE(extra_decimal, "0.0.0")
-TEST_AMOUNT_NEGATIVE(bad_characters, "0x0ff")
+TEST_AMOUNT_FAIL(format_fail, "0.-1")
+TEST_AMOUNT_FAIL(extra_decimal, "0.0.0")
+TEST_AMOUNT_FAIL(hexidecimal_fail, "0x0ff")
 
 // Numeric errors:
-TEST_AMOUNT_NEGATIVE(overflow, "18446744073709551616")
-TEST_AMOUNT_NEGATIVE(rounding_overflow, "18446744073709551615.1", 0, false)
-TEST_AMOUNT_NEGATIVE(fractional_amount, "0.999999999", btc_decimal_places)
+TEST_AMOUNT_FAIL(overflow, "18446744073709551616")
+TEST_AMOUNT_FAIL(rounding_overflow, "18446744073709551615.1", 0, false)
+TEST_AMOUNT_FAIL(fractional_amount, "0.999999999", btc_decimal_places)
+
+// Negative error:
+TEST_AMOUNT_FAIL(negative_fail, "-42")
 
 // Limits:
-TEST_FORMAT(zero, "0", 0)
 TEST_FORMAT(zero_max_decimal_places, "0", 0, max_uint8)
 TEST_FORMAT(max_uint64, "18446744073709551615", max_uint64)
 TEST_FORMAT(max_uint64_max_decimal_places, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018446744073709551615", max_uint64, max_uint8)

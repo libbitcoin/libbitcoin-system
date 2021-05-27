@@ -22,6 +22,14 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 
+// base64
+// Base 64 is an ascii data encoding with a domain of 64 symbols (characters).
+// 64 is 2^6 so base64 is a 6<=>8 bit mapping.
+// 4 characters (64^4) are encoded into one 8 byte (8^8) chunk before mapping.
+// So after 8 byte encoding base64 is a 64<=>64 bit mapping.
+// The 6 bit encoding is authoritative as byte encoding is padded.
+// Invalid padding results in a decoding error.
+
 // This implementation derived from public domain:
 // en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64
 
@@ -37,7 +45,8 @@ std::string encode_base64(const data_slice& unencoded)
 {
     std::string encoded;
     const auto size = unencoded.size();
-    encoded.reserve(((size / 3u) + (size % 3u > 0u)) * 4u);
+    const auto padding = (size % 3 != 0) ? 1 : 0;
+    encoded.reserve((size / 3 + padding) * 4);
 
     uint32_t value;
     auto cursor = unencoded.begin();
@@ -45,13 +54,13 @@ std::string encode_base64(const data_slice& unencoded)
     {
         // Convert to big endian.
         value = (*cursor++) << 16;
-
         value += (*cursor++) << 8;
         value += (*cursor++);
-        encoded.append(1, table[(value & 0x00FC0000) >> 18]);
-        encoded.append(1, table[(value & 0x0003F000) >> 12]);
-        encoded.append(1, table[(value & 0x00000FC0) >> 6]);
-        encoded.append(1, table[(value & 0x0000003F) >> 0]);
+
+        encoded.append(1, table[(value & 0x00fc0000) >> 18]);
+        encoded.append(1, table[(value & 0x0003f000) >> 12]);
+        encoded.append(1, table[(value & 0x00000fc0) >> 6]);
+        encoded.append(1, table[(value & 0x0000003f) >> 0]);
     }
 
     switch (size % 3)
@@ -60,18 +69,18 @@ std::string encode_base64(const data_slice& unencoded)
             // Convert to big endian.
             value = (*cursor++) << 16;
 
-            encoded.append(1, table[(value & 0x00FC0000) >> 18]);
-            encoded.append(1, table[(value & 0x0003F000) >> 12]);
+            encoded.append(1, table[(value & 0x00fc0000) >> 18]);
+            encoded.append(1, table[(value & 0x0003f000) >> 12]);
             encoded.append(2, pad);
             break;
         case 2:
             // Convert to big endian.
             value = (*cursor++) << 16;
-
             value += (*cursor++) << 8;
-            encoded.append(1, table[(value & 0x00FC0000) >> 18]);
-            encoded.append(1, table[(value & 0x0003F000) >> 12]);
-            encoded.append(1, table[(value & 0x00000FC0) >> 6]);
+
+            encoded.append(1, table[(value & 0x00fc0000) >> 18]);
+            encoded.append(1, table[(value & 0x0003f000) >> 12]);
+            encoded.append(1, table[(value & 0x00000fc0) >> 6]);
             encoded.append(1, pad);
             break;
     }
@@ -81,7 +90,7 @@ std::string encode_base64(const data_slice& unencoded)
 
 bool decode_base64(data_chunk& out, const std::string& in)
 {
-    const static uint32_t mask = 0x000000FF;
+    const static uint32_t mask = 0x000000ff;
 
     const auto length = in.length();
     if ((length % 4) != 0)
@@ -102,19 +111,19 @@ bool decode_base64(data_chunk& out, const std::string& in)
     uint32_t value = 0;
     for (auto cursor = in.begin(); cursor < in.end();)
     {
-        for (size_t position = 0; position < 4; position++)
+        for (size_t position = 0; position < 4u; position++)
         {
             value <<= 6;
-            if (*cursor >= 0x41 && *cursor <= 0x5A)
+            if (*cursor >= 0x41 && *cursor <= 0x5a)
                 value |= *cursor - 0x41;
-            else if (*cursor >= 0x61 && *cursor <= 0x7A)
+            else if (*cursor >= 0x61 && *cursor <= 0x7a)
                 value |= *cursor - 0x47;
             else if (*cursor >= 0x30 && *cursor <= 0x39)
                 value |= *cursor + 0x04;
-            else if (*cursor == 0x2B)
-                value |= 0x3E;
-            else if (*cursor == 0x2F)
-                value |= 0x3F;
+            else if (*cursor == 0x2b)
+                value |= 0x3e;
+            else if (*cursor == 0x2f)
+                value |= 0x3f;
             else if (*cursor == pad)
             {
                 // Handle 1 or 2 pad characters.

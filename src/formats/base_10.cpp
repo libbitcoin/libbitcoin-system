@@ -18,31 +18,43 @@
  */
 #include <bitcoin/system/formats/base_10.hpp>
 
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/serialization/deserialize.hpp>
+#include <bitcoin/system/serialization/serialize.hpp>
+
+// base10
+// Base 10 is an ascii data encoding with a domain of 10 symbols (characters).
+// 10 is not a power of 2 so base10 not a bit mapping.
+// base10 is 10^n, with power determined by the paramter 'decimal_places'.
+// Conversion range is limited to [0..2^64-1], decoded as uint64_t.
+// Encoding uses arabic numeral characters ['0'..'9'] and supports negative
+// powers using the '.' character delimiter. Leading zeros and trailing
+// delimiters are not emitted. Trailing zeros of a negative power are not
+// emitted. Leading zeros or delimiter are allowed. Empty string returns zero.
+// Fractional values are rounded up (away from zero). No other textual
+// encodings (e.g. "scientific notation") are supported. Integer conversion
+// depends on the serialization library, which depends on std::iostream.
 
 namespace libbitcoin {
 namespace system {
 
-/**
- * Returns true if a character is one of `[0-9]`.
- *
- * The C standard library function `isdigit` depends on the current locale,
- * and doesn't necessarily correspond to the valid base10 encoding digits.
- * The Microsoft `isdigit` includes superscript characters like '²'
- * in some locales, for example.
- */
-inline bool is_digit(const char c)
+// Returns true if a character is one of [0-9].
+// The C standard library function 'isdigit' depends on the current locale
+// and doesn't necessarily correspond to our valid base10 encoding digits.
+// msvc++ 'isdigit' includes superscript characters like '²'.
+inline bool is_digit(const char character)
 {
-    return '0' <= c && c <= '9';
+    return '0' <= character && character <= '9';
 }
 
-template <char C>
-bool char_is(const char c)
+template <char Character>
+bool is_character(const char character)
 {
-    return c == C;
+    return character == Character;
 }
 
 bool decode_base10(uint64_t& out, const std::string& amount,
@@ -55,7 +67,7 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     if (point != value.end())
         point = value.erase(point);
 
-    // Only digits should remain.
+    // Only digits should remain (this also precludes negatives).
     if (!std::all_of(value.begin(), value.end(), is_digit))
         return false;
 
@@ -65,41 +77,41 @@ bool decode_base10(uint64_t& out, const std::string& amount,
         value.append(decimal_places - actual_places, '0');
 
     // Remove digits from the end if there are too many.
-    auto round = false;
+    // Value is truncated if trailing digits are non-zero.
+    auto truncated = false;
     if (actual_places > decimal_places)
     {
         auto end = point + decimal_places;
-        round = !std::all_of(end, value.end(), char_is<'0'>);
+        truncated = !std::all_of(end, value.end(), is_character<'0'>);
         value.erase(end, value.end());
     }
 
-    if (strict && round)
+    if (strict && truncated)
         return false;
 
-    // Convert to an integer.
-    std::istringstream stream(value);
     uint64_t number = 0;
-    if (!value.empty() && !(stream >> number))
+    if (!value.empty() && !deserialize(number, value))
         return false;
 
-    // Round and return.
-    if (round && number == max_uint64)
+    if (truncated && number == max_uint64)
         return false;
 
-    out = number + round;
+    // Round the value up if it was truncated.
+    out = number + (truncated ? 1 : 0);
     return true;
 }
 
 std::string encode_base10(uint64_t amount, uint8_t decimal_places)
 {
     std::ostringstream stream;
-    stream << std::setfill('0') << std::setw(1 + decimal_places) << amount;
-
-    auto string = stream.str();
-    string.insert(string.size() - decimal_places, 1, '.');
-    boost::algorithm::trim_right_if(string, char_is<'0'>);
-    boost::algorithm::trim_right_if(string, char_is<'.'>);
-    return string;
+    stream.fill('0');
+    stream.width(1 + decimal_places);
+    serialize(stream, amount, "");
+    auto text = stream.str();
+    text.insert(text.size() - decimal_places, 1, '.');
+    trim_right(text, { "0" });
+    trim_right(text, { "." });
+    return text;
 }
 
 } // namespace system
