@@ -111,7 +111,7 @@ public:
     bool is_overflow() const;
 
     /// One overflow flag for each word triplet. If is_overflow is false then
-    /// is all false. Can be used to contruct actual entropy by prepending 0x1
+    /// is all false. Can be used to construct actual entropy by prepending 0x1
     /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
     /// populated to the length [word-count / word_multiple] if the instance is
     /// word-initialized and valid, otherwise the value is empty.

@@ -518,15 +518,15 @@ electrum::electrum(const data_chunk& entropy, const string_list& words,
 electrum electrum::from_entropy(const data_chunk& entropy, seed_prefix prefix,
     language identifier, size_t grind_limit)
 {
-    // This would fail after grinding to limit.
+    // If allowed this would fail after grinding to limit.
     if (prefix == seed_prefix::none)
         return {};
 
-    // Use mnemonic class.
+    // Use mnemonic class instead.
     if (prefix == seed_prefix::bip39)
         return {};
 
-    // Allows electrum_v1 entropy sizes.
+    // Generates entropy from electrum_v1 entropy sizes.
     if (prefix == seed_prefix::old)
         return { entropy };
 
