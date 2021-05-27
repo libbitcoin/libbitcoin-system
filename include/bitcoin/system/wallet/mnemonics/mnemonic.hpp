@@ -38,6 +38,9 @@ namespace system {
 namespace wallet {
 
 /// A wallet mnemonic, as defined by BIP39.
+/// Generates menemonic from entropy.
+/// Converts valid menemonic to entropy.
+/// Derives master keys from menemonic or entropy, and optional passphrase.
 class BC_API mnemonic
   : public languages
 {
@@ -140,8 +143,9 @@ protected:
     static long_hash seeder(const string_list& words,
         const std::string& passphrase);
 
-    static mnemonic from_entropy(const data_chunk& entropy, language identifier);
     static mnemonic from_words(const string_list& words, language identifier);
+    static mnemonic from_entropy(const data_chunk& entropy,
+        language identifier);
 
 private:
     // All Electrum v1 dictionaries, from <dictionaries/mnemonic.cpp>.
