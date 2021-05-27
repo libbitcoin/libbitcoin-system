@@ -506,35 +506,35 @@ BOOST_AUTO_TEST_CASE(electrum_v1__to_seed__todo__todo)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy_invalid__false)
 {
-    const electrum_v1 instance(data_chunk{});
+    const accessor instance(data_chunk{});
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(!instance.is_overflow());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy__false)
 {
-    const electrum_v1 instance(data_chunk(16, 0x00));
+    const accessor instance(data_chunk(16, 0x00));
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(!instance.is_overflow());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__false)
 {
-    const electrum_v1 instance(words2);
+    const accessor instance(words2);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(!instance.is_overflow());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_not_overflowed__false)
 {
-    const electrum_v1 instance(words12);
+    const accessor instance(words12);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(!instance.is_overflow());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_overflowed__true)
 {
-    const electrum_v1 instance(two_overflows12);
+    const accessor instance(two_overflows12);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.is_overflow());
 }
@@ -543,28 +543,28 @@ BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_overflowed__true)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
 {
-    const electrum_v1 instance(data_chunk{});
+    const accessor instance(data_chunk{});
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.overflows().empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
 {
-    const electrum_v1 instance(data_chunk(32, 0x00));
+    const accessor instance(data_chunk(32, 0x00));
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.overflows().empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__empty)
 {
-    const electrum_v1 instance(words2);
+    const accessor instance(words2);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.overflows().empty());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
 {
-    const electrum_v1 instance(words24);
+    const accessor instance(words24);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(!instance.is_overflow());
     const auto& overflows = instance.overflows();
@@ -581,7 +581,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
 {
-    const electrum_v1 instance(two_overflows12);
+    const accessor instance(two_overflows12);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.is_overflow());
     const auto& overflows = instance.overflows();
@@ -688,7 +688,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_electrum__expected
 {
     for (const auto& vector: vectors_electrum)
     {
-        const electrum_v1 instance(vector.mnemonic, vector.lingo);
+        const accessor instance(vector.mnemonic, vector.lingo);
         BOOST_REQUIRE(instance);
         BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
         BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
@@ -721,7 +721,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_local__expected)
 {
     for (const auto& vector: vectors_local)
     {
-        const electrum_v1 instance(vector.mnemonic, vector.lingo);
+        const accessor instance(vector.mnemonic, vector.lingo);
         BOOST_REQUIRE(instance);
         BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
         BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);

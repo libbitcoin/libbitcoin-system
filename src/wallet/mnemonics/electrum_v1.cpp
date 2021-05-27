@@ -39,6 +39,74 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
+// Helper class for managing decoding overflow bug.
+// ============================================================================
+
+// github.com/spesmilo/electrum/issues/3149
+// "While (32-long) hex seeds necessarily map to (12-long) seed
+// words/"mnemonics", the inverse is not always true. For example, 'hurry idiot
+// prefer sunset mention mist jaw inhale impossible kingdom rare squeeze'
+// maps to 025d2f2d005036911003ca78900ca155c (33 chars)."
+// By word triplet this is: [025d2f2d][00503691][1003ca789][00ca155c], where
+// 'jaw inhale impossible' maps to 1003ca789 (33 bits, overflowing uint32).
+// It is the distance between words that creates the overflow.
+// Electrum v1 failed to catch this overflow, so "old seed" checks presently
+// allow it, despite the invalidity. In other words, any list of 12/24 electrum
+// v1 (en) words is considered valid v1 by later versions of electrum. It
+// passes the decoded entropy to the strecher, creating the master private key
+// despite the error. These seed words cannot be recovered from entropy as the
+// encoding algorithm only parses 32 bits of entropy for each word triplet.
+// But electrum itself cannot round trip these seeds, so we do not support it.
+// Electrum concatenates hex characters for each triplet.
+// The result can be an odd number of characters (9 total max).
+// print('%08x' % x) emits >= 8 hex characters, and can be odd length.
+
+v1_decoding::v1_decoding(const data_chunk & entropy,
+    const overflow & overflows)
+  : entropy_(entropy), overflows_(overflows)
+{
+}
+
+const data_chunk& v1_decoding::entropy() const
+{
+    return entropy_;
+}
+
+const v1_decoding::overflow& v1_decoding::overflows() const
+{
+    return overflows_;
+}
+
+// Electrum hashes the base16 encoded ascii text of the seed.
+std::string v1_decoding::base16_entropy() const
+{
+    // overflows is empty for entropy constructions.
+    if (overflows_.empty())
+        return encode_base16(entropy_);
+
+    // overflow count must always be the count of entropy uint32_t.
+    if (overflows_.size() * sizeof(uint32_t) != entropy_.size())
+        return {};
+
+    std::string out;
+    data_source source(entropy_);
+    istream_reader reader(source);
+
+    // See comments above on electrum v1 decoder overflow bug.
+    // This inserts any overflow bits while converting entropy to text.
+    auto it = overflows_.begin();
+    while (!reader.is_exhausted())
+    {
+        // This is a big-endian read of a big-endian byte stream.
+        const auto value = reader.read_bytes(sizeof(uint32_t));
+        out.append((*it++ ? "1" : "") + encode_base16(value));
+    }
+
+    return out;
+}
+
+// ============================================================================
+
 // Guard: decoder 'value' cannot exceed 0x1003ca7a7, safe in int64_t but can
 // overflow int32_t/uint32_t. Only one bit (0x[1][003ca7a7]) can overflow.
 // So we upcast indexes to int64 and later check the result for overflow.
@@ -65,28 +133,6 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
         electrum_v1::dictionary{ language::pt, electrum_v1::pt }
     }
 };
-
-// Decoder Overflow Bug
-// ============================================================================
-// github.com/spesmilo/electrum/issues/3149
-// "While (32-long) hex seeds necessarily map to (12-long) seed
-// words/"mnemonics", the inverse is not always true. For example, 'hurry idiot
-// prefer sunset mention mist jaw inhale impossible kingdom rare squeeze'
-// maps to 025d2f2d005036911003ca78900ca155c (33 chars)."
-// By word triplet this is: [025d2f2d][00503691][1003ca789][00ca155c], where
-// 'jaw inhale impossible' maps to 1003ca789 (33 bits, overflowing uint32).
-// It is the distance between words that creates the overflow.
-// Electrum v1 failed to catch this overflow, so "old seed" checks presently
-// allow it, despite the invalidity. In other words, any list of 12/24 electrum
-// v1 (en) words is considered valid v1 by later versions of electrum. It
-// passes the decoded entropy to the strecher, creating the master private key
-// despite the error. These seed words cannot be recovered from entropy as the
-// encoding algorithm only parses 32 bits of entropy for each word triplet.
-// But electrum itself cannot round trip these seeds, so we do not support it.
-// Electrum concatenates hex characters for each triplet.
-// The result can be an odd number of characters (9 total max).
-// print('%08x' % x) emits >= 8 hex characters, and can be odd length.
-// ============================================================================
 
 // protected static (coders)
 // ----------------------------------------------------------------------------
@@ -121,8 +167,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 }
 
 // electrum/old_mnemonic.py#L1682
-electrum_v1::result electrum_v1::decoder(const string_list& words,
-    language identifier)
+v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
@@ -130,7 +175,7 @@ electrum_v1::result electrum_v1::decoder(const string_list& words,
     ostream_writer writer(sink);
 
     // See comments above on electrum v1 decoder overflow bug.
-    bit_vector overflows(words.size() / word_multiple);
+    v1_decoding::overflow overflows(words.size() / word_multiple);
     auto overflow = overflows.begin();
 
     // Word count and dictionary membership must have been validated.
@@ -160,38 +205,12 @@ electrum_v1::result electrum_v1::decoder(const string_list& words,
     return { entropy, overflows };
 }
 
-// Electrum hashes the base16 encoded ascii text of the seed.
-std::string electrum_v1::result::hacked_entropy() const
-{
-    // overflows is empty for entropy constructions.
-    if (overflows.empty())
-        return encode_base16(entropy);
-
-    // overflows.size() is always equal to the numer of uint32_t's in entropy.
-    BITCOIN_ASSERT(overflows.size() * sizeof(uint32_t) == entropy.size());
-
-    std::string out;
-    data_source source(entropy);
-    istream_reader reader(source);
-
-    // See comments above on electrum v1 decoder overflow bug.
-    // This inserts any overflow bits while converting entropy to text.
-    auto it = overflows.begin();
-    while (!reader.is_exhausted())
-    {
-        // This is a big-endian read of a big-endian byte stream.
-        const auto value = reader.read_bytes(sizeof(uint32_t));
-        out.append((*it++ ? "1" : "") + encode_base16(value));
-    }
-
-    return out;
-}
-
 // electrum/keystore.py#L692
-hash_digest electrum_v1::strecher(const result& result)
+hash_digest electrum_v1::strecher(const v1_decoding& decoding)
 {
     // Compensate for overflows, convert to base16, and then to bytes.
-    const auto entropy = to_chunk(result.hacked_entropy());
+    const auto entropy = to_chunk(decoding.base16_entropy());
+    BITCOIN_ASSERT_MSG(entropy != null_hash, "unreachable state reached");
 
     auto streched = entropy;
     for (size_t i = 0; i < stretch_iterations; ++i)
@@ -288,15 +307,15 @@ electrum_v1::electrum_v1(const maximum_entropy& entropy, language identifier)
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
     language identifier)
-  : electrum_v1(result{ entropy, {} }, words, identifier)
+  : electrum_v1(v1_decoding{ entropy, {} }, words, identifier)
 {
 }
 
 // protected
-electrum_v1::electrum_v1(const result& result, const string_list& words,
+electrum_v1::electrum_v1(const v1_decoding& decoding, const string_list& words,
     language identifier)
-  : languages(result.entropy, words, identifier),
-    overflows_(result.overflows)
+  : languages(decoding.entropy(), words, identifier),
+    overflows_(decoding.overflows())
 {
 }
 
@@ -304,7 +323,7 @@ electrum_v1::electrum_v1(const result& result, const string_list& words,
 // ----------------------------------------------------------------------------
 
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
-    language identifier) const
+    language identifier)
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
@@ -317,7 +336,7 @@ electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
 }
 
 electrum_v1 electrum_v1::from_words(const string_list& words,
-    language identifier) const
+    language identifier)
 {
     if (!is_valid_word_count(words.size()))
         return {};
@@ -336,6 +355,22 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
     return { decoder(tokens, lexicon), tokens, lexicon };
 }
 
+// protected methods
+// ----------------------------------------------------------------------------
+
+bool electrum_v1::is_overflow() const
+{
+    return std::any_of(overflows_.begin(), overflows_.end(), [](bool value)
+    {
+        return value;
+    });
+}
+
+const v1_decoding::overflow& electrum_v1::overflows() const
+{
+    return overflows_;
+}
+
 // public methods
 // ----------------------------------------------------------------------------
 
@@ -345,7 +380,7 @@ ec_private electrum_v1::to_seed(const context& context) const
         return {};
 
     // Combine base class entropy with derived class overflows.
-    const result combined{ entropy_, overflows_ };
+    const v1_decoding combined(entropy_, overflows_);
 
     // Sets compression to false as this is the electrum convention.
     // Causes derived payment addresses to use the uncompressed public key.
@@ -361,19 +396,6 @@ ec_public electrum_v1::to_public_key(const context& context) const
 
     // The public key will be invalid if the private key is invalid.
     return to_seed(context).to_public();
-}
-
-bool electrum_v1::is_overflow() const
-{
-    return std::any_of(overflows_.begin(), overflows_.end(), [](bool value)
-    {
-        return value;
-    });
-}
-
-const electrum_v1::bit_vector& electrum_v1::overflows() const
-{
-    return overflows_;
 }
 
 } // namespace wallet

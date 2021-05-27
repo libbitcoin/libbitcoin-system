@@ -31,7 +31,7 @@ using namespace bc::system::wallet;
 namespace test {
 namespace mnemonics_electrum_v1 {
 
-typedef electrum_v1::bit_vector overflow_bits;
+typedef std::vector<bool> overflow_bits;
 
 struct electrum_v1_vector
 {
@@ -271,6 +271,21 @@ class accessor
   : public electrum_v1
 {
 public:
+    accessor(const data_chunk& entropy, language identifier=language::en)
+      : electrum_v1(entropy, identifier)
+    {
+    }
+
+    accessor(const string_list& words, language identifier=language::none)
+      : electrum_v1(words, identifier)
+    {
+    }
+
+    accessor(const std::string& sentence, language identifier=language::none)
+      : electrum_v1(sentence, identifier)
+    {
+    }
+
     accessor(const data_chunk& entropy, const string_list& words,
         language identifier)
       : electrum_v1(entropy, words, identifier)
@@ -297,7 +312,7 @@ public:
         return electrum_v1::word_count(entropy);
     }
 
-    static electrum_v1::result decoder(const string_list& words,
+    static v1_decoding decoder(const string_list& words,
         language identifier)
     {
         return electrum_v1::decoder(words, identifier);
@@ -309,16 +324,26 @@ public:
         return electrum_v1::encoder(entropy, identifier);
     }
 
+    electrum_v1 from_words(const string_list& words,
+        language identifier) const
+    {
+        return electrum_v1::from_words(words, identifier);
+    }
+
     electrum_v1 from_entropy(const data_chunk& entropy,
         language identifier) const
     {
         return electrum_v1::from_entropy(entropy, identifier);
     }
 
-    electrum_v1 from_words(const string_list& words,
-        language identifier) const
+    bool is_overflow() const
     {
-        return electrum_v1::from_words(words, identifier);
+        return electrum_v1::is_overflow();
+    }
+
+    v1_decoding::overflow overflows() const
+    {
+        return electrum_v1::overflows();
     }
 };
 
