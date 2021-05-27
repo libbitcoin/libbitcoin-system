@@ -40,7 +40,7 @@ inline bool is_between(uint8_t value, uint8_t low, uint8_t high)
     return low <= value && value <= high;
 }
 
-// The C standard library function `isxdigit` depends on the current locale,
+// The C standard library function 'isxdigit' depends on the current locale,
 // and does not necessarily match the base16 encoding.
 bool is_base16(char character)
 {

@@ -39,9 +39,9 @@ bool is_base58(const char ch)
 
 bool is_base58(const std::string& text)
 {
-    const auto test = [](const char ch)
+    const auto test = [](const char character)
     {
-        return is_base58(ch);
+        return is_base58(character);
     };
 
     return std::all_of(text.begin(), text.end(), test);

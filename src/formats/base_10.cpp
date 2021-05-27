@@ -52,7 +52,7 @@ inline bool is_digit(const char character)
 }
 
 template <char Character>
-bool is_character(const char character)
+inline bool is_character(const char character)
 {
     return character == Character;
 }
