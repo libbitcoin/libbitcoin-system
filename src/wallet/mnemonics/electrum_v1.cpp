@@ -66,13 +66,12 @@ v1_decoding::v1_decoding()
 {
 }
 
-v1_decoding::v1_decoding(const data_chunk & entropy)
+v1_decoding::v1_decoding(const data_chunk& entropy)
   : v1_decoding(entropy, {})
 {
 }
 
-v1_decoding::v1_decoding(const data_chunk & entropy,
-    const overflow & overflows)
+v1_decoding::v1_decoding(const data_chunk& entropy, const overflow& overflows)
   : entropy_(entropy), overflows_(overflows)
 {
 }
@@ -101,7 +100,7 @@ data_chunk v1_decoding::seed_entropy() const
     data_source source(entropy_);
     istream_reader reader(source);
     auto it = overflows_.begin();
-    std::string hexidecimal;
+    std::string hexadecimal;
 
     while (!reader.is_exhausted())
     {
@@ -110,10 +109,10 @@ data_chunk v1_decoding::seed_entropy() const
 
         // This inserts any overflow bits.
         // See comments on the decoder overflow bug.
-        hexidecimal.append((*it++ ? "1" : "") + encode_base16(value));
+        hexadecimal.append((*it++ ? "1" : "") + encode_base16(value));
     }
 
-    return to_chunk(hexidecimal);
+    return to_chunk(hexadecimal);
 }
 
 // ============================================================================
@@ -156,9 +155,9 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
     data_source source(entropy);
     istream_reader reader(source);
 
-    // Entropy size and dictionary existence must have been validated.
     while (!reader.is_exhausted())
     {
+        // Guard: entropy verified as multiples of four bytes.
         // Guard: below cannot overflow even if this reads max_uint32.
         const auto value = reader.read_4_bytes_big_endian();
 
@@ -168,6 +167,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
         const auto two = (value / size1 + one) % size1;
         const auto tri = (value / size2 + two) % size1;
 
+        // Guard: dictionary membership has been verified.
         // Guard: any positive number modulo 1626 is always [0-1625].
         words.push_back(dictionaries_.at(one, identifier));
         words.push_back(dictionaries_.at(two, identifier));
@@ -217,17 +217,11 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 }
 
 // electrum/keystore.py#L692
-hash_digest electrum_v1::strecher(const v1_decoding& decoding)
+hash_digest electrum_v1::strecher(const data_chunk& seed_entropy)
 {
-    // Compensate for overflows and encode as text.
-    const auto entropy = decoding.seed_entropy();
-
-    // This implies non-empty overflow size does not match entropy size.
-    BITCOIN_ASSERT_MSG(!entropy.empty(), "unreachable state reached");
-
-    auto streched = entropy;
+    auto streched = seed_entropy;
     for (size_t i = 0; i < stretch_iterations; ++i)
-        streched = sha256_hash_chunk(splice(streched, entropy));
+        streched = sha256_hash_chunk(splice(streched, seed_entropy));
 
     return to_array<hash_size>(streched);
 }
@@ -368,10 +362,12 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
     return { decoder(tokens, lexicon), tokens, lexicon };
 }
 
-// protected methods
+// overflow methods
 // ----------------------------------------------------------------------------
+// Manage overflow bug and converion to idiosyncratic textual seed data.
 
-bool electrum_v1::is_overflow() const
+// public
+bool electrum_v1::overflow() const
 {
     return std::any_of(overflows_.begin(), overflows_.end(), [](bool value)
     {
@@ -384,6 +380,11 @@ const v1_decoding::overflow& electrum_v1::overflows() const
     return overflows_;
 }
 
+data_chunk electrum_v1::seed_entropy() const
+{
+    return v1_decoding(entropy_, overflows_).seed_entropy();
+}
+
 // public methods
 // ----------------------------------------------------------------------------
 
@@ -392,14 +393,16 @@ ec_private electrum_v1::to_seed(const context& context) const
     if (!(*this))
         return {};
 
-    // Recombine decoder outputs for streching.
-    const v1_decoding decoding(entropy_, overflows_);
-
-    // Sets compression to false as this is the electrum convention.
+    // Set public key compression to false as is the electrum convention.
     // Causes derived payment addresses to use the uncompressed public key.
+    static const auto compression = false;
+
+    // Strech entropy into the seed, which is also the master private key.
+    const auto seed = strecher(seed_entropy());
+
     // Context sets the version byte for derived payment addresses.
     // The private key will be invalid if the value does not ec verify.
-    return { ec_scalar(strecher(decoding)), context.address_version, false };
+    return { ec_scalar(seed), context.address_version, compression };
 }
 
 ec_public electrum_v1::to_public_key(const context& context) const

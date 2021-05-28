@@ -126,7 +126,32 @@ public:
     /// Context sets the version byte for derived payment addresses.
     ec_public to_public_key(const context& context=btc_mainnet_p2kh) const;
 
+    /// True if the mnemonic words were incorrectly generated.
+    /// An overflow does not affect the validity of the object.
+    /// If true then entropy will not round trip, but the seed is considered
+    /// valid by Electrum (for reasons of backward compatibility). This can only
+    /// result from manually-generated menmonics, which were inadvertently
+    /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
+    bool overflow() const;
+
 protected:
+    /// Helpers for managing decoding overflow state.
+    /// github.com/spesmilo/electrum/issues/3149
+    /// =======================================================================
+
+    /// One overflow flag for each word triplet. If overflow() is false then
+    /// is all false. Can be used to construct actual entropy by prepending 0x1
+    /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
+    /// populated to the length [word-count / word_multiple] if the instance is
+    /// word-initialized and valid, otherwise the value is empty.
+    const v1_decoding::overflow& overflows() const;
+
+    /// This is the denormalized entropy, used for seeding.
+    /// The base16 entropy encoding is converted to data with overflows.
+    data_chunk seed_entropy() const;
+
+    /// =======================================================================
+
     /// Constructors.
     electrum_v1(const data_chunk& entropy, const string_list& words,
         language identifier);
@@ -147,33 +172,12 @@ protected:
 
     static v1_decoding decoder(const string_list& words, language identifier);
     static string_list encoder(const data_chunk& entropy, language identifier);
-    static ec_secret strecher(const v1_decoding& decoding);
+    static ec_secret strecher(const data_chunk& seed_entropy);
 
     static electrum_v1 from_words(const string_list& words,
         language identifier);
     static electrum_v1 from_entropy(const data_chunk& entropy,
         language identifier);
-
-    /// Helpers for managing decoding overflow state.
-    /// github.com/spesmilo/electrum/issues/3149
-    /// =======================================================================
-
-    /// True if the mnemonic words were incorrectly generated.
-    /// An overflow does not affect the validity of the object.
-    /// If true then entropy will not round trip, but the seed is considered
-    /// valid by Electrum (for reasons of backward compatibility). This can only
-    /// result from manually-generated menmonics, which were inadvertently
-    /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
-    bool is_overflow() const;
-
-    /// One overflow flag for each word triplet. If is_overflow is false then
-    /// is all false. Can be used to construct actual entropy by prepending 0x1
-    /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
-    /// populated to the length [word-count / word_multiple] if the instance is
-    /// word-initialized and valid, otherwise the value is empty.
-    const v1_decoding::overflow& overflows() const;
-
-    /// =======================================================================
 
 private:
     // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.

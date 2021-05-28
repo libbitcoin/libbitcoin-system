@@ -289,17 +289,94 @@ BOOST_AUTO_TEST_CASE(electrum_v1__is_valid_word_count__invalid__false)
 
 // encoder
 
-BOOST_AUTO_TEST_CASE(electrum_v1__encoder__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__encoder__empty__empty)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    BOOST_REQUIRE(accessor::encoder({}, language::en).empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__encoder__size_and_language__expected)
+{
+    const auto size = 7u;
+    const data_chunk entropy(size * sizeof(uint32_t), 0x00);
+    const string_list expected(size * electrum_v1::word_multiple, "abaular");
+    const auto words = accessor::encoder(entropy, language::pt);
+    BOOST_REQUIRE_EQUAL(words.size(), size * electrum_v1::word_multiple);
+    BOOST_REQUIRE_EQUAL(words, expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__encoder__overflow__expected)
+{
+    const auto entropy = base16_chunk("003ca789");
+    const auto expected = split("ship baby bright");
+    const auto words = accessor::encoder(entropy, language::en);
+    BOOST_REQUIRE_EQUAL(words, expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__encoder__non_overflow__expected)
+{
+    const auto entropy = base16_chunk("025d2f2d");
+    const auto expected = split("hurry idiot prefer");
+    const auto words = accessor::encoder(entropy, language::en);
+    BOOST_REQUIRE_EQUAL(words, expected);
 }
 
 // decoder
 
-BOOST_AUTO_TEST_CASE(electrum_v1__decoder__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__decoder__empty__empty)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    const auto decoding = accessor::decoder({}, language::en);
+    BOOST_REQUIRE(decoding.entropy().empty());
+    BOOST_REQUIRE(decoding.overflows().empty());
+    BOOST_REQUIRE(decoding.seed_entropy().empty());
 }
+
+BOOST_AUTO_TEST_CASE(electrum_v1__decoder__size_and_language__expected)
+{
+    const auto size = 7u;
+    const data_chunk entropy(size * sizeof(uint32_t), 0x00);
+    const auto expected = to_chunk(encode_base16(entropy));
+    const v1_decoding::overflow overflows(size, false);
+    const string_list words(size * electrum_v1::word_multiple, "abaular");
+    const auto decoding = accessor::decoder(words, language::pt);
+    BOOST_REQUIRE_EQUAL(decoding.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(decoding.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(decoding.seed_entropy(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__decoder__overflow__expected)
+{
+    const auto entropy = base16_chunk("025d2f2d00503691003ca78900ca155c");
+    const auto expected = to_chunk("025d2f2d00503691""1""003ca78900ca155c");
+    const auto words = split("hurry idiot prefer sunset mention mist jaw inhale impossible kingdom rare squeeze");
+    const v1_decoding::overflow overflows{ false, false, true, false };
+    const auto decoding = accessor::decoder(words, language::en);
+    BOOST_REQUIRE_EQUAL(decoding.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(decoding.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(decoding.seed_entropy(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__decoder__non_overflow__expected)
+{
+    const auto entropy = base16_chunk("acb740e454c3134901d7c8f16497cc1c");
+    const auto expected = to_chunk(encode_base16(entropy));
+    const auto words = split("powerful random nobody notice nothing important anyway look away hidden message over");
+    const v1_decoding::overflow overflows(4, false);
+    const auto decoding = accessor::decoder(words, language::en);
+    BOOST_REQUIRE_EQUAL(decoding.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(decoding.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(decoding.seed_entropy(), expected);
+}
+
+// strecher
+
+////BOOST_AUTO_TEST_CASE(electrum_v1__strecher__one_byte__expected)
+////{
+////    const data_chunk entropy{ 0x00 };
+////    const v1_decoding::overflow overflows(size, false);
+////    const v1_decoding::overflow overflows(size, false);
+////    const auto seed = accessor::strecher({ { 0x00 }, {} });
+////    BOOST_REQUIRE_EQUAL(seed, entropy);
+////}
 
 // sizers
 // ----------------------------------------------------------------------------
@@ -346,6 +423,66 @@ BOOST_AUTO_TEST_CASE(electrum_v1__from_entropy__todo__todo)
 // from_words
 
 BOOST_AUTO_TEST_CASE(electrum_v1__from_words__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// overflows
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
+{
+    const accessor instance(data_chunk{});
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
+{
+    const accessor instance(data_chunk(32, 0x00));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_invalid__empty)
+{
+    const accessor instance(words2);
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
+{
+    const accessor instance(words24);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 24u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(!overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(!overflows[3]);
+    BOOST_REQUIRE(!overflows[4]);
+    BOOST_REQUIRE(!overflows[5]);
+    BOOST_REQUIRE(!overflows[6]);
+    BOOST_REQUIRE(!overflows[7]);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
+{
+    const accessor instance(two_overflows12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 12u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(overflows[3]);
+}
+
+// seed_entropy
+
+BOOST_AUTO_TEST_CASE(electrum_v1__seed_entropy__todo__todo)
 {
     BOOST_REQUIRE(TODO_TESTS);
 }
@@ -583,7 +720,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_maximum_entropy__always__valid_expec
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_entropy__empty__expected)
 {
-    const accessor instance({}, {}, language::ja);
+    const accessor instance(data_chunk{}, {}, language::ja);
     BOOST_REQUIRE(!instance);
     BOOST_REQUIRE(instance.entropy().empty());
     BOOST_REQUIRE(instance.words().empty());
@@ -648,94 +785,41 @@ BOOST_AUTO_TEST_CASE(electrum_v1__to_seed__todo__todo)
     BOOST_REQUIRE(TODO_TESTS);
 }
 
-// is_overflow
+// overflow
 
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy_invalid__false)
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__entropy_invalid__false)
 {
     const accessor instance(data_chunk{});
     BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(!instance.is_overflow());
+    BOOST_REQUIRE(!instance.overflow());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__entropy__false)
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__entropy__false)
 {
     const accessor instance(data_chunk(16, 0x00));
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.is_overflow());
+    BOOST_REQUIRE(!instance.overflow());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__false)
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_invalid__false)
 {
     const accessor instance(words2);
     BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(!instance.is_overflow());
+    BOOST_REQUIRE(!instance.overflow());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_not_overflowed__false)
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_not_overflowed__false)
 {
     const accessor instance(words12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.is_overflow());
+    BOOST_REQUIRE(!instance.overflow());
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_overflowed__true)
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_overflowed__true)
 {
     const accessor instance(two_overflows12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.is_overflow());
-}
-
-// overflows
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
-{
-    const accessor instance(data_chunk{});
-    BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
-{
-    const accessor instance(data_chunk(32, 0x00));
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__is_overflow__words_invalid__empty)
-{
-    const accessor instance(words2);
-    BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
-{
-    const accessor instance(words24);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.is_overflow());
-    const auto& overflows = instance.overflows();
-    BOOST_REQUIRE_EQUAL(overflows.size(), 24u / 3u);
-    BOOST_REQUIRE(!overflows[0]);
-    BOOST_REQUIRE(!overflows[1]);
-    BOOST_REQUIRE(!overflows[2]);
-    BOOST_REQUIRE(!overflows[3]);
-    BOOST_REQUIRE(!overflows[4]);
-    BOOST_REQUIRE(!overflows[5]);
-    BOOST_REQUIRE(!overflows[6]);
-    BOOST_REQUIRE(!overflows[7]);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
-{
-    const accessor instance(two_overflows12);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.is_overflow());
-    const auto& overflows = instance.overflows();
-    BOOST_REQUIRE_EQUAL(overflows.size(), 12u / 3u);
-    BOOST_REQUIRE(!overflows[0]);
-    BOOST_REQUIRE(overflows[1]);
-    BOOST_REQUIRE(!overflows[2]);
-    BOOST_REQUIRE(overflows[3]);
+    BOOST_REQUIRE(instance.overflow());
 }
 
 #endif // PUBLIC_METHODS
@@ -830,69 +914,38 @@ BOOST_AUTO_TEST_CASE(electrum_v1__serialize__invalid__invalid)
 
 #ifdef VERIFIED_VECTORS
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_electrum__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct__vectors__expected)
 {
-    for (const auto& vector: vectors_electrum)
+    for (const auto& vector: vectors)
     {
-        const accessor instance(vector.mnemonic, vector.lingo);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
-        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+        const accessor words_instance(vector.mnemonic, vector.lingo);
+        BOOST_REQUIRE(words_instance);
+        BOOST_REQUIRE(words_instance.lingo() == vector.lingo);
+        BOOST_REQUIRE_EQUAL(words_instance.entropy(), vector.entropy);
+        BOOST_REQUIRE_EQUAL(words_instance.to_public_key(vector.network), vector.key);
 
-        // Verify overflows when testing wordlists.
-        BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
-        BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
-        BOOST_REQUIRE_EQUAL(instance.to_public_key(vector.network), vector.key);
-    }
-}
+        // The mnemonic always round trips from words/sentence.
+        BOOST_REQUIRE_EQUAL(words_instance.sentence(), vector.mnemonic);
+        BOOST_REQUIRE_EQUAL(words_instance.words(), vector.words());
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors_electrum__expected)
-{
-    for (const auto& vector: vectors_electrum)
-    {
-        const electrum_v1 instance(vector.entropy, vector.lingo);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+        // Overflow is always populated when constructed from words/sentence.
+        BOOST_REQUIRE_EQUAL(words_instance.overflow(), vector.overflow());
+        BOOST_REQUIRE_EQUAL(words_instance.overflows(), vector.overflows());
+        BOOST_REQUIRE_EQUAL(words_instance.seed_entropy(), vector.overflowed_seed_entropy());
 
-        // Use overflow expectations when testing from entropy.
-        BOOST_REQUIRE_EQUAL(instance.words(), vector.entropy_words());
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.entropy_mnemonic());
-    }
-}
+        const accessor entropy_instance(vector.entropy, vector.lingo);
+        BOOST_REQUIRE(entropy_instance);
+        BOOST_REQUIRE(entropy_instance.lingo() == vector.lingo);
+        BOOST_REQUIRE_EQUAL(entropy_instance.entropy(), vector.entropy);
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_sentence__vectors_local__expected)
-{
-    for (const auto& vector: vectors_local)
-    {
-        const accessor instance(vector.mnemonic, vector.lingo);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.mnemonic);
-        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-        BOOST_REQUIRE_EQUAL(instance.words(), vector.words());
-        BOOST_REQUIRE(instance.lingo() == vector.lingo);
+        // The mnemonic does not round trip from entropy when overflowed.
+        BOOST_REQUIRE_EQUAL(entropy_instance.sentence(), vector.trimmed_mnemonic());
+        BOOST_REQUIRE_EQUAL(entropy_instance.words(), vector.trimmed_words());
 
-        // Verify overflows when testing wordlists.
-        BOOST_REQUIRE_EQUAL(instance.overflows(), vector.overflows());
-        BOOST_REQUIRE_EQUAL(instance.is_overflow(), vector.is_overflow());
-        BOOST_CHECK_EQUAL(instance.to_public_key(vector.network), vector.key);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_entropy__vectors_local__expected)
-{
-    for (const auto& vector: vectors_local)
-    {
-        const electrum_v1 instance(vector.entropy, vector.lingo);
-        BOOST_REQUIRE(instance);
-        BOOST_REQUIRE_EQUAL(instance.entropy(), vector.entropy);
-        BOOST_REQUIRE(instance.lingo() == vector.lingo);
-
-        // Use overflow expectations when testing from entropy.
-        BOOST_REQUIRE_EQUAL(instance.words(), vector.entropy_words());
-        BOOST_REQUIRE_EQUAL(instance.sentence(), vector.entropy_mnemonic());
+        // Overflow is never populated when constructed from entropy.
+        BOOST_REQUIRE(!entropy_instance.overflow());
+        BOOST_REQUIRE(entropy_instance.overflows().empty());
+        BOOST_REQUIRE_EQUAL(entropy_instance.seed_entropy(), vector.seed_entropy());
     }
 }
 
