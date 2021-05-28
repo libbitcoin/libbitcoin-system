@@ -115,9 +115,10 @@ string_list languages::try_normalize(const string_list& words)
     return normal;
 }
 
-// protected constructors
+// constructors
 // ----------------------------------------------------------------------------
 
+// protected
 languages::languages()
   : entropy_(), words_(), identifier_(language::none)
 {
@@ -129,6 +130,7 @@ languages::languages(const languages& other)
 {
 }
 
+// protected
 languages::languages(const data_chunk& entropy, const string_list& words,
     language identifier)
   : entropy_(entropy), words_(words), identifier_(identifier)
@@ -181,8 +183,10 @@ bool languages::operator<(const languages& other) const
 
 bool languages::operator==(const languages& other) const
 {
-    // Words and entropy are equivalent (one is a cache of the other).
-    return entropy_ == other.entropy_ && identifier_ == other.identifier_;
+    // Words and entropy are equivalent except in the case of electrum_v1
+    // overflows. Comparing here prevents the need for electrum_v1 override.
+    return entropy_ == other.entropy_ && identifier_ == other.identifier_ &&
+        words_ == other.words_;
 }
 
 bool languages::operator!=(const languages& other) const

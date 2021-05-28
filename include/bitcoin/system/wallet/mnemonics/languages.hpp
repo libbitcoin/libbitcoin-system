@@ -55,6 +55,12 @@ public:
     /// All other languages are split and trimmed on ASCII whitespace.
     static string_list split(const std::string& sentence, language identifier);
 
+    // constructors
+    // ------------------------------------------------------------------------
+
+    /// Class is not constructable but this is exposed for derived assignment.
+    languages(const languages& other);
+
     // public methods
     // ------------------------------------------------------------------------
 
@@ -86,7 +92,6 @@ public:
 
 protected:
     languages();
-    languages(const languages& other);
     languages(const data_chunk& entropy, const string_list& words,
         language identifier);
 
