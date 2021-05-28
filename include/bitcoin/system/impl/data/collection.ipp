@@ -38,7 +38,7 @@ template <typename Element, typename Container>
 int binary_search(const Container& list, const Element& value)
 {
     const auto size = list.size();
-    BITCOIN_ASSERT(is_sorted(list));
+    ////BITCOIN_ASSERT(is_sorted(list));
 
     // Guard right cast.
     if (size > static_cast<size_t>(max_int32))
