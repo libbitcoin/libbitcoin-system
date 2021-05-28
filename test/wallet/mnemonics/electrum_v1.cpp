@@ -32,6 +32,7 @@ using namespace bc::system::wallet;
 #define PROTECTED_STATIC 1
 #define CONSTRUCTORS 1
 #define PUBLIC_METHODS 1
+#define PROTECTED_METHODS 1
 #define OPERATORS 1
 #define VERIFIED_VECTORS 1
 
@@ -369,14 +370,17 @@ BOOST_AUTO_TEST_CASE(electrum_v1__decoder__non_overflow__expected)
 
 // strecher
 
-////BOOST_AUTO_TEST_CASE(electrum_v1__strecher__one_byte__expected)
-////{
-////    const data_chunk entropy{ 0x00 };
-////    const v1_decoding::overflow overflows(size, false);
-////    const v1_decoding::overflow overflows(size, false);
-////    const auto seed = accessor::strecher({ { 0x00 }, {} });
-////    BOOST_REQUIRE_EQUAL(seed, entropy);
-////}
+BOOST_AUTO_TEST_CASE(electrum_v1__strecher__empty__expected)
+{
+    const auto expected = base16_array("52f429563ecbf164efe23f9f77cd00073f5677600d721a6c754dc4e41124d645");
+    BOOST_REQUIRE_EQUAL(accessor::strecher({}), expected);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__strecher__non_empty__expected)
+{
+    const auto expected = base16_array("922538904d8070da6a98a44f9a19661724c775e312c4c67e2a67c0a316f7efa6");
+    BOOST_REQUIRE_EQUAL(accessor::strecher(to_chunk(null_hash)), expected);
+}
 
 // sizers
 // ----------------------------------------------------------------------------
@@ -427,66 +431,6 @@ BOOST_AUTO_TEST_CASE(electrum_v1__from_words__todo__todo)
     BOOST_REQUIRE(TODO_TESTS);
 }
 
-// overflows
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
-{
-    const accessor instance(data_chunk{});
-    BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
-{
-    const accessor instance(data_chunk(32, 0x00));
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_invalid__empty)
-{
-    const accessor instance(words2);
-    BOOST_REQUIRE(!instance);
-    BOOST_REQUIRE(instance.overflows().empty());
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
-{
-    const accessor instance(words24);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.overflow());
-    const auto& overflows = instance.overflows();
-    BOOST_REQUIRE_EQUAL(overflows.size(), 24u / 3u);
-    BOOST_REQUIRE(!overflows[0]);
-    BOOST_REQUIRE(!overflows[1]);
-    BOOST_REQUIRE(!overflows[2]);
-    BOOST_REQUIRE(!overflows[3]);
-    BOOST_REQUIRE(!overflows[4]);
-    BOOST_REQUIRE(!overflows[5]);
-    BOOST_REQUIRE(!overflows[6]);
-    BOOST_REQUIRE(!overflows[7]);
-}
-
-BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
-{
-    const accessor instance(two_overflows12);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.overflow());
-    const auto& overflows = instance.overflows();
-    BOOST_REQUIRE_EQUAL(overflows.size(), 12u / 3u);
-    BOOST_REQUIRE(!overflows[0]);
-    BOOST_REQUIRE(overflows[1]);
-    BOOST_REQUIRE(!overflows[2]);
-    BOOST_REQUIRE(overflows[3]);
-}
-
-// seed_entropy
-
-BOOST_AUTO_TEST_CASE(electrum_v1__seed_entropy__todo__todo)
-{
-    BOOST_REQUIRE(TODO_TESTS);
-}
-
 #endif // PROTECTED_STATIC
 
 #ifdef CONSTRUCTORS
@@ -502,24 +446,39 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_default__always__invalid)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_copy__always__expected)
 {
-    electrum_v1 instance1(join(words12));
+    electrum_v1 instance1(two_overflows12);
     const electrum_v1 instance2(instance1);
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.words(), words12);
+    BOOST_REQUIRE_EQUAL(instance2.words(), two_overflows12);
     BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
     BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+    BOOST_REQUIRE(instance2.overflow() == instance1.overflow());
+
+    // Overflow entropy does not round trip words.
+    const electrum_v1 instance3(instance2.entropy());
+    BOOST_REQUIRE_EQUAL(instance3.entropy(), instance2.entropy());
+    BOOST_REQUIRE_NE(instance3.words(), instance2.words());
+    BOOST_REQUIRE(instance3.overflow() != instance2.overflow());
 }
 
 // construct move (default)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__construct_move__always__expected)
 {
-    electrum_v1 instance1(join(words12));
+    electrum_v1 instance1(two_overflows12);
+    const electrum_v1 instance1_copy(instance1);
     const electrum_v1 instance2(std::move(instance1));
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.words(), words12);
-    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
-    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+    BOOST_REQUIRE_EQUAL(instance2.words(), two_overflows12);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1_copy.entropy());
+    BOOST_REQUIRE(instance2.lingo() == instance1_copy.lingo());
+    BOOST_REQUIRE(instance2.overflow() == instance1_copy.overflow());
+
+    // Overflow entropy does not round trip words.
+    const electrum_v1 instance3(instance2.entropy());
+    BOOST_REQUIRE_EQUAL(instance3.entropy(), instance2.entropy());
+    BOOST_REQUIRE_NE(instance3.words(), instance2.words());
+    BOOST_REQUIRE(instance3.overflow() != instance2.overflow());
 }
 
 // construct sentence
@@ -824,6 +783,70 @@ BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_overflowed__true)
 
 #endif // PUBLIC_METHODS
 
+#ifdef PROTECTED_METHODS
+
+// overflows
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy_invalid__empty)
+{
+    const accessor instance(data_chunk{});
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__entropy__empty)
+{
+    const accessor instance(data_chunk(32, 0x00));
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_invalid__empty)
+{
+    const accessor instance(words2);
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.overflows().empty());
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_not_overflowed__expected)
+{
+    const accessor instance(words24);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 24u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(!overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(!overflows[3]);
+    BOOST_REQUIRE(!overflows[4]);
+    BOOST_REQUIRE(!overflows[5]);
+    BOOST_REQUIRE(!overflows[6]);
+    BOOST_REQUIRE(!overflows[7]);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__overflows__words_overflowed__expected)
+{
+    const accessor instance(two_overflows12);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.overflow());
+    const auto& overflows = instance.overflows();
+    BOOST_REQUIRE_EQUAL(overflows.size(), 12u / 3u);
+    BOOST_REQUIRE(!overflows[0]);
+    BOOST_REQUIRE(overflows[1]);
+    BOOST_REQUIRE(!overflows[2]);
+    BOOST_REQUIRE(overflows[3]);
+}
+
+// seed_entropy
+
+BOOST_AUTO_TEST_CASE(electrum_v1__seed_entropy__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+#endif // PROTECTED METHODS
+
 #ifdef OPERATORS
 
 // All operators are implemented in the languages base class.
@@ -832,24 +855,39 @@ BOOST_AUTO_TEST_CASE(electrum_v1__overflow__words_overflowed__true)
 
 BOOST_AUTO_TEST_CASE(electrum_v1__assign_copy__always__expected)
 {
-    const electrum_v1 instance1(words12);
+    const electrum_v1 instance1(two_overflows12);
     electrum_v1 instance2;
     instance2 = instance1;
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.words(), words12);
+    BOOST_REQUIRE_EQUAL(instance2.words(), two_overflows12);
     BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
     BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+    BOOST_REQUIRE(instance2.overflow() == instance1.overflow());
+
+    // Overflow entropy does not round trip words.
+    const electrum_v1 instance3(instance2.entropy());
+    BOOST_REQUIRE_EQUAL(instance3.entropy(), instance2.entropy());
+    BOOST_REQUIRE_NE(instance3.words(), instance2.words());
+    BOOST_REQUIRE(instance3.overflow() != instance2.overflow());
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__assign_move__always__expected)
 {
-    electrum_v1 instance1(words12);
+    electrum_v1 instance1(two_overflows12);
+    const electrum_v1 instance1_copy(two_overflows12);
     electrum_v1 instance2;
     instance2 = std::move(instance1);
     BOOST_REQUIRE(instance2);
-    BOOST_REQUIRE_EQUAL(instance2.words(), words12);
-    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1.entropy());
-    BOOST_REQUIRE(instance2.lingo() == instance1.lingo());
+    BOOST_REQUIRE_EQUAL(instance2.words(), two_overflows12);
+    BOOST_REQUIRE_EQUAL(instance2.entropy(), instance1_copy.entropy());
+    BOOST_REQUIRE(instance2.lingo() == instance1_copy.lingo());
+    BOOST_REQUIRE(instance2.overflow() == instance1_copy.overflow());
+
+    // Overflow entropy does not round trip words.
+    const electrum_v1 instance3(instance2.entropy());
+    BOOST_REQUIRE_EQUAL(instance3.entropy(), instance2.entropy());
+    BOOST_REQUIRE_NE(instance3.words(), instance2.words());
+    BOOST_REQUIRE(instance3.overflow() != instance2.overflow());
 }
 
 // in/equality
@@ -860,16 +898,17 @@ BOOST_AUTO_TEST_CASE(electrum_v1__equality__always__expected)
     const electrum_v1 instance2(words12);
     BOOST_REQUIRE(instance1);
     BOOST_REQUIRE(instance1 == instance2);
+    BOOST_REQUIRE(electrum_v1(instance2.entropy()) == instance2);
 }
 
-BOOST_AUTO_TEST_CASE(electrum_v1__inequality_move__always__expected)
+BOOST_AUTO_TEST_CASE(electrum_v1__inequality__always__expected)
 {
-
     const electrum_v1 instance1(words12);
-    const electrum_v1 instance2(words24);
+    const electrum_v1 instance2(two_overflows12);
     BOOST_REQUIRE(instance1);
     BOOST_REQUIRE(instance2);
     BOOST_REQUIRE(instance1 != instance2);
+    BOOST_REQUIRE(electrum_v1(instance2.entropy()) != instance2);
 }
 
 // operator>>

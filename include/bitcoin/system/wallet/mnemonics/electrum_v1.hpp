@@ -134,6 +134,12 @@ public:
     /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
     bool overflow() const;
 
+    /// Assignment.
+    electrum_v1& operator=(electrum_v1 other);
+
+    /// Swap implementation required to properly handle derived class assign.
+    friend void swap(electrum_v1& left, electrum_v1& right);
+
 protected:
     /// Helpers for managing decoding overflow state.
     /// github.com/spesmilo/electrum/issues/3149

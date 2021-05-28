@@ -220,7 +220,7 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 hash_digest electrum_v1::strecher(const data_chunk& seed_entropy)
 {
     auto streched = seed_entropy;
-    for (size_t i = 0; i < stretch_iterations; ++i)
+    for (size_t count = 0; count < stretch_iterations; ++count)
         streched = sha256_hash_chunk(splice(streched, seed_entropy));
 
     return to_array<hash_size>(streched);
@@ -364,7 +364,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
 
 // overflow methods
 // ----------------------------------------------------------------------------
-// Manage overflow bug and converion to idiosyncratic textual seed data.
+// Manage overflow bug and conversion to idiosyncratic textual seed data.
 
 // public
 bool electrum_v1::overflow() const
@@ -412,6 +412,25 @@ ec_public electrum_v1::to_public_key(const context& context) const
 
     // The public key will be invalid if the private key is invalid.
     return to_seed(context).to_public();
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+electrum_v1& electrum_v1::operator=(electrum_v1 other)
+{
+    swap(*this, other);
+    return *this;
+}
+
+// friend function, see: stackoverflow.com/a/5695855/1172329
+void swap(electrum_v1& left, electrum_v1& right)
+{
+    using std::swap;
+
+    // Must be unqualified (no std namespace).
+    swap(static_cast<languages&>(left), static_cast<languages&>(right));
+    swap(left.overflows_, right.overflows_);
 }
 
 } // namespace wallet
