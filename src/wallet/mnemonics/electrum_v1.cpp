@@ -61,6 +61,16 @@ namespace wallet {
 // The result can be an odd number of characters (9 total max).
 // print('%08x' % x) emits >= 8 hex characters, and can be odd length.
 
+v1_decoding::v1_decoding()
+  : v1_decoding({}, {})
+{
+}
+
+v1_decoding::v1_decoding(const data_chunk & entropy)
+  : v1_decoding(entropy, {})
+{
+}
+
 v1_decoding::v1_decoding(const data_chunk & entropy,
     const overflow & overflows)
   : entropy_(entropy), overflows_(overflows)
@@ -77,32 +87,33 @@ const v1_decoding::overflow& v1_decoding::overflows() const
     return overflows_;
 }
 
-// Electrum hashes the base16 encoded ascii text of the seed.
-std::string v1_decoding::base16_entropy() const
+// Electrum hashes the base16 encoded ascii *text* of the seed.
+data_chunk v1_decoding::seed_entropy() const
 {
     // overflows is empty for entropy constructions.
     if (overflows_.empty())
-        return encode_base16(entropy_);
+        return to_chunk(encode_base16(entropy_));
 
     // overflow count must always be the count of entropy uint32_t.
     if (overflows_.size() * sizeof(uint32_t) != entropy_.size())
         return {};
 
-    std::string out;
     data_source source(entropy_);
     istream_reader reader(source);
-
-    // See comments above on electrum v1 decoder overflow bug.
-    // This inserts any overflow bits while converting entropy to text.
     auto it = overflows_.begin();
+    std::string hexidecimal;
+
     while (!reader.is_exhausted())
     {
         // This is a big-endian read of a big-endian byte stream.
         const auto value = reader.read_bytes(sizeof(uint32_t));
-        out.append((*it++ ? "1" : "") + encode_base16(value));
+
+        // This inserts any overflow bits.
+        // See comments on the decoder overflow bug.
+        hexidecimal.append((*it++ ? "1" : "") + encode_base16(value));
     }
 
-    return out;
+    return to_chunk(hexidecimal);
 }
 
 // ============================================================================
@@ -208,9 +219,11 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 // electrum/keystore.py#L692
 hash_digest electrum_v1::strecher(const v1_decoding& decoding)
 {
-    // Compensate for overflows, convert to base16, and then to bytes.
-    const auto entropy = to_chunk(decoding.base16_entropy());
-    BITCOIN_ASSERT_MSG(entropy != null_hash, "unreachable state reached");
+    // Compensate for overflows and encode as text.
+    const auto entropy = decoding.seed_entropy();
+
+    // This implies non-empty overflow size does not match entropy size.
+    BITCOIN_ASSERT_MSG(!entropy.empty(), "unreachable state reached");
 
     auto streched = entropy;
     for (size_t i = 0; i < stretch_iterations; ++i)
@@ -270,12 +283,12 @@ bool electrum_v1::is_valid_word_count(size_t count)
 // ----------------------------------------------------------------------------
 
 electrum_v1::electrum_v1()
-  : languages()
+  : languages(), overflows_()
 {
 }
 
 electrum_v1::electrum_v1(const electrum_v1& other)
-  : languages(other)
+  : languages(other), overflows_(other.overflows_)
 {
 }
 
@@ -307,7 +320,7 @@ electrum_v1::electrum_v1(const maximum_entropy& entropy, language identifier)
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
     language identifier)
-  : electrum_v1(v1_decoding{ entropy, {} }, words, identifier)
+  : electrum_v1(v1_decoding(entropy), words, identifier)
 {
 }
 
@@ -379,14 +392,14 @@ ec_private electrum_v1::to_seed(const context& context) const
     if (!(*this))
         return {};
 
-    // Combine base class entropy with derived class overflows.
-    const v1_decoding combined(entropy_, overflows_);
+    // Recombine decoder outputs for streching.
+    const v1_decoding decoding(entropy_, overflows_);
 
     // Sets compression to false as this is the electrum convention.
     // Causes derived payment addresses to use the uncompressed public key.
     // Context sets the version byte for derived payment addresses.
     // The private key will be invalid if the value does not ec verify.
-    return { ec_scalar{ strecher(combined) }, context.address_version, false };
+    return { ec_scalar(strecher(decoding)), context.address_version, false };
 }
 
 ec_public electrum_v1::to_public_key(const context& context) const

@@ -46,10 +46,13 @@ class v1_decoding
 {
 public:
     typedef std::vector<bool> overflow;
+
+    v1_decoding();
+    v1_decoding(const data_chunk& entropy);
     v1_decoding(const data_chunk& entropy, const overflow& overflows);
     const data_chunk& entropy() const;
     const overflow& overflows() const;
-    std::string base16_entropy() const;
+    data_chunk seed_entropy() const;
 
 private:
     data_chunk entropy_;

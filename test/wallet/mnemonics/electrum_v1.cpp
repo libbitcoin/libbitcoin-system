@@ -27,12 +27,119 @@ using namespace test::mnemonics_electrum_v1;
 using namespace bc::system::wallet;
 
 #define TODO_TESTS true
+#define DECODING_CLASS 1
 #define PUBLIC_STATIC 1
 #define PROTECTED_STATIC 1
 #define CONSTRUCTORS 1
 #define PUBLIC_METHODS 1
 #define OPERATORS 1
 #define VERIFIED_VECTORS 1
+
+#ifdef DECODING_CLASS
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct_default__always__empty)
+{
+    v1_decoding instance;
+    BOOST_REQUIRE(instance.entropy().empty());
+    BOOST_REQUIRE(instance.overflows().empty());
+    BOOST_REQUIRE(instance.seed_entropy().empty());
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct_entropy__empty__empty)
+{
+    v1_decoding instance(data_chunk{});
+    BOOST_REQUIRE(instance.entropy().empty());
+    BOOST_REQUIRE(instance.overflows().empty());
+    BOOST_REQUIRE(instance.seed_entropy().empty());
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct_entropy__non_empty__expected)
+{
+    const auto entropy = data_chunk(4, 0x42);
+    const auto expected_seed = to_chunk("42424242");
+    v1_decoding instance(entropy);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE(instance.overflows().empty());
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed);
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct__empty__expected)
+{
+    v1_decoding instance({}, {});
+    BOOST_REQUIRE(instance.entropy().empty());
+    BOOST_REQUIRE(instance.overflows().empty());
+    BOOST_REQUIRE(instance.seed_entropy().empty());
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct__empty_entropy__expected)
+{
+    const v1_decoding::overflow overflows{ true, false, true };
+    v1_decoding instance({}, overflows);
+    BOOST_REQUIRE(instance.entropy().empty());
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE(instance.seed_entropy().empty());
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__seed_entropy__mismatched_overflow__expected)
+{
+    const auto entropy = data_chunk(3 * sizeof(uint32_t), 0x42);
+    const v1_decoding::overflow overflows(2, false);
+    v1_decoding instance(entropy, overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE(instance.seed_entropy().empty());
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__seed_entropy__false_overflows__expected)
+{
+    const auto entropy = data_chunk(3 * sizeof(uint32_t), 0x42);
+
+    // to_chunk(text) is not decode_base16(out, text)
+    // It casts char directly to uint8_t.
+    // This is the value that electrum hashes to obtain the seed.
+    // We refer to this as the "seed entropy", as opposed to the "entropy".
+    const auto expected_seed_entropy = to_chunk(encode_base16(entropy));
+
+    const v1_decoding::overflow overflows(3, false);
+    v1_decoding instance(entropy, overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed_entropy);
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct__true_overflows__expected)
+{
+    const auto entropy = data_chunk
+    {
+        0xaa, 0xcc, 0xcc, 0xdd,
+        0xaa, 0xcc, 0xcc, 0xdd,
+        0xaa, 0xcc, 0xcc, 0xdd
+    };
+    const v1_decoding::overflow overflows(3, true);
+    const auto expected_seed = to_chunk("1""aaccccdd""1""aaccccdd""1""aaccccdd");
+    v1_decoding instance(entropy, overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed);
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct__mixed_overflows__expected)
+{
+    const auto entropy = data_chunk
+    {
+        0xaa, 0xcc, 0xcc, 0xdd,
+        0xaa, 0xcc, 0xcc, 0xdd,
+        0xaa, 0xcc, 0xcc, 0xdd
+    };
+    const v1_decoding::overflow overflows{ false, true, false };
+    const auto expected_seed = to_chunk("aaccccdd""1""aaccccddaaccccdd");
+    v1_decoding instance(entropy, overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed);
+}
+
+#endif // DECODING_CLASS
 
 #ifdef PUBLIC_STATIC
 
