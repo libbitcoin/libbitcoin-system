@@ -38,6 +38,13 @@ template <typename Element, typename Container>
 int binary_search(const Container& list, const Element& value)
 {
     const auto size = list.size();
+
+    // This fails arbitrarily if 'list' contains pointer elements (e.g. to
+    // const char*) because the comparison is between pointers, not values.
+    // However the binary_search call remains valid in the case where the
+    // 'value' parameter implements sufficient binary comparison operator
+    // overloads (e.g. operator<(const char* left, const std::string& right).
+    // Therefore we avoid this assertion and rely entirely on caller sorting.
     ////BITCOIN_ASSERT(is_sorted(list));
 
     // Guard right cast.

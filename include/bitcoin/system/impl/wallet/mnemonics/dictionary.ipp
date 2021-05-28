@@ -87,6 +87,7 @@ template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const
 {
     // Dictionary sort is configured on each dictionary, verified by tests.
+    // Dictionary is char* elements but using std::string (word) for compares.
     if (words_.sorted)
         return binary_search(words_.word, word);
 

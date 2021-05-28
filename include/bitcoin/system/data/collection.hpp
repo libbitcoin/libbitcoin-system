@@ -27,7 +27,13 @@ namespace libbitcoin {
 namespace system {
 
 /// Find the position of an element in a *lexically sorted* collection.
+/// It is the responsibility of the caller to ensure that paramters implement
+/// sufficient comparison operator overloads (LT and GT). Either the 'list' 
+/// elements must implement (at least) member comparison operator overloads or
+/// the 'value' parameter must implement binary comparison operator overloads.
 /// Be aware that C-style arrays/strings are compared by pointers, not values.
+/// A 'list' of C-style arrays of char may be seached with std::string 'value'.
+/// std::string comparisons are not locale aware.
 /// Returns the position or negative if not found or list size > max_int32.
 template <typename Element, typename Container>
 int binary_search(const Container& list, const Element& value);

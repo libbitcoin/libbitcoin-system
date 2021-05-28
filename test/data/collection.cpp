@@ -26,37 +26,40 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 
 const auto not_found = -1;
 
-// Collection must be iterable and members implement lexical compare (<, >).
+// Collection must implement [] and .size().
+// Either list members or the search key must implement lexical compare (<, >).
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__empty__not_found)
+// binary_search - native byte comparison operators
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__empty__not_found)
 {
     const std::string empty = "";
     const auto value = 'a';
     BOOST_REQUIRE_EQUAL(binary_search(empty, value), not_found);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__one_element_unmatched__not_found)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__one_element_unmatched__not_found)
 {
     const std::string single = "a";
     const auto value = 'b';
     BOOST_REQUIRE_EQUAL(binary_search(single, value), not_found);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__one_element_match__0)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__one_element_match__0)
 {
     const std::string single = "a";
     const auto value = 'a';
     BOOST_REQUIRE_EQUAL(binary_search(single, value), 0);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__two_elements_match_first__0)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__two_elements_match_first__0)
 {
     const std::string sorted = "ab";
     const auto value = 'a';
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 0);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__two_elements_match_second__1)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__two_elements_match_second__1)
 {
     const std::string sorted = "ab";
     const auto value = 'b';
@@ -64,42 +67,72 @@ BOOST_AUTO_TEST_CASE(limits__binary_search__two_elements_match_second__1)
     BOOST_REQUIRE_EQUAL(result, 1);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__three_elements_match_second__1)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__three_elements_match_second__1)
 {
     const std::string sorted = "abc";
     const auto value = 'b';
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 1);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__three_various_elements__unmatched__not_found)
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__sorted_contained__expected)
+{
+    const std::string sorted = "abcdefjkxyz";
+    const auto value = 'x';
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 8);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_native__reverse_sorted_contained__unlucky)
+{
+    const std::string unsorted = "zyxwvutscba";
+    const auto value = 'x';
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), -1);
+}
+
+// binary_search - list element comparison operators
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_element__three_various_elements_unmatched__not_found)
 {
     const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const auto value = "bcd";
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), not_found);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_element__three_various_elements_matched__found)
+{
+    const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const auto value = "cfdd";
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 2);
+}
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_element__unsorted_contained__unlucky)
+{
+    const string_list unsorted{ { "z", "y", "x" } };
+    const auto value = "z";
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+}
+
+// binary_search - key comparison operators
+
+BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_unmatched__not_found)
+{
+    const std::vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const std::string value = "bcd";
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), not_found);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__three_various_elements__matched__found)
+BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_matched__found)
 {
-    const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const std::vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const std::string value = "cfdd";
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 2);
 }
 
-// These generate aborts because of the sort assertion in the implementation.
-
-////BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__unlucky)
-////{
-////    const string_list unsorted{ { "z", "y", "x" } };
-////    const std::string value = "z";
-////    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
-////}
-////
-////BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__lucky)
-////{
-////    const data_chunk unsorted{ { 'z', 'a', 'x' } };
-////    const auto value = 'x';
-////    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), 2);
-////}
+BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
+{
+    const std::vector<const char*> unsorted{ "z", "y", "x" };
+    const std::string value = "z";
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+}
 
 // cast
 
