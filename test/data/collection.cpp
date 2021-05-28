@@ -85,19 +85,21 @@ BOOST_AUTO_TEST_CASE(limits__binary_search__three_various_elements__matched__fou
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 2);
 }
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__unlucky)
-{
-    const string_list unsorted{ { "z", "y", "x" } };
-    const std::string value = "z";
-    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
-}
+// These generate aborts because of the sort assertion in the implementation.
 
-BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__lucky)
-{
-    const data_chunk unsorted{ { 'z', 'a', 'x' } };
-    const auto value = 'x';
-    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), 2);
-}
+////BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__unlucky)
+////{
+////    const string_list unsorted{ { "z", "y", "x" } };
+////    const std::string value = "z";
+////    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+////}
+////
+////BOOST_AUTO_TEST_CASE(limits__binary_search__unsorted__contained__lucky)
+////{
+////    const data_chunk unsorted{ { 'z', 'a', 'x' } };
+////    const auto value = 'x';
+////    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), 2);
+////}
 
 // cast
 
