@@ -374,46 +374,80 @@ BOOST_AUTO_TEST_CASE(languages__less_than__differently_delimited_same_words__exp
     BOOST_REQUIRE(!(instance2 < instance2));
 }
 
-BOOST_AUTO_TEST_CASE(languages__equality__same_entropy_and_language__expected)
+BOOST_AUTO_TEST_CASE(languages__equality__same__expected)
 {
-    // Words have no effect on equality operators.
     const data_chunk entropy{ 0x01, 0x02, 0x03 };
-    accessor instance1(entropy, {}, language::es);
-    accessor instance2(entropy, { "foo" }, language::es);
+    const string_list words{ "a", "b", "c" };
+    accessor instance1(entropy, words, language::es);
+    accessor instance2(entropy, words, language::es);
     BOOST_REQUIRE(instance1 == instance2);
     BOOST_REQUIRE(instance2 == instance1);
     BOOST_REQUIRE(instance1 == instance1);
     BOOST_REQUIRE(instance2 == instance2);
 }
 
-BOOST_AUTO_TEST_CASE(languages__equality__same_entropy_distinct_language__expected)
+BOOST_AUTO_TEST_CASE(languages__equality__distinct_entropy__expected)
 {
-    const data_chunk entropy{ 0x01, 0x02, 0x03 };
-    accessor instance1(entropy, {}, language::es);
-    accessor instance2(entropy, {}, language::ja);
+    const string_list words{ "a", "b", "c" };
+    accessor instance1({}, words, language::es);
+    accessor instance2({ 0x01, 0x02, 0x03 }, words, language::ja);
     BOOST_REQUIRE(!(instance1 == instance2));
     BOOST_REQUIRE(!(instance2 == instance1));
     BOOST_REQUIRE(instance1 == instance1);
     BOOST_REQUIRE(instance2 == instance2);
 }
 
-BOOST_AUTO_TEST_CASE(languages__inequality__distinct_entropy_same_language__expected)
+BOOST_AUTO_TEST_CASE(languages__equality__distinct_words__expected)
 {
-    const data_chunk entropy1{ 0x01, 0x02, 0x03 };
-    const data_chunk entropy2{ 0x02, 0x03, 0x04 };
-    accessor instance1(entropy1, {}, language::ja);
-    accessor instance2(entropy2, {}, language::ja);
+    const data_chunk entropy{ 0x01, 0x02, 0x03 };
+    accessor instance1(entropy, {}, language::es);
+    accessor instance2(entropy, { "a", "b", "c" }, language::ja);
+    BOOST_REQUIRE(!(instance1 == instance2));
+    BOOST_REQUIRE(!(instance2 == instance1));
+    BOOST_REQUIRE(instance1 == instance1);
+    BOOST_REQUIRE(instance2 == instance2);
+}
+
+BOOST_AUTO_TEST_CASE(languages__equality__distinct_language__expected)
+{
+    const data_chunk entropy{ 0x01, 0x02, 0x03 };
+    const string_list words{ "a", "b", "c" };
+    accessor instance1(entropy, words, language::es);
+    accessor instance2(entropy, words, language::ja);
+    BOOST_REQUIRE(!(instance1 == instance2));
+    BOOST_REQUIRE(!(instance2 == instance1));
+    BOOST_REQUIRE(instance1 == instance1);
+    BOOST_REQUIRE(instance2 == instance2);
+}
+
+BOOST_AUTO_TEST_CASE(languages__inequality__distinct_entropy__expected)
+{
+    const string_list words{ "a", "b", "c" };
+    accessor instance2({}, words, language::ja);
+    accessor instance1({ 0x01, 0x02, 0x03 }, words, language::ja);
     BOOST_REQUIRE(instance1 != instance2);
     BOOST_REQUIRE(instance2 != instance1);
     BOOST_REQUIRE(!(instance1 != instance1));
     BOOST_REQUIRE(!(instance2 != instance2));
 }
 
-BOOST_AUTO_TEST_CASE(languages__inequality__same_entropy_distinct_language__expected)
+BOOST_AUTO_TEST_CASE(languages__inequality__distinct_words__expected)
 {
     const data_chunk entropy{ 0x01, 0x02, 0x03 };
-    accessor instance1(entropy, {}, language::es);
-    accessor instance2(entropy, {}, language::ja);
+    accessor instance1(entropy, {}, language::ja);
+    accessor instance2(entropy, { "a", "b", "c" }, language::ja);
+    BOOST_REQUIRE(instance1 != instance2);
+    BOOST_REQUIRE(instance2 != instance1);
+    BOOST_REQUIRE(!(instance1 != instance1));
+    BOOST_REQUIRE(!(instance2 != instance2));
+}
+
+BOOST_AUTO_TEST_CASE(languages__inequality__distinct_language__expected)
+{
+    const data_chunk entropy{ 0x01, 0x02, 0x03 };
+    const string_list words{ "a", "b", "c" };
+    accessor instance1(entropy, words, language::es);
+    accessor instance2(entropy, words, language::ja);
     BOOST_REQUIRE(instance1 != instance2);
     BOOST_REQUIRE(instance2 != instance1);
     BOOST_REQUIRE(!(instance1 != instance1));
