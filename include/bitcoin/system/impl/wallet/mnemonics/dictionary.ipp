@@ -86,9 +86,9 @@ string_list dictionary<Size>::at(const search& indexes) const
 template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const
 {
-    ////// Dictionary sort is configured on each dictionary, verified by tests.
-    ////if (words_.sorted)
-    ////    return binary_search(words_.word, word);
+    // Dictionary sort is configured on each dictionary, verified by tests.
+    if (words_.sorted)
+        return binary_search(words_.word, word);
 
     // std::find returns first match, though words should be unique.
     const auto it = std::find(words_.word.begin(), words_.word.end(), word);
