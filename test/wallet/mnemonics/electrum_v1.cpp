@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(v1_decoding__construct_entropy__empty__empty)
 
 BOOST_AUTO_TEST_CASE(v1_decoding__construct_entropy__non_empty__expected)
 {
-    const auto entropy = data_chunk(4, 0x42);
+    const data_chunk entropy(4, 0x42);
     const auto expected_seed = to_chunk("42424242");
     v1_decoding instance(entropy);
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(v1_decoding__seed_entropy__mismatched_overflow__expected)
 
 BOOST_AUTO_TEST_CASE(v1_decoding__seed_entropy__false_overflows__expected)
 {
-    const auto entropy = data_chunk(3 * sizeof(uint32_t), 0x42);
+    const data_chunk entropy(3 * sizeof(uint32_t), 0x42);
 
     // to_chunk(text) is not decode_base16(out, text)
     // It casts char directly to uint8_t.
@@ -109,34 +109,73 @@ BOOST_AUTO_TEST_CASE(v1_decoding__seed_entropy__false_overflows__expected)
 
 BOOST_AUTO_TEST_CASE(v1_decoding__construct__true_overflows__expected)
 {
-    const auto entropy = data_chunk
+    const data_chunk entropy
     {
-        0xaa, 0xcc, 0xcc, 0xdd,
-        0xaa, 0xcc, 0xcc, 0xdd,
-        0xaa, 0xcc, 0xcc, 0xdd
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd
     };
+    const auto expected_seed_entropy = to_chunk("1""aabbccdd""1""aabbccdd""1""aabbccdd");
+
     const v1_decoding::overflow overflows(3, true);
-    const auto expected_seed = to_chunk("1""aaccccdd""1""aaccccdd""1""aaccccdd");
     v1_decoding instance(entropy, overflows);
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
     BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
-    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed_entropy);
 }
 
 BOOST_AUTO_TEST_CASE(v1_decoding__construct__mixed_overflows__expected)
 {
-    const auto entropy = data_chunk
+    const data_chunk entropy
     {
-        0xaa, 0xcc, 0xcc, 0xdd,
-        0xaa, 0xcc, 0xcc, 0xdd,
-        0xaa, 0xcc, 0xcc, 0xdd
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd
     };
+    const auto expected_seed_entropy = to_chunk("aabbccdd""1""aabbccddaabbccdd");
     const v1_decoding::overflow overflows{ false, true, false };
-    const auto expected_seed = to_chunk("aaccccdd""1""aaccccddaaccccdd");
     v1_decoding instance(entropy, overflows);
     BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
     BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
-    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), expected_seed_entropy);
+}
+
+BOOST_AUTO_TEST_CASE(v1_decoding__construct__even_overflows__expected)
+{
+    const data_chunk entropy
+    {
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0xaa, 0xbb, 0xcc, 0xdd
+    };
+
+    // This is a byte encoded example of an even number of overflow bits.
+    // Note that a single overflow bit cannot be represened in byte encoding.
+    // Note also that a single overflow bit consumes 4 bits in the electrum
+    // encoding because of electrum's concatenation of presumed 4 byte hex
+    // strings. The overflow consumes a full hex character in the string
+    // encoding is then concatenated with the next chunks. Electrum's own
+    // entropy decoder cannot decode an overflowed value as it successively
+    // divides the entropy by 1626 (the dictionary size), which is based on the
+    // assumption that each chunk is limited to [0-1625]. But overflowed values
+    // violate this assumption. For these reasons we carry overflow flags in a
+    // distinct data structure and truncate the overflow for entropy.
+    // Fortunately the overflows are limited to one bit, which simplifies this
+    // techique. For this reason overflowed entropy will not round trip to the
+    // original seed words (which were invalid - manually generated).
+    const data_chunk malformed_entropy
+    {
+        0xaa, 0xbb, 0xcc, 0xdd,
+        0x1a, 0xab, 0xbc, 0xcd,
+        0xd1, 0xaa, 0xbb, 0xcc, 0xdd
+    };
+
+    // This is the true true.
+    const v1_decoding::overflow overflows{ false, true, true };
+    v1_decoding instance(entropy, overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.seed_entropy(), to_chunk(encode_base16(malformed_entropy)));
 }
 
 #endif // DECODING_CLASS
