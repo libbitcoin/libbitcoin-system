@@ -55,7 +55,9 @@ inline bool deserialize(std::string& out, const std::string& text)
 inline bool deserialize(uint8_t& out, const std::string& text)
 {
     uint16_t value;
-    deserialize(value, text);
+    if (!deserialize(value, text))
+        return false;
+
     out = static_cast<uint8_t>(value);
     return value <= max_uint8;
 }
