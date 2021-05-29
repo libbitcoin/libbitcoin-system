@@ -126,8 +126,6 @@ static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
 // local constants
 // ----------------------------------------------------------------------------
 
-constexpr size_t stretch_iterations = 100000;
-
 static const auto size = static_cast<int>(electrum_v1::dictionary::size());
 static const auto size0 = power(size, 0);
 static const auto size1 = power(size, 1);
@@ -219,8 +217,10 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 // electrum/keystore.py#L692
 hash_digest electrum_v1::strecher(const data_chunk& seed_entropy)
 {
+    constexpr size_t hash_iterations = 100000;
+
     auto streched = seed_entropy;
-    for (size_t count = 0; count < stretch_iterations; ++count)
+    for (size_t count = 0; count < hash_iterations; ++count)
         streched = sha256_hash_chunk(splice(streched, seed_entropy));
 
     return to_array<hash_size>(streched);

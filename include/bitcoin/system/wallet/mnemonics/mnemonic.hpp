@@ -103,7 +103,7 @@ public:
     /// wiki.trezor.io/account_private_key
     /// Derive the "account private key" from the "master binary seed".
     /// This is also known as the wallet "root key" or "master private key".
-    /// hd_private.point() is the wallet compressed "master public key".
+    /// hd_private.to_public() is the "master public key".
     /// The "master binary seed" cannot be obtained from the key.
     /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_key(const std::string& passphrase="",

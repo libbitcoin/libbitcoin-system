@@ -40,9 +40,6 @@ namespace wallet {
 // local constants
 // ----------------------------------------------------------------------------
 
-constexpr auto passphrase_prefix = "mnemonic";
-constexpr size_t hmac_iterations = 2048;
-
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
 static const auto index_bits = static_cast<uint8_t>(
     system::floored_log2(mnemonic::dictionary::size()));
@@ -94,6 +91,9 @@ data_chunk mnemonic::decoder(const string_list& words, language identifier)
 long_hash mnemonic::seeder(const string_list& words,
     const std::string& passphrase)
 {
+    constexpr size_t hmac_iterations = 2048;
+    constexpr auto passphrase_prefix = "mnemonic";
+
     // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
     auto phrase = passphrase;
 

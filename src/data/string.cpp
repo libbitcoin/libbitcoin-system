@@ -166,7 +166,7 @@ static bool trim_left(std::string& text, const std::string& token)
     return found;
 }
 
-static  bool trim_right(std::string& text, const std::string& token)
+static bool trim_right(std::string& text, const std::string& token)
 {
     auto found = false;
     const auto length = token.length();

@@ -26,7 +26,7 @@ using namespace bc::system::wallet;
 
 const auto dictionary_count = 10u;
 
-// The french combining diacritics are in nfkd (normal) form.
+// The french combining characters are diacritics in nfkd (normal) form.
 const auto combinings_es = 334;
 const auto combinings_fr = 366;
 const auto combinings_ja = 644;
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__divergences__unused_words__false)
 
 // combined
 
-// The spanish, french and japanese dictionaries contain combining diacritics.
+// The spanish, french and japanese dictionaries contain combining characters.
 // This requires combinings removal in these (only) for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__combinings__combininged_words__true)
 {
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__combinings__combininged_words__true)
     BOOST_REQUIRE_EQUAL(combinings(electrum::ja), combinings_ja);
 }
 
-// No words in these dictionaries contain combining diacritics.
+// No words in these dictionaries contain combining characters.
 // So there is no need to normalize combinings these for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__combininged__not_combininged_words__false)
 {

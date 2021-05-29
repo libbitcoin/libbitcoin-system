@@ -150,11 +150,10 @@ public:
     long_hash to_seed(const std::string& passphrase="") const;
 
     /// Derive hd form "root seed" from mnemonic entropy and passphrase.
-    /// The "root seed" is also referred to by electrum as the "master key".
-    /// Context affects the hd form but does not affect the contained seed.
-    /// hd_private.point() is the compressed "master public key".
-    /// hd_private.secret() is the "master private key".
+    /// The "root seed" is also referred to as the "master private key".
+    /// hd_private.to_public() is the "master public key".
     /// hd_private.secret() + .chain_code() is the raw form "root seed".
+    /// Context affects the hd form but does not affect the contained seed.
     /// Returns invalid result if current prefix is 'none', 'bip39, or 'old'.
     /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_key(const std::string& passphrase="",

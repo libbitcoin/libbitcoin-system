@@ -42,11 +42,6 @@ namespace wallet {
 // local constants
 // ----------------------------------------------------------------------------
 
-constexpr auto passphrase_prefix = "electrum";
-constexpr size_t hmac_iterations = 2048;
-constexpr size_t minimum_two_factor_authentication_words = 20;
-static const auto seed_version = to_chunk("Seed version");
-
 // Seed prefixes.
 // The values for old, bip39 and none are not actual prefixes but included
 // here for consistency when handling electrum exceptional conditions.
@@ -159,7 +154,7 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
     sentence = to_non_combining_form(sentence);
     sentence = to_compressed_form(sentence);
 
-    const auto seed = encode_base16(hmac_sha512_hash(sentence, seed_version));
+    const auto seed = encode_base16(hmac_sha512_hash(sentence, "Seed version"));
     return starts_with(seed, to_version(prefix));
 }
 
@@ -169,6 +164,9 @@ bool electrum::validator(const string_list& words, seed_prefix prefix)
 long_hash electrum::seeder(const string_list& words,
     const std::string& passphrase)
 {
+    constexpr size_t hmac_iterations = 2048;
+    constexpr auto passphrase_prefix = "electrum";
+
     // Passphrase is limited to ascii (normal) if WITH_ICU undefined.
     auto phrase = passphrase;
 
@@ -283,6 +281,8 @@ size_t electrum::usable_size(const data_slice& entropy)
 
 bool electrum::is_ambiguous(size_t count, seed_prefix prefix)
 {
+    constexpr size_t minimum_two_factor_authentication_words = 20;
+
     // HACK: github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L258
     // In Electrum 2.7, there was a breaking change in key derivation for
     // two_factor_authentication. Unfortunately the seed prefix was reused,
