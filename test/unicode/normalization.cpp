@@ -554,8 +554,7 @@ BOOST_AUTO_TEST_CASE(normalization__is_chinese_japanese_or_korean__points__90286
 
 // is_diacritic
 
-// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
-BOOST_AUTO_TEST_CASE(normalization__diacritics__points__882)
+BOOST_AUTO_TEST_CASE(normalization__diacritics__points_836)
 {
     size_t points = 0;
     for (size_t index = 0; index < char32_diacritics_count; ++index)
@@ -567,8 +566,7 @@ BOOST_AUTO_TEST_CASE(normalization__diacritics__points__882)
     BOOST_REQUIRE_EQUAL(points, 836u);
 }
 
-// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
-BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__882)
+BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__836)
 {
     size_t points = 0;
     for (uint32_t character = 0; character < maximum_code_point; ++character)
@@ -580,7 +578,10 @@ BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__882)
 
 // is_combining
 
-// TODO: determine if we have transcribed the table incorrectly (reported count off by 10).
+// The combining points count reported (872) by Unicode publication is off by 10.
+// Our internal count is based on Python's Uncode sources, which are authoritative
+// for Electrum normalization, and is the standard on which we rely for BIP39
+// normalization.
 BOOST_AUTO_TEST_CASE(normalization__is_combining__points__882)
 {
     size_t points = 0;
@@ -591,7 +592,7 @@ BOOST_AUTO_TEST_CASE(normalization__is_combining__points__882)
     BOOST_REQUIRE_EQUAL(points, 872u);
 }
 
-BOOST_AUTO_TEST_CASE(normalization__is_combining__is_diacritic__differences)
+BOOST_AUTO_TEST_CASE(normalization__is_combining__is_diacritic__608_differences)
 {
     std::vector<uint32_t> exceptions;
     for (uint32_t character = 0; character < maximum_code_point; ++character)
