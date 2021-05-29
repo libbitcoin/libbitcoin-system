@@ -385,34 +385,45 @@ BOOST_AUTO_TEST_CASE(electrum_v1__strecher__non_empty__expected)
 // sizers
 // ----------------------------------------------------------------------------
 
-// entropy_bits1
+// entropy_bits entropy
 
-BOOST_AUTO_TEST_CASE(electrum_v1__entropy_bits1__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__entropy_bits__entropy__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    for (size_t bytes = 0; bytes < electrum_v1::entropy_maximum; ++bytes)
+    {
+        BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(bytes, 0x00)), bytes * 8u);
+    }
 }
 
-// entropy_bits2
+// entropy_bits words
 
-BOOST_AUTO_TEST_CASE(electrum_v1__entropy_bits2__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__entropy_bits__words__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    for (size_t words = 0; words < electrum_v1::word_maximum; ++words)
+    {
+        BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(words, "")), (words * 4u) / 3u);
+    }
 }
 
 // entropy_size
 
-BOOST_AUTO_TEST_CASE(electrum_v1__entropy_size__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__entropy_size__various__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    for (size_t words = 0; words < electrum_v1::word_maximum; ++words)
+    {
+        BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(words, "")), ((words * 4u) / 3u) / 8u);
+    }
 }
 
 // word_count
 
-BOOST_AUTO_TEST_CASE(electrum_v1__word_count__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__word_count__various__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    for (size_t bytes = 0; bytes < electrum_v1::entropy_maximum; ++bytes)
+    {
+        BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(bytes, 0x00)), (bytes * 8u) / 4u);
+    }
 }
-
 
 // factories
 // ----------------------------------------------------------------------------
@@ -699,10 +710,32 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_entropy__not_empty__expect
 
 // construct protected result
 
-BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_result__todo__todo)
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_decoding__true_overflows__expected)
 {
-    // Also update other constructor tests to verify overflow.
-    BOOST_REQUIRE(TODO_TESTS);
+    const data_chunk entropy(5, 0x42);
+    const string_list words(5, "word");
+    const v1_decoding::overflow overflows(5, true);
+    const accessor instance(v1_decoding(entropy, overflows), words, language::ja);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.overflow(), true);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.words(), words);
+    BOOST_REQUIRE(instance.lingo() == language::ja);
+}
+
+BOOST_AUTO_TEST_CASE(electrum_v1__construct_protected_decoding__false_overflows__expected)
+{
+    const data_chunk entropy(5, 0x42);
+    const string_list words(5, "word");
+    const v1_decoding::overflow overflows(5, false);
+    const accessor instance(v1_decoding(entropy, overflows), words, language::ja);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.overflow(), false);
+    BOOST_REQUIRE_EQUAL(instance.overflows(), overflows);
+    BOOST_REQUIRE_EQUAL(instance.entropy(), entropy);
+    BOOST_REQUIRE_EQUAL(instance.words(), words);
+    BOOST_REQUIRE(instance.lingo() == language::ja);
 }
 
 #endif // CONSTRUCTORS

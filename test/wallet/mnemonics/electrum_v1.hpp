@@ -324,7 +324,7 @@ public:
 
     static size_t entropy_size(const string_list& words)
     {
-        return electrum_v1::entropy_bits(words);
+        return electrum_v1::entropy_size(words);
     }
 
     static size_t word_count(const data_slice& entropy)
