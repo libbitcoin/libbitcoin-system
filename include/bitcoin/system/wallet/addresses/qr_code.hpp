@@ -34,14 +34,8 @@ class BC_API qr_code
 public:
     enum class encode_mode
     {
-        numeric = 0,
-        alpha_numeric,
-        eight_bit,
-        kanji,
-        unused,
-        eci_mode,
-        fcn1_1,
-        fcn1_2
+        eight_bit = 2,
+        kanji = 3
     };
 
     enum class recovery_level

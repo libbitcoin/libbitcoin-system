@@ -28,6 +28,7 @@ using namespace bc::system::wallet;
 static const uint16_t no_scale = 0u;
 static const uint16_t no_margin = 0u;
 static const uint8_t default_version = 0u;
+static const auto low = qr_code::recovery_level::low;
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__no_value__false)
 {
@@ -195,6 +196,58 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__excessive_scale__false)
 
     // At margin 0, scaling even a single pixel to 2^16 overflows the TIFF pixel limit.
     BOOST_REQUIRE(!qr_code::encode(sink, "X", default_version, bc::max_uint16, no_margin));
+}
+
+// recovery_level
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_low__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::low));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_medium__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::medium));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_high__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::high));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_highest__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::highest));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+// encode_mode
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_eight_bit__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, low, qr_code::encode_mode::eight_bit));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_kanji__expected_size)
+{
+    data_chunk out;
+    data_sink sink(out);
+    BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, low, qr_code::encode_mode::kanji));
+    BOOST_REQUIRE_EQUAL(out.size(), 219u);
 }
 
 // to_pixels
