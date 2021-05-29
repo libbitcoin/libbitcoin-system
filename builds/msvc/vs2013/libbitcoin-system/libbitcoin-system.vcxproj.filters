@@ -1337,9 +1337,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_environment.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_file_lock.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_ifstream.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>

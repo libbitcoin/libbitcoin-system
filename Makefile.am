@@ -752,7 +752,6 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_about.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_console_streambuf.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp \
-    include/bitcoin/system/unicode/utf8_everywhere/utf8_file_lock.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/utf8_main.hpp \
