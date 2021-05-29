@@ -138,7 +138,8 @@ electrum::grinding electrum::grinder(const data_chunk& entropy,
         words = encoder(hash, identifier);
 
         // Avoid collisions with Electrum v1 (en) and BIP39 mnemonics.
-        if (!is_conflict(words) && validator(words, prefix))
+        // Run validator first because conflict checks can be costly.
+        if (validator(words, prefix) && !is_conflict(words))
             return { hash, words, start - limit };
 
         // This replaces Electrum's prng with determinism.
