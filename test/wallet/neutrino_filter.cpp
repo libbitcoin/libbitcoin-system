@@ -115,8 +115,8 @@ bool add_metadata(prevout_data::list& metadata, chain::block& block)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_0__success)
 {
-    const auto expected = hash_literal("21584579b7eb08997773e5aeff3a7f932700042d0ed2a6129012b7d7ae81b750");
-    const auto previous_header = hash_literal("0000000000000000000000000000000000000000000000000000000000000000");
+    const auto expected = base16_hash("21584579b7eb08997773e5aeff3a7f932700042d0ed2a6129012b7d7ae81b750");
+    const auto previous_header = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
     const auto filter = base16_chunk("019dfca8");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -124,8 +124,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_0__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_2__success)
 {
-    const auto expected = hash_literal("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
-    const auto previous_header = hash_literal("d7bdac13a59d745b1add0d2ce852f1a0442e8945fc1bf3848d3cbffd88c24fe1");
+    const auto expected = base16_hash("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
+    const auto previous_header = base16_hash("d7bdac13a59d745b1add0d2ce852f1a0442e8945fc1bf3848d3cbffd88c24fe1");
     const auto filter = base16_chunk("0174a170");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_2__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_3__success)
 {
-    const auto expected = hash_literal("8d63aadf5ab7257cb6d2316a57b16f517bff1c6388f124ec4c04af1212729d2a");
-    const auto previous_header = hash_literal("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
+    const auto expected = base16_hash("8d63aadf5ab7257cb6d2316a57b16f517bff1c6388f124ec4c04af1212729d2a");
+    const auto previous_header = base16_hash("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
     const auto filter = base16_chunk("016cf7a0");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -142,8 +142,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_3__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_15007__success)
 {
-    const auto expected = hash_literal("07384b01311867949e0c046607c66b7a766d338474bb67f66c8ae9dbd454b20e");
-    const auto previous_header = hash_literal("18b5c2b0146d2d09d24fb00ff5b52bd0742f36c9e65527abdb9de30c027a4748");
+    const auto expected = base16_hash("07384b01311867949e0c046607c66b7a766d338474bb67f66c8ae9dbd454b20e");
+    const auto previous_header = base16_hash("18b5c2b0146d2d09d24fb00ff5b52bd0742f36c9e65527abdb9de30c027a4748");
     const auto filter = base16_chunk("013c3710");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -151,8 +151,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_15007__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_49291__success)
 {
-    const auto expected = hash_literal("b6d98692cec5145f67585f3434ec3c2b3030182e1cb3ec58b855c5c164dfaaa3");
-    const auto previous_header = hash_literal("ed47705334f4643892ca46396eb3f4196a5e30880589e4009ef38eae895d4a13");
+    const auto expected = base16_hash("b6d98692cec5145f67585f3434ec3c2b3030182e1cb3ec58b855c5c164dfaaa3");
+    const auto previous_header = base16_hash("ed47705334f4643892ca46396eb3f4196a5e30880589e4009ef38eae895d4a13");
     const auto filter = base16_chunk("0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -160,8 +160,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_49291__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_180480__success)
 {
-    const auto expected = hash_literal("c582d51c0ca365e3fcf36c51cb646d7f83a67e867cb4743fd2128e3e022b700c");
-    const auto previous_header = hash_literal("d34ef98386f413769502808d4bac5f20f8dfd5bffc9eedafaa71de0eb1f01489");
+    const auto expected = base16_hash("c582d51c0ca365e3fcf36c51cb646d7f83a67e867cb4743fd2128e3e022b700c");
+    const auto previous_header = base16_hash("d34ef98386f413769502808d4bac5f20f8dfd5bffc9eedafaa71de0eb1f01489");
     const auto filter = base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -169,8 +169,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_180480__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_926485__success)
 {
-    const auto expected = hash_literal("546c574a0472144bcaf9b6aeabf26372ad87c7af7d1ee0dbfae5e099abeae49c");
-    const auto previous_header = hash_literal("8f13b9a9c85611635b47906c3053ac53cfcec7211455d4cb0d63dc9acc13d472");
+    const auto expected = base16_hash("546c574a0472144bcaf9b6aeabf26372ad87c7af7d1ee0dbfae5e099abeae49c");
+    const auto previous_header = base16_hash("8f13b9a9c85611635b47906c3053ac53cfcec7211455d4cb0d63dc9acc13d472");
     const auto filter = base16_chunk("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_926485__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_987876__success)
 {
-    const auto expected = hash_literal("0965a544743bbfa36f254446e75630c09404b3d164a261892372977538928ed5");
-    const auto previous_header = hash_literal("fe4d230dbb0f4fec9bed23a5283e08baf996e3f32b93f52c7de1f641ddfd04ad");
+    const auto expected = base16_hash("0965a544743bbfa36f254446e75630c09404b3d164a261892372977538928ed5");
+    const auto previous_header = base16_hash("fe4d230dbb0f4fec9bed23a5283e08baf996e3f32b93f52c7de1f641ddfd04ad");
     const auto filter = base16_chunk("010c0b40");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -187,8 +187,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_987876__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1263442__success)
 {
-    const auto expected = hash_literal("4e6d564c2a2452065c205dd7eb2791124e0c4e0dbb064c410c24968572589dec");
-    const auto previous_header = hash_literal("31d66d516a9eda7de865df29f6ef6cb8e4bf9309e5dac899968a9a62a5df61e3");
+    const auto expected = base16_hash("4e6d564c2a2452065c205dd7eb2791124e0c4e0dbb064c410c24968572589dec");
+    const auto previous_header = base16_hash("31d66d516a9eda7de865df29f6ef6cb8e4bf9309e5dac899968a9a62a5df61e3");
     const auto filter = base16_chunk("0385acb4f0fe889ef0");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
 
@@ -197,8 +197,8 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1263442__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1414221__success)
 {
-    const auto expected = hash_literal("021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc");
-    const auto previous_header = hash_literal("5e5e12d90693c8e936f01847859404c67482439681928353ca1296982042864e");
+    const auto expected = base16_hash("021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc");
+    const auto previous_header = base16_hash("5e5e12d90693c8e936f01847859404c67482439681928353ca1296982042864e");
     const auto filter = base16_chunk("00");
     const auto result = neutrino::compute_filter_header(previous_header, filter);
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter_header__block_1414221__success)
 #ifndef _MSC_VER
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
 {
-    auto raw_block = to_chunk(base16_literal(
+    auto raw_block = base16_chunk(
         "02000000b51eb76f7cfd89ef4be99b0c7ea3e009ffbf33643661a0fc29354e010000"
         "000029cac78dd1eb1575de815d371bc652c47fcf6f15557bbd02b449513bb46de6f3"
         "de1d28518f1d021cff949bdc04010000000100000000000000000000000000000000"
@@ -808,9 +808,9 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-    extend(raw_block, to_chunk(base16_literal(
+    extend(raw_block, base16_chunk(
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -1409,15 +1409,15 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000"
-        "00")));
+        "00"));
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
     prevout_data::list metadata = {
-        { hash_literal("b4cf04be3d741d17932fb615532ab26668c5407fde7d4aaf7ef63e0da7970f97"), 0u, hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
-        { hash_literal("d110582b821b63959bd9a712b0aa160733d851244f84c7c3622f52622bc244e1"), 0u, hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 1u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
-        { hash_literal("af3dd7d35132d3a4e6b283ae0ea42a1832187eb95f1974ba255a45f42962cb3b"), 0u, hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, 0u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") }
+        { base16_hash("b4cf04be3d741d17932fb615532ab26668c5407fde7d4aaf7ef63e0da7970f97"), 0u, base16_hash("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { base16_hash("d110582b821b63959bd9a712b0aa160733d851244f84c7c3622f52622bc244e1"), 0u, base16_hash("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 1u, 0u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { base16_hash("af3dd7d35132d3a4e6b283ae0ea42a1832187eb95f1974ba255a45f42962cb3b"), 0u, base16_hash("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, 0u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") }
     };
 
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
@@ -1431,7 +1431,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
 {
-    auto raw_block = to_chunk(base16_literal(
+    auto raw_block = base16_chunk(
         "02000000ebf8983ec7194db57e4c85daf96b8b12c11cdb421ed8329275da0e020000"
         "000049706eabeacfc248c3e9b12e3b4ad657649b9ed8137e668c2cbd0766246de4ed"
         "4d1428518f1d021c89ebdf7b18010000000100000000000000000000000000000000"
@@ -2116,9 +2116,9 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-    extend(raw_block, to_chunk(base16_literal(
+    extend(raw_block, base16_chunk(
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -2801,44 +2801,44 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
         "f101210348f4cfb29c73268624994cb9688c6f32cc150b8fa1be956f2bc6b0457295"
         "d51fffffffff0200e1f505000000001976a914f2295d6917611afbb2015ae10725fd"
         "3d93cc58aa88ac3003ef05000000001976a91439072da37d9b9ca5f614691cb18830"
-        "f88ca1d8c588ac00000000")));
+        "f88ca1d8c588ac00000000"));
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
     prevout_data::list metadata = {
-        { hash_literal("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 0u, null_hash, 0u, 1000000000u, base16_chunk("76a9140fe23a9f788e094162ef8c187c6bab5398167bc288ac") },
-        { hash_literal("cd165d61a02275953f807cde46612f12f237698007becdf04654625141ace7be"), 0u, null_hash, 1u, 26684929999u, base16_chunk("76a9147585eddbafddeb5e09dca5c75a437f139fdf4b8f88ac") },
-        { hash_literal("46ed65fae8c311ecd72d494be97fca25f4d4d4eeda8c586eec138a53dc330a5c"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
-        { hash_literal("8cbee06050b463d435a734e76aca1c4c50ae201d04660e93760ffcf5907042e6"), 0u, null_hash, 0u, 98799999u, base16_chunk("76a914093ff32b9c19df316a50b108b1c69eee5e05ba6888ac") },
-        { hash_literal("e4f01a73cf66e9ab72fa31a6d7319369bffd615ea296a03e61af8d3c583ec7b6"), 0u, null_hash, 1u, 3699499999u, base16_chunk("76a9148e41a824970dfe29408cdb02b5b3a63eb7fd964388ac") },
-        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 1u, null_hash, 0u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
-        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 1u, null_hash, 1u, 99900000u, base16_chunk("76a91470ed37a176fa31a417ac4342629fd2436626b67488ac") },
-        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 1u, null_hash, 1u, 99800000u, base16_chunk("76a9147705a7a8dc42bfb549faa3253ed13a03fe42c21588ac") },
-        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 0u, null_hash, 0u, 99700000u, base16_chunk("76a9148c66db3c6265f127498084e7fe58abb97a0ff6cb88ac") },
-        { hash_literal("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 0u, null_hash, 0u, 99600000u, base16_chunk("76a9144bc5d5b68950619e52797622a38fcec17caf2cfa88ac") },
-        { hash_literal("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 0u, null_hash, 0u, 99500000u, base16_chunk("76a9143e766efd724a4de9950950f34e2d91c890bddc9588ac") },
-        { hash_literal("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 0u, null_hash, 0u, 99400000u, base16_chunk("76a91498080ef934beb096af4ac7d90c6533db5c126d1588ac") },
-        { hash_literal("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 1u, null_hash, 1u, 99300000u, base16_chunk("76a9146e3158b43777301c4ca852160047a3d6a63e3a7b88ac") },
-        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, null_hash, 0u, 99200000u, base16_chunk("76a91475ead4cb03aff9bb395c2e4f29c227450e34289888ac") },
-        { hash_literal("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
-        { hash_literal("37976821d10ba9d7e96f268e2bc005bb4dcc73e0f08fe46b612278e2b8586bb9"), 0u, null_hash, 0u, 899950000u, base16_chunk("76a91429911c1fbf60604b99d27082c2124e55cce11fbb88ac") },
-        { hash_literal("9347d6b5dc828476a8e830c6be764d0e125eb2e8bd03078a5c62895448d4ac1c"), 0u, null_hash, 0u, 799900000u, base16_chunk("76a914955dad7ac20a0e1d85e6428ede415c245f48719588ac") },
-        { hash_literal("64690f31edcc7d7f69d7cf417916351bf4ec133031a149fca58dc294fbf1da86"), 0u, null_hash, 1u, 699850000u, base16_chunk("76a9142621344f600b9bed2f330d695a4c5e45591a613088ac") },
-        { hash_literal("335a4e5cb3647e0e140372750d49b2b633495de9f85edbe42728dbd83146026f"), 0u, null_hash, 1u, 599800000u, base16_chunk("76a9145cd1b1ae6e1f8671e66b54f06446b19cc6baeec888ac") },
-        { hash_literal("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, null_hash, 1u, 499750000u, base16_chunk("76a9140f694e25932910a03ab4e2d25d05192e9d84c24288ac") },
-        { hash_literal("67c73721d83ae9cd0becdc9e7fdb7e50fcc8ddcfdfe6f73ce02929bb0c75bdbb"), 0u, null_hash, 1u, 399700000u, base16_chunk("76a914d8d5238df70cc86c48a9c332a103ba72080667da88ac") },
-        { hash_literal("0086bad73c94660c8bd6bec2526b71a9d5af5aeccde3ba5e21edecab3327edbc"), 0u, null_hash, 0u, 299650000u, base16_chunk("76a9144390bb02b50e93fca3186b00a09193f342cc909888ac") },
-        { hash_literal("a6ccd4f9bfd5540f2ff34253dfd4d0704748e112baaf1518ec18427f422d5f17"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
-        { hash_literal("0271d716bb72459c682d8cd1b8b65cff80891c8124cb508304f2f2f84e48a13a"), 0u, null_hash, 0u, 199600000u, base16_chunk("76a91434fb159d8365bcf1613f6cfd42b269b130edbe6e88ac") }
+        { base16_hash("01018dbd32f9438b459ef3abc4c03de3e5c58f0ca94c5cbb210789fc10c9f928"), 0u, null_hash, 0u, 1000000000u, base16_chunk("76a9140fe23a9f788e094162ef8c187c6bab5398167bc288ac") },
+        { base16_hash("cd165d61a02275953f807cde46612f12f237698007becdf04654625141ace7be"), 0u, null_hash, 1u, 26684929999u, base16_chunk("76a9147585eddbafddeb5e09dca5c75a437f139fdf4b8f88ac") },
+        { base16_hash("46ed65fae8c311ecd72d494be97fca25f4d4d4eeda8c586eec138a53dc330a5c"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
+        { base16_hash("8cbee06050b463d435a734e76aca1c4c50ae201d04660e93760ffcf5907042e6"), 0u, null_hash, 0u, 98799999u, base16_chunk("76a914093ff32b9c19df316a50b108b1c69eee5e05ba6888ac") },
+        { base16_hash("e4f01a73cf66e9ab72fa31a6d7319369bffd615ea296a03e61af8d3c583ec7b6"), 0u, null_hash, 1u, 3699499999u, base16_chunk("76a9148e41a824970dfe29408cdb02b5b3a63eb7fd964388ac") },
+        { base16_hash("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("4563afe5ef1b08041aebb99017efac525b14ed434a4e84abe5b97ca9684f3270"), 1u, null_hash, 0u, 100000000u, base16_chunk("76a91470d9bae2bd8a75c158c99b26b832549ea2d8e74f88ac") },
+        { base16_hash("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("31c35d8638f754e1f0eae33850ad841e9d2f045efdfb957ee2be7a53726cc6d8"), 1u, null_hash, 1u, 99900000u, base16_chunk("76a91470ed37a176fa31a417ac4342629fd2436626b67488ac") },
+        { base16_hash("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("74ac2e6cfd5da46c2a9b11ad8b036fe8f44ab92a121577ec2c36c3dd18a69138"), 1u, null_hash, 1u, 99800000u, base16_chunk("76a9147705a7a8dc42bfb549faa3253ed13a03fe42c21588ac") },
+        { base16_hash("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 0u, null_hash, 0u, 99700000u, base16_chunk("76a9148c66db3c6265f127498084e7fe58abb97a0ff6cb88ac") },
+        { base16_hash("b9191a4327768308210a12aefca163909a6118e0a7a28b672637c7f9be7bec32"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 0u, null_hash, 0u, 99600000u, base16_chunk("76a9144bc5d5b68950619e52797622a38fcec17caf2cfa88ac") },
+        { base16_hash("7cb1ac50ca2e4d9c21643a90980cd0b35a78d65eb78825b0840818efa0bdb6f2"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 0u, null_hash, 0u, 99500000u, base16_chunk("76a9143e766efd724a4de9950950f34e2d91c890bddc9588ac") },
+        { base16_hash("317b710f36715ce57ea326eeb70226232d76a185546032c15d3c90b527648a34"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 0u, null_hash, 0u, 99400000u, base16_chunk("76a91498080ef934beb096af4ac7d90c6533db5c126d1588ac") },
+        { base16_hash("1fbb610faf215b017bf1f056e036d44ddd3b6c194b5c2d15f3a806bd38af07d4"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 0u, null_hash, 0u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("52f1d4822ae631fc289fb49a7965580656fec25fa217e233fc08b0671f57cf0a"), 1u, null_hash, 1u, 99300000u, base16_chunk("76a9146e3158b43777301c4ca852160047a3d6a63e3a7b88ac") },
+        { base16_hash("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, null_hash, 0u, 99200000u, base16_chunk("76a91475ead4cb03aff9bb395c2e4f29c227450e34289888ac") },
+        { base16_hash("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 1u, null_hash, 1u, 100000000u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") },
+        { base16_hash("37976821d10ba9d7e96f268e2bc005bb4dcc73e0f08fe46b612278e2b8586bb9"), 0u, null_hash, 0u, 899950000u, base16_chunk("76a91429911c1fbf60604b99d27082c2124e55cce11fbb88ac") },
+        { base16_hash("9347d6b5dc828476a8e830c6be764d0e125eb2e8bd03078a5c62895448d4ac1c"), 0u, null_hash, 0u, 799900000u, base16_chunk("76a914955dad7ac20a0e1d85e6428ede415c245f48719588ac") },
+        { base16_hash("64690f31edcc7d7f69d7cf417916351bf4ec133031a149fca58dc294fbf1da86"), 0u, null_hash, 1u, 699850000u, base16_chunk("76a9142621344f600b9bed2f330d695a4c5e45591a613088ac") },
+        { base16_hash("335a4e5cb3647e0e140372750d49b2b633495de9f85edbe42728dbd83146026f"), 0u, null_hash, 1u, 599800000u, base16_chunk("76a9145cd1b1ae6e1f8671e66b54f06446b19cc6baeec888ac") },
+        { base16_hash("612593fee6de1da7e9081b40248353d2084ee597093d1dc720093b527c9d618e"), 0u, null_hash, 1u, 499750000u, base16_chunk("76a9140f694e25932910a03ab4e2d25d05192e9d84c24288ac") },
+        { base16_hash("67c73721d83ae9cd0becdc9e7fdb7e50fcc8ddcfdfe6f73ce02929bb0c75bdbb"), 0u, null_hash, 1u, 399700000u, base16_chunk("76a914d8d5238df70cc86c48a9c332a103ba72080667da88ac") },
+        { base16_hash("0086bad73c94660c8bd6bec2526b71a9d5af5aeccde3ba5e21edecab3327edbc"), 0u, null_hash, 0u, 299650000u, base16_chunk("76a9144390bb02b50e93fca3186b00a09193f342cc909888ac") },
+        { base16_hash("a6ccd4f9bfd5540f2ff34253dfd4d0704748e112baaf1518ec18427f422d5f17"), 0u, null_hash, 1u, 100000000u, base16_chunk("76a914f2295d6917611afbb2015ae10725fd3d93cc58aa88ac") },
+        { base16_hash("0271d716bb72459c682d8cd1b8b65cff80891c8124cb508304f2f2f84e48a13a"), 0u, null_hash, 0u, 199600000u, base16_chunk("76a91434fb159d8365bcf1613f6cfd42b269b130edbe6e88ac") }
     };
 
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
@@ -2853,11 +2853,11 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
 {
-    // const auto expected_block_hash = hash_literal("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
+    // const auto expected_block_hash = base16_hash("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
 
     const auto expected_filter = base16_chunk("019dfca8");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "01000000000000000000000000000000000000000000000000000000000000000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "dae5494dffff001d1aa4ae1801010000000100000000000000000000000000000000"
@@ -2866,13 +2866,14 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
         "6e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff"
         "0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e039"
         "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
-        "8a4c702b6bf11d5fac00000000"));
+        "8a4c702b6bf11d5fac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
-    prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    // Block zero has no prevouts.
+    ////prevout_data::list metadata;
+    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
@@ -2881,23 +2882,24 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
 {
-    // const auto expected_block_hash = hash_literal("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
+    // const auto expected_block_hash = base16_hash("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
 
     const auto expected_filter = base16_chunk("0174a170");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "0100000006128e87be8b1b4dea47a7247d5528d2702c96826c7a648497e773b80000"
         "0000e241352e3bec0a95a6217e10c3abb54adfa05abb12c126695595580fb92e2220"
         "32e7494dffff001d00d2353401010000000100000000000000000000000000000000"
         "00000000000000000000000000000000ffffffff0e0432e7494d010e062f50325348"
         "2fffffffff0100f2052a010000002321038a7f6ef1c8ca0c588aa53fa860128077c9"
-        "e6c11e6830f4d7ee4e763a56b7718fac00000000"));
+        "e6c11e6830f4d7ee4e763a56b7718fac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
-    prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    // Block 2 has no prevouts.
+    ////prevout_data::list metadata;
+    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
@@ -2906,23 +2908,24 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
 {
-    // const auto expected_block_hash = hash_literal("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
+    // const auto expected_block_hash = base16_hash("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
 
     const auto expected_filter = base16_chunk("016cf7a0");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "0100000020782a005255b657696ea057d5b98f34defcf75196f64f6eeac8026c0000"
         "000041ba5afc532aae03151b8aa87b65e1594f97504a768e010c98c0add792162471"
         "86e7494dffff001d058dc2b601010000000100000000000000000000000000000000"
         "00000000000000000000000000000000ffffffff0e0486e7494d0151062f50325348"
         "2fffffffff0100f2052a01000000232103f6d9ff4c12959445ca5549c811683bf9c8"
-        "8e637b222dd2e0311154c4c85cf423ac00000000"));
+        "8e637b222dd2e0311154c4c85cf423ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
-    prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    // Block 3 has no prevouts.
+    ////prevout_data::list metadata;
+    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
@@ -2931,37 +2934,32 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
 {
-    // const auto expected_block_hash = hash_literal("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
+    // const auto expected_block_hash = base16_hash("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
 
     const auto expected_filter = base16_chunk("013c3710");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "0100000002394092aa378fe35d7e9ac79c869b975c4de4374cd75eb5484b0e1e0000"
         "0000eb9b8670abd44ad6c55cee18e3020fb0c6519e7004b01a16e9164867531b67af"
         "c33bc94fffff001d123f100501010000000100000000000000000000000000000000"
         "00000000000000000000000000000000ffffffff0e04c33bc94f0115062f50325348"
         "2fffffffff0100f2052a01000000232103f268e9ae07e0f8cb2f6e901d87c510d650"
-        "b97230c0365b021df8f467363cafb1ac00000000"));
+        "b97230c0365b021df8f467363cafb1ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
 
-    prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    // Block 15007 has no prevouts.
+    ////prevout_data::list metadata;
+    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
-
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
+BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__false)
 {
-    // const auto expected_block_hash = hash_literal("0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
-
-    const auto expected_filter = to_chunk(base16_literal(
-        "0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"));
-
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "02000000abfaf47274223ca2fea22797e44498240e482cb4c2f2baea088962f80000"
         "0000604b5b52c32305b15d7542071d8b04e750a547500005d4010727694b6e72a776"
         "e55d0d51ffff001d2118064802010000000100000000000000000000000000000000"
@@ -3008,7 +3006,70 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
         "ab28d024f92fa05c922924157e022100ebc166edf6fbe4004c72bfe8cf40130263f9"
         "8ddff728c8e67b113dbd621906a601210211a4ed241174708c07206601b44a4c1c29"
         "e5ad8b1f731c50ca7e1d4b2a06dc1fffffffff02d0223a00000000001976a91445db"
-        "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000"));
+        "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
+
+    auto validated_block = chain::block::factory(raw_block);
+    BOOST_REQUIRE(validated_block.is_valid());
+
+    data_chunk result;
+    BOOST_REQUIRE(!neutrino::compute_filter(validated_block, result));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
+{
+    // const auto expected_block_hash = base16_hash("0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
+
+    const auto expected_filter = base16_chunk(
+        "0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380");
+
+    const auto raw_block = base16_chunk(
+        "02000000abfaf47274223ca2fea22797e44498240e482cb4c2f2baea088962f80000"
+        "0000604b5b52c32305b15d7542071d8b04e750a547500005d4010727694b6e72a776"
+        "e55d0d51ffff001d2118064802010000000100000000000000000000000000000000"
+        "00000000000000000000000000000000ffffffff0d038bc0000102062f503253482f"
+        "ffffffff01a078072a01000000232102971dd6034ed0cf52450b608d196c07d63451"
+        "84fcb14deb277a6b82d526a6163dac0000000001000000081cefd96060ecb1c4fbe6"
+        "75ad8a4f8bdc61d634c52b3a1c4116dee23749fe80ff000000009300493046022100"
+        "866859c21f306538152e83f115bcfbf59ab4bb34887a88c03483a5dff9895f960221"
+        "00a6dfd83caa609bf0516debc2bf65c3df91813a4842650a1858b3f61cfa8af24901"
+        "4730440220296d4b818bb037d0f83f9f7111665f49532dfdcbec1e6b784526e9ac40"
+        "46eaa602204acf3a5cb2695e8404d80bf49ab04828bcbe6fc31d25a2844ced7a8d24"
+        "afbdff01ffffffff1cefd96060ecb1c4fbe675ad8a4f8bdc61d634c52b3a1c4116de"
+        "e23749fe80ff020000009400483045022100e87899175991aa008176cb553c6f2bad"
+        "bb5b741f328c9845fcab89f8b18cae2302200acce689896dc82933015e7230e5230d"
+        "5cff8a1ffe82d334d60162ac2c5b0c9601493046022100994ad29d1e7b03e41731a4"
+        "316e5f4992f0d9b6e2efc40a1ccd2c949b461175c502210099b69fdc2db00fbba214"
+        "f16e286f6a49e2d8a0d5ffc6409d87796add475478d601ffffffff1e4a6d2d280ea0"
+        "6680d6cf8788ac90344a9c67cca9b06005bbd6d3f6945c8272010000009500493046"
+        "022100a27400ba52fd842ce07398a1de102f710a10c5599545e6c95798934352c2e4"
+        "df022100f6383b0b14c9f64b6718139f55b6b9494374755b86bae7d63f5d3e583b57"
+        "255a01493046022100fdf543292f34e1eeb1703b264965339ec4a450ec47585009c6"
+        "06b3edbc5b617b022100a5fbb1c8de8aaaa582988cdb23622838e38de90bebcaab39"
+        "28d949aa502a65d401ffffffff1e4a6d2d280ea06680d6cf8788ac90344a9c67cca9"
+        "b06005bbd6d3f6945c8272020000009400493046022100ac626ac3051f875145b4fe"
+        "4cfe089ea895aac73f65ab837b1ac30f5d875874fa022100bc03e79fa4b7eb707fb7"
+        "35b95ff6613ca33adeaf3a0607cdcead4cfd3b51729801483045022100b720b04a5c"
+        "5e2f61b7df0fcf334ab6fea167b7aaede5695d3f7c6973496adbf1022043328c4cc1"
+        "cdc3e5db7bb895ccc37133e960b2fd3ece98350f774596badb387201ffffffff23a8"
+        "733e349c97d6cd90f520fdd084ba15ce0a395aad03cd51370602bb9e5db301000000"
+        "4a00483045022100e8556b72c5e9c0da7371913a45861a61c5df434dfd962de7b238"
+        "48e1a28c86ca02205d41ceda00136267281be0974be132ac4cda1459fe2090ce4556"
+        "19d8b91045e901ffffffff6856d609b881e875a5ee141c235e2a82f6b039f2b9babe"
+        "82333677a5570285a6000000006a473044022040a1c631554b8b210fbdf2a73f191b"
+        "2851afb51d5171fb53502a3a040a38d2c0022040d11cf6e7b41fe1b66c3d08f6ada1"
+        "aee07a047cb77f242b8ecc63812c832c9a012102bcfad931b502761e452962a5976c"
+        "79158a0f6d307ad31b739611dac6a297c256ffffffff6856d609b881e875a5ee141c"
+        "235e2a82f6b039f2b9babe82333677a5570285a601000000930048304502205b109d"
+        "f098f7e932fbf71a45869c3f80323974a826ee2770789eae178a21bfc8022100c0e7"
+        "5615e53ee4b6e32b9bb5faa36ac539e9c05fa2ae6b6de5d09c08455c8b9601483045"
+        "022009fb7d27375c47bea23b24818634df6a54ecf72d52e0c1268fb2a2c84f1885de"
+        "022100e0ed4f15d62e7f537da0d0f1863498f9c7c0c0a4e00e4679588c8d1a9eb20b"
+        "b801ffffffffa563c3722b7b39481836d5edfc1461f97335d5d1e9a23ade13680d0e"
+        "2c1c371f030000006c493046022100ecc38ae2b1565643dc3c0dad5e961a5f0ea09c"
+        "ab28d024f92fa05c922924157e022100ebc166edf6fbe4004c72bfe8cf40130263f9"
+        "8ddff728c8e67b113dbd621906a601210211a4ed241174708c07206601b44a4c1c29"
+        "e5ad8b1f731c50ca7e1d4b2a06dc1fffffffff02d0223a00000000001976a91445db"
+        "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3016,65 +3077,65 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
     prevout_data::list metadata
     {
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             0u,
-            hash_literal("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
+            base16_hash("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
             0u,
             5000000u,
             base16_chunk("5221033423007d8f263819a2e42becaaf5b06f34cb09919e06304349d950668209eaed21021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             1u,
-            hash_literal("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
+            base16_hash("ff80fe4937e2de16411c3a2bc534d661dc8b4f8aad75e6fbc4b1ec6060d9ef1c"),
             2u,
             5000000u,
             base16_chunk("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821021d69e2b68c3960903b702af7829fadcd80bd89b158150c85c4a75b2c8cb9c39452ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             2u,
-            hash_literal("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
+            base16_hash("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
             1u,
             5000000u,
             base16_chunk("522102a7ae1e0971fc1689bd66d2a7296da3a1662fd21a53c9e38979e0f090a375c12d21022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             3u,
-            hash_literal("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
+            base16_hash("72825c94f6d3d6bb0560b0a9cc679c4a3490ac8887cfd68066a00e282d6d4a1e"),
             2u,
             5000000u,
             base16_chunk("52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179821022adb62335f41eb4e27056ac37d462cda5ad783fa8e0e526ed79c752475db285d52ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             4u,
-            hash_literal("b35d9ebb02063751cd03ad5a390ace15ba84d0fd20f590cdd6979c343e73a823"),
+            base16_hash("b35d9ebb02063751cd03ad5a390ace15ba84d0fd20f590cdd6979c343e73a823"),
             1u,
             5000000u,
             base16_chunk("512103b9d1d0e2b4355ec3cdef7c11a5c0beff9e8b8d8372ab4b4e0aaf30e80173001951ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             5u,
-            hash_literal("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
+            base16_hash("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
             0u,
             4070000u,
             base16_chunk("76a9149144761ebaccd5b4bbdc2a35453585b5637b2f8588ac")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             6u,
-            hash_literal("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
+            base16_hash("a6850257a577363382bebab9f239b0f6822a5e231c14eea575e881b809d65668"),
             1u,
             5000000u,
             base16_chunk("522103f1848b40621c5d48471d9784c8174ca060555891ace6d2b03c58eece946b1a9121020ee5d32b54d429c152fdc7b1db84f2074b0564d35400d89d11870f9273ec140c52ae")
         },
         {
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             7u,
-            hash_literal("1f371c2c0e0d6813de3aa2e9d1d53573f96114fcedd5361848397b2b72c363a5"),
+            base16_hash("1f371c2c0e0d6813de3aa2e9d1d53573f96114fcedd5361848397b2b72c363a5"),
             3u,
             19840000u,
             base16_chunk("76a914f4fa1cc7de742d135ea82c17adf0bb9cf5f4fb8388ac")
@@ -3090,11 +3151,11 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
 {
-    // const auto expected_block_hash = hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
+    // const auto expected_block_hash = base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
 
     const auto expected_filter = base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "020000006058aa080a655aa991a444bd7d1f2defd9a3bbe68aabb69030cf3b4e0000"
         "0000d2e826bfd7ef0beaa891a7eedbc92cd6a544a6cb61c7bdaa436762eb2123ef97"
         "90f5f552ffff001d0002c90f05010000000100000000000000000000000000000000"
@@ -3134,7 +3195,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
         "f04c2239942ba942012102925c9794fd7bb9f8b29e207d5fc491b1150135a21f5050"
         "41858889fa4edf436fffffffff026c840f00000000001976a914797fb8777d7991d8"
         "284d88bfd421ce520f0f843188ac00ca9a3b000000001976a9146d10f3f592699265"
-        "d10b106eda37c3ce793f7a8588ac00000000"));
+        "d10b106eda37c3ce793f7a8588ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3142,65 +3203,65 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
     prevout_data::list metadata
     {
         {
-            hash_literal("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
+            base16_hash("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
             0u,
-            hash_literal("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
+            base16_hash("4852fe372ff7534c16713b3146bbc1e86379c70bea4d5c02fb1fa0112980a081"),
             1u,
             50000000u,
             base16_chunk("")
         },
         {
-            hash_literal("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
+            base16_hash("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
             1u,
-            hash_literal("4cd1404b266feff0c17f0c5511c32bac3222247595bd28215e213d8367b204c9"),
+            base16_hash("4cd1404b266feff0c17f0c5511c32bac3222247595bd28215e213d8367b204c9"),
             1u,
             3354000000,
             base16_chunk("")
         },
         {
-            hash_literal("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
+            base16_hash("62a972ba5593255dd4662d470dfb0a075cfac6302a70ceb44d07c9c04a6b9a28"),
             2u,
-            hash_literal("75f7d5e99912875e88d667afb48021b0b74916539c518618a8db4966661509df"),
+            base16_hash("75f7d5e99912875e88d667afb48021b0b74916539c518618a8db4966661509df"),
             0u,
             10000000u,
             base16_chunk("")
         },
         {
-            hash_literal("88b760ee751176d80b0808e7e72916a63684688f9ed6374c2368f300c1f84dd0"),
+            base16_hash("88b760ee751176d80b0808e7e72916a63684688f9ed6374c2368f300c1f84dd0"),
             0u,
-            hash_literal("b4c804843976c89d813fc09b4d111b30944e5efc74af5260d682ba4f438ba38d"),
+            base16_hash("b4c804843976c89d813fc09b4d111b30944e5efc74af5260d682ba4f438ba38d"),
             1u,
             265903318u,
             base16_chunk("76a9142903b138c24be9e070b3e73ec495d77a204615e788ac")
         },
         {
-            hash_literal("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
+            base16_hash("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
             0u,
-            hash_literal("830fadd1c80d9fcbee9c5398e5ee5acad3c125a273c836de02a622342ea63961"),
+            base16_hash("830fadd1c80d9fcbee9c5398e5ee5acad3c125a273c836de02a622342ea63961"),
             1u,
             4000000u,
             base16_chunk("76a91433a1941fd9a37b9821d376f5a51bd4b52fa50e2888ac")
         },
         {
-            hash_literal("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
+            base16_hash("28934e7f3b8ae2b0a0d75463a5313aa3ccea5522e226eee58e4f46ff9f2b98db"),
             1u,
-            hash_literal("aeee59002c3622a5e1858c946d8cb2c2d51450525619670d0420f07cc8823c98"),
+            base16_hash("aeee59002c3622a5e1858c946d8cb2c2d51450525619670d0420f07cc8823c98"),
             1u,
             1250000u,
             base16_chunk("76a914e4374e8155d0865742ca12b8d4d14d41b57d682f88ac")
         },
         {
-            hash_literal("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
+            base16_hash("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
             0u,
-            hash_literal("dcf1e7987bd0e56aef07061d105c4d540c7d7f022ca8c4750c3f93d98c6e56be"),
+            base16_hash("dcf1e7987bd0e56aef07061d105c4d540c7d7f022ca8c4750c3f93d98c6e56be"),
             0u,
             999990000u,
             base16_chunk("76a914001fa7459a6cfc64bdc178ba7e7a21603bb2568f88ac")
         },
         {
-            hash_literal("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
+            base16_hash("5f0be77c5bba162290f74d01770dab8fb3b9c0a6fb9f02079de9505b6a1b2b35"),
             1u,
-            hash_literal("90fc0d2cbfa6252df32f085516eefe156a4547488722e93fb2ce765b6467cf96"),
+            base16_hash("90fc0d2cbfa6252df32f085516eefe156a4547488722e93fb2ce765b6467cf96"),
             0u,
             1036940u,
             base16_chunk("76a914f6039952bc2b307aeec5371bfb96b66078ec17f688ac")
@@ -3216,11 +3277,11 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
 {
-    // const auto expected_block_hash = hash_literal("000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
+    // const auto expected_block_hash = base16_hash("000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
 
     const auto expected_filter = base16_chunk("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "0000002060bbab0edbf3ef8a49608ee326f8fd75c473b7e3982095e2d10000000000"
         "0000c30134f8c9b6d2470488d7a67a888f6fa12f8692e0c3411fbfb92f0f68f67eed"
         "ae03ca57ef13021acc22dc4105010000000001010000000000000000000000000000"
@@ -3279,7 +3340,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
         "4d6a012103f7a897e4dbecab2264b21917f90664ea8256189ea725d28740cf7ba5d8"
         "5b5763ffffffff0200e1f5050000000017a9148fc37ad460fdfbd2b44fe446f6e307"
         "1a4f64faa6878f447f0b000000001976a914913bcc2be49cb534c20474c4dee1e9c4"
-        "c317e7eb88ac00000000"));
+        "c317e7eb88ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3287,65 +3348,65 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
     prevout_data::list metadata
     {
         {
-            hash_literal("d06d86bacf88f1f316d4470080b7869f1c298b850e7b219124ae131c0475abb0"),
+            base16_hash("d06d86bacf88f1f316d4470080b7869f1c298b850e7b219124ae131c0475abb0"),
             0u,
-            hash_literal("0a510f49749aaaa2638048132eafea959dd8e47e79332dbcb2a14189870e3145"),
+            base16_hash("0a510f49749aaaa2638048132eafea959dd8e47e79332dbcb2a14189870e3145"),
             1u,
             20021300u,
             base16_chunk("a914feb8a29635c56d9cd913122f90678756bf23887687")
         },
         {
-            hash_literal("06eee51317a76a76c67499c8f782819745b58d28cdb4d8357ef7f7e6d79cc513"),
+            base16_hash("06eee51317a76a76c67499c8f782819745b58d28cdb4d8357ef7f7e6d79cc513"),
             0u,
-            hash_literal("df3b6ebcfead10c9c21d11fb68f93e7afe2bb6b15aedb1ebdce41d2634559220"),
+            base16_hash("df3b6ebcfead10c9c21d11fb68f93e7afe2bb6b15aedb1ebdce41d2634559220"),
             1u,
             450380894u,
             base16_chunk("76a914c01a7ca16b47be50cbdbc60724f701d52d75156688ac")
         },
         {
-            hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
+            base16_hash("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
             0u,
-            hash_literal("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
+            base16_hash("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
             0u,
             100000000u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
-            hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
+            base16_hash("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
             1u,
-            hash_literal("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
+            base16_hash("226351667e09bd4b4b3aa76caf6df5836615d25f365025a51e7a0d63585fa203"),
             1u,
             16559999u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
-            hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
+            base16_hash("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
             0u,
-            hash_literal("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
+            base16_hash("f56da6d0bb5807561c29093066edd1d505c2fa4ae89bb895c4318481d360fd3f"),
             1u,
             16549999u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
-            hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
+            base16_hash("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
             1u,
-            hash_literal("926ba916aa1487be7e500477e57cccf2ed27ce65baf11e73840fe3cc019437a5"),
+            base16_hash("926ba916aa1487be7e500477e57cccf2ed27ce65baf11e73840fe3cc019437a5"),
             1u,
             100000u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
-            hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
+            base16_hash("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
             2u,
-            hash_literal("ce43f8403c00606c24004bcaff1291091a7395085184312cf15f2393e131e770"),
+            base16_hash("ce43f8403c00606c24004bcaff1291091a7395085184312cf15f2393e131e770"),
             0u,
             16250000u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
         },
         {
-            hash_literal("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
+            base16_hash("32a52be869fc148b6104244859c879f1319cfd86e89e6f7fc1ffaaf518fa14be"),
             3u,
-            hash_literal("6f9ff0ce05a22b70346c0357f285c98f401a3ffe18fc858e9c37503e1ba7b766"),
+            base16_hash("6f9ff0ce05a22b70346c0357f285c98f401a3ffe18fc858e9c37503e1ba7b766"),
             0u,
             260000000u,
             base16_chunk("76a914913bcc2be49cb534c20474c4dee1e9c4c317e7eb88ac")
@@ -3361,17 +3422,17 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
 {
-    // const auto expected_block_hash = hash_literal("0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
+    // const auto expected_block_hash = base16_hash("0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
 
     const auto expected_filter = base16_chunk("010c0b40");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "000000202694f74969fdb542090e95a56bc8aa2d646e27033850e32f1c5f00000000"
         "0000f7e53676b3f12d5beb524ed617f2d25f5a93b5f4f52c1ba2678260d72712f8dd"
         "0a6dfe5740257e1a4b17689601010000000100000000000000000000000000000000"
         "00000000000000000000000000000000ffffffff1603e4120ff9c30a1c216900002f"
         "424d4920546573742fffffff0001205fa012000000001e76a914c486de584a735ec2"
-        "f22da7cd9681614681f92173d83d0aa68688ac00000000"));
+        "f22da7cd9681614681f92173d83d0aa68688ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3386,11 +3447,11 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
 {
-    // const auto expected_block_hash = hash_literal("000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
+    // const auto expected_block_hash = base16_hash("000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
 
     const auto expected_filter = base16_chunk("0385acb4f0fe889ef0");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "000000201c8d1a529c39a396db2db234d5ec152fa651a2872966daccbde028b40000"
         "0000083f14492679151dbfaa1a825ef4c18518e780c1f91044180280a7d33f4a98ff"
         "5f45765aaddc001d38333b9a02010000000001010000000000000000000000000000"
@@ -3406,7 +3467,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
         "8a6aa58279797f861042ba604ebd2f8f61e5bddbd9d3be5a245047b201004b632103"
         "eeaeba7ce5dc2470221e9517fb498e8d6bd4e73b85b8be655196972eb9ccd5566754"
         "b2752103a40b74d43df244799d041f32ce1ad515a6cd99501701540e38750d883ae2"
-        "1d3a68ac00000000"));
+        "1d3a68ac00000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3414,9 +3475,9 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
     prevout_data::list metadata
     {
         {
-            hash_literal("2c21d40599523d6d24ed1cfe06346d0080362dc1d13f86d4a7f06931c73ce0e0"),
+            base16_hash("2c21d40599523d6d24ed1cfe06346d0080362dc1d13f86d4a7f06931c73ce0e0"),
             0u,
-            hash_literal("c52ca2fa069190af53b20a905de80debd58db8942419e7f54fba0639467809d2"),
+            base16_hash("c52ca2fa069190af53b20a905de80debd58db8942419e7f54fba0639467809d2"),
             1u,
             16745155u,
             base16_chunk("002027a5000c7917f785d8fc6e5a55adfca8717ecb973ebb7743849ff956d896a7ed")
@@ -3432,16 +3493,16 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
 {
-    // const auto expected_block_hash = hash_literal("0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
+    // const auto expected_block_hash = base16_hash("0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
 
     const auto expected_filter = base16_chunk("00");
 
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = base16_chunk(
         "000000204ea88307a7959d8207968f152bedca5a93aefab253f1fb2cfb032a400000"
         "000070cebb14ec6dbc27a9dfd066d9849a4d3bac5f674665f73a5fe1de01a022a0c8"
         "51fda85bf05f4c19a779d14501020000000100000000000000000000000000000000"
         "00000000000000000000000000000000ffffffff18034d94154d696e657247617465"
-        "3030310d000000f238f401ffffffff01c817a804000000000000000000"));
+        "3030310d000000f238f401ffffffff01c817a804000000000000000000");
 
     auto validated_block = chain::block::factory(raw_block);
     BOOST_REQUIRE(validated_block.is_valid());
@@ -3454,49 +3515,49 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
 {
     const message::compact_filter filter(
         bc::neutrino_filter_type,
-        hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address address(
-        base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
+        base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
         wallet::payment_address::testnet_p2kh);
 
     BOOST_REQUIRE(neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
 {
     const message::compact_filter filter(
         bc::neutrino_filter_type,
-        hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address address(
-        base16_literal("001fa005900cf004b00100ba700021000b00500f"),
+        base16_array("001fa005900cf004b00100ba700021000b00500f"),
         wallet::payment_address::testnet_p2kh);
 
     BOOST_REQUIRE(!neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__return_true)
+BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
 {
     const message::compact_filter filter(
         bc::neutrino_filter_type,
-        hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address::list addresses
     {
         {
-            base16_literal("001fa7459a6cfc64bdc100ba700a21003b005000"),
+            base16_array("001fa7459a6cfc64bdc100ba700a21003b005000"),
             wallet::payment_address::testnet_p2kh
         },
         {
-            base16_literal("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
+            base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
             wallet::payment_address::testnet_p2kh
         }
     };
@@ -3504,17 +3565,17 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__return_true)
     BOOST_REQUIRE(neutrino::match_filter(filter, addresses));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__return_false)
+BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
 {
     const message::compact_filter filter(
         bc::neutrino_filter_type,
-        hash_literal("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
+        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
         base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
 
     const wallet::payment_address::list addresses
     {
         {
-            base16_literal("001fa7459a6cfc64bdc100ba700a21003b005000"),
+            base16_array("001fa7459a6cfc64bdc100ba700a21003b005000"),
             wallet::payment_address::testnet_p2kh
         }
     };
