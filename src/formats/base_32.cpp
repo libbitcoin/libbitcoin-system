@@ -64,7 +64,7 @@ std::string encode_base32(const base32_chunk& data)
     out.reserve(data.size());
 
     // encode[] cannot be out of bounds because expanded bytes are < 32.
-    for (auto value : data)
+    for (auto value: data)
         out.push_back(encode[value.convert_to<uint8_t>()]);
 
     return out;
