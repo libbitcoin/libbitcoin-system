@@ -86,19 +86,6 @@ static ptrdiff_t abnormals(const electrum::dictionary::words& words)
         });
 }
 
-static bool sorted(const electrum::dictionary::words& words)
-{
-    // Convert dictionary to string, otherwise pointers are compared.
-    string_list tokens(mnemonic::dictionary::size());
-    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
-        [](const char* token)
-    {
-        return token;
-    });
-
-    return is_sorted(tokens);
-}
-
 // This differs from BIP39 in nfkd normalization.
 // This was normalized after publication, so probably not updated.
 const electrum::dictionary::words electrum_es

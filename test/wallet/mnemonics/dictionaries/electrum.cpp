@@ -31,6 +31,20 @@ const auto combinings_es = 334;
 const auto combinings_fr = 366;
 const auto combinings_ja = 644;
 
+#ifdef WITH_ICU
+const auto abnormals_es = 334;
+const auto abnormals_ja = 644;
+const auto divergences_es = 334;
+const auto divergences_ja = 644;
+#else
+const auto abnormals_es = 0;
+const auto abnormals_ja = 0;
+const auto divergences_es = 334;
+const auto divergences_ja = 644;
+#endif
+
+// count
+
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
@@ -38,6 +52,9 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__count__all__expected)
     BOOST_REQUIRE_MESSAGE(electrum::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
+// subset
+
+// Identities are the same as the mnemonic dictionaries.
 // nfkd testing is performed on the mnemonic dictionaries.
 // This test ensures electrum dictionaries are a subset of mnemonic dictionaries.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
@@ -53,46 +70,6 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__mnemonic__subset__true)
     BOOST_REQUIRE_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
     BOOST_REQUIRE_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
 }
-
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__sorted__unused_words__true)
-{
-    BOOST_REQUIRE(sorted(electrum::en) && electrum::en.sorted);
-    BOOST_REQUIRE(sorted(electrum::pt) && electrum::pt.sorted);
-}
-
-#ifdef WITH_ICU
-const auto abnormals_es = 334;
-const auto abnormals_ja = 644;
-const auto divergences_es = 334;
-const auto divergences_ja = 644;
-#else
-const auto abnormals_es = 0;
-const auto abnormals_ja = 0;
-const auto divergences_es = 334;
-const auto divergences_ja = 644;
-#endif
-
-// abnormal (requires ICU)
-
-// These dictionaries from the electrum repo are not in nfkd form.
-// But the others are identical to BIP39 dictionaries.
-// We do not use these words with in electrum sources, we use BIP39 words.
-// This verifies the number of abnormals in the two divergent dictionaries.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__abnormal__unused_words__false)
-{
-    // The result is definitive only when WITH_ICU is defined.
-    BOOST_REQUIRE_EQUAL(abnormals(electrum_es), abnormals_es);
-    BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
-}
-
-// This verifies that the differences are only in nfkd normalization.
-// Otherwise there may be differences in word value and/or position.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__divergences__unused_words__false)
-{
-    BOOST_REQUIRE_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
-    BOOST_REQUIRE_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
-}
-
 // combined
 
 // The spanish, french and japanese dictionaries contain combining characters.
@@ -106,7 +83,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__combinings__combininged_words__true)
 
 // No words in these dictionaries contain combining characters.
 // So there is no need to normalize combinings these for wordlist-based seedings.
-BOOST_AUTO_TEST_CASE(dictionaries_electrum__combininged__not_combininged_words__false)
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__combined__not_combininged_words__false)
 {
     BOOST_REQUIRE(!combined(electrum::en));
     BOOST_REQUIRE(!combined(electrum::it));
@@ -119,7 +96,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__combininged__not_combininged_words__
 
 // compressed_cjk
 
-// No words in any supported dictionaries are compressed.
+// No words in any supported dictionaries are uncompressed.
 // So there is no need to normalize compression for wordlist-based seeding.
 BOOST_AUTO_TEST_CASE(dictionaries_electrum__compressed__not_compressed_words__false)
 {
@@ -133,6 +110,31 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum__compressed__not_compressed_words__fa
     BOOST_REQUIRE(!compressed(electrum::ko));
     BOOST_REQUIRE(!compressed(electrum::zh_Hans));
     BOOST_REQUIRE(!compressed(electrum::zh_Hant));
+}
+
+// abnormal
+// ----------------------------------------------------------------------------
+// These dictionaries from the electrum repo are not in nfkd form, but are
+// otherwise identical to BIP39 dictionaries. We do not use these words within
+// electrum sources, we use BIP39 words. These tests verify that the BIP39
+// dictionaries are functionally identical.
+
+// This verifies the number of abnormals in the two divergent dictionaries.
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__abnormal__unused_words__false)
+{
+    // The result is definitive only when WITH_ICU is defined.
+    BOOST_REQUIRE_EQUAL(abnormals(electrum_es), abnormals_es);
+    BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
+}
+
+// divergence
+
+// This verifies that the differences are only in nfkd normalization.
+// Otherwise there could be differences in word value and/or position.
+BOOST_AUTO_TEST_CASE(dictionaries_electrum__divergences__unused_words__false)
+{
+    BOOST_REQUIRE_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
+    BOOST_REQUIRE_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
