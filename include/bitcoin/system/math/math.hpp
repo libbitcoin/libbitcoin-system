@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_MATH_HPP
 
 #include <cstddef>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -27,68 +28,99 @@ namespace system {
 /// All operations below support signed and unsigned parameters.
 
 /// Obtain the absolute value of the given integer value.
-template <typename Integer>
-Integer absolute(Integer value);
+template <typename Integer, IS_UNSIGNED_INTEGER(Integer)=true>
+inline Integer absolute(Integer value);
+template <typename Integer, IS_SIGNED_INTEGER(Integer)=true>
+inline Integer absolute(Integer value);
 
 /// Determine if the product (or quotient) of the two factors is negative. 
-template <typename Factor1, typename Factor2>
-bool negative(Factor1 factor1, Factor2 factor2);
+template <typename Factor1, typename Factor2,
+    IS_UNSIGNED_INTEGERS(Factor1, Factor2)=true>
+inline bool negative(Factor1 factor1, Factor2 factor2);
+template <typename Factor1, typename Factor2,
+    IS_SIGNED_INTEGER(Factor1)=true, IS_UNSIGNED_INTEGER(Factor2)=true>
+inline bool negative(Factor1 factor1, Factor2 factor2);
+template <typename Factor1, typename Factor2,
+    IS_UNSIGNED_INTEGER(Factor1)=true, IS_SIGNED_INTEGER(Factor2)=true>
+inline bool negative(Factor1 factor1, Factor2 factor2);
+template <typename Factor1, typename Factor2,
+    IS_SIGNED_INTEGERS(Factor1, Factor2)=true>
+inline bool negative(Factor1 factor1, Factor2 factor2);
 
 /// Determine if integer division produces a remainder
 /// This is the equivalent to the c++ % operation non-zero result.
 /// The result is independent of the type of division rounding.
-template <typename Dividend, typename Divisor>
-bool remainder(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_INTEGERS(Dividend, Divisor)=true>
+inline bool remainder(Dividend dividend, Divisor divisor);
 
 /// Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
-template <typename Integer>
-Integer ceilinged_log2(Integer value);
+template <typename Integer, IS_INTEGER(Integer)=true>
+inline Integer ceilinged_log2(Integer value);
 
 /// Obtain the floored (rounded down) integer base 2 logarithm of given value.
-template <typename Integer>
-Integer floored_log2(Integer value);
+template <typename Integer, IS_INTEGER(Integer)=true>
+inline Integer floored_log2(Integer value);
 
 /// Obtain the integer base 2 power for given exponent (can overflow).
-template <typename Integer>
-Integer power2(Integer exponent);
+template <typename Integer, IS_INTEGER(Integer)=true>
+inline Integer power2(Integer exponent);
 
 /// Obtain the integer power of given base for given exponent (can overflow).
-template <typename Integer>
-Integer power(Integer base, Integer exponent);
+template <typename Integer, IS_INTEGER(Integer)=true>
+inline Integer power(Integer base, Integer exponent);
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to the c++ % operator for negative quotients.
-template <typename Dividend, typename Divisor>
-Dividend ceilinged_modulo(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_UNSIGNED_INTEGERS(Dividend, Divisor)=true>
+inline Dividend ceilinged_modulo(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)=true>
+inline Dividend ceilinged_modulo(Dividend dividend, Divisor divisor);
 
 /// Obtain the floorded (rounded down) integer modulo quotient.
 /// This is equivalent to the c++ % operator for positive quotients.
 /// Python integer modulo (%) is floored.
-template <typename Dividend, typename Divisor>
-Dividend floored_modulo(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_UNSIGNED_INTEGERS(Dividend, Divisor)=true>
+inline Dividend floored_modulo(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)=true>
+inline Dividend floored_modulo(Dividend dividend, Divisor divisor);
 
 /// Obtain the truncated (rounded toward zero) integer divide remainder.
 /// This is the equivalent to the c++ % operation.
-template <typename Dividend, typename Divisor>
-Dividend truncated_modulo(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_INTEGERS(Dividend, Divisor)=true>
+inline Dividend truncated_modulo(Dividend dividend, Divisor divisor);
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to the c++ % operator for negative quotients.
 /// Python integer division is floored and so can create ceilinged integer
 /// division by -(numerator//-denominator).
-template <typename Dividend, typename Divisor>
-Dividend ceilinged_divide(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_UNSIGNED_INTEGERS(Dividend, Divisor)=true>
+inline Dividend ceilinged_divide(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)=true>
+inline Dividend ceilinged_divide(Dividend dividend, Divisor divisor);
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to the c++ % operator for positive quotients.
 /// Python integer division is floored.
-template <typename Dividend, typename Divisor>
-Dividend floored_divide(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_UNSIGNED_INTEGERS(Dividend, Divisor)=true>
+inline Dividend floored_divide(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)=true>
+inline Dividend floored_divide(Dividend dividend, Divisor divisor);
 
 /// Obtain the truncated (rounded toward zero) integer quotient.
 /// This is the equivalent to the c++ / operation.
-template <typename Dividend, typename Divisor>
-Dividend truncated_divide(Dividend dividend, Divisor divisor);
+template <typename Dividend, typename Divisor,
+    IS_INTEGERS(Dividend, Divisor)=true>
+inline Dividend truncated_divide(Dividend dividend, Divisor divisor);
 
 } // namespace system
 } // namespace libbitcoin

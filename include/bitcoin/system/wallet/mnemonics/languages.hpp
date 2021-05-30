@@ -106,7 +106,7 @@ protected:
     language identifier_;
 };
 
-template <class Type, IS_DERIVED(languages, Type)>
+template <class Type, IS_DERIVED(languages, Type)=true>
 std::istream& operator>>(std::istream& in, Type& out)
 {
     std::istreambuf_iterator<char> begin(in), end;
@@ -119,7 +119,7 @@ std::istream& operator>>(std::istream& in, Type& out)
     return in;
 }
 
-template <class Type, IS_DERIVED(languages, Type)>
+template <class Type, IS_DERIVED(languages, Type)=true>
 std::ostream& operator<<(std::ostream& out, const Type& in)
 {
     out << in.sentence();

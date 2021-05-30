@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 #define LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 
+#include <limits>
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 
@@ -31,7 +32,46 @@ template<bool Bool, class Type=void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
 #define IS_DERIVED(Base, Type) \
-enable_if_type<std::is_base_of<Base, Type>::value, bool> = true
+enable_if_type<std::is_base_of<Base, Type>::value, bool>
+
+#define IS_INTEGER(Type) \
+enable_if_type<std::numeric_limits<Type>::is_integer, bool>
+
+#define IS_UNSIGNED_INTEGER(Type) \
+enable_if_type< \
+    std::numeric_limits<Type>::is_integer && \
+    !std::numeric_limits<Type>::is_signed, bool>
+
+#define IS_SIGNED_INTEGER(Type) \
+enable_if_type< \
+    std::numeric_limits<Type>::is_integer && \
+    std::numeric_limits<Type>::is_signed, bool>
+
+#define IS_INTEGERS(Left, Right) \
+enable_if_type< \
+    std::numeric_limits<Left>::is_integer && \
+    std::numeric_limits<Right>::is_integer, bool>
+
+#define IS_UNSIGNED_INTEGERS(Left, Right) \
+enable_if_type< \
+    std::numeric_limits<Left>::is_integer && \
+    !std::numeric_limits<Left>::is_signed && \
+    std::numeric_limits<Right>::is_integer && \
+    !std::numeric_limits<Right>::is_signed, bool>
+
+#define IS_SIGNED_INTEGERS(Left, Right) \
+enable_if_type< \
+    std::numeric_limits<Left>::is_integer && \
+    std::numeric_limits<Left>::is_signed && \
+    std::numeric_limits<Right>::is_integer && \
+    std::numeric_limits<Right>::is_signed, bool>
+
+#define IS_EITHER_INTEGER_SIGNED(Left, Right) \
+enable_if_type< \
+    (std::numeric_limits<Left>::is_integer && \
+        std::numeric_limits<Left>::is_signed) || \
+    (std::numeric_limits<Right>::is_integer && \
+        std::numeric_limits<Right>::is_signed), bool>
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.
