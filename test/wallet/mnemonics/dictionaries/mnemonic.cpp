@@ -31,6 +31,18 @@ const auto intersecton_en_fr = 100;
 const auto deviations_zh = 0;
 const auto intersection_zh = 1275;
 
+// These are not "reversed" as with typical bitcoin hash presentations.
+const auto identity_en = base16_array("f18b9a84c83e38e98eceb0102b275e26438af83ab08f080cdb780a2caa9f3a6d");
+const auto identity_es = base16_array("27e99ad4328299108663c19eb611310bd3b77260af852169108713019831d07d");
+const auto identity_it = base16_array("d9664953fe4c49e0b40eb6f6378c421f5f01dc9360aaac6d2a3c294f046ef520");
+const auto identity_fr = base16_array("fd4cd57c8e86a99ac53cd0f21a6b89af366769b0143ac0d268ac7d7a39200145");
+const auto identity_cs = base16_array("92e035ca0e3680fab85fa18b9e5c7e7582b3bd9caeb6d4bc8a2ecc8e492100c9");
+const auto identity_pt = base16_array("85fea658f90c42c182823807a1d30db587abb72c14a3098e1a65f8b78d1ffcf4");
+const auto identity_ja = base16_array("e641781d89213031233ebc5130020c3de297cad96065ecc688d1c00e010ea71c");
+const auto identity_ko = base16_array("0c26059ed7ede977d7fa1c40443e71793e7850aa6a3d8aabf0cbcec91c1f95ec");
+const auto identity_zh_Hans = base16_array("a86e2bd870e228d19a887c9faae8c1374b4e624e85d2b245b59e36583cba4afc");
+const auto identity_zh_Hant = base16_array("11ef479f2f44b6d4f7fb6239dff06e3cd7a1473b83df6cf91adcbbbee598acf6");
+
 // count
 
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__count__all__expected)
@@ -40,24 +52,78 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__count__all__expected)
     BOOST_REQUIRE_MESSAGE(mnemonic::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
-// sort
+// identity
 
-BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__sorted__true)
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__all__identity__expected)
 {
-    BOOST_REQUIRE(sorted(mnemonic::en) && mnemonic::en.sorted);
-    BOOST_REQUIRE(sorted(mnemonic::it) && mnemonic::it.sorted);
-    BOOST_REQUIRE(sorted(mnemonic::pt) && mnemonic::pt.sorted);
-    BOOST_REQUIRE(sorted(mnemonic::ko) && mnemonic::ko.sorted);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::en), identity_en);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::es), identity_es);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::it), identity_it);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::fr), identity_fr);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::cs), identity_cs);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::pt), identity_pt);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::ja), identity_ja);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::ko), identity_ko);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::zh_Hans), identity_zh_Hans);
+    BOOST_REQUIRE_EQUAL(identity(mnemonic::zh_Hant), identity_zh_Hant);
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__unsorted__false)
+// distinct
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__all__distinct__true)
 {
-    BOOST_REQUIRE(!sorted(mnemonic::es) && !mnemonic::es.sorted);
-    BOOST_REQUIRE(!sorted(mnemonic::fr) && !mnemonic::fr.sorted);
-    BOOST_REQUIRE(!sorted(mnemonic::cs) && !mnemonic::cs.sorted);
-    BOOST_REQUIRE(!sorted(mnemonic::ja) && !mnemonic::ja.sorted);
-    BOOST_REQUIRE(!sorted(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
-    BOOST_REQUIRE(!sorted(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BOOST_REQUIRE(distinct(mnemonic::en));
+    BOOST_REQUIRE(distinct(mnemonic::es));
+    BOOST_REQUIRE(distinct(mnemonic::it));
+    BOOST_REQUIRE(distinct(mnemonic::fr));
+    BOOST_REQUIRE(distinct(mnemonic::cs));
+    BOOST_REQUIRE(distinct(mnemonic::pt));
+    BOOST_REQUIRE(distinct(mnemonic::ja));
+    BOOST_REQUIRE(distinct(mnemonic::ko));
+    BOOST_REQUIRE(distinct(mnemonic::zh_Hans));
+    BOOST_REQUIRE(distinct(mnemonic::zh_Hant));
+}
+
+// sorted
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted8__sorted__true)
+{
+    // Compare is not locale-aware, but these are consistent across encodings.
+    BOOST_REQUIRE(sorted8(mnemonic::en) && mnemonic::en.sorted);
+    BOOST_REQUIRE(sorted8(mnemonic::it) && mnemonic::it.sorted);
+    BOOST_REQUIRE(sorted8(mnemonic::pt) && mnemonic::pt.sorted);
+    BOOST_REQUIRE(sorted8(mnemonic::ko) && mnemonic::ko.sorted);
+    BOOST_REQUIRE(sorted16(mnemonic::en) && mnemonic::en.sorted);
+    BOOST_REQUIRE(sorted16(mnemonic::it) && mnemonic::it.sorted);
+    BOOST_REQUIRE(sorted16(mnemonic::pt) && mnemonic::pt.sorted);
+    BOOST_REQUIRE(sorted16(mnemonic::ko) && mnemonic::ko.sorted);
+    BOOST_REQUIRE(sorted32(mnemonic::en) && mnemonic::en.sorted);
+    BOOST_REQUIRE(sorted32(mnemonic::it) && mnemonic::it.sorted);
+    BOOST_REQUIRE(sorted32(mnemonic::pt) && mnemonic::pt.sorted);
+    BOOST_REQUIRE(sorted32(mnemonic::ko) && mnemonic::ko.sorted);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted8__unsorted__false)
+{
+    // Compare is not locale-aware, but these are consistent across encodings.
+    BOOST_REQUIRE(!sorted8(mnemonic::es) && !mnemonic::es.sorted);
+    BOOST_REQUIRE(!sorted8(mnemonic::fr) && !mnemonic::fr.sorted);
+    BOOST_REQUIRE(!sorted8(mnemonic::cs) && !mnemonic::cs.sorted);
+    BOOST_REQUIRE(!sorted8(mnemonic::ja) && !mnemonic::ja.sorted);
+    BOOST_REQUIRE(!sorted8(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BOOST_REQUIRE(!sorted8(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::es) && !mnemonic::es.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::fr) && !mnemonic::fr.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::cs) && !mnemonic::cs.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::ja) && !mnemonic::ja.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BOOST_REQUIRE(!sorted16(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::es) && !mnemonic::es.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::fr) && !mnemonic::fr.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::cs) && !mnemonic::cs.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::ja) && !mnemonic::ja.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BOOST_REQUIRE(!sorted32(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
 }
 
 // abnormal

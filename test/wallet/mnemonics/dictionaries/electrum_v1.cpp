@@ -39,6 +39,12 @@ const auto intersection_pt_electrum_fr = 7;
 const auto intersection_pt_electrum_cs = 2;
 const auto intersection_pt_electrum_pt = 185;
 
+// These are not "reversed" as with typical bitcoin hash presentations.
+const auto identity_en = base16_array("430ce8fc15a42a6097782a10144d1277e2596b7591be338254a257dfcf1f57d6");
+const auto identity_pt = base16_array("43da9ad5a079483e224bcdd61cd1728a68c2b2647f0f1b87832dbaab5e159a12");
+
+// count
+
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
@@ -46,13 +52,36 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__count__all__expected)
     BOOST_REQUIRE_MESSAGE(electrum_v1::dictionaries::count() == dictionary_count, "new dictionary");
 }
 
-BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__sorted__sorted__false)
+// identity
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__all__identity__expected)
 {
-    BOOST_REQUIRE(!sorted(electrum_v1::pt) && !electrum_v1::pt.sorted);
-    BOOST_REQUIRE(!sorted(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_REQUIRE_EQUAL(identity(electrum_v1::en), identity_en);
+    BOOST_REQUIRE_EQUAL(identity(electrum_v1::pt), identity_pt);
 }
 
-// abnormal (requires WITH_ICU)
+// distinct
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__all__distinct__true)
+{
+    BOOST_REQUIRE(distinct(electrum_v1::en));
+    BOOST_REQUIRE(distinct(electrum_v1::pt));
+}
+
+// sorted
+
+BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__sorted__unsorted__false)
+{
+    // Compare is not locale-aware, but these are consistent across encodings.
+    BOOST_REQUIRE(!sorted8(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_REQUIRE(!sorted8(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_REQUIRE(!sorted16(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_REQUIRE(!sorted16(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_REQUIRE(!sorted32(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_REQUIRE(!sorted32(electrum_v1::en) && !electrum_v1::en.sorted);
+}
+
+// abnormal
 
 // These dictionaries are in normal form.
 // So there is no need to nfkd normalize these for wordlist-based seedings.
@@ -64,6 +93,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__normal__normal_words__true)
     BOOST_REQUIRE(!abnormal(electrum_v1::pt));
 }
 
+// intersection
 
 BOOST_AUTO_TEST_CASE(dictionaries_electrum_v1__intersections__en__expected)
 {

@@ -85,7 +85,7 @@ static bool abnormal(const mnemonic::dictionary::words& words)
         });
 }
 
-static bool sorted(const mnemonic::dictionary::words& words)
+static string_list to_string_list(const mnemonic::dictionary::words& words)
 {
     // Convert dictionary to string, otherwise pointers are compared.
     string_list tokens(mnemonic::dictionary::size());
@@ -95,7 +95,32 @@ static bool sorted(const mnemonic::dictionary::words& words)
             return token;
         });
 
-    return is_sorted(tokens);
+    return tokens;
+}
+
+static bool sorted8(const mnemonic::dictionary::words& words)
+{
+    return is_sorted(to_string_list(words));
+}
+
+static bool sorted16(const mnemonic::dictionary::words& words)
+{
+    return is_sorted(to_utf16(to_string_list(words)));
+}
+
+static bool sorted32(const mnemonic::dictionary::words& words)
+{
+    return is_sorted(to_utf32(to_string_list(words)));
+}
+
+static bool distinct(const mnemonic::dictionary::words& words)
+{
+    return is_distinct(to_string_list(words));
+}
+
+static hash_digest identity(const mnemonic::dictionary::words& words)
+{
+    return sha256_hash(join(to_string_list(words)));
 }
 
 } // dictionaries_mnemonic

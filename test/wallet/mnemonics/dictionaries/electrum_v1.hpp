@@ -69,23 +69,48 @@ static ptrdiff_t intersection(const electrum_v1::dictionary::words& left,
 {
     return std::count_if(left.word.begin(), left.word.end(),
         [&](const char test[])
-    {
-        return std::find(right.word.begin(), right.word.end(), test) !=
-            right.word.end();
-    });
+        {
+            return std::find(right.word.begin(), right.word.end(), test) !=
+                right.word.end();
+        });
 }
 
-static bool sorted(const electrum_v1::dictionary::words& words)
+static string_list to_string_list(const electrum_v1::dictionary::words& words)
 {
     // Convert dictionary to string, otherwise pointers are compared.
-    string_list tokens(mnemonic::dictionary::size());
+    string_list tokens(electrum_v1::dictionary::size());
     std::transform(words.word.begin(), words.word.end(), tokens.begin(),
         [](const char* token)
-    {
-        return token;
-    });
+        {
+            return token;
+        });
 
-    return is_sorted(tokens);
+    return tokens;
+}
+
+static bool sorted8(const electrum_v1::dictionary::words& words)
+{
+    return is_sorted(to_string_list(words));
+}
+
+static bool sorted16(const electrum_v1::dictionary::words& words)
+{
+    return is_sorted(to_utf16(to_string_list(words)));
+}
+
+static bool sorted32(const electrum_v1::dictionary::words& words)
+{
+    return is_sorted(to_utf32(to_string_list(words)));
+}
+
+static bool distinct(const electrum_v1::dictionary::words& words)
+{
+    return is_distinct(to_string_list(words));
+}
+
+static hash_digest identity(const electrum_v1::dictionary::words& words)
+{
+    return sha256_hash(join(to_string_list(words)));
 }
 
 } // dictionaries_electrum_v1
