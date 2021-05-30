@@ -248,6 +248,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__uncha
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
+#ifdef WITH_ICU
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentence__ascii_space)
 {
     // The ideographic_space normalizes to ascii_space.
@@ -257,7 +258,9 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentenc
     BOOST_REQUIRE(to_compatibility_decomposition(normal));
     BOOST_REQUIRE_NE(normal, ideographic_delimited);
     BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
+
 }
+#endif
 
 // is_separator
 
