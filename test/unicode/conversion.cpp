@@ -38,16 +38,14 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__ideographic_space__space)
     BOOST_REQUIRE_EQUAL(to_utf8(space), ideographic_space);
 }
 
-// to_utf<>
-
 BOOST_AUTO_TEST_CASE(conversion__to_utf__invalid__empty)
 {
     // Cause boost::locale::conv::utf_to_utf<>() to throw, which we suppress.
-    std::u32string invalid{ 0xffffffff };
+    const char32_t invalid = 0xffffffff;
     BOOST_REQUIRE(to_utf8(invalid).empty());
 }
 
-// to_utf8 (wstring)
+// to_utf8 (u16string)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf8_16__empty__empty)
 {
@@ -60,6 +58,21 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf8_16__ascii__expected)
     const auto utf16_ascii = L"ascii";
     const auto converted = to_utf8(utf16_ascii);
     BOOST_REQUIRE_EQUAL(converted, utf8_ascii);
+}
+
+// to_utf8 (wstring_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_list_16__empty__empty)
+{
+    BOOST_REQUIRE(to_utf8(wstring_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_list_16__ascii__expected)
+{
+    const auto utf8_ascii = "ascii";
+    const auto utf32_ascii = L"ascii";
+    const string_list expected(2, utf8_ascii);
+    BOOST_REQUIRE(to_utf8(wstring_list(2, utf32_ascii)) == expected);
 }
 
 // to_utf8 (u32string)
@@ -77,6 +90,21 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf8_32__ascii__expected)
     BOOST_REQUIRE_EQUAL(converted, utf8_ascii);
 }
 
+// to_utf8 (u32string_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_list_32__empty__empty)
+{
+    BOOST_REQUIRE(to_utf8(u32string_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_list_32__ascii__expected)
+{
+    const auto utf8_ascii = "ascii";
+    const auto utf32_ascii = U"ascii";
+    const string_list expected(2, utf8_ascii);
+    BOOST_REQUIRE(to_utf8(u32string_list(2, utf32_ascii)) == expected);
+}
+
 // to_utf16 (string)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf16_8__empty__empty)
@@ -90,6 +118,21 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf16_8__ascii__expected)
     const auto utf16_ascii = L"ascii";
     const auto converted = to_utf16(utf8_ascii);
     BOOST_REQUIRE_EQUAL(converted.c_str(), utf16_ascii);
+}
+
+// to_utf16 (string_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16_list_8__empty__empty)
+{
+    BOOST_REQUIRE(to_utf16(string_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16_list_8__ascii__expected)
+{
+    const auto utf8_ascii = "ascii";
+    const auto utf16_ascii = L"ascii";
+    const wstring_list expected(2, utf16_ascii);
+    BOOST_REQUIRE(to_utf16(string_list(2, utf8_ascii)) == expected);
 }
 
 // to_utf16 (u32string)
@@ -107,6 +150,22 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf16_32__ascii__expected)
     BOOST_REQUIRE_EQUAL(converted.c_str(), utf16_ascii);
 }
 
+// to_utf16 (u32string_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16_list_32__empty__empty)
+{
+    BOOST_REQUIRE(to_utf16(u32string_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16_list_32__ascii__expected)
+{
+    const auto utf32_ascii = U"ascii";
+    const auto utf16_ascii = L"ascii";
+    const auto converted = to_utf16(u32string_list(2, utf32_ascii));
+    const wstring_list expected(2, utf16_ascii);
+    BOOST_REQUIRE(to_utf16(u32string_list(2, utf32_ascii)) == expected);
+}
+
 // to_utf32 (string)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__empty__empty)
@@ -122,6 +181,21 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__ascii__expected)
     BOOST_REQUIRE(converted == utf32_ascii);
 }
 
+// to_utf32 (string_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_list_8__empty__empty)
+{
+    BOOST_REQUIRE(to_utf32(string_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_list_8__ascii__expected)
+{
+    const auto utf8_ascii = "ascii";
+    const auto utf32_ascii = U"ascii";
+    const u32string_list expected(2, utf32_ascii);
+    BOOST_REQUIRE(to_utf32(string_list(2, utf8_ascii)) == expected);
+}
+
 // to_utf32 (wstring)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf32_16__empty__empty)
@@ -135,6 +209,21 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf32_16__ascii__expected)
     const auto utf32_ascii = U"ascii";
     const auto converted = to_utf32(utf16_ascii);
     BOOST_REQUIRE(converted == utf32_ascii);
+}
+
+// to_utf32 (wstring_list)
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_list_16__empty__empty)
+{
+    BOOST_REQUIRE(to_utf32(string_list{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_list_16__ascii__expected)
+{
+    const auto utf16_ascii = L"ascii";
+    const auto utf32_ascii = U"ascii";
+    const u32string_list expected(2, utf32_ascii);
+    BOOST_REQUIRE(to_utf32(wstring_list(2, utf16_ascii)) == expected);
 }
 
 // Round trip.

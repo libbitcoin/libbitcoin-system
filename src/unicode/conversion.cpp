@@ -18,14 +18,15 @@
  */
 #include <bitcoin/system/unicode/conversion.hpp>
 
+#include <algorithm>
 #include <string>
 #include <boost/locale.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <typename CharOut, typename StringIn>
-static std::basic_string<CharOut> to_utf(const StringIn& in)
+template <typename CharOut, typename CharIn>
+static std::basic_string<CharOut> to_utf(const std::basic_string<CharIn>& in)
 {
     using namespace boost::locale;
     std::basic_string<CharOut> out;
@@ -42,6 +43,20 @@ static std::basic_string<CharOut> to_utf(const StringIn& in)
     {
         out.clear();
     }
+
+    return out;
+}
+
+template <typename CharOut, typename CharIn>
+static std::vector<std::basic_string<CharOut>> to_utf(
+    const std::vector<std::basic_string<CharIn>>& in)
+{
+    std::vector<std::basic_string<CharOut>> out(in.size());
+    std::transform(in.begin(), in.end(), out.begin(),
+        [](const std::basic_string<CharIn>& word)
+    {
+        return to_utf<CharOut>(word);
+    });
 
     return out;
 }
@@ -78,6 +93,36 @@ std::u32string to_utf32(const std::string& text)
 }
 
 std::u32string to_utf32(const std::wstring& text)
+{
+    return to_utf<char32_t>(text);
+}
+
+string_list to_utf8(const wstring_list& text)
+{
+    return to_utf<char>(text);
+}
+
+string_list to_utf8(const u32string_list& text)
+{
+    return to_utf<char>(text);
+}
+
+wstring_list to_utf16(const string_list& text)
+{
+    return to_utf<wchar_t>(text);
+}
+
+wstring_list to_utf16(const u32string_list& text)
+{
+    return to_utf<wchar_t>(text);
+}
+
+u32string_list to_utf32(const string_list& text)
+{
+    return to_utf<char32_t>(text);
+}
+
+u32string_list to_utf32(const wstring_list& text)
 {
     return to_utf<char32_t>(text);
 }
