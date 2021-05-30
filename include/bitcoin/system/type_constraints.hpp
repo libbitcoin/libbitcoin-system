@@ -27,7 +27,7 @@ namespace system {
 
 // Borrowing enable_if_t from c++14.
 // en.cppreference.com/w/cpp/types/enable_if
-template<bool Bool, class Type = void>
+template<bool Bool, class Type=void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
 #define IS_DERIVED(Base, Type) \

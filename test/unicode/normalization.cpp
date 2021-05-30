@@ -258,7 +258,6 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentenc
     BOOST_REQUIRE(to_compatibility_decomposition(normal));
     BOOST_REQUIRE_NE(normal, ideographic_delimited);
     BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
-
 }
 #endif
 
