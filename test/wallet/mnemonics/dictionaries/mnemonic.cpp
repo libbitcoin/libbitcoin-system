@@ -31,12 +31,16 @@ const auto intersecton_en_fr = 100;
 const auto deviations_zh = 0;
 const auto intersection_zh = 1275;
 
+// count
+
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
     // Failure to do so may lead to invalid seed generation, which is very bad.
     BOOST_REQUIRE_MESSAGE(mnemonic::dictionaries::count() == dictionary_count, "new dictionary");
 }
+
+// sort
 
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__sorted__true)
 {
@@ -56,7 +60,7 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__sorted__unsorted__false)
     BOOST_REQUIRE(!sorted(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
 }
 
-// abnormal (requires WITH_ICU)
+// abnormal
 
 // These dictionaries are in normal form.
 // So there is no need to nfkd normalize these for wordlist-based seedings.
@@ -76,6 +80,8 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normal__normal_words__true)
     BOOST_REQUIRE(!abnormal(mnemonic::zh_Hant));
 }
 
+// deviation
+
 // All zh_Hans/zh_Hant collisions are interchangeable.
 // None of the en/fr collisions are interchangeable.
 // It is unsafe to deduce en/fr dictionary, but only if all words collide.
@@ -87,6 +93,8 @@ BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__deviation__deviants__expected)
     BOOST_REQUIRE_EQUAL(deviation(mnemonic::en, mnemonic::fr), deviations_en_fr);
     BOOST_REQUIRE_EQUAL(deviation(mnemonic::zh_Hans, mnemonic::zh_Hant), deviations_zh);
 }
+
+// intersection
 
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__intersections__en__expected)
 {
