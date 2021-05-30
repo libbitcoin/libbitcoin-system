@@ -248,6 +248,17 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__uncha
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentence__ascii_space)
+{
+    // The ideographic_space normalizes to ascii_space.
+    const auto ascii_delimited = "あいこくしん" + ascii_space + "あいさつ";
+    const auto ideographic_delimited = "あいこくしん" + ideographic_space + "あいさつ";
+    auto normal = ideographic_delimited;
+    BOOST_REQUIRE(to_compatibility_decomposition(normal));
+    BOOST_REQUIRE_NE(normal, ideographic_delimited);
+    BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
+}
+
 // is_separator
 
 BOOST_AUTO_TEST_CASE(ascii__is_separator__all_separators__true)
