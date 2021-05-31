@@ -137,9 +137,9 @@ inline bool floored(Dividend dividend, Divisor divisor)
     return !remainder(dividend, divisor) || !negative(dividend, divisor);
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Remainder,
     IS_INTEGERS(Dividend, Divisor)>
-inline Dividend ceilinged_modulo(Dividend dividend, Divisor divisor)
+inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
 {
     // truncated_modulo is positive if not ceilinged.
     return ceilinged(dividend, divisor) ?
@@ -148,17 +148,17 @@ inline Dividend ceilinged_modulo(Dividend dividend, Divisor divisor)
 }
 
 // Override for unsigned floor (native/optimization).
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Remainder,
     IS_UNSIGNED_INTEGERS(Dividend, Divisor)>
-inline Dividend floored_modulo(Dividend dividend, Divisor divisor)
+inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
 {
     // truncated_modulo is already floored for positive quotient.
     return truncated_modulo(dividend, divisor);
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Remainder,
     IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)>
-inline Dividend floored_modulo(Dividend dividend, Divisor divisor)
+inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
 {
     // truncated_modulo is negative if not floored.
     return floored(dividend, divisor) ?
@@ -166,9 +166,9 @@ inline Dividend floored_modulo(Dividend dividend, Divisor divisor)
         divisor + truncated_modulo(dividend, divisor);
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Quotient,
     IS_INTEGERS(Dividend, Divisor)>
-inline Dividend ceilinged_divide(Dividend dividend, Divisor divisor)
+inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor)
 {
     // truncated_divide is 1 low if not ceilinged. 
     return ceilinged(dividend, divisor) ?
@@ -177,17 +177,17 @@ inline Dividend ceilinged_divide(Dividend dividend, Divisor divisor)
 }
 
 // Override for unsigned floor (native/optimization).
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Quotient,
     IS_UNSIGNED_INTEGERS(Dividend, Divisor)>
-inline Dividend floored_divide(Dividend dividend, Divisor divisor)
+inline Quotient floored_divide(Dividend dividend, Divisor divisor)
 {
     // truncated_modulo is already floored for positive quotient.
     return truncated_divide(dividend, divisor);
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Quotient,
     IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)>
-inline Dividend floored_divide(Dividend dividend, Divisor divisor)
+inline Quotient floored_divide(Dividend dividend, Divisor divisor)
 {
     // truncated_divide is 1 high if not floored. 
     return floored(dividend, divisor) ?
@@ -195,18 +195,18 @@ inline Dividend floored_divide(Dividend dividend, Divisor divisor)
         truncated_divide(dividend, divisor) - 1;
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Remainder,
     IS_INTEGERS(Dividend, Divisor)>
-inline Dividend truncated_modulo(Dividend dividend, Divisor divisor)
+inline Remainder truncated_modulo(Dividend dividend, Divisor divisor)
 {
     // C++ applies "toward zero" integer division rounding (and remainder).
     // Floored for positive quotient, ceilinged for negative quotient.
     return dividend % divisor;
 }
 
-template <typename Dividend, typename Divisor,
+template <typename Dividend, typename Divisor, typename Quotient,
     IS_INTEGERS(Dividend, Divisor)>
-inline Dividend truncated_divide(Dividend dividend, Divisor divisor)
+inline Quotient truncated_divide(Dividend dividend, Divisor divisor)
 {
     // C++ applies "toward zero" integer division rounding (and remainder).
     // Floored for positive quotient, ceilinged for negative quotient.
