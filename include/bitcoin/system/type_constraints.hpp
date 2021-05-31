@@ -59,13 +59,6 @@ enable_if_type< \
     std::numeric_limits<Right>::is_integer && \
     !std::numeric_limits<Right>::is_signed, bool>
 
-#define IS_SIGNED_INTEGERS(Left, Right) \
-enable_if_type< \
-    std::numeric_limits<Left>::is_integer && \
-    std::numeric_limits<Left>::is_signed && \
-    std::numeric_limits<Right>::is_integer && \
-    std::numeric_limits<Right>::is_signed, bool>
-
 #define IS_EITHER_INTEGER_SIGNED(Left, Right) \
 enable_if_type< \
     (std::numeric_limits<Left>::is_integer && \
