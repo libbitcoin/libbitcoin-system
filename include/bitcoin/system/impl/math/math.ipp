@@ -103,14 +103,15 @@ inline Integer power(Integer base, Integer exponent)
     for (auto count = absolute(exponent); count > 1; --count)
         value *= base;
 
-    // The negative call and ternary compile away for unsigned value.
+    // The negative call compiles away for unsigned value.
+    // The ternary condition compiles awat for a constexpr value.
     // Do not shortcircuit negative exponent (to 1 or 0) because in the unusual
     // case when it is used this provides consistent overflow behavior.
     return negative(exponent) ? 1 / value : value;
 }
 
 template <typename Dividend, typename Divisor,
-    IS_INTEGERS(Dividend, Divisor)>
+    IS_INTEGERS(Dividend, Divisor)=true>
 inline bool remainder(Dividend dividend, Divisor divisor)
 {
     // The modulo compiles away for constexpr values.
@@ -137,62 +138,55 @@ inline bool floored(Dividend dividend, Divisor divisor)
     return !remainder(dividend, divisor) || !negative(dividend, divisor);
 }
 
-template <typename Dividend, typename Divisor, typename Remainder,
-    IS_INTEGERS(Dividend, Divisor)>
-inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
-{
-    // truncated_modulo is positive if not ceilinged.
-    return ceilinged(dividend, divisor) ?
-        truncated_modulo(dividend, divisor) :
-        divisor + truncated_modulo(dividend, divisor);
-}
-
-// Override for unsigned floor (native/optimization).
-template <typename Dividend, typename Divisor, typename Remainder,
-    IS_UNSIGNED_INTEGERS(Dividend, Divisor)>
-inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
-{
-    // truncated_modulo is already floored for positive quotient.
-    return truncated_modulo(dividend, divisor);
-}
-
-template <typename Dividend, typename Divisor, typename Remainder,
-    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)>
-inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
-{
-    // truncated_modulo is negative if not floored.
-    return floored(dividend, divisor) ?
-        truncated_modulo(dividend, divisor) :
-        divisor + truncated_modulo(dividend, divisor);
-}
+// ----------------------------------------------------------------------------
 
 template <typename Dividend, typename Divisor, typename Quotient,
     IS_INTEGERS(Dividend, Divisor)>
 inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor)
 {
-    // truncated_divide is 1 low if not ceilinged. 
     return ceilinged(dividend, divisor) ?
         truncated_divide(dividend, divisor) :
         truncated_divide(dividend, divisor) + 1;
 }
 
-// Override for unsigned floor (native/optimization).
-template <typename Dividend, typename Divisor, typename Quotient,
-    IS_UNSIGNED_INTEGERS(Dividend, Divisor)>
-inline Quotient floored_divide(Dividend dividend, Divisor divisor)
+template <typename Dividend, typename Divisor, typename Remainder,
+    IS_INTEGERS(Dividend, Divisor)>
+inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
 {
-    // truncated_modulo is already floored for positive quotient.
-    return truncated_divide(dividend, divisor);
+    return ceilinged(dividend, divisor) ?
+        truncated_modulo(dividend, divisor) :
+        truncated_modulo(dividend, divisor) - divisor;
 }
 
+// ----------------------------------------------------------------------------
+
 template <typename Dividend, typename Divisor, typename Quotient,
-    IS_EITHER_INTEGER_SIGNED(Dividend, Divisor)>
+    IS_INTEGERS(Dividend, Divisor)>
 inline Quotient floored_divide(Dividend dividend, Divisor divisor)
 {
-    // truncated_divide is 1 high if not floored. 
     return floored(dividend, divisor) ?
         truncated_divide(dividend, divisor) :
         truncated_divide(dividend, divisor) - 1;
+}
+
+template <typename Dividend, typename Divisor, typename Remainder,
+    IS_INTEGERS(Dividend, Divisor)>
+inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
+{
+    return floored(dividend, divisor) ?
+        truncated_modulo(dividend, divisor) :
+        truncated_modulo(dividend, divisor) + divisor;
+}
+
+// ----------------------------------------------------------------------------
+
+template <typename Dividend, typename Divisor, typename Quotient,
+    IS_INTEGERS(Dividend, Divisor)>
+inline Quotient truncated_divide(Dividend dividend, Divisor divisor)
+{
+    // C++ applies "toward zero" integer division rounding (and remainder).
+    // Floored for positive quotient, ceilinged for negative quotient.
+    return dividend / divisor;
 }
 
 template <typename Dividend, typename Divisor, typename Remainder,
@@ -202,15 +196,6 @@ inline Remainder truncated_modulo(Dividend dividend, Divisor divisor)
     // C++ applies "toward zero" integer division rounding (and remainder).
     // Floored for positive quotient, ceilinged for negative quotient.
     return dividend % divisor;
-}
-
-template <typename Dividend, typename Divisor, typename Quotient,
-    IS_INTEGERS(Dividend, Divisor)>
-inline Quotient truncated_divide(Dividend dividend, Divisor divisor)
-{
-    // C++ applies "toward zero" integer division rounding (and remainder).
-    // Floored for positive quotient, ceilinged for negative quotient.
-    return dividend / divisor;
 }
 
 } // namespace system
