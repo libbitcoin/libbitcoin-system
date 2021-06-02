@@ -541,6 +541,24 @@ BOOST_AUTO_TEST_CASE(math__power__negative_overflow__expected)
 
 #ifdef MATH_MODULO
 
+template <typename Dividend, typename Divisor>
+bool ceilinged_identity(Dividend x, Divisor y)
+{
+    return ceilinged_divide(x, y) * y + ceilinged_modulo(x, y) == x;
+}
+
+template <typename Dividend, typename Divisor>
+bool floored_identity(Dividend x, Divisor y)
+{
+    return floored_divide(x, y) * y + floored_modulo(x, y) == x;
+}
+
+template <typename Dividend, typename Divisor>
+bool truncated_identity(Dividend x, Divisor y)
+{
+    return  truncated_divide(x, y) * y + truncated_modulo(x, y) == x;
+}
+
 // Return values are typed by the dividend, consistent with native operators.
 
 // ceilinged_modulo
@@ -549,20 +567,26 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__0_1__cpp)
 {
     // Zero is same as c++.
     BOOST_REQUIRE_EQUAL(0 % 1, 0);
+
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(0u, 1), 0u);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(0, 1u), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(0u, 1u), 0u);
+
+    BOOST_REQUIRE(ceilinged_identity(0, 1));
+    BOOST_REQUIRE(ceilinged_identity(0u, 1));
+    BOOST_REQUIRE(ceilinged_identity(0, 1u));
+    BOOST_REQUIRE(ceilinged_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_positives__cpp)
 {
     // No remainder and positive quotient are same as c++.
     BOOST_REQUIRE_EQUAL(42 % 2, 0);
+
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, 2), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, 2), 0u);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, 2u), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, 2u), 0u);
+
+    BOOST_REQUIRE(ceilinged_identity(42, 2));
+    BOOST_REQUIRE(ceilinged_identity(42u, 2));
+    BOOST_REQUIRE(ceilinged_identity(42, 2u));
+    BOOST_REQUIRE(ceilinged_identity(42u, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_negative_dividend__cpp)
@@ -571,29 +595,18 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_negative_dividend__cpp
     BOOST_REQUIRE_EQUAL(-42 % 2, 0);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, 2), 0);
 
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 2u == 0x7fffffeb, "truncated quotient is 0x7fffffeb");
-    ////static_assert(-42 % 2u == 0, "truncated remainder is 0");
-    ////static_assert(-42 == (2u * 0x7fffffeb) + 0, "identity");
-
-    // Native negative divide has no remainder (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, 2u), 0);
+    BOOST_REQUIRE(ceilinged_identity(-42, 2));
+    BOOST_REQUIRE(ceilinged_identity(-42, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_negative_divisor__cpp)
 {
     // No remainder is same as c++.
     BOOST_REQUIRE_EQUAL(42 % -2, 0);
-    BOOST_REQUIRE_EQUAL(42 / -2, -21);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, -2), 0);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -2 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -2 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-2 * 0) + 42, "identity");
-
-    // Native negative divide has remainder (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, -2), 42u);
+    BOOST_REQUIRE(ceilinged_identity(42, -2));
+    BOOST_REQUIRE(ceilinged_identity(42u, -2));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_negatives__cpp)
@@ -601,16 +614,20 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__no_remainder_negatives__cpp)
     // No remainder is same as c++.
     BOOST_REQUIRE_EQUAL(-42 % -2, 0);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, -2), 0);
+
+    BOOST_REQUIRE(ceilinged_identity(-42, -2));
 }
 
-BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__positives__cpp)
+BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__positives__expected)
 {
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(42 % 8, 2);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, 8), -6);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, 8), -6);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, 8u), -6);
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, 8u), -6);
+
+    BOOST_REQUIRE(ceilinged_identity(42, 8));
+    BOOST_REQUIRE(ceilinged_identity(42u, 8));
+    BOOST_REQUIRE(ceilinged_identity(42, 8u));
+    BOOST_REQUIRE(ceilinged_identity(42u, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negative_dividend__expected)
@@ -619,13 +636,8 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negative_dividend__expected)
     BOOST_REQUIRE_EQUAL(-42 % 8, -2);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, 8), -2);
 
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 8u == 0x1ffffffa, "truncated quotient is -6");
-    ////static_assert(-42 % 8u == 6, "truncated remainder is 6");
-    ////static_assert(-42 == (8u * 0x1ffffffa) + 6, "identity");
-
-    // Native negative divide has remainder (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, 8u), 6);
+    BOOST_REQUIRE(ceilinged_identity(-42, 8));
+    BOOST_REQUIRE(ceilinged_identity(-42, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negative_divisor__expected)
@@ -634,20 +646,17 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negative_divisor__expected)
     BOOST_REQUIRE_EQUAL(42 % -8, 2);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(42, -8), 2);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -8 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -8 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-8 * 0) + 42, "identity");
-
-    // Native negative divide has remainder (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_modulo(42u, -8), 42u);
+    BOOST_REQUIRE(ceilinged_identity(42, -8));
+    BOOST_REQUIRE(ceilinged_identity(42u, -8));
 }
 
-BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negatives__cpp)
+BOOST_AUTO_TEST_CASE(math__ceilinged_modulo__negatives__expected)
 {
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(-42 % -8, -2);
     BOOST_REQUIRE_EQUAL(ceilinged_modulo(-42, -8), 6);
+
+    BOOST_REQUIRE(ceilinged_identity(-42, -8));
 }
 
 // floored_modulo
@@ -660,9 +669,11 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__0_1__cpp)
 
     // The python result of 0%1.
     BOOST_REQUIRE_EQUAL(floored_modulo(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(floored_modulo(0u, 1), 0u);
-    BOOST_REQUIRE_EQUAL(floored_modulo(0, 1u), 0);
-    BOOST_REQUIRE_EQUAL(floored_modulo(0u, 1u), 0u);
+
+    BOOST_REQUIRE(floored_identity(0, 1));
+    BOOST_REQUIRE(floored_identity(0u, 1));
+    BOOST_REQUIRE(floored_identity(0, 1u));
+    BOOST_REQUIRE(floored_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_positives__cpp)
@@ -672,9 +683,11 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_positives__cpp)
 
     // The python result of 42%2.
     BOOST_REQUIRE_EQUAL(floored_modulo(42, 2), 0);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, 2), 0u);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42, 2u), 0);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, 2u), 0u);
+
+    BOOST_REQUIRE(floored_identity(42, 2));
+    BOOST_REQUIRE(floored_identity(42u, 2));
+    BOOST_REQUIRE(floored_identity(42, 2u));
+    BOOST_REQUIRE(floored_identity(42u, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negative_dividend__cpp)
@@ -685,13 +698,8 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negative_dividend__cpp)
     // The python result of -42%2.
     BOOST_REQUIRE_EQUAL(floored_modulo(-42, 2), 0);
 
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 2u == 0x7fffffeb, "truncated quotient is 0x7fffffeb");
-    ////static_assert(-42 % 2u == 0, "truncated remainder is 0");
-    ////static_assert(-42 == (2u * 0x7fffffeb) + 0, "identity");
-
-    // Native negative divide has no remainder (already floored).
-    BOOST_REQUIRE_EQUAL(floored_modulo(-42, 2u), 0);
+    BOOST_REQUIRE(floored_identity(-42, 2));
+    BOOST_REQUIRE(floored_identity(-42, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negative_divisor__cpp)
@@ -702,17 +710,8 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negative_divisor__cpp)
     // The python result of 42%-2.
     BOOST_REQUIRE_EQUAL(floored_modulo(42, -2), 0);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -2 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -2 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-2 * 0) + 42, "identity");
-
-    // In native operations, comiler converts this divisor to unsigned (positive).
-    // Native POSITIVE divide has a remainder, so ADD it to the CONVERTED divisor.
-    ////BOOST_REQUIRE_EQUAL(floored_modulo(42u, -2), 0xfffffffe + 42);
-
-    // Or ADD it to the UNCONVERTED divisor (prevents compiler overflow warning).
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, -2), -2 + 42);
+    BOOST_REQUIRE(floored_identity(42, -2));
+    BOOST_REQUIRE(floored_identity(42u, -2));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negatives__cpp)
@@ -722,6 +721,8 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__no_remainder_negatives__cpp)
 
     // The python result of -42%-2.
     BOOST_REQUIRE_EQUAL(floored_modulo(-42, -2), 0);
+
+    BOOST_REQUIRE(floored_identity(-42, -2));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__positives__cpp)
@@ -731,12 +732,14 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__positives__cpp)
 
     // The python result of 42%8.
     BOOST_REQUIRE_EQUAL(floored_modulo(42, 8), 2);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, 8), 2u);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42, 8u), 2);
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, 8u), 2u);
+
+    BOOST_REQUIRE(floored_identity(42, 8));
+    BOOST_REQUIRE(floored_identity(42u, 8));
+    BOOST_REQUIRE(floored_identity(42, 8u));
+    BOOST_REQUIRE(floored_identity(42u, 8u));
 }
 
-BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_dividend__expected)
+BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_dividend__python)
 {
     // Negative quotient is ceilinged in c++.
     BOOST_REQUIRE_EQUAL(-42 % 8, -2);
@@ -744,47 +747,11 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_dividend__expected)
     // The python result of -42%8.
     BOOST_REQUIRE_EQUAL(floored_modulo(-42, 8), 6);
 
-    ////static_assert( 42u /  8u        ==   5, "obvious");
-    ////static_assert( 42  /  8u        ==   5, "obvious");
-    ////static_assert( 42  /  8         ==   5, "obvious");
-    ////static_assert( 42  / -8         ==  -5, "obvious");
-    ////static_assert(-42  / -8         ==   5, "obvious");
-    ////static_assert(-42  /  8         ==  -5, "obvious");
-
-    ////static_assert( 42u / -8         ==   0, "negative integral constant converted to unsigned type");
-    ////static_assert( 42u / 0xfffffff8 ==   0, "manual conversion to base16 unsigned type");
-    ////static_assert( 42u / 4294967288 ==   0, "manual conversion to base10 unsigned type");
-
-    ////static_assert(-42  / 8u         ==   0x1ffffffa, "negative integral constant converted to unsigned type");
-    ////static_assert(0xffffffd6 / 8u   ==   0x1ffffffa, "manual conversion to base16 unsigned type");
-    ////static_assert(0xffffffd6 / 8u   ==   0x1ffffffa, "manual conversion to base10 unsigned type");
-
-    ////static_assert( 42u %  8u        ==   2, "obvious");
-    ////static_assert( 42  %  8u        ==   2, "obvious");
-    ////static_assert( 42  %  8         ==   2, "obvious");
-    ////static_assert( 42  % -8         ==   2, "not as obvious");
-    ////static_assert(-42  % -8         ==  -2, "not as obvious");
-    ////static_assert(-42  %  8         ==  -2, "obvious");
-
-    ////static_assert( 42u % -8         ==  42, "negative integral constant converted to unsigned type");
-    ////static_assert( 42u % 0xfffffff8 ==  42, "manual conversion to base16 unsigned type");
-    ////static_assert( 42u % 4294967288 ==  42, "manual conversion to base10 unsigned type");
-
-    ////static_assert(-42  % 8u         ==   6, "negative integral constant converted to unsigned type");
-    ////static_assert(0xffffffd6 % 8u   ==   6, "manual conversion to base16 unsigned type");
-    ////static_assert(0xffffffd6 % 8u   ==   6, "manual conversion to base10 unsigned type");
-
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 8u == 0x1ffffffa, "truncated quotient is -6");
-    ////static_assert(-42 % 8u == 6, "truncated remainder is 6");
-    ////static_assert(-42 == (8u * 0x1ffffffa) + 6, "identity");
-
-    // In native operations, comiler converts the this dividend to unsigned (positive).
-    // Native POSITIVE divide has a remainder, so ADD it to the divisor.
-    BOOST_REQUIRE_EQUAL(floored_modulo(-42, 8u), 8 + 6);
+    BOOST_REQUIRE(floored_identity(-42, 8));
+    BOOST_REQUIRE(floored_identity(-42, 8u));
 }
 
-BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_divisor__expected)
+BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_divisor__python)
 {
     // Negative quotient is ceilinged in c++.
     BOOST_REQUIRE_EQUAL(42 % -8, 2);
@@ -792,17 +759,8 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__negative_divisor__expected)
     // The python result of 42%-8.
     BOOST_REQUIRE_EQUAL(floored_modulo(42, -8), -6);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -8 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -8 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-8 * 0) + 42, "identity");
-
-    // In native operations, comiler converts this divisor to unsigned (positive).
-    // Native POSITIVE divide has a remainder, so ADD it to the CONVERTED divisor.
-    ////BOOST_REQUIRE_EQUAL(floored_modulo(42u, -8), 0xfffffff8 + 42);
-
-    // Or ADD it to the UNCONVERTED divisor (prevents compiler overflow warning).
-    BOOST_REQUIRE_EQUAL(floored_modulo(42u, -8), -8 + 42);
+    BOOST_REQUIRE(floored_identity(42, -8));
+    BOOST_REQUIRE(floored_identity(42u, -8));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_modulo__negatives__cpp)
@@ -812,6 +770,8 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__negatives__cpp)
 
     // The python result of -42%-8.
     BOOST_REQUIRE_EQUAL(floored_modulo(-42, -8), -2);
+
+    BOOST_REQUIRE(floored_identity(-42, -8));
 }
 
 // truncated_modulo
@@ -820,29 +780,37 @@ BOOST_AUTO_TEST_CASE(math__floored_modulo__negatives__cpp)
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__0_1__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(0, 1), 0 % 1);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(0u, 1), 0u % 1);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(0, 1u), 0 % 1);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(0u, 1u), 0u % 1);
+
+    BOOST_REQUIRE(truncated_identity(0, 1));
+    BOOST_REQUIRE(truncated_identity(0u, 1));
+    BOOST_REQUIRE(truncated_identity(0, 1u));
+    BOOST_REQUIRE(truncated_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__no_remainder_positives__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(42, 2), 42 % 2);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42u, 2), 42u % 2);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42, 2u), 42 % 2);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42u, 2u), 42u % 2);
+
+    BOOST_REQUIRE(truncated_identity(42, 2));
+    BOOST_REQUIRE(truncated_identity(42u, 2));
+    BOOST_REQUIRE(truncated_identity(42, 2u));
+    BOOST_REQUIRE(truncated_identity(42u, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__no_remainder_negative_dividend__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(-42, 2), -42 % 2);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(-42, 2u), -42 % 2);
+
+    BOOST_REQUIRE(truncated_identity(-42, 2));
+    BOOST_REQUIRE(truncated_identity(-42, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__no_remainder_negative_divisor__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(42, -2), 42 % -2);
-    ////BOOST_REQUIRE_EQUAL(truncated_modulo(42u, -2), 42u % -2);
+
+    BOOST_REQUIRE(truncated_identity(42, -2));
+    BOOST_REQUIRE(truncated_identity(42u, -2));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__no_remainder_negatives__cpp)
@@ -853,26 +821,34 @@ BOOST_AUTO_TEST_CASE(math__truncated_modulo__no_remainder_negatives__cpp)
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__positives__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(42, 8), 42 % 8);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42u, 8), 42u % 8);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42, 8u), 42 % 8);
-    BOOST_REQUIRE_EQUAL(truncated_modulo(42u, 8u), 42u % 8);
+
+    BOOST_REQUIRE(truncated_identity(42, 8));
+    BOOST_REQUIRE(truncated_identity(42u, 8));
+    BOOST_REQUIRE(truncated_identity(42, 8u));
+    BOOST_REQUIRE(truncated_identity(42u, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__negative_dividend__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(-42, 8), -42 % 8);
-    ////BOOST_REQUIRE_EQUAL(truncated_modulo(-42, 8u), -42 % 8u);
+
+    BOOST_REQUIRE(truncated_identity(-42, 8));
+    BOOST_REQUIRE(truncated_identity(-42, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__negative_divisor__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(42, -8), 42 % -8);
-    ////BOOST_REQUIRE_EQUAL(truncated_modulo(42u, -8), 42u % -8);
+
+    BOOST_REQUIRE(truncated_identity(42, -8));
+    BOOST_REQUIRE(truncated_identity(42, -8));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_modulo__negatives__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_modulo(-42, -8), -42 % -8);
+
+    BOOST_REQUIRE(truncated_identity(-42, -8));
 }
 
 #endif // MATH_MODULO
@@ -887,9 +863,11 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__0_1__cpp)
     // Zero is same as c++.
     BOOST_REQUIRE_EQUAL(0 / 1, 0);
     BOOST_REQUIRE_EQUAL(ceilinged_divide(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(0u, 1), 0u);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(0, 1u), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(0u, 1u), 0u);
+
+    BOOST_REQUIRE(ceilinged_identity(0, 1));
+    BOOST_REQUIRE(ceilinged_identity(0u, 1));
+    BOOST_REQUIRE(ceilinged_identity(0, 1u));
+    BOOST_REQUIRE(ceilinged_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_divide__1_negative_1__cpp)
@@ -898,13 +876,8 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__1_negative_1__cpp)
     BOOST_REQUIRE_EQUAL(1 / -1, -1);
     BOOST_REQUIRE_EQUAL(ceilinged_divide(1, -1), -1);
 
-    // Same but with the positive unsigned.
-    ////static_assert(1u / -1 == 0, "truncated quotient is 0");
-    ////static_assert(1u % -1 == 1, "truncated remainder is 1");
-    ////static_assert(1u == (-1 * -1) + 0, "identity");
-
-    // Native negative divide has no remainder (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(1u, -1), 0);
+    BOOST_REQUIRE(ceilinged_identity(1, -1));
+    BOOST_REQUIRE(ceilinged_identity(1u, -1));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_1_1__cpp)
@@ -912,7 +885,9 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_1_1__cpp)
     // No remainder and negative quotient are same as c++.
     BOOST_REQUIRE_EQUAL(-1 / 1, -1 / 1);
     BOOST_REQUIRE_EQUAL(ceilinged_divide(-1, 1), -1);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(-1, 1u), -1);
+
+    BOOST_REQUIRE(ceilinged_identity(-1, 1));
+    BOOST_REQUIRE(ceilinged_identity(-1, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_divide__no_remainder__cpp)
@@ -920,34 +895,34 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__no_remainder__cpp)
     // No remainder is same as c++.
     BOOST_REQUIRE_EQUAL(42 / 2, 21);
     BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 2), 21);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 2), 21u);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 2u), 21);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 2u), 21u);
+
+    BOOST_REQUIRE(ceilinged_identity(42, 2));
+    BOOST_REQUIRE(ceilinged_identity(42u, 2));
+    BOOST_REQUIRE(ceilinged_identity(42, 2u));
+    BOOST_REQUIRE(ceilinged_identity(42u, 2u));
 }
 
-BOOST_AUTO_TEST_CASE(math__ceilinged_divide__positives__expected)
+BOOST_AUTO_TEST_CASE(math__ceilinged_divide__positives__python)
 {
     // A common round-up hack works for both positives in c++.
     BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 8), (42 + (8 - 1)) / 8);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 8), (42u + (8 - 1)) / 8);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 8u), (42 + (8 - 1)) / 8u);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 8u), (42u + (8u - 1)) / 8u);
 
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(42 / 8, 5);
 
     // The python result of -(42//-8).
     BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 8), 6);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 8), 6u);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42, 8u), 6);
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, 8u), 6u);
+
+    BOOST_REQUIRE(ceilinged_identity(42, 8));
+    BOOST_REQUIRE(ceilinged_identity(42u, 8));
+    BOOST_REQUIRE(ceilinged_identity(42, 8u));
+    BOOST_REQUIRE(ceilinged_identity(42u, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_dividend__cpp)
 {
     // A common round-up hack DOES NOT work for negative dividend in c++.
     BOOST_REQUIRE_NE(ceilinged_divide(-42, 8), (-42 + (8 - 1)) / 8);
-    ////BOOST_REQUIRE_NE(ceilinged_divide(-42, 8u), (-42 + (8u - 1)) / 8u);
 
     // Negative quotient is ceilinged in c++.
     BOOST_REQUIRE_EQUAL(-42 / 8, -5);
@@ -955,13 +930,8 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_dividend__cpp)
     // The python result of -(-42//-8).
     BOOST_REQUIRE_EQUAL(ceilinged_divide(-42, 8), -5);
 
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 8u == 0x1ffffffa, "truncated quotient is -6");
-    ////static_assert(-42 % 8u == 6, "truncated remainder is 6");
-    ////static_assert(-42 == (8u * 0x1ffffffa) + 6, "identity");
-
-    // Native negative divide is -6 [0x1ffffffa] (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(-42, 8u), 0x1ffffffa);
+    BOOST_REQUIRE(ceilinged_identity(-42, 8));
+    BOOST_REQUIRE(ceilinged_identity(-42, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_divisor__cpp)
@@ -976,16 +946,11 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negative_divisor__cpp)
     // The python result of -(42//8).
     BOOST_REQUIRE_EQUAL(ceilinged_divide(42, -8), -5);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -8 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -8 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-8 * 0) + 42, "identity");
-
-    // Native negative divide is 0 (already ceilinged).
-    BOOST_REQUIRE_EQUAL(ceilinged_divide(42u, -8), 0);
+    BOOST_REQUIRE(ceilinged_identity(42, -8));
+    BOOST_REQUIRE(ceilinged_identity(42u, -8));
 }
 
-BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negatives__expected)
+BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negatives__python)
 {
     // A common round-up hack works for both negatives in c++.
     BOOST_REQUIRE_EQUAL(ceilinged_divide(-42, -8), (-42 + (-8 - 1)) / -8);
@@ -995,6 +960,8 @@ BOOST_AUTO_TEST_CASE(math__ceilinged_divide__negatives__expected)
 
     // The python result of -(-42//8).
     BOOST_REQUIRE_EQUAL(ceilinged_divide(-42, -8), 6);
+
+    BOOST_REQUIRE(ceilinged_identity(-42, -8));
 }
 
 // floored_divide
@@ -1005,9 +972,11 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__0_1__cpp)
     // Zero is same as c++.
     BOOST_REQUIRE_EQUAL(0 / 1, 0);
     BOOST_REQUIRE_EQUAL(floored_divide(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(floored_divide(0u, 1), 0u);
-    BOOST_REQUIRE_EQUAL(floored_divide(0, 1u), 0);
-    BOOST_REQUIRE_EQUAL(floored_divide(0u, 1u), 0u);
+
+    BOOST_REQUIRE(floored_identity(0, 1));
+    BOOST_REQUIRE(floored_identity(0u, 1));
+    BOOST_REQUIRE(floored_identity(0, 1u));
+    BOOST_REQUIRE(floored_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_divide__1_negative_1__cpp)
@@ -1016,28 +985,18 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__1_negative_1__cpp)
     BOOST_REQUIRE_EQUAL(1 / -1, -1);
     BOOST_REQUIRE_EQUAL(floored_divide(1, -1), -1);
 
-    // Same but with the positive unsigned.
-    ////static_assert(1u / -1 == 0, "truncated quotient is 0");
-    ////static_assert(1u % -1 == 1, "truncated remainder is 1");
-    ////static_assert(1u == (-1 * -1) + 0, "identity");
-
-    // Native negative divide is 0 with a remainder (0 - 1 = -1 [0xffffffff]).
-    BOOST_REQUIRE_EQUAL(floored_divide(1u, -1), 0xffffffff);
+    BOOST_REQUIRE(floored_identity(1, -1));
+    BOOST_REQUIRE(floored_identity(1u, -1));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_divide__negative_1_1__cpp)
 {
     // No remainder is same as c++.
     BOOST_REQUIRE_EQUAL(-1 / 1, -1);
-    BOOST_REQUIRE_EQUAL(floored_divide(-1, 1), -1);
-
-    // Same but with the positive unsigned.
-    ////static_assert(-1 / 1u == -1, "truncated quotient is -1");
-    ////static_assert(-1 % 1u == 0, "truncated remainder is 0");
-    ////static_assert(-1 == (1u * -1) + 0, "identity");
-
-    // Native negative divide is -1 with no remainder (already floored).
     BOOST_REQUIRE_EQUAL(floored_divide(-1, 1u), -1);
+
+    BOOST_REQUIRE(floored_identity(-1, 1));
+    BOOST_REQUIRE(floored_identity(-1, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_divide__no_remainder__cpp)
@@ -1045,9 +1004,11 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__no_remainder__cpp)
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(42 / 2, 21);
     BOOST_REQUIRE_EQUAL(floored_divide(42, 2), 21);
-    BOOST_REQUIRE_EQUAL(floored_divide(42u, 2), 21u);
-    BOOST_REQUIRE_EQUAL(floored_divide(42, 2u), 21);
-    BOOST_REQUIRE_EQUAL(floored_divide(42u, 2u), 21u);
+
+    BOOST_REQUIRE(floored_identity(42, 2));
+    BOOST_REQUIRE(floored_identity(42u, 2));
+    BOOST_REQUIRE(floored_identity(42, 2u));
+    BOOST_REQUIRE(floored_identity(42u, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_divide__positives__cpp)
@@ -1055,39 +1016,31 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__positives__cpp)
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(42 / 8, 5);
     BOOST_REQUIRE_EQUAL(floored_divide(42, 8), 5);
-    BOOST_REQUIRE_EQUAL(floored_divide(42u, 8), 5u);
-    BOOST_REQUIRE_EQUAL(floored_divide(42, 8u), 5);
-    BOOST_REQUIRE_EQUAL(floored_divide(42u, 8u), 5u);
+
+    BOOST_REQUIRE(floored_identity(42, 8));
+    BOOST_REQUIRE(floored_identity(42u, 8));
+    BOOST_REQUIRE(floored_identity(42, 8u));
+    BOOST_REQUIRE(floored_identity(42u, 8u));
 }
 
-BOOST_AUTO_TEST_CASE(math__floored_divide__negative_dividend__negative_6)
+BOOST_AUTO_TEST_CASE(math__floored_divide__negative_dividend__expected)
 {
     // Negative quotient is ceilinged in c++.
     BOOST_REQUIRE_EQUAL(-42 / 8, -5);
     BOOST_REQUIRE_EQUAL(floored_divide(-42, 8), -6);
 
-    // Same but with the positive unsigned.
-    ////static_assert(-42 / 8u == 0x1ffffffa, "truncated quotient is -6");
-    ////static_assert(-42 % 8u == 6, "truncated remainder is 6");
-    ////static_assert(-42 == (8u * 0x1ffffffa) + 6, "identity");
-
-    // Native negative divide is -6 with a remainder (-6 - 1 = -7 [0x1ffffff9]).
-    BOOST_REQUIRE_EQUAL(floored_divide(-42, 8u), 0x1ffffff9);
+    BOOST_REQUIRE(floored_identity(-42, 8));
+    BOOST_REQUIRE(floored_identity(-42, 8u));
 }
 
-BOOST_AUTO_TEST_CASE(math__floored_divide__negative_divisor__negative_6)
+BOOST_AUTO_TEST_CASE(math__floored_divide__negative_divisor__expected)
 {
     // Negative quotient is ceilinged in c++.
     BOOST_REQUIRE_EQUAL(42 / -8, -5);
     BOOST_REQUIRE_EQUAL(floored_divide(42, -8), -6);
 
-    // Same but with the positive unsigned.
-    ////static_assert(42u / -8 == 0, "truncated quotient is 0");
-    ////static_assert(42u % -8 == 42, "truncated remainder is 42");
-    ////static_assert(42u == (-8 * 0) + 42, "identity");
-
-    // Native negative divide is 0 with a remainder (0 - 1 = -1 [0xffffffff]).
-    BOOST_REQUIRE_EQUAL(floored_divide(42u, -8), 0xffffffff);
+    BOOST_REQUIRE(floored_identity(42, -8));
+    BOOST_REQUIRE(floored_identity(42u, -8));
 }
 
 BOOST_AUTO_TEST_CASE(math__floored_divide__negatives__cpp)
@@ -1095,6 +1048,8 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__negatives__cpp)
     // Positive quotient is floored in c++.
     BOOST_REQUIRE_EQUAL(-42 / -8, 5);
     BOOST_REQUIRE_EQUAL(floored_divide(-42, -8), 5);
+
+    BOOST_REQUIRE(floored_identity(-42, -8));
 }
 
 // truncated_divide
@@ -1103,62 +1058,77 @@ BOOST_AUTO_TEST_CASE(math__floored_divide__negatives__cpp)
 BOOST_AUTO_TEST_CASE(math__truncated_divide__0_1__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(0, 1), 0 / 1);
-    BOOST_REQUIRE_EQUAL(truncated_divide(0u, 1), 0u / 1);
-    BOOST_REQUIRE_EQUAL(truncated_divide(0, 1u), 0 / 1u);
-    BOOST_REQUIRE_EQUAL(truncated_divide(0u, 1u), 0u / 1u);
+
+    BOOST_REQUIRE(truncated_identity(0, 1));
+    BOOST_REQUIRE(truncated_identity(0u, 1));
+    BOOST_REQUIRE(truncated_identity(0, 1u));
+    BOOST_REQUIRE(truncated_identity(0u, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__1_negative_1__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(1, -1), 1 / -1);
 
-    // Same but with the positive unsigned.
-    ////BOOST_REQUIRE_EQUAL(truncated_divide(1u, -1), 1u / -1);
+    BOOST_REQUIRE(truncated_identity(1, -1));
+    BOOST_REQUIRE(truncated_identity(1u, -1));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__negative_1_1__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(-1, 1), -1 / 1);
-    ////BOOST_REQUIRE_EQUAL(truncated_divide(-1, 1u), -1 / 1u);
+
+    BOOST_REQUIRE(truncated_identity(-1, 1));
+    BOOST_REQUIRE(truncated_identity(-1, 1u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__no_remainder__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(42, 2), 42 / 2);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42u, 2), 42u / 2);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42, 2u), 42 / 2u);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42u, 2u), 42u / 2);
+
+    BOOST_REQUIRE(truncated_identity(42, 2));
+    BOOST_REQUIRE(truncated_identity(42u, 2));
+    BOOST_REQUIRE(truncated_identity(42, 2u));
+    BOOST_REQUIRE(truncated_identity(42u, 2u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__positives__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(42, 8), 42 / 8);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42u, 8), 42u / 8);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42, 8u), 42 / 8);
-    BOOST_REQUIRE_EQUAL(truncated_divide(42u, 8u), 42u / 8);
+
+    BOOST_REQUIRE(truncated_identity(42, 8));
+    BOOST_REQUIRE(truncated_identity(42u, 8));
+    BOOST_REQUIRE(truncated_identity(42, 8u));
+    BOOST_REQUIRE(truncated_identity(42u, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__negative_dividend__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(-42, 8), -42 / 8);
-    ////BOOST_REQUIRE_EQUAL(truncated_divide(-42, 8u), -42 / 8u);
+
+    BOOST_REQUIRE(truncated_identity(-42, 8));
+    BOOST_REQUIRE(truncated_identity(-42, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__negative_divisor__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(42, -8), 42 / -8);
-    ////BOOST_REQUIRE_EQUAL(truncated_divide(42u, -8), 42u / -8);
+
+    BOOST_REQUIRE(truncated_identity(42, 8));
+    BOOST_REQUIRE(truncated_identity(42, 8u));
 }
 
 BOOST_AUTO_TEST_CASE(math__truncated_divide__negatives__cpp)
 {
     BOOST_REQUIRE_EQUAL(truncated_divide(-42, -8), -42 / -8);
+
+    BOOST_REQUIRE(truncated_identity(-42, -8));
 }
 
 #endif // MATH_DIVIDE
 
 BOOST_AUTO_TEST_SUITE_END()
 
+// Full matrix of conversions/signs (unsigned types avoided due to warnings).
 // ----------------------------------------------------------------------------
 
 // C++11: if the quotient x/y is representable in the type of the result:
