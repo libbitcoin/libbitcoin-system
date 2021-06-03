@@ -24,10 +24,23 @@
 
 namespace libbitcoin {
 namespace system {
+
+// C++14: Log can be defaulted to decltype(Integer / Base).
+
+// Returns 0 for undefined (base < 2 or value < 1).
+template <typename Base, typename Integer, typename Log,
+    IS_INTEGER(Base), IS_INTEGER(Integer)>
+Log ceilinged_log(Base base, Integer value)
+{
+    if (base < 2 || value < 1)
+        return 0;
+
+    return floored_log(base, value) + ((value % base) != 0 ? 1 : 0);
+}
     
 // Returns 0 for undefined (value < 1).
 template <typename Integer, IS_INTEGER(Integer)>
-inline Integer ceilinged_log2(Integer value)
+Integer ceilinged_log2(Integer value)
 {
     if (value < 1)
         return 0;
@@ -35,9 +48,22 @@ inline Integer ceilinged_log2(Integer value)
     return floored_log2(value) + (value % 2);
 }
 
-// Returns 0 for undefined (value < 1).
+// Returns 0 for undefined (base < 2 or value < 1).
+template <typename Base, typename Integer, typename Log,
+    IS_INTEGER(Base), IS_INTEGER(Integer)>
+Log floored_log(Base base, Integer value)
+{
+    if (base < 2 || value < 1)
+        return 0;
+
+    Log exponent = 0;
+    while (((value /= base)) > 0) { ++exponent; }
+    return exponent;
+}
+
+// Returns 0 for undefined value < 1).
 template <typename Integer, IS_INTEGER(Integer)>
-inline Integer floored_log2(Integer value)
+Integer floored_log2(Integer value)
 {
     if (value < 1)
         return 0;
@@ -47,23 +73,10 @@ inline Integer floored_log2(Integer value)
     return exponent;
 }
 
-template <typename Integer, IS_INTEGER(Integer)>
-inline Integer power2(Integer exponent)
-{
-    if (exponent == 0)
-        return 1;
-
-    if (is_negative(exponent))
-        return 0;
-
-    Integer value = 2;
-    while (--exponent > 0) { value <<= 1; };
-    return value;
-}
-
 // Returns 0 for undefined (0^0).
-template <typename Integer, IS_INTEGER(Integer)>
-inline Integer power(Integer base, Integer exponent)
+template <typename Base, typename Integer, typename Power,
+    IS_INTEGER(Base), IS_INTEGER(Integer)>
+Power power(Base base, Integer exponent)
 {
     if (base == 0)
         return 0;
@@ -75,8 +88,22 @@ inline Integer power(Integer base, Integer exponent)
         return absolute(base) > 1 ? 0 :
             (is_odd(exponent) && is_negative(base) ? -1 : 1);
 
-    Integer value = base;
+    Power value = base;
     while (--exponent > 0) { value *= base; }
+    return value;
+}
+
+template <typename Integer, IS_INTEGER(Integer)>
+Integer power2(Integer exponent)
+{
+    if (exponent == 0)
+        return 1;
+
+    if (is_negative(exponent))
+        return 0;
+
+    Integer value = 2;
+    while (--exponent > 0) { value <<= 1; };
     return value;
 }
 

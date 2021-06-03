@@ -20,6 +20,174 @@
 
 BOOST_AUTO_TEST_SUITE(power_tests)
 
+// ceilinged_log
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__negatives__undefined)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(-2, 2u), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, -2), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(-2, -2), 0);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__0_0__undefined)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 0u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_0__undefined)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1u, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1u, 0u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__0_1__undefined)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 1u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_1__undefined)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1u, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(1u, 1u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_1__1)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1u), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_2__1)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 2), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 2u), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 2), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 2u), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__3_2__1)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(3, 2), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(3, 2u), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(3u, 2), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(3u, 2u), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_3__2)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 3), 2);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 3u), 2u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 3), 2);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 3u), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__10s__expected)
+{
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 1), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 10), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 100), 2);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 1000), 3);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 10000), 4);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 100000), 5);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(10, 1000000), 6);
+}
+
+// floored_log
+
+BOOST_AUTO_TEST_CASE(power__floored_log__negatives__undefined)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(-2, 2u), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, -2), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(-2, -2), 0);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__0_0__undefined)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(0, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(0, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(0u, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(0u, 0u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__1_0__undefined)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(1, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(1, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(1u, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(1u, 0u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__0_1__undefined)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(0, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(0, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(0u, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(0u, 1u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__1_1__undefined)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(1, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(1, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(1u, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(1u, 1u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__2_1__0)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(2, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(2, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 1u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__2_2__1)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(2, 2), 1);
+    BOOST_REQUIRE_EQUAL(floored_log(2, 2u), 1u);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 2), 1);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 2u), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__3_2__0)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(3, 2), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(3, 2u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(3u, 2), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(3u, 2u), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__2_3__1)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(2, 3), 1);
+    BOOST_REQUIRE_EQUAL(floored_log(2, 3u), 1u);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 3), 1);
+    BOOST_REQUIRE_EQUAL(floored_log(2u, 3u), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(power__floored_log__10s__expected)
+{
+    BOOST_REQUIRE_EQUAL(floored_log(10, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 10), 1);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 100), 2);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 1000), 3);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 10000), 4);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 100000), 5);
+    BOOST_REQUIRE_EQUAL(floored_log(10, 1000000), 6);
+}
+
 // ceilinged_log2
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2__zero__undefined)

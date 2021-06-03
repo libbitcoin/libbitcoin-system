@@ -26,24 +26,37 @@ namespace system {
 
 /// All operations below support signed and unsigned parameters.
 
+/// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
+/// Returns 0 for undefined (base < 2 or value < 1).
+template <typename Base, typename Integer, typename Log=Integer,
+    IS_INTEGER(Base)=true, IS_INTEGER(Integer)=true>
+Log ceilinged_log(Base base, Integer value);
+
 /// Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
-/// Returns zero if value is less than one (undefined).
+/// Returns 0 for undefined (value < 1).
 template <typename Integer, IS_INTEGER(Integer)=true>
-inline Integer ceilinged_log2(Integer value);
+Integer ceilinged_log2(Integer value);
+
+/// Obtain the floored (rounded down) integer logarithm of given value and base.
+/// Returns 0 for undefined (base < 2 or value < 1).
+template <typename Base, typename Integer, typename Log=Integer,
+    IS_INTEGER(Base)=true, IS_INTEGER(Integer)=true>
+Log floored_log(Base base, Integer value);
 
 /// Obtain the floored (rounded down) integer base 2 logarithm of given value.
-/// Returns zero if value is less than one (undefined).
+/// Returns 0 for undefined (value < 1).
 template <typename Integer, IS_INTEGER(Integer)=true>
-inline Integer floored_log2(Integer value);
-
-/// Obtain the integer base 2 power for given exponent.
-template <typename Integer, IS_INTEGER(Integer)=true>
-inline Integer power2(Integer exponent);
+Integer floored_log2(Integer value);
 
 /// Obtain the integer power of given base for given exponent.
 /// Returns zero if both operands are zero (undefined).
+template <typename Base, typename Integer, typename Power=Base,
+    IS_INTEGER(Base)=true, IS_INTEGER(Integer)=true>
+Power power(Base base, Integer exponent);
+
+/// Obtain the integer base 2 power for given exponent.
 template <typename Integer, IS_INTEGER(Integer)=true>
-inline Integer power(Integer base, Integer exponent);
+Integer power2(Integer exponent);
 
 } // namespace system
 } // namespace libbitcoin
