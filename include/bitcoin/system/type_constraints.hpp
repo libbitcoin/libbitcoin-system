@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -46,25 +46,6 @@ enable_if_type< \
 enable_if_type< \
     std::numeric_limits<Type>::is_integer && \
     std::numeric_limits<Type>::is_signed, bool>
-
-#define IS_INTEGERS(Left, Right) \
-enable_if_type< \
-    std::numeric_limits<Left>::is_integer && \
-    std::numeric_limits<Right>::is_integer, bool>
-
-#define IS_UNSIGNED_INTEGERS(Left, Right) \
-enable_if_type< \
-    std::numeric_limits<Left>::is_integer && \
-    !std::numeric_limits<Left>::is_signed && \
-    std::numeric_limits<Right>::is_integer && \
-    !std::numeric_limits<Right>::is_signed, bool>
-
-#define IS_EITHER_INTEGER_SIGNED(Left, Right) \
-enable_if_type< \
-    (std::numeric_limits<Left>::is_integer && \
-        std::numeric_limits<Left>::is_signed) || \
-    (std::numeric_limits<Right>::is_integer && \
-        std::numeric_limits<Right>::is_signed), bool>
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.

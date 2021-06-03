@@ -26,7 +26,7 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

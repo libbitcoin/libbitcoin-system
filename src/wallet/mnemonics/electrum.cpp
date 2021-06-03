@@ -26,7 +26,8 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
@@ -56,8 +57,8 @@ static const auto version_two_factor_authentication_witness = "102";
 static const auto version_none = "none";
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
-static const auto index_bits = static_cast<uint8_t>(
-    system::floored_log2(electrum::dictionary::size()));
+static const auto index_bits = static_cast<uint8_t>(floored_log2(
+    electrum::dictionary::size()));
 
 // private static
 // ----------------------------------------------------------------------------

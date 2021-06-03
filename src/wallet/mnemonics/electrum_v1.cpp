@@ -29,7 +29,8 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>

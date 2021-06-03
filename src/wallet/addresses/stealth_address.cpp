@@ -29,7 +29,7 @@
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/divide.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/exceptions.hpp>
 
