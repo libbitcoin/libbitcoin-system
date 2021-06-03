@@ -544,19 +544,25 @@ BOOST_AUTO_TEST_CASE(math__power__negative_overflow__expected)
 template <typename Dividend, typename Divisor>
 bool ceilinged_identity(Dividend x, Divisor y)
 {
-    return ceilinged_divide(x, y) * y + ceilinged_modulo(x, y) == x;
+    // Cast avoids conversion of left side to Divisor type.
+    // This otherwise leads to comparison of unsigned types warnings.
+    return ceilinged_divide(x, y) * static_cast<Dividend>(y) + ceilinged_modulo(x, y) == x;
 }
 
 template <typename Dividend, typename Divisor>
 bool floored_identity(Dividend x, Divisor y)
 {
-    return floored_divide(x, y) * y + floored_modulo(x, y) == x;
+    // Cast avoids conversion of left side to Divisor type.
+    // This otherwise leads to comparison of unsigned types warnings.
+    return floored_divide(x, y) * static_cast<Dividend>(y) + floored_modulo(x, y) == x;
 }
 
 template <typename Dividend, typename Divisor>
 bool truncated_identity(Dividend x, Divisor y)
 {
-    return  truncated_divide(x, y) * y + truncated_modulo(x, y) == x;
+    // Cast avoids conversion of left side to Divisor type.
+    // This otherwise leads to comparison of unsigned types warnings.
+    return  truncated_divide(x, y) * static_cast<Dividend>(y) + truncated_modulo(x, y) == x;
 }
 
 // Return values are typed by the dividend, consistent with native operators.
@@ -1206,5 +1212,15 @@ static_assert((+1 - 0) * (+y) + (+1 + +0) == +x, "+");
 static_assert((+1 - 0) * (-y) + (-1 + +0) == -x, "+");
 static_assert((-1 - i) * (+y) + (-1 + +y) == -x, "-");
 static_assert((-1 - i) * (-y) + (+1 + -y) == +x, "-");
+
+// Verify modulo adjustment.
+static_assert(((+x / +y) + 1) * +y + ((+x % +y) - +y) == +x, "+1++");
+static_assert(((+x / +y) - 1) * +y + ((+x % +y) + +y) == +x, "-1++");
+static_assert(((-x / -y) + 1) * -y + ((-x % -y) - -y) == -x, "+1--");
+static_assert(((-x / -y) - 1) * -y + ((-x % -y) + -y) == -x, "-1--");
+static_assert(((-x / +y) + 1) * +y + ((-x % +y) - +y) == -x, "+1-+");
+static_assert(((-x / +y) - 1) * +y + ((-x % +y) + +y) == -x, "-1-+");
+static_assert(((+x / -y) + 1) * -y + ((+x % -y) - -y) == +x, "+1+-");
+static_assert(((+x / -y) - 1) * -y + ((+x % -y) + -y) == +x, "-1+-");
 
 // ----------------------------------------------------------------------------

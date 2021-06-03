@@ -62,7 +62,7 @@ template <typename Integer, IS_SIGNED_INTEGER(Integer)>
 inline Integer absolute(Integer value)
 {
     // The negative call and ternary compile away for unsigned value.
-    return negative(value) ? -1 * value : value;
+    return negative(value) ? -value : value;
 }
 
 template <typename Integer, IS_INTEGER(Integer)>
