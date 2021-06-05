@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,14 +42,14 @@ void ostream_writer::write_reverse(const byte_array<Size>& value)
         write_byte(value[Size - (index + 1)]);
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 void ostream_writer::write_big_endian(Integer value)
 {
     byte_array<sizeof(Integer)> bytes = to_big_endian(value);
     write_forward<sizeof(Integer)>(bytes);
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 void ostream_writer::write_little_endian(Integer value)
 {
     byte_array<sizeof(Integer)> bytes = to_little_endian(value);

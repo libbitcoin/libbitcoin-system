@@ -21,10 +21,10 @@
 
 #include <cstddef>
 #include <ostream>
-#include <type_traits>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/iostream/writer.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,12 +41,10 @@ public:
     template <size_t Size>
     void write_reverse(const byte_array<Size>& value);
 
-    template <typename Integer, typename =
-        std::enable_if<std::is_unsigned<Integer>::value>>
+    template <typename Integer, if_unsigned_integer<Integer> = true>
     void write_big_endian(Integer value);
 
-    template <typename Integer, typename =
-        std::enable_if<std::is_unsigned<Integer>::value>>
+    template <typename Integer, if_unsigned_integer<Integer> = true>
     void write_little_endian(Integer value);
 
     /// Context.

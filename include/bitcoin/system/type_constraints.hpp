@@ -26,26 +26,27 @@
 namespace libbitcoin {
 namespace system {
 
-// Borrowing enable_if_t from c++14.
-// en.cppreference.com/w/cpp/types/enable_if
-template<bool Bool, class Type=void>
+// C++14: use enable_if_t.
+template <bool Bool, typename Type=void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
-#define IS_DERIVED(Base, Type) \
-enable_if_type<std::is_base_of<Base, Type>::value, bool>
+template <typename Base, typename Type>
+using if_base_of = enable_if_type<
+    std::is_base_of<Base, Type>::value, bool>;
 
-#define IS_INTEGER(Type) \
-enable_if_type<std::numeric_limits<Type>::is_integer, bool>
+template <typename Type>
+using if_integer = enable_if_type<
+    std::numeric_limits<Type>::is_integer, bool>;
 
-#define IS_UNSIGNED_INTEGER(Type) \
-enable_if_type< \
-    std::numeric_limits<Type>::is_integer && \
-    !std::numeric_limits<Type>::is_signed, bool>
+template <typename Type>
+using if_signed_integer = enable_if_type<
+    std::numeric_limits<Type>::is_integer &&
+    std::numeric_limits<Type>::is_signed, bool>;
 
-#define IS_SIGNED_INTEGER(Type) \
-enable_if_type< \
-    std::numeric_limits<Type>::is_integer && \
-    std::numeric_limits<Type>::is_signed, bool>
+template <typename Type>
+using if_unsigned_integer = enable_if_type<
+    std::numeric_limits<Type>::is_integer &&
+    !std::numeric_limits<Type>::is_signed, bool>;
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.

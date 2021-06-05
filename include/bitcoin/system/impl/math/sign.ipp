@@ -24,33 +24,33 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename Integer, IS_SIGNED_INTEGER(Integer)>
+template <typename Integer, if_signed_integer<Integer>>
 inline Integer absolute(Integer value)
 {
     // std::abs is limited to signed types.
     return is_negative(value) ? -value : value;
 }
 
-template <typename Integer, IS_UNSIGNED_INTEGER(Integer)>
+template <typename Integer, if_unsigned_integer<Integer>>
 inline Integer absolute(Integer value)
 {
     return value;
 }
 
-template <typename Integer, IS_SIGNED_INTEGER(Integer)>
+template <typename Integer, if_signed_integer<Integer>>
 inline bool is_negative(Integer value)
 {
     // std::signbit is limited to floating point types.
     return value < 0;
 }
 
-template <typename Integer, IS_UNSIGNED_INTEGER(Integer)>
+template <typename Integer, if_unsigned_integer<Integer>>
 inline bool is_negative(Integer value)
 {
     return false;
 }
 
-template <typename Integer, IS_INTEGER(Integer)>
+template <typename Integer, if_integer<Integer>>
 inline bool is_odd(Integer value)
 {
     return (value % 2) != 0;

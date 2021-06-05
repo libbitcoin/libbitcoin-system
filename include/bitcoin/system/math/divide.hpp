@@ -30,37 +30,37 @@ namespace system {
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to c++ % for negative quotients.
 template <typename Dividend, typename Divisor, typename Quotient=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor);
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to c++ % for negative quotients.
 template <typename Dividend, typename Divisor, typename Remainder=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor);
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to c++ % for positive quotients.
 template <typename Dividend, typename Divisor, typename Quotient=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Quotient floored_divide(Dividend dividend, Divisor divisor);
 
 /// Obtain the floorded (rounded down) integer modulo quotient.
 /// This is equivalent to c++ % for positive quotients.
 template <typename Dividend, typename Divisor, typename Remainder=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Remainder floored_modulo(Dividend dividend, Divisor divisor);
 
 /// Obtain the truncated (rounded toward zero) integer quotient.
 /// This is equivalent to c++ /.
 template <typename Dividend, typename Divisor, typename Quotient=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Quotient truncated_divide(Dividend dividend, Divisor divisor);
 
 /// Obtain the truncated (rounded toward zero) integer divide remainder.
 /// This is equivalent to c++ %.
 template <typename Dividend, typename Divisor, typename Remainder=Dividend,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline Remainder truncated_modulo(Dividend dividend, Divisor divisor);
 
 } // namespace system

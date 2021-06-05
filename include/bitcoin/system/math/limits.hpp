@@ -19,23 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 
-#include <algorithm>
 #include <limits>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-#define IF(T) std::enable_if<T>
-#define SIGN(T) std::is_signed<T>::value
-#define UNSIGN(T) std::is_unsigned<T>::value
-
-#define SIGNED(A) IF(SIGN(A))
-#define UNSIGNED(A) IF(UNSIGN(A))
-#define SIGNED_SIGNED(A, B) IF(SIGN(A) && SIGN(B))
-#define SIGNED_UNSIGNED(A, B) IF(SIGN(A) && UNSIGN(B))
-#define UNSIGNED_SIGNED(A, B) IF(UNSIGN(A) && SIGN(B))
-#define UNSIGNED_UNSIGNED(A, B) IF(UNSIGN(A) && UNSIGN(B))
 
 template <typename Space, typename Integer>
 Space cast_add(Integer left, Integer right)
@@ -49,21 +38,21 @@ Space cast_subtract(Integer left, Integer right)
     return static_cast<Space>(left) - static_cast<Space>(right);
 }
 
-template <typename Integer, typename = UNSIGNED(Integer)>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer ceiling_add(Integer left, Integer right)
 {
     static const auto ceiling = std::numeric_limits<Integer>::max();
     return left > ceiling - right ? ceiling : left + right;
 }
 
-template <typename Integer, typename = UNSIGNED(Integer)>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer floor_subtract(Integer left, Integer right)
 {
     static const auto floor = std::numeric_limits<Integer>::min();
     return right >= left ? floor : left - right;
 }
 
-template <typename Integer, typename = UNSIGNED(Integer)>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right)
 {
     static const auto maximum = std::numeric_limits<Integer>::max();
@@ -74,7 +63,7 @@ Integer safe_add(Integer left, Integer right)
     return left + right;
 }
 
-template <typename Integer, typename = UNSIGNED(Integer)>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_subtract(Integer left, Integer right)
 {
     static const auto minimum = std::numeric_limits<Integer>::min();
@@ -85,7 +74,7 @@ Integer safe_subtract(Integer left, Integer right)
     return left - right;
 }
 
-template <typename Integer, typename = UNSIGNED(Integer)>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_multiply(Integer left, Integer right)
 {
     static const auto maximum = std::numeric_limits<Integer>::max();
@@ -113,7 +102,9 @@ void safe_decrement(Integer& value)
     value = safe_subtract(value, one);
 }
 
-template <typename To, typename From, typename = SIGNED_SIGNED(To, From)>
+template <typename To, typename From,
+    if_signed_integer<To> = true,
+    if_signed_integer<From> = true>
 To safe_signed(From signed_value)
 {
     static const auto signed_minimum = std::numeric_limits<To>::min();
@@ -125,7 +116,9 @@ To safe_signed(From signed_value)
     return static_cast<To>(signed_value);
 }
 
-template <typename To, typename From, typename = UNSIGNED_UNSIGNED(To, From)>
+template <typename To, typename From,
+    if_unsigned_integer<To> = true,
+    if_unsigned_integer<From> = true>
 To safe_unsigned(From unsigned_value)
 {
     static const auto unsigned_minimum = std::numeric_limits<To>::min();
@@ -137,7 +130,9 @@ To safe_unsigned(From unsigned_value)
     return static_cast<To>(unsigned_value);
 }
 
-template <typename To, typename From, typename = SIGNED_UNSIGNED(To, From)>
+template <typename To, typename From,
+    if_signed_integer<To> = true,
+    if_unsigned_integer<From> = true>
 To safe_to_signed(From unsigned_value)
 {
     static_assert(sizeof(uint64_t) >= sizeof(To), "safe assign out of range");
@@ -149,7 +144,9 @@ To safe_to_signed(From unsigned_value)
     return static_cast<To>(unsigned_value);
 }
 
-template <typename To, typename From, typename = UNSIGNED_SIGNED(To, From)>
+template <typename To, typename From,
+    if_unsigned_integer<To> = true,
+    if_signed_integer<From> = true>
 To safe_to_unsigned(From signed_value)
 {
     static_assert(sizeof(uint64_t) >= sizeof(To), "safe assign out of range");
@@ -163,7 +160,9 @@ To safe_to_unsigned(From signed_value)
 }
 
 /// Constrain a numeric value within a given type domain.
-template <typename To, typename From>
+template <typename To, typename From,
+    if_integer<To> = true,
+    if_integer<From> = true>
 To domain_constrain(From value)
 {
     static const auto minimum = std::numeric_limits<To>::min();
@@ -179,7 +178,9 @@ To domain_constrain(From value)
 }
 
 /// Constrain a numeric value within a given range.
-template <typename To, typename From>
+template <typename To, typename From,
+    if_integer<To> = true,
+    if_integer<From> = true>
 To range_constrain(From value, To minimum, To maximum)
 {
     if (value < minimum)
@@ -190,16 +191,6 @@ To range_constrain(From value, To minimum, To maximum)
 
     return static_cast<To>(value);
 }
-
-#undef IF
-#undef SIGN
-#undef UNSIGN
-#undef SIGNED
-#undef UNSIGNED
-#undef SIGNED_SIGNED
-#undef SIGNED_UNSIGNED
-#undef UNSIGNED_SIGNED
-#undef UNSIGNED_UNSIGNED
 
 } // namespace system
 } // namespace libbitcoin

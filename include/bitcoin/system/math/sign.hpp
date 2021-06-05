@@ -27,19 +27,19 @@ namespace system {
 /// All operations below support signed and unsigned parameters.
 
 /// Obtain the absolute value of the integer.
-template <typename Integer, IS_SIGNED_INTEGER(Integer)=true>
+template <typename Integer, if_signed_integer<Integer> = true>
 inline Integer absolute(Integer value);
-template <typename Integer, IS_UNSIGNED_INTEGER(Integer)=true>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 inline Integer absolute(Integer value);
 
 /// Determine whether the integer is negative.
-template <typename Integer, IS_SIGNED_INTEGER(Integer)=true>
+template <typename Integer, if_signed_integer<Integer> = true>
 inline bool is_negative(Integer value);
-template <typename Integer, IS_UNSIGNED_INTEGER(Integer)=true>
+template <typename Integer, if_unsigned_integer<Integer> = true>
 inline bool is_negative(Integer value);
 
 /// Determine whether the integer is odd.
-template <typename Integer, IS_INTEGER(Integer)=true>
+template <typename Integer, if_integer<Integer> = true>
 inline bool is_odd(Integer value);
 
 } // namespace system

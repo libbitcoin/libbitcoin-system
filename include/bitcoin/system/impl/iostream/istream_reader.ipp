@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -45,13 +46,13 @@ byte_array<Size> istream_reader::read_reverse()
     return out;
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_reader::read_big_endian()
 {
     return from_big_endian_stream_unsafe<Integer>(stream_);
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_reader::read_little_endian()
 {
     return from_little_endian_stream_unsafe<Integer>(stream_);

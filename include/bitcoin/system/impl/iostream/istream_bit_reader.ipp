@@ -23,6 +23,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_ISTREAM_BIT_READER_IPP
 
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
@@ -47,7 +48,7 @@ byte_array<Size> istream_bit_reader::read_reverse()
     return out;
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_bit_reader::read_big_endian()
 {
     Integer out = 0;
@@ -61,7 +62,7 @@ Integer istream_bit_reader::read_big_endian()
     return out;
 }
 
-template <typename Integer, typename>
+template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_bit_reader::read_little_endian()
 {
     Integer out = 0;

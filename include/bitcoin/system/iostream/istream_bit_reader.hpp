@@ -25,8 +25,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <type_traits>
 #include <bitcoin/system/iostream/bit_reader.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -43,12 +43,10 @@ public:
     template <size_t Size>
     byte_array<Size> read_reverse();
 
-    template <typename Integer, typename =
-        std::enable_if<std::is_unsigned<Integer>::value>>
+    template <typename Integer, if_unsigned_integer<Integer> = true>
     Integer read_big_endian();
 
-    template <typename Integer, typename =
-        std::enable_if<std::is_unsigned<Integer>::value>>
+    template <typename Integer, if_unsigned_integer<Integer> = true>
     Integer read_little_endian();
 
     /// Context.

@@ -27,7 +27,7 @@ namespace system {
 
 // local
 template <typename Factor1, typename Factor2,
-    IS_INTEGER(Factor1)=true, IS_INTEGER(Factor2)=true>
+    if_integer<Factor1> = true, if_integer<Factor2> = true>
 inline bool is_negative(Factor1 factor1, Factor2 factor2)
 {
     return is_negative(factor1) != is_negative(factor2);
@@ -35,7 +35,7 @@ inline bool is_negative(Factor1 factor1, Factor2 factor2)
 
 // local
 template <typename Dividend, typename Divisor,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline bool no_remainder(Dividend dividend, Divisor divisor)
 {
     return (dividend % divisor) == 0;
@@ -43,7 +43,7 @@ inline bool no_remainder(Dividend dividend, Divisor divisor)
 
 // local
 template <typename Dividend, typename Divisor,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline bool is_ceilinged(Dividend dividend, Divisor divisor)
 {
     return is_negative(dividend, divisor) || no_remainder(dividend, divisor);
@@ -51,7 +51,7 @@ inline bool is_ceilinged(Dividend dividend, Divisor divisor)
 
 // local
 template <typename Dividend, typename Divisor,
-    IS_INTEGER(Dividend)=true, IS_INTEGER(Divisor)=true>
+    if_integer<Dividend> = true, if_integer<Divisor> = true>
 inline bool is_floored(Dividend dividend, Divisor divisor)
 {
     return !is_negative(dividend, divisor) || no_remainder(dividend, divisor);
@@ -61,7 +61,7 @@ inline bool is_floored(Dividend dividend, Divisor divisor)
 // C++14: Remainder can be defaulted to decltype(Dividend % Divisor).
 
 template <typename Dividend, typename Divisor, typename Quotient,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor)
 {
     return truncated_divide(dividend, divisor) + 
@@ -69,7 +69,7 @@ inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor)
 }
 
 template <typename Dividend, typename Divisor, typename Remainder,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
 {
     return truncated_modulo(dividend, divisor) -
@@ -77,7 +77,7 @@ inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
 }
 
 template <typename Dividend, typename Divisor, typename Quotient,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Quotient floored_divide(Dividend dividend, Divisor divisor)
 {
     return truncated_divide(dividend, divisor) -
@@ -85,7 +85,7 @@ inline Quotient floored_divide(Dividend dividend, Divisor divisor)
 }
 
 template <typename Dividend, typename Divisor, typename Remainder,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
 {
     return truncated_modulo(dividend, divisor) +
@@ -93,14 +93,14 @@ inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
 }
 
 template <typename Dividend, typename Divisor, typename Quotient,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Quotient truncated_divide(Dividend dividend, Divisor divisor)
 {
     return dividend / divisor;
 }
 
 template <typename Dividend, typename Divisor, typename Remainder,
-    IS_INTEGER(Dividend), IS_INTEGER(Divisor)>
+    if_integer<Dividend>, if_integer<Divisor>>
 inline Remainder truncated_modulo(Dividend dividend, Divisor divisor)
 {
     return dividend % divisor;

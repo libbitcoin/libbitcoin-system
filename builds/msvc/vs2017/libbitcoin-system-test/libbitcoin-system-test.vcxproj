@@ -130,12 +130,14 @@
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\divide.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\math.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
@@ -304,7 +306,7 @@
   </Target>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
     <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=math_tests --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
