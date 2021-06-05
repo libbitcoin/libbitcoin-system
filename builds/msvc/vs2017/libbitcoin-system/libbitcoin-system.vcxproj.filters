@@ -1142,6 +1142,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\crypto.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\divide.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\elliptic_curve.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
@@ -1154,13 +1157,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\pseudo_random.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\ring_signature.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\siphash.hpp">
@@ -1609,10 +1615,16 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\checksum.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\divide.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\math.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\serialization\deserialize.ipp">

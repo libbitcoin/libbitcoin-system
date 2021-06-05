@@ -343,13 +343,15 @@ test_libbitcoin_system_test_SOURCES = \
     test/machine/opcode.cpp \
     test/machine/operation.cpp \
     test/math/checksum.cpp \
+    test/math/divide.cpp \
     test/math/elliptic_curve.cpp \
     test/math/hash.cpp \
     test/math/hash.hpp \
     test/math/limits.cpp \
-    test/math/math.cpp \
+    test/math/power.cpp \
     test/math/pseudo_random.cpp \
     test/math/ring_signature.cpp \
+    test/math/sign.cpp \
     test/math/siphash.cpp \
     test/math/siphash.hpp \
     test/math/stealth.cpp \
@@ -602,8 +604,10 @@ include_bitcoin_system_impl_machine_HEADERS = \
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/checksum.ipp \
+    include/bitcoin/system/impl/math/divide.ipp \
     include/bitcoin/system/impl/math/hash.ipp \
-    include/bitcoin/system/impl/math/math.ipp
+    include/bitcoin/system/impl/math/power.ipp \
+    include/bitcoin/system/impl/math/sign.ipp
 
 include_bitcoin_system_impl_serializationdir = ${includedir}/bitcoin/system/impl/serialization
 include_bitcoin_system_impl_serialization_HEADERS = \
@@ -679,13 +683,15 @@ include_bitcoin_system_mathdir = ${includedir}/bitcoin/system/math
 include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/checksum.hpp \
     include/bitcoin/system/math/crypto.hpp \
+    include/bitcoin/system/math/divide.hpp \
     include/bitcoin/system/math/elliptic_curve.hpp \
     include/bitcoin/system/math/golomb_coding.hpp \
     include/bitcoin/system/math/hash.hpp \
     include/bitcoin/system/math/limits.hpp \
-    include/bitcoin/system/math/math.hpp \
+    include/bitcoin/system/math/power.hpp \
     include/bitcoin/system/math/pseudo_random.hpp \
     include/bitcoin/system/math/ring_signature.hpp \
+    include/bitcoin/system/math/sign.hpp \
     include/bitcoin/system/math/siphash.hpp \
     include/bitcoin/system/math/stealth.hpp
 

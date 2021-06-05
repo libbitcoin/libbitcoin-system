@@ -130,12 +130,14 @@
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\divide.cpp" />
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\math.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
