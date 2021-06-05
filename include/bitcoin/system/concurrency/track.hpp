@@ -27,7 +27,10 @@
 // These are defined in bc so that they can be used in network and blockchain.
 
 #define CONSTRUCT_TRACK(class_name) \
-    track<class_name>(#class_name)
+    system::track<class_name>(#class_name)
+
+namespace libbitcoin {
+namespace system {
 
 template <class Shared>
 class track
@@ -42,6 +45,9 @@ protected:
 private:
     const std::string class_;
 };
+
+} // namespace system
+} // namespace libbitcoin
 
 #include <bitcoin/system/impl/concurrency/track.ipp>
 

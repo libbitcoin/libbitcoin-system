@@ -32,6 +32,9 @@
 // Log name.
 #define LOG_SYSTEM "system"
 
+namespace libbitcoin {
+namespace system {
+
 template <class Shared>
 std::atomic<size_t> track<Shared>::instances(0);
 
@@ -42,7 +45,7 @@ track<Shared>::track(const std::string& DEBUG_ONLY(class_name))
 #endif
 {
 #ifndef NDEBUG
-    LOG_DEBUG(LOG_SYSTEM) << class_ << "(" << ++instances << ")";
+    ////LOG_DEBUG(LOG_SYSTEM) << class_ << "(" << ++instances << ")";
 #endif
 }
 
@@ -50,8 +53,11 @@ template <class Shared>
 track<Shared>::~track()
 {
 #ifndef NDEBUG
-    LOG_DEBUG(LOG_SYSTEM) << "~" << class_ << "(" << --instances << ")";
+    ////LOG_DEBUG(LOG_SYSTEM) << "~" << class_ << "(" << --instances << ")";
 #endif
 }
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif
