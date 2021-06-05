@@ -30,7 +30,7 @@ namespace system {
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Base, typename Integer, typename Log,
     if_integer<Base>, if_integer<Integer>>
-Log ceilinged_log(Base base, Integer value)
+inline Log ceilinged_log(Base base, Integer value)
 {
     if (base < 2 || value < 1)
         return 0;
@@ -40,7 +40,7 @@ Log ceilinged_log(Base base, Integer value)
     
 // Returns 0 for undefined (value < 1).
 template <typename Integer, if_integer<Integer>>
-Integer ceilinged_log2(Integer value)
+inline Integer ceilinged_log2(Integer value)
 {
     if (value < 1)
         return 0;
@@ -51,7 +51,7 @@ Integer ceilinged_log2(Integer value)
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Base, typename Integer, typename Log,
     if_integer<Base>, if_integer<Integer>>
-Log floored_log(Base base, Integer value)
+inline Log floored_log(Base base, Integer value)
 {
     if (base < 2 || value < 1)
         return 0;
@@ -63,7 +63,7 @@ Log floored_log(Base base, Integer value)
 
 // Returns 0 for undefined (value < 1).
 template <typename Integer, if_integer<Integer>>
-Integer floored_log2(Integer value)
+inline Integer floored_log2(Integer value)
 {
     if (value < 1)
         return 0;
@@ -76,7 +76,7 @@ Integer floored_log2(Integer value)
 // Returns 0 for undefined (0^0).
 template <typename Base, typename Integer, typename Power,
     if_integer<Base>, if_integer<Integer>>
-Power power(Base base, Integer exponent)
+inline Power power(Base base, Integer exponent)
 {
     if (base == 0)
         return 0;
@@ -94,7 +94,7 @@ Power power(Base base, Integer exponent)
 }
 
 template <typename Integer, if_integer<Integer>>
-Integer power2(Integer exponent)
+inline Integer power2(Integer exponent)
 {
     if (exponent == 0)
         return 1;

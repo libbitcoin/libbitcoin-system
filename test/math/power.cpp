@@ -20,6 +20,12 @@
 
 BOOST_AUTO_TEST_SUITE(power_tests)
 
+// use a non-const zero for log base tests to avoid compiler warning against
+// possible (but unreachable) division by zero (caused by inlining
+// "value / 0" when the base is const 0.
+int32_t signed_zero = 0;
+uint32_t unsigned_zero = 0;
+
 // ceilinged_log
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__negatives__undefined)
@@ -31,10 +37,10 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log__negatives__undefined)
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__0_0__undefined)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 0), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 0), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(signed_zero, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(signed_zero, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(unsigned_zero, 0), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(unsigned_zero, 0u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_0__undefined)
@@ -47,10 +53,10 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_0__undefined)
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__0_1__undefined)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0, 1u), 0u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 1), 0);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(0u, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(signed_zero, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(signed_zero, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(unsigned_zero, 1), 0);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(unsigned_zero, 1u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_1__undefined)
@@ -115,10 +121,10 @@ BOOST_AUTO_TEST_CASE(power__floored_log__negatives__undefined)
 
 BOOST_AUTO_TEST_CASE(power__floored_log__0_0__undefined)
 {
-    BOOST_REQUIRE_EQUAL(floored_log(0, 0), 0);
-    BOOST_REQUIRE_EQUAL(floored_log(0, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(floored_log(0u, 0), 0);
-    BOOST_REQUIRE_EQUAL(floored_log(0u, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(signed_zero, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(signed_zero, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(unsigned_zero, 0), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(unsigned_zero, 0u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__floored_log__1_0__undefined)
@@ -131,10 +137,10 @@ BOOST_AUTO_TEST_CASE(power__floored_log__1_0__undefined)
 
 BOOST_AUTO_TEST_CASE(power__floored_log__0_1__undefined)
 {
-    BOOST_REQUIRE_EQUAL(floored_log(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(floored_log(0, 1u), 0u);
-    BOOST_REQUIRE_EQUAL(floored_log(0u, 1), 0);
-    BOOST_REQUIRE_EQUAL(floored_log(0u, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(signed_zero, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(signed_zero, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(floored_log(unsigned_zero, 1), 0);
+    BOOST_REQUIRE_EQUAL(floored_log(unsigned_zero, 1u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__floored_log__1_1__undefined)
