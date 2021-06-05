@@ -45,7 +45,7 @@ inline bool is_negative(Integer value)
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-inline bool is_negative(Integer value)
+inline bool is_negative(Integer)
 {
     return false;
 }
