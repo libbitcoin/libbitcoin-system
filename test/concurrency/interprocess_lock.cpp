@@ -36,13 +36,76 @@ struct interprocess_lock_setup_fixture
 
 BOOST_FIXTURE_TEST_SUITE(interprocess_lock_tests, interprocess_lock_setup_fixture)
 
-// TODO: verify delete result code.
-
-BOOST_AUTO_TEST_CASE(interprocess_lock__todo__todo__todo)
+BOOST_AUTO_TEST_CASE(interprocess_lock__lock__not_exists__true_created)
 {
-    ////interprocess_lock instance("interprocess_lock");
-    ////BOOST_REQUIRE(instance.lock());
-    ////BOOST_REQUIRE(instance.unlock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.lock());
+    BOOST_REQUIRE(test::exists(TEST_PATH));
+}
+
+// The file exists but no lock is held on it.
+BOOST_AUTO_TEST_CASE(interprocess_lock__lock__file_exists__true)
+{
+    BOOST_REQUIRE(test::create(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.lock());
+}
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__lock__externally_locked__false)
+{
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+
+    interprocess_lock instance1(TEST_PATH);
+    interprocess_lock instance2(TEST_PATH);
+    BOOST_REQUIRE(instance1.lock());
+    BOOST_REQUIRE(test::exists(TEST_PATH));
+    BOOST_REQUIRE(!instance2.lock());
+    BOOST_REQUIRE(instance1.unlock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+    BOOST_REQUIRE(instance2.lock());
+    BOOST_REQUIRE(test::exists(TEST_PATH));
+    BOOST_REQUIRE(instance2.unlock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+}
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__unlock__not_exists__true)
+{
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.unlock());
+}
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__unlock__exists__true_not_deleted)
+{
+    BOOST_REQUIRE(test::create(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.unlock());
+    BOOST_REQUIRE(test::exists(TEST_PATH));
+}
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__lock_unlock__not_exists__true_deleted)
+{
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.lock());
+    BOOST_REQUIRE(instance.unlock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+}
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__lock_unlock__exists__true_deleted)
+{
+    BOOST_REQUIRE(test::create(TEST_PATH));
+
+    interprocess_lock instance(TEST_PATH);
+    BOOST_REQUIRE(instance.lock());
+    BOOST_REQUIRE(instance.unlock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

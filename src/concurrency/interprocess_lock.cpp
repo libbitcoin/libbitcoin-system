@@ -125,8 +125,7 @@ bool interprocess_lock::unlock() noexcept
     if (handle_ == invalid)
         return true;
 
-    // TODO: verify result code.
-    // Delete before close, to preclude delete of a filecthat is not owned,
+    // Delete before close, to preclude delete of a file that is not owned,
     // resulting from a race condition. The file is queued for deletion.
     const auto result = destroy();
 
