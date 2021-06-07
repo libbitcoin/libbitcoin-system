@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\..\..\src\concurrency\conditional_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\concurrency\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\concurrency\dispatcher.cpp" />
+    <ClCompile Include="..\..\..\..\src\concurrency\file_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\concurrency\flush_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\concurrency\interprocess_lock.cpp" />
     <ClCompile Include="..\..\..\..\src\concurrency\monitor.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\delegates.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\enable_shared_from_base.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\file_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\flush_lock.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\handlers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\interprocess_lock.hpp" />

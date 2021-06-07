@@ -57,4 +57,25 @@ std::ostream& operator<<(std::ostream& stream,
 
 } // namespace std
 
+#define TEST_NAME \
+    boost::unit_test::framework::current_test_case().p_name.get()
+#define SUITE_NAME \
+    boost::unit_test::framework::current_auto_test_suite().p_name.get()
+#define TEST_PATH \
+    test::directory + "/" + TEST_NAME
+
+namespace test {
+
+// Common directory for all test file creations.
+// Subdirectories and/or files must be differentiated (i.e. by TEST_NAME).
+// Total path length cannot exceed MAX_PATH in _MSC_VER builds.
+extern const std::string directory;
+
+bool clear(const boost::filesystem::path& directory) noexcept;
+bool create(const boost::filesystem::path& file_path) noexcept;
+bool exists(const boost::filesystem::path& file_path) noexcept;
+bool remove(const boost::filesystem::path& file_path) noexcept;
+
+} // namespace test
+
 #endif

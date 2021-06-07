@@ -92,6 +92,9 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\file_lock.cpp" />
+    <ClCompile Include="..\..\..\..\test\concurrency\flush_lock.cpp" />
+    <ClCompile Include="..\..\..\..\test\concurrency\interprocess_lock.cpp" />
     <ClCompile Include="..\..\..\..\test\concurrency\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
@@ -200,7 +203,9 @@
     <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ifstream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ofstream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
@@ -304,6 +309,11 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets'))" />
   </Target>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
+    <PostBuildEvent>
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
+#include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -78,6 +79,13 @@ BC_API char** allocate_environment(wchar_t* environment[]);
 BC_API char** allocate_environment(int argc, wchar_t* argv[]);
 BC_API int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[]));
+#endif
+
+#ifdef _MSC_VER
+// Not thread safe.
+std::wstring to_extended_path(const boost::filesystem::path& path);
+#else
+std::string to_extended_path(const boost::filesystem::path& path);
 
 #endif
 

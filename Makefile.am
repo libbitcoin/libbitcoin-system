@@ -57,6 +57,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/concurrency/conditional_lock.cpp \
     src/concurrency/deadline.cpp \
     src/concurrency/dispatcher.cpp \
+    src/concurrency/file_lock.cpp \
     src/concurrency/flush_lock.cpp \
     src/concurrency/interprocess_lock.cpp \
     src/concurrency/monitor.cpp \
@@ -309,6 +310,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/script.hpp \
     test/chain/stealth_record.cpp \
     test/chain/transaction.cpp \
+    test/concurrency/file_lock.cpp \
+    test/concurrency/flush_lock.cpp \
+    test/concurrency/interprocess_lock.cpp \
     test/concurrency/thread.cpp \
     test/config/authority.cpp \
     test/config/base16.cpp \
@@ -405,7 +409,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/conversion.cpp \
     test/unicode/normalization.cpp \
     test/unicode/utf8_everywhere/utf8_environment.cpp \
+    test/unicode/utf8_everywhere/utf8_ifstream.cpp \
     test/unicode/utf8_everywhere/utf8_istream.cpp \
+    test/unicode/utf8_everywhere/utf8_ofstream.cpp \
     test/unicode/utf8_everywhere/utf8_ostream.cpp \
     test/wallet/context.cpp \
     test/wallet/message.cpp \
@@ -497,6 +503,7 @@ include_bitcoin_system_concurrency_HEADERS = \
     include/bitcoin/system/concurrency/delegates.hpp \
     include/bitcoin/system/concurrency/dispatcher.hpp \
     include/bitcoin/system/concurrency/enable_shared_from_base.hpp \
+    include/bitcoin/system/concurrency/file_lock.hpp \
     include/bitcoin/system/concurrency/flush_lock.hpp \
     include/bitcoin/system/concurrency/handlers.hpp \
     include/bitcoin/system/concurrency/interprocess_lock.hpp \

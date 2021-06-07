@@ -92,6 +92,9 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\file_lock.cpp" />
+    <ClCompile Include="..\..\..\..\test\concurrency\flush_lock.cpp" />
+    <ClCompile Include="..\..\..\..\test\concurrency\interprocess_lock.cpp" />
     <ClCompile Include="..\..\..\..\test\concurrency\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
@@ -200,7 +203,9 @@
     <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ifstream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ofstream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />

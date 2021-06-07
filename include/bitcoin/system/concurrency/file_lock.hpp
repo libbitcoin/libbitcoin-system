@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,25 +16,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OFSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OFSTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONCURRENCY_FILE_LOCK_HPP
+#define LIBBITCOIN_SYSTEM_CONCURRENCY_FILE_LOCK_HPP
 
-#include <fstream>
+#include <string>
 #include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Use bc::system::ofstream in place of std::ofstream.
-/// This provides unicode and long path translation for Win32.
-class BC_API ofstream
-  : public std::ofstream
+/// This class is not thread safe, and does not throw.
+class BC_API file_lock
 {
 public:
-    /// This also opens the file.
-    ofstream(const boost::filesystem::path& path,
-        std::ofstream::openmode mode=std::ofstream::out);
+    file_lock(const boost::filesystem::path& file) noexcept;
+
+    std::string file() const noexcept;
+
+    /// True if file exists.
+    bool exists() const noexcept;
+
+    /// True if file exists or was created.
+    bool create() noexcept;
+
+    /// True if file does not exist or was deleted.
+    bool destroy() noexcept;
+
+private:
+    const boost::filesystem::path file_;
 };
 
 } // namespace system

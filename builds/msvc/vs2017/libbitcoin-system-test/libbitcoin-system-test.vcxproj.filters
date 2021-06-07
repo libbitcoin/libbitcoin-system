@@ -111,6 +111,15 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\file_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\flush_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\concurrency\interprocess_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\concurrency\thread.cpp">
       <Filter>src\concurrency</Filter>
     </ClCompile>
@@ -399,7 +408,13 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_environment.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ifstream.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_istream.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ofstream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\utf8_ostream.cpp">

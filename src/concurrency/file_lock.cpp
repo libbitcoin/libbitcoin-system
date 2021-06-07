@@ -16,39 +16,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/concurrency/flush_lock.hpp>
+#include <bitcoin/system/concurrency/file_lock.hpp>
 
+#include <string>
 #include <boost/filesystem.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-flush_lock::flush_lock(const boost::filesystem::path& file) noexcept
-  : file_lock(file)
+file_lock::file_lock(const boost::filesystem::path& file) noexcept
+  : file_(file)
 {
 }
 
-bool flush_lock::try_lock() const noexcept
+bool file_lock::exists() const noexcept
 {
-    return !exists();
-}
-
-// This is non-const as it alters state (externally but may become internal).
-bool flush_lock::lock() noexcept
-{
-    if (!try_lock())
-        return false;
-
-    return create();
+    ifstream stream(file_);
+    return stream.good();
 }
 
 // This is non-const as it alters state (externally but may become internal).
-bool flush_lock::unlock() noexcept
+bool file_lock::create() noexcept
 {
-    if (try_lock())
-        return false;
+    ofstream stream(file_);
+    return stream.good();
+}
 
-    return destroy();
+// This is non-const as it alters state (externally but may become internal).
+bool file_lock::destroy() noexcept
+{
+    // remove returns false if file did not exist though error_code is false if
+    // file did not exist. use of error_code overload also precludes exception.
+    boost::system::error_code ec;
+    boost::filesystem::remove(to_extended_path(file_), ec);
+    return !ec;
+}
+
+std::string file_lock::file() const noexcept
+{
+    return file_.string();
 }
 
 } // namespace system

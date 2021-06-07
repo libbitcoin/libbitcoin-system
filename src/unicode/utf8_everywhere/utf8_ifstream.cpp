@@ -19,20 +19,18 @@
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp>
 
 #include <fstream>
-#include <string>
-#include <bitcoin/system/unicode/conversion.hpp>
+#include <boost/filesystem.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Construct bc::system::ifstream.
-ifstream::ifstream(const std::string& path, std::ifstream::openmode mode)
-#ifdef _MSC_VER
-  : std::ifstream(system::to_utf16(path), mode)
-#else
-  : std::ifstream(path, mode)
-#endif
+// VC++ EXTENSION: "construct with wide-named file".
+ifstream::ifstream(const boost::filesystem::path& path,
+    std::ifstream::openmode mode)
+  : std::ifstream(to_extended_path(path), mode)
 {
+    // This opens the file.
 }
 
 } // namespace system

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,33 +19,28 @@
 #ifndef LIBBITCOIN_SYSTEM_CONCURRENCY_FLUSH_LOCK_HPP
 #define LIBBITCOIN_SYSTEM_CONCURRENCY_FLUSH_LOCK_HPP
 
-#include <memory>
 #include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/concurrency/file_lock.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// This class is not thread safe.
-/// Guard a resource that may be corrupted due to an interrupted write.
+/// This class is not thread safe, and does not throw.
 class BC_API flush_lock
+  : file_lock
 {
 public:
-    typedef boost::filesystem::path path;
+    flush_lock(const boost::filesystem::path& file) noexcept;
 
-    flush_lock(const path& file);
+    /// False if file exists.
+    bool try_lock() const noexcept;
 
-    bool try_lock();
-    bool lock_shared();
-    bool unlock_shared();
+    /// False if file exists or fails to create.
+    bool lock() noexcept;
 
-private:
-    static bool create(const std::string& file);
-    static bool exists(const std::string& file);
-    static bool destroy(const std::string& file);
-
-    bool locked_;
-    const std::string file_;
+    /// False if file does not exist or fails to delete.
+    bool unlock() noexcept;
 };
 
 } // namespace system

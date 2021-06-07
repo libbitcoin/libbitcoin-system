@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,28 +16,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OFSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_OFSTREAM_HPP
+#include "../test.hpp"
 
-#include <fstream>
+#include <iostream>
 #include <boost/filesystem.hpp>
-#include <bitcoin/system/define.hpp>
 
-namespace libbitcoin {
-namespace system {
-
-/// Use bc::system::ofstream in place of std::ofstream.
-/// This provides unicode and long path translation for Win32.
-class BC_API ofstream
-  : public std::ofstream
+struct interprocess_lock_setup_fixture
 {
-public:
-    /// This also opens the file.
-    ofstream(const boost::filesystem::path& path,
-        std::ofstream::openmode mode=std::ofstream::out);
+    interprocess_lock_setup_fixture()
+    {
+        BOOST_REQUIRE(test::clear(test::directory));
+    }
+
+    ~interprocess_lock_setup_fixture()
+    {
+        BOOST_REQUIRE(test::clear(test::directory));
+    }
 };
 
-} // namespace system
-} // namespace libbitcoin
+BOOST_FIXTURE_TEST_SUITE(interprocess_lock_tests, interprocess_lock_setup_fixture)
 
-#endif
+// TODO: verify delete result code.
+
+BOOST_AUTO_TEST_CASE(interprocess_lock__todo__todo__todo)
+{
+    ////interprocess_lock instance("interprocess_lock");
+    ////BOOST_REQUIRE(instance.lock());
+    ////BOOST_REQUIRE(instance.unlock());
+}
+
+BOOST_AUTO_TEST_SUITE_END()

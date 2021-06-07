@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -26,6 +25,8 @@
 #include <iostream>
 #include <locale>
 #include <string>
+#include <utility>
+#include <vector>
 #ifdef _MSC_VER
     #include <fcntl.h>
     #include <io.h>
@@ -36,6 +37,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
@@ -361,6 +363,56 @@ int call_utf8_main(int argc, wchar_t* argv[],
     return result;
 }
 
+// docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
+std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
+{
+    // Separator normalization required by use of length extender.
+    const auto normal = to_utf16(replace_copy(path.string(), "/", "\\"));
+
+    // GetFullPathName is not thread safe. If another thread calls
+    // SetCurrentDirectory during a call of GetFullPathName the value may be
+    // corrupted as process-static storage is used to retain the directory.
+    auto size = GetFullPathNameW(normal.c_str(), 0, NULL, NULL);
+    if (size == 0)
+        return {};
+
+    // Despite contradictory documentation, this accepts long relative paths
+    // and converts them to fully-qualified, without an extension prefix.
+    // This also converts "considered relative" paths (with ".." segments).
+    // Add the prefix after calling as required in order to use a long path.
+    std::vector<wchar_t> directory(size);
+    size = GetFullPathNameW(normal.c_str(), size, directory.data(), NULL);
+    if (size == 0)
+        return {};
+
+    // The returned size does not include the null terminator, and cannot
+    // exceed the original, but does become smaller, so resize accordingly.
+    return { directory.begin(), std::next(directory.begin(), size) };
+}
+
+#endif // _MSC_VER
+
+#ifdef _MSC_VER
+// Use to_extended_path with APIs that compile to wide with _MSC_VER defined
+// and to UTF8 with _MSC_VER undefined. This includes some boost APIs - such as
+// filesystem::remove, remove_all, and create_directories, as well as some
+// Win32 API extensions to std libs - such as std::ofstream and std::ifstream.
+// Otherwise use in any Win32 (W) APIs with _MSC_VER defined, such as we do in 
+// interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
+// calls CreateFileA. The length extension prefix requires Win32 (W) APIs.
+std::wstring to_extended_path(const boost::filesystem::path& path)
+{
+    // The length extension prefix works only with a fully-qualified path.
+    // However this includes "considered relative" paths (with ".." segments).
+    // That is of no consequence here because those will also be converted.
+    const auto full = to_fully_qualified_path(path);
+    return (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full;
+}
+#else
+std::string to_extended_path(const boost::filesystem::path& path)
+{
+    return path.string();
+}
 #endif // _MSC_VER
 
 } // namespace system

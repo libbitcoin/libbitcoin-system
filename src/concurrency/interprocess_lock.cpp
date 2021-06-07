@@ -18,19 +18,16 @@
  */
 #include <bitcoin/system/concurrency/interprocess_lock.hpp>
 
-#include <string>
 #ifdef _MSC_VER
-#include <Windows.h>
+#include <windows.h>
 #endif
-#include <boost/filesystem.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
-#include <bitcoin/system/unicode/conversion.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
-
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+using namespace boost::filesystem;
 using namespace boost::interprocess;
 static const auto invalid = ipcdetail::invalid_file();
 
@@ -39,10 +36,10 @@ static const auto invalid = ipcdetail::invalid_file();
 
 #ifdef _MSC_VER
 
-static file_handle_t open_file(const std::string& name)
+static file_handle_t open_file(const path& file) noexcept
 {
     // This is why we're here.
-    const auto filename = to_utf16(name).c_str();
+    const auto filename = to_extended_path(file);
 
     static const auto access = FILE_FLAG_OVERLAPPED | FILE_FLAG_WRITE_THROUGH;
     static const auto mode = FILE_SHARE_READ | FILE_SHARE_WRITE |
@@ -50,7 +47,8 @@ static file_handle_t open_file(const std::string& name)
 
     for (auto attempt = 0; attempt < 3u; ++attempt)
     {
-        const auto handle = CreateFileW(filename, access, mode, NULL,
+        // ipcdetail::open_existing_file calls CreateFileA in Win32 :<.
+        const auto handle = CreateFileW(filename.c_str(), access, mode, NULL,
             OPEN_EXISTING, 0u, NULL);
         
         if (handle != INVALID_HANDLE_VALUE)
@@ -67,9 +65,9 @@ static file_handle_t open_file(const std::string& name)
 
 #else
 
-static file_handle_t open_file(const std::string& name)
+static file_handle_t open_file(const path& file) noexcept
 {
-    return ipcdetail::open_existing_file(name.c_str(), read_write);
+    return ipcdetail::open_existing_file(file.string().c_str(), read_write);
 }
 
 #endif
@@ -77,13 +75,13 @@ static file_handle_t open_file(const std::string& name)
 // construct/destruct
 // ----------------------------------------------------------------------------
 
-interprocess_lock::interprocess_lock(const path& file)
-  : filename_(file.string()), handle_(invalid)
+interprocess_lock::interprocess_lock(const path& file) noexcept
+  : file_lock(file), handle_(invalid)
 {
     // This is a behavior change, we no longer open file (or throw) here.
 }
 
-interprocess_lock::~interprocess_lock()
+interprocess_lock::~interprocess_lock() noexcept
 {
     unlock();
 }
@@ -93,21 +91,18 @@ interprocess_lock::~interprocess_lock()
 
 // Lock is not idempotent, returns false if already locked (or error).
 // This succeeds if no other process has exclusive or sharable ownership.
-bool interprocess_lock::lock()
+bool interprocess_lock::lock() noexcept
 {
+    // A valid handle guarantees file existence and ownership.
     if (handle_ != invalid)
         return false;
 
-    // An easy way to create the file.
-    ofstream stream(filename_);
-    if (!stream.good())
+    // Create the file.
+    if (!create())
         return false;
 
-    // Close the stream now that the file exists.
-    stream.close();
-
     // Get a handle to the file.
-    const auto handle = open_file(filename_);
+    const auto handle = open_file(file());
 
     // Obtain exclusive access to the file.
     bool result;
@@ -123,17 +118,22 @@ bool interprocess_lock::lock()
 
 // Unlock is idempotent, returns true if unlocked on return (or success).
 // This may leave the lock file behind, which is not a problem.
-bool interprocess_lock::unlock()
+bool interprocess_lock::unlock() noexcept
 {
+    // An invalid handle guarantees lack of ownership, but file may exist.
+    // Do not delete the file unless we own it.
     if (handle_ == invalid)
         return true;
+
+    // TODO: verify result code.
+    // Delete before close, to preclude delete of a filecthat is not owned,
+    // resulting from a race condition. The file is queued for deletion.
+    const auto result = destroy();
 
     // Release exclusive access to the file.
     ipcdetail::close_file(handle_);
     handle_ = invalid;
-
-    // Delete file (boost path should have been configured for utf8).
-    return boost::filesystem::remove(filename_);
+    return result;
 }
 
 } // namespace system

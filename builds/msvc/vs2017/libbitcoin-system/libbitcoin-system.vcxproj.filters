@@ -234,6 +234,9 @@
     <ClCompile Include="..\..\..\..\src\concurrency\dispatcher.cpp">
       <Filter>src\concurrency</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\concurrency\file_lock.cpp">
+      <Filter>src\concurrency</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\concurrency\flush_lock.cpp">
       <Filter>src\concurrency</Filter>
     </ClCompile>
@@ -849,6 +852,9 @@
       <Filter>include\bitcoin\system\concurrency</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\enable_shared_from_base.hpp">
+      <Filter>include\bitcoin\system\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\file_lock.hpp">
       <Filter>include\bitcoin\system\concurrency</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\concurrency\flush_lock.hpp">

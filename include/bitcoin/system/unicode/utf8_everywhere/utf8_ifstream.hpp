@@ -20,26 +20,20 @@
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_IFSTREAM_HPP
 
 #include <fstream>
-#include <string>
+#include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/**
- * Use bc::system::ifstream in place of std::ifstream.
- * This provides utf8 to utf16 path translation for Windows.
- */
+/// Use bc::system::ifstream in place of std::ifstream.
+/// This provides unicode and long path translation for Win32.
 class BC_API ifstream
   : public std::ifstream
 {
 public:
-    /**
-     * Construct bc::system::ifstream.
-     * @param[in]  path  The utf8 path to the file.
-     * @param[in]  mode  The file opening mode.
-     */
-    ifstream(const std::string& path,
+    /// This also opens the file.
+    ifstream(const boost::filesystem::path& path,
         std::ifstream::openmode mode=std::ifstream::in);
 };
 

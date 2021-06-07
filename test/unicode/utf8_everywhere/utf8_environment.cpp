@@ -24,19 +24,19 @@ BOOST_AUTO_TEST_SUITE(utf8_environment_tests)
 
 // utf8_max_character_size
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_max_character_size__always__4)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_max_character_size__always__4)
 {
     BOOST_REQUIRE_EQUAL(utf8_max_character_size, 4u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__empty__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_remainder_size__empty__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size(nullptr, 0), 0u);
 }
 
 // utf8_remainder_size
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_remainder_size__ascii_bytes__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("a", 1), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("ab", 2), 0u);
@@ -46,14 +46,14 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__ascii_bytes__zero)
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("abcdef", 6), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__whole_characters__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_remainder_size__whole_characters__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF\xbf", 2), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF\xbf\xbf", 3), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf\xbf", 4), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_remainder_size__truncated_trailing_bytes__expected)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xDF", 1), 1u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xEF", 1), 1u);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__truncated_trailing_bytes__exp
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xF7\xbf\xbf", 3), 3u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__invalid_leading_bytes__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__utf8_remainder_size__invalid_leading_bytes__zero)
 {
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf", 1), 0u);
     BOOST_REQUIRE_EQUAL(utf8_remainder_size("\xbf\xbf", 2), 0u);
@@ -73,33 +73,33 @@ BOOST_AUTO_TEST_CASE(unicode__utf8_remainder_size__invalid_leading_bytes__zero)
 
 // to_utf8 (wchar_t[])
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__null_out__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__null_out__zero)
 {
     const wchar_t* in = L"";
     BOOST_REQUIRE_EQUAL(to_utf8(nullptr, 42, in, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__null_in__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__null_in__zero)
 {
     char out[42];
     BOOST_REQUIRE_EQUAL(to_utf8(out, 42, nullptr, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__zero_in__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__zero_in__zero)
 {
     char out[42];
     const wchar_t* in = L"";
     BOOST_REQUIRE_EQUAL(to_utf8(out, 42, in, 0), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__zero_out__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__zero_out__zero)
 {
     char out[42];
     const wchar_t* in = L"";
     BOOST_REQUIRE_EQUAL(to_utf8(out, 0, in, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__ascii__test)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__ascii__test)
 {
     char utf8[20];
 
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__ascii__test)
     BOOST_REQUIRE_EQUAL(size, expected_utf8.size());
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__non_ascii__test)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf8_array__non_ascii__test)
 {
     char utf8[36];
 
@@ -133,28 +133,28 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__non_ascii__test)
 
 // to_utf16 (char[])
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_truncated__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__null_truncated__zero)
 {
     size_t truncated;
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_out__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__null_out__zero)
 {
     size_t truncated;
     const auto in = "";
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, nullptr, 42, in, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__null_in__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__null_in__zero)
 {
     size_t truncated;
     wchar_t out[42];
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, nullptr, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__zero_in__zero)
 {
     size_t truncated;
     wchar_t out[42];
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_in__zero)
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 42, in, 0), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_out__zero)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__zero_out__zero)
 {
     size_t truncated;
     wchar_t* out = nullptr;
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__zero_out__zero)
     BOOST_REQUIRE_EQUAL(to_utf16(truncated, out, 0, in, 42), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__ascii__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__ascii__expected)
 {
     const auto length = 20u;
     wchar_t utf16[length];
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__ascii__expected)
     BOOST_REQUIRE_EQUAL(truncated, 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii__expected)
 {
     const auto length = 36u;
     wchar_t utf16[length];
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii__expected)
     BOOST_REQUIRE_EQUAL(truncated, 0u);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation1__expected)
 {
     const auto length = 36u;
     wchar_t utf16[length];
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__expected)
 {
     const auto length = 36u;
     wchar_t utf16[length];
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
 
 // allocate_environment (vars) / free_environment
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__ascii__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__ascii__expected)
 {
     std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
     auto variables = const_cast<wchar_t**>(&wide_environment[0]);
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__ascii__expected)
     free_environment(narrow_environment);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__utf16__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__utf16__expected)
 {
     // We cannot use L for literal encoding of non-ascii text on Windows.
     auto utf16 = to_utf16("テスト");
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__utf16__expected)
     free_environment(narrow_environment);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__null_termination__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__null_termination__expected)
 {
     std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
     auto variables = const_cast<wchar_t**>(&wide_environment[0]);
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_vars__null_termination__expec
 
 // allocate_environment (args) / free_environment
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__ascii__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__ascii__expected)
 {
     std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__ascii__expected)
     free_environment(narrow_args);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__utf16__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__utf16__expected)
 {
     // We cannot use L for literal encoding of non-ascii text on Windows.
     auto utf16 = to_utf16("テスト");
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__utf16__expected)
     free_environment(narrow_args);
 }
 
-BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__null_termination__expected)
+BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__null_termination__expected)
 {
     std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
@@ -357,6 +357,18 @@ BOOST_AUTO_TEST_CASE(unicode__allocate_environment_args__null_termination__expec
     free_environment(narrow_args);
 }
 
-#endif
+// to_extended_path
+
+BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path__always__expected)
+{
+    ////std::string to_extended_path(const path& path);
+}
+
+BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path16__always__expected)
+{
+    ////std::wstring to_extended_path16(const std::string& path);
+}
+
+#endif // _MSC_VER
 
 BOOST_AUTO_TEST_SUITE_END()
