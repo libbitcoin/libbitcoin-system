@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 #define LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
 
-#include <limits>
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 
@@ -36,17 +35,17 @@ using if_base_of = enable_if_type<
 
 template <typename Type>
 using if_integer = enable_if_type<
-    std::numeric_limits<Type>::is_integer, bool>;
+    std::is_integral<Type>::value, bool>;
 
 template <typename Type>
 using if_signed_integer = enable_if_type<
-    std::numeric_limits<Type>::is_integer &&
-    std::numeric_limits<Type>::is_signed, bool>;
+    std::is_integral<Type>::value &&
+    std::is_signed<Type>::value, bool>;
 
 template <typename Type>
 using if_unsigned_integer = enable_if_type<
-    std::numeric_limits<Type>::is_integer &&
-    !std::numeric_limits<Type>::is_signed, bool>;
+    std::is_integral<Type>::value &&
+    !std::is_signed<Type>::value, bool>;
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.
