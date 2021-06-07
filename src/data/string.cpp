@@ -215,7 +215,26 @@ void trim(std::string& text, const string_list& trim_tokens)
     trim_right(text, trim_tokens);
 }
 
-std::string trim_copy(const std::string& text, const string_list& trim_tokens)
+// TODO: test.
+std::string trim_left_copy(const std::string& text,
+    const string_list& trim_tokens)
+{
+    auto copy = text;
+    trim_left(copy, trim_tokens);
+    return copy;
+}
+
+// TODO: test.
+std::string trim_right_copy(const std::string& text,
+    const string_list& trim_tokens)
+{
+    auto copy = text;
+    trim_right(copy, trim_tokens);
+    return copy;
+}
+
+std::string trim_copy(const std::string& text,
+    const string_list& trim_tokens)
 {
     auto copy = text;
     trim(copy, trim_tokens);
