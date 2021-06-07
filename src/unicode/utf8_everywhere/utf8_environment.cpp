@@ -329,6 +329,7 @@ char** allocate_environment(wchar_t* environment[])
 int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[]))
 {
+    // C++17: use std::filesystem.
     // When working with boost and utf8 narrow characters on Win32 the thread
     // must be configured for utf8. When working with boost::filesystem::path
     // the static path object must be imbued with the utf8 locale or paths will
@@ -363,6 +364,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     return result;
 }
 
+// C++17: use std::filesystem.
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
 std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
 {
@@ -393,6 +395,7 @@ std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
 #endif // _MSC_VER
 
 #ifdef _MSC_VER
+// C++17: use std::filesystem.
 // Use to_extended_path with APIs that compile to wide with _MSC_VER defined
 // and to UTF8 with _MSC_VER undefined. This includes some boost APIs - such as
 // filesystem::remove, remove_all, and create_directories, as well as some

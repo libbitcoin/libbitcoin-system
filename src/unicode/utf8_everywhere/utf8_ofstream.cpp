@@ -24,7 +24,8 @@
 
 namespace libbitcoin {
 namespace system {
-
+    
+// C++17: use std::filesystem.
 // VC++ EXTENSION: "construct with wide-named file".
 ofstream::ofstream(const boost::filesystem::path& path,
     std::ofstream::openmode mode)

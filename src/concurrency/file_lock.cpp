@@ -26,7 +26,8 @@
 
 namespace libbitcoin {
 namespace system {
-
+    
+// C++17: use std::filesystem.
 file_lock::file_lock(const boost::filesystem::path& file) noexcept
   : file_(file)
 {
@@ -48,6 +49,7 @@ bool file_lock::create() noexcept
 // This is non-const as it alters state (externally but may become internal).
 bool file_lock::destroy() noexcept
 {
+    // C++17: use std::filesystem.
     // remove returns false if file did not exist though error_code is false if
     // file did not exist. use of error_code overload also precludes exception.
     boost::system::error_code ec;

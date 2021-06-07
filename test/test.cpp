@@ -39,8 +39,10 @@ namespace test {
 
 const std::string directory = "tests";
 
+// C++17: use std::filesystem.
 bool clear(const boost::filesystem::path& directory) noexcept
 {
+    // C++17: use std::filesystem.
     // remove_all returns count removed, and error code if fails.
     // create_directories returns true if path exists or created.
     // used for setup, with no expectations of file/directory existence.
@@ -50,6 +52,7 @@ bool clear(const boost::filesystem::path& directory) noexcept
     return !ec && boost::filesystem::create_directories(path, ec);
 }
 
+// C++17: use std::filesystem.
 bool create(const boost::filesystem::path& file_path) noexcept
 {
     // Creates and returns true if file already existed (and no error).
@@ -57,6 +60,7 @@ bool create(const boost::filesystem::path& file_path) noexcept
     return file.good();
 }
 
+// C++17: use std::filesystem.
 bool exists(const boost::filesystem::path& file_path) noexcept
 {
     // Returns true only if file existed.
@@ -64,8 +68,10 @@ bool exists(const boost::filesystem::path& file_path) noexcept
     return file.good();
 }
 
+// C++17: use std::filesystem.
 bool remove(const boost::filesystem::path& file_path) noexcept
 {
+    // C++17: use std::filesystem.
     // Deletes and returns false if file did not exist (or error).
     boost::system::error_code ec;
     return boost::filesystem::remove(to_extended_path(file_path), ec);
