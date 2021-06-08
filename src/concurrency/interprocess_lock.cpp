@@ -33,10 +33,13 @@ static const auto invalid = ipcdetail::invalid_file();
 
 // local
 // ----------------------------------------------------------------------------
+// ipcdetail::open_existing_file has been changed to a TCHAR template in boost
+// v1.76.0, and compiles to wchar_t (UNICODE defined), so this can be removed.
+// boost.org/doc/libs/1_76_0/boost/interprocess/detail/os_file_functions.hpp
 
 #ifdef _MSC_VER
 
-static file_handle_t open_file(const path& file) noexcept
+static file_handle_t open_existing_file(const path& file) noexcept
 {
     // This is why we're here.
     const auto filename = to_extended_path(file);
@@ -65,7 +68,7 @@ static file_handle_t open_file(const path& file) noexcept
 
 #else
 
-static file_handle_t open_file(const path& file) noexcept
+static file_handle_t open_existing_file(const path& file) noexcept
 {
     return ipcdetail::open_existing_file(file.string().c_str(), read_write);
 }
@@ -102,9 +105,16 @@ bool interprocess_lock::lock() noexcept
         return false;
 
     // Get a handle to the file.
-    const auto handle = open_file(file());
+    const auto handle = open_existing_file(file());
 
     // Obtain exclusive access to the file.
+    // This is process-exclusive in linux/macOS, globally-exclusive in win32.
+    // "An exclusive lock excludes all other locks, both shared and exclusive.
+    // A single process can hold only one type of lock on a file region."
+    // linux.die.net/man/2/fcntl
+    // "If the locking process opens the file a second time it cannot access
+    // the specified region through this second handle until it unlocks it."
+    // docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-lockfileex
     bool result;
     if (ipcdetail::try_acquire_file_lock(handle, result) && result)
     {

@@ -54,6 +54,8 @@ BOOST_AUTO_TEST_CASE(interprocess_lock__lock__file_exists__true)
     BOOST_REQUIRE(instance.lock());
 }
 
+// The lock is process-exclusive in linux/macOS, globally in win32.
+// This is okay here, but a proper test requires an external process.
 BOOST_AUTO_TEST_CASE(interprocess_lock__lock__externally_locked__false)
 {
     BOOST_REQUIRE(!test::exists(TEST_PATH));
@@ -62,10 +64,22 @@ BOOST_AUTO_TEST_CASE(interprocess_lock__lock__externally_locked__false)
     interprocess_lock instance2(TEST_PATH);
     BOOST_REQUIRE(instance1.lock());
     BOOST_REQUIRE(test::exists(TEST_PATH));
+
+#ifdef _MSC_VER
     BOOST_REQUIRE(!instance2.lock());
+#else
+    BOOST_REQUIRE(instance2.lock());
+#endif
+
     BOOST_REQUIRE(instance1.unlock());
     BOOST_REQUIRE(!test::exists(TEST_PATH));
+
+#ifdef _MSC_VER
     BOOST_REQUIRE(instance2.lock());
+#else
+    BOOST_REQUIRE(!instance2.lock());
+#endif
+     
     BOOST_REQUIRE(test::exists(TEST_PATH));
     BOOST_REQUIRE(instance2.unlock());
     BOOST_REQUIRE(!test::exists(TEST_PATH));
