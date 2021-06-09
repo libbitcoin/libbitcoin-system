@@ -24,11 +24,6 @@
 
 BOOST_AUTO_TEST_SUITE(siphash_tests)
 
-uint64_t read_uint64(const data_chunk& data)
-{
-    return from_little_endian<uint64_t>(data.begin(), data.end());
-}
-
 BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
 {
     half_hash hash;
@@ -52,7 +47,7 @@ BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
         data_chunk encoded_expected;
         BOOST_REQUIRE(decode_base16(encoded_expected, result.result));
 
-        const auto expected = read_uint64(encoded_expected);
+        const auto expected = from_little_endian<uint64_t>(encoded_expected);
         BOOST_REQUIRE_EQUAL(siphash(hash, data), expected);
     }
 }
@@ -72,7 +67,7 @@ BOOST_AUTO_TEST_CASE(siphash__key__vectors__expected)
         data_chunk encoded_expected;
         BOOST_REQUIRE(decode_base16(encoded_expected, result.result));
 
-        const auto expected = read_uint64(encoded_expected);
+        const auto expected = from_little_endian<uint64_t>(encoded_expected);
         BOOST_REQUIRE_EQUAL(siphash(key, data), expected);
     }
 }

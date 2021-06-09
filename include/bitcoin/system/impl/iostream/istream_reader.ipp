@@ -49,13 +49,13 @@ byte_array<Size> istream_reader::read_reverse()
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_reader::read_big_endian()
 {
-    return from_big_endian_stream_unsafe<Integer>(stream_);
+    return from_big_endian<Integer>(stream_);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer istream_reader::read_little_endian()
 {
-    return from_little_endian_stream_unsafe<Integer>(stream_);
+    return from_little_endian<Integer>(stream_);
 }
 
 } // namespace system

@@ -22,6 +22,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/formats/base_32.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
@@ -59,7 +60,7 @@ bool verify_checksum(const data_slice& data)
         return false;
 
     const auto position = std::prev(data.end(), sizeof(uint32_t));
-    const auto check = from_little_endian<uint32_t>(position, data.end());
+    const auto check = from_little_endian<uint32_t>({ position, data.end() });
     return check == bitcoin_checksum({ data.begin(), position });
 }
 
