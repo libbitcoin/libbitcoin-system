@@ -58,15 +58,15 @@ BOOST_AUTO_TEST_CASE(data__to_array2__to_string__inverse)
 
 BOOST_AUTO_TEST_CASE(data__to_array2__double_long_hash__expected)
 {
-    const auto l = 42;
-    const auto u = 24;
+    const char l = 42;
+    const uint8_t u = 24;
 
     // Uses data_slice data initializer construction.
     const auto result = to_array<long_hash_size>(
     {
-        l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        u, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
     BOOST_REQUIRE_EQUAL(result[0], l);
