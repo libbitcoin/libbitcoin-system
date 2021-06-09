@@ -49,6 +49,11 @@ data_slice::data_slice(const std::string& text)
 {
 }
 
+data_slice::data_slice(std::initializer_list<value_type> bytes)
+  : data_slice(from_size(bytes.begin(), bytes.size()))
+{
+}
+
 // private
 data_slice::data_slice(const_pointer begin, const_pointer end, size_type size)
   : begin_(begin), end_(end), size_(size)

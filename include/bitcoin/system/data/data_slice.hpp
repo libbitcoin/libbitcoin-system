@@ -58,8 +58,8 @@ public:
 
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
-    template <size_type Size, typename Byte>
-    data_slice(const Byte(&bytes)[Size]);
+    template <size_type Size>
+    data_slice(const char(&text)[Size]);
 
     /// Byte array constructor.
     template <size_type Size, typename Byte, if_byte<Byte> = true>
@@ -77,14 +77,11 @@ public:
     template <typename Byte, if_byte<Byte> = true>
     data_slice(const Byte* begin, const Byte* end);
 
-    /// Byte initializer list constructor.
-    /// Accepts literal numbers as 'int' and truncates them to byte.
-    /// All elements must be of the same type to satisfy the template.
-    template <typename Byte>
-    data_slice(std::initializer_list<Byte> bytes);
-
     /// String constructor, null terminator is not indexed.
     data_slice(const std::string& text);
+
+    /// Byte initializer list constructor.
+    data_slice(std::initializer_list<value_type> bytes);
 
     /// Methods.
 

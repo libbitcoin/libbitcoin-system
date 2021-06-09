@@ -29,8 +29,8 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
-template <data_slice::size_type Size, typename Byte>
-data_slice::data_slice(const Byte(&bytes)[Size])
+template <data_slice::size_type Size>
+data_slice::data_slice(const char(&bytes)[Size])
   : data_slice(from_literal(bytes))
 {
 }
@@ -56,12 +56,6 @@ data_slice::data_slice(const Iterator& begin, const Iterator& end)
 template <typename Byte, if_byte<Byte>>
 data_slice::data_slice(const Byte* begin, const Byte* end)
   : data_slice(from_iterators(begin, end))
-{
-}
-
-template <typename Byte>
-data_slice::data_slice(std::initializer_list<Byte> bytes)
-  : data_slice(from_size(bytes.begin(), bytes.size()))
 {
 }
 
