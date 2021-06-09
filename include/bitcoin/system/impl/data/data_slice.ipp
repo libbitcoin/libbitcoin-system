@@ -20,6 +20,8 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_IPP
 
 #include <array>
+#include <vector>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -27,15 +29,21 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
-template <data_slice::size_type Size>
-data_slice::data_slice(const char(&text)[Size])
-  : data_slice(from_literal(text))
+template <data_slice::size_type Size, typename Byte>
+data_slice::data_slice(const Byte(&bytes)[Size])
+  : data_slice(from_literal(bytes))
 {
 }
 
-template <data_slice::size_type Size>
-data_slice::data_slice(const std::array<data_slice::value_type, Size>& data)
+template <data_slice::size_type Size, typename Byte, if_byte<Byte>>
+data_slice::data_slice(const std::array<Byte, Size>& data)
   : data_slice(from_size(data.begin(), Size))
+{
+}
+
+template <typename Byte, if_byte<Byte>>
+data_slice::data_slice(const std::vector<Byte>& data)
+  : data_slice(from_size(data.begin(), data.size()))
 {
 }
 
@@ -45,11 +53,23 @@ data_slice::data_slice(const Iterator& begin, const Iterator& end)
 {
 }
 
+template <typename Byte, if_byte<Byte>>
+data_slice::data_slice(const Byte* begin, const Byte* end)
+  : data_slice(from_iterators(begin, end))
+{
+}
+
+template <typename Byte>
+data_slice::data_slice(std::initializer_list<Byte> bytes)
+  : data_slice(from_size(bytes.begin(), bytes.size()))
+{
+}
+
 // factories (private)
 // ----------------------------------------------------------------------------
 
-template <data_slice::size_type Size>
-data_slice data_slice::from_literal(const char(&text)[Size])
+template <data_slice::size_type Size, typename Byte>
+data_slice data_slice::from_literal(const Byte(&bytes)[Size])
 {
     // Guard 0 for lack of null terminator (see below).
     if (Size == 0u)
@@ -59,7 +79,7 @@ data_slice data_slice::from_literal(const char(&text)[Size])
     // Those are picked up here and lose their last char. Workaround:
     // data_slice slice({ 'f', 'o', 'o', 'b', 'a', 'r', '\0' });
     // The more common syntax works as expected: data_slice slice("foobar");
-    return from_size(&text[0], Size - 1u);
+    return from_size(&bytes[0], Size - 1u);
 }
 
 // static

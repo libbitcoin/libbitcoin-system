@@ -27,12 +27,14 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
    
-/// Const iterable wrapper for byte collection pointers.
+/// Resizable but otherwise const iterable wrapper for a memory buffer.
 /// Not a substitute for move overrides or containment.
+/// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// Value (not pointer) iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
 class BC_API data_slice
@@ -54,31 +56,35 @@ public:
     /// Copy construction.
     data_slice(const data_slice& other);
 
-    /// Literal text constructor.
+    /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
-    template <size_type Size>
-    data_slice(const char(&text)[Size]);
+    template <size_type Size, typename Byte>
+    data_slice(const Byte(&bytes)[Size]);
 
     /// Byte array constructor.
-    template <size_type Size>
-    data_slice(const std::array<value_type, Size>& data);
+    template <size_type Size, typename Byte, if_byte<Byte> = true>
+    data_slice(const std::array<Byte, Size>& data);
 
-    /// Iterators (including pointers) constructor.
+    /// Byte vector constructor.
+    template <typename Byte, if_byte<Byte> = true>
+    data_slice(const std::vector<Byte>& data);
+
+    /// Byte iterators constructor.
     template <typename Iterator>
     data_slice(const Iterator& begin, const Iterator& end);
 
+    /// Byte pointers constructor.
+    template <typename Byte, if_byte<Byte> = true>
+    data_slice(const Byte* begin, const Byte* end);
+
     /// Byte initializer list constructor.
-    data_slice(std::initializer_list<value_type> bytes);
+    /// Accepts literal numbers as 'int' and truncates them to byte.
+    /// All elements must be of the same type to satisfy the template.
+    template <typename Byte>
+    data_slice(std::initializer_list<Byte> bytes);
 
-    /// String constructor, casts char to uint8_t.
-    /// Integral null terminator is not indexed.
+    /// String constructor, null terminator is not indexed.
     data_slice(const std::string& text);
-
-    /// Byte vector constructor.
-    data_slice(const std::vector<value_type>& data);
-
-    /// Pointers constructor.
-    data_slice(const_pointer begin, const_pointer end);
 
     /// Methods.
 
@@ -95,6 +101,11 @@ public:
 
     /// Convert data to a base16 string.
     std::string encoded() const;
+
+    /// Resize the slice by decrementing the end pointer.
+    /// This is the only mutable action that can be taken on the slice.
+    /// Returns true if the size was reduced (expansion is not allowed).
+    bool resize(size_t size);
 
     /// Properties.
     const_pointer data() const;
@@ -114,8 +125,8 @@ public:
 private:
     data_slice(const_pointer begin, const_pointer end, size_type size);
 
-    template <size_type Size>
-    static data_slice from_literal(const char(&text)[Size]);
+    template <size_type Size, typename Byte>
+    static data_slice from_literal(const Byte(&text)[Size]);
 
     template <typename Iterator>
     static data_slice from_iterators(const Iterator& begin,
@@ -125,8 +136,8 @@ private:
     static data_slice from_size(Pointer begin, size_type size);
 
     const const_pointer begin_;
-    const const_pointer end_;
-    const size_type size_;
+    const_pointer end_;
+    size_type size_;
 };
 
 /// Binary operators.

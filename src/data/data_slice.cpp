@@ -44,23 +44,8 @@ data_slice::data_slice(const data_slice& other)
 {
 }
 
-data_slice::data_slice(std::initializer_list<value_type> bytes)
-  : data_slice(from_size(bytes.begin(), bytes.size()))
-{
-}
-
 data_slice::data_slice(const std::string& text)
   : data_slice(from_size(text.begin(), text.size()))
-{
-}
-
-data_slice::data_slice(const std::vector<value_type>& data)
-  : data_slice(from_size(data.begin(), data.size()))
-{
-}
-
-data_slice::data_slice(const_pointer begin, const_pointer end)
-  : data_slice(from_iterators(begin, end))
 {
 }
 
@@ -87,6 +72,16 @@ std::string data_slice::to_string() const
 std::string data_slice::encoded() const
 {
     return encode_base16(to_chunk());
+}
+
+bool data_slice::resize(size_t size)
+{
+    if (size >= size_)
+        return false;
+
+    end_ = std::next(begin_, size);
+    size_ = size;
+    return true;
 }
 
 // properties

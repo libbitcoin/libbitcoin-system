@@ -460,4 +460,31 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__iterators__expected)
     ////BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 }
 
+// resize
+
+BOOST_AUTO_TEST_CASE(data_slice__resize__empty__false)
+{
+    data_slice slice("");
+    BOOST_REQUIRE(!slice.resize(0));
+    BOOST_REQUIRE(!slice.resize(42));
+}
+
+BOOST_AUTO_TEST_CASE(data_slice__resize__downsize__true_expected)
+{
+    data_slice slice("foobar");
+    BOOST_REQUIRE(slice.resize(3));
+    BOOST_REQUIRE_EQUAL(slice.to_string(), "foo");
+}
+
+BOOST_AUTO_TEST_CASE(data_slice__resize__upsize__false_expected)
+{
+    data_slice slice("foobar");
+    BOOST_REQUIRE(!slice.resize(6));
+    BOOST_REQUIRE(!slice.resize(7));
+    BOOST_REQUIRE(slice.resize(3));
+    BOOST_REQUIRE(!slice.resize(3));
+    BOOST_REQUIRE(!slice.resize(6));
+    BOOST_REQUIRE_EQUAL(slice.to_string(), "foo");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
