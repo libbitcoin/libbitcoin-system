@@ -20,18 +20,16 @@
 #define LIBBITCOIN_SYSTEM_MATH_HASH_HPP
 
 #include <cstddef>
-#include <string>
+#include <cstdint>
 #include <vector>
-#include <boost/functional/hash_fwd.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Common bitcoin hash container sizes.
+/// Common bitcoin hash container sizes.
 static constexpr size_t hash_size = 32;
 static constexpr size_t half_hash_size = hash_size / 2;
 static constexpr size_t quarter_hash_size = half_hash_size / 2;
@@ -39,28 +37,23 @@ static constexpr size_t long_hash_size = 2 * hash_size;
 static constexpr size_t short_hash_size = 20;
 static constexpr size_t mini_hash_size = 6;
 
-// Common bitcoin hash containers.
+/// Common bitcoin hash containers.
 typedef byte_array<mini_hash_size> mini_hash;
 typedef byte_array<quarter_hash_size> quarter_hash;
 typedef byte_array<half_hash_size> half_hash;
+typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<hash_size> hash_digest;
 typedef byte_array<long_hash_size> long_hash;
-typedef byte_array<short_hash_size> short_hash;
 
-// Lists of common bitcoin hashes.
+/// Lists of common bitcoin hashes.
 typedef std::vector<mini_hash> mini_hash_list;
 typedef std::vector<quarter_hash> quarter_hash_list;
 typedef std::vector<half_hash> half_hash_list;
+typedef std::vector<short_hash> short_hash_list;
 typedef std::vector<hash_digest> hash_list;
 typedef std::vector<long_hash> long_hash_list;
-typedef std::vector<short_hash> short_hash_list;
 
-// Alias for boost big integer types.
-typedef boost::multiprecision::uint128_t uint128_t;
-typedef boost::multiprecision::uint256_t uint256_t;
-typedef boost::multiprecision::uint512_t uint512_t;
-
-// Null-valued common bitcoin hashes.
+/// Null-valued common hashes.
 
 constexpr mini_hash null_mini_hash
 {
@@ -83,6 +76,13 @@ constexpr half_hash null_half_hash
     }
 };
 
+constexpr short_hash null_short_hash
+{
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
+
 constexpr hash_digest null_hash
 {
     {
@@ -101,32 +101,34 @@ constexpr long_hash null_long_hash
     }
 };
 
-constexpr short_hash null_short_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
+// TODO: test.
 
-inline uint256_t to_uint256(const hash_digest& hash)
-{
-    return from_little_endian<uint256_t>(hash.begin(), hash.end());
-}
+/// Hash conversions of corresponding integers.
+BC_API mini_hash to_hash(const uint48_t& value);
+BC_API quarter_hash to_hash(const uint64_t& value);
+BC_API half_hash to_hash(const uint128_t& value);
+BC_API short_hash to_hash(const uint160_t& value);
+BC_API hash_digest to_hash(const uint256_t& value);
+BC_API long_hash to_hash(const uint512_t& value);
+
+/// Integer conversions of corresponding hashes.
+BC_API uint48_t to_uint48(const mini_hash& hash);
+BC_API uint64_t to_uint64(const quarter_hash& hash);
+BC_API uint128_t to_uint128(const half_hash& hash);
+BC_API uint160_t to_uint160(const short_hash& hash);
+BC_API uint256_t to_uint256(const hash_digest& hash);
+BC_API uint512_t to_uint512(const long_hash& hash);
 
 /// Generate a scrypt hash to fill a byte array.
 template <size_t Size>
 byte_array<Size> scrypt(const data_slice& data, const data_slice& salt,
     uint64_t N, uint32_t p, uint32_t r);
 
-/// Generate a scrypt hash of specified length.
-BC_API data_chunk scrypt(const data_slice& data, const data_slice& salt,
-    uint64_t N, uint32_t p, uint32_t r, size_t length);
+/// Generate a scrypt hash.
+BC_API hash_digest scrypt_hash(const data_slice& data);
 
 /// Generate a bitcoin hash.
 BC_API hash_digest bitcoin_hash(const data_slice& data);
-
-/// Generate a scrypt hash.
-BC_API hash_digest scrypt_hash(const data_slice& data);
 
 /// Generate a bitcoin short hash.
 BC_API short_hash bitcoin_short_hash(const data_slice& data);
@@ -152,6 +154,10 @@ BC_API hash_digest sha256_hash(const data_slice& first,
 BC_API hash_digest hmac_sha256_hash(const data_slice& data,
     const data_slice& key);
 
+/// Generate a pbkdf2 hmac sha256 hash.
+BC_API data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations, size_t length);
+
 /// Generate a sha512 hash.
 BC_API long_hash sha512_hash(const data_slice& data);
 
@@ -163,24 +169,28 @@ BC_API long_hash hmac_sha512_hash(const data_slice& data,
 BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations);
 
-/// Generate a pbkdf2 hmac sha256 hash.
-BC_API data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length);
+/// Generate a scrypt hash of specified length.
+BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
+    uint64_t N, uint32_t p, uint32_t r, size_t length);
+
+/// DJB2 hash key algorithm by Dan Bernstein.
+BC_API size_t djb2_hash(const data_slice& data);
 
 } // namespace system
 } // namespace libbitcoin
 
-// Extend std and boost namespaces with our hash wrappers.
+// Extend std and boost namespaces with djb2_hash.
 //-----------------------------------------------------------------------------
+// This allows our byte_array to be incorporated into std/boost hash tables.
 
 namespace std
 {
 template <size_t Size>
 struct hash<bc::system::byte_array<Size>>
 {
-    size_t operator()(const bc::system::byte_array<Size>& hash) const
+    size_t operator()(const bc::system::byte_array<Size>& data) const
     {
-        return boost::hash_range(hash.begin(), hash.end());
+        return bc::system::djb2_hash(data);
     }
 };
 } // namespace std
@@ -190,9 +200,9 @@ namespace boost
 template <size_t Size>
 struct hash<bc::system::byte_array<Size>>
 {
-    size_t operator()(const bc::system::byte_array<Size>& hash) const
+    size_t operator()(const bc::system::byte_array<Size>& data) const
     {
-        return boost::hash_range(hash.begin(), hash.end());
+        return bc::system::djb2_hash(data);
     }
 };
 } // namespace boost

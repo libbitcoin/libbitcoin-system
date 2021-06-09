@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
 {
     for (const auto& result: pkcs5_pbkdf2_hmac_sha512_tests)
     {
-        const auto hash = pkcs5_pbkdf2_hmac_sha512(to_chunk(result.passphrase), to_chunk(result.salt), result.iterations);
+        const auto hash = pkcs5_pbkdf2_hmac_sha512(result.passphrase, result.salt, result.iterations);
         BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
     }
 }
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(pbkdf2_hmac_sha256_test)
 {
     for (const auto& result: pbkdf2_hmac_sha256_tests)
     {
-        const auto data = pbkdf2_hmac_sha256(to_chunk(result.passphrase), to_chunk(result.salt), result.iterations, result.length);
+        const auto data = pbkdf2_hmac_sha256_chunk(result.passphrase, result.salt, result.iterations, result.length);
         BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
     }
 }
@@ -103,6 +103,13 @@ BOOST_AUTO_TEST_CASE(scrypt_hash_test)
         BOOST_REQUIRE(decode_base16(data, result.input));
         BOOST_REQUIRE_EQUAL(encode_base16(scrypt_hash(data)), result.result);
     }
+}
+
+BOOST_AUTO_TEST_CASE(djb2_hash_test)
+{
+    // djb2_hash is size_t so cast for consistent test expectation.
+    const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
+    BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 42u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

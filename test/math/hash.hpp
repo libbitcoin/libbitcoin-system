@@ -24,26 +24,29 @@
 
 struct hash_result
 {
-    std::string input, result;
+    std::string input;
+    std::string result;
 };
 
 struct pkcs5_pbkdf2_hmac_sha512_result
 {
-    std::string passphrase, salt;
+    std::string passphrase;
+    std::string salt;
     size_t iterations;
     std::string result;
 };
 
 struct pbkdf2_hmac_sha256_result
 {
-    std::string passphrase, salt;
-    size_t iterations, length;
+    std::string passphrase;
+    std::string salt;
+    size_t iterations;
+    size_t length;
     std::string result;
 };
 
 typedef std::vector<hash_result> hash_result_list;
-typedef std::vector<pkcs5_pbkdf2_hmac_sha512_result>
-    pkcs5_pbkdf2_hmac_sha512_result_list;
+typedef std::vector<pkcs5_pbkdf2_hmac_sha512_result> pkcs5_pbkdf2_hmac_sha512_result_list;
 typedef std::vector<pbkdf2_hmac_sha256_result> pbkdf2_hmac_sha256_result_list;
 
 hash_result_list sha1_tests{{
@@ -142,7 +145,8 @@ hash_result_list ripemd_tests{{
     {"59ce28d8016e7ebb1dedbfef16686735ed65", "0a71887812c3d5c241bcd651a736a0fe9baa86fd"}
 }};
 
-pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests{{
+pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests
+{{
     {"password", "salt", 1, "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce"},
     {"password", "salt", 2, "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e"},
     {"password", "salt", 4096, "d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5"},
@@ -150,17 +154,19 @@ pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests{{
     {"password", "NaCL", 1, "73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306"}
 }};
 
-pbkdf2_hmac_sha256_result_list pbkdf2_hmac_sha256_tests{{
+pbkdf2_hmac_sha256_result_list pbkdf2_hmac_sha256_tests
+{{
     {"passwd", "salt", 1, 64, "55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783"},
     {"Password", "NaCl", 80000, 64, "4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d"}
 }};
 
-hash_result_list scrypt_hash_tests({
+hash_result_list scrypt_hash_tests
+{{
     {"020000004c1271c211717198227392b029a64a7971931d351b387bb80db027f270411e398a07046f7d4a08dd815412a8712f874a7ebf0507e3878bd24e20a3b73fd750a667d2f451eac7471b00de6659", "065898d7ab2daa8235cdda9511d248f3010b5e11f682f80741ef2b0000000000"},
     {"0200000011503ee6a855e900c00cfdd98f5f55fffeaee9b6bf55bea9b852d9de2ce35828e204eef76acfd36949ae56d1fbe81c1ac9c0209e6331ad56414f9072506a77f8c6faf551eac7471b00389d01", "94fc881c9ff1da50d235ed28f2bbcfddfeb7084e63ebd5bd110d3a0000000000"},
     {"02000000a72c8a177f523946f42f22c3e86b8023221b4105e8007e59e81f6beb013e29aaf635295cb9ac966213fb56e046dc71df5b3f7f67ceaeab24038e743f883aff1aaafaf551eac7471b0166249b", "81caa81451ddf8659cf2afd8599d2d6c8a724432e188f295f8400b0000000000"},
     {"010000007824bc3a8a1b4628485eee3024abd8626721f7f870f8ad4d2f33a27155167f6a4009d1285049603888fe85a84b6c803a53305a8d497965a5e896e1a00568359589faf551eac7471b0065434e", "fe05e1971818866adc7e8e6e2fd7e8d8991e032349cd91580007300000000000"},
     {"0200000050bfd4e4a307a8cb6ef4aef69abc5c0f2d579648bd80d7733e1ccc3fbc90ed664a7f74006cb11bde87785f229ecd366c2d4e44432832580e0608c579e4cb76f383f7f551eac7471b00c36982", "8cec00384d72c7e74f5b340d73af02fa47cb0c13c7afa426b4f0180000000000"}
-});
+}};
 
 #endif

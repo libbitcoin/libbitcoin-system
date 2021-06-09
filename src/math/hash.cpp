@@ -18,11 +18,11 @@
  */
 #include <bitcoin/system/math/hash.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <errno.h>
-#include <new>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
 #include "../math/external/crypto_scrypt.h"
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
@@ -36,14 +36,85 @@
 namespace libbitcoin {
 namespace system {
 
-hash_digest bitcoin_hash(const data_slice& data)
+// Hash conversions of corresponding integers.
+// ----------------------------------------------------------------------------
+
+mini_hash to_hash(const uint48_t& value)
 {
-    return sha256_hash(sha256_hash(data));
+    return to_little_endian<48>(value);
 }
+
+quarter_hash to_hash(const uint64_t& value)
+{
+    // Use integral uint64_t.
+    return to_little_endian(value);
+}
+
+half_hash to_hash(const uint128_t& value)
+{
+    return to_little_endian<128>(value);
+}
+
+short_hash to_hash(const uint160_t& value)
+{
+    return to_little_endian<160>(value);
+}
+
+hash_digest to_hash(const uint256_t& value)
+{
+    return to_little_endian<256>(value);
+}
+
+long_hash to_hash(const uint512_t& value)
+{
+    return to_little_endian<512>(value);
+}
+
+// Integer conversions of corresponding hashes.
+// ----------------------------------------------------------------------------
+
+uint48_t to_uint48(const mini_hash& hash)
+{
+    return from_little_endian<48>(hash);
+}
+
+uint64_t to_uint64(const quarter_hash& hash)
+{
+    // Use integral uint64_t.
+    return from_little_endian<uint64_t>(hash);
+}
+
+uint128_t to_uint128(const half_hash& hash)
+{
+    return from_little_endian<128>(hash);
+}
+
+uint160_t to_uint160(const short_hash& hash)
+{
+    return from_little_endian<160>(hash);
+}
+
+uint256_t to_uint256(const hash_digest& hash)
+{
+    return from_little_endian<256>(hash);
+}
+
+uint512_t to_uint512(const long_hash& hash)
+{
+    return from_little_endian<512>(hash);
+}
+
+// Hash generators.
+// ----------------------------------------------------------------------------
 
 hash_digest scrypt_hash(const data_slice& data)
 {
     return scrypt<hash_size>(data, data, 1024u, 1u, 1u);
+}
+
+hash_digest bitcoin_hash(const data_slice& data)
+{
+    return sha256_hash(sha256_hash(data));
 }
 
 short_hash bitcoin_short_hash(const data_slice& data)
@@ -111,6 +182,15 @@ hash_digest hmac_sha256_hash(const data_slice& data, const data_slice& key)
     return hash;
 }
 
+data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations, size_t length)
+{
+    data_chunk hash(length);
+    pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
+        salt.size(), iterations, hash.data(), length);
+    return hash;
+}
+
 long_hash sha512_hash(const data_slice& data)
 {
     long_hash hash;
@@ -137,17 +217,8 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     return hash;
 }
 
-data_chunk pbkdf2_hmac_sha256(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length)
-{
-    data_chunk output(length);
-    pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
-        salt.size(), iterations, output.data(), length);
-    return output;
-}
-
-data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
-    uint32_t p, uint32_t r, size_t length)
+data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
+    uint64_t N, uint32_t p, uint32_t r, size_t length)
 {
     data_chunk out(length, 0x00);
     crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), N, r, p,
@@ -156,6 +227,19 @@ data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
     // If crypto_scrypt returns != 0 then out will be zeroized.
     // This can only be caused by out-of-memory or invalid parameterization.
     return out;
+}
+
+// Objectives: deterministic, uniform distribution, efficient computation.
+size_t djb2_hash(const data_slice& data)
+{
+    // Nothing special here except that it tested well against collisions.
+    size_t hash = 5381;
+
+    // Efficient sum of ((hash * 33) + byte) for all bytes.
+    for (const auto byte: data)
+        hash = ((hash << 5) + hash) + byte;
+
+    return hash;
 }
 
 } // namespace system
