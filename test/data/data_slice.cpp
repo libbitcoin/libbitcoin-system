@@ -17,8 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <array>
 #include <iterator>
 #include <string>
+#include <vector>
 
 BOOST_AUTO_TEST_SUITE(data_slice_tests)
 
@@ -121,7 +123,10 @@ const auto size = 6u;
 const std::string string{ "foobar" };
 const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const byte_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+const std::vector<char> char_vector{ 'f', 'o', 'o', 'b', 'a', 'r' };
+const std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const auto encoded = encode_base16(string);
+
 
 // copy construct
 
@@ -284,6 +289,12 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
     BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
+
+    // construct(char_array)
+    const data_slice slice4(char_array);
+    BOOST_REQUIRE(!slice4.empty());
+    BOOST_REQUIRE_EQUAL(slice4.size(), size);
+    BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
@@ -410,6 +421,12 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     ////BOOST_REQUIRE(!slice4.empty());
     ////BOOST_REQUIRE_EQUAL(slice4.size(), size);
     ////BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
+
+    // construct(char_vector)
+    const data_slice slice5(char_vector);
+    BOOST_REQUIRE(!slice5.empty());
+    BOOST_REQUIRE_EQUAL(slice5.size(), size);
+    BOOST_REQUIRE_EQUAL(slice5.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__pointers__expected)
