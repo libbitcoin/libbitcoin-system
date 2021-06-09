@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(djb2_hash_test)
 {
     // djb2_hash is size_t so cast for consistent test expectation.
     const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
-    BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 42u);
+    BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 0xe1669c01);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
