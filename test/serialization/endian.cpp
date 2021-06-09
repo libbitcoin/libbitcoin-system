@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(endian__to_big_endian__uintx_to_data__expected)
     BOOST_REQUIRE_EQUAL(to_big_endian<32>(value), data);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian__to_data__expected)
+BOOST_AUTO_TEST_CASE(endian__to_little_endian__uintx_to_data__expected)
 {
     uint256_t value = 0x01020304;
     byte_array<32> data{ { 0x04, 0x03, 0x02, 0x01 } };
