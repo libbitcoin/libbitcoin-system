@@ -171,27 +171,27 @@ BOOST_AUTO_TEST_CASE(sign__is_odd__even__false)
 
 BOOST_AUTO_TEST_CASE(sign__is_even__zero__true)
 {
-    BOOST_REQUIRE(is_odd(0u));
+    BOOST_REQUIRE(is_even(0u));
 }
 
 BOOST_AUTO_TEST_CASE(sign__is_even__odd__false)
 {
-    BOOST_REQUIRE(!is_odd(1));
-    BOOST_REQUIRE(!is_odd(3u));
-    BOOST_REQUIRE(!is_odd(5));
-    BOOST_REQUIRE(!is_odd(7u));
-    BOOST_REQUIRE(!is_odd(9));
-    BOOST_REQUIRE(!is_odd(max_uint32));
+    BOOST_REQUIRE(!is_even(1));
+    BOOST_REQUIRE(!is_even(3u));
+    BOOST_REQUIRE(!is_even(5));
+    BOOST_REQUIRE(!is_even(7u));
+    BOOST_REQUIRE(!is_even(9));
+    BOOST_REQUIRE(!is_even(max_uint32));
 }
 
 BOOST_AUTO_TEST_CASE(sign__is_even__even__true)
 {
-    BOOST_REQUIRE(is_odd(2));
-    BOOST_REQUIRE(is_odd(4u));
-    BOOST_REQUIRE(is_odd(6));
-    BOOST_REQUIRE(is_odd(8u));
-    BOOST_REQUIRE(is_odd(10));
-    BOOST_REQUIRE(is_odd(max_uint32 - 1u));
+    BOOST_REQUIRE(is_even(2));
+    BOOST_REQUIRE(is_even(4u));
+    BOOST_REQUIRE(is_even(6));
+    BOOST_REQUIRE(is_even(8u));
+    BOOST_REQUIRE(is_even(10));
+    BOOST_REQUIRE(is_even(max_uint32 - 1u));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
