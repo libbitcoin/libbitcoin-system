@@ -209,9 +209,9 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2__negative__undefined)
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2__maximums__sizeof_maximum)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint8), sizeof(uint8_t) * byte_bits);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint16), sizeof(uint16_t) * byte_bits);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint32), sizeof(uint32_t) * byte_bits);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint8), to_bits(sizeof(uint8_t)));
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint16), to_bits(sizeof(uint16_t)));
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(max_uint32), to_bits(sizeof(uint32_t)));
 }
 
 // Also mixing in signed and unsigned types.
@@ -311,9 +311,9 @@ BOOST_AUTO_TEST_CASE(power__floored_log2__negative__undefined)
 
 BOOST_AUTO_TEST_CASE(power__floored_log2__maximums__sizeof_maximum_minus_one)
 {
-    BOOST_REQUIRE_EQUAL(floored_log2(max_uint8), sizeof(uint8_t) * byte_bits - 1);
-    BOOST_REQUIRE_EQUAL(floored_log2(max_uint16), sizeof(uint16_t) * byte_bits - 1);
-    BOOST_REQUIRE_EQUAL(floored_log2(max_uint32), sizeof(uint32_t) * byte_bits - 1);
+    BOOST_REQUIRE_EQUAL(floored_log2(max_uint8), to_bits(sizeof(uint8_t)) - 1);
+    BOOST_REQUIRE_EQUAL(floored_log2(max_uint16), to_bits(sizeof(uint16_t)) - 1);
+    BOOST_REQUIRE_EQUAL(floored_log2(max_uint32), to_bits(sizeof(uint32_t)) - 1);
 }
 
 // Also mixing in signed and unsigned types.

@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

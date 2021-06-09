@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <cstddef>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -36,7 +37,7 @@ public:
     /// Determine if the given handle is a write-locked handle.
     static bool is_write_locked(handle value)
     {
-        return (value % 2) == 1;
+        return is_odd(value);
     }
 
     sequential_lock();

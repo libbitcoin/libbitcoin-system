@@ -26,6 +26,7 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -254,14 +255,14 @@ void serializer<Iterator>::write_reverse(const Tuple& data)
 }
 
 template <typename Iterator>
-template <typename Integer>
+template <typename Integer, if_integer<Integer>>
 void serializer<Iterator>::write_big_endian(Integer value)
 {
     return write_forward(to_big_endian(value));
 }
 
 template <typename Iterator>
-template <typename Integer>
+template <typename Integer, if_integer<Integer>>
 void serializer<Iterator>::write_little_endian(Integer value)
 {
     return write_forward(to_little_endian(value));

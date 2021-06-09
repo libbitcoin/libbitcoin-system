@@ -31,6 +31,7 @@
 #include <bitcoin/system/concurrency/timer.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -44,6 +45,16 @@ namespace chain {
 using namespace bc::system::config;
 using namespace bc::system::machine;
 using namespace boost::adaptors;
+
+// github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
+static const system::config::checkpoint mainnet_bip30_exception_checkpoint1
+{
+    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
+};
+static const system::config::checkpoint mainnet_bip30_exception_checkpoint2
+{
+    "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
+};
 
 // Inlines.
 //-----------------------------------------------------------------------------

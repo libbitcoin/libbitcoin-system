@@ -22,8 +22,10 @@
 #include <algorithm>
 #include <string>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -54,40 +56,34 @@ bool decode_hash(byte_array<Size>& out, const std::string& in)
     return false;
 }
 
-template <size_t Size>
+template <size_t Size, if_odd<Size>>
 std::string base16_string(const char(&string)[Size])
 {
     return to_string(base16_chunk(string));
 }
 
-template <size_t Size>
+template <size_t Size, if_odd<Size>>
 data_chunk base16_chunk(const char(&string)[Size])
 {
-    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
-
     data_chunk out;
     decode_base16(out, string);
     return out;
 }
 
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_array(const char(&string)[Size])
+template <size_t Size, if_odd<Size>>
+byte_array<to_half(Size - 1)> base16_array(const char(&string)[Size])
 {
-    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
-
-    byte_array<(Size - 1u) / 2u> out;
+    byte_array<to_half(Size - 1)> out;
     if (!decode_base16(out, string))
         out.fill(0);
 
     return out;
 }
 
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_hash(const char(&string)[Size])
+template <size_t Size, if_odd<Size>>
+byte_array<to_half(Size - 1)> base16_hash(const char(&string)[Size])
 {
-    static_assert((Size - 1u) % 2u == 0, "odd number of hexidecimal bytes");
-
-    byte_array<(Size - 1u) / 2u> out;
+    byte_array<to_half(Size - 1)> out;
     if (!decode_hash(out, string))
         out.fill(0);
 
@@ -95,15 +91,15 @@ byte_array<(Size - 1u) / 2u> base16_hash(const char(&string)[Size])
 }
 
 // DEPRECATED: use base16_array (renamed).
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size])
+template <size_t Size, if_odd<Size>>
+byte_array<to_half(Size - 1)> base16_literal(const char(&string)[Size])
 {
     return base16_array(string);
 }
 
 // DEPRECATED: use base16_hash (renamed).
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> hash_literal(const char(&string)[Size])
+template <size_t Size, if_odd<Size>>
+byte_array<to_half(Size - 1)> hash_literal(const char(&string)[Size])
 {
     return base16_hash(string);
 }

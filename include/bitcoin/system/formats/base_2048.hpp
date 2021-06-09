@@ -21,8 +21,8 @@
 
 #include <string>
 #include <vector>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
@@ -30,10 +30,6 @@
 namespace libbitcoin {
 namespace system {
 
-typedef boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<11, 11,
-    boost::multiprecision::unsigned_magnitude,
-    boost::multiprecision::unchecked, void>> uint11_t;
 typedef std::vector<uint11_t> base2048_chunk;
 
 // This is the encoding used by both BIP39 and Electrum mnemonics.

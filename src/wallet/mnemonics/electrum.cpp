@@ -227,7 +227,7 @@ long_hash electrum::seeder(const string_list& words,
 size_t electrum::entropy_bits(const data_slice& entropy)
 {
     // The number of bits for the given number of bytes.
-    return entropy.size() * byte_bits;
+    return to_bits(entropy.size());
 }
 
 size_t electrum::entropy_bits(const string_list& words)
@@ -269,7 +269,7 @@ uint8_t electrum::unused_bits(const data_slice& entropy)
 uint8_t electrum::unused_bytes(const data_slice& entropy)
 {
     // 0..10 unused bits implies we can discard up to one byte.
-    return unused_bits(entropy) / byte_bits;
+    return to_bytes(unused_bits(entropy));
 }
 
 size_t electrum::usable_size(const data_slice& entropy)

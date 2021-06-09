@@ -50,12 +50,6 @@ inline bool is_negative(Integer)
     return false;
 }
 
-template <typename Integer, if_integer<Integer>>
-inline bool is_odd(Integer value)
-{
-    return (value % 2) != 0;
-}
-
 } // namespace system
 } // namespace libbitcoin
 

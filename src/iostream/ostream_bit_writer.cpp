@@ -138,7 +138,7 @@ void ostream_bit_writer::write_variable_big_endian(uint64_t value)
 void ostream_bit_writer::write_bits(uint64_t value, uint8_t bits)
 {
     auto remaining_bits = std::min(static_cast<uint64_t>(bits),
-        static_cast<uint64_t>(byte_bits * sizeof(uint64_t)));
+        static_cast<uint64_t>(to_bits(sizeof(uint64_t))));
 
     while (remaining_bits > byte_bits)
     {

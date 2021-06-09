@@ -27,6 +27,7 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -47,10 +48,10 @@ public:
     template <typename Tuple>
     void write_reverse(const Tuple& data);
 
-    template <typename Integer>
+    template <typename Integer, if_integer<Integer> = true>
     void write_big_endian(Integer value);
 
-    template <typename Integer>
+    template <typename Integer, if_integer<Integer> = true>
     void write_little_endian(Integer value);
 
     /// Context.

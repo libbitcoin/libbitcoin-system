@@ -16,18 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
-#define LIBBITCOIN_SYSTEM_NONCOPYABLE_HPP
+#ifndef LIBBITCOIN_SYSTEM_TYPE_CONSTRAINTS_HPP
+#define LIBBITCOIN_SYSTEM_TYPE_CONSTRAINTS_HPP
 
+#include <limits>
 #include <type_traits>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+// TODO: test.
+
 // C++14: use enable_if_t.
 template <bool Bool, typename Type=void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
+
+template <size_t Value>
+using if_odd = enable_if_type<is_odd(Value), bool>;
+
+template <size_t Value>
+using if_even = enable_if_type<is_even(Value), bool>;
+
+template <typename Type>
+using if_byte = enable_if_type<is_one(sizeof(Type)), bool>;
+
+template <size_t Value>
+using if_byte_aligned = enable_if_type<is_byte_aligned(Value), bool>;
 
 template <typename Base, typename Type>
 using if_base_of = enable_if_type<
@@ -35,17 +51,17 @@ using if_base_of = enable_if_type<
 
 template <typename Type>
 using if_integer = enable_if_type<
-    std::is_integral<Type>::value, bool>;
+    std::numeric_limits<Type>::is_integer, bool>;
 
 template <typename Type>
 using if_signed_integer = enable_if_type<
-    std::is_integral<Type>::value &&
-    std::is_signed<Type>::value, bool>;
+    std::is_signed<Type>::value &&
+    std::numeric_limits<Type>::is_integer, bool>;
 
 template <typename Type>
 using if_unsigned_integer = enable_if_type<
-    std::is_integral<Type>::value &&
-    !std::is_signed<Type>::value, bool>;
+    !std::is_signed<Type>::value &&
+    std::numeric_limits<Type>::is_integer, bool>;
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.

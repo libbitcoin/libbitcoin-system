@@ -65,7 +65,7 @@ std::string encode_base32(const base32_chunk& data)
 
     // encode[] cannot be out of bounds because expanded bytes are < 32.
     for (auto value: data)
-        out.push_back(encode[value.convert_to<uint8_t>()]);
+        out.push_back(encode[static_cast<uint8_t>(value)]);
 
     return out;
 }
@@ -120,7 +120,7 @@ data_chunk base32_pack(const base32_chunk& unpacked)
 
     // This is how c++ developers do it. :)
     for (const auto& value: unpacked)
-        bit_writer.write_bits(value.convert_to<uint64_t>(), 5);
+        bit_writer.write_bits(static_cast<uint8_t>(value), 5);
 
     bit_writer.flush();
     sink.flush();

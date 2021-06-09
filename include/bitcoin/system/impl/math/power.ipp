@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_POWER_IPP
 #define LIBBITCOIN_SYSTEM_POWER_IPP
 
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 

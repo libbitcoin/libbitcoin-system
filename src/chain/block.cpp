@@ -29,6 +29,7 @@
 #include <unordered_map>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -368,7 +369,7 @@ hash_digest block::hash() const
 size_t block::locator_size(size_t top)
 {
     size_t size = 0, step = 1;
-    for (auto height = top; height > 0u; height = floor_subtract(height, step))
+    for (auto height = top; height > 0; height = floor_subtract(height, step))
         if (++size > 9u)
             step <<= 1;
 
@@ -383,7 +384,7 @@ block::indexes block::locator_heights(size_t top)
     heights.reserve(locator_size(top));
 
     // Start at top block and collect block indexes in reverse.
-    for (auto height = top; height > 0u; height = floor_subtract(height, step))
+    for (auto height = top; height > 0; height = floor_subtract(height, step))
     {
         heights.push_back(height);
 
@@ -425,7 +426,7 @@ void block::strip_witness()
 uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
-    static const auto overflow = sizeof(uint64_t) * byte_bits;
+    static const auto overflow = to_bits(sizeof(uint64_t));
     auto subsidy = initial_block_subsidy_satoshi;
     const auto halvings = height / subsidy_interval;
     subsidy >>= (bip42 && halvings >= overflow ? 0 : halvings);
@@ -455,7 +456,7 @@ size_t block::signature_operations(bool bip16, bool bip141) const
     // to exclude p2sh coinbase sigops since there is never a script to count.
     //*************************************************************************
     const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), size_t{0}, value);
+    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
 }
 
 size_t block::total_non_coinbase_inputs() const
@@ -546,7 +547,7 @@ bool block::is_extra_coinbases() const
     };
 
     const auto& txs = transactions_;
-    return std::any_of(txs.begin() + 1, txs.end(), value);
+    return std::any_of(std::next(txs.begin()), txs.end(), value);
 }
 
 bool block::is_final(size_t height, uint32_t block_time) const
@@ -579,12 +580,12 @@ hash_digest block::generate_merkle_root(bool witness) const
     auto merkle = to_hashes(witness);
 
     // Initial capacity is half of the original list (clear doesn't reset).
-    update.reserve((merkle.size() + 1u) / 2u);
+    update.reserve(to_half(merkle.size() + 1u));
 
-    while (merkle.size() > 1u)
+    while (!is_zero(merkle.size()))
     {
         // If number of hashes is odd, duplicate last hash in the list.
-        if (merkle.size() % 2u != 0u)
+        if (is_odd(merkle.size()))
             merkle.push_back(merkle.back());
 
         for (auto it = merkle.begin(); it != merkle.end(); it += 2u)
@@ -607,7 +608,7 @@ bool block::is_forward_reference() const
     std::unordered_map<hash_digest, bool> hashes(transactions_.size());
     const auto is_forward = [&hashes](const input& input)
     {
-        return hashes.count(input.previous_output().hash()) != 0;
+        return !is_zero(hashes.count(input.previous_output().hash()));
     };
 
     for (const auto& tx: reverse(transactions_))
@@ -655,7 +656,7 @@ uint64_t block::fees() const
     };
 
     const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), uint64_t{0}, value);
+    return std::accumulate(txs.begin(), txs.end(), uint64_t(0), value);
 }
 
 uint64_t block::claim() const

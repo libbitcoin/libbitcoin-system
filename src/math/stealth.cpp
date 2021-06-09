@@ -63,7 +63,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 {
     static const auto magic = to_chunk(std::string("Stealth seed"));
-    auto nonced_seed = splice({ 0 }, seed);
+    auto nonced_seed = splice({ 0u }, seed);
     ec_compressed point;
 
     // Iterate up to 255 times before giving up on finding a valid key pair.
@@ -113,15 +113,15 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
         return false;
 
     // Copy the unsigned portion of the ephemeral public key into data.
-    std::copy_n(point.begin() + 1, ec_compressed_size - 1, data.begin());
+    std::copy_n(std::next(point.begin()), ec_compressed_size - 1, data.begin());
 
     // Copy arbitrary pad bytes into data.
     const auto pad_begin = data.begin() + hash_size;
     std::copy_n(bytes.begin(), pad_size, pad_begin);
 
     // Create an initial 32 bit nonce value from last word (avoiding pad).
-    const auto start = from_little_endian_unsafe<uint32_t>(bytes.begin() +
-        max_pad_size);
+    const auto start = from_little_endian_unsafe<uint32_t>(
+        std::next(bytes.begin(), max_pad_size));
 
     // Mine a prefix into the double sha256 hash of the stealth script.
     // This will iterate up to 2^32 times before giving up.
@@ -130,7 +130,8 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
     {
         // Fill the nonce into the data buffer.
         const auto fill = to_little_endian(nonce);
-        std::copy_n(fill.begin(), sizeof(nonce), data.end() - sizeof(nonce));
+        std::copy_n(fill.begin(), sizeof(nonce),
+            std::prev(data.end(), sizeof(nonce)));
 
         // Create the stealth script with the current data.
         out_null_data = script(script::to_pay_null_data_pattern(data));

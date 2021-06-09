@@ -21,19 +21,73 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/config/checkpoint.hpp>
+#include <limits>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/message/network_address.hpp>
 #include <bitcoin/system/version.hpp>
 
 namespace libbitcoin {
 
 // This guards assumptions within the codebase.
-static_assert(sizeof(size_t) == sizeof(uint32_t) ||
+static_assert(
+    sizeof(size_t) == sizeof(uint32_t) ||
     sizeof(size_t) == sizeof(uint64_t), "unsupported size_t");
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
+
+// Common const-expressions.
+//-----------------------------------------------------------------------------
+
+// TODO: test.
+
+constexpr uint8_t byte_bits = 8;
+
+template <typename Type>
+constexpr Type to_bits(Type bytes)
+{
+    return bytes * byte_bits;
+}
+
+template <typename Type>
+constexpr Type to_bytes(Type bits)
+{
+    return bits / byte_bits;
+}
+
+template <typename Type>
+constexpr Type to_half(Type value)
+{
+    return value / 2;
+}
+
+template <typename Type>
+constexpr bool is_one(Type value)
+{
+    return value == 1;
+}
+
+template <typename Type>
+constexpr bool is_zero(Type value)
+{
+    return value == 0;
+}
+
+template <typename Type>
+constexpr bool is_even(Type value)
+{
+    return is_zero(value % 2);
+}
+
+template <typename Type>
+constexpr bool is_odd(Type value)
+{
+    return !is_even(value);
+}
+
+template <typename Type>
+constexpr bool is_byte_aligned(Type bits)
+{
+    return is_zero(bits % byte_bits);
+}
 
 // Generic constants.
 //-----------------------------------------------------------------------------
@@ -42,12 +96,13 @@ constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
 constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
 constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
 constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
+constexpr int16_t min_int16 = std::numeric_limits<int16_t>::min();
+constexpr int16_t max_int16 = std::numeric_limits<int16_t>::max();
 constexpr uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
 constexpr uint32_t max_uint32 = std::numeric_limits<uint32_t>::max();
 constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
 constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
 constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
-constexpr uint8_t byte_bits = 8;
 
 // Consensus sentinels.
 //-----------------------------------------------------------------------------
@@ -95,19 +150,6 @@ constexpr uint32_t relative_locktime_mask = 0x0000ffff;
 constexpr uint32_t relative_locktime_disabled = 0x80000000;
 constexpr uint32_t relative_locktime_time_locked = 0x00400000;
 
-// Fork constants.
-//-----------------------------------------------------------------------------
-
-// github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-static const system::config::checkpoint mainnet_bip30_exception_checkpoint1
-{
-    "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
-};
-static const system::config::checkpoint mainnet_bip30_exception_checkpoint2
-{
-    "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
-};
-
 // Network protocol constants.
 //-----------------------------------------------------------------------------
 
@@ -134,7 +176,7 @@ constexpr size_t compact_filter_checkpoint_interval = 1000;
 constexpr size_t minimum_seed_bits = 128;
 
 // The minimum safe length of a seed in bytes (16).
-constexpr size_t minimum_seed_size = minimum_seed_bits / byte_bits;
+constexpr size_t minimum_seed_size = to_bytes(minimum_seed_bits);
 
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
 constexpr size_t max_locator = 43;

@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_FORMATS_BASE_16_HPP
 
 #include <cstddef>
-#include <cstdint>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -66,31 +66,31 @@ bool decode_hash(byte_array<Size>& out, const std::string& in);
 
 /// Convert a literal hex string to a string (bytes are cast to string chars).
 /// Empty string returned if decoding fails.
-template <size_t Size>
+template <size_t Size, if_odd<Size> = true>
 std::string base16_string(const char(&string)[Size]);
 
 /// Convert a literal hexidecimal string literal to a byte array.
 /// Empty chunk returned if decoding fails.
-template <size_t Size>
+template <size_t Size, if_odd<Size> = true>
 data_chunk base16_chunk(const char(&string)[Size]);
 
 /// Convert a hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_array(const char(&string)[Size]);
+template <size_t Size, if_odd<Size> = true>
+byte_array<to_half(Size - 1u)> base16_array(const char(&string)[Size]);
 
 /// Convert a reversed byte order hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_hash(const char(&string)[Size]);
+template <size_t Size, if_odd<Size> = true>
+byte_array<to_half(Size - 1u)> base16_hash(const char(&string)[Size]);
 
 /// DEPRECATED: use base16_array (renamed).
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> base16_literal(const char(&string)[Size]);
+template <size_t Size, if_odd<Size> = true>
+byte_array<to_half(Size - 1u)> base16_literal(const char(&string)[Size]);
 
 /// DEPRECATED: use base16_hash (renamed).
-template <size_t Size>
-byte_array<(Size - 1u) / 2u> hash_literal(const char(&string)[Size]);
+template <size_t Size, if_odd<Size> = true>
+byte_array<to_half(Size - 1u)> hash_literal(const char(&string)[Size]);
 
 } // namespace system
 } // namespace libbitcoin

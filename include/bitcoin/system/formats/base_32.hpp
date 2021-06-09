@@ -21,17 +21,13 @@
 
 #include <string>
 #include <vector>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-typedef boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<5, 5,
-    boost::multiprecision::unsigned_magnitude,
-    boost::multiprecision::unchecked, void>> uint5_t;
 typedef std::vector<uint5_t> base32_chunk;
 
 // This is NOT an implementation of RFC 4648: tools.ietf.org/html/rfc4648

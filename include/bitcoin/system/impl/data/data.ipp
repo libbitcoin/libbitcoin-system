@@ -25,6 +25,7 @@
 #include <iterator>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {
@@ -115,8 +116,8 @@ byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
 template <size_t Size>
 split_parts<Size / 2u> split(const byte_array<Size>& bytes)
 {
-    static_assert(Size != 0u, "Split requires a non-zero parameter.");
-    static_assert(Size % 2u == 0u, "Split requires an even length parameter.");
+    static_assert(!is_zero(Size), "Split requires a non-zero parameter.");
+    static_assert(is_even(Size), "Split requires an even length parameter.");
     static const auto half = Size / 2u;
     split_parts<half> out;
     std::copy_n(bytes.begin(), half, out.first.begin());

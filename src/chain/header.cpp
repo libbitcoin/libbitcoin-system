@@ -24,6 +24,7 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>

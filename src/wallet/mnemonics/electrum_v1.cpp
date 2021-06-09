@@ -232,7 +232,7 @@ hash_digest electrum_v1::strecher(const data_chunk& seed_entropy)
 
 size_t electrum_v1::entropy_bits(const data_slice& entropy)
 {
-    return entropy.size() * byte_bits;
+    return to_bits(entropy.size());
 }
 
 size_t electrum_v1::entropy_bits(const string_list& words)
@@ -242,7 +242,7 @@ size_t electrum_v1::entropy_bits(const string_list& words)
 
 size_t electrum_v1::entropy_size(const string_list& words)
 {
-    return entropy_bits(words) / byte_bits;
+    return to_bytes(entropy_bits(words));
 }
 
 size_t electrum_v1::word_count(const data_slice& entropy)

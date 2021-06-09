@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 
@@ -79,7 +80,7 @@ std::string encode_hash(const data_slice& hash)
 
 bool decode_base16(data_chunk& out, const std::string& in)
 {
-    if (in.size() % 2u != 0u)
+    if (is_odd(in.size()))
         return false;
 
     if (!std::all_of(in.begin(), in.end(), is_base16))
@@ -101,7 +102,7 @@ bool decode_base16(data_chunk& out, const std::string& in)
         return (from_base16_digit(high) << 4u) | from_base16_digit(low);
     };
 
-    out.resize(in.size() / 2u);
+    out.resize(to_half(in.size()));
     auto data = out.begin();
 
     for (auto digit = in.begin(); digit != in.end();)

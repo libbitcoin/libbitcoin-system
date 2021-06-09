@@ -134,7 +134,7 @@ size_t mnemonic::checksum_bits(const string_list& words)
 
 size_t mnemonic::entropy_bits(const data_slice& entropy)
 {
-    return entropy.size() * byte_bits;
+    return to_bits(entropy.size());
 }
 
 size_t mnemonic::entropy_bits(const string_list& words)
@@ -144,7 +144,7 @@ size_t mnemonic::entropy_bits(const string_list& words)
 
 size_t mnemonic::entropy_size(const string_list& words)
 {
-    return entropy_bits(words) / byte_bits;
+    return to_bytes(entropy_bits(words));
 }
 
 size_t mnemonic::word_count(const data_slice& entropy)

@@ -38,10 +38,6 @@ inline bool is_negative(Integer value);
 template <typename Integer, if_unsigned_integer<Integer> = true>
 inline bool is_negative(Integer value);
 
-/// Determine whether the integer is odd.
-template <typename Integer, if_integer<Integer> = true>
-inline bool is_odd(Integer value);
-
 } // namespace system
 } // namespace libbitcoin
 
