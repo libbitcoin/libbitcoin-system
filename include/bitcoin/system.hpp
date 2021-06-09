@@ -47,6 +47,7 @@
 #include <bitcoin/system/concurrency/delegates.hpp>
 #include <bitcoin/system/concurrency/dispatcher.hpp>
 #include <bitcoin/system/concurrency/enable_shared_from_base.hpp>
+#include <bitcoin/system/concurrency/file_lock.hpp>
 #include <bitcoin/system/concurrency/flush_lock.hpp>
 #include <bitcoin/system/concurrency/handlers.hpp>
 #include <bitcoin/system/concurrency/interprocess_lock.hpp>
@@ -93,6 +94,7 @@
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/formats/base_10.hpp>
 #include <bitcoin/system/formats/base_16.hpp>

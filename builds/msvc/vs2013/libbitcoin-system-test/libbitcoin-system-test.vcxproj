@@ -118,6 +118,7 @@
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
@@ -143,7 +144,6 @@
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />

@@ -332,6 +332,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/collection.cpp \
     test/data/data.cpp \
     test/data/data_slice.cpp \
+    test/data/integer.cpp \
     test/data/string.cpp \
     test/formats/base_10.cpp \
     test/formats/base_16.cpp \
@@ -359,7 +360,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/siphash.cpp \
     test/math/siphash.hpp \
     test/math/stealth.cpp \
-    test/math/uint256.cpp \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
@@ -556,6 +556,7 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/collection.hpp \
     include/bitcoin/system/data/data.hpp \
     include/bitcoin/system/data/data_slice.hpp \
+    include/bitcoin/system/data/integer.hpp \
     include/bitcoin/system/data/string.hpp
 
 include_bitcoin_system_formatsdir = ${includedir}/bitcoin/system/formats
@@ -579,7 +580,8 @@ include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/collection.ipp \
     include/bitcoin/system/impl/data/data.ipp \
-    include/bitcoin/system/impl/data/data_slice.ipp
+    include/bitcoin/system/impl/data/data_slice.ipp \
+    include/bitcoin/system/impl/data/string.ipp
 
 include_bitcoin_system_impl_formatsdir = ${includedir}/bitcoin/system/impl/formats
 include_bitcoin_system_impl_formats_HEADERS = \

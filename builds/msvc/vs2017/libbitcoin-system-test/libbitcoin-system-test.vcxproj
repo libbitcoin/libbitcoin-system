@@ -118,6 +118,7 @@
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
@@ -143,7 +144,6 @@
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />
@@ -309,11 +309,6 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc141.0.1.0.19\build\native\secp256k1_vc141.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc141.1.72.0.0\build\boost_unit_test_framework-vc141.targets'))" />
   </Target>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
-    <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

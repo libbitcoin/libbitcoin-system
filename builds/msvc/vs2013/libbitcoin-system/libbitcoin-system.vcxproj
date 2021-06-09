@@ -401,6 +401,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\integer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error.hpp" />
@@ -594,6 +595,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\string.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\formats\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\formats\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\istream_bit_reader.ipp" />

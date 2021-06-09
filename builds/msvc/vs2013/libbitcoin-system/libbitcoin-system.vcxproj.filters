@@ -1004,6 +1004,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\integer.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
@@ -1577,6 +1580,9 @@
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp">
+      <Filter>include\bitcoin\system\impl\data</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\string.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\formats\base_16.ipp">

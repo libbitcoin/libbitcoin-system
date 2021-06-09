@@ -177,6 +177,9 @@
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\integer.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
@@ -250,9 +253,6 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\uint256.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\address.cpp">
