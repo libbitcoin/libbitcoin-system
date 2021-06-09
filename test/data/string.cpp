@@ -21,7 +21,65 @@
 
 BOOST_AUTO_TEST_SUITE(string_tests)
 
-// join
+#define TODO_TESTS true
+#define STRING_TO_STRING 1
+#define STRING_JOIN 1
+#define STRING_SPLIT 1
+#define STRING_TRIM 1
+#define STRING_REDUCE 1
+#define STRING_REPLACE 1
+#define STRING_STARTS_WITH 1
+#define STRING_ENDS_WITH 1
+
+#ifdef STRING_TO_STRING
+
+// to_string<>
+
+BOOST_AUTO_TEST_CASE(string__to_string_integer__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// to_string
+
+BOOST_AUTO_TEST_CASE(string__to_string_slice__to_array__inverse)
+{
+    std::string result{ "foobar" };
+    BOOST_REQUIRE_EQUAL(to_string(to_array<6>(result)), result);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string_slice__to_chunk__inverse)
+{
+    std::string result{ "foobar" };
+    BOOST_REQUIRE_EQUAL(to_string(to_chunk(result)), result);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string_slice__empty__empty)
+{
+    const data_chunk value{};
+    const std::string expected{ "" };
+    BOOST_REQUIRE_EQUAL(to_string(value), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string_slice__vector__expected)
+{
+    const data_chunk value{ 'a', 'b', 'c' };
+    const std::string expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(to_string(value), expected);
+}
+
+BOOST_AUTO_TEST_CASE(string__to_string_slice__array__expected)
+{
+    const byte_array<3> value{ { 'a', 'b', 'c' } };
+    const std::string expected{ "abc" };
+    BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
+}
+
+#endif // STRING_TO_STRING
+
+#ifdef STRING_JOIN
+
+// join1
 
 BOOST_AUTO_TEST_CASE(string__join1__empties__one_space)
 {
@@ -48,6 +106,8 @@ BOOST_AUTO_TEST_CASE(string__join1__values__delimited)
     BOOST_REQUIRE_EQUAL(system::join(string_list{ "abc", "xyz" }), "abc xyz");
 }
 
+// join2
+
 BOOST_AUTO_TEST_CASE(string__join2__empties_empty_delimiter__empty)
 {
     BOOST_REQUIRE_EQUAL(system::join(string_list{ "", "" }, ""), "");
@@ -73,8 +133,11 @@ BOOST_AUTO_TEST_CASE(string__join2__untrimmed_values_comma_delimiter__untrimmed_
     BOOST_REQUIRE_EQUAL(system::join(string_list{ " abc ", " xyz " }, ","), " abc , xyz ");
 }
 
-// split
+#endif // STRING_JOIN
 
+#ifdef STRING_SPLIT
+
+// split0
 
 BOOST_AUTO_TEST_CASE(string__split0__true_compress__trimmed_compressed)
 {
@@ -89,6 +152,9 @@ BOOST_AUTO_TEST_CASE(string__split0__false_compress__trimmed)
     const string_list expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::split(value, false), expected);
 }
+
+// split1
+
 BOOST_AUTO_TEST_CASE(string__split1__empty__empty)
 {
     const std::string value{};
@@ -145,6 +211,8 @@ BOOST_AUTO_TEST_CASE(string__split1__twelve_delimiters__trimmed_and_compressed)
     BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
+// split2
+
 BOOST_AUTO_TEST_CASE(string__split2__one_ideographic_space_delimiter__split)
 {
     const std::string value{ "www\xe3\x80\x80mmm" };
@@ -165,6 +233,8 @@ BOOST_AUTO_TEST_CASE(string__split2__four_ideographic_space_delimiters__trimmed_
     const string_list expected{ "www", "mmm" };
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space), expected);
 }
+
+// split3
 
 BOOST_AUTO_TEST_CASE(string__split3__one_delimiter_left__untrimmed)
 {
@@ -194,6 +264,8 @@ BOOST_AUTO_TEST_CASE(string__split3__four_ideographic_space_delimiters__untrimme
     BOOST_REQUIRE_EQUAL(system::split(value, ideographic_space, false), expected);
 }
 
+// split4
+
 BOOST_AUTO_TEST_CASE(string__split4__twelve_comma_delimiters__trimmed_uncompressed)
 {
     const std::string value{ ",,\t\r\n,,abc,,\t\r\n,,xyz,,\t\r\n,," };
@@ -215,6 +287,8 @@ BOOST_AUTO_TEST_CASE(string__split5__ascii_and_ideographic_space_delimiters__unt
     const string_list delimiters{ ideographic_space, ascii_space };
     BOOST_REQUIRE_EQUAL(system::split(value, delimiters, {}, false), expected);
 }
+
+// split5
 
 BOOST_AUTO_TEST_CASE(string__split5__ascii_and_ideographic_space_delimiters__untrimmed_compressed)
 {
@@ -240,6 +314,10 @@ BOOST_AUTO_TEST_CASE(string__split5__alpha_bravo_charlie__trimmed)
     BOOST_REQUIRE_EQUAL(system::split(value, delimiters, ascii_whitespace, false), expected);
 }
 
+#endif // STRING_SPLIT
+
+#ifdef STRING_TRIM
+
 // trim
 
 BOOST_AUTO_TEST_CASE(string__trim__empty__empty)
@@ -253,6 +331,7 @@ BOOST_AUTO_TEST_CASE(string__trim__no_whitespace__unchanged)
 {
     std::string value{ "abcdefghij" };
     const auto expected = value;
+    system::trim(value);
     BOOST_REQUIRE_EQUAL(value, value);
 }
 
@@ -278,6 +357,20 @@ BOOST_AUTO_TEST_CASE(string__trim__external_whitespace__trimmed)
     BOOST_REQUIRE_EQUAL(value, "1");
 }
 
+// trim_left
+
+BOOST_AUTO_TEST_CASE(string__trim_left__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// trim_right
+
+BOOST_AUTO_TEST_CASE(string__trim_right__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
 // trim_copy
 
 BOOST_AUTO_TEST_CASE(string__trim_copy__empty__empty)
@@ -299,6 +392,24 @@ BOOST_AUTO_TEST_CASE(string__trim_copy__external_whitespace__trimmed)
 {
     BOOST_REQUIRE_EQUAL(system::trim_copy("\t\n\v\f\r 1 \r\f\v\n\t"), "1");
 }
+
+// trim_left_copy
+
+BOOST_AUTO_TEST_CASE(string__trim_left_copy__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+// trim_right_copy
+
+BOOST_AUTO_TEST_CASE(string__trim_right_copy__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+#endif // STRING_TRIM
+
+#ifdef STRING_REDUCE
 
 // reduce
 
@@ -365,6 +476,17 @@ BOOST_AUTO_TEST_CASE(string__reduce__only_whitespace_both_false__unchanged)
     reduce(values, {}, false);
     BOOST_REQUIRE_EQUAL(values, expected);
 }
+
+// reduce_copy
+
+BOOST_AUTO_TEST_CASE(string__reduce_copy__todo__todo)
+{
+    BOOST_REQUIRE(TODO_TESTS);
+}
+
+#endif // STRING_REDUCE
+
+#ifdef STRING_REPLACE
 
 // replace
 
@@ -443,10 +565,17 @@ BOOST_AUTO_TEST_CASE(string__replace__with_spaces__expected)
 
 BOOST_AUTO_TEST_CASE(string__replace_copy__empty__empty)
 {
+    BOOST_REQUIRE_EQUAL(replace_copy("", "abc", "def"), "");
+}
+
+BOOST_AUTO_TEST_CASE(string__replace_copy__not_empty__expected)
+{
     BOOST_REQUIRE_EQUAL(replace_copy("abc def abc def", "def", "defdef"), "abc defdef abc defdef");
 }
 
-// starts_with
+#endif // STRING_REPLACE
+
+#ifdef STRING_STARTS_WITH
 
 BOOST_AUTO_TEST_CASE(string__starts_with__empty_empty__true)
 {
@@ -468,7 +597,9 @@ BOOST_AUTO_TEST_CASE(string__starts_with__found__true)
     BOOST_REQUIRE(system::starts_with("abc", "ab"));
 }
 
-// ends_with
+#endif // STRING_STARTS_WITH
+
+#ifdef STRING_ENDS_WITH
 
 BOOST_AUTO_TEST_CASE(string__ends_with__empty_empty__true)
 {
@@ -490,27 +621,6 @@ BOOST_AUTO_TEST_CASE(string__ends_with__found__true)
     BOOST_REQUIRE(system::ends_with("abc", "bc"));
 }
 
-// to_string
-
-BOOST_AUTO_TEST_CASE(string__to_string__empty__empty)
-{
-    const data_chunk value{};
-    const std::string expected{ "" };
-    BOOST_REQUIRE_EQUAL(to_string(value), expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__to_string__vector__expected)
-{
-    const data_chunk value{ 'a', 'b', 'c' };
-    const std::string expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(to_string(value), expected);
-}
-
-BOOST_AUTO_TEST_CASE(string__to_string__array__expected)
-{
-    const byte_array<3> value{ { 'a', 'b', 'c' } };
-    const std::string expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
-}
+#endif // STRING_ENDS_WITH
 
 BOOST_AUTO_TEST_SUITE_END()

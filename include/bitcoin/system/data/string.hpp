@@ -20,17 +20,33 @@
 #define LIBBITCOIN_SYSTEM_DATA_STRING_HPP
 
 #include <string>
-#include <vector>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 
 namespace libbitcoin {
 namespace system {
+    
+/// std::to_string is a formatter (and not thread safe).
+/// Use system::serialize for string formatting.
+/// Cast integer bytes directly into the string member.
+template <typename Integer, if_integer<Integer> = true>
+std::string to_string(Integer value, bool big_endian=true);
 
+/// Use system::serialize for string formatting.
+/// Casts bytes directly into the string member.
+/// to_string(to_chunk(string)) == string.
+/// to_string(to_array(string)) == string.
+BC_API std::string to_string(const data_slice& bytes);
+
+/// Join tokens by the specified delimiter.
 BC_API std::string join(const string_list& tokens,
     const std::string& delimiter=ascii_space);
 
+/// Split text into tokens by the specified delimiter(s).
+/// Compression removes all but a last empty token (after trimming).
+/// Compression removes all but a last empty token (after trimming).
 BC_API string_list split(const std::string& text, bool compress=true);
 BC_API string_list split(const std::string& text,
     const std::string& delimiter, bool trim=true, bool compress=true);
@@ -65,9 +81,9 @@ BC_API std::string replace_copy(const std::string& text,
 BC_API bool ends_with(const std::string& text, const std::string& suffix);
 BC_API bool starts_with(const std::string& text, const std::string& prefix);
 
-BC_API std::string to_string(const data_slice& bytes);
-
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/data/string.ipp>
 
 #endif

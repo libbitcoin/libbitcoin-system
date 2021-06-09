@@ -29,6 +29,11 @@
 namespace libbitcoin {
 namespace system {
 
+std::string to_string(const data_slice& bytes)
+{
+    return bytes.to_string();
+}
+
 std::string join(const string_list& tokens, const std::string& delimiter)
 {
     if (tokens.empty())
@@ -87,7 +92,6 @@ size_t replace(std::string& text, const std::string& from,
     return count;
 }
 
-// TODO: test.
 std::string replace_copy(const std::string& text, const std::string& from,
     const std::string& to)
 {
@@ -153,7 +157,7 @@ string_list split(const std::string& text, bool compress)
     return split(text, ascii_whitespace, ascii_whitespace, compress);
 }
 
-static bool trim_left(std::string& text, const std::string& token)
+bool trim_left(std::string& text, const std::string& token)
 {
     auto found = false;
     const auto length = token.length();
@@ -166,7 +170,7 @@ static bool trim_left(std::string& text, const std::string& token)
     return found;
 }
 
-static bool trim_right(std::string& text, const std::string& token)
+bool trim_right(std::string& text, const std::string& token)
 {
     auto found = false;
     const auto length = token.length();
@@ -179,7 +183,6 @@ static bool trim_right(std::string& text, const std::string& token)
     return found;
 }
 
-// TODO: test.
 bool trim_left(std::string& text, const string_list& trim_tokens)
 {
     bool found;
@@ -194,7 +197,6 @@ bool trim_left(std::string& text, const string_list& trim_tokens)
     return found;
 }
 
-// TODO: test.
 bool trim_right(std::string& text, const string_list& trim_tokens)
 {
     bool found;
@@ -215,7 +217,6 @@ void trim(std::string& text, const string_list& trim_tokens)
     trim_right(text, trim_tokens);
 }
 
-// TODO: test.
 std::string trim_left_copy(const std::string& text,
     const string_list& trim_tokens)
 {
@@ -224,7 +225,6 @@ std::string trim_left_copy(const std::string& text,
     return copy;
 }
 
-// TODO: test.
 std::string trim_right_copy(const std::string& text,
     const string_list& trim_tokens)
 {
@@ -250,11 +250,6 @@ bool ends_with(const std::string& text, const std::string& suffix)
 bool starts_with(const std::string& text, const std::string& prefix)
 {
     return text.find(prefix) == 0u;
-}
-
-std::string to_string(const data_slice& bytes)
-{
-    return bytes.to_string();
 }
 
 } // namespace system
