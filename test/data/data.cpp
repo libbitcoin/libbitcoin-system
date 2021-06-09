@@ -23,12 +23,20 @@
 
 BOOST_AUTO_TEST_SUITE(data_tests)
 
-// to_byte (character)
+#define TODO_TESTS true
+#define DATA_TO_BYTE 1
+#define DATA_TO_ARRAY 1
 
-BOOST_AUTO_TEST_CASE(string__to_byte__character__expected)
+#ifdef DATA_TO_BYTE
+
+BOOST_AUTO_TEST_CASE(data__to_byte__character__expected)
 {
     BOOST_REQUIRE_EQUAL(to_byte('x'), uint8_t{ 'x' });
 }
+
+#endif // DATA_TO_BYTE
+
+#ifdef DATA_TO_ARRAY
 
 // to_array (byte)
 
@@ -42,10 +50,16 @@ BOOST_AUTO_TEST_CASE(data__to_array1__value__expected_size_and_value)
 
 // to_array (data_slice)
 
+BOOST_AUTO_TEST_CASE(data__to_array2__to_string__inverse)
+{
+    byte_array<3> result{ { 24, 0, 15 } };
+    BOOST_REQUIRE_EQUAL(to_array<3>(to_string(result)), result);
+}
+
 BOOST_AUTO_TEST_CASE(data__to_array2__double_long_hash__expected)
 {
-    const uint8_t l = 42;
-    const uint8_t u = 24;
+    const auto l = 42;
+    const auto u = 24;
 
     // Uses data_slice data initializer construction.
     const auto result = to_array<long_hash_size>(
@@ -58,6 +72,8 @@ BOOST_AUTO_TEST_CASE(data__to_array2__double_long_hash__expected)
     BOOST_REQUIRE_EQUAL(result[0], l);
     BOOST_REQUIRE_EQUAL(result[long_hash_size / 2], u);
 }
+
+#endif // DATA_TO_ARRAY
 
 // build_array
 
@@ -124,6 +140,12 @@ BOOST_AUTO_TEST_CASE(data__to_chunk1__value__expected_size_and_value)
 }
 
 // to_chunk (data_slice)
+
+BOOST_AUTO_TEST_CASE(data__to_chunk2__to_string__inverse)
+{
+    data_chunk result{ 24, 0, 15 };
+    BOOST_REQUIRE_EQUAL(to_chunk(to_string(result)), result);
+}
 
 BOOST_AUTO_TEST_CASE(data__to_chunk2__array__expected)
 {

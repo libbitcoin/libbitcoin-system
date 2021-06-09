@@ -52,6 +52,7 @@ inline uint8_t to_byte(char character);
 
 /// Convert the data slice to an array.
 /// Underfill is padded with 0x00, excess is truncated.
+/// to_array(to_string(data)) == data.
 template <size_t Size>
 byte_array<Size> to_array(const data_slice& bytes);
 
@@ -108,6 +109,7 @@ BC_API one_byte to_array(uint8_t byte);
 BC_API data_chunk to_chunk(uint8_t byte);
 
 /// Create a data chunk from data slice.
+/// to_chunk(to_string(data)) == data.
 BC_API data_chunk to_chunk(const data_slice& bytes);
 
 /// Concatenate several data slices into a single data_chunk.
