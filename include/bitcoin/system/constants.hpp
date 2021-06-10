@@ -176,19 +176,19 @@ constexpr uint8_t byte_bits = 8;
 template <typename Type>
 constexpr bool is_zero(Type value)
 {
-    return value == zero;
+    return value == Type{ zero };
 }
 
 template <typename Type>
 constexpr bool is_one(Type value)
 {
-    return value == one;
+    return value == Type{ one };
 }
 
 template <typename Type>
 constexpr bool is_even(Type value)
 {
-    return is_zero(value % two);
+    return is_zero(value % Type{ two });
 }
 
 template <typename Type>
@@ -200,7 +200,24 @@ constexpr bool is_odd(Type value)
 template <typename Type>
 constexpr bool is_byte_aligned(Type bits)
 {
-    return is_zero(bits % byte_bits);
+    return is_zero(bits % Type{ byte_bits });
+}
+template <typename Type>
+constexpr Type to_bits(Type bytes)
+{
+    return bytes * Type{ byte_bits };
+}
+
+template <typename Type>
+constexpr Type to_bytes(Type bits)
+{
+    return bits / Type{ byte_bits };
+}
+
+template <typename Type>
+constexpr Type to_half(Type value)
+{
+    return value / Type{ two };
 }
 
 template <typename Type>
@@ -213,24 +230,6 @@ template <typename Type>
 constexpr Type sub1(Type value)
 {
     return value - Type{ one };
-}
-
-template <typename Type>
-constexpr Type to_bits(Type bytes)
-{
-    return bytes * byte_bits;
-}
-
-template <typename Type>
-constexpr Type to_bytes(Type bits)
-{
-    return bits / byte_bits;
-}
-
-template <typename Type>
-constexpr Type to_half(Type value)
-{
-    return value / two;
 }
 
 } // namespace libbitcoin
