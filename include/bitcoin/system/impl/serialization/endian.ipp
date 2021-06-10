@@ -178,15 +178,15 @@ Integer from_little_endian(std::istream& stream)
 template <typename Integer, if_integer<Integer>>
 void to_big_endian(std::ostream& stream, Integer value)
 {
-    const auto buffer = reinterpret_cast<char*>(to_big_endian(value).data());
-    stream.write(buffer, sizeof(Integer));
+    const auto buffer = to_big_endian(value);
+    stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
 template <typename Integer, if_integer<Integer>>
 void to_little_endian(std::ostream& stream, Integer value)
 {
-    const auto buffer = reinterpret_cast<char*>(to_little_endian(value).data());
-    stream.write(buffer, sizeof(Integer));
+    const auto buffer = to_little_endian(value);
+    stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
 // byte_array <=> uintx_t
