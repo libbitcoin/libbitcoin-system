@@ -576,23 +576,27 @@ hash_digest block::generate_merkle_root(bool witness) const
     if (transactions_.empty())
         return null_hash;
 
-    hash_list update;
     auto merkle = to_hashes(witness);
+    if (is_one(merkle.size()))
+        return merkle.front();
 
-    // Initial capacity is half of the original list (clear doesn't reset).
-    update.reserve(to_half(merkle.size() + 1));
+    // If number of hashes is odd, duplicate the last hash in the list.
+    if (is_odd(merkle.size()))
+        merkle.push_back(merkle.back());
 
-    while (merkle.size() > 1u)
+    // Initial capacity is half of the original list.
+    hash_list buffer;
+    buffer.reserve(to_half(merkle.size()));
+
+    // Reduce to a single hash (each iteration divides list size in half).
+    while (!is_one(merkle.size()))
     {
-        // If number of hashes is odd, duplicate last hash in the list.
-        if (is_odd(merkle.size()))
-            merkle.push_back(merkle.back());
-
+        // Hash each pair of concatenated transaction hashes.
         for (auto it = merkle.begin(); it != merkle.end(); std::advance(it, 2))
-            update.push_back(bitcoin_hash(splice(it[0], it[1])));
+            buffer.push_back(bitcoin_hash(splice(it[0], it[1])));
 
-        std::swap(merkle, update);
-        update.clear();
+        std::swap(merkle, buffer);
+        buffer.clear();
     }
 
     // There is now only one item in the list.
