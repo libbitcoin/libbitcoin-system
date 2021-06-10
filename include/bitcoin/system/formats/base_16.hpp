@@ -32,8 +32,11 @@ namespace system {
 /// The bitcoin hash format is base16 with the bytes reversed.
 /// This reversed format is generally used only for display formatting.
 
-/// Returns true if a character is a hexadecimal digit.
-BC_API bool is_base16(char character);
+/// True if the character is a hexadecimal digit.
+bool is_base16(char character);
+
+/// Byte value of the literal octet, undefined (but safe) if not base16.
+uint8_t encode_octet(const char(&string)[3]);
 
 // Encoding of data_slice (e.g. byte_array/data_chunk/string) to hex string.
 // ----------------------------------------------------------------------------

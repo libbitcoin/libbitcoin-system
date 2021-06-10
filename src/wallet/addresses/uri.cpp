@@ -19,8 +19,10 @@
 #include <bitcoin/system/wallet/addresses/uri.hpp>
 
 #include <iomanip>
+#include <iterator>
 #include <sstream>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/formats/base_16.hpp>
 
 namespace libbitcoin {
@@ -44,7 +46,7 @@ static bool is_scheme(const char c)
         '+' == c || '-' == c || '.' == c;
 }
 
-static bool is_path_char(const char c)
+static bool is_path_character(const char c)
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
@@ -57,15 +59,15 @@ static bool is_path_char(const char c)
 
 static bool is_path(const char c)
 {
-    return is_path_char(c) || '/' == c;
+    return is_path_character(c) || '/' == c;
 }
 
 static bool is_query(const char c)
 {
-    return is_path_char(c) || '/' == c || '?' == c;
+    return is_path_character(c) || '/' == c || '?' == c;
 }
 
-static bool is_query_char(const char c)
+static bool is_query_character(const char c)
 {
     return is_query(c) && '&' != c && '=' != c;
 }
@@ -74,22 +76,25 @@ static bool is_query_char(const char c)
 // all characters belong to the given class.
 static bool validate(const std::string& in, bool (*is_valid)(const char))
 {
-    auto i = in.begin();
-    while (in.end() != i)
+    for (auto it = in.begin(); it != in.end();)
     {
-        if ('%' == *i)
+        if (*it == '%')
         {
-            if (!(2 < in.end() - i && is_base16(i[1]) && is_base16(i[2])))
+            // If not octet.
+            if (!((std::distance(it, in.end()) > 2) &&
+                is_base16(it[1]) && is_base16(it[2])))
+            {
                 return false;
+            }
 
-            i += 3;
+            std::advance(it, 3);
         }
         else
         {
-            if (!is_valid(*i))
+            if (!is_valid(*it))
                 return false;
 
-            i += 1;
+            std::advance(it, 1);
         }
     }
 
@@ -103,20 +108,20 @@ static std::string unescape(const std::string& in)
     std::string out;
     out.reserve(in.size());
 
-    auto i = in.begin();
-    while (in.end() != i)
+    auto it = in.begin();
+    while (it != in.end())
     {
-        if ('%' == *i && 2 < in.end() - i && is_base16(i[1]) &&
-            is_base16(i[2]))
+        // If % and is octet.
+        if ((*it == '%') && (std::distance(it, in.end()) > 2) &&
+            is_base16(it[1]) && is_base16(it[2]))
         {
-            const char temp[] = { i[1], i[2], 0 };
-            out.push_back(base16_literal(temp)[0]);
-            i += 3;
+            out.push_back(encode_octet({ it[1], it[2], '\0' }));
+            std::advance(it, 3);
         }
         else
         {
-            out.push_back(*i);
-            i += 1;
+            out.push_back(*it);
+            std::advance(it, 1);
         }
     }
 
@@ -129,12 +134,12 @@ static std::string escape(const std::string& in, bool (*is_valid)(char))
 {
     std::ostringstream stream;
     stream << std::hex << std::uppercase << std::setfill('0');
-    for (const auto c: in)
+    for (const auto character: in)
     {
-        if (is_valid(c))
-            stream << c;
+        if (is_valid(character))
+            stream << character;
         else
-            stream << '%' << std::setw(2) << +c;
+            stream << '%' << std::setw(2) << +character;
     }
 
     return stream.str();
@@ -142,14 +147,14 @@ static std::string escape(const std::string& in, bool (*is_valid)(char))
 
 bool uri::decode(const std::string& encoded, bool strict)
 {
-    auto i = encoded.begin();
+    auto it = encoded.begin();
 
     // Store the scheme:
-    auto start = i;
-    while (encoded.end() != i && ':' != *i)
-        ++i;
+    auto start = it;
+    while (it != encoded.end() && *it != ':')
+        ++it;
 
-    scheme_ = std::string(start, i);
+    scheme_ = std::string(start, it);
     if (scheme_.empty() || !is_alpha(scheme_[0]))
         return false;
 
@@ -157,65 +162,65 @@ bool uri::decode(const std::string& encoded, bool strict)
         return false;
 
     // Consume ':':
-    if (encoded.end() == i)
+    if (it == encoded.end())
         return false;
 
-    ++i;
+    ++it;
 
     // Consume "//":
     authority_.clear();
     has_authority_ = false;
-    if (1 < encoded.end() - i && '/' == i[0] && '/' == i[1])
+    if (std::distance(it, encoded.end()) > 1 && it[0] == '/' && it[1] == '/')
     {
         has_authority_ = true;
-        i += 2;
+        it += 2;
 
         // Store authority part:
-        start = i;
-        while (encoded.end() != i && '#' != *i && '?' != *i && '/' != *i)
-            ++i;
+        start = it;
+        while (it != encoded.end() && *it != '#' && *it != '?' && *it != '/')
+            ++it;
 
-        authority_ = std::string(start, i);
-        if (strict && !validate(authority_, is_path_char))
+        authority_ = std::string(start, it);
+        if (strict && !validate(authority_, is_path_character))
             return false;
     }
 
     // Store the path part:
-    start = i;
-    while (encoded.end() != i && '#' != *i && '?' != *i)
-        ++i;
+    start = it;
+    while (it != encoded.end() && *it != '#' && *it != '?')
+        ++it;
 
-    path_ = std::string(start, i);
+    path_ = std::string(start, it);
     if (strict && !validate(path_, is_path))
         return false;
 
     // Consume '?':
     has_query_ = false;
-    if (encoded.end() != i && '#' != *i)
+    if (it != encoded.end() && *it != '#')
     {
         has_query_ = true;
-        ++i;
+        ++it;
     }
 
     // Store the query part:
-    start = i;
-    while (encoded.end() != i && '#' != *i)
-        ++i;
+    start = it;
+    while (it != encoded.end() && *it != '#')
+        ++it;
 
-    query_ = std::string(start, i);
+    query_ = std::string(start, it);
     if (strict && !validate(query_, is_query))
         return false;
 
     // Consume '#':
     has_fragment_ = false;
-    if (encoded.end() != i)
+    if (encoded.end() != it)
     {
         has_fragment_ = true;
-        ++i;
+        ++it;
     }
 
     // Store the fragment part:
-    fragment_ = std::string(i, encoded.end());
+    fragment_ = std::string(it, encoded.end());
     return !strict || validate(fragment_, is_query);
 }
 
@@ -240,12 +245,7 @@ std::string uri::encoded() const
 
 std::string uri::scheme() const
 {
-    auto out = scheme_;
-    for (auto& c: out)
-        if ('A' <= c && c <= 'Z')
-            c = c - 'A' + 'a';
-
-    return out;
+    return ascii_to_lower(scheme_);
 }
 
 void uri::set_scheme(const std::string& scheme)
@@ -268,7 +268,7 @@ bool uri::has_authority() const
 void uri::set_authority(const std::string& authority)
 {
     has_authority_ = true;
-    authority_ = escape(authority, is_path_char);
+    authority_ = escape(authority, is_path_character);
 }
 
 void uri::remove_authority()
@@ -339,30 +339,29 @@ void uri::remove_fragment()
 uri::query_map uri::decode_query() const
 {
     query_map out;
-    auto i = query_.begin();
-    while (query_.end() != i)
+    for (auto it = query_.begin(); it != query_.end();)
     {
         // Read the key:
-        auto begin = i;
-        while (query_.end() != i && '&' != *i && '=' != *i)
-            ++i;
+        auto begin = it;
+        while (it != query_.end() && *it != '&' && *it != '=')
+            ++it;
 
-        auto key = unescape(std::string(begin, i));
+        auto key = unescape(std::string(begin, it));
 
         // Consume '=':
-        if (query_.end() != i && '&' != *i)
-            ++i;
+        if (it != query_.end() && *it != '&')
+            ++it;
 
         // Read the value:
-        begin = i;
-        while (query_.end() != i && '&' != *i)
-            ++i;
+        begin = it;
+        while (it != query_.end() && *it != '&')
+            ++it;
 
-        out[key] = unescape(std::string(begin, i));
+        out[key] = unescape(std::string(begin, it));
 
         // Consume '&':
-        if (query_.end() != i)
-            ++i;
+        if (query_.end() != it)
+            ++it;
     }
 
     return out;
@@ -378,9 +377,9 @@ void uri::encode_query(const query_map& map)
             query << '&';
 
         first = false;
-        query << escape(term.first, is_query_char);
+        query << escape(term.first, is_query_character);
         if (!term.second.empty())
-            query << '=' << escape(term.second, is_query_char);
+            query << '=' << escape(term.second, is_query_character);
     }
 
     has_query_ = !map.empty();

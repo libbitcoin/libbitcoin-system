@@ -41,6 +41,27 @@ inline bool is_between(uint8_t value, uint8_t low, uint8_t high)
     return low <= value && value <= high;
 }
 
+inline uint8_t from_base16_characters(char high, char low)
+{
+    const auto from_base16_digit = [](char character)
+    {
+        if (is_between(character, 'A', 'F'))
+            return character - 'A' + 10u;
+
+        if (is_between(character, 'a', 'f'))
+            return character - 'a' + 10u;
+
+        return character - '0' + 0u;
+    };
+
+    return (from_base16_digit(high) << 4u) | from_base16_digit(low);
+}
+
+inline char to_base16_character(char digit)
+{
+    return (is_between(digit, 0, 9) ? '0' : 'a' - 10u) + digit;
+};
+
 // The C standard library function 'isxdigit' depends on the current locale,
 // and does not necessarily match the base16 encoding.
 bool is_base16(char character)
@@ -51,21 +72,22 @@ bool is_base16(char character)
         (is_between(character, 'A', 'F'));
 }
 
+// Undefined (but safe) behavior if characters are not base16. 
+uint8_t encode_octet(const char(&string)[3])
+{
+    return from_base16_characters(string[0], string[1]);
+}
+
 std::string encode_base16(const data_slice& data)
 {
-    const auto to_base16_digit = [](char digit)
-    {
-        return (is_between(digit, 0, 9) ? '0': 'a' - 10u) + digit;
-    };
-
     std::string out;
     out.resize(data.size() * 2u);
     auto digit = out.begin();
 
     for (const auto byte: data)
     {
-        *digit++ = to_base16_digit(byte >> 4);
-        *digit++ = to_base16_digit(byte & 0x0f);
+        *digit++ = to_base16_character(byte >> 4);
+        *digit++ = to_base16_character(byte & 0x0f);
     }
 
     return out;
@@ -86,22 +108,6 @@ bool decode_base16(data_chunk& out, const std::string& in)
     if (!std::all_of(in.begin(), in.end(), is_base16))
         return false;
 
-    const auto from_base16 = [](char high, char low)
-    {
-        const auto from_base16_digit = [](char character)
-        {
-            if (is_between(character, 'A', 'F'))
-                return character - 'A' + 10u;
-
-            if (is_between(character, 'a', 'f'))
-                return character - 'a' + 10u;
-
-            return character - '0' + 0u;
-        };
-
-        return (from_base16_digit(high) << 4u) | from_base16_digit(low);
-    };
-
     out.resize(to_half(in.size()));
     auto data = out.begin();
 
@@ -109,7 +115,7 @@ bool decode_base16(data_chunk& out, const std::string& in)
     {
         const auto hi = *digit++;
         const auto lo = *digit++;
-        *data++ = from_base16(hi, lo);
+        *data++ = from_base16_characters(hi, lo);
     }
 
     return true;
