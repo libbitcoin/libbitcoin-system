@@ -80,20 +80,20 @@ data_chunk base16_chunk(const char(&string)[Size]);
 /// Convert a hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-byte_array<to_half(Size - 1u)> base16_array(const char(&string)[Size]);
+byte_array<to_half(Size - 1)> base16_array(const char(&string)[Size]);
 
 /// Convert a reversed byte order hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-byte_array<to_half(Size - 1u)> base16_hash(const char(&string)[Size]);
+byte_array<to_half(Size - 1)> base16_hash(const char(&string)[Size]);
 
 /// DEPRECATED: use base16_array (renamed).
 template <size_t Size, if_odd<Size> = true>
-byte_array<to_half(Size - 1u)> base16_literal(const char(&string)[Size]);
+byte_array<to_half(Size - 1)> base16_literal(const char(&string)[Size]);
 
 /// DEPRECATED: use base16_hash (renamed).
 template <size_t Size, if_odd<Size> = true>
-byte_array<to_half(Size - 1u)> hash_literal(const char(&string)[Size]);
+byte_array<to_half(Size - 1)> hash_literal(const char(&string)[Size]);
 
 } // namespace system
 } // namespace libbitcoin
