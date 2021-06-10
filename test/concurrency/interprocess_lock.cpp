@@ -76,12 +76,14 @@ BOOST_AUTO_TEST_CASE(interprocess_lock__lock__externally_locked__false)
 
 #ifdef _MSC_VER
     BOOST_REQUIRE(instance2.lock());
-#else
-    BOOST_REQUIRE(!instance2.lock());
-#endif
-     
     BOOST_REQUIRE(test::exists(TEST_PATH));
     BOOST_REQUIRE(instance2.unlock());
+#else
+    BOOST_REQUIRE(!instance2.lock());
+    BOOST_REQUIRE(!test::exists(TEST_PATH));
+    BOOST_REQUIRE(!instance2.unlock());
+#endif
+ 
     BOOST_REQUIRE(!test::exists(TEST_PATH));
 }
 
