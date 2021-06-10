@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__expected)
     data_chunk source{ 0, 2, 4, 6, 8 };
     data_chunk target;
     const data_chunk expected = source;
-    move_append(target, data_chunk{});
+    move_append(target, source);
     BOOST_REQUIRE_EQUAL(target, expected);
 }
 
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(collection__reverse__single__unchanged)
 BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    const data_chunk expected{ 4, 6, 7, 0, 0, 2 };
+    const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
     BOOST_REQUIRE_EQUAL(reverse(set), expected);
 }
 

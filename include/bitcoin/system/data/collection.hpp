@@ -78,7 +78,9 @@ pop(Collection& stack);
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>
-bool is_distinct(Collection list);
+bool is_distinct(Collection&& list);
+template <typename Collection>
+bool is_distinct(const Collection& list);
 
 /// Determine if a collection is lexically sorted.
 template <typename Collection>
@@ -86,16 +88,22 @@ bool is_sorted(const Collection& list);
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
-Collection distinct(Collection list);
+Collection distinct(Collection&& list);
+template <typename Collection>
+Collection distinct(const Collection& list);
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
-Collection reverse(Collection list);
+Collection reverse(Collection&& list);
+template <typename Collection>
+Collection reverse(const Collection& list);
 
 /// Sort collection elements.
 template <typename Collection>
-Collection sort(Collection list);
+Collection sort(Collection&& list);
+template <typename Collection>
+Collection sort(const Collection& list);
 
 } // namespace system
 } // namespace libbitcoin
