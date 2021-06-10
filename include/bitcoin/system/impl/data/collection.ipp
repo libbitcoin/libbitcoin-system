@@ -51,8 +51,8 @@ binary_search(const Collection& list, const Element& element)
     if (list.empty())
         return negative_one;
 
-    Collection::difference_type left = zero;
-    Collection::difference_type right = sub1(size);
+    typename Collection::difference_type left = zero;
+    typename Collection::difference_type right = sub1(size);
 
     while (left <= right)
     {
@@ -84,7 +84,7 @@ bool contains(const Collection& list,
     const typename Collection::value_type& element)
 {
     return std::any_of(std::begin(list), std::end(list),
-        [&element](const Collection::value_type& value)
+        [&element](const typename Collection::value_type& value)
         {
             return value == element;
         });
@@ -98,7 +98,7 @@ find_pair_position(const Collection& list,
     const typename Collection::value_type::first_type& key)
 {
     const auto position = std::find_if(std::begin(list), std::end(list),
-        [&key](const Collection::value_type& pair)
+        [&key](const typename Collection::value_type& pair)
         {
             return pair.first == key;
         });
