@@ -39,6 +39,7 @@ static_assert(
 
 // TODO: test.
 
+constexpr size_t zero = 0;
 constexpr uint8_t byte_bits = 8;
 
 template <typename Type>

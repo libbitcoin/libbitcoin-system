@@ -678,7 +678,7 @@ data_chunk script::to_outputs(const transaction& tx)
     };
 
     const auto& outs = tx.outputs();
-    auto size = std::accumulate(outs.begin(), outs.end(), size_t(0), sum);
+    auto size = std::accumulate(outs.begin(), outs.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
@@ -703,7 +703,7 @@ data_chunk script::to_inpoints(const transaction& tx)
     };
 
     const auto& ins = tx.inputs();
-    auto size = std::accumulate(ins.begin(), ins.end(), size_t(0), sum);
+    auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
@@ -728,7 +728,7 @@ data_chunk script::to_sequences(const transaction& tx)
     };
 
     const auto& ins = tx.inputs();
-    auto size = std::accumulate(ins.begin(), ins.end(), size_t(0), sum);
+    auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);

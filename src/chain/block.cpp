@@ -303,7 +303,7 @@ size_t block::serialized_size(bool witness) const
     const auto& txs = transactions_;
     value = header_.serialized_size(true) +
         message::variable_uint_size(transactions_.size()) +
-        std::accumulate(txs.begin(), txs.end(), size_t(0), sum);
+        std::accumulate(txs.begin(), txs.end(), zero, sum);
 
     if (witness)
         total_size_ = value;
@@ -456,7 +456,7 @@ size_t block::signature_operations(bool bip16, bool bip141) const
     // to exclude p2sh coinbase sigops since there is never a script to count.
     //*************************************************************************
     const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), size_t(0), value);
+    return std::accumulate(txs.begin(), txs.end(), zero, value);
 }
 
 size_t block::total_non_coinbase_inputs() const
@@ -484,7 +484,7 @@ size_t block::total_non_coinbase_inputs() const
     };
 
     const auto& txs = transactions_;
-    value = std::accumulate(txs.begin() + 1, txs.end(), size_t(0), inputs);
+    value = std::accumulate(txs.begin() + 1, txs.end(), zero, inputs);
     non_coinbase_inputs_ = value;
 
     mutex_.unlock();
@@ -518,7 +518,7 @@ size_t block::total_inputs() const
     };
 
     const auto& txs = transactions_;
-    value = std::accumulate(txs.begin(), txs.end(), size_t(0), inputs);
+    value = std::accumulate(txs.begin(), txs.end(), zero, inputs);
     total_inputs_ = value;
 
     mutex_.unlock();
@@ -580,15 +580,15 @@ hash_digest block::generate_merkle_root(bool witness) const
     auto merkle = to_hashes(witness);
 
     // Initial capacity is half of the original list (clear doesn't reset).
-    update.reserve(to_half(merkle.size() + 1u));
+    update.reserve(to_half(merkle.size() + 1));
 
-    while (!is_zero(merkle.size()))
+    while (merkle.size() > 1u)
     {
         // If number of hashes is odd, duplicate last hash in the list.
         if (is_odd(merkle.size()))
             merkle.push_back(merkle.back());
 
-        for (auto it = merkle.begin(); it != merkle.end(); it += 2u)
+        for (auto it = merkle.begin(); it != merkle.end(); std::advance(it, 2))
             update.push_back(bitcoin_hash(splice(it[0], it[1])));
 
         std::swap(merkle, update);

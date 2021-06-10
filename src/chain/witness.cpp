@@ -27,6 +27,7 @@
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
@@ -203,7 +204,7 @@ size_t witness::serialized_size(const data_stack& stack)
         return total + message::variable_uint_size(size) + size;
     };
 
-    return std::accumulate(stack.begin(), stack.end(), size_t(0), sum);
+    return std::accumulate(stack.begin(), stack.end(), zero, sum);
 }
 
 // protected
