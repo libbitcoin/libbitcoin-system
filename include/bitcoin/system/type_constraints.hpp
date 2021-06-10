@@ -27,8 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-// TODO: test.
-
 // C++14: use enable_if_t.
 template <bool Bool, typename Type=void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
