@@ -615,7 +615,7 @@ bool block::is_forward_reference() const
         return !is_zero(hashes.count(input.previous_output().hash()));
     };
 
-    for (const auto& tx: reverse(transactions_))
+    for (const auto& tx: boost::adaptors::reverse(transactions_))
     {
         hashes.emplace(tx.hash(), true);
 
@@ -703,7 +703,7 @@ bool block::is_valid_witness_commitment() const
 
     // Last output of commitment pattern holds committed value (bip141).
     if (coinbase.inputs().front().extract_reserved_hash(reserved))
-        for (const auto& output: reverse(coinbase.outputs()))
+        for (const auto& output: boost::adaptors::reverse(coinbase.outputs()))
             if (output.extract_committed_hash(committed))
                 return committed == bitcoin_hash(
                     splice(generate_merkle_root(true), reserved));
