@@ -25,6 +25,8 @@ BOOST_AUTO_TEST_SUITE(encrypted_tests)
 
 using namespace bc::system::wallet;
 
+#if defined(SLOW_TESTS) || !defined(NDEBUG)
+
 #ifdef WITH_ICU
 
 BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
@@ -658,7 +660,9 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif
+#endif // WITH_ICU
+
+#endif // SLOW_TESTS
 
 // ----------------------------------------------------------------------------
 
