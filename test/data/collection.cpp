@@ -24,8 +24,6 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 
 // binary_search
 
-const auto not_found = -1;
-
 // Collection must implement [] and .size().
 // Either list members or the search key must implement lexical compare (<, >).
 
@@ -35,14 +33,14 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_native__empty__not_found)
 {
     const std::string empty = "";
     const auto value = 'a';
-    BOOST_REQUIRE_EQUAL(binary_search(empty, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(empty, value), negative_one);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_native__one_element_unmatched__not_found)
 {
     const std::string single = "a";
     const auto value = 'b';
-    BOOST_REQUIRE_EQUAL(binary_search(single, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(single, value), negative_one);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_native__one_element_match__0)
@@ -94,7 +92,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_element__three_various_elements_unmat
 {
     const string_list sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const auto value = "bcd";
-    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), negative_one);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_element__three_various_elements_matched__found)
@@ -108,7 +106,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_element__unsorted_contained__unlucky)
 {
     const string_list unsorted{ { "z", "y", "x" } };
     const auto value = "z";
-    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
 // binary_search - key comparison operators
@@ -117,7 +115,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_unmatched
 {
     const std::vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const std::string value = "bcd";
-    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, value), negative_one);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_matched__found)
@@ -131,211 +129,82 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
 {
     const std::vector<const char*> unsorted{ "z", "y", "x" };
     const std::string value = "z";
-    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), not_found);
+    BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
 // cast
 
-BOOST_AUTO_TEST_CASE(collection__cast__empty__same)
+BOOST_AUTO_TEST_CASE(collection__cast__empty__empty)
 {
-    data_chunk parameter;
-    const auto result = cast<uint8_t>(parameter);
-    BOOST_REQUIRE(parameter.empty());
-    BOOST_REQUIRE(result.empty());
+    BOOST_REQUIRE(cast<uint8_t>(data_chunk{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__cast__one_element__same)
 {
-    data_chunk parameter{ 42 };
-    const auto result = cast<uint8_t>(parameter);
-    BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
+    const uint8_t expected = 42;
+    const auto result = cast<uint8_t>(data_chunk{ expected });
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result.front(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__cast__distinct_types__same)
 {
-    data_chunk parameter{ 42, 24 };
-    const auto result = cast<uint32_t>(parameter);
-    BOOST_REQUIRE_EQUAL(parameter.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], parameter[0]);
-    BOOST_REQUIRE_EQUAL(result[1], parameter[1]);
-}
-
-// distinct
-
-BOOST_AUTO_TEST_CASE(collection__distinct__empty__same)
-{
-    data_chunk set{};
-    set = distinct(std::move(set));
-    BOOST_REQUIRE(set.empty());
-}
-
-BOOST_AUTO_TEST_CASE(collection__distinct__single__match)
-{
-    const uint8_t expected = 42;
-    data_chunk set{ expected };
-    set = distinct(std::move(set));
-    BOOST_REQUIRE_EQUAL(set.size(), 1u);
-    BOOST_REQUIRE_EQUAL(set[0], expected);
-}
-
-BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__sorted)
-{
-    data_chunk set{ 0, 2, 4, 6, 8 };
-    set = distinct(std::move(set));
-    BOOST_REQUIRE_EQUAL(set.size(), 5u);
-    BOOST_REQUIRE_EQUAL(set[0], 0u);
-    BOOST_REQUIRE_EQUAL(set[1], 2u);
-    BOOST_REQUIRE_EQUAL(set[2], 4u);
-    BOOST_REQUIRE_EQUAL(set[3], 6u);
-    BOOST_REQUIRE_EQUAL(set[4], 8u);
-}
-
-BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
-{
-    data_chunk set{ 2, 0, 8, 6, 4 };
-    set = distinct(std::move(set));
-    BOOST_REQUIRE_EQUAL(set.size(), 5u);
-    BOOST_REQUIRE_EQUAL(set[0], 0u);
-    BOOST_REQUIRE_EQUAL(set[1], 2u);
-    BOOST_REQUIRE_EQUAL(set[2], 4u);
-    BOOST_REQUIRE_EQUAL(set[3], 6u);
-    BOOST_REQUIRE_EQUAL(set[4], 8u);
-}
-
-BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted_duplicates__sorted_distinct)
-{
-    data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    set = distinct(std::move(set));
-    BOOST_REQUIRE_EQUAL(set.size(), 5u);
-    BOOST_REQUIRE_EQUAL(set[0], 0u);
-    BOOST_REQUIRE_EQUAL(set[1], 2u);
-    BOOST_REQUIRE_EQUAL(set[2], 4u);
-    BOOST_REQUIRE_EQUAL(set[3], 6u);
-    BOOST_REQUIRE_EQUAL(set[4], 8u);
-}
-
-// is_distinct
-
-BOOST_AUTO_TEST_CASE(collection__is_distinct__empty__true)
-{
-    data_chunk set{};
-    BOOST_REQUIRE(is_distinct(std::move(set)));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_distinct__single__true)
-{
-    data_chunk set{ 42 };
-    BOOST_REQUIRE(is_distinct(std::move(set)));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_distinct__distinct__true)
-{
-    data_chunk set{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(is_distinct(std::move(set)));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_distinct__nondistinct__false)
-{
-    data_chunk set{ 0, 2, 4, 2, 8 };
-    BOOST_REQUIRE(!is_distinct(std::move(set)));
-}
-
-// is_sorted
-
-BOOST_AUTO_TEST_CASE(collection__is_sorted__empty__true)
-{
-    data_chunk set{};
-    BOOST_REQUIRE(is_sorted(set));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_sorted__single__true)
-{
-    data_chunk set{ 42 };
-    BOOST_REQUIRE(is_sorted(set));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_distinct__true)
-{
-    data_chunk set{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(is_sorted(set));
-}
-
-BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_non_distinct__true)
-{
-    data_chunk set{ 0, 2, 2, 6, 8 };
-    BOOST_REQUIRE(is_sorted(set));
-}
-
-
-BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
-{
-    data_chunk set{ 0, 2, 4, 2, 8 };
-    BOOST_REQUIRE(!is_sorted(set));
+    const data_chunk value{ 42, 24 };
+    const auto result = cast<uint32_t>(value);
+    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+    BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
 // move_append
 
-BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__both_empty)
+BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__empty)
 {
     data_chunk source;
     data_chunk target;
     move_append(target, source);
-    BOOST_REQUIRE_EQUAL(source.size(), 0u);
-    BOOST_REQUIRE_EQUAL(target.size(), 0u);
+    BOOST_REQUIRE(source.empty());
+    BOOST_REQUIRE(target.empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__move_append__source_empty__both_unchanged)
+BOOST_AUTO_TEST_CASE(collection__move_append__source_empty__expected)
 {
     data_chunk source;
     data_chunk target{ 0, 2, 4, 6, 8 };
-    const auto expected = target.size();
+    const data_chunk expected = target;
     move_append(target, source);
-    BOOST_REQUIRE_EQUAL(source.size(), 0u);
-    BOOST_REQUIRE_EQUAL(target.size(), expected);
-    BOOST_REQUIRE_EQUAL(target[0], 0u);
-    BOOST_REQUIRE_EQUAL(target[1], 2u);
-    BOOST_REQUIRE_EQUAL(target[2], 4u);
-    BOOST_REQUIRE_EQUAL(target[3], 6u);
-    BOOST_REQUIRE_EQUAL(target[4], 8u);
+    BOOST_REQUIRE_EQUAL(target, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__swapped_values)
+BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__expected)
 {
     data_chunk source{ 0, 2, 4, 6, 8 };
     data_chunk target;
-    const auto expected = source.size();
-    move_append(target, source);
-    ////BOOST_REQUIRE_EQUAL(source.size(), 0u);
-    BOOST_REQUIRE_EQUAL(target.size(), expected);
-    BOOST_REQUIRE_EQUAL(target[0], 0u);
-    BOOST_REQUIRE_EQUAL(target[1], 2u);
-    BOOST_REQUIRE_EQUAL(target[2], 4u);
-    BOOST_REQUIRE_EQUAL(target[3], 6u);
-    BOOST_REQUIRE_EQUAL(target[4], 8u);
+    const data_chunk expected = source;
+    move_append(target, data_chunk{});
+    BOOST_REQUIRE_EQUAL(target, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__moved_in_order)
+BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__expected)
 {
     data_chunk source{ 10, 12, 14, 16, 18 };
     data_chunk target{ 0, 2, 4, 6, 8 };
-    const auto expected = source.size() + source.size();
+    const data_chunk expected{ 0, 2, 4, 6, 8, 10, 12, 14, 16, 18 };
     move_append(target, source);
-    ////BOOST_REQUIRE_EQUAL(source.size(), 0u);
-    BOOST_REQUIRE_EQUAL(target.size(), expected);
-    BOOST_REQUIRE_EQUAL(target[0], 0u);
-    BOOST_REQUIRE_EQUAL(target[1], 2u);
-    BOOST_REQUIRE_EQUAL(target[2], 4u);
-    BOOST_REQUIRE_EQUAL(target[3], 6u);
-    BOOST_REQUIRE_EQUAL(target[4], 8u);
-    BOOST_REQUIRE_EQUAL(target[5], 10u);
-    BOOST_REQUIRE_EQUAL(target[6], 12u);
-    BOOST_REQUIRE_EQUAL(target[7], 14u);
-    BOOST_REQUIRE_EQUAL(target[8], 16u);
-    BOOST_REQUIRE_EQUAL(target[9], 18u);
+    BOOST_REQUIRE_EQUAL(target, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__pop__single__empty_and_returns_expected)
+// pop
+
+BOOST_AUTO_TEST_CASE(collection__pop__empty__empty_default)
+{
+    data_chunk stack;
+    const auto value = pop(stack);
+    BOOST_REQUIRE(stack.empty());
+    BOOST_REQUIRE_EQUAL(value, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(collection__pop__single__empty_expected)
 {
     const uint8_t expected = 42u;
     data_chunk stack{ expected };
@@ -344,19 +213,137 @@ BOOST_AUTO_TEST_CASE(collection__pop__single__empty_and_returns_expected)
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_and_returns_expected)
+BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_expected)
 {
-    const uint8_t expected = 42u;
-    data_chunk stack{ 0, 1, 2, 3, expected };
+    const uint8_t expected_value = 42u;
+    data_chunk stack{ 0, 1, 2, 3, expected_value };
+    const data_chunk expected_stack{ 0, 1, 2, 3 };
     const auto value = pop(stack);
-    BOOST_REQUIRE_EQUAL(stack.size(), 4u);
-    BOOST_REQUIRE_EQUAL(stack[0], 0u);
-    BOOST_REQUIRE_EQUAL(stack[1], 1u);
-    BOOST_REQUIRE_EQUAL(stack[2], 2u);
-    BOOST_REQUIRE_EQUAL(stack[3], 3u);
-    BOOST_REQUIRE_EQUAL(value, expected);
+    BOOST_REQUIRE_EQUAL(value, expected_value);
+    BOOST_REQUIRE_EQUAL(stack, expected_stack);
+}
+
+// is_distinct
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__empty__true)
+{
+    BOOST_REQUIRE(is_distinct(data_chunk{}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__single__true)
+{
+    BOOST_REQUIRE(is_distinct(data_chunk{ 42 }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__distinct__true)
+{
+    BOOST_REQUIRE(is_distinct(data_chunk{ 0, 2, 4, 6, 8 }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_distinct__const_nondistinct__false)
+{
+    const data_chunk set{ 0, 2, 4, 2, 8 };
+    BOOST_REQUIRE(!is_distinct(set));
+}
+
+// is_sorted
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__empty__true)
+{
+    BOOST_REQUIRE(is_sorted(data_chunk{}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__single__true)
+{
+    BOOST_REQUIRE(is_sorted(data_chunk{ 42 }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_distinct__true)
+{
+    BOOST_REQUIRE(is_sorted(data_chunk{ 0, 2, 4, 6, 8 }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_non_distinct__true)
+{
+    BOOST_REQUIRE(is_sorted(data_chunk{ 0, 2, 2, 6, 8 }));
+}
+
+
+BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
+{
+    BOOST_REQUIRE(!is_sorted(data_chunk{ 0, 2, 4, 2, 8 }));
+}
+
+// distinct
+
+BOOST_AUTO_TEST_CASE(collection__distinct__empty__empty)
+{
+    BOOST_REQUIRE(distinct(data_chunk{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__distinct__single__unchanged)
+{
+    const uint8_t expected = 42;
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ expected }).front(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__unchanged)
+{
+    const data_chunk expected{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 0, 2, 4, 6, 8 }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
+{
+    const data_chunk expected{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 2, 0, 8, 6, 4 }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__distinct__const_distinct_unsorted_duplicates__sorted_distinct)
+{
+    const data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk expected{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(distinct(set), expected);
 }
 
 // reverse
+
+BOOST_AUTO_TEST_CASE(collection__reverse__empty__empty)
+{
+    BOOST_REQUIRE(reverse(data_chunk{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__reverse__single__unchanged)
+{
+    const uint8_t expected = 42;
+    BOOST_REQUIRE_EQUAL(reverse(data_chunk{ expected }).front(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
+{
+    const data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk expected{ 4, 6, 7, 0, 0, 2 };
+    BOOST_REQUIRE_EQUAL(reverse(set), expected);
+}
+
+// sort
+
+BOOST_AUTO_TEST_CASE(collection__sort__empty__empty)
+{
+    BOOST_REQUIRE(sort(data_chunk{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__sort__single__unchanged)
+{
+    const uint8_t expected = 42;
+    BOOST_REQUIRE_EQUAL(sort(data_chunk{ expected }).front(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__sort__const_unsorted__sorted)
+{
+    const data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk expected{ 0, 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(sort(set), expected);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

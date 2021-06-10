@@ -39,7 +39,7 @@ template <typename Collection, typename Element>
 typename Collection::difference_type
 binary_search(const Collection& list, const Element& element);
 
-/// Cast collection to a new collection of To members.
+/// Cast vector to a new vector of To members.
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source);
 
@@ -47,10 +47,6 @@ std::vector<To> cast(const std::vector<From>& source);
 template <typename Collection>
 bool contains(const Collection& list,
     const typename Collection::value_type& element);
-
-/// Obtain the sorted distinct elements of the list.
-template <typename Collection>
-Collection distinct(Collection&& list);
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
@@ -70,14 +66,6 @@ typename Collection::iterator
 insert_sorted(Collection& list, const typename Collection::value_type& element,
     Predicate predicate);
 
-/// Determine if a collection contains only distinct members.
-template <typename Collection>
-bool is_distinct(Collection&& list);
-
-/// Determine if a collection is lexically sorted.
-template <typename Collection>
-bool is_sorted(const Collection& list);
-
 /// Move members of a source list to end of a target list. Source members are 
 /// undefined upon return.
 template <typename Collection>
@@ -88,9 +76,26 @@ template <typename Collection>
 typename Collection::value_type
 pop(Collection& stack);
 
-/// Create a reversed copy of a collection.
+/// Determine if a collection contains only distinct members.
 template <typename Collection>
-Collection reverse(const Collection& list);
+bool is_distinct(Collection list);
+
+/// Determine if a collection is lexically sorted.
+template <typename Collection>
+bool is_sorted(const Collection& list);
+
+/// Obtain the (sorted) distinct elements of a collection.
+template <typename Collection>
+Collection distinct(Collection list);
+
+/// Reverse the order of collection elements.
+/// Use boost::adaptors::reverse for reverse iteration.
+template <typename Collection>
+Collection reverse(Collection list);
+
+/// Sort collection elements.
+template <typename Collection>
+Collection sort(Collection list);
 
 } // namespace system
 } // namespace libbitcoin
