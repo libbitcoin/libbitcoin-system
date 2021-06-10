@@ -192,7 +192,7 @@ Collection distinct(Collection&& list)
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
     list.shrink_to_fit();
-    return std::move(list);
+    return list;
 }
 
 template <typename Collection>
@@ -207,7 +207,7 @@ template <typename Collection>
 Collection reverse(Collection&& list)
 {
     std::reverse(std::begin(list), std::end(list));
-    return std::move(list);
+    return list;
 }
 
 template <typename Collection>
@@ -222,7 +222,7 @@ template <typename Collection>
 Collection sort(Collection&& list)
 {
     std::sort(std::begin(list), std::end(list));
-    return std::move(list);
+    return list;
 }
 
 template <typename Collection>
