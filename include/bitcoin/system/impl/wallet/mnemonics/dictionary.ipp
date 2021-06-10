@@ -89,7 +89,7 @@ int32_t dictionary<Size>::index(const std::string& word) const
     // Dictionary sort is configured on each dictionary, verified by tests.
     // Dictionary is char* elements but using std::string (word) for compares.
     if (words_.sorted)
-        return binary_search(words_.word, word);
+        return static_cast<int32_t>(binary_search(words_.word, word));
 
     // std::find returns first match, though words should be unique.
     const auto it = std::find(words_.word.begin(), words_.word.end(), word);

@@ -34,137 +34,146 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename Element, typename Container>
-int binary_search(const Container& list, const Element& value)
+// Assert fails arbitrarily if 'list' contains pointer elements (e.g. to
+// const char*) because the comparison is between pointers, not values.
+// However the binary_search call remains valid in the case where the
+// 'value' parameter implements sufficient binary comparison operator
+// overloads (e.g. operator<(const char* left, const std::string& right).
+// Therefore we avoid this assertion and rely entirely on caller sorting.
+////BITCOIN_ASSERT(is_sorted(list));
+
+// Element is not required to be the Collection::value_type. 
+template <typename Collection, typename Element>
+typename Collection::difference_type
+binary_search(const Collection& list, const Element& element)
 {
     const auto size = list.size();
 
-    // This fails arbitrarily if 'list' contains pointer elements (e.g. to
-    // const char*) because the comparison is between pointers, not values.
-    // However the binary_search call remains valid in the case where the
-    // 'value' parameter implements sufficient binary comparison operator
-    // overloads (e.g. operator<(const char* left, const std::string& right).
-    // Therefore we avoid this assertion and rely entirely on caller sorting.
-    ////BITCOIN_ASSERT(is_sorted(list));
+    if (list.empty())
+        return negative_one;
 
-    // Guard right cast.
-    if (size > static_cast<size_t>(max_int32))
-        return -1;
-
-    int left = 0;
-    int right = static_cast<int>(size) - 1;
+    Collection::difference_type left = zero;
+    Collection::difference_type right = sub1(size);
 
     while (left <= right)
     {
-        int middle = (left + right) / 2;
-        const auto& element = list[middle];
+        auto middle = to_half(left + right);
+        const auto& value = list[middle];
 
-        if (element < value)
-            left = middle + 1;
-        else if (element > value)
-            right = middle - 1;
+        if (value < element)
+            left = add1(middle);
+        else if (value > element)
+            right = sub1(middle);
         else
             return middle;
     }
 
-    return -1;
+    return negative_one;
 }
 
-template <typename Target, typename Source>
-std::vector<Target> cast(const std::vector<Source>& source)
+// TODO: generalize from std::vector.
+template <typename To, typename From>
+std::vector<To> cast(const std::vector<From>& source)
 {
-    std::vector<Target> target(source.size());
-    target.assign(source.begin(), source.end());
+    std::vector<To> target(std::size(source));
+    target.assign(std::begin(source), std::end(source));
     return target;
 }
 
-template <typename Container, typename Element>
-bool contains(const Container& list, const Element& value)
+template <typename Collection>
+bool contains(const Collection& list,
+    const typename Collection::value_type& element)
 {
-    return std::any_of(list.begin(), list.end(),
-        [&value](const Element& element)
+    return std::any_of(std::begin(list), std::end(list),
+        [&element](const Collection::value_type& value)
         {
-            return element == value;
+            return value == element;
         });
 }
 
-template <typename Element>
-std::vector<Element> distinct(std::vector<Element>&& list)
+// Collection requires erase and shrink_to_fit methods (vector).
+template <typename Collection>
+Collection distinct(Collection&& list)
 {
-    std::sort(list.begin(), list.end());
-    list.erase(std::unique(list.begin(), list.end()), list.end());
+    std::sort(std::begin(list), std::end(list));
+    list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
     list.shrink_to_fit();
     return std::move(list);
 }
 
-template <typename Pair, typename Key>
-int find_pair_position(const std::vector<Pair>& list, const Key& key)
+// Collection requires std::pair elements.
+template <typename Collection>
+typename Collection::difference_type
+find_pair_position(const Collection& list,
+    const typename Collection::value_type::first_type& key)
 {
-    const auto position = std::find_if(list.begin(), list.end(),
-        [&key](const Pair& pair)
+    const auto position = std::find_if(std::begin(list), std::end(list),
+        [&key](const Collection::value_type& pair)
         {
             return pair.first == key;
         });
 
-    // TODO: guard cast.
-    return position == list.end() ? -1 : 
-        static_cast<int>(std::distance(list.begin(), position));
+    return position == std::end(list) ? negative_one :
+        std::distance(std::begin(list), position);
 }
 
-template <typename Element, typename Container>
-int find_position(const Container& list, const Element& value)
+template <typename Collection>
+typename Collection::difference_type
+find_position(const Collection& list,
+    const typename Collection::value_type& element)
 {
-    const auto position = std::find(std::begin(list), std::end(list), value);
+    const auto position = std::find(std::begin(list), std::end(list), element);
 
-    // TODO: guard cast.
-    return position == std::end(list) ? -1 :
-        static_cast<int>(std::distance(std::begin(list), position));
+    return position == std::end(list) ? negative_one :
+        std::distance(std::begin(list), position);
 }
 
-template <typename Type, typename Predicate>
-typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
-    Type& element, Predicate predicate)
+// Collection requires insert method (vector).
+template <typename Collection, typename Predicate>
+typename Collection::iterator
+insert_sorted(Collection& list, typename Collection::value_type& element,
+    Predicate predicate)
 {
-    return list.insert(std::upper_bound(list.begin(), list.end(), element,
-        predicate), element);
+    return list.insert(std::upper_bound(std::begin(list),
+        std::end(list), element, predicate), element);
 }
 
-template <typename Element>
-bool is_distinct(std::vector<Element>&& list)
+template <typename Collection>
+bool is_distinct(Collection&& list)
 {
-    std::sort(list.begin(), list.end());
-    return std::unique(list.begin(), list.end()) == list.end();
+    std::sort(std::begin(list), std::end(list));
+    return std::unique(std::begin(list), std::end(list)) == std::end(list);
 }
 
-template <typename Container>
-bool is_sorted(const Container& list)
+template <typename Collection>
+bool is_sorted(const Collection& list)
 {
     return std::is_sorted(std::begin(list), std::end(list));
 }
 
-template <typename Type>
-void move_append(std::vector<Type>& target, std::vector<Type>& source)
+template <typename Collection>
+void move_append(Collection& target, Collection& source)
 {
-    target.reserve(target.size() + source.size());
-    std::move(source.begin(), source.end(), std::back_inserter(target));
-    source.clear();
+    target.reserve(std::size(target) + std::size(source));
+    std::move(std::begin(source), std::end(source), std::back_inserter(target));
 }
 
-template <typename Element>
-Element pop(std::vector<Element>& stack)
+// Collection requires back and pop_back methods (vector).
+template <typename Collection>
+typename Collection::value_type
+pop(Collection& stack)
 {
-    BITCOIN_ASSERT(!stack.empty());
+    BITCOIN_ASSERT(!std::empty(stack));
     const auto element = stack.back();
     stack.pop_back();
-    ////stack.shrink_to_fit();
     return element;
 }
 
 template <typename Collection>
-Collection reverse(const Collection& source)
+Collection reverse(const Collection& list)
 {
-    Collection out(source.size());
-    std::reverse_copy(std::begin(source), std::end(source), std::begin(out));
+    Collection out(std::size(list));
+    std::reverse_copy(std::begin(list), std::end(list), std::begin(out));
     return out;
 }
 

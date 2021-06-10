@@ -35,54 +35,62 @@ namespace system {
 /// A 'list' of C-style arrays of char may be seached with std::string 'value'.
 /// std::string comparisons are not locale aware.
 /// Returns the position or negative if not found or list size > max_int32.
-template <typename Element, typename Container>
-int binary_search(const Container& list, const Element& value);
+template <typename Collection, typename Element>
+typename Collection::difference_type
+binary_search(const Collection& list, const Element& element);
 
-/// Cast vector/enumerable elements into a new vector.
-template <typename Target, typename Source>
-std::vector<Target> cast(const std::vector<Source>& source);
+/// Cast collection to a new collection of To members.
+template <typename To, typename From>
+std::vector<To> cast(const std::vector<From>& source);
 
 /// Determine if a collection contains the specified element.
-template <typename Container, typename Element>
-bool contains(const Container& list, const Element& value);
+template <typename Collection>
+bool contains(const Collection& list,
+    const typename Collection::value_type& element);
 
 /// Obtain the sorted distinct elements of the list.
-template <typename Element>
-std::vector<Element> distinct(std::vector<Element>&& list);
+template <typename Collection>
+Collection distinct(Collection&& list);
 
-/// Find the position of a pair in an ordered list.
-template <typename Pair, typename Key>
-int find_pair_position(const std::vector<const Pair>& list, Key& key);
+/// Find the position of a std::pair in an ordered list.
+template <typename Collection>
+typename Collection::difference_type
+find_pair_position(const Collection& list,
+    typename Collection::value_type::first_type& key);
 
 /// Find the position of an element in an ordered collection.
-template <typename Element, typename Container>
-int find_position(const Container& list, const Element& value);
+template <typename Collection>
+typename Collection::difference_type
+find_position(const Collection& list,
+    const typename Collection::value_type& value);
 
 /// Facilitate a list insertion sort by inserting into a sorted position.
-template <typename Type, typename Predicate>
-typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
-    const Type& element, Predicate predicate);
+template <typename Collection, typename Predicate>
+typename Collection::iterator
+insert_sorted(Collection& list, const typename Collection::value_type& element,
+    Predicate predicate);
 
 /// Determine if a collection contains only distinct members.
-template <typename Element>
-bool is_distinct(std::vector<Element>&& list);
+template <typename Collection>
+bool is_distinct(Collection&& list);
 
 /// Determine if a collection is lexically sorted.
-template <typename Container>
-bool is_sorted(const Container& list);
+template <typename Collection>
+bool is_sorted(const Collection& list);
 
 /// Move members of a source list to end of a target list. Source members are 
 /// undefined upon return.
-template <typename Type>
-void move_append(std::vector<Type>& target, std::vector<Type>& source);
+template <typename Collection>
+void move_append(Collection& target, Collection& source);
 
 /// Pop an element from the stack and return its value.
-template <typename Element>
-Element pop(std::vector<Element>& stack);
+template <typename Collection>
+typename Collection::value_type
+pop(Collection& stack);
 
 /// Create a reversed copy of a collection.
 template <typename Collection>
-Collection reverse(const Collection& source);
+Collection reverse(const Collection& list);
 
 } // namespace system
 } // namespace libbitcoin
