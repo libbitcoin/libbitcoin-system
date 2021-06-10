@@ -60,7 +60,7 @@ inline uint8_t from_base16_characters(char high, char low)
 inline char to_base16_character(char digit)
 {
     return (is_between(digit, 0, 9) ? '0' : 'a' - 10u) + digit;
-};
+}
 
 // The C standard library function 'isxdigit' depends on the current locale,
 // and does not necessarily match the base16 encoding.

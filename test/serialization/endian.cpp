@@ -295,7 +295,6 @@ BOOST_AUTO_TEST_CASE(endian__round_trip__uint1024_little_endian__expected)
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian_unsafe__iterator_to_integer__expected)
 {
-    auto a = '0';
     uint32_t value = 0x01020304;
     data_chunk data{ 0x01, 0x02, 0x03, 0x04 };
     BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(data.begin()), value);
