@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -132,25 +133,65 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
-// cast
+// cast vector
 
-BOOST_AUTO_TEST_CASE(collection__cast__empty__empty)
+BOOST_AUTO_TEST_CASE(collection__cast_vector__empty__empty)
 {
-    BOOST_REQUIRE(cast<uint8_t>(data_chunk{}).empty());
+    BOOST_REQUIRE(cast<char>(data_chunk{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast__one_element__same)
+BOOST_AUTO_TEST_CASE(collection__cast_vector__one_element__same)
 {
-    const uint8_t expected = 42;
-    const auto result = cast<uint8_t>(data_chunk{ expected });
+    const auto result = cast<char>(data_chunk{ 42 });
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result.front(), expected);
+    BOOST_REQUIRE_EQUAL(result.front(), 42);
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast__distinct_types__same)
+BOOST_AUTO_TEST_CASE(collection__cast_vector__distinct_types__same)
 {
     const data_chunk value{ 42, 24 };
     const auto result = cast<uint32_t>(value);
+    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+    BOOST_REQUIRE_EQUAL(result[1], value[1]);
+}
+
+BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
+{
+    const std::vector<uint32_t> value{ 42, 24 };
+    const auto result = cast<uint8_t>(value);
+    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+    BOOST_REQUIRE_EQUAL(result[1], value[1]);
+}
+
+// cast array
+
+BOOST_AUTO_TEST_CASE(collection__cast_array__empty__empty)
+{
+    BOOST_REQUIRE(cast<char>(byte_array<0>{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__cast_array__one_element__same)
+{
+    const auto result = cast<char>(byte_array<1>{ 42 });
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result.front(), 42);
+}
+
+BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
+{
+    const byte_array<2> value{ 42, 24 };
+    const auto result = cast<uint32_t>(value);
+    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+    BOOST_REQUIRE_EQUAL(result[1], value[1]);
+}
+
+BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
+{
+    const std::array<uint32_t, 2> value{ 42, 24 };
+    const auto result = cast<uint8_t>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], value[0]);
     BOOST_REQUIRE_EQUAL(result[1], value[1]);

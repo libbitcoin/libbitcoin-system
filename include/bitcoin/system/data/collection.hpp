@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_COLLECTION_HPP
 #define LIBBITCOIN_SYSTEM_DATA_COLLECTION_HPP
 
+#include <array>
+#include <cstddef>
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
@@ -39,9 +41,11 @@ template <typename Collection, typename Element>
 typename Collection::difference_type
 binary_search(const Collection& list, const Element& element);
 
-/// Cast vector to a new vector of To members.
+/// Cast collection of From members to a new collection of To members.
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source);
+template <typename To, typename From, size_t Size>
+std::array<To, Size> cast(const std::array<From, Size>& source);
 
 /// Determine if a collection contains the specified element.
 template <typename Collection>

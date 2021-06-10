@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdint>
+#include <cstddef>
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
@@ -70,13 +70,31 @@ binary_search(const Collection& list, const Element& element)
     return negative_one;
 }
 
-// TODO: generalize from std::vector (any iterable).
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source)
 {
-    std::vector<To> target(source.size());
-    target.assign(std::begin(source), std::end(source));
-    return std::move(target);
+    ////std::vector<To> out(source.size());
+    ////std::transform(std::begin(source), std::end(source), std::begin(out),
+    ////    [](const From& element)
+    ////    {
+    ////        return static_cast<To>(element);
+    ////    });
+
+    // More efficient than array here because can be value-initialized.
+    return { std::begin(source), std::end(source) };
+}
+
+template <typename To, typename From, size_t Size>
+std::array<To, Size> cast(const std::array<From, Size>& source)
+{
+    std::array<To, Size> out;
+    std::transform(std::begin(source), std::end(source), std::begin(out),
+        [](const From& element)
+        {
+            return element;
+        });
+
+    return std::move(out);
 }
 
 template <typename Collection>
