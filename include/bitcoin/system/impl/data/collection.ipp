@@ -47,9 +47,9 @@ template <typename Collection, typename Element>
 typename Collection::difference_type
 binary_search(const Collection& list, const Element& element)
 {
-    const auto size = list.size();
+    const auto size = std::size(list);
 
-    if (list.empty())
+    if (std::empty(list))
         return negative_one;
 
     Collection::difference_type left = zero;
@@ -151,6 +151,7 @@ bool is_sorted(const Collection& list)
     return std::is_sorted(std::begin(list), std::end(list));
 }
 
+// Collection requires reserve method (vector).
 template <typename Collection>
 void move_append(Collection& target, Collection& source)
 {
