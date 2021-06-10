@@ -158,6 +158,7 @@ BOOST_AUTO_TEST_CASE(collection__cast_vector__distinct_types__same)
 
 BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
 {
+    // Implicit narrowing cast doesn't warn.
     const std::vector<uint32_t> value{ 42, 24 };
     const auto result = cast<uint8_t>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
@@ -190,6 +191,7 @@ BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
 
 BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
 {
+    // Implicit narrowing cast doesn't warn.
     const std::array<uint32_t, 2> value{ 42, 24 };
     const auto result = cast<uint8_t>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
