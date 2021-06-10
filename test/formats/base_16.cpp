@@ -72,6 +72,24 @@ BOOST_AUTO_TEST_CASE(base16__is_base16__boundaries__false)
     BOOST_REQUIRE(!is_base16('F' + 1));
 }
 
+// encode_octet
+
+BOOST_AUTO_TEST_CASE(base16__encode_octet__undefined_behavior__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_octet("x0"), 0x80);
+    BOOST_REQUIRE_EQUAL(encode_octet("0x"), 0x48);
+    BOOST_REQUIRE_EQUAL(encode_octet("xy"), 0xc9);
+}
+
+BOOST_AUTO_TEST_CASE(base16__encode_octet__defined_behavior__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_octet("00"), 0x00);
+    BOOST_REQUIRE_EQUAL(encode_octet("01"), 0x01);
+    BOOST_REQUIRE_EQUAL(encode_octet("42"), 0x42);
+    BOOST_REQUIRE_EQUAL(encode_octet("e5"), 0xe5);
+    BOOST_REQUIRE_EQUAL(encode_octet("ff"), 0xff);
+}
+
 // encode_base16 (data_chunk)
 
 BOOST_AUTO_TEST_CASE(base16__encode_base16_chunk__empty__empty)
