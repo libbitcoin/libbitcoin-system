@@ -596,6 +596,7 @@ if (with-tests)
         "../../test/settings.cpp"
         "../../test/test.cpp"
         "../../test/test.hpp"
+        "../../test/type_constraints.cpp"
         "../../test/chain/block.cpp"
         "../../test/chain/block_filter.cpp"
         "../../test/chain/chain_state.cpp"

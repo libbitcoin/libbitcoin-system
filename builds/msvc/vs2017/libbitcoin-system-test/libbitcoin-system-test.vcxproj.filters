@@ -396,6 +396,9 @@
     <ClCompile Include="..\..\..\..\test\test.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\type_constraints.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>

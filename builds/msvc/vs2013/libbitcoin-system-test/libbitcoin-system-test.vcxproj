@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\..\..\test\serialization\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
+    <ClCompile Include="..\..\..\..\test\type_constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
