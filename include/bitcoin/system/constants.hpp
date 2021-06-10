@@ -34,62 +34,6 @@ static_assert(
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
-// Common const-expressions.
-//-----------------------------------------------------------------------------
-
-// TODO: test.
-
-constexpr size_t zero = 0;
-constexpr uint8_t byte_bits = 8;
-
-template <typename Type>
-constexpr Type to_bits(Type bytes)
-{
-    return bytes * byte_bits;
-}
-
-template <typename Type>
-constexpr Type to_bytes(Type bits)
-{
-    return bits / byte_bits;
-}
-
-template <typename Type>
-constexpr Type to_half(Type value)
-{
-    return value / 2;
-}
-
-template <typename Type>
-constexpr bool is_one(Type value)
-{
-    return value == 1;
-}
-
-template <typename Type>
-constexpr bool is_zero(Type value)
-{
-    return value == 0;
-}
-
-template <typename Type>
-constexpr bool is_even(Type value)
-{
-    return is_zero(value % 2);
-}
-
-template <typename Type>
-constexpr bool is_odd(Type value)
-{
-    return !is_even(value);
-}
-
-template <typename Type>
-constexpr bool is_byte_aligned(Type bits)
-{
-    return is_zero(bits % byte_bits);
-}
-
 // Generic constants.
 //-----------------------------------------------------------------------------
 
@@ -177,7 +121,7 @@ constexpr size_t compact_filter_checkpoint_interval = 1000;
 constexpr size_t minimum_seed_bits = 128;
 
 // The minimum safe length of a seed in bytes (16).
-constexpr size_t minimum_seed_size = to_bytes(minimum_seed_bits);
+constexpr size_t minimum_seed_size = minimum_seed_bits / 8u;
 
 // Effective limit given a 32 bit chain height boundary: 10 + log2(2^32) + 1.
 constexpr size_t max_locator = 43;
@@ -219,6 +163,62 @@ constexpr uint64_t siphash_magic_0 = 0x736f6d6570736575;
 constexpr uint64_t siphash_magic_1 = 0x646f72616e646f6d;
 constexpr uint64_t siphash_magic_2 = 0x6c7967656e657261;
 constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
+
+// Common const-expressions.
+//-----------------------------------------------------------------------------
+
+constexpr size_t zero = 0;
+constexpr size_t one = 1;
+constexpr size_t two = 2;
+constexpr uint8_t byte_bits = 8;
+
+template <typename Type>
+constexpr bool is_zero(Type value)
+{
+    return value == zero;
+}
+
+template <typename Type>
+constexpr bool is_one(Type value)
+{
+    return value == one;
+}
+
+template <typename Type>
+constexpr bool is_even(Type value)
+{
+    return is_zero(value % two);
+}
+
+template <typename Type>
+constexpr bool is_odd(Type value)
+{
+    return !is_even(value);
+}
+
+template <typename Type>
+constexpr bool is_byte_aligned(Type bits)
+{
+    return is_zero(bits % byte_bits);
+}
+
+template <typename Type>
+constexpr Type to_bits(Type bytes)
+{
+    return bytes * byte_bits;
+}
+
+template <typename Type>
+constexpr Type to_bytes(Type bits)
+{
+    return bits / byte_bits;
+}
+
+template <typename Type>
+constexpr Type to_half(Type value)
+{
+    return value / two;
+}
 
 } // namespace libbitcoin
 

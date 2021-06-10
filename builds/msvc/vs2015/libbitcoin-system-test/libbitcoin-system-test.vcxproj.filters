@@ -165,6 +165,9 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\constants.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\binary.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
