@@ -167,6 +167,7 @@ constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
 // Common const-expressions.
 //-----------------------------------------------------------------------------
 
+constexpr int32_t negative_one = -1;
 constexpr size_t zero = 0;
 constexpr size_t one = 1;
 constexpr size_t two = 2;
@@ -200,6 +201,18 @@ template <typename Type>
 constexpr bool is_byte_aligned(Type bits)
 {
     return is_zero(bits % byte_bits);
+}
+
+template <typename Type>
+constexpr Type add1(Type value)
+{
+    return value + Type{ one };
+}
+
+template <typename Type>
+constexpr Type sub1(Type value)
+{
+    return value - Type{ one };
 }
 
 template <typename Type>

@@ -71,9 +71,9 @@ data_chunk base16_chunk(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(Size - 1)> base16_array(const char(&string)[Size])
+byte_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
 {
-    byte_array<to_half(Size - 1)> out;
+    byte_array<to_half(sub1(Size))> out;
     if (!decode_base16(out, string))
         out.fill(0);
 
@@ -81,9 +81,9 @@ byte_array<to_half(Size - 1)> base16_array(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(Size - 1)> base16_hash(const char(&string)[Size])
+byte_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size])
 {
-    byte_array<to_half(Size - 1)> out;
+    byte_array<to_half(sub1(Size))> out;
     if (!decode_hash(out, string))
         out.fill(0);
 
@@ -92,14 +92,14 @@ byte_array<to_half(Size - 1)> base16_hash(const char(&string)[Size])
 
 // DEPRECATED: use base16_array (renamed).
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(Size - 1)> base16_literal(const char(&string)[Size])
+byte_array<to_half(sub1(Size))> base16_literal(const char(&string)[Size])
 {
     return base16_array(string);
 }
 
 // DEPRECATED: use base16_hash (renamed).
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(Size - 1)> hash_literal(const char(&string)[Size])
+byte_array<to_half(sub1(Size))> hash_literal(const char(&string)[Size])
 {
     return base16_hash(string);
 }

@@ -46,20 +46,21 @@ inline uint8_t from_base16_characters(char high, char low)
     const auto from_base16_digit = [](char character)
     {
         if (is_between(character, 'A', 'F'))
-            return character - 'A' + 10u;
+            return character - 'A' + '\xA';
 
         if (is_between(character, 'a', 'f'))
-            return character - 'a' + 10u;
+            return character - 'a' + '\xa';
 
-        return character - '0' + 0u;
+        return character - '0' + '\x0';
     };
 
-    return (from_base16_digit(high) << 4u) | from_base16_digit(low);
+    return (from_base16_digit(high) << to_half(byte_bits)) |
+        from_base16_digit(low);
 }
 
 inline char to_base16_character(char digit)
 {
-    return (is_between(digit, 0, 9) ? '0' : 'a' - 10u) + digit;
+    return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
 }
 
 // The C standard library function 'isxdigit' depends on the current locale,
@@ -73,7 +74,7 @@ bool is_base16(char character)
 }
 
 // Undefined (but safe) behavior if characters are not base16. 
-uint8_t encode_octet(const char(&string)[3])
+uint8_t encode_octet(const char(&string)[add1(octet_width)])
 {
     return from_base16_characters(string[0], string[1]);
 }
@@ -81,12 +82,12 @@ uint8_t encode_octet(const char(&string)[3])
 std::string encode_base16(const data_slice& data)
 {
     std::string out;
-    out.resize(data.size() * 2u);
+    out.resize(data.size() * octet_width);
     auto digit = out.begin();
 
     for (const auto byte: data)
     {
-        *digit++ = to_base16_character(byte >> 4);
+        *digit++ = to_base16_character(byte >> to_half(byte_bits));
         *digit++ = to_base16_character(byte & 0x0f);
     }
 
