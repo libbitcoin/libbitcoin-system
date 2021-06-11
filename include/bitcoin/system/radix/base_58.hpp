@@ -59,7 +59,7 @@ BC_API bool decode_base58(data_chunk& out, const std::string& in);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/formats/base_58.ipp>
+#include <bitcoin/system/impl/radix/base_58.ipp>
 
 #endif
 

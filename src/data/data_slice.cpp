@@ -24,7 +24,7 @@
 #include <iterator>
 #include <string>
 #include <vector>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {

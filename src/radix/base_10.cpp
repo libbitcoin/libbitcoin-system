@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/formats/base_10.hpp>
+#include <bitcoin/system/radix/base_10.hpp>
 
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/serialization/deserialize.hpp>
-#include <bitcoin/system/serialization/serialize.hpp>
+#include <bitcoin/system/serialization/read.hpp>
+#include <bitcoin/system/serialization/write.hpp>
 
 // base10
 // Base 10 is an ascii data encoding with a domain of 10 symbols (characters).

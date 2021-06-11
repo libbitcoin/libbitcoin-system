@@ -24,9 +24,9 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/integer.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/formats/base_32.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
+#include <bitcoin/system/radix/base_32.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 
 namespace libbitcoin {
 namespace system {

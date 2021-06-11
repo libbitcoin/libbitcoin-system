@@ -22,8 +22,8 @@
 #include <iterator>
 #include <sstream>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {

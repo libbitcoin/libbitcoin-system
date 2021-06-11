@@ -23,7 +23,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 
 namespace libbitcoin {

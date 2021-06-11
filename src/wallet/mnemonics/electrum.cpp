@@ -24,10 +24,10 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/formats/base_2048.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/divide.hpp>
 #include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/radix/base_2048.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

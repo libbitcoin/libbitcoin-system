@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/formats/base_2048.hpp>
+#include <bitcoin/system/radix/base_2048.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -127,8 +127,7 @@ std::string decode_base2048(const data_chunk& data,
 base2048_chunk base2048_pack(const data_chunk& unpacked)
 {
     base2048_chunk packed;
-    data_source source(unpacked);
-    istream_reader reader(source);
+    istream_reader reader(unpacked);
     istream_bit_reader bit_reader(reader);
 
     while (!bit_reader.is_exhausted())
@@ -154,15 +153,13 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
 data_chunk base2048_unpack(const base2048_chunk& packed)
 {
     data_chunk unpacked;
-    data_sink sink(unpacked);
-    ostream_writer writer(sink);
+    ostream_writer writer(unpacked);
     ostream_bit_writer bit_writer(writer);
 
     for (const auto& value: packed)
         bit_writer.write_bits(value.convert_to<uint64_t>(), 11);
 
     bit_writer.flush();
-    sink.flush();
 
     // The bit reader reads zeros past end as padding.
     // This is a ((n * 11) / 8) operation, so (8 - ((n * 11) % 8)) are pad.

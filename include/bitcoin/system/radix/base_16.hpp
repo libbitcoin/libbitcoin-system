@@ -100,6 +100,6 @@ byte_array<to_half(sub1(Size))> hash_literal(const char(&string)[Size]);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/formats/base_16.ipp>
+#include <bitcoin/system/impl/radix/base_16.ipp>
 
 #endif

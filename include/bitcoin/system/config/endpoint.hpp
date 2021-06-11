@@ -26,7 +26,7 @@
 #include <boost/asio.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {

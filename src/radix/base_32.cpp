@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/formats/base_32.hpp>
+#include <bitcoin/system/radix/base_32.hpp>
 
 #include <algorithm>
 #include <cstddef>

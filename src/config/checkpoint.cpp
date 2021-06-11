@@ -24,8 +24,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {
