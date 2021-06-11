@@ -40,6 +40,9 @@ using if_even = enable_if_type<is_even(Value), bool>;
 template <typename Type>
 using if_byte = enable_if_type<is_one(sizeof(Type)), bool>;
 
+template <typename Type1, typename Type2>
+using if_same_size = enable_if_type<(sizeof(Type1) == sizeof(Type2)), bool>;
+
 template <size_t Value>
 using if_byte_aligned = enable_if_type<is_byte_aligned(Value), bool>;
 
