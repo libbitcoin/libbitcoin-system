@@ -79,7 +79,7 @@ Integer from_little_endian_private(const data_slice& data)
     for (auto index = size; index > 0; --index)
     {
         out <<= byte_bits;
-        out |= Integer{ data[index - 1] };
+        out |= Integer{ data[sub1(index)] };
     }
 
     return out;
