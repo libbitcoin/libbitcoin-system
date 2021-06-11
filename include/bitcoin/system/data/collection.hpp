@@ -22,6 +22,8 @@
 #include <array>
 #include <cstddef>
 #include <iterator>
+#include <memory>
+#include <utility>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 
@@ -108,6 +110,41 @@ template <typename Collection>
 Collection sort(Collection&& list);
 template <typename Collection>
 Collection sort(const Collection& list);
+
+// TODO: test.
+// bit.ly/3vdbF17
+// Convert value initialization into default initialization.
+template <typename Type, typename Allocator = std::allocator<Type>>
+class default_allocator
+  : public Allocator
+{
+public:
+    template <typename T>
+    struct rebind
+    {
+        // en.cppreference.com/w/cpp/memory/allocator_traits
+        using other = default_allocator<T, typename
+            std::allocator_traits<Allocator>::template rebind_alloc<T>>;
+    };
+
+    using Allocator::Allocator;
+
+    template <typename T>
+    void construct(T* ptr)
+        noexcept(std::is_nothrow_default_constructible<T>::value)
+    {
+        // en.cppreference.com/w/cpp/memory/allocator
+        // Base class (std::allocator) owns memory deallocation.
+        ::new(static_cast<void*>(ptr)) T;
+    }
+
+    template <typename T, typename...Args>
+    void construct(T* ptr, Args&&... args)
+    {
+        std::allocator_traits<Allocator>::construct(
+            static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);
+    }
+};
 
 } // namespace system
 } // namespace libbitcoin
