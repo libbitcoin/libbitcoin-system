@@ -23,101 +23,143 @@
 // The msvc++ compiler dislikes std::is_same outside of template arguments.
 // But visual studio intellisense properly evaluations these assertions.
 
-#ifdef TYPE_CONTRAINT_TESTS
-
 class base : noncopyable { int foo; };
 class not_derived { int bar; };
 class derived : base { int bar; };
 
-static_assert(std::is_same<if_odd<1>, bool>::value, "");
-static_assert(std::is_same<if_odd<3>, bool>::value, "");
-static_assert(std::is_same<if_odd<5u>, bool>::value, "");
-static_assert(std::is_same<if_odd<0xff>, bool>::value, "");
-static_assert(!std::is_same<if_odd<0>, bool>::value, "");
-static_assert(!std::is_same<if_odd<2>, bool>::value, "");
-static_assert(!std::is_same<if_odd<42u>, bool>::value, "");
-static_assert(!std::is_same<if_odd<0xfe>, bool>::value, "");
+template <typename Type>
+constexpr bool is_true()
+{
+    return !std::is_same<Type, std::enable_if<false, bool>>::value;
+}
 
-static_assert(std::is_same<if_even<0>, bool>::value, "");
-static_assert(std::is_same<if_even<2>, bool>::value, "");
-static_assert(std::is_same<if_even<42u>, bool>::value, "");
-static_assert(std::is_same<if_even<0xfe>, bool>::value, "");
-static_assert(!std::is_same<if_even<1>, bool>::value, "");
-static_assert(!std::is_same<if_even<3>, bool>::value, "");
-static_assert(!std::is_same<if_even<5u>, bool>::value, "");
-static_assert(!std::is_same<if_even<0xff>, bool>::value, "");
+static_assert(is_true<if_odd<1>>(), "");
+static_assert(is_true<if_odd<3>>(), "");
+static_assert(is_true<if_odd<5u>>(), "");
+static_assert(is_true<if_odd<0xff>>(), "");
+////static_assert(!is_true<if_odd<0>>(), "");
+////static_assert(!is_true<if_odd<2>>(), "");
+////static_assert(!is_true<if_odd<42u>>(), "");
+////static_assert(!is_true<if_odd<0xfe>>(), "");
 
-static_assert(std::is_same<if_byte<bool>, bool>::value, "");
-static_assert(std::is_same<if_byte<char>, bool>::value, "");
-static_assert(std::is_same<if_byte<uint8_t>, bool>::value, "");
-static_assert(!std::is_same<if_byte<int16_t>, bool>::value, "");
-static_assert(!std::is_same<if_byte<uint32_t>, bool>::value, "");
-static_assert(!std::is_same<if_byte<int64_t>, bool>::value, "");
-static_assert(!std::is_same<if_byte<size_t>, bool>::value, "");
-static_assert(!std::is_same<if_byte<float>, bool>::value, "");
-static_assert(!std::is_same<if_byte<double>, bool>::value, "");
-static_assert(!std::is_same<if_byte<base>, bool>::value, "");
+static_assert(is_true<if_even<0>>(), "");
+static_assert(is_true<if_even<2>>(), "");
+static_assert(is_true<if_even<42u>>(), "");
+static_assert(is_true<if_even<0xfe>>(), "");
+////static_assert(!is_true<if_even<1>>(), "");
+////static_assert(!is_true<if_even<3>>(), "");
+////static_assert(!is_true<if_even<5u>>(), "");
+////static_assert(!is_true<if_even<0xff>>(), "");
 
-static_assert(std::is_same<if_same_size<bool, bool>, bool>::value, "");
-static_assert(std::is_same<if_same_size<uint8_t, bool>, bool>::value, "");
-static_assert(std::is_same<if_same_size<uint8_t, char>, bool>::value, "");
-static_assert(!std::is_same<if_same_size<float, bool>, bool>::value, "");
-static_assert(!std::is_same<if_same_size<uint8_t, int16_t>, bool>::value, "");
-static_assert(!std::is_same<if_same_size<base, int16_t>, bool>::value, "");
+static_assert(is_true<if_byte<bool>>(), "");
+static_assert(is_true<if_byte<char>>(), "");
+static_assert(is_true<if_byte<uint8_t>>(), "");
+////static_assert(!is_true<if_byte<int16_t>>(), "");
+////static_assert(!is_true<if_byte<uint32_t>>(), "");
+////static_assert(!is_true<if_byte<int64_t>>(), "");
+////static_assert(!is_true<if_byte<size_t>>(), "");
+////static_assert(!is_true<if_byte<float>>(), "");
+////static_assert(!is_true<if_byte<double>>(), "");
+////static_assert(!is_true<if_byte<base>>(), "");
 
-static_assert(std::is_same<if_byte_aligned<0>, bool>::value, "");
-static_assert(std::is_same<if_byte_aligned<8>, bool>::value, "");
-static_assert(std::is_same<if_byte_aligned<16>, bool>::value, "");
-static_assert(std::is_same<if_byte_aligned<128>, bool>::value, "");
-static_assert(!std::is_same<if_byte_aligned<1>, bool>::value, "");
-static_assert(!std::is_same<if_byte_aligned<2>, bool>::value, "");
-static_assert(!std::is_same<if_byte_aligned<-42>, bool>::value, "");
-static_assert(!std::is_same<if_byte_aligned<0xff>, bool>::value, "");
+static_assert(is_true<if_byte_aligned<0>>(), "");
+static_assert(is_true<if_byte_aligned<8>>(), "");
+static_assert(is_true<if_byte_aligned<16>>(), "");
+static_assert(is_true<if_byte_aligned<128>>(), "");
+////static_assert(!is_true<if_byte_aligned<1>>(), "");
+////static_assert(!is_true<if_byte_aligned<2>>(), "");
+////static_assert(!is_true<if_byte_aligned<-42>>(), "");
+////static_assert(!is_true<if_byte_aligned<0xff>>(), "");
 
-static_assert(std::is_same<if_base_of<base, base>, bool>::value, "");
-static_assert(std::is_same<if_base_of<base, derived>, bool>::value, "");
-static_assert(!std::is_same<if_base_of<base, not_derived>, bool>::value, "");
-static_assert(!std::is_same<if_base_of<uint8_t, uint8_t>, bool>::value, "");
-static_assert(!std::is_same<if_base_of<uint8_t, uint32_t>, bool>::value, "");
-static_assert(!std::is_same<if_base_of<float, double>, bool>::value, "");
+static_assert(is_true<if_base_of<base, base>>(), "");
+static_assert(is_true<if_base_of<base, derived>>(), "");
+////static_assert(!is_true<if_base_of<base, not_derived>>(), "");
+////static_assert(!is_true<if_base_of<uint8_t, uint8_t>>(), "");
+////static_assert(!is_true<if_base_of<uint8_t, uint32_t>>(), "");
+////static_assert(!is_true<if_base_of<float, double>>(), "");
 
-static_assert(std::is_same<if_integer<bool>, bool>::value, "");
-static_assert(std::is_same<if_integer<char>, bool>::value, "");
-static_assert(std::is_same<if_integer<int>, bool>::value, "");
-static_assert(std::is_same<if_integer<uint8_t>, bool>::value, "");
-static_assert(std::is_same<if_integer<uint32_t>, bool>::value, "");
-static_assert(std::is_same<if_integer<int32_t>, bool>::value, "");
-static_assert(!std::is_same<if_integer<float>, bool>::value, "");
-static_assert(!std::is_same<if_integer<double>, bool>::value, "");
-static_assert(!std::is_same<if_integer<base>, bool>::value, "");
+static_assert(is_true<if_integer<bool>>(), "");
+static_assert(is_true<if_integer<char>>(), "");
+static_assert(is_true<if_integer<int>>(), "");
+static_assert(is_true<if_integer<uint8_t>>(), "");
+static_assert(is_true<if_integer<uint32_t>>(), "");
+static_assert(is_true<if_integer<int32_t>>(), "");
+static_assert(is_true<if_integer<uintx>>(), "");
+////static_assert(!is_true<if_integer<float>>(), "");
+////static_assert(!is_true<if_integer<double>>(), "");
+////static_assert(!is_true<if_integer<base>>(), "");
 
-static_assert(std::is_same<if_signed_integer<char>, bool>::value, "");
-static_assert(std::is_same<if_signed_integer<int>, bool>::value, "");
-static_assert(std::is_same<if_signed_integer<int16_t>, bool>::value, "");
-static_assert(std::is_same<if_signed_integer<int32_t>, bool>::value, "");
-static_assert(std::is_same<if_signed_integer<int64_t>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<bool>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<float>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<double>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<uint16_t>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<size_t>, bool>::value, "");
-static_assert(!std::is_same<if_signed_integer<base>, bool>::value, "");
+static_assert(is_true<if_integral_integer<bool>>(), "");
+static_assert(is_true<if_integral_integer<char>>(), "");
+static_assert(is_true<if_integral_integer<int>>(), "");
+static_assert(is_true<if_integral_integer<uint8_t>>(), "");
+static_assert(is_true<if_integral_integer<uint32_t>>(), "");
+static_assert(is_true<if_integral_integer<int32_t>>(), "");
+////static_assert(!is_true<if_integral_integer<uintx>>(), "");
+////static_assert(!is_true<if_integral_integer<float>>(), "");
+////static_assert(!is_true<if_integral_integer<double>>(), "");
+////static_assert(!is_true<if_integral_integer<base>>(), "");
 
-static_assert(std::is_same<if_unsigned_integer<bool>, bool>::value, "");
-static_assert(std::is_same<if_unsigned_integer<uint16_t>, bool>::value, "");
-static_assert(std::is_same<if_unsigned_integer<size_t>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<char>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<int>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<float>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<double>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<int16_t>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<int32_t>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<int64_t>, bool>::value, "");
-static_assert(!std::is_same<if_unsigned_integer<base>, bool>::value, "");
+static_assert(is_true<if_non_integral_integer<uintx>>(), "");
+static_assert(is_true<if_non_integral_integer<uint256_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<bool>>(), "");
+////static_assert(!is_true<if_non_integral_integer<char>>(), "");
+////static_assert(!is_true<if_non_integral_integer<int>>(), "");
+////static_assert(!is_true<if_non_integral_integer<uint8_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<uint32_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<int32_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<float>>(), "");
+////static_assert(!is_true<if_non_integral_integer<double>>(), "");
+////static_assert(!is_true<if_non_integral_integer<base>>(), "");
+
+static_assert(is_true<if_signed_integer<char>>(), "");
+static_assert(is_true<if_signed_integer<int>>(), "");
+static_assert(is_true<if_signed_integer<int16_t>>(), "");
+static_assert(is_true<if_signed_integer<int32_t>>(), "");
+static_assert(is_true<if_signed_integer<int64_t>>(), "");
+////static_assert(!is_true<if_signed_integer<bool>>(), "");
+////static_assert(!is_true<if_signed_integer<float>>(), "");
+////static_assert(!is_true<if_signed_integer<double>>(), "");
+////static_assert(!is_true<if_signed_integer<uint16_t>>(), "");
+////static_assert(!is_true<if_signed_integer<size_t>>(), "");
+////static_assert(!is_true<if_signed_integer<base>>(), "");
+
+static_assert(is_true<if_unsigned_integer<bool>>(), "");
+static_assert(is_true<if_unsigned_integer<uint16_t>>(), "");
+static_assert(is_true<if_unsigned_integer<size_t>>(), "");
+////static_assert(!is_true<if_unsigned_integer<char>>(), "");
+////static_assert(!is_true<if_unsigned_integer<int>>(), "");
+////static_assert(!is_true<if_unsigned_integer<float>>(), "");
+////static_assert(!is_true<if_unsigned_integer<double>>(), "");
+////static_assert(!is_true<if_unsigned_integer<int16_t>>(), "");
+////static_assert(!is_true<if_unsigned_integer<int32_t>>(), "");
+////static_assert(!is_true<if_unsigned_integer<int64_t>>(), "");
+////static_assert(!is_true<if_unsigned_integer<base>>(), "");
+
+static_assert(is_true<if_same_signed_integer<bool, bool>>(), "");
+static_assert(is_true<if_same_signed_integer<uint16_t, bool>>(), "");
+static_assert(is_true<if_same_signed_integer<size_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<int, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<float, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<double, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<int16_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<int32_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<int64_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<base, bool>>(), "");
+
+static_assert(is_true<if_same_signed_integer<char, char>>(), "");
+static_assert(is_true<if_same_signed_integer<char, int>>(), "");
+static_assert(is_true<if_same_signed_integer<char, int16_t>>(), "");
+static_assert(is_true<if_same_signed_integer<char, int32_t>>(), "");
+static_assert(is_true<if_same_signed_integer<char, int64_t>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, uint16_t>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, size_t>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, float>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, double>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, base>>(), "");
 
 static_assert(std::is_copy_constructible<not_derived>::value, "");
 static_assert(!std::is_copy_constructible<noncopyable>::value, "");
 static_assert(!std::is_copy_constructible<derived>::value, "");
 static_assert(!std::is_copy_constructible<base>::value, "");
-
-#endif // TYPE_CONTRAINT_TESTS

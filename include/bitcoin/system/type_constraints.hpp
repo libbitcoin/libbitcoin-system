@@ -40,9 +40,6 @@ using if_even = enable_if_type<is_even(Value), bool>;
 template <typename Type>
 using if_byte = enable_if_type<is_one(sizeof(Type)), bool>;
 
-template <typename Type1, typename Type2>
-using if_same_size = enable_if_type<(sizeof(Type1) == sizeof(Type2)), bool>;
-
 template <size_t Value>
 using if_byte_aligned = enable_if_type<is_byte_aligned(Value), bool>;
 
@@ -55,6 +52,16 @@ using if_integer = enable_if_type<
     std::numeric_limits<Type>::is_integer, bool>;
 
 template <typename Type>
+using if_integral_integer = enable_if_type<
+    std::is_integral<Type>::value &&
+    std::numeric_limits<Type>::is_integer, bool>;
+
+template <typename Type>
+using if_non_integral_integer = enable_if_type<
+    !std::is_integral<Type>::value &&
+    std::numeric_limits<Type>::is_integer, bool>;
+
+template <typename Type>
 using if_signed_integer = enable_if_type<
     std::is_signed<Type>::value &&
     std::numeric_limits<Type>::is_integer, bool>;
@@ -63,6 +70,13 @@ template <typename Type>
 using if_unsigned_integer = enable_if_type<
     !std::is_signed<Type>::value &&
     std::numeric_limits<Type>::is_integer, bool>;
+
+template <typename Left, typename Right>
+using if_same_signed_integer = enable_if_type<
+    (std::numeric_limits<Left>::is_integer &&
+    std::numeric_limits<Right>::is_integer) &&
+    (std::is_signed<Left>::value ==
+    std::is_signed<Right>::value), bool>;
 
 // Derive from 'noncopyable' to preclude copy construct and assign semantics in
 // the derived class. Move semantics are preserved if they are defined.
