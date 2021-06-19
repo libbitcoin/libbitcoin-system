@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,33 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_IPP
 
-// Sponsored in part by Digital Contract Design, LLC
-
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_BIT_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_BIT_WRITER_HPP
-
-#include <cstdint>
-#include <bitcoin/system/iostream/writer.hpp>
-
-// The bit writer operates from high to low order bits.
-// It reads and writes high bits first both in the operand and the buffer.
-// The bit order is independent of the byte order (big vs. little endian).
-// We refer to this as a "high endian" bit stream writer.
-// Both big and little byte orderings are supported by the bit writer.
+#include <iterator>
+#include <limits>
+#include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Writer interface.
-class BC_API bit_writer
-  : public writer
+template <typename Container>
+push_sink<Container>::push_sink(Container& data) noexcept
+  : sink_(data),
+    to_(data.begin()),
+    size_(limit<size_type>(data.max_size() - data.size()))
 {
-public:
-    /// Write bit.
-    virtual void write_bit(bool value) = 0;
-    virtual void write_bits(uint64_t value, uint8_t bits) = 0;
-};
+}
+
+template <typename Container>
+typename push_sink<Container>::size_type
+push_sink<Container>::do_write(const value_type* from, size_type size) noexcept
+{
+    // std::vector.insert returns iterator to first element inserted.
+    sink_.insert(to_, size, from);
+    to_ = std::next(to_, size);
+}
 
 } // namespace system
 } // namespace libbitcoin
