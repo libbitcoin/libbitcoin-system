@@ -18,124 +18,186 @@
  */
 #include "../test.hpp"
 
+// Test helper to verify output signedness.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr bool is_unsigned(Integer) { return false }
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr bool is_unsigned(Integer) { return true }
+
+// to_unsigned
+static_assert(is_unsigned(to_unsigned(-1)), "");
+static_assert(is_unsigned(to_unsigned(0)), "");
+static_assert(is_unsigned(to_unsigned(0u)), "");
+static_assert(is_unsigned(to_unsigned(1)), "");
+static_assert(is_unsigned(to_unsigned(1u)), "");
+static_assert(to_unsigned(-2) == 0xfffffffe, "");
+static_assert(to_unsigned(-1) == 0xffffffff, "");
+static_assert(to_unsigned(0) == 0u, "");
+static_assert(to_unsigned(0u) == 0u, "");
+static_assert(to_unsigned(1) == 1u, "");
+static_assert(to_unsigned(1u) == 1u, "");
+static_assert(to_unsigned(2u) == 2u, "");
+
+// absolute
+static_assert(is_unsigned(absolute(-1)), "");
+static_assert(is_unsigned(absolute(0)), "");
+static_assert(is_unsigned(absolute(1u)), "");
+static_assert(absolute(-1) == 1u, "");
+static_assert(absolute(-42) == 42u, "");
+static_assert(absolute(0) == 0u, "");
+static_assert(absolute(0u) == 0u, "");
+static_assert(absolute(1) == 1u, "");
+static_assert(absolute(1u) == 1u, "");
+static_assert(absolute(42) == 42, "");
+static_assert(absolute(42u) == 42, "");
+static_assert(absolute(max_int32) == max_int32, "");
+static_assert(absolute(min_int32 + 1) == max_int32, "");
+static_assert(absolute(max_uint32) == max_uint32, "");
+
+// is_negative
+static_assert(is_negative(min_int32), "");
+static_assert(is_negative(-1), "");
+static_assert(is_negative(-42), "");
+static_assert(!is_negative(0u), "");
+static_assert(!is_negative(1u), "");
+static_assert(!is_negative(42u), "");
+static_assert(!is_negative(max_int32), "");
+static_assert(!is_negative(max_uint32), "");
+
+// is_greater
+static_assert(is_greater(1, 0), "");
+static_assert(is_greater(1u, 0), "");
+static_assert(is_greater(1u, 0u), "");
+static_assert(is_greater(0, -1), "");
+static_assert(is_greater(0u, -1), "");
+static_assert(!is_greater(-1, -1), "");
+static_assert(!is_greater(0u, 0), "");
+static_assert(!is_greater(0u, 0u), "");
+static_assert(!is_greater(0, 0u), "");
+static_assert(!is_greater(1, 1), "");
+static_assert(!is_greater(1u, 1), "");
+static_assert(!is_greater(1u, 1u), "");
+static_assert(!is_greater(1, 1u), "");
+static_assert(!is_greater(0, 1), "");
+static_assert(!is_greater(-1, 0), "");
+
+// is_lesser
+static_assert(!is_lesser(1, 0), "");
+static_assert(!is_lesser(1u, 0), "");
+static_assert(!is_lesser(1u, 0u), "");
+static_assert(!is_lesser(0, -1), "");
+static_assert(!is_lesser(0u, -1), "");
+static_assert(!is_lesser(-1, -1), "");
+static_assert(!is_lesser(0u, 0), "");
+static_assert(!is_lesser(0u, 0u), "");
+static_assert(!is_lesser(0, 0u), "");
+static_assert(!is_lesser(1, 1), "");
+static_assert(!is_lesser(1u, 1), "");
+static_assert(!is_lesser(1u, 1u), "");
+static_assert(!is_lesser(1, 1u), "");
+static_assert(is_lesser(0, 1), "");
+static_assert(is_lesser(-1, 0), "");
+
+// greater
+
+BOOST_AUTO_TEST_CASE(greater__signed__different__expected)
+{
+    BOOST_REQUIRE_EQUAL(greater<signed>(1, 0), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0, 1), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 0u), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 1u), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1, 0u), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0, 1u), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 0), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 1), 1);
+}
+
+BOOST_AUTO_TEST_CASE(greater__signed__equal__expected)
+{
+    BOOST_REQUIRE_EQUAL(greater<signed>(0, 0), 0);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1, 1), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 0u), 0);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 1u), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 0), 0);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 1), 1);
+    BOOST_REQUIRE_EQUAL(greater<signed>(0, 0u), 0);
+    BOOST_REQUIRE_EQUAL(greater<signed>(1, 1u), 1);
+}
+
+BOOST_AUTO_TEST_CASE(greater__unsigned__different__expected)
+{
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1), 1);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 0u), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0u), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 0), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 1), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(greater__unsigned__equal__expected)
+{
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 0), 0u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 1), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 0), 0u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 1), 1u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 1u), 1u);
+}
+
+// lesser
+
+BOOST_AUTO_TEST_CASE(lesser__signed__different__expected)
+{
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 0), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 1), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 0u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 1u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 0u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 1u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 0), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 1), 0);
+}
+
+BOOST_AUTO_TEST_CASE(lesser__signed__equal__expected)
+{
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 0), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 1), 1);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 0u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 1u), 1);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 0), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 1), 1);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 0u), 0);
+    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 1u), 1);
+}
+
+BOOST_AUTO_TEST_CASE(lesser__unsigned__different__expected)
+{
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 0), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 1), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 0), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 1), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(lesser__unsigned__equal__expected)
+{
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 0), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 1), 1u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 0), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 1), 1u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 0u), 0u);
+    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 1u), 1u);
+}
+
 BOOST_AUTO_TEST_SUITE(sign_tests)
-
-// absolute signed
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__zero__zero)
-{
-    BOOST_REQUIRE_EQUAL(absolute(0), 0);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__one__one)
-{
-    BOOST_REQUIRE_EQUAL(absolute(1), 1);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__value__value)
-{
-    BOOST_REQUIRE_EQUAL(absolute(42), 42);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__negative_one__one)
-{
-    BOOST_REQUIRE_EQUAL(absolute(-1), 1);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__negative_value__value)
-{
-    BOOST_REQUIRE_EQUAL(absolute(-42), 42);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__min_int32_plus_one__max_int32)
-{
-    BOOST_REQUIRE_EQUAL(absolute(min_int32 + 1), max_int32);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_signed__max_int32__max_int32)
-{
-    BOOST_REQUIRE_EQUAL(absolute(max_int32), max_int32);
-}
-
-// absolute unsigned
-
-BOOST_AUTO_TEST_CASE(sign__absolute_unsigned__zero__zero)
-{
-    BOOST_REQUIRE_EQUAL(absolute(0u), 0u);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_unsigned__one__one)
-{
-    BOOST_REQUIRE_EQUAL(absolute(1u), 1u);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_unsigned__value__value)
-{
-    BOOST_REQUIRE_EQUAL(absolute(42u), 42u);
-}
-
-BOOST_AUTO_TEST_CASE(sign__absolute_unsigned__max_uint32__max_uint32)
-{
-    BOOST_REQUIRE_EQUAL(absolute(max_uint32), max_uint32);
-}
-
-// is_negative signed
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__zero__false)
-{
-    BOOST_REQUIRE(!is_negative(0u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__one__false)
-{
-    BOOST_REQUIRE(!is_negative(1u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__positive_value__false)
-{
-    BOOST_REQUIRE(!is_negative(42u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__negative_one__true)
-{
-    BOOST_REQUIRE(is_negative(-1));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__negative_value__true)
-{
-    BOOST_REQUIRE(is_negative(-42));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__min_int32__true)
-{
-    BOOST_REQUIRE(is_negative(min_int32));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_signed__max_int32__false)
-{
-    BOOST_REQUIRE(!is_negative(max_int32));
-}
-
-// is_negative unsigned
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_unsigned__zero__false)
-{
-    BOOST_REQUIRE(!is_negative(0u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_unsigned__one__false)
-{
-    BOOST_REQUIRE(!is_negative(1u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_unsigned__positive_value__false)
-{
-    BOOST_REQUIRE(!is_negative(42u));
-}
-
-BOOST_AUTO_TEST_CASE(sign__is_negative_unsigned__max_uint32__false)
-{
-    BOOST_REQUIRE(!is_negative(max_uint32));
-}
 
 BOOST_AUTO_TEST_SUITE_END()

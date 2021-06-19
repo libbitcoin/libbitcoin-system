@@ -19,24 +19,68 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_HPP
 
+#include <type_traits>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// All operations below support signed and unsigned parameters.
+/// All operations below support signed and unsigned integer parameters.
+
+/// Cast to the smallest unsigned integer type to hold the maximum signed value.
+template <typename Integer,
+    typename Unsigned = std::make_unsigned<Integer>::type,
+    if_integer<Integer> = true>
+constexpr Unsigned to_unsigned(Integer value) noexcept;
 
 /// Obtain the absolute value of the integer.
-template <typename Integer, if_signed_integer<Integer> = true>
-inline Integer absolute(Integer value);
-template <typename Integer, if_unsigned_integer<Integer> = true>
-inline Integer absolute(Integer value);
+template <typename Integer,
+    typename Absolute = std::make_unsigned<Integer>::type,
+    if_signed_integer<Integer> = true>
+constexpr Absolute absolute(Integer value) noexcept;
+template <typename Integer, typename Absolute = Integer,
+    if_unsigned_integer<Integer> = true>
+constexpr Absolute absolute(Integer value) noexcept;
 
 /// Determine whether the integer is negative.
 template <typename Integer, if_signed_integer<Integer> = true>
-inline bool is_negative(Integer value);
+constexpr bool is_negative(Integer value) noexcept;
 template <typename Integer, if_unsigned_integer<Integer> = true>
-inline bool is_negative(Integer value);
+constexpr bool is_negative(Integer) noexcept;
+
+/// Use !is_lesser(left, right) for (left >= right).
+/// Determine whether the left integer is greater than the right.
+template <typename Left, typename Right,
+    if_same_signed_integer<Left, Right> = true>
+constexpr bool is_greater(Left left, Right right) noexcept;
+template <typename Left, typename Right,
+    if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
+constexpr bool is_greater(Left left, Right right) noexcept;
+template <typename Left, typename Right,
+    if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
+constexpr bool is_greater(Left left, Right right) noexcept;
+
+/// Use !is_greater(left, right) for (left <= right).
+/// Determine whether the left integer is less than the right.
+template <typename Left, typename Right,
+    if_same_signed_integer<Left, Right> = true>
+constexpr bool is_lesser(Left left, Right right) noexcept;
+template <typename Left, typename Right,
+    if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
+constexpr bool is_lesser(Left left, Right right) noexcept;
+template <typename Left, typename Right,
+    if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
+constexpr bool is_lesser(Left left, Right right) noexcept;
+
+/// Return the greater of the two values, cast to the Result type.
+template<typename Result, typename Left, typename Right,
+    if_integer<Left> = true, if_integer<Right> = true>
+    inline Result greater(Left left, Right right) noexcept;
+
+/// Return the lesser of the two values, cast to the Result type.
+template<typename Result, typename Left, typename Right,
+    if_integer<Left> = true, if_integer<Right> = true>
+inline Result lesser(Left left, Right right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
