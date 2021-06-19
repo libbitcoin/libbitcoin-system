@@ -104,7 +104,7 @@ template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
 constexpr bool is_lesser(Left left, Right right) noexcept
 {
-    return !is_negative(right) && (to_unsigned(right) > left));
+    return !is_negative(right) && (to_unsigned(right) > left);
 }
 
 // greater
