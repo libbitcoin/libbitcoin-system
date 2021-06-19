@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,58 +19,66 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BINARY_HPP
 #define LIBBITCOIN_SYSTEM_DATA_BINARY_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+/// Constant class for bit vector serialization and comparison.
 class BC_API binary
 {
 public:
-    typedef uint8_t block;
-    typedef std::size_t size_type;
+    /// uintx is limited to unsigned.
+    typedef uint32_t size_type;
 
-    static constexpr size_type bits_per_block = byte_bits;
-    static size_type blocks_size(size_type bit_size);
-    static bool is_base2(const std::string& text);
+    /// True if all characters are '0' or '1'.
+    static bool is_base2(const std::string& text) noexcept;
 
-    binary();
-    binary(const binary& other);
-    binary(const std::string& bit_string);
-    binary(size_type size, uint32_t number);
-    binary(size_type size, const data_slice& blocks);
+    // TODO: endianness.
+    template<typename Integer, if_integer<Integer> = true>
+    binary(size_type size, const Integer number) noexcept
+      : binary(from_data(size, to_little_endian(number)))
+    {
+    }
 
-    void resize(size_type size);
-    bool operator[](size_type index) const;
-    const data_chunk& blocks() const;
-    std::string encoded() const;
+    /// Constructors.
+    binary() noexcept;
+    binary(binary&& other) noexcept;
+    binary(const binary& other) noexcept;
+    binary(const std::string& bits) noexcept;
+    binary(size_type size, const data_slice& data) noexcept;
 
-    /// size in bits
-    size_type size() const;
-    void append(const binary& post);
-    void prepend(const binary& prior);
-    void shift_left(size_type distance);
-    void shift_right(size_type distance);
-    binary substring(size_type first, size_type length=max_size_t) const;
+    /// Methods.
+    std::string encoded() const noexcept;
+    data_chunk data() const noexcept;
+    size_type bytes() const noexcept;
+    size_type bits() const noexcept;
 
-    bool is_prefix_of(const data_slice& field) const;
-    bool is_prefix_of(uint32_t field) const;
-    bool is_prefix_of(const binary& field) const;
-
-    bool operator<(const binary& other) const;
-    bool operator==(const binary& other) const;
-    bool operator!=(const binary& other) const;
-    binary& operator=(const binary& other);
-    friend std::istream& operator>>(std::istream& in, binary& to);
-    friend std::ostream& operator<<(std::ostream& out, const binary& of);
+    /// Operators.
+    bool operator[](size_type index) const noexcept;
+    bool operator<(const binary& other) const noexcept;
+    binary& operator=(binary&& other) noexcept;
+    binary& operator=(const binary& other) noexcept;
 
 private:
-    data_chunk blocks_;
-    uint8_t final_block_excess_;
+    static binary from_data(size_type size, const data_slice& data) noexcept;
+    static binary from_string(const std::string bits) noexcept;
+    binary(size_type size, const uintx& number) noexcept;
+
+    uintx bits_;
+    size_type size_;
 };
+
+bool operator==(const binary& left, const binary& right) noexcept;
+bool operator!=(const binary& left, const binary& right) noexcept;
+std::istream& operator>>(std::istream& in, binary& to) noexcept;
+std::ostream& operator<<(std::ostream& out, const binary& of) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
