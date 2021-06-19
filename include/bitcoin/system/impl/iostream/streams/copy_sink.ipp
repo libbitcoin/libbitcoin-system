@@ -28,8 +28,8 @@ namespace libbitcoin {
 namespace system {
     
 template <typename Container>
-copy_sink<Container>::copy_sink(Container::iterator& begin,
-    Container::iterator& end) noexcept
+copy_sink<Container>::copy_sink(typename Container::iterator& begin,
+    typename Container::iterator& end) noexcept
   : to_(begin),
     size_(limit<size_type>(std::distance(begin, end)))
 {

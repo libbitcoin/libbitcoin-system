@@ -37,7 +37,7 @@ protected:
 
 private:
     Container& sink_;
-    Container::iterator to_;
+    typename Container::iterator to_;
 };
 
 } // namespace system

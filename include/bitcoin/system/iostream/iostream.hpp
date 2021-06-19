@@ -57,11 +57,12 @@ std::istream istream(Container&& container) noexcept
 
 template <typename Container>
 std::istream unchecked_istream(
-    const Container::const_iterator& begin) noexcept
+    const typename Container::const_iterator& begin) noexcept
 {
     // Copies bytes from the container, with unchecked end.
     using namespace boost::iostreams;
-    constexpr auto maximum = std::numeric_limits<Container::size_type>::max();
+    typedef size_type = typename Container::size_type;
+    constexpr auto maximum = std::numeric_limits<size_type>::max();
     return stream<copy_source<Container>>(begin, std::next(begin, maximum));
 }
 
@@ -85,8 +86,8 @@ std::ostream ostream(Container& container) noexcept
 }
 
 template <typename Container>
-std::ostream ostream(Container::iterator& begin,
-    Container::iterator& end) noexcept
+std::ostream ostream(typename Container::iterator& begin,
+    typename Container::iterator& end) noexcept
 {
     // Copies bytes to the container.
     using namespace boost::iostreams;
@@ -94,11 +95,12 @@ std::ostream ostream(Container::iterator& begin,
 }
 
 template <typename Container>
-std::ostream unchecked_ostream(Container::iterator& begin) noexcept
+std::ostream unchecked_ostream(typename Container::iterator& begin) noexcept
 {
     // Copies bytes to the container, with unchecked end.
     using namespace boost::iostreams;
-    constexpr auto maximum = std::numeric_limits<Container::size_type>::max();
+    typedef size_type = typename Container::size_type;
+    constexpr auto maximum = std::numeric_limits<size_type>::max();
     return stream<copy_sink<Container>>(begin, std::next(begin, maximum));
 }
 

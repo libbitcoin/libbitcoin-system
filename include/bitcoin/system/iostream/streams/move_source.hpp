@@ -37,7 +37,7 @@ protected:
 
 private:
     Container&& source_;
-    Container::iterator from_;
+    typename Container::iterator from_;
 };
 
 } // namespace system

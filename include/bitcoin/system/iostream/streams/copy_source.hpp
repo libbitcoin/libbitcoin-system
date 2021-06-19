@@ -36,7 +36,7 @@ protected:
     virtual size_type do_read(value_type* to, size_type size) noexcept;
 
 private:
-    Container::const_iterator from_;
+    typename Container::const_iterator from_;
 };
 
 } // namespace system

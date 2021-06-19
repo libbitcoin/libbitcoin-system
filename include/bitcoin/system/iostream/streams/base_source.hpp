@@ -34,7 +34,7 @@ public:
     typedef char char_type;
     typedef boost::iostreams::source_tag category;
     typedef std::streamsize size_type;
-    typedef Container::value_type value_type;
+    typedef typename Container::value_type value_type;
 
     size_type read(char_type* buffer, size_type count) noexcept
     {

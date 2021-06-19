@@ -30,14 +30,15 @@ class copy_sink
   : base_sink<Container>
 {
 public:
-    copy_sink(Container::iterator& begin, Container::iterator& end) noexcept;
+    copy_sink(typename Container::iterator& begin,
+        typename Container::iterator& end) noexcept;
 
 protected:
     virtual size_type do_write(const value_type* from,
         size_type size) noexcept;
 
 private:
-    Container::iterator to_;
+    typename Container::iterator to_;
 };
 
 } // namespace system
