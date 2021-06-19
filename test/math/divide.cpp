@@ -40,7 +40,7 @@ constexpr bool ceilinged_identity(Dividend x, Divisor y)
 template <typename Dividend, typename Divisor>
 constexpr bool floored_identity(Dividend x, Divisor y)
 {
-#if BC_CPP_14
+#ifdef BC_CPP_14
     // C++14: required for static_cast to be constexpr.
     // Cast avoids conversion of left side to Divisor type.
     // This otherwise leads to comparison of unsigned types warnings.
@@ -53,7 +53,7 @@ constexpr bool floored_identity(Dividend x, Divisor y)
 template <typename Dividend, typename Divisor>
 constexpr bool truncated_identity(Dividend x, Divisor y)
 {
-#if BC_CPP_14
+#ifdef BC_CPP_14
     // C++14: required for static_cast to be constexpr.
     // Cast avoids conversion of left side to Divisor type.
     // This otherwise leads to comparison of unsigned types warnings.
