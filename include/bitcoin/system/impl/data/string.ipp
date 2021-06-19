@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 template <typename Integer, if_integer<Integer>>
-std::string to_string(Integer value, bool big_endian)
+std::string to_string(Integer value, bool big_endian) noexcept
 {
     const auto bytes = big_endian ? to_big_endian(value) :
         to_little_endian(value);

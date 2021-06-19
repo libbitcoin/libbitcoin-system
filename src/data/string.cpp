@@ -29,12 +29,13 @@
 namespace libbitcoin {
 namespace system {
 
-std::string to_string(const data_slice& bytes)
+std::string to_string(const data_slice& bytes) noexcept
 {
     return bytes.to_string();
 }
 
-std::string join(const string_list& tokens, const std::string& delimiter)
+std::string join(const string_list& tokens,
+    const std::string& delimiter) noexcept
 {
     if (tokens.empty())
         return {};
@@ -50,7 +51,8 @@ std::string join(const string_list& tokens, const std::string& delimiter)
     return sentence.str();
 }
 
-void reduce(string_list& tokens, const string_list& trim_tokens, bool compress)
+void reduce(string_list& tokens, const string_list& trim_tokens,
+    bool compress) noexcept
 {
     static const std::string empty{};
 
@@ -69,7 +71,7 @@ void reduce(string_list& tokens, const string_list& trim_tokens, bool compress)
 }
 
 string_list reduce_copy(const string_list& tokens,
-    const string_list& trim_tokens, bool compress)
+    const string_list& trim_tokens, bool compress) noexcept
 {
     auto copy = tokens;
     reduce(copy, trim_tokens, compress);
@@ -77,7 +79,7 @@ string_list reduce_copy(const string_list& tokens,
 }
 
 size_t replace(std::string& text, const std::string& from,
-    const std::string& to)
+    const std::string& to) noexcept
 {
     size_t count = 0;
 
@@ -93,7 +95,7 @@ size_t replace(std::string& text, const std::string& from,
 }
 
 std::string replace_copy(const std::string& text, const std::string& from,
-    const std::string& to)
+    const std::string& to) noexcept
 {
     auto copy = text;
     replace(copy, from, to);
@@ -101,7 +103,7 @@ std::string replace_copy(const std::string& text, const std::string& from,
 }
 
 static string_list splitter(const std::string& text, const std::string& delimiter,
-    const string_list& trim_tokens, bool compress)
+    const string_list& trim_tokens, bool compress) noexcept
 {
     size_t start = 0;
     string_list tokens;
@@ -122,7 +124,7 @@ static string_list splitter(const std::string& text, const std::string& delimite
 }
 
 string_list split(const std::string& text, const string_list& delimiters,
-    const string_list& trim_tokens, bool compress)
+    const string_list& trim_tokens, bool compress) noexcept
 {
     // Nothing to do.
     if (delimiters.empty() && trim_tokens.empty())
@@ -144,20 +146,20 @@ string_list split(const std::string& text, const string_list& delimiters,
 }
 
 string_list split(const std::string& text, const std::string& delimiter,
-    bool trim, bool compress)
+    bool trim, bool compress) noexcept
 {
     const auto trim_tokens = trim ? ascii_whitespace : string_list{};
     return split(text, string_list{ delimiter }, trim_tokens, compress);
 }
 
-string_list split(const std::string& text, bool compress)
+string_list split(const std::string& text, bool compress) noexcept
 {
     // Splitting is prioritized over trimming, because each token is trimmed.
     // So trimming is not an option when splitting on the trim characters.
     return split(text, ascii_whitespace, ascii_whitespace, compress);
 }
 
-bool trim_left(std::string& text, const std::string& token)
+bool trim_left(std::string& text, const std::string& token) noexcept
 {
     auto found = false;
     const auto length = token.length();
@@ -170,7 +172,7 @@ bool trim_left(std::string& text, const std::string& token)
     return found;
 }
 
-bool trim_right(std::string& text, const std::string& token)
+bool trim_right(std::string& text, const std::string& token) noexcept
 {
     auto found = false;
     const auto length = token.length();
@@ -183,7 +185,7 @@ bool trim_right(std::string& text, const std::string& token)
     return found;
 }
 
-bool trim_left(std::string& text, const string_list& trim_tokens)
+bool trim_left(std::string& text, const string_list& trim_tokens) noexcept
 {
     bool found;
     do
@@ -197,7 +199,7 @@ bool trim_left(std::string& text, const string_list& trim_tokens)
     return found;
 }
 
-bool trim_right(std::string& text, const string_list& trim_tokens)
+bool trim_right(std::string& text, const string_list& trim_tokens) noexcept
 {
     bool found;
     do
@@ -211,14 +213,14 @@ bool trim_right(std::string& text, const string_list& trim_tokens)
     return found;
 }
 
-void trim(std::string& text, const string_list& trim_tokens)
+void trim(std::string& text, const string_list& trim_tokens) noexcept
 {
     trim_left(text, trim_tokens);
     trim_right(text, trim_tokens);
 }
 
 std::string trim_left_copy(const std::string& text,
-    const string_list& trim_tokens)
+    const string_list& trim_tokens) noexcept
 {
     auto copy = text;
     trim_left(copy, trim_tokens);
@@ -226,7 +228,7 @@ std::string trim_left_copy(const std::string& text,
 }
 
 std::string trim_right_copy(const std::string& text,
-    const string_list& trim_tokens)
+    const string_list& trim_tokens) noexcept
 {
     auto copy = text;
     trim_right(copy, trim_tokens);
@@ -234,20 +236,20 @@ std::string trim_right_copy(const std::string& text,
 }
 
 std::string trim_copy(const std::string& text,
-    const string_list& trim_tokens)
+    const string_list& trim_tokens) noexcept
 {
     auto copy = text;
     trim(copy, trim_tokens);
     return copy;
 }
 
-bool ends_with(const std::string& text, const std::string& suffix)
+bool ends_with(const std::string& text, const std::string& suffix) noexcept
 {
     const auto at = text.rfind(suffix);
     return at != std::string::npos && (at + suffix.length()) == text.length();
 }
 
-bool starts_with(const std::string& text, const std::string& prefix)
+bool starts_with(const std::string& text, const std::string& prefix) noexcept
 {
     return text.find(prefix) == 0u;
 }
