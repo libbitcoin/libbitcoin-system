@@ -37,7 +37,11 @@
 namespace libbitcoin {
 namespace system {
 
-// input steams
+// Transitional aliases (formerly interfaces now base classes).
+using reader = byte_reader;
+using writer = byte_writer;
+
+/// Input steams.
 
 template <typename Container>
 std::istream istream(const Container& container) noexcept
@@ -69,13 +73,13 @@ std::istream unchecked_istream(
 /// istream* and bit/byte reader construction examples.
 ////const data_chunk copyable(1024, 0x42);
 ////data_chunk moveable = copyable;
-////bit_reader read_bits_move(istream_move(std::move(moveable)));
-////bit_reader read_bits_copy(istream_copy(copyable));
-////byte_reader read_bytes_move(istream_copy(std::move(moveable)));
-////byte_reader read_bytes_copy(istream_copy(copyable));
-////byte_reader read_bytes_unchecked(istream_copy(copyable.begin()));
+////bit_reader reader(copyable);
+////bit_reader mover(std::move(moveable));
+////byte_reader reader(copyable);
+////byte_reader mover(std::move(moveable));
+////byte_reader unchecked_reader(copyable.begin());
 
-// output steams
+/// Output steams.
 
 template <typename Container>
 std::ostream ostream(Container& container) noexcept
@@ -107,11 +111,11 @@ std::ostream unchecked_ostream(typename Container::iterator& begin) noexcept
 /// ostream* and bit/byte writer construction examples.
 ////data_chunk empty;
 ////data_chunk populated(1024, 0x42);
-////bit_writer write_bits_push(ostream_push(empty));
-////bit_writer write_bits_copy(ostream_copy(populated));
-////byte_writer write_bytes_push(ostream_push(empty));
-////byte_writer write_bytes_copy(ostream_copy(populated));
-////byte_writer write_bytes_unchecked(ostream_copy(populated.begin()));
+////bit_writer pusher(empty);
+////bit_writer writer(populated.begin(), populated.end());
+////byte_writer pusher(empty);
+////byte_writer writer(populated.begin(), populated.end());
+////byte_writer unchecked_writer(populated.begin());
 
 } // namespace system
 } // namespace libbitcoin
