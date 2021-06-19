@@ -174,60 +174,78 @@ constexpr size_t two = 2;
 constexpr uint8_t byte_bits = 8;
 
 template <typename Type>
-constexpr bool is_zero(Type value)
+constexpr bool is_zero(Type value) noexcept
 {
     return value == Type{ zero };
 }
 
 template <typename Type>
-constexpr bool is_one(Type value)
+constexpr bool is_one(Type value) noexcept
 {
     return value == Type{ one };
 }
 
 template <typename Type>
-constexpr bool is_even(Type value)
+constexpr Type lo_bit(Type value) noexcept
 {
-    return is_zero(value % Type{ two });
+    return value % Type{ two };
 }
 
 template <typename Type>
-constexpr bool is_odd(Type value)
+constexpr bool is_even(Type value) noexcept
+{
+    return is_zero(lo_bit(value));
+}
+
+template <typename Type>
+constexpr bool is_odd(Type value) noexcept
 {
     return !is_even(value);
 }
 
 template <typename Type>
-constexpr bool is_byte_aligned(Type bits)
+constexpr bool is_byte_aligned(Type bits) noexcept
 {
     return is_zero(bits % Type{ byte_bits });
 }
 template <typename Type>
-constexpr Type to_bits(Type bytes)
+constexpr Type to_bits(Type bytes) noexcept
 {
     return bytes * Type{ byte_bits };
 }
 
 template <typename Type>
-constexpr Type to_bytes(Type bits)
+constexpr Type to_bytes(Type bits) noexcept
 {
     return bits / Type{ byte_bits };
 }
 
 template <typename Type>
-constexpr Type to_half(Type value)
+constexpr Type to_half(Type value) noexcept
 {
     return value / Type{ two };
 }
 
+template <typename Type = int>
+constexpr Type to_int(bool value) noexcept
+{
+    return value ? Type{ one } : Type{ zero };
+}
+
 template <typename Type>
-constexpr Type add1(Type value)
+constexpr bool to_bool(Type value) noexcept
+{
+    return !is_zero(value);
+}
+
+template <typename Type>
+constexpr Type add1(Type value) noexcept
 {
     return value + Type{ one };
 }
 
 template <typename Type>
-constexpr Type sub1(Type value)
+constexpr Type sub1(Type value) noexcept
 {
     return value - Type{ one };
 }
