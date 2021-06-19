@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

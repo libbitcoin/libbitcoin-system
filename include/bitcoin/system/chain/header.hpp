@@ -29,7 +29,7 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>

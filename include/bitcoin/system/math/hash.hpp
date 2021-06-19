@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -101,8 +101,6 @@ constexpr long_hash null_long_hash
     }
 };
 
-// TODO: test.
-
 /// Hash conversions of corresponding integers.
 BC_API mini_hash to_hash(const uint48_t& value);
 BC_API quarter_hash to_hash(const uint64_t& value);
@@ -120,9 +118,10 @@ BC_API uint256_t to_uint256(const hash_digest& hash);
 BC_API uint512_t to_uint512(const long_hash& hash);
 
 /// Generate a scrypt hash to fill a byte array.
+/// Memory required (bytes) = 2 * 64 * work * resources.
 template <size_t Size>
 byte_array<Size> scrypt(const data_slice& data, const data_slice& salt,
-    uint64_t N, uint32_t p, uint32_t r);
+    uint64_t work, uint32_t resources, uint32_t parallelism);
 
 /// Generate a scrypt hash.
 BC_API hash_digest scrypt_hash(const data_slice& data);
@@ -171,7 +170,7 @@ BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
 
 /// Generate a scrypt hash of specified length.
 BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
-    uint64_t N, uint32_t p, uint32_t r, size_t length);
+    uint64_t work, uint32_t resources, uint32_t parallelism, size_t length);
 
 /// DJB2 hash key algorithm by Dan Bernstein.
 BC_API size_t djb2_hash(const data_slice& data);

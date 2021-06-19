@@ -16,20 +16,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_DATA_INTEGER_HPP
-#define LIBBITCOIN_SYSTEM_DATA_INTEGER_HPP
+#ifndef LIBBITCOIN_SYSTEM_DATA_UINTX_HPP
+#define LIBBITCOIN_SYSTEM_DATA_UINTX_HPP
 
 #include <cstdint>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
 namespace system {
-   
+
+/// Template for constructing uintx types.
 template <uint32_t Bits>
 using uintx_t = boost::multiprecision::number<
     boost::multiprecision::cpp_int_backend<Bits, Bits,
         boost::multiprecision::unsigned_magnitude,
         boost::multiprecision::unchecked, void>>;
+
+// Cannot generalize because no boost support for unsigned arbitrary precision.
+// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
+// but is not a base type. Use of signed types here would also not generalize
+// as boost uses a different allocator for arbitrary precision. So we are stuck
+// with this seam, requiring template specialization for uintx.
+typedef boost::multiprecision::cpp_int uintx;
 
 typedef uintx_t<5> uint5_t;
 typedef uintx_t<11> uint11_t;

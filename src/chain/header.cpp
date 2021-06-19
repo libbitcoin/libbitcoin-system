@@ -24,7 +24,7 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -189,14 +189,15 @@ header header::factory(reader& source, const hash_digest& hash, bool wire)
 
 bool header::from_data(const data_chunk& data, bool wire)
 {
-    data_source istream(data);
-    return from_data(istream, wire);
+    data_source source(data);
+    istream_reader reader(source);
+    return from_data(reader, wire);
 }
 
 bool header::from_data(std::istream& stream, bool wire)
 {
-    istream_reader source(stream);
-    return from_data(source, wire);
+    istream_reader reader(stream);
+    return from_data(reader, wire);
 }
 
 bool header::from_data(reader& source, bool)
@@ -280,8 +281,8 @@ void header::to_data(std::ostream& stream, bool wire) const
 void header::to_data(writer& sink, bool) const
 {
     sink.write_4_bytes_little_endian(version_);
-    sink.write_hash(previous_block_hash_);
-    sink.write_hash(merkle_root_);
+    sink.write_bytes(previous_block_hash_);
+    sink.write_bytes(merkle_root_);
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);

@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 
 namespace libbitcoin {
 namespace system {

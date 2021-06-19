@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 
 namespace libbitcoin {
 namespace system {

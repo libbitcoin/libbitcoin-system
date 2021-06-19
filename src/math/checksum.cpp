@@ -22,7 +22,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
 #include <bitcoin/system/serialization/endian.hpp>

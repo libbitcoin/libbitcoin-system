@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -23,75 +23,83 @@
 #include <iostream>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// data - integral integer (e.g. int32_t, uint64_t)
+/// data -> integral (explicit type), integral -> array (implicit size)
 /// ---------------------------------------------------------------------------
-/// Integer is an explicitly-required template parameter for "from" conversion.
 
-template <typename Integer, if_integer<Integer> = true>
-Integer from_big_endian(const data_slice& data);
+template <typename Integer, if_integral_integer<Integer> = true>
+Integer from_big_endian(const data_slice& data) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-Integer from_little_endian(const data_slice& data);
+template <typename Integer, if_integral_integer<Integer> = true>
+Integer from_little_endian(const data_slice& data) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-byte_array<sizeof(Integer)> to_big_endian(Integer value);
+template <typename Integer, if_integral_integer<Integer> = true>
+byte_array<sizeof(Integer)> to_big_endian(Integer value) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-byte_array<sizeof(Integer)> to_little_endian(Integer value);
+template <typename Integer, if_integral_integer<Integer> = true>
+byte_array<sizeof(Integer)> to_little_endian(Integer value) noexcept;
 
-/// stream - integral integer (e.g. int32_t, uint64_t)
+/// stream -> integral (explicit type), integral -> stream (implicit size)
 /// ---------------------------------------------------------------------------
-/// Integer is an explicitly-required template parameter for "from" conversion.
 
-template <typename Integer, if_integer<Integer> = true>
-Integer from_big_endian(std::istream& stream);
+template <typename Integer, if_integral_integer<Integer> = true>
+Integer from_big_endian(std::istream& stream) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-Integer from_little_endian(std::istream& stream);
+template <typename Integer, if_integral_integer<Integer> = true>
+Integer from_little_endian(std::istream& stream) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-void to_big_endian(std::ostream& stream, Integer value);
+template <typename Integer, if_integral_integer<Integer> = true>
+void to_big_endian(std::ostream& stream, Integer value) noexcept;
 
-template <typename Integer, if_integer<Integer> = true>
-void to_little_endian(std::ostream& stream, Integer value);
+template <typename Integer, if_integral_integer<Integer> = true>
+void to_little_endian(std::ostream& stream, Integer value) noexcept;
 
-/// byte_array - uintx_t/integer (e.g. uint128_t, uint256_t)
+/// data -> uintx (inferred size), uintx -> vector (inferred size)
 /// ---------------------------------------------------------------------------
-/// Bits is an explicitly-required template parameter for all conversion.
-/// Bits determines the return value size (uintx<Bits> or byte_array<Bits/8>).
-/// Bits is required to be byte aligned but not to match the Integer parameter.
-/// Integer may be any copy-constructable type, including integral and uintx_t,
-/// that implements bit shift 'operator>>=' and cast 'operator uint8_t()'.
 
-template <size_t Bits, if_byte_aligned<Bits> = true>
-uintx_t<Bits> from_big_endian(const data_slice& data);
+inline uintx from_big_endian(const data_slice& data) noexcept;
 
-template <size_t Bits, if_byte_aligned<Bits> = true>
-uintx_t<Bits> from_little_endian(const data_slice& data);
+inline uintx from_little_endian(const data_slice& data) noexcept;
 
-template <size_t Bits, typename Integer, if_byte_aligned<Bits> = true>
-byte_array<to_bytes(Bits)> to_big_endian(const Integer& value);
+template <typename Integer, if_non_integral_integer<Integer> = true>
+data_chunk to_big_endian(const Integer& value) noexcept;
 
-template <size_t Bits, typename Integer, if_byte_aligned<Bits> = true>
-byte_array<to_bytes(Bits)> to_little_endian(const Integer& value);
+template <typename Integer, if_non_integral_integer<Integer> = true>
+data_chunk to_little_endian(const Integer& value) noexcept;
 
-/// iterator - integer
+/// data -> uintx (explicit size), integer -> array (explicit size)
+//// ---------------------------------------------------------------------------
+/// Bytes is not required to match data size or Integer type implicit size.
+/// Integer may be any integral, uintx or other integer type.
+
+template <size_t Bytes>
+uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept;
+
+template <size_t Bytes>
+uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept;
+
+template <size_t Bytes, typename Integer, if_integer<Integer> = true>
+byte_array<Bytes> to_big_endian(const Integer& value) noexcept;
+
+template <size_t Bytes, typename Integer, if_integer<Integer> = true>
+byte_array<Bytes> to_little_endian(const Integer& value) noexcept;
+
+/// iterator (unknown size) -> integral (implicit size)
 /// ---------------------------------------------------------------------------
-/// Integer is an explicitly-required template parameter.
-
 /// Must be guarded by the caller, use when passing end would be redundant.
-template <typename Integer, typename Iterator, if_integer<Integer> = true>
-Integer from_big_endian_unsafe(const Iterator& data);
 
-/// Must be guarded by the caller, use when passing end would be redundant.
-template <typename Integer, typename Iterator, if_integer<Integer> = true>
-Integer from_little_endian_unsafe(const Iterator& data);
+template <typename Integer, typename Iterator,
+    if_integral_integer<Integer> = true>
+Integer from_big_endian_unsafe(const Iterator& data) noexcept;
+
+template <typename Integer, typename Iterator,
+    if_integral_integer<Integer> = true>
+Integer from_little_endian_unsafe(const Iterator& data) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

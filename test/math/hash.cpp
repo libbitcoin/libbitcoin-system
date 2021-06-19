@@ -19,6 +19,24 @@
 #include "../test.hpp"
 #include "hash.hpp"
 
+// TODO: test:
+
+//// /// Hash conversions of corresponding integers.
+////BC_API mini_hash to_hash(const uint48_t& value);
+////BC_API quarter_hash to_hash(const uint64_t& value);
+////BC_API half_hash to_hash(const uint128_t& value);
+////BC_API short_hash to_hash(const uint160_t& value);
+////BC_API hash_digest to_hash(const uint256_t& value);
+////BC_API long_hash to_hash(const uint512_t& value);
+////
+/////// Integer conversions of corresponding hashes.
+////BC_API uint48_t to_uint48(const mini_hash& hash);
+////BC_API uint64_t to_uint64(const quarter_hash& hash);
+////BC_API uint128_t to_uint128(const half_hash& hash);
+////BC_API uint160_t to_uint160(const short_hash& hash);
+////BC_API uint256_t to_uint256(const hash_digest& hash);
+////BC_API uint512_t to_uint512(const long_hash& hash);
+
 BOOST_AUTO_TEST_SUITE(hash_tests)
 
 BOOST_AUTO_TEST_CASE(sha1_hash_test)

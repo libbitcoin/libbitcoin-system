@@ -25,20 +25,31 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/integer.hpp>
+#include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// local helpers
+// These conversions are efficient, performing no data copies or reversals.
+// array/uintx_t sizes are inferred by type, and vector/uintx by value.
+// High order bits are padded when read (from) is insufficient.
+// High order bits are ignored when write (to) is insufficient.
+
+// convertors
 // ----------------------------------------------------------------------------
+// These do the byte-integer translations.
 
 template <typename Integer>
-Integer from_big_endian_private(const data_slice& data)
+static Integer from_big_endian_private(size_t size,
+    const data_slice& data) noexcept
 {
     // read msb (forward), shift in the byte (no shift on first)
     // data[0] is most significant
@@ -48,21 +59,21 @@ Integer from_big_endian_private(const data_slice& data)
     // 0x0000 |= 0x01[0] => 0x0001
     // 0x0100 |= 0x02[1] => 0x0102
 
-    // Guard against insufficient data.
-    const auto size = std::min(sizeof(Integer), data.size());
+    Integer value = 0;
+    const auto bytes = std::min(size, data.size());
 
-    Integer out = 0;
-    for (size_t index = 0; index < size; ++index)
+    for (size_t byte = 0; byte < bytes; ++byte)
     {
-        out <<= byte_bits;
-        out |= Integer{ data[index] };
+        value <<= byte_bits;
+        value |= Integer{ data[byte] };
     }
 
-    return out;
+    return value;
 }
 
 template <typename Integer>
-Integer from_little_endian_private(const data_slice& data)
+static Integer from_little_endian_private(size_t size,
+    const data_slice& data) noexcept
 {
     // read msb (reverse), shift in the byte (no shift on first)
     // data[0] is least significant
@@ -72,21 +83,21 @@ Integer from_little_endian_private(const data_slice& data)
     // 0x0000 |= 0x02[1] => 0x0002
     // 0x0200 |= 0x01[0] => 0x0201
 
-    // Guard against insufficient data.
-    const auto size = std::min(sizeof(Integer), data.size());
+    Integer value = 0;
+    const auto bytes = std::min(size, data.size());
 
-    Integer out = 0;
-    for (auto index = size; index > 0; --index)
+    for (auto byte = bytes; byte > 0; --byte)
     {
-        out <<= byte_bits;
-        out |= Integer{ data[sub1(index)] };
+        value <<= byte_bits;
+        value |= Integer{ data[sub1(byte)] };
     }
 
-    return out;
+    return value;
 }
 
-template <size_t Size, typename Integer>
-byte_array<Size> to_big_endian_private(Integer value)
+template <typename Data, typename Integer>
+static Data to_big_endian_private(Data&& bytes,
+    Integer value) noexcept
 {
     // read and shift out lsb, set byte in reverse order
     // data[0] is most significant
@@ -96,18 +107,18 @@ byte_array<Size> to_big_endian_private(Integer value)
     // 0x0102 >> 8 => 0x0001
     // 0x0001 >> 8 => 0x0000
 
-    byte_array<Size> out;
-    for (auto& byte: boost::adaptors::reverse(out))
+    for (auto& byte: boost::adaptors::reverse(bytes))
     {
         byte = static_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 
-    return out;
+    return bytes;
 }
 
-template <size_t Size, typename Integer>
-byte_array<Size> to_little_endian_private(Integer value)
+template <typename Data, typename Integer>
+static Data to_little_endian_private(Data&& bytes,
+    Integer value) noexcept
 {
     // read and shift out lsb, set byte in forward order
     // data[0] is least significant
@@ -117,119 +128,209 @@ byte_array<Size> to_little_endian_private(Integer value)
     // 0x0102 >> 8 => 0x0001
     // 0x0001 >> 8 => 0x0000
 
-    byte_array<Size> out;
-    for (auto& byte: out)
+    for (auto& byte: bytes)
     {
         byte = static_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 
-    return out;
+    return bytes;
+}
+
+// allocators
+// ----------------------------------------------------------------------------
+// These allocate the to-endian outgoing buffer and forward the call.
+
+template <size_t Size, typename Integer>
+static byte_array<Size> to_big_endian_private(Integer value) noexcept
+{
+    byte_array<Size> out;
+    return to_big_endian_private(std::move(out), value);
+}
+
+template <size_t Size, typename Integer>
+static byte_array<Size> to_little_endian_private(Integer value) noexcept
+{
+    byte_array<Size> out;
+    return to_little_endian_private(std::move(out), value);
+}
+
+template <typename Integer>
+static data_chunk to_big_endian_private(Integer value) noexcept
+{
+    // Log2 is top bit position, +1 for bit count.
+    // Divide bit count by bits per byte (8) and round up.
+    // Rounding is required because length is determined by value, not type.
+    data_chunk out(no_fill_allocator);
+    out.resize(ceilinged_divide(add1(floored_log2(value)), byte_bits));
+    return to_little_endian_private(std::move(out), value);
+}
+
+template <typename Integer>
+static data_chunk to_little_endian_private(Integer value) noexcept
+{
+    // Log2 is top bit position, +1 for bit count.
+    // Divide bit count by bits per byte (8) and round up.
+    // Rounding is required because length is determined by value, not type.
+    data_chunk out(no_fill_allocator);
+    out.resize(ceilinged_divide(add1(floored_log2(value)), byte_bits));
+    return to_little_endian_private(std::move(out), value);
 }
 
 // data <=> integer
 // ----------------------------------------------------------------------------
 
-template <typename Integer, if_integer<Integer>>
-Integer from_big_endian(const data_slice& data)
+template <typename Integer, if_integral_integer<Integer>>
+Integer from_big_endian(const data_slice& data) noexcept
 {
-    return from_big_endian_private<Integer>(data);
+    // Limit sizeof to integral integers.
+    return from_big_endian_private<Integer>(sizeof(Integer), data);
 }
 
-template <typename Integer, if_integer<Integer>>
-Integer from_little_endian(const data_slice& data)
+template <typename Integer, if_integral_integer<Integer>>
+Integer from_little_endian(const data_slice& data) noexcept
 {
-    return from_little_endian_private<Integer>(data);
+    // Limit sizeof to integral integers.
+    return from_little_endian_private<Integer>(sizeof(Integer), data);
 }
 
-template <typename Integer, if_integer<Integer>>
-byte_array<sizeof(Integer)> to_big_endian(Integer value)
+template <typename Integer, if_integral_integer<Integer>>
+byte_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
+    // Limit sizeof to integral integers.
     return to_big_endian_private<sizeof(Integer)>(value);
 }
 
-template <typename Integer, if_integer<Integer>>
-byte_array<sizeof(Integer)> to_little_endian(Integer value)
+template <typename Integer, if_integral_integer<Integer>>
+byte_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
+    // Limit sizeof to integral integers.
     return to_little_endian_private<sizeof(Integer)>(value);
 }
 
 // stream <=> integer
 // ----------------------------------------------------------------------------
 
-template <typename Integer, if_integer<Integer>>
-Integer from_big_endian(std::istream& stream)
+template <typename Integer, if_integral_integer<Integer>>
+Integer from_big_endian(std::istream& stream) noexcept
 {
+    // Limit sizeof to integral integers.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), buffer.size());
     buffer.resize(stream.gcount());
     return from_big_endian<Integer>(buffer);
 }
 
-template <typename Integer, if_integer<Integer>>
-Integer from_little_endian(std::istream& stream)
+template <typename Integer, if_integral_integer<Integer>>
+Integer from_little_endian(std::istream& stream) noexcept
 {
+    // Limit sizeof to integral integers.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), buffer.size());
     buffer.resize(stream.gcount());
     return from_little_endian<Integer>(buffer);
 }
 
-template <typename Integer, if_integer<Integer>>
-void to_big_endian(std::ostream& stream, Integer value)
+template <typename Integer, if_integral_integer<Integer>>
+void to_big_endian(std::ostream& stream, Integer value) noexcept
 {
-    const auto buffer = to_big_endian(value);
+    // Limit sizeof (in above override) to integral integers.
+    const auto buffer = to_big_endian<Integer>(value);
     stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
-template <typename Integer, if_integer<Integer>>
-void to_little_endian(std::ostream& stream, Integer value)
+template <typename Integer, if_integral_integer<Integer>>
+void to_little_endian(std::ostream& stream, Integer value) noexcept
 {
-    const auto buffer = to_little_endian(value);
+    // Limit sizeof (in above override) to integral integers.
+    const auto buffer = to_little_endian<Integer>(value);
     stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
-// byte_array <=> uintx_t
+// data => uintx
+// uintx => data_chunk
 // ----------------------------------------------------------------------------
 
-template <size_t Bits, if_byte_aligned<Bits>>
-uintx_t<Bits> from_big_endian(const data_slice& data)
+// TODO: test.
+inline uintx from_big_endian(const data_slice& data) noexcept
 {
-    return from_big_endian_private<uintx_t<Bits>>(data);
+    // Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is
+    // a signed type (though otherwise would be declared as uintx_t<0>).
+    return from_big_endian_private<uintx>(data.size(), data);
 }
 
-template <size_t Bits, if_byte_aligned<Bits>>
-uintx_t<Bits> from_little_endian(const data_slice& data)
+// TODO: test.
+inline uintx from_little_endian(const data_slice& data) noexcept
 {
-    return from_little_endian_private<uintx_t<Bits>>(data);
+    // Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is
+    // a signed type (though otherwise would be declared as uintx_t<0>).
+    return from_little_endian_private<uintx>(data.size(), data);
 }
 
-template <size_t Bits, typename Integer, if_byte_aligned<Bits>>
-byte_array<to_bytes(Bits)> to_big_endian(const Integer& value)
+// TODO: test.
+template <typename Integer, if_non_integral_integer<Integer>>
+data_chunk to_big_endian(const Integer& value) noexcept
 {
-    return to_big_endian_private<to_bytes(Bits)>(value);
+    // Limit to non-integral integers (integral selects array<-sizeof).
+    return to_big_endian_private<Integer>(value);
 }
 
-template <size_t Bits, typename Integer, if_byte_aligned<Bits>>
-byte_array<to_bytes(Bits)> to_little_endian(const Integer& value)
+// TODO: test.
+template <typename Integer, if_non_integral_integer<Integer>>
+data_chunk to_little_endian(const Integer& value) noexcept
 {
-    return to_little_endian_private<to_bytes(Bits)>(value);
+    // Limit to non-integral integers (integral selects array<-sizeof).
+    return to_little_endian_private<Integer>(value);
+}
+
+// data => uintx_t<to_bits(Bytes)>
+// uintx_t or integer => data<Bytes>
+// ----------------------------------------------------------------------------
+
+template <size_t Bytes>
+uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept
+{
+    // Explicit uintx_t selection, uintx is specialized above.
+    return from_big_endian_private<uintx_t<to_bits(Bytes)>>(Bytes, data);
+}
+
+template <size_t Bytes>
+uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
+{
+    // Explicit uintx_t selection, uintx is specialized above.
+    return from_little_endian_private<uintx_t<to_bits(Bytes)>>(Bytes, data);
+}
+
+template <size_t Bytes, typename Integer, if_integer<Integer>>
+byte_array<Bytes> to_big_endian(const Integer& value) noexcept
+{
+    // Explicit array selection (from any integer including uintx).
+    return to_big_endian_private<Bytes>(value);
+}
+
+template <size_t Bytes, typename Integer, if_integer<Integer>>
+byte_array<Bytes> to_little_endian(const Integer& value) noexcept
+{
+    // Explicit array selection (from any integer including uintx).
+    return to_little_endian_private<Bytes>(value);
 }
 
 // iterator => integer
 // ----------------------------------------------------------------------------
 // size is unguarded.
 
-template <typename Integer, typename Iterator, if_integer<Integer>>
-Integer from_big_endian_unsafe(const Iterator& data)
+template <typename Integer, typename Iterator, if_integral_integer<Integer>>
+Integer from_big_endian_unsafe(const Iterator& data) noexcept
 {
+    // Limit sizeof to integral integers.
     const auto slice = data_slice(data, std::next(data, sizeof(Integer)));
     return from_big_endian<Integer>(slice);
 }
 
-template <typename Integer, typename Iterator, if_integer<Integer>>
-Integer from_little_endian_unsafe(const Iterator& data)
+template <typename Integer, typename Iterator, if_integral_integer<Integer>>
+Integer from_little_endian_unsafe(const Iterator& data) noexcept
 {
+    // Limit sizeof to integral integers.
     const auto slice = data_slice(data, std::next(data, sizeof(Integer)));
     return from_little_endian<Integer>(slice);
 }
