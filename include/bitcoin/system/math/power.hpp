@@ -19,50 +19,58 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
+#include <cstddef>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// All operations below support signed and unsigned parameters.
-
+/// Division by Zero warning
 /// log(0, n) is undefined, and given inlining of these functions, a compiler
 /// may warn of a "possible" (but actually unreachable) division by zero when
 /// the base is const 0. This occurs because the compiler is inlining
 /// "value / 0". The resolution is to not make this call in production code
 /// (the warning is beneficial) and to use a non-const base 0 in tests.
 
+/// All operations below support signed and unsigned template paramters.
+
 /// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
-template <typename Base, typename Integer, typename Log=Integer,
-    if_integer<Base> = true, if_integer<Integer> = true>
-inline Log ceilinged_log(Base base, Integer value);
+template <typename Exponent = size_t, typename Base, typename Value,
+    if_integer<Exponent> = true, if_integer<Base> = true, if_integer<Value> = true>
+inline Exponent ceilinged_log(Base base, Value value) noexcept;
 
 /// Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
 /// Returns 0 for undefined (value < 1).
-template <typename Integer, if_integer<Integer> = true>
-inline Integer ceilinged_log2(Integer value);
+template <typename Exponent = size_t, typename Value,
+    if_integer<Exponent> = true, if_integer<Value> = true>
+inline Exponent ceilinged_log2(Value value) noexcept;
 
 /// Obtain the floored (rounded down) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
-template <typename Base, typename Integer, typename Log=Integer,
-    if_integer<Base> = true, if_integer<Integer> = true>
-inline Log floored_log(Base base, Integer value);
+template <typename Exponent = size_t, typename Base, typename Value,
+    if_integer<Exponent> = true, if_integer<Base> = true,
+    if_integer<Value> = true>
+inline Exponent floored_log(Base base, Value value) noexcept;
 
 /// Obtain the floored (rounded down) integer base 2 logarithm of given value.
 /// Returns 0 for undefined (value < 1).
-template <typename Integer, if_integer<Integer> = true>
-inline Integer floored_log2(Integer value);
+template <typename Exponent = size_t, typename Value,
+    if_integer<Exponent> = true, if_integer<Value> = true>
+inline Exponent floored_log2(Value value) noexcept;
 
 /// Obtain the integer power of given base for given exponent.
 /// Returns zero if both operands are zero (undefined).
-template <typename Base, typename Integer, typename Power=Base,
-    if_integer<Base> = true, if_integer<Integer> = true>
-inline Power power(Base base, Integer exponent);
+template <typename Value = size_t, typename Base, typename Exponent,
+    if_integer<Value> = true, if_integer<Base> = true,
+    if_integer<Exponent> = true>
+inline Value power(Base base, Exponent exponent) noexcept;
 
 /// Obtain the integer base 2 power for given exponent.
-template <typename Integer, if_integer<Integer> = true>
-inline Integer power2(Integer exponent);
+template <typename Value = size_t, typename Exponent,
+    if_integer<Value> = true, if_integer<Exponent> = true>
+inline Value power2(Exponent exponent) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
@@ -70,4 +78,3 @@ inline Integer power2(Integer exponent);
 #include <bitcoin/system/impl/math/power.ipp>
 
 #endif
-

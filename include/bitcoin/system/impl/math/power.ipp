@@ -19,91 +19,103 @@
 #ifndef LIBBITCOIN_SYSTEM_POWER_IPP
 #define LIBBITCOIN_SYSTEM_POWER_IPP
 
+#include <cstddef>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// C++14: Log can be defaulted to decltype(Integer / Base).
+// TODO: test all with uintx.
+
+// C++14: All functions below can be made constexpr.
 
 // Returns 0 for undefined (base < 2 or value < 1).
-template <typename Base, typename Integer, typename Log,
-    if_integer<Base>, if_integer<Integer>>
-inline Log ceilinged_log(Base base, Integer value)
+template <typename Exponent, typename Base, typename Value,
+    if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
+inline Exponent ceilinged_log(Base base, Value value) noexcept
 {
     if (base < 2 || value < 1)
         return 0;
 
-    return floored_log(base, value) + ((value % base) != 0 ? 1 : 0);
+    const auto exponent = floored_log<Exponent>(base, value);
+    return exponent + ((power<Value>(base, exponent) == value) ? 0 : 1);
 }
     
 // Returns 0 for undefined (value < 1).
-template <typename Integer, if_integer<Integer>>
-inline Integer ceilinged_log2(Integer value)
+template <typename Exponent, typename Value,
+    if_integer<Exponent>, if_integer<Value>>
+inline Exponent ceilinged_log2(Value value) noexcept
 {
     if (value < 1)
         return 0;
 
-    return floored_log2(value) + (value % 2);
+    const auto exponent = floored_log2<Exponent>(value);
+    return exponent + ((power2<Value>(exponent) == value) ? 0 : 1);
 }
 
 // Returns 0 for undefined (base < 2 or value < 1).
-template <typename Base, typename Integer, typename Log,
-    if_integer<Base>, if_integer<Integer>>
-inline Log floored_log(Base base, Integer value)
+template <typename Exponent, typename Base, typename Value,
+    if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
+inline Exponent floored_log(Base base, Value value) noexcept
 {
     if (base < 2 || value < 1)
         return 0;
 
-    Log exponent = 0;
+    Exponent exponent = 0;
     while (((value /= base)) > 0) { ++exponent; }
     return exponent;
 }
 
 // Returns 0 for undefined (value < 1).
-template <typename Integer, if_integer<Integer>>
-inline Integer floored_log2(Integer value)
+template <typename Exponent, typename Value,
+    if_integer<Exponent>, if_integer<Value>>
+inline Exponent floored_log2(Value value) noexcept
 {
     if (value < 1)
         return 0;
 
-    Integer exponent = 0;
+    Exponent exponent = 0;
     while (((value >>= 1)) > 0) { ++exponent; };
     return exponent;
 }
 
 // Returns 0 for undefined (0^0).
-template <typename Base, typename Integer, typename Power,
-    if_integer<Base>, if_integer<Integer>>
-inline Power power(Base base, Integer exponent)
+template <typename Value, typename Base, typename Exponent,
+    if_integer<Value>, if_integer<Base>, if_integer<Exponent>>
+inline Value power(Base base, Exponent exponent) noexcept
 {
-    if (base == 0)
+    if (is_zero(base))
         return 0;
 
-    if (exponent == 0)
+    if (is_zero(exponent))
         return 1;
 
     if (is_negative(exponent))
         return absolute(base) > 1 ? 0 :
             (is_odd(exponent) && is_negative(base) ? -1 : 1);
 
-    Power value = base;
+    Value value = base;
     while (--exponent > 0) { value *= base; }
     return value;
 }
 
-template <typename Integer, if_integer<Integer>>
-inline Integer power2(Integer exponent)
+// uintx power2 can be implemented by bit_set(int, exponent) on a new int.
+// We could use 64 element lookup table for integrals, instead of shifting.
+template <typename Value, typename Exponent,
+    if_integer<Value>, if_integer<Exponent>>
+inline Value power2(Exponent exponent) noexcept
 {
-    if (exponent == 0)
+    if (is_zero(exponent))
         return 1;
 
     if (is_negative(exponent))
         return 0;
 
-    Integer value = 2;
+    Value value = 2;
     while (--exponent > 0) { value <<= 1; };
     return value;
 }
