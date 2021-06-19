@@ -19,16 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_IPP
 #define LIBBITCOIN_SYSTEM_MATH_IPP
 
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+// TODO: rename to division.hpp.
+// TODO: test with uintx.
+
 // local
 template <typename Factor1, typename Factor2,
     if_integer<Factor1> = true, if_integer<Factor2> = true>
-inline bool is_negative(Factor1 factor1, Factor2 factor2)
+constexpr bool is_negative(Factor1 factor1, Factor2 factor2) noexcept
 {
     return is_negative(factor1) != is_negative(factor2);
 }
@@ -36,15 +40,15 @@ inline bool is_negative(Factor1 factor1, Factor2 factor2)
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-inline bool no_remainder(Dividend dividend, Divisor divisor)
+constexpr bool no_remainder(Dividend dividend, Divisor divisor) noexcept
 {
-    return (dividend % divisor) == 0;
+    return is_zero(dividend % divisor);
 }
 
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-inline bool is_ceilinged(Dividend dividend, Divisor divisor)
+constexpr bool is_ceilinged(Dividend dividend, Divisor divisor) noexcept
 {
     return is_negative(dividend, divisor) || no_remainder(dividend, divisor);
 }
@@ -52,56 +56,59 @@ inline bool is_ceilinged(Dividend dividend, Divisor divisor)
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-inline bool is_floored(Dividend dividend, Divisor divisor)
+constexpr bool is_floored(Dividend dividend, Divisor divisor) noexcept
 {
     return !is_negative(dividend, divisor) || no_remainder(dividend, divisor);
 }
 
-// C++14: Quotient can be defaulted to decltype(Dividend / Divisor).
-// C++14: Remainder can be defaulted to decltype(Dividend % Divisor).
-
-template <typename Dividend, typename Divisor, typename Quotient,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Quotient ceilinged_divide(Dividend dividend, Divisor divisor)
+constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend / divisor)
 {
     return truncated_divide(dividend, divisor) + 
         (is_ceilinged(dividend, divisor) ? 0 : 1);
 }
 
-template <typename Dividend, typename Divisor, typename Remainder,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Remainder ceilinged_modulo(Dividend dividend, Divisor divisor)
+constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend % divisor)
 {
     return truncated_modulo(dividend, divisor) -
         (is_ceilinged(dividend, divisor) ? 0 : divisor);
 }
 
-template <typename Dividend, typename Divisor, typename Quotient,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Quotient floored_divide(Dividend dividend, Divisor divisor)
+constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend / divisor)
 {
     return truncated_divide(dividend, divisor) -
         (is_floored(dividend, divisor) ? 0 : 1);
 }
 
-template <typename Dividend, typename Divisor, typename Remainder,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Remainder floored_modulo(Dividend dividend, Divisor divisor)
+constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend % divisor)
 {
     return truncated_modulo(dividend, divisor) +
         (is_floored(dividend, divisor) ? 0 : divisor);
 }
 
-template <typename Dividend, typename Divisor, typename Quotient,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Quotient truncated_divide(Dividend dividend, Divisor divisor)
+constexpr auto truncated_divide(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend / divisor)
 {
     return dividend / divisor;
 }
 
-template <typename Dividend, typename Divisor, typename Remainder,
+template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-inline Remainder truncated_modulo(Dividend dividend, Divisor divisor)
+constexpr auto truncated_modulo(Dividend dividend, Divisor divisor) noexcept
+    -> decltype(dividend % divisor)
 {
     return dividend % divisor;
 }

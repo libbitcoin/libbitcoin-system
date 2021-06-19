@@ -75,6 +75,23 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
+// ISO predefined constant for c++ version.
+#if __cplusplus >= 199711L
+    #define BC_CPP_03
+#endif
+#if __cplusplus >= 201103L
+    #define BC_CPP_11
+#endif
+#if __cplusplus >= 201402L
+    #define BC_CPP_14
+#endif
+#if __cplusplus >= 201703L
+    #define BC_CPP_17
+#endif
+#if __cplusplus >= 202002L
+    #define BC_CPP_20
+#endif
+
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
 // This arises when including <functional>, which declares std::placeholders.
 // This results in an declared symbol when boost includes use placeholders.
