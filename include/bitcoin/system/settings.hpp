@@ -24,7 +24,8 @@
 #include <string>
 #include <bitcoin/system/config/block.hpp>
 #include <bitcoin/system/config/settings.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/config/settings.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -44,6 +45,7 @@ public:
     uint32_t minimum_timespan() const;
     uint32_t maximum_timespan() const;
     size_t retargeting_interval() const;
+    uint256_t work_limit() const;
 
     // Utilities.
     //-------------------------------------------------------------------------
