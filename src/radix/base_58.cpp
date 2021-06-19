@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 
 // base58
 // Base 58 is an ascii data encoding with a domain of 58 symbols (characters).
@@ -48,10 +49,10 @@ bool is_base58(const std::string& text)
 }
 
 template <typename Data>
-auto search_first_nonzero(const Data& data) -> decltype(data.cbegin())
+static auto find_first_nonzero(const Data& data) -> decltype(data.cbegin())
 {
     auto first_nonzero = data.cbegin();
-    while (first_nonzero != data.end() && *first_nonzero == 0)
+    while (first_nonzero != data.end() && is_zero(*first_nonzero))
         ++first_nonzero;
 
     return first_nonzero;
@@ -63,7 +64,7 @@ size_t count_leading_zeros(const data_slice& unencoded)
     size_t leading_zeros = 0;
     for (const auto byte: unencoded)
     {
-        if (byte != 0u)
+        if (!is_zero(byte))
             break;
 
         ++leading_zeros;
@@ -82,7 +83,7 @@ void pack_value(data_chunk& indexes, size_t carry)
         carry /= 58u;
     }
 
-    BITCOIN_ASSERT(carry == 0u);
+    BITCOIN_ASSERT(is_zero(carry));
 }
 
 std::string encode_base58(const data_slice& unencoded)
@@ -91,7 +92,7 @@ std::string encode_base58(const data_slice& unencoded)
 
     // size = log(256) / log(58), rounded up.
     const size_t number_nonzero = unencoded.size() - leading_zeros;
-    const size_t indexes_size = number_nonzero * 138u / 100u + 1u;
+    const size_t indexes_size = add1(number_nonzero * 138u / 100u);
 
     // Allocate enough space in big-endian base58 representation.
     data_chunk indexes(indexes_size);
@@ -104,7 +105,7 @@ std::string encode_base58(const data_slice& unencoded)
     }
 
     // Skip leading zeros in base58 result.
-    auto first_nonzero = search_first_nonzero(indexes);
+    auto first_nonzero = find_first_nonzero(indexes);
 
     // Translate the result into a string.
     std::string encoded;
@@ -153,7 +154,7 @@ bool decode_base58(data_chunk& out, const std::string& in)
     const auto leading_zeros = count_leading_zeros(in);
 
     // log(58) / log(256), rounded up.
-    const size_t data_size = in.size() * 733u / 1000u + 1u;
+    const size_t data_size = add1(in.size() * 733u / 1000u);
 
     // Allocate enough space in big-endian base256 representation.
     data_chunk data(data_size);
@@ -169,13 +170,13 @@ bool decode_base58(data_chunk& out, const std::string& in)
     }
 
     // Skip leading zeros in data.
-    auto first_nonzero = search_first_nonzero(data);
+    auto first_nonzero = find_first_nonzero(data);
 
     // Copy result into output vector.
     data_chunk decoded;
     const size_t estimated_size = leading_zeros + (data.end() - first_nonzero);
     decoded.reserve(estimated_size);
-    decoded.assign(leading_zeros, 0x00);
+    decoded.assign(leading_zeros, zero);
     decoded.insert(decoded.end(), first_nonzero, data.cend());
 
     out = decoded;

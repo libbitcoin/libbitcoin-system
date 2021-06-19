@@ -24,9 +24,9 @@
 #include <secp256k1_recovery.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include "../math/external/lax_der_parsing.h"
 #include "secp256k1_initializer.hpp"
@@ -116,7 +116,7 @@ bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
 {
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
-    const auto recovery_id = safe_to_signed<int>(recoverable.recovery_id);
+    const auto recovery_id = static_cast<int>(recoverable.recovery_id);
     return
         secp256k1_ecdsa_recoverable_signature_parse_compact(context,
             &sign, recoverable.signature.data(), recovery_id) == 1 &&
@@ -463,8 +463,10 @@ bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
         secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
             out.signature.data(), &recovery_id, &signature) == 1;
 
-    BITCOIN_ASSERT(recovery_id >= 0 && recovery_id <= 3);
-    out.recovery_id = safe_to_unsigned<uint8_t>(recovery_id);
+    if (is_negative(recovery_id) || recovery_id > 3)
+        return false;
+
+    out.recovery_id = static_cast<uint8_t>(recovery_id);
     return result;
 }
 

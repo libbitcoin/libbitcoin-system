@@ -23,6 +23,7 @@
 #include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -152,7 +153,7 @@ bool output_point::is_mature(size_t height) const
         return true;
 
     // The (non-coinbase) input refers to a coinbase output, so validate depth.
-    return floor_subtract(height, metadata.height) >= coinbase_maturity;
+    return floored_subtract(height, metadata.height) >= coinbase_maturity;
 }
 
 } // namespace chain
