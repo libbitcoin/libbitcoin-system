@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -24,38 +24,38 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-const data_slice::value_type data_slice::pad = 0x00;
-
 // constructors
 // ----------------------------------------------------------------------------
 
-data_slice::data_slice()
-  : data_slice(nullptr, nullptr, 0u)
+data_slice::data_slice() noexcept
+  : data_slice(nullptr, nullptr, zero)
 {
 }
 
-data_slice::data_slice(const data_slice& other)
+data_slice::data_slice(const data_slice& other) noexcept
   : begin_(other.begin_), end_(other.end_), size_(other.size_)
 {
 }
 
-data_slice::data_slice(const std::string& text)
+data_slice::data_slice(const std::string& text) noexcept
   : data_slice(from_size(text.begin(), text.size()))
 {
 }
 
-data_slice::data_slice(std::initializer_list<value_type> bytes)
+data_slice::data_slice(std::initializer_list<value_type> bytes) noexcept
   : data_slice(from_size(bytes.begin(), bytes.size()))
 {
 }
 
 // private
-data_slice::data_slice(const_pointer begin, const_pointer end, size_type size)
+data_slice::data_slice(const_pointer begin, const_pointer end,
+    size_type size) noexcept
   : begin_(begin), end_(end), size_(size)
 {
 }
@@ -63,23 +63,23 @@ data_slice::data_slice(const_pointer begin, const_pointer end, size_type size)
 // methods
 // ----------------------------------------------------------------------------
 
-std::vector<data_slice::value_type> data_slice::to_chunk() const
+std::vector<data_slice::value_type> data_slice::to_chunk() const noexcept
 {
     return { begin_, end_ };
 }
 
-std::string data_slice::to_string() const
+std::string data_slice::to_string() const noexcept
 {
     return { begin_, end_ };
 }
 
 // Cannot provide a "decode" factory since the data is not owned.
-std::string data_slice::encoded() const
+std::string data_slice::encoded() const noexcept
 {
     return encode_base16(to_chunk());
 }
 
-bool data_slice::resize(size_t size)
+bool data_slice::resize(size_t size) noexcept
 {
     if (size >= size_)
         return false;
@@ -93,63 +93,63 @@ bool data_slice::resize(size_t size)
 // ----------------------------------------------------------------------------
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::data() const
+data_slice::const_pointer data_slice::data() const noexcept
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::begin() const
+data_slice::const_pointer data_slice::begin() const noexcept
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::end() const
+data_slice::const_pointer data_slice::end() const noexcept
 {
     return end_;
 }
 
-data_slice::value_type data_slice::front() const
+data_slice::value_type data_slice::front() const noexcept
 {
     // Guard against end overrun (return zero).
-    return empty() ? pad : *begin_;
+    return empty() ? 0x00 : *begin_;
 }
 
-data_slice::value_type data_slice::back() const
+data_slice::value_type data_slice::back() const noexcept
 {
     // Guard against begin underrun (return zero).
-    return empty() ? pad : *std::prev(end_, 1);
+    return empty() ? 0x00 : *std::prev(end_, 1);
 }
 
-data_slice::size_type data_slice::size() const
+data_slice::size_type data_slice::size() const noexcept
 {
     return size_;
 }
 
-bool data_slice::empty() const
+bool data_slice::empty() const noexcept
 {
-    return size_ == 0u;
+    return is_zero(size_);
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-data_slice::operator std::vector<data_slice::value_type>() const
+data_slice::operator std::vector<data_slice::value_type>() const noexcept
 {
     return data_slice::to_chunk();
 }
 
-data_slice::value_type data_slice::operator[](size_type index) const
+data_slice::value_type data_slice::operator[](size_type index) const noexcept
 {
     // Guard against end overrun (return zero).
-    return index < size_ ? *std::next(begin_, index) : pad;
+    return index < size_ ? *std::next(begin_, index) : 0x00;
 }
 
-bool operator==(const data_slice& left, const data_slice& right)
+bool operator==(const data_slice& left, const data_slice& right) noexcept
 {
-    // Produces clang template specialization error.
-    ////return std::equal(left.begin(), left.end(), right.begin(), right.end());
+    // Compares iterator addresses, not values.
+    ////return left.begin() == right.begin() && left.end() == right.end();
 
     if (left.size() != right.size())
         return false;
@@ -161,7 +161,7 @@ bool operator==(const data_slice& left, const data_slice& right)
     return true;
 }
 
-bool operator!=(const data_slice& left, const data_slice& right)
+bool operator!=(const data_slice& left, const data_slice& right) noexcept
 {
     return !(left == right);
 }

@@ -27,6 +27,7 @@
 #include <queue>
 #include <utility>
 #include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -48,76 +49,78 @@ typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
 
 /// Cast a char to a byte.
-inline uint8_t to_byte(char character);
+inline uint8_t to_byte(char character) noexcept;
 
 /// Convert the data slice to an array.
 /// Underfill is padded with 0x00, excess is truncated.
 /// to_array(to_string(data)) == data.
 template <size_t Size>
-byte_array<Size> to_array(const data_slice& bytes);
+byte_array<Size> to_array(const data_slice& bytes) noexcept;
 
 /// Concatenate several data slices into a single array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
-byte_array<Size> build_array(const data_loaf& slices);
+byte_array<Size> build_array(const data_loaf& slices) noexcept;
 
 /// Extend insertable target by copying extension.
 template <class Target>
-Target& extend(Target& target, const data_slice& extension);
+Target& extend(Target& target, const data_slice& extension) noexcept;
 
 /// Extend insertable target by moving extension.
 template <class Target, class Extension>
-Target& extend(Target& target, Extension&& extension);
+Target& extend(Target& target, Extension&& extension) noexcept;
 
 /// Extract a byte subarray from start position with length end minus start.
 template <size_t Start, size_t End, size_t Size>
-byte_array<End - Start> slice(const byte_array<Size>& bytes);
+byte_array<End - Start> slice(const byte_array<Size>& bytes) noexcept;
 
 /// Break an evenly-sized byte array array into two equal length parts.
 template <size_t Size>
-split_parts<Size / 2u> split(const byte_array<Size>& bytes);
+split_parts<to_half(Size)> split(const byte_array<Size>& bytes) noexcept;
 
 /// Concatenate two byte arrays into a new array.
 template <size_t Left, size_t Right>
 byte_array<Left + Right> splice(const byte_array<Left>& left,
-    const byte_array<Right>& right);
+    const byte_array<Right>& right) noexcept;
 
 /// Concatenate three byte arrays into a new array.
 template <size_t Left, size_t Middle, size_t Right>
 byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
-    const byte_array<Middle>& middle, const byte_array<Right>& right);
+    const byte_array<Middle>& middle, const byte_array<Right>& right) noexcept;
 
 /// Determine if a buffer starts with a byte sequence.
 template <typename Source, class Target>
 bool starts_with(const typename Source::const_iterator& begin,
-    const typename Source::const_iterator& end, const Source& value);
+    const typename Source::const_iterator& end, const Source& value) noexcept;
 
 /// Perform an exclusive or (xor) on two arrays to specified length.
 template <size_t Size, size_t Size1, size_t Size2>
 byte_array<Size> xor_data(const byte_array<Size1>& bytes1,
-    const byte_array<Size2>& bytes2);
+    const byte_array<Size2>& bytes2) noexcept;
 
 /// Perform an exclusive or (xor) on two arrays at specified offsets and length.
 template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2>
 byte_array<Size> xor_offset(const byte_array<Size1>& bytes1,
-    const byte_array<Size2>& bytes2);
+    const byte_array<Size2>& bytes2) noexcept;
 
 /// Create a single byte arrray with given element value.
-BC_API one_byte to_array(uint8_t byte);
+BC_API one_byte to_array(uint8_t byte) noexcept;
 
 /// Create a single byte data_chunk with given element value.
-BC_API data_chunk to_chunk(uint8_t byte);
+BC_API data_chunk to_chunk(uint8_t byte) noexcept;
 
 /// Create a data chunk from data slice.
 /// to_chunk(to_string(data)) == data.
-BC_API data_chunk to_chunk(const data_slice& bytes);
+BC_API data_chunk to_chunk(const data_slice& bytes) noexcept;
 
 /// Concatenate several data slices into a single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
-BC_API data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve=0);
+BC_API data_chunk build_chunk(const data_loaf& slices,
+    size_t extra_reserve=0) noexcept;
 
 /// Concatenate two data_slices into a single data chunk.
-BC_API data_chunk splice(const data_slice& left, const data_slice& right);
+BC_API data_chunk splice(const data_slice& left,
+    const data_slice& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

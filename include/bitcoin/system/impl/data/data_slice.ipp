@@ -21,7 +21,8 @@
 
 #include <array>
 #include <vector>
-#include <bitcoin/system/type_constraints.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,31 +31,31 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-data_slice::data_slice(const char(&bytes)[Size])
+data_slice::data_slice(const char(&bytes)[Size]) noexcept
   : data_slice(from_literal(bytes))
 {
 }
 
 template <data_slice::size_type Size, typename Byte, if_byte<Byte>>
-data_slice::data_slice(const std::array<Byte, Size>& data)
+data_slice::data_slice(const std::array<Byte, Size>& data) noexcept
   : data_slice(from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_byte<Byte>>
-data_slice::data_slice(const std::vector<Byte>& data)
+data_slice::data_slice(const std::vector<Byte>& data) noexcept
   : data_slice(from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
-data_slice::data_slice(const Iterator& begin, const Iterator& end)
+data_slice::data_slice(const Iterator& begin, const Iterator& end) noexcept
   : data_slice(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_byte<Byte>>
-data_slice::data_slice(const Byte* begin, const Byte* end)
+data_slice::data_slice(const Byte* begin, const Byte* end) noexcept
   : data_slice(from_iterators(begin, end))
 {
 }
@@ -63,30 +64,30 @@ data_slice::data_slice(const Byte* begin, const Byte* end)
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size, typename Byte>
-data_slice data_slice::from_literal(const Byte(&bytes)[Size])
+data_slice data_slice::from_literal(const Byte(&bytes)[Size]) noexcept
 {
     // Guard 0 for lack of null terminator (see below).
-    if (Size == 0u)
+    if (is_zero(Size))
         return {};
 
     // Literals are null terminated but initializer syntax char arrays are not.
     // Those are picked up here and lose their last char. Workaround:
     // data_slice slice({ 'f', 'o', 'o', 'b', 'a', 'r', '\0' });
     // The more common syntax works as expected: data_slice slice("foobar");
-    return from_size(&bytes[0], Size - 1u);
+    return from_size(&bytes[0], sub1(Size));
 }
 
 // static
 template <typename Iterator>
 data_slice data_slice::from_iterators(const Iterator& begin,
-    const Iterator& end)
+    const Iterator& end) noexcept
 {
     // An end iterator can be anything, so convert to size.
     const auto size = std::distance(begin, end);
 
     // Guard negative against iterators reversed (undefined behavior).
     // Guard 0 because &begin[0] is undefined if size is zero.
-    if (size <= 0)
+    if (is_negative(size) || is_zero(size))
         return {};
 
     return from_size(&begin[0], static_cast<size_type>(size));
@@ -94,10 +95,10 @@ data_slice data_slice::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-data_slice data_slice::from_size(Pointer begin, size_type size)
+data_slice data_slice::from_size(Pointer begin, size_type size) noexcept
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
-    if (size == 0u)
+    if (is_zero(size))
         return {};
 
     // Pointer may be a char or uin8_t pointer or iterator type.
@@ -109,7 +110,8 @@ data_slice data_slice::from_size(Pointer begin, size_type size)
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-std::array<typename data_slice::value_type, Size> data_slice::to_array() const
+std::array<typename data_slice::value_type, Size>
+data_slice::to_array() const noexcept
 {
     std::array<data_slice::value_type, Size> out;
 
@@ -124,7 +126,8 @@ std::array<typename data_slice::value_type, Size> data_slice::to_array() const
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-data_slice::operator std::array<typename data_slice::value_type, Size>() const
+data_slice::operator
+std::array<typename data_slice::value_type, Size>() const noexcept
 {
     return to_array<Size>();
 }

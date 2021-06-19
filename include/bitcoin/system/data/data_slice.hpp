@@ -40,97 +40,97 @@ namespace system {
 class BC_API data_slice
 {
 public:
+    typedef size_t size_type;
     typedef uint8_t value_type;
     typedef const value_type* const_pointer;
-    typedef size_t size_type;
-    
-    /// Zero is returned when value would be undefined.
-    /// This allows a caller to pad by value-iterating past end.
-    static const data_slice::value_type pad;
+
+    // This accomodates the copy_sink until we have a full iterator here.
+    typedef const value_type* const_iterator;
 
     /// Constructors.
 
-    /// Empty data object.
-    data_slice();
+    /// Empty slice.
+    data_slice() noexcept;
 
     /// Copy construction.
-    data_slice(const data_slice& other);
+    data_slice(const data_slice& other) noexcept;
 
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
     template <size_type Size>
-    data_slice(const char(&text)[Size]);
+    data_slice(const char(&text)[Size]) noexcept;
 
-    /// Byte array constructor.
+    /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_byte<Byte> = true>
-    data_slice(const std::array<Byte, Size>& data);
+    data_slice(const std::array<Byte, Size>& data) noexcept;
 
-    /// Byte vector constructor.
+    /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
-    data_slice(const std::vector<Byte>& data);
+    data_slice(const std::vector<Byte>& data) noexcept;
 
-    /// Byte iterators constructor.
+    /// Byte iterators constructor (casts Byte to uint8_t).
     template <typename Iterator>
-    data_slice(const Iterator& begin, const Iterator& end);
+    data_slice(const Iterator& begin, const Iterator& end) noexcept;
 
-    /// Byte pointers constructor.
+    // TODO: change to begin/size construction.
+    /// Byte pointer constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
-    data_slice(const Byte* begin, const Byte* end);
+    data_slice(const Byte* begin, const Byte* end) noexcept;
 
-    /// String constructor, null terminator is not indexed.
-    data_slice(const std::string& text);
+    /// String constructor (casts char to uint8_t).
+    data_slice(const std::string& text) noexcept;
 
     /// Byte initializer list constructor.
-    data_slice(std::initializer_list<value_type> bytes);
+    data_slice(std::initializer_list<value_type> bytes) noexcept;
 
     /// Methods.
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    std::array<value_type, Size> to_array() const;
+    std::array<value_type, Size> to_array() const noexcept;
 
     /// Copy data to a vector.
-    std::vector<value_type> to_chunk() const;
+    std::vector<value_type> to_chunk() const noexcept;
 
-    /// Convert data to a string, casts uint8_t to char.
-    std::string to_string() const;
+    /// Convert data to a string (casts uint8_t to char).
+    std::string to_string() const noexcept;
 
     /// Convert data to a base16 string.
-    std::string encoded() const;
+    std::string encoded() const noexcept;
 
     /// Resize the slice by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slice.
     /// Returns true if the size was reduced (expansion is not allowed).
-    bool resize(size_t size);
+    bool resize(size_t size) noexcept;
 
     /// Properties.
-    const_pointer data() const;
-    const_pointer begin() const;
-    const_pointer end() const;
-    value_type front() const;
-    value_type back() const;
-    size_type size() const;
-    bool empty() const;
+    const_pointer data() const noexcept;
+    const_pointer begin() const noexcept;
+    const_pointer end() const noexcept;
+    value_type front() const noexcept;
+    value_type back() const noexcept;
+    size_type size() const noexcept;
+    bool empty() const noexcept;
 
     /// Unary operators.
     template<size_type Size>
-    operator std::array<value_type, Size>() const;
-    operator std::vector<value_type>() const;
-    value_type operator[](size_type index) const;
+    operator std::array<value_type, Size>() const noexcept;
+    operator std::vector<value_type>() const noexcept;
+    value_type operator[](size_type index) const noexcept;
 
 private:
-    data_slice(const_pointer begin, const_pointer end, size_type size);
+    data_slice(const_pointer begin, const_pointer end, size_type size) noexcept;
 
     template <size_type Size, typename Byte>
-    static data_slice from_literal(const Byte(&text)[Size]);
+    static data_slice from_literal(const Byte(&text)[Size]) noexcept;
 
     template <typename Iterator>
     static data_slice from_iterators(const Iterator& begin,
-        const Iterator& end);
+        const Iterator& end) noexcept;
 
     template <typename Pointer>
-    static data_slice from_size(Pointer begin, size_type size);
+    static data_slice from_size(Pointer begin, size_type size) noexcept;
 
     const const_pointer begin_;
     const_pointer end_;
@@ -138,8 +138,8 @@ private:
 };
 
 /// Binary operators.
-bool operator==(const data_slice& left, const data_slice& right);
-bool operator!=(const data_slice& left, const data_slice& right);
+bool operator==(const data_slice& left, const data_slice& right) noexcept;
+bool operator!=(const data_slice& left, const data_slice& right) noexcept;
 
 typedef std::initializer_list<data_slice> data_loaf;
 

@@ -31,28 +31,27 @@
 namespace libbitcoin {
 namespace system {
 
-inline uint8_t to_byte(char character)
+inline uint8_t to_byte(char character) noexcept
 {
     return static_cast<uint8_t>(character);
 }
 
 template <size_t Size>
-byte_array<Size> to_array(const data_slice& bytes)
+byte_array<Size> to_array(const data_slice& bytes) noexcept
 {
     return bytes.to_array<Size>();
 }
 
 template <size_t Size>
-byte_array<Size> build_array(const data_loaf& slices)
+byte_array<Size> build_array(const data_loaf& slices) noexcept
 {
-    static const ptrdiff_t zero{ 0 };
     byte_array<Size> out;
     auto position = out.begin();
     for (const auto& slice: slices)
     {
         const auto unfilled = std::distance(position, out.end());
-        const auto remain = static_cast<size_t>(std::max(unfilled, zero));
-        const auto size = std::min(remain, slice.size());
+        const auto remaining = static_cast<ptrdiff_t>(slice.size());
+        const auto size = std::min(unfilled, remaining);
         std::copy_n(slice.begin(), size, position);
         std::advance(position, size);
     }
@@ -63,7 +62,7 @@ byte_array<Size> build_array(const data_loaf& slices)
 }
 
 template <class Target>
-Target& extend(Target& target, const data_slice& extension)
+Target& extend(Target& target, const data_slice& extension) noexcept
 {
     target.insert(std::end(target), std::begin(extension),
         std::end(extension));
@@ -72,7 +71,7 @@ Target& extend(Target& target, const data_slice& extension)
 }
 
 template <class Target, class Extension>
-Target& extend(Target& target, Extension&& extension)
+Target& extend(Target& target, Extension&& extension) noexcept
 {
     target.insert(std::end(target),
         std::make_move_iterator(std::begin(extension)),
@@ -82,7 +81,7 @@ Target& extend(Target& target, Extension&& extension)
 }
 
 template <size_t Start, size_t End, size_t Size>
-byte_array<End - Start> slice(const byte_array<Size>& bytes)
+byte_array<End - Start> slice(const byte_array<Size>& bytes) noexcept
 {
     static_assert(End <= Size, "Slice end must not exceed array size.");
     byte_array<End - Start> out;
@@ -92,7 +91,7 @@ byte_array<End - Start> slice(const byte_array<Size>& bytes)
 
 template <size_t Left, size_t Right>
 byte_array<Left + Right> splice(const byte_array<Left>& left,
-    const byte_array<Right>& right)
+    const byte_array<Right>& right) noexcept
 {
     byte_array<Left + Right> out;
     std::copy(right.begin(), right.end(),
@@ -103,7 +102,7 @@ byte_array<Left + Right> splice(const byte_array<Left>& left,
 
 template <size_t Left, size_t Middle, size_t Right>
 byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
-    const byte_array<Middle>& middle, const byte_array<Right>& right)
+    const byte_array<Middle>& middle, const byte_array<Right>& right) noexcept
 {
     byte_array<Left + Middle + Right> out;
     std::copy(right.begin(), right.end(),
@@ -114,11 +113,11 @@ byte_array<Left + Middle + Right> splice(const byte_array<Left>& left,
 }
 
 template <size_t Size>
-split_parts<Size / 2u> split(const byte_array<Size>& bytes)
+split_parts<to_half(Size)> split(const byte_array<Size>& bytes) noexcept
 {
     static_assert(!is_zero(Size), "Split requires a non-zero parameter.");
     static_assert(is_even(Size), "Split requires an even length parameter.");
-    static const auto half = Size / 2u;
+    constexpr auto half = to_half(Size);
     split_parts<half> out;
     std::copy_n(bytes.begin(), half, out.first.begin());
     std::copy_n(std::next(bytes.begin(), half), half, out.second.begin());
@@ -127,7 +126,7 @@ split_parts<Size / 2u> split(const byte_array<Size>& bytes)
 
 template <typename Source>
 bool starts_with(const typename Source::const_iterator& begin,
-    const typename Source::const_iterator& end, const Source& value)
+    const typename Source::const_iterator& end, const Source& value) noexcept
 {
     const auto length = std::distance(begin, end);
     return length >= 0 && static_cast<uint64_t>(length) >= value.size() &&
@@ -136,14 +135,14 @@ bool starts_with(const typename Source::const_iterator& begin,
 
 template <size_t Size, size_t Size1, size_t Size2>
 byte_array<Size> xor_data(const byte_array<Size1>& bytes1,
-    const byte_array<Size2>& bytes2)
+    const byte_array<Size2>& bytes2) noexcept
 {
-    return xor_offset<Size, 0u, 0u>(bytes1, bytes2);
+    return xor_offset<Size, 0, 0>(bytes1, bytes2);
 }
 
 template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2>
 byte_array<Size> xor_offset(const byte_array<Size1>& bytes1,
-    const byte_array<Size2>& bytes2)
+    const byte_array<Size2>& bytes2) noexcept
 {
     static_assert(Size + Offset1 <= Size1, "xor_data Size + Offset1 > Size1");
     static_assert(Size + Offset2 <= Size2, "xor_data Size + Offset2 > Size2");
