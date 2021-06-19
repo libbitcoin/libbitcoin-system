@@ -37,6 +37,8 @@ namespace system {
 // overloads (e.g. operator<(const char* left, const std::string& right).
 // Therefore we avoid this assertion and rely entirely on caller sorting.
 ////BITCOIN_ASSERT(is_sorted(list));
+// TODO: provide optional comparison function, std::sort accepts:
+// en.cppreference.com/w/cpp/utility/functional/less
 
 // TODO: constrain to iterable Collection and constrain Element to
 // comparable against Collection::value_type.
@@ -44,7 +46,7 @@ namespace system {
 // Collection requires size and empty methods.
 template <typename Collection, typename Element>
 typename Collection::difference_type
-binary_search(const Collection& list, const Element& element)
+binary_search(const Collection& list, const Element& element) noexcept
 {
     const auto size = list.size();
 
@@ -71,7 +73,7 @@ binary_search(const Collection& list, const Element& element)
 }
 
 template <typename To, typename From>
-std::vector<To> cast(const std::vector<From>& source)
+std::vector<To> cast(const std::vector<From>& source) noexcept
 {
     ////std::vector<To> out(source.size());
     ////std::transform(std::begin(source), std::end(source), std::begin(out),
@@ -85,7 +87,7 @@ std::vector<To> cast(const std::vector<From>& source)
 }
 
 template <typename To, typename From, size_t Size>
-std::array<To, Size> cast(const std::array<From, Size>& source)
+std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 {
     std::array<To, Size> out;
     std::transform(std::begin(source), std::end(source), std::begin(out),
@@ -99,7 +101,7 @@ std::array<To, Size> cast(const std::array<From, Size>& source)
 
 template <typename Collection>
 bool contains(const Collection& list,
-    const typename Collection::value_type& element)
+    const typename Collection::value_type& element) noexcept
 {
     return std::any_of(std::begin(list), std::end(list),
         [&element](const typename Collection::value_type& value)
@@ -113,7 +115,7 @@ bool contains(const Collection& list,
 template <typename Collection>
 typename Collection::difference_type
 find_pair_position(const Collection& list,
-    const typename Collection::value_type::first_type& key)
+    const typename Collection::value_type::first_type& key) noexcept
 {
     const auto position = std::find_if(std::begin(list), std::end(list),
         [&key](const typename Collection::value_type& pair)
@@ -128,7 +130,7 @@ find_pair_position(const Collection& list,
 template <typename Collection>
 typename Collection::difference_type
 find_position(const Collection& list,
-    const typename Collection::value_type& element)
+    const typename Collection::value_type& element) noexcept
 {
     const auto position = std::find(std::begin(list), std::end(list), element);
     return position == std::end(list) ? negative_one :
@@ -140,7 +142,7 @@ find_position(const Collection& list,
 template <typename Collection, typename Predicate>
 typename Collection::iterator
 insert_sorted(Collection& list, typename Collection::value_type& element,
-    Predicate predicate)
+    Predicate predicate) noexcept
 {
     return list.insert(std::upper_bound(std::begin(list),
         std::end(list), element, predicate), element);
@@ -149,7 +151,7 @@ insert_sorted(Collection& list, typename Collection::value_type& element,
 // TODO: specialize vector and generalize on element type.
 // Collection requires reserve and size methods (vector).
 template <typename Collection>
-void move_append(Collection& target, Collection& source)
+void move_append(Collection& target, Collection& source) noexcept
 {
     target.reserve(target.size() + source.size());
     std::move(std::begin(source), std::end(source), std::back_inserter(target));
@@ -159,7 +161,7 @@ void move_append(Collection& target, Collection& source)
 // Collection requires empty, back and pop_back methods (vector).
 template <typename Collection>
 typename Collection::value_type
-pop(Collection& stack)
+pop(Collection& stack) noexcept
 {
     if (stack.empty())
         return {};
@@ -170,14 +172,14 @@ pop(Collection& stack)
 }
 
 template <typename Collection>
-bool is_distinct(Collection&& list)
+bool is_distinct(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     return std::unique(std::begin(list), std::end(list)) == std::end(list);
 }
 
 template <typename Collection>
-bool is_distinct(const Collection& list)
+bool is_distinct(const Collection& list) noexcept
 {
     // A single move function would require a move and a copy (least ideal).
     // This is necessary because the argument will be const if not moved.
@@ -196,8 +198,9 @@ bool is_distinct(const Collection& list)
     return is_distinct(copy);
 }
 
+// TODO: provide optional comparison function
 template <typename Collection>
-bool is_sorted(const Collection& list)
+bool is_sorted(const Collection& list) noexcept
 {
     return std::is_sorted(std::begin(list), std::end(list));
 }
@@ -205,7 +208,7 @@ bool is_sorted(const Collection& list)
 // TODO: specialize vector and generalize on element type.
 // Collection requires erase and shrink_to_fit methods (vector).
 template <typename Collection>
-Collection distinct(Collection&& list)
+Collection distinct(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
@@ -214,7 +217,7 @@ Collection distinct(Collection&& list)
 }
 
 template <typename Collection>
-Collection distinct(const Collection& list)
+Collection distinct(const Collection& list) noexcept
 {
     // See above comments.
     auto copy = list;
@@ -222,29 +225,31 @@ Collection distinct(const Collection& list)
 }
 
 template <typename Collection>
-Collection reverse(Collection&& list)
+Collection reverse(Collection&& list) noexcept
 {
     std::reverse(std::begin(list), std::end(list));
     return list;
 }
 
 template <typename Collection>
-Collection reverse(const Collection& list)
+Collection reverse(const Collection& list) noexcept
 {
     // See above comments.
     auto copy = list;
     return reverse(copy);
 }
 
+// TODO: provide optional comparison function.
 template <typename Collection>
-Collection sort(Collection&& list)
+Collection sort(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     return list;
 }
 
+// TODO: provide optional comparison function.
 template <typename Collection>
-Collection sort(const Collection& list)
+Collection sort(const Collection& list) noexcept
 {
     // See above comments.
     auto copy = list;

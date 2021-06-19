@@ -41,75 +41,75 @@ namespace system {
 /// Returns the position or negative if not found or list size > max_int32.
 template <typename Collection, typename Element>
 typename Collection::difference_type
-binary_search(const Collection& list, const Element& element);
+binary_search(const Collection& list, const Element& element) noexcept;
 
 /// Cast collection of From members to a new collection of To members.
 template <typename To, typename From>
-std::vector<To> cast(const std::vector<From>& source);
+std::vector<To> cast(const std::vector<From>& source) noexcept;
 template <typename To, typename From, size_t Size>
-std::array<To, Size> cast(const std::array<From, Size>& source);
+std::array<To, Size> cast(const std::array<From, Size>& source) noexcept;
 
 /// Determine if a collection contains the specified element.
 template <typename Collection>
 bool contains(const Collection& list,
-    const typename Collection::value_type& element);
+    const typename Collection::value_type& element) noexcept;
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
 typename Collection::difference_type
 find_pair_position(const Collection& list,
-    typename Collection::value_type::first_type& key);
+    typename Collection::value_type::first_type& key) noexcept;
 
 /// Find the position of an element in an ordered collection.
 template <typename Collection>
 typename Collection::difference_type
 find_position(const Collection& list,
-    const typename Collection::value_type& value);
+    const typename Collection::value_type& value) noexcept;
 
 /// Facilitate a list insertion sort by inserting into a sorted position.
 template <typename Collection, typename Predicate>
 typename Collection::iterator
 insert_sorted(Collection& list, const typename Collection::value_type& element,
-    Predicate predicate);
+    Predicate predicate) noexcept;
 
 /// Move members of a source list to end of a target list. Source members are 
 /// undefined upon return.
 template <typename Collection>
-void move_append(Collection& target, Collection& source);
+void move_append(Collection& target, Collection& source) noexcept;
 
 /// Pop an element from the stack and return its value.
 template <typename Collection>
 typename Collection::value_type
-pop(Collection& stack);
+pop(Collection& stack) noexcept;
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>
-bool is_distinct(Collection&& list);
+bool is_distinct(Collection&& list) noexcept;
 template <typename Collection>
-bool is_distinct(const Collection& list);
+bool is_distinct(const Collection& list) noexcept;
 
 /// Determine if a collection is lexically sorted.
 template <typename Collection>
-bool is_sorted(const Collection& list);
+bool is_sorted(const Collection& list) noexcept;
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
-Collection distinct(Collection&& list);
+Collection distinct(Collection&& list) noexcept;
 template <typename Collection>
-Collection distinct(const Collection& list);
+Collection distinct(const Collection& list) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
-Collection reverse(Collection&& list);
+Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
-Collection reverse(const Collection& list);
+Collection reverse(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>
-Collection sort(Collection&& list);
+Collection sort(Collection&& list) noexcept;
 template <typename Collection>
-Collection sort(const Collection& list);
+Collection sort(const Collection& list) noexcept;
 
 // TODO: test.
 // bit.ly/3vdbF17
@@ -140,11 +140,14 @@ public:
 
     template <typename T, typename...Args>
     void construct(T* ptr, Args&&... args)
+        noexcept(std::is_nothrow_default_constructible<Allocator>::value)
     {
         std::allocator_traits<Allocator>::construct(
             static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);
     }
 };
+
+static default_allocator<uint8_t> no_fill_allocator{};
 
 } // namespace system
 } // namespace libbitcoin
