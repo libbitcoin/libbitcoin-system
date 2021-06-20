@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -30,7 +30,7 @@ namespace message {
 // The little-endian encoding is a private data format.
 uint32_t network_checksum(const data_slice& data)
 {
-    return from_little_endian_unsafe<uint32_t>(bitcoin_hash(data).begin());
+    return from_little_endian<uint32_t>(bitcoin_hash(data));
 }
 
 size_t variable_uint_size(uint64_t value)

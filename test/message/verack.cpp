@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
     const message::verack expected{};
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = message::verack::factory(
         message::version::level::minimum, source);
 

@@ -20,8 +20,7 @@
 
 #include <initializer_list>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -107,7 +106,7 @@ bool get_block_transactions::from_data(uint32_t version,
 bool get_block_transactions::from_data(uint32_t version,
     std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -117,7 +116,7 @@ bool get_block_transactions::from_data(uint32_t ,
     reset();
 
     block_hash_ = source.read_hash();
-    const auto count = source.read_size_little_endian();
+    const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -126,7 +125,7 @@ bool get_block_transactions::from_data(uint32_t ,
         indexes_.reserve(count);
 
     for (size_t position = 0; position < count && source; ++position)
-        indexes_.push_back(source.read_size_little_endian());
+        indexes_.push_back(source.read_size());
 
     if (!source)
         reset();
@@ -149,17 +148,17 @@ data_chunk get_block_transactions::to_data(uint32_t version) const
 void get_block_transactions::to_data(uint32_t version,
     std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void get_block_transactions::to_data(uint32_t ,
     writer& sink) const
 {
-    sink.write_hash(block_hash_);
-    sink.write_variable_little_endian(indexes_.size());
+    sink.write_bytes(block_hash_);
+    sink.write_variable(indexes_.size());
     for (const auto& element: indexes_)
-        sink.write_variable_little_endian(element);
+        sink.write_variable(element);
 }
 
 size_t get_block_transactions::serialized_size(uint32_t) const

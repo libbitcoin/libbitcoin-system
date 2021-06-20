@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 
 namespace libbitcoin {
@@ -30,7 +31,7 @@ namespace system {
 
 bool is_ascii_character(char32_t character)
 {
-    return (character & 0xffffff80) == 0;
+    return is_zero(character & 0xffffff80);
 }
 
 bool is_ascii_separator(char32_t point)

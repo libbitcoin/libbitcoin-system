@@ -24,7 +24,6 @@
 #include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -181,8 +180,8 @@ witness_address::parse_result witness_address::parse_prefix(
         return parse_result::prefix_too_short;
 
     // A separator, version, program and checksum are also required.
-    if (prefix.length() > (address_maximum_length - 2u - program_minimum_length -
-        checksum_length))
+    if (prefix.length() > (address_maximum_length - two -
+        program_minimum_length - checksum_length))
         return parse_result::prefix_too_long;
 
     // Excludes all non-ascii as well.
@@ -246,7 +245,7 @@ witness_address::parse_result witness_address::parse_address(
 
     // Split the parts and discard the separator character.
     out_prefix = lowered.substr(0, split);
-    const auto payload = lowered.substr(split + 1u);
+    const auto payload = lowered.substr(add1(split));
 
     // Parsing lowered prefix, so all upper will pass as all lower.
     const auto parse = parse_prefix(out_prefix, strict);
@@ -254,11 +253,11 @@ witness_address::parse_result witness_address::parse_address(
         return parse;
 
     // The payload contains the version, program and checksum.
-    if (payload.length() < (1u + program_minimum_length + checksum_length))
+    if (payload.length() < (one + program_minimum_length + checksum_length))
         return parse_result::payload_too_short;
 
     // The payload contains the version, program and checksum.
-    if (payload.length() > (1u + program_maximum_length + checksum_length))
+    if (payload.length() > (one + program_maximum_length + checksum_length))
         return parse_result::payload_too_long;
 
     base32_chunk checked;

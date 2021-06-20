@@ -20,7 +20,7 @@
 
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -100,16 +100,15 @@ bool prefilled_transaction::from_data(uint32_t version,
 bool prefilled_transaction::from_data(uint32_t version,
     std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
-bool prefilled_transaction::from_data(uint32_t ,
-    reader& source)
+bool prefilled_transaction::from_data(uint32_t, reader& source)
 {
     reset();
 
-    index_ = source.read_variable_little_endian();
+    index_ = source.read_variable();
     transaction_.from_data(source, true);
 
     if (!source)
@@ -133,14 +132,14 @@ data_chunk prefilled_transaction::to_data(uint32_t version) const
 void prefilled_transaction::to_data(uint32_t version,
     std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void prefilled_transaction::to_data(uint32_t ,
     writer& sink) const
 {
-    sink.write_variable_little_endian(index_);
+    sink.write_variable(index_);
     transaction_.to_data(sink);
 }
 

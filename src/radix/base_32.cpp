@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
@@ -115,15 +115,13 @@ data_chunk base32_pack(const base32_chunk& unpacked)
 {
     data_chunk packed;
     data_sink sink(packed);
-    ostream_writer writer(sink);
-    ostream_bit_writer bit_writer(writer);
+    bit_writer bit_writer(sink);
 
     // This is how c++ developers do it. :)
     for (const auto& value: unpacked)
         bit_writer.write_bits(static_cast<uint8_t>(value), 5);
 
     bit_writer.flush();
-    sink.flush();
 
     // Remove an element that is only padding, assumes base32_unpack encoding.
     // The bit writer writes zeros past end as padding.
@@ -132,11 +130,11 @@ data_chunk base32_pack(const base32_chunk& unpacked)
     // and then packed this will always result in either no pad bits or a full
     // element of zeros that is padding. This should be apparent from the fact
     // that the number of used bits is unchanged. Remainder indicates padding.
-    if ((unpacked.size() * 5) % 8 != 0)
+    if (!is_zero((unpacked.size() * 5) % 8))
     {
         // If pad byte is non-zero the unpacking was not base32_unpack.
         // So we return an failure where the condition is detecable.
-        packed.resize(packed.back() == 0x00 ? packed.size() - 1u : 0);
+        packed.resize(packed.back() == 0x00 ? sub1(packed.size()) : 0);
     }
 
     return packed;
@@ -146,8 +144,7 @@ base32_chunk base32_unpack(const data_chunk& packed)
 {
     base32_chunk unpacked;
     data_source source(packed);
-    istream_reader reader(source);
-    istream_bit_reader bit_reader(reader);
+    bit_reader bit_reader(source);
 
     // This is how c++ developers do it. :)
     while (!bit_reader.is_exhausted())

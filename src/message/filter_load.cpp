@@ -20,8 +20,7 @@
 
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -112,7 +111,7 @@ bool filter_load::from_data(uint32_t version, const data_chunk& data)
 
 bool filter_load::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -120,7 +119,7 @@ bool filter_load::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    const auto size = source.read_size_little_endian();
+    const auto size = source.read_size();
 
     if (size > max_filter_load)
         source.invalidate();
@@ -158,13 +157,13 @@ data_chunk filter_load::to_data(uint32_t version) const
 
 void filter_load::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void filter_load::to_data(uint32_t, writer& sink) const
 {
-    sink.write_variable_little_endian(filter_.size());
+    sink.write_variable(filter_.size());
     sink.write_bytes(filter_);
     sink.write_4_bytes_little_endian(hash_functions_);
     sink.write_4_bytes_little_endian(tweak_);

@@ -23,10 +23,10 @@
 #include <iterator>
 #include <limits>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/data/bit_reader.hpp>
-#include <bitcoin/system/iostream/data/bit_writer.hpp>
-#include <bitcoin/system/iostream/data/byte_reader.hpp>
-#include <bitcoin/system/iostream/data/byte_writer.hpp>
+#include <bitcoin/system/iostream/bit_reader.hpp>
+#include <bitcoin/system/iostream/bit_writer.hpp>
+#include <bitcoin/system/iostream/byte_reader.hpp>
+#include <bitcoin/system/iostream/byte_writer.hpp>
 #include <bitcoin/system/iostream/streams/base_sink.hpp>
 #include <bitcoin/system/iostream/streams/base_source.hpp>
 #include <bitcoin/system/iostream/streams/copy_sink.hpp>
@@ -37,85 +37,22 @@
 namespace libbitcoin {
 namespace system {
 
-// Transitional aliases (formerly interfaces now base classes).
+/// Transitional aliases.
+
+/// These were formerly interfaces and are now base classes.
 using reader = byte_reader;
 using writer = byte_writer;
 
-/// Input steams.
+/// These are the only sink/source in use presently.
+/// The role of copy_sink was previously served by a specialized writer.
+/// The role of copy_source was previously also served by redundant reader.
+using data_sink = boost::iostreams::stream<push_sink<data_chunk>>;
+using data_source = boost::iostreams::stream<copy_source<data_slice>>;
 
-template <typename Container>
-std::istream istream(const Container& container) noexcept
-{
-    // Copies bytes from the container.
-    using namespace boost::iostreams;
-    return stream<copy_source<Container>>(container);
-}
-
-template <typename Container>
-std::istream istream(Container&& container) noexcept
-{
-    // Moves bytes from the container.
-    using namespace boost::iostreams;
-    return stream<move_source<Container>>(std::forward(container));
-}
-
-template <typename Container>
-std::istream unchecked_istream(
-    const typename Container::const_iterator& begin) noexcept
-{
-    // Copies bytes from the container, with unchecked end.
-    using namespace boost::iostreams;
-    typedef size_type = typename Container::size_type;
-    constexpr auto maximum = std::numeric_limits<size_type>::max();
-    return stream<copy_source<Container>>(begin, std::next(begin, maximum));
-}
-
-/// istream* and bit/byte reader construction examples.
-////const data_chunk copyable(1024, 0x42);
-////data_chunk moveable = copyable;
-////bit_reader reader(copyable);
-////bit_reader mover(std::move(moveable));
-////byte_reader reader(copyable);
-////byte_reader mover(std::move(moveable));
-////byte_reader unchecked_reader(copyable.begin());
-
-/// Output steams.
-
-template <typename Container>
-std::ostream ostream(Container& container) noexcept
-{
-    // Inserts bytes into the end of the container.
-    using namespace boost::iostreams;
-    return stream<push_sink<Container>>(container);
-}
-
-template <typename Container>
-std::ostream ostream(typename Container::iterator& begin,
-    typename Container::iterator& end) noexcept
-{
-    // Copies bytes to the container.
-    using namespace boost::iostreams;
-    return stream<copy_sink<Container>>(begin, end);
-}
-
-template <typename Container>
-std::ostream unchecked_ostream(typename Container::iterator& begin) noexcept
-{
-    // Copies bytes to the container, with unchecked end.
-    using namespace boost::iostreams;
-    typedef size_type = typename Container::size_type;
-    constexpr auto maximum = std::numeric_limits<size_type>::max();
-    return stream<copy_sink<Container>>(begin, std::next(begin, maximum));
-}
-
-/// ostream* and bit/byte writer construction examples.
-////data_chunk empty;
-////data_chunk populated(1024, 0x42);
-////bit_writer pusher(empty);
-////bit_writer writer(populated.begin(), populated.end());
-////byte_writer pusher(empty);
-////byte_writer writer(populated.begin(), populated.end());
-////byte_writer unchecked_writer(populated.begin());
+using icopy = boost::iostreams::stream<copy_source<data_slice>>;
+using imove = boost::iostreams::stream<move_source<data_chunk>>;
+using ocopy = boost::iostreams::stream<copy_sink<data_slice>>;
+using opush = boost::iostreams::stream<push_sink<data_chunk>>;
 
 } // namespace system
 } // namespace libbitcoin

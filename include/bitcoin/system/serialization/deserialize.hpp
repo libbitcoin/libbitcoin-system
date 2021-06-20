@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -45,9 +45,9 @@ inline bool deserialize(std::string& out, const std::string& text);
 /// Specialize template because basic_ostream treats uint8_t as char.
 inline bool deserialize(uint8_t& out, const std::string& text);
 
-/// Specialize byte_array to base16 (avoids split).
+/// Specialize data_array to base16 (avoids split).
 template <size_t Size>
-bool deserialize(byte_array<Size>& out, const std::string& text);
+bool deserialize(data_array<Size>& out, const std::string& text);
 
 /// Specialize data_chunk to base16 (avoids split).
 inline bool deserialize(data_chunk& out, const std::string& text);

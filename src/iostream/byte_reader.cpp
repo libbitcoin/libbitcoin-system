@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/iostream/data/byte_reader.hpp>
+#include <bitcoin/system/iostream/byte_reader.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -35,29 +35,29 @@ namespace system {
 // constructors
 //-----------------------------------------------------------------------------
 
-byte_reader::byte_reader(std::istream& source)
+byte_reader::byte_reader(std::istream& source) noexcept
   : stream_(source)
 {
 }
 
-byte_reader::~byte_reader()
+byte_reader::~byte_reader() noexcept
 {
 }
 
 // big endian
 //-----------------------------------------------------------------------------
 
-uint16_t byte_reader::read_2_bytes_big_endian()
+uint16_t byte_reader::read_2_bytes_big_endian() noexcept
 {
     return read_big_endian<uint16_t>();
 }
 
-uint32_t byte_reader::read_4_bytes_big_endian()
+uint32_t byte_reader::read_4_bytes_big_endian() noexcept
 {
     return read_big_endian<uint32_t>();
 }
 
-uint64_t byte_reader::read_8_bytes_big_endian()
+uint64_t byte_reader::read_8_bytes_big_endian() noexcept
 {
     return read_big_endian<uint64_t>();
 }
@@ -65,22 +65,22 @@ uint64_t byte_reader::read_8_bytes_big_endian()
 // little endian
 //-----------------------------------------------------------------------------
 
-uint16_t byte_reader::read_2_bytes_little_endian()
+uint16_t byte_reader::read_2_bytes_little_endian() noexcept
 {
     return read_little_endian<uint16_t>();
 }
 
-uint32_t byte_reader::read_4_bytes_little_endian()
+uint32_t byte_reader::read_4_bytes_little_endian() noexcept
 {
     return read_little_endian<uint32_t>();
 }
 
-uint64_t byte_reader::read_8_bytes_little_endian()
+uint64_t byte_reader::read_8_bytes_little_endian() noexcept
 {
     return read_little_endian<uint64_t>();
 }
 
-uint64_t byte_reader::read_variable()
+uint64_t byte_reader::read_variable() noexcept
 {
     const auto value = read_byte();
 
@@ -97,7 +97,7 @@ uint64_t byte_reader::read_variable()
     }
 }
 
-size_t byte_reader::read_size()
+size_t byte_reader::read_size() noexcept
 {
     const auto size = read_variable();
 
@@ -112,7 +112,7 @@ size_t byte_reader::read_size()
     return static_cast<size_t>(size);
 }
 
-code byte_reader::read_error_code()
+code byte_reader::read_error_code() noexcept
 {
     const auto value = read_little_endian<uint32_t>();
     return code(static_cast<error::error_code_t>(value));
@@ -121,37 +121,37 @@ code byte_reader::read_error_code()
 // bytes
 //-----------------------------------------------------------------------------
 
-mini_hash byte_reader::read_mini_hash()
+mini_hash byte_reader::read_mini_hash() noexcept
 {
     return read_forward<mini_hash_size>();
 }
 
-short_hash byte_reader::read_short_hash()
+short_hash byte_reader::read_short_hash() noexcept
 {
     return read_forward<short_hash_size>();
 }
 
-hash_digest byte_reader::read_hash()
+hash_digest byte_reader::read_hash() noexcept
 {
     return read_forward<hash_size>();
 }
 
-long_hash byte_reader::read_long_hash()
+long_hash byte_reader::read_long_hash() noexcept
 {
     return read_forward<long_hash_size>();
 }
 
-uint8_t byte_reader::peek_byte()
+uint8_t byte_reader::peek_byte() noexcept
 {
     return do_peek();
 }
 
-uint8_t byte_reader::read_byte()
+uint8_t byte_reader::read_byte() noexcept
 {
     return do_read();
 }
 
-data_chunk byte_reader::read_bytes()
+data_chunk byte_reader::read_bytes() noexcept
 {
     data_chunk out;
     while (!is_exhausted())
@@ -160,7 +160,7 @@ data_chunk byte_reader::read_bytes()
     return std::move(out);
 }
 
-data_chunk byte_reader::read_bytes(size_t size)
+data_chunk byte_reader::read_bytes(size_t size) noexcept
 {
     if (is_zero(size))
         return {};
@@ -171,7 +171,7 @@ data_chunk byte_reader::read_bytes(size_t size)
     return std::move(out);
 }
 
-void byte_reader::read_bytes(uint8_t* buffer, size_t size)
+void byte_reader::read_bytes(uint8_t* buffer, size_t size) noexcept
 {
     do_read(buffer, size);
 }
@@ -179,13 +179,13 @@ void byte_reader::read_bytes(uint8_t* buffer, size_t size)
 // strings
 //-----------------------------------------------------------------------------
 
-std::string byte_reader::read_string()
+std::string byte_reader::read_string() noexcept
 {
     return read_string(read_size());
 }
 
 // Removes trailing zeros, required for bitcoin string comparisons.
-std::string byte_reader::read_string(size_t size)
+std::string byte_reader::read_string(size_t size) noexcept
 {
     std::string out;
     out.reserve(size);
@@ -205,7 +205,7 @@ std::string byte_reader::read_string(size_t size)
     return out;
 }
 
-void byte_reader::skip(size_t size)
+void byte_reader::skip(size_t size) noexcept
 {
     // Stream source is presumed to not be seekable.
     read_bytes(size);
@@ -214,22 +214,22 @@ void byte_reader::skip(size_t size)
 // context
 //-----------------------------------------------------------------------------
 
-bool byte_reader::is_exhausted() const
+bool byte_reader::is_exhausted() const noexcept
 {
     return get_exhausted();
 }
 
-void byte_reader::invalidate()
+void byte_reader::invalidate() noexcept
 {
     set_invalid();
 }
 
-byte_reader::operator bool() const
+byte_reader::operator bool() const noexcept
 {
     return get_valid();
 }
 
-bool byte_reader::operator!() const
+bool byte_reader::operator!() const noexcept
 {
     return !get_valid();
 }
@@ -238,18 +238,18 @@ bool byte_reader::operator!() const
 //-----------------------------------------------------------------------------
 // Stream state is not checked on reads, stream should return 0x00 if failed.
 
-uint8_t byte_reader::do_peek()
+uint8_t byte_reader::do_peek() noexcept
 {
     // This invalidates the stream if empty (invalid read).
     return stream_.peek();
 }
 
-uint8_t byte_reader::do_read()
+uint8_t byte_reader::do_read() noexcept
 {
     return stream_.get();
 }
 
-void byte_reader::do_read(uint8_t* buffer, size_t size)
+void byte_reader::do_read(uint8_t* buffer, size_t size) noexcept
 {
     if (is_zero(size))
         return;
@@ -258,12 +258,12 @@ void byte_reader::do_read(uint8_t* buffer, size_t size)
     stream_.read(reinterpret_cast<char*>(buffer), size);
 }
 
-bool byte_reader::get_valid() const
+bool byte_reader::get_valid() const noexcept
 {
     return !!stream_;
 }
 
-bool byte_reader::get_exhausted() const
+bool byte_reader::get_exhausted() const noexcept
 {
     // This will invalidate an empty stream. stream.peek is non-const but this
     // compiles because the stream_ member is a reference. The behavior can be
@@ -272,7 +272,7 @@ bool byte_reader::get_exhausted() const
     return !stream_ || stream_.peek() == std::istream::traits_type::eof();
 }
 
-void byte_reader::set_invalid()
+void byte_reader::set_invalid() noexcept
 {
     stream_.setstate(std::istream::failbit);
 }

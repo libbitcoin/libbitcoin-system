@@ -26,10 +26,9 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
@@ -99,7 +98,7 @@ data_chunk v1_decoding::seed_entropy() const
         return {};
 
     data_source source(entropy_);
-    istream_reader reader(source);
+    byte_reader reader(source);
     auto it = overflows_.begin();
     std::string hexadecimal;
 
@@ -152,7 +151,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
     string_list words;
     words.reserve(word_count(entropy));
     data_source source(entropy);
-    istream_reader reader(source);
+    byte_reader reader(source);
 
     while (!reader.is_exhausted())
     {
@@ -162,15 +161,15 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 
         // [(value/size0 + 0)%size1] is a nop, shown for consistency.
         // Pos quotient integer div/mod is floor in c++ and python[2/3].
-        const auto one = (value / size0 + 0x0) % size1;
-        const auto two = (value / size1 + one) % size1;
-        const auto tri = (value / size2 + two) % size1;
+        const auto uno = (value / size0 + 0x0) % size1;
+        const auto dos = (value / size1 + uno) % size1;
+        const auto tre = (value / size2 + dos) % size1;
 
         // Guard: dictionary membership has been verified.
         // Guard: any positive number modulo 1626 is always [0-1625].
-        words.push_back(dictionaries_.at(one, identifier));
-        words.push_back(dictionaries_.at(two, identifier));
-        words.push_back(dictionaries_.at(tri, identifier));
+        words.push_back(dictionaries_.at(uno, identifier));
+        words.push_back(dictionaries_.at(dos, identifier));
+        words.push_back(dictionaries_.at(tre, identifier));
     }
 
     return words;
@@ -182,7 +181,7 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
     data_sink sink(entropy);
-    ostream_writer writer(sink);
+    byte_writer writer(sink);
 
     // See comments above on electrum v1 decoder overflow bug.
     v1_decoding::overflow overflows(words.size() / word_multiple);
@@ -191,17 +190,17 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
     // Word count and dictionary membership must have been validated.
     for (auto word = words.begin(); word != words.end();)
     {
-        // Electrum modulos two and tri by size1, which is a nop.
-        const int64_t one = dictionaries_.index(*word++, identifier);
-        const int64_t two = dictionaries_.index(*word++, identifier);
-        const int64_t tri = dictionaries_.index(*word++, identifier);
+        // Electrum modulos dos and tri by size1, which is a nop.
+        const int64_t uno = dictionaries_.index(*word++, identifier);
+        const int64_t dos = dictionaries_.index(*word++, identifier);
+        const int64_t tre = dictionaries_.index(*word++, identifier);
 
-        // [floored_modulo(one-0, size1)*size0] is a nop, shown for consistency.
+        // [floored_modulo(uno-0, size1)*size0] is a nop, shown for consistency.
         // Neg quotient integer div/mod is ceil in c++ and floor in python[2/3].
         const auto value =
-            floored_modulo(one - 0x0, size1) * size0 +
-            floored_modulo(two - one, size1) * size1 +
-            floored_modulo(tri - two, size1) * size2;
+            floored_modulo(uno - 0x0, size1) * size0 +
+            floored_modulo(dos - uno, size1) * size1 +
+            floored_modulo(tre - dos, size1) * size2;
 
         // Overflow: if true then this mnemonic was not encoded from entropy.
         *overflow++ = value > static_cast<int64_t>(max_uint32);

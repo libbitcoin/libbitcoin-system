@@ -21,7 +21,6 @@
 
 #include <string>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -35,7 +34,7 @@ namespace wallet {
  * A message signature is an EC signature with one prefix byte.
  */
 static constexpr size_t message_signature_size = 1 + ec_signature_size;
-typedef byte_array<message_signature_size> message_signature;
+typedef data_array<message_signature_size> message_signature;
 
 /**
  * Hashes a messages in preparation for signing.

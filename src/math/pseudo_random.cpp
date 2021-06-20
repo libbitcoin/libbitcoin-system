@@ -23,6 +23,7 @@
 #include <limits>
 #include <random>
 #include <boost/thread.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -92,7 +93,7 @@ std::mt19937& pseudo_random::get_twister()
 asio::duration pseudo_random::duration(const asio::duration& expiration,
     uint8_t ratio)
 {
-    if (ratio == 0u)
+    if (is_zero(ratio))
         return expiration;
 
     // Uses milliseconds level resolution.
@@ -101,11 +102,11 @@ asio::duration pseudo_random::duration(const asio::duration& expiration,
     // [10 secs, 4] => 10000 / 4 => 2500
     const auto limit = max_expire / ratio;
 
-    if (limit == 0u)
+    if (is_zero(limit))
         return expiration;
 
     // [0..2^64) % 2500 => [0..2500]
-    const auto random_offset = pseudo_random::next<uint64_t>(0u, limit);
+    const auto random_offset = pseudo_random::next<uint64_t>(zero, limit);
 
     // (10000 - [0..2500]) => [7500..10000]
     const auto expires = max_expire - random_offset;

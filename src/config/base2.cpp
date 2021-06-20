@@ -48,7 +48,7 @@ base2::base2(const base2& other)
 
 size_t base2::size() const
 {
-    return value_.size();
+    return value_.bits();
 }
 
 base2::operator const binary&() const
@@ -62,12 +62,9 @@ std::istream& operator>>(std::istream& input, base2& argument)
     input >> binary;
 
     if (!binary::is_base2(binary))
-    {
         throw istream_exception(binary);
-    }
 
     std::stringstream(binary) >> argument.value_;
-
     return input;
 }
 

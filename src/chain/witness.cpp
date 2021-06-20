@@ -28,14 +28,12 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -147,7 +145,7 @@ bool witness::from_data(const data_chunk& encoded, bool prefix)
 
 bool witness::from_data(std::istream& stream, bool prefix)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, prefix);
 }
 
@@ -160,7 +158,7 @@ bool witness::from_data(reader& source, bool prefix)
     const auto read_element = [](reader& source)
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = source.read_size_little_endian();
+        const auto size = source.read_size();
 
         // The max_script_size and max_push_data_size constants limit
         // evaluation, but not all stacks evaluate, so use max_block_weight
@@ -179,7 +177,7 @@ bool witness::from_data(reader& source, bool prefix)
     {
         // Witness prefix is an element count, not byte length (unlike script).
         // On wire each witness is prefixed with number of elements (bip144).
-        for (auto count = source.read_size_little_endian(); count > 0; --count)
+        for (auto count = source.read_size(); count > 0; --count)
              stack_.push_back(read_element(source));
     }
     else
@@ -238,7 +236,7 @@ data_chunk witness::to_data(bool prefix) const
 
 void witness::to_data(std::ostream& stream, bool prefix) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, prefix);
 }
 
@@ -246,12 +244,12 @@ void witness::to_data(writer& sink, bool prefix) const
 {
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable_little_endian(stack_.size());
+        sink.write_variable(stack_.size());
 
     const auto serialize = [&sink](const data_chunk& element)
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
-        sink.write_variable_little_endian(element.size());
+        sink.write_variable(element.size());
         sink.write_bytes(element);
     };
 

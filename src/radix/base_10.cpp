@@ -22,9 +22,9 @@
 #include <iomanip>
 #include <sstream>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/serialization/read.hpp>
-#include <bitcoin/system/serialization/write.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serialization/deserialize.hpp>
+#include <bitcoin/system/serialization/serialize.hpp>
 
 // base10
 // Base 10 is an ascii data encoding with a domain of 10 symbols (characters).
@@ -93,11 +93,11 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     if (!value.empty() && !deserialize(number, value))
         return false;
 
-    if (truncated && number == max_uint64)
+    if (truncated && (number == max_uint64))
         return false;
 
     // Round the value up if it was truncated.
-    out = number + (truncated ? 1 : 0);
+    out = number + to_int(truncated);
     return true;
 }
 
@@ -105,10 +105,10 @@ std::string encode_base10(uint64_t amount, uint8_t decimal_places)
 {
     std::ostringstream stream;
     stream.fill('0');
-    stream.width(1 + decimal_places);
+    stream.width(add1(decimal_places));
     serialize(stream, amount, "");
     auto text = stream.str();
-    text.insert(text.size() - decimal_places, 1, '.');
+    text.insert(text.size() - decimal_places, one, '.');
     trim_right(text, { "0" });
     trim_right(text, { "." });
     return text;

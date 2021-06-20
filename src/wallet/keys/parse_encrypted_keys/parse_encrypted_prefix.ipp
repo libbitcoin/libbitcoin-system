@@ -28,32 +28,32 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-template<size_t Size>
+template<uint8_t Size>
 parse_encrypted_prefix<Size>::parse_encrypted_prefix(
-    const byte_array<Size>& value)
+    const data_array<Size>& value)
   : prefix_(value), valid_(false)
 {
 }
 
-template<size_t Size>
+template<uint8_t Size>
 uint8_t parse_encrypted_prefix<Size>::context() const
 {
     return prefix_.back();
 }
 
-template<size_t Size>
-byte_array<Size> parse_encrypted_prefix<Size>::prefix() const
+template<uint8_t Size>
+data_array<Size> parse_encrypted_prefix<Size>::prefix() const
 {
     return prefix_;
 }
 
-template<size_t Size>
+template<uint8_t Size>
 bool parse_encrypted_prefix<Size>::valid() const
 {
     return valid_;
 }
 
-template<size_t Size>
+template<uint8_t Size>
 void parse_encrypted_prefix<Size>::valid(bool value)
 {
     valid_ = value;

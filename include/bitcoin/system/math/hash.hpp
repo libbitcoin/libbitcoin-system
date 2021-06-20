@@ -38,12 +38,12 @@ static constexpr size_t short_hash_size = 20;
 static constexpr size_t mini_hash_size = 6;
 
 /// Common bitcoin hash containers.
-typedef byte_array<mini_hash_size> mini_hash;
-typedef byte_array<quarter_hash_size> quarter_hash;
-typedef byte_array<half_hash_size> half_hash;
-typedef byte_array<short_hash_size> short_hash;
-typedef byte_array<hash_size> hash_digest;
-typedef byte_array<long_hash_size> long_hash;
+typedef data_array<mini_hash_size> mini_hash;
+typedef data_array<quarter_hash_size> quarter_hash;
+typedef data_array<half_hash_size> half_hash;
+typedef data_array<short_hash_size> short_hash;
+typedef data_array<hash_size> hash_digest;
+typedef data_array<long_hash_size> long_hash;
 
 /// Lists of common bitcoin hashes.
 typedef std::vector<mini_hash> mini_hash_list;
@@ -120,7 +120,7 @@ BC_API uint512_t to_uint512(const long_hash& hash);
 /// Generate a scrypt hash to fill a byte array.
 /// Memory required (bytes) = 2 * 64 * work * resources.
 template <size_t Size>
-byte_array<Size> scrypt(const data_slice& data, const data_slice& salt,
+data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism);
 
 /// Generate a scrypt hash.
@@ -180,14 +180,14 @@ BC_API size_t djb2_hash(const data_slice& data);
 
 // Extend std and boost namespaces with djb2_hash.
 //-----------------------------------------------------------------------------
-// This allows our byte_array to be incorporated into std/boost hash tables.
+// This allows our data_array to be incorporated into std/boost hash tables.
 
 namespace std
 {
 template <size_t Size>
-struct hash<bc::system::byte_array<Size>>
+struct hash<bc::system::data_array<Size>>
 {
-    size_t operator()(const bc::system::byte_array<Size>& data) const
+    size_t operator()(const bc::system::data_array<Size>& data) const
     {
         return bc::system::djb2_hash(data);
     }
@@ -197,9 +197,9 @@ struct hash<bc::system::byte_array<Size>>
 namespace boost
 {
 template <size_t Size>
-struct hash<bc::system::byte_array<Size>>
+struct hash<bc::system::data_array<Size>>
 {
-    size_t operator()(const bc::system::byte_array<Size>& data) const
+    size_t operator()(const bc::system::data_array<Size>& data) const
     {
         return bc::system::djb2_hash(data);
     }

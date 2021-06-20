@@ -36,7 +36,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-template<size_t Size>
+template<uint8_t Size>
 class parse_encrypted_prefix
 {
 public:
@@ -45,16 +45,16 @@ public:
     static constexpr uint8_t prefix_size = Size;
 
 protected:
-    explicit parse_encrypted_prefix(const byte_array<Size>& value);
+    explicit parse_encrypted_prefix(const data_array<Size>& value);
 
     uint8_t context() const;
-    byte_array<Size> prefix() const;
+    data_array<Size> prefix() const;
     void valid(bool value);
 
-    static constexpr uint8_t magic_size = Size - 1;
+    static constexpr auto magic_size = sub1(Size);
 
 private:
-    const byte_array<Size> prefix_;
+    const data_array<Size> prefix_;
     bool valid_;
 };
 

@@ -20,24 +20,26 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SINK_IPP
 
 #include <algorithm>
-#include <iterator>
-#include <limits>
-#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
     
 template <typename Container>
-copy_sink<Container>::copy_sink(typename Container::iterator& begin,
-    typename Container::iterator& end) noexcept
-  : to_(begin),
-    size_(limit<size_type>(std::distance(begin, end)))
+copy_sink<Container>::copy_sink(Container& data) noexcept
+  : base_sink(limit<size_type>(data.size())),
+    to_(begin)
 {
 }
 
 template <typename Container>
-typename copy_sink<Container>::size_type
-copy_sink<Container>::do_write(const value_type* from, size_type size) noexcept
+copy_sink<Container>::~copy_sink() noexcept
+{
+}
+
+template <typename Container>
+void copy_sink<Container>::do_write(const value_type* from,
+    size_type size) noexcept
 {
     // std::copy_n returns iterator past last element copied to.
     to_ = std::copy_n(from, size, to_);

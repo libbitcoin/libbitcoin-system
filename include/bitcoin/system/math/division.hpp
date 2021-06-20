@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MATH_DIVIDE_HPP
-#define LIBBITCOIN_SYSTEM_MATH_DIVIDE_HPP
+#ifndef LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
+#define LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
 
 #include <bitcoin/system/type_constraints.hpp>
 
@@ -72,7 +72,7 @@ constexpr auto truncated_modulo(Dividend dividend, Divisor divisor) noexcept
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/math/divide.ipp>
+#include <bitcoin/system/impl/math/division.ipp>
 
 #endif
 

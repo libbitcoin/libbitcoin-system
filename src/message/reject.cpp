@@ -20,7 +20,7 @@
 
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/block.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/transaction.hpp>
 #include <bitcoin/system/message/version.hpp>
 
@@ -130,7 +130,7 @@ bool reject::from_data(uint32_t version, const data_chunk& data)
 
 bool reject::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -176,7 +176,7 @@ data_chunk reject::to_data(uint32_t version) const
 
 void reject::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
@@ -189,7 +189,7 @@ void reject::to_data(uint32_t, writer& sink) const
     if ((message_ == block::command) ||
         (message_ == transaction::command))
     {
-        sink.write_hash(data_);
+        sink.write_bytes(data_);
     }
 }
 

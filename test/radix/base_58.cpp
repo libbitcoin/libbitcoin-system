@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(base58__decode_base58__address_round_trip__expected)
 
 BOOST_AUTO_TEST_CASE(base58__decode_base58__array__expected)
 {
-    const byte_array<25> expected
+    const data_array<25> expected
     {
         {
             0x00, 0x5c, 0xc8, 0x7f, 0x4a, 0x3f, 0xdf, 0xe3,
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(base58__decode_base58__array__expected)
             0x64
         }
     };
-    byte_array<25> converted;
+    data_array<25> converted;
     BOOST_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
     BOOST_REQUIRE_EQUAL(converted, expected);
 }

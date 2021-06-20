@@ -19,25 +19,26 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
+#include <bitcoin/system/math/siphash.hpp>
+
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/siphash.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 constexpr uint64_t finalization = 0x00000000000000ff;
-constexpr uint32_t max_encoded_byte_count = (1 << byte_bits);
+constexpr uint64_t max_encoded_byte_count = (1 << byte_bits);
 
 // NOTE: C++20 provides std::rotl which could replace this function.
-uint64_t inline rotate_left(uint64_t value, uint8_t shift)
+constexpr auto rotate_left(uint64_t value, uint8_t shift)
 {
-    return (uint64_t)((value << shift) | (value >> (64 - shift)));
+    return (value << shift) | (value >> (to_bits(sizeof(uint64_t)) - shift));
 }
 
-void inline sipround(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
+constexpr void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
 {
     v0 += v1;
     v2 += v3;
@@ -58,12 +59,12 @@ void inline sipround(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
     v2 = rotate_left(v2, 32);
 }
 
-void inline compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+constexpr void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     uint64_t& v3, uint64_t word)
 {
     v3 ^= word;
-    sipround(v0, v1, v2, v3);
-    sipround(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
     v0 ^= word;
 }
 
@@ -79,29 +80,26 @@ uint64_t siphash(const siphash_key& key, const data_slice& message)
     uint64_t v2 = siphash_magic_2 ^ std::get<0>(key);
     uint64_t v3 = siphash_magic_3 ^ std::get<1>(key);
 
-    uint64_t byte_count = message.size();
-    stream_source<data_slice> istream(message);
-    istream_reader source(istream);
+    constexpr auto eight = sizeof(uint64_t);
+    const auto bytes= message.size();
+    data_source source(message);
+    byte_reader reader(source);
 
-    for (uint64_t index = 8; index <= byte_count; index += byte_bits)
-    {
-        uint64_t word = source.read_8_bytes_little_endian();
-        compression_round(v0, v1, v2, v3, word);
-    }
+    for (size_t index = eight; index <= bytes; index += eight)
+        compression_round(v0, v1, v2, v3,
+            reader.read_8_bytes_little_endian());
 
-    uint64_t last_word = 0;
+    auto last = is_zero(bytes % eight) ? 0ll :
+        reader.read_8_bytes_little_endian();
 
-    if (byte_count % byte_bits > 0)
-        last_word = source.read_8_bytes_little_endian();
-
-    last_word ^= ((byte_count % max_encoded_byte_count) << 56);
-    compression_round(v0, v1, v2, v3, last_word);
+    last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));
+    compression_round(v0, v1, v2, v3, last);
 
     v2 ^= finalization;
-    sipround(v0, v1, v2, v3);
-    sipround(v0, v1, v2, v3);
-    sipround(v0, v1, v2, v3);
-    sipround(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
 
     return v0 ^ v1 ^ v2 ^ v3;
 }
@@ -109,8 +107,8 @@ uint64_t siphash(const siphash_key& key, const data_slice& message)
 siphash_key to_siphash_key(const half_hash& hash)
 {
     const auto part = split(hash);
-    const auto hi = from_little_endian_unsafe<uint64_t>(part.first.begin());
-    const auto lo = from_little_endian_unsafe<uint64_t>(part.second.begin());
+    const auto hi = from_little_endian<uint64_t>(part.first);
+    const auto lo = from_little_endian<uint64_t>(part.second);
     return std::make_tuple(hi, lo);
 }
 

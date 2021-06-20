@@ -26,6 +26,9 @@ namespace libbitcoin {
 namespace system {
 
 /// Virtual base class for boost::iostreams::stream sinks.
+/// This class is constructible only so that it may be default constructed
+/// when not used in writer initializations. A default construction is empty
+/// and will therefore accept no writes.
 template <typename Container>
 class base_sink
 {
@@ -35,20 +38,11 @@ public:
     typedef std::streamsize size_type;
     typedef typename Container::value_type value_type;
 
-    size_type write(const char_type* buffer, size_type count) noexcept
-    {
-        if (count < 1 || is_zero(size_))
-            return negative_one;
-
-        const auto size = std::min(size_, count);
-        do_write(reinterpret_cast<const value_type*>(buffer), size);
-        size_ -= size;
-        return size;
-    }
+    size_type write(const char_type* buffer, size_type count) noexcept;
 
 protected:
-    virtual size_type do_write(const value_type* from,
-        size_type size) noexcept = 0;
+    base_sink(size_type size) noexcept;
+    virtual void do_write(const value_type* from, size_type size) noexcept = 0;
 
     // Size tracks the Container space remaining.
     size_type size_;
@@ -56,5 +50,7 @@ protected:
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/iostream/streams/base_sink.ipp>
 
 #endif

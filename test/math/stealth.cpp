@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(verify_string_constructor)
 {
     const std::string value = "01100110000";
     binary prefix(value);
-    BOOST_REQUIRE_EQUAL(value.size(), prefix.size());
-    for (size_t i = 0; i < value.size(); ++i)
+    BOOST_REQUIRE_EQUAL(value.size(), prefix.bits());
+    for (unsigned i = 0; i < value.size(); ++i)
     {
         const auto comparison = value[i] == '1';
         BOOST_REQUIRE_EQUAL(prefix[i], comparison);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(compare_constructor_results)
     std::string value = "01100111000";
     binary prefix(value);
     data_chunk blocks{ { 0x67, 0x00 } };
-    binary prefix2(value.size(), blocks);
+    binary prefix2(static_cast<unsigned>(value.size()), blocks);
     BOOST_REQUIRE_EQUAL(prefix, prefix2);
 }
 
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(bitfield_test1)
 {
     binary prefix("01100111001");
     data_chunk raw_bitfield{ { 0x67, 0x20, 0x00, 0x0 } };
-    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
-    binary compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.bits());
+    binary compare(prefix.bits(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(bitfield_test2)
     const data_chunk blocks{ { 0x8b, 0xf4, 0x1c, 0x69 } };
     const binary prefix(27, blocks);
     const data_chunk raw_bitfield{ { 0x8b, 0xf4, 0x1c, 0x79 } };
-    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
-    const binary compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.bits());
+    const binary compare(prefix.bits(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(bitfield_test3)
     const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
     const binary prefix(32, blocks);
     const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
-    const binary compare(prefix.size(), raw_bitfield);
+    const binary compare(prefix.bits(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(bitfield_test4)
     const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
     const binary prefix(29, blocks);
     const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
-    const binary compare(prefix.size(), raw_bitfield);
+    const binary compare(prefix.bits(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 

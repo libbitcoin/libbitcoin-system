@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_chunk.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -25,11 +25,6 @@
 
 namespace libbitcoin {
 namespace system {
-
-one_byte to_array(uint8_t byte) noexcept
-{
-    return { { byte } };
-}
 
 data_chunk to_chunk(uint8_t byte) noexcept
 {

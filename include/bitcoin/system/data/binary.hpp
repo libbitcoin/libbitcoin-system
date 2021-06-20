@@ -22,9 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/data/data_chunk.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -39,13 +39,6 @@ public:
 
     /// True if all characters are '0' or '1'.
     static bool is_base2(const std::string& text) noexcept;
-
-    // TODO: endianness.
-    template<typename Integer, if_integer<Integer> = true>
-    binary(size_type size, const Integer number) noexcept
-      : binary(from_data(size, to_little_endian(number)))
-    {
-    }
 
     /// Constructors.
     binary() noexcept;

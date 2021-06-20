@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_3__roundtrip__success)
 
     const auto data = expected.to_data(message::version::level::minimum);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = message::alert_payload::factory(
         message::version::level::minimum, source);
 

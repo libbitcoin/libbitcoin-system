@@ -19,6 +19,7 @@
 #include <bitcoin/system/machine/opcode.hpp>
 
 #include <cstdint>
+#include <iterator>
 #include <string>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -685,7 +686,8 @@ bool opcode_from_hexadecimal(opcode& out_code, const std::string& value)
         return false;
 
     data_chunk out;
-    if (!decode_base16(out, std::string(value.begin() + 2, value.end())))
+    const std::string stripped(std::next(value.begin(), 2), value.end());
+    if (!decode_base16(out, stripped))
         return false;
 
     out_code = static_cast<opcode>(out.front());

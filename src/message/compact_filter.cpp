@@ -23,8 +23,7 @@
 
 #include <initializer_list>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -112,7 +111,7 @@ bool compact_filter::from_data(const data_chunk& data)
 
 bool compact_filter::from_data(std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source);
 }
 
@@ -123,7 +122,7 @@ bool compact_filter::from_data(reader& source)
     filter_type_ = source.read_byte();
     block_hash_ = source.read_hash();
 
-    const auto count = source.read_size_little_endian();
+    const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -151,15 +150,15 @@ data_chunk compact_filter::to_data() const
 
 void compact_filter::to_data(std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink);
 }
 
 void compact_filter::to_data(writer& sink) const
 {
     sink.write_byte(filter_type_);
-    sink.write_hash(block_hash_);
-    sink.write_size_little_endian(filter_.size());
+    sink.write_bytes(block_hash_);
+    sink.write_variable(filter_.size());
     sink.write_bytes(filter_);
 }
 
@@ -177,7 +176,7 @@ bool compact_filter::from_data(uint32_t version, const data_chunk& data)
 
 bool compact_filter::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -196,15 +195,15 @@ data_chunk compact_filter::to_data(uint32_t) const
 
 void compact_filter::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void compact_filter::to_data(uint32_t , writer& sink) const
 {
     sink.write_byte(filter_type_);
-    sink.write_hash(block_hash_);
-    sink.write_variable_little_endian(filter_.size());
+    sink.write_bytes(block_hash_);
+    sink.write_variable(filter_.size());
     sink.write_bytes(filter_);
 }
 

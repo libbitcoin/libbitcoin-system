@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
 
     // Reload genesis block.
     data_source stream(raw_block);
-    istream_reader reader(stream);
+    byte_reader reader(stream);
     const auto block = chain::block::factory(reader);
 
     BOOST_REQUIRE(block.is_valid());

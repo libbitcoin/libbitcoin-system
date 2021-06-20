@@ -26,8 +26,8 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/math/divide.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/addition.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 
 // See std::bitset (fixed size), std::vector<bool>, and boost::dynamic_bitset

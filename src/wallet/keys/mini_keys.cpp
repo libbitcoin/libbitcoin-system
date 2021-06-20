@@ -32,7 +32,7 @@ bool check_minikey(const std::string& minikey)
     // Legacy minikeys are 22 chars long
     const auto size = minikey.size();
     const auto valid = size == 22u || size == 30u;
-    return valid && sha256_hash(to_chunk(minikey + "?"))[0] == 0x00;
+    return valid && sha256_hash(to_chunk(minikey + "?")).front() == 0x00;
 }
 
 bool minikey_to_secret(ec_secret& out_secret, const std::string& key)

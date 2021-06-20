@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__factory_3__valid_input__success)
     BOOST_REQUIRE(raw == data);
 
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = message::get_compact_filters::factory(message::get_compact_filters::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

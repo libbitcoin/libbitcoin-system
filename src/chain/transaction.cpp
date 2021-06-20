@@ -32,14 +32,15 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -68,7 +69,7 @@ template<class Source, class Put>
 bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
 {
     auto result = true;
-    const auto count = source.read_size_little_endian();
+    const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -92,7 +93,7 @@ bool read(Source& source, std::vector<Put>& puts, bool wire, bool witness)
 template<class Sink, class Put>
 void write(Sink& sink, const std::vector<Put>& puts, bool wire, bool witness)
 {
-    sink.write_variable_little_endian(puts.size());
+    sink.write_variable(puts.size());
 
     const auto serialize = [&](const Put& put)
     {
@@ -299,7 +300,7 @@ bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 
 bool transaction::from_data(std::istream& stream, bool wire, bool witness)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, wire, witness);
 }
 
@@ -340,8 +341,8 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
         // Witness data is managed internal to inputs.
         read(source, outputs_, wire, witness);
         read(source, inputs_, wire, witness);
-        const auto locktime = source.read_variable_little_endian();
-        const auto version = source.read_variable_little_endian();
+        const auto locktime = source.read_variable();
+        const auto version = source.read_variable();
 
         if (locktime > max_uint32 || version > max_uint32)
             source.invalidate();
@@ -433,7 +434,7 @@ void transaction::to_data(std::ostream& stream, bool wire, bool witness) const
     // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, wire, witness);
 }
 
@@ -470,8 +471,8 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
         // Witness data is managed internal to inputs.
         write(sink, outputs_, wire, witness);
         write(sink, inputs_, wire, witness);
-        sink.write_variable_little_endian(locktime_);
-        sink.write_variable_little_endian(version_);
+        sink.write_variable(locktime_);
+        sink.write_variable(version_);
     }
 }
 
@@ -748,7 +749,7 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
     const auto max_locktime = [=]()
     {
         return locktime_ < locktime_threshold ?
-            safe_unsigned<uint32_t>(block_height) : block_time;
+            safe_cast<uint32_t>(block_height) : block_time;
     };
 
     return locktime_ == 0 || locktime_ < max_locktime() || all_inputs_final();
@@ -801,7 +802,7 @@ uint64_t transaction::total_input_value() const
         const auto missing = !prevout.is_valid();
 
         // Treat missing previous outputs as zero-valued, no math on sentinel.
-        return ceiling_add(total, missing ? 0u : prevout.value());
+        return ceilinged_add(total, missing ? 0u : prevout.value());
     };
 
     value = std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), sum);
@@ -834,7 +835,7 @@ uint64_t transaction::total_output_value() const
 
     const auto sum = [](uint64_t total, const output& output)
     {
-        return ceiling_add(total, output.value());
+        return ceilinged_add(total, output.value());
     };
 
     value = std::accumulate(outputs_.begin(), outputs_.end(), uint64_t(0), sum);
@@ -847,7 +848,7 @@ uint64_t transaction::total_output_value() const
 
 uint64_t transaction::fees() const
 {
-    return floor_subtract(total_input_value(), total_output_value());
+    return floored_subtract(total_input_value(), total_output_value());
 }
 
 bool transaction::is_overspent() const
@@ -870,12 +871,12 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const
     const auto in = [bip16, bip141](size_t total, const input& input)
     {
         // This includes BIP16 p2sh additional sigops if prevout is cached.
-        return ceiling_add(total, input.signature_operations(bip16, bip141));
+        return ceilinged_add(total, input.signature_operations(bip16, bip141));
     };
 
     const auto out = [bip141](size_t total, const output& output)
     {
-        return ceiling_add(total, output.signature_operations(bip141));
+        return ceilinged_add(total, output.signature_operations(bip141));
     };
 
     return std::accumulate(inputs_.begin(), inputs_.end(), size_t{0}, in) +

@@ -24,10 +24,9 @@
 #include <ostream>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/data/byte_reader.hpp>
+#include <bitcoin/system/iostream/byte_reader.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -38,67 +37,67 @@ class BC_API byte_writer
 {
 public:
     /// Constructors.
-    byte_writer(std::ostream& stream);
-    virtual ~byte_writer();
+    byte_writer(std::ostream& stream) noexcept;
+    virtual ~byte_writer() noexcept;
 
     /// Type-inferenced integer writers.
     template <typename Integer, if_integer<Integer> = true>
-    void write_big_endian(Integer value);
+    void write_big_endian(Integer value) noexcept;
     template <typename Integer, if_integer<Integer> = true>
-    void write_little_endian(Integer value);
+    void write_little_endian(Integer value) noexcept;
 
     /// Write big endian integers.
-    virtual void write_2_bytes_big_endian(uint16_t value);
-    virtual void write_4_bytes_big_endian(uint32_t value);
-    virtual void write_8_bytes_big_endian(uint64_t value);
+    virtual void write_2_bytes_big_endian(uint16_t value) noexcept;
+    virtual void write_4_bytes_big_endian(uint32_t value) noexcept;
+    virtual void write_8_bytes_big_endian(uint64_t value) noexcept;
 
     /// Write little endian integers.
-    virtual void write_2_bytes_little_endian(uint16_t value);
-    virtual void write_4_bytes_little_endian(uint32_t value);
-    virtual void write_8_bytes_little_endian(uint64_t value);
+    virtual void write_2_bytes_little_endian(uint16_t value) noexcept;
+    virtual void write_4_bytes_little_endian(uint32_t value) noexcept;
+    virtual void write_8_bytes_little_endian(uint64_t value) noexcept;
 
     /// Write Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
-    virtual void write_variable(uint64_t value);
+    virtual void write_variable(uint64_t value) noexcept;
 
     /// Call write_4_bytes_little_endian with integer value of error code.
-    virtual void write_error_code(const code& ec);
+    virtual void write_error_code(const code& ec) noexcept;
 
     /// Write until reader is exhausted.
-    virtual void write(byte_reader& in);
+    virtual void write(byte_reader& in) noexcept;
 
     /// Write one byte.
-    virtual void write_byte(uint8_t value);
+    virtual void write_byte(uint8_t value) noexcept;
 
     /// Write all bytes.
-    virtual void write_bytes(const data_slice& data);
+    virtual void write_bytes(const data_slice& data) noexcept;
 
     /// Write size bytes.
-    virtual void write_bytes(const uint8_t* data, size_t size);
+    virtual void write_bytes(const uint8_t* data, size_t size) noexcept;
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    virtual void write_string(const std::string& value, size_t size);
+    virtual void write_string(const std::string& value, size_t size) noexcept;
 
     /// Write string to specified length, padded with nulls as required.
-    virtual void write_string(const std::string& value);
+    virtual void write_string(const std::string& value) noexcept;
 
     /// Advance iterator by writing nulls.
-    virtual void skip(size_t size);
+    virtual void skip(size_t size) noexcept;
 
     /// Flush the buffer.
-    virtual void flush();
+    virtual void flush() noexcept;
 
     /// The stream is valid.
-    virtual operator bool() const;
+    virtual operator bool() const noexcept;
 
     /// The stream is invalid.
-    virtual bool operator!() const;
+    virtual bool operator!() const noexcept;
 
 protected:
-    virtual void do_write(uint8_t byte);
-    virtual void do_write(const uint8_t* data, size_t size);
-    virtual void do_skip(size_t size);
-    virtual void do_flush();
-    virtual bool get_valid() const;
+    virtual void do_write(uint8_t byte) noexcept;
+    virtual void do_write(const uint8_t* data, size_t size) noexcept;
+    virtual void do_skip(size_t size) noexcept;
+    virtual void do_flush() noexcept;
+    virtual bool get_valid() const noexcept;
 
 private:
     std::ostream& stream_;
@@ -107,6 +106,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/data/byte_writer.ipp>
+#include <bitcoin/system/impl/iostream/byte_writer.ipp>
 
 #endif

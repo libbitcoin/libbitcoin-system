@@ -25,7 +25,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 #include "qrencode/qrencode.h"
@@ -104,7 +104,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 
     // Make otherwise safe sign cast explicit.
     const auto signed_version = static_cast<int>(version);
-    const auto sensitive = case_sensitive ? 1 : 0;
+    const auto sensitive = to_int(case_sensitive);
 
     // External (embedded) qrencode library function.
     // QRcode_encodeString supports only QR_MODE_8 and QR_MODE_KANJI.
@@ -115,11 +115,11 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 
     // Zero check guards later data assignment.
     // Empty or excessive value string should return null pointer.
-    if (qrcode == nullptr || qrcode->width == 0u)
+    if (qrcode == nullptr || is_zero(qrcode->width))
         return safe_free_and_return(qrcode, false);
 
     // Bound: 2^1 * 2^16 + 2^32 < 2^64.
-    const auto width = uint64_t{ 2u } * margin + scale * qrcode->width;
+    const auto width = uint64_t(2) * margin + scale * qrcode->width;
 
     // Guard: TIFF parameter overflow.
     if (width > max_uint16)
@@ -194,13 +194,12 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
 
     // For reading the qrcode byte stream.
     data_source image_source(coded);
-    istream_reader image_reader(image_source);
+    byte_reader image_reader(image_source);
 
     // For writing the image bit stream.
     data_chunk image_out;
     data_sink image_sink(image_out);
-    ostream_writer image_writer(image_sink);
-    ostream_bit_writer image_bit_writer(image_writer);
+    bit_writer image_bit_writer(image_sink);
     image_out.reserve(area_bytes);
 
     // ------------------------- Write top margin -------------------------
@@ -214,8 +213,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
         // For repeatedly writing a row buffer.
         data_chunk row_out;
         data_sink row_sink(row_out);
-        ostream_writer row_writer(row_sink);
-        ostream_bit_writer row_bit_writer(row_writer);
+        bit_writer row_bit_writer(row_sink);
         row_out.reserve(row_bytes);
 
         // ------------------------ Buffer left margin ------------------------
@@ -241,7 +239,6 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
 
         // Flush any partial byte and then flush bytes to data_chunk.
         row_bit_writer.flush();
-        row_sink.flush();
 
         // Write row buffer scale times.
         for (size_t scaled = 0; scaled < scale; ++scaled)
@@ -254,11 +251,10 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     // --------------------------------------------------------------------
 
     // Guard against writer failure and unexpected stream length.
-    if (!image_bit_writer || !image_reader || !image_reader.is_exhausted())
+    if (!image_bit_writer || !image_reader.is_exhausted())
         return {};
 
     // Flush bytes to data_chunk.
-    image_sink.flush();
     return image_out;
 }
 

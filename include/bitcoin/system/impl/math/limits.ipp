@@ -20,55 +20,19 @@
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
 #include <limits>
-#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// TODO: move to addition.ipp.
-// TODO: test with uintx.
-
-template <typename Result, typename Left, typename Right,
-    if_same_signed_integer<Left, Right>>
-inline Result add(Left left, Right right) noexcept
-{
-    // Casts are not constexpr.
-    return static_cast<Result>(left) + static_cast<Result>(right);
-}
-
-template <typename Result, typename Left, typename Right,
-    if_same_signed_integer<Left, Right>>
-inline Result subtract(Left left, Right right) noexcept
-{
-    // Casts are not constexpr.
-    return static_cast<Result>(left) - static_cast<Result>(right);
-}
-
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
-{
-    constexpr auto maximum = std::numeric_limits<Integer>::max();
-    return (left > (maximum - right)) ? maximum : (left + right);
-}
-
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer floored_subtract(Integer left, Integer right) noexcept
-{
-    constexpr auto minimum = std::numeric_limits<Integer>::min();
-    return (right >= left) ? minimum : (left - right);
-}
-
-// TODO: rename to limit.ipp.
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 inline Result limit(Integer value) noexcept
 {
     // Casts are not constexpr.
-    return limit(static_cast<Result>(value),
-        std::numeric_limits<Result>::min(),
+    return limit(value, std::numeric_limits<Result>::min(),
         std::numeric_limits<Result>::max());
 }
 
@@ -77,9 +41,9 @@ template <typename Result, typename Integer,
 inline Result limit(Integer value, Result minimum, Result maximum) noexcept
 {
     // Casts are not constexpr.
-    const auto cast = static_cast<Result>(value);
-    return is_lesser(cast, minimum) ? minimum :
-        (is_greater(cast, maximum) ? maximum : cast);
+    return is_lesser(value, minimum) ? minimum :
+        (is_greater(value, maximum) ? maximum :
+            static_cast<Result>(value));
 }
 
 } // namespace system

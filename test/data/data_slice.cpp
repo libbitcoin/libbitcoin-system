@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -43,14 +43,14 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     BOOST_REQUIRE_EQUAL(slice.encoded(), "");
     BOOST_REQUIRE_EQUAL(slice.to_string(), "");
     BOOST_REQUIRE_EQUAL(slice.to_chunk(), data_chunk{});
-    BOOST_REQUIRE_EQUAL(slice.to_array<0>(), byte_array<0>{});
+    BOOST_REQUIRE_EQUAL(slice.to_array<0>(), data_array<0>{});
 
     // operator[] (value read past end, zero padded)
     BOOST_REQUIRE_EQUAL(slice[0], 0x00);
 
     // cast operators
     BOOST_REQUIRE(static_cast<data_chunk>(slice).empty());
-    BOOST_REQUIRE_EQUAL(static_cast<byte_array<32>>(slice), null_hash);
+    BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(slice), null_hash);
 
     // operator==/operator!=
     BOOST_REQUIRE(slice == slice);
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     BOOST_REQUIRE(!(slice != std::string{}));
     BOOST_REQUIRE(slice == data_slice{});
     BOOST_REQUIRE(!(slice != data_slice{}));
-    BOOST_REQUIRE(slice == byte_array<0>{});
-    BOOST_REQUIRE(!(slice != byte_array<0>{}));
+    BOOST_REQUIRE(slice == data_array<0>{});
+    BOOST_REQUIRE(!(slice != data_array<0>{}));
     BOOST_REQUIRE(slice == "");
     BOOST_REQUIRE(!(slice != ""));
 }
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text_empty__empty)
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__array_empty__empty)
 {
-    BOOST_REQUIRE(data_slice(byte_array<0>{}).empty());
+    BOOST_REQUIRE(data_slice(data_array<0>{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__string_empty__empty)
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__iterators_reversed__empty)
 BOOST_AUTO_TEST_CASE(data_slice__to_array__past_end__zero_padded)
 {
     const auto size = 10u;
-    const byte_array<size> expected{ { 'f', 'o', 'o', 'b', 'a', 'r', 0, 0, 0, 0 } };
+    const data_array<size> expected{ { 'f', 'o', 'o', 'b', 'a', 'r', 0, 0, 0, 0 } };
     const data_slice slice("foobar");
     BOOST_REQUIRE_EQUAL(slice.size(), 6u);
     BOOST_REQUIRE_EQUAL(slice.to_array<size>(), expected);
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(data_slice__to_array__past_end__zero_padded)
 const auto size = 6u;
 const std::string string{ "foobar" };
 const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
-const byte_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+const data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const std::vector<char> char_vector{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const auto encoded = encode_base16(string);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     // negative vector
     const std::string negative_string{ "baadf00d" };
     const data_chunk negative_data{ 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' };
-    const byte_array<8> negative_byte{ { 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' } };
+    const data_array<8> negative_byte{ { 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' } };
 
     // construct(literal)
     const data_slice slice("foobar");
@@ -166,14 +166,14 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     BOOST_REQUIRE_EQUAL(slice[0], 'f');
     BOOST_REQUIRE_EQUAL(*slice.begin(), 'f');
     BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).front(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<byte_array<size>>(slice).front(), 'f');
+    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).front(), 'f');
     
     // end
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
     BOOST_REQUIRE_EQUAL(slice[size-1], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(slice.end()), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).back(), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<byte_array<size>>(slice).back(), 'r');
+    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).back(), 'r');
 
     // methods
     BOOST_REQUIRE_EQUAL(slice.encoded(), encoded);
@@ -262,13 +262,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
 {
-    // construct(byte_array)
+    // construct(data_array)
     const data_slice slice0(byte);
     BOOST_REQUIRE(!slice0.empty());
     BOOST_REQUIRE_EQUAL(slice0.size(), size);
     BOOST_REQUIRE_EQUAL(slice0.encoded(), encoded);
 
-    // construct(byte_array)
+    // construct(data_array)
     const data_slice slice1{ byte };
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
 
     // Deleted function, use:
     // data_slice slice(byte);
-    ////// construct(byte_array)
+    ////// construct(data_array)
     ////const data_slice slice2 = byte;
     ////BOOST_REQUIRE(!slice2.empty());
     ////BOOST_REQUIRE_EQUAL(slice2.size(), size);
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
 
     // Array construction is non-ambiguous.
     // Unnecessary copy construction.
-    // construct(byte_array)
+    // construct(data_array)
     const data_slice slice3({ byte });
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);

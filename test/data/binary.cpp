@@ -55,13 +55,13 @@ BOOST_AUTO_TEST_CASE(binary__construct__bytes_32__expected_out)
 
 BOOST_AUTO_TEST_CASE(binary__construct__uint32_8__expected_encoded)
 {
-    const binary prefix(8, uint32_t(0x0df0adba));
+    const binary prefix(8, to_little_endian<uint32_t>(0x0df0adba));
     BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010");
 }
 
 BOOST_AUTO_TEST_CASE(binary__construct__uint32_32__expected_encoded)
 {
-    const binary prefix(32, uint32_t(0x0df0adba));
+    const binary prefix(32, to_little_endian<uint32_t>(0x0df0adba));
     BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010101011011111000000001101");
 }
 

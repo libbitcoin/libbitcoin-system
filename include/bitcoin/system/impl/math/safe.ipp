@@ -75,40 +75,16 @@ void safe_decrement(Integer& value)
     value = safe_subtract(value, one);
 }
 
-template <typename To, typename From, if_same_signed_integer<To, From>>
+template <typename To, typename From, if_integer<To>, if_integer<From>>
 To safe_cast(From value)
 {
-    if (value < std::numeric_limits<To>::min() ||
-        value > std::numeric_limits<To>::max())
-        throw range_exception("safe cast out of range");
+    if (is_lesser(value, std::numeric_limits<To>::min()))
+        throw range_exception("safe cast below minimum range");
+
+    if (is_greater(value, std::numeric_limits<To>::max()))
+        throw range_exception("safe cast above maximum range");
 
     return static_cast<To>(value);
-}
-
-template <typename To, typename From,
-    if_unsigned_integer<To>, if_signed_integer<From>>
-To safe_cast(From signed_value)
-{
-    if ((static_cast<std::make_unsigned<From>::type>(signed_value) <
-        std::numeric_limits<To>::min()) ||
-        (static_cast<std::make_unsigned<From>::type>(signed_value) >
-        std::numeric_limits<To>::max()))
-        throw range_exception("safe cast out of range");
-
-    return static_cast<To>(signed_value);
-}
-
-template <typename To, typename From,
-    if_signed_integer<To>, if_unsigned_integer<From>>
-To safe_cast(From unsigned_value)
-{
-    if ((unsigned_value < static_cast<std::make_unsigned<To>::type>
-        (std::numeric_limits<To>::min())) ||
-        (unsigned_value > static_cast<std::make_unsigned<To>::type>
-        (std::numeric_limits<To>::max())))
-        throw range_exception("safe cast out of range");
-
-    return static_cast<To>(unsigned_value);
 }
 
 } // namespace system

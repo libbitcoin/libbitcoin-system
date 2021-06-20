@@ -36,11 +36,11 @@ static constexpr uint32_t hd_first_hardened_key = 1 << 31;
 
 /// An hd key chain code.
 static constexpr size_t hd_chain_code_size = 32;
-typedef byte_array<hd_chain_code_size> hd_chain_code;
+typedef data_array<hd_chain_code_size> hd_chain_code;
 
 /// A decoded hd public or private key.
 static constexpr size_t hd_key_size = 82;
-typedef byte_array<hd_key_size> hd_key;
+typedef data_array<hd_key_size> hd_key;
 
 /// Key derivation information used in the serialization format.
 struct BC_API hd_lineage

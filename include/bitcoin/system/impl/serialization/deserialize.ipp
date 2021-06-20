@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SERIALIZATION_DESERIALIZE_IPP
-#define LIBBITCOIN_SYSTEM_SERIALIZATION_DESERIALIZE_IPP
+#ifndef LIBBITCOIN_SYSTEM_SERIALIZATION_DESERIALZIE_IPP
+#define LIBBITCOIN_SYSTEM_SERIALIZATION_DESERIALZIE_IPP
 
 #include <algorithm>
 #include <array>
@@ -29,8 +29,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
  // Cannot use a data_slice override as it is not deserializable.
 
@@ -63,7 +62,7 @@ inline bool deserialize(uint8_t& out, const std::string& text)
 }
 
 template <size_t Size>
-bool deserialize(byte_array<Size>& out, const std::string& text)
+bool deserialize(data_array<Size>& out, const std::string& text)
 {
     return decode_base16(out, text);
 }

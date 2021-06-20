@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -27,13 +27,12 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Cannot use a data_slice override for byte_array/data_chunk because it would
+// Cannot use a data_slice override for data_array/data_chunk because it would
 // pick up string and serialize as bytes vs. chars.
     
 template <typename Value>
@@ -49,7 +48,7 @@ inline std::string serialize(uint8_t value, const std::string& fallback)
 }
 
 template <size_t Size>
-std::string serialize(const byte_array<Size>& value, const std::string&)
+std::string serialize(const data_array<Size>& value, const std::string&)
 {
     return encode_base16(value);
 }

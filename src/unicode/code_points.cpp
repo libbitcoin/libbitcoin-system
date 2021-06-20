@@ -19,7 +19,7 @@
 #include <bitcoin/system/unicode/code_points.hpp>
 
 #include <string>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
 namespace libbitcoin {

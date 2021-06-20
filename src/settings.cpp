@@ -259,7 +259,8 @@ uint64_t settings::max_money() const
     const std::function<uint64_t(uint64_t)> recursive_money =
         [&recursive_money](uint64_t money)
         {
-            return money > 0 ? safe_add(money, recursive_money(money >> 1u)) : 0;
+            return !is_zero(money) ?
+                safe_add(money, recursive_money(money >> 1)) : 0ll;
         };
 
     //*************************************************************************

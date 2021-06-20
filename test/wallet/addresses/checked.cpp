@@ -29,12 +29,12 @@ typedef checked<1, mini_hash_size, 2> mini_checked;
 typedef checked<3, short_hash_size, 4> short_checked;
 typedef checked<5, long_hash_size, 8> long_checked;
 
-const byte_array<0> zero_prefix{};
-const byte_array<1> mini_prefix{ 1 };
-const byte_array<3> short_prefix{ 1, 2, 3 };
-const byte_array<5> long_prefix{ 1, 2, 3, 4, 5 };
+const data_array<0> zero_prefix{};
+const data_array<1> mini_prefix{ 1 };
+const data_array<3> short_prefix{ 1, 2, 3 };
+const data_array<5> long_prefix{ 1, 2, 3, 4, 5 };
 
-const byte_array<0> test_zero_hash = hash_literal("");
+const data_array<0> test_zero_hash = hash_literal("");
 const mini_hash test_mini_hash = hash_literal("000102030405");
 const short_hash test_short_hash = hash_literal("0908070605040302010009080706050403020100");
 const long_hash test_long_hash = hash_literal("09080706050403020100090807060504030201000908070605040302010009080706050403020100090807060504030201000908070605040302010003020100");
@@ -74,12 +74,13 @@ BOOST_AUTO_TEST_CASE(checked__values_construct__zero__valid)
     BOOST_REQUIRE(long_instance);
 }
 
-BOOST_AUTO_TEST_CASE(checked__value_copy_construct__zero__valid)
-{
-    // Empty checksum and empty value, so no state and always valid.
-    const zero_checked instance(zero_valid_value);
-    BOOST_REQUIRE(instance);
-}
+// Excluded by type constraints on split.
+//////BOOST_AUTO_TEST_CASE(checked__value_copy_construct__zero__valid)
+//////{
+//////    // Empty checksum and empty value, so no state and always valid.
+//////    const zero_checked instance(zero_valid_value);
+//////    BOOST_REQUIRE(instance);
+//////}
 
 BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini_invalid__invalid)
 {

@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/inventory.hpp>
 
@@ -137,7 +138,7 @@ bool inventory_vector::from_data(uint32_t version,
 bool inventory_vector::from_data(uint32_t version,
     std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -168,19 +169,17 @@ data_chunk inventory_vector::to_data(uint32_t version) const
     return data;
 }
 
-void inventory_vector::to_data(uint32_t version,
-    std::ostream& stream) const
+void inventory_vector::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
-void inventory_vector::to_data(uint32_t ,
-    writer& sink) const
+void inventory_vector::to_data(uint32_t, writer& sink) const
 {
     const auto raw_type = inventory_vector::to_number(type_);
     sink.write_4_bytes_little_endian(raw_type);
-    sink.write_hash(hash_);
+    sink.write_bytes(hash_);
 }
 
 size_t inventory_vector::serialized_size(uint32_t version) const

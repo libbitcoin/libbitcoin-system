@@ -40,33 +40,33 @@ static constexpr uint32_t ek_max_sequence = 4095;
  * A seed for use in creating an intermediate passphrase (token).
  */
 static constexpr size_t ek_salt_size = 4;
-typedef byte_array<ek_salt_size> ek_salt;
+typedef data_array<ek_salt_size> ek_salt;
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
  */
 static constexpr size_t ek_entropy_size = 8;
-typedef byte_array<ek_entropy_size> ek_entropy;
+typedef data_array<ek_entropy_size> ek_entropy;
 
 /**
  * A seed for use in creating a key pair.
  */
 static constexpr size_t ek_seed_size = 24;
-typedef byte_array<ek_seed_size> ek_seed;
+typedef data_array<ek_seed_size> ek_seed;
 
 /**
  * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
 static constexpr size_t encrypted_token_encoded_size = 72;
 static constexpr size_t encrypted_token_decoded_size = 53;
-typedef byte_array<encrypted_token_decoded_size> encrypted_token;
+typedef data_array<encrypted_token_decoded_size> encrypted_token;
 
 /**
  * An encrypted private key type (checked but not base58 encoded).
  */
 static constexpr size_t ek_private_encoded_size = 58;
 static constexpr size_t ek_private_decoded_size = 43;
-typedef byte_array<ek_private_decoded_size> encrypted_private;
+typedef data_array<ek_private_decoded_size> encrypted_private;
 
 /**
  * DEPRECATED
@@ -75,7 +75,7 @@ typedef byte_array<ek_private_decoded_size> encrypted_private;
  */
 static constexpr size_t encrypted_public_encoded_size = 75;
 static constexpr size_t encrypted_public_decoded_size = 55;
-typedef byte_array<encrypted_public_decoded_size> encrypted_public;
+typedef data_array<encrypted_public_decoded_size> encrypted_public;
 
 // BIP38
 // It is requested that the unused flag bytes NOT be used for denoting that

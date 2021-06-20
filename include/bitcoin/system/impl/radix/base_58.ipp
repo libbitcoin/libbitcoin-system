@@ -30,9 +30,9 @@ BC_API bool decode_base58_private(uint8_t* out, size_t out_size,
     const char in[]);
 
 template <size_t Size>
-bool decode_base58(byte_array<Size>& out, const std::string& in)
+bool decode_base58(data_array<Size>& out, const std::string& in)
 {
-    byte_array<Size> result;
+    data_array<Size> result;
     if (!decode_base58_private(result.data(), result.size(), in.data()))
         return false;
 
@@ -42,10 +42,10 @@ bool decode_base58(byte_array<Size>& out, const std::string& in)
 
 // TODO: determine if the sizing function is always accurate.
 template <size_t Size>
-byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size])
+data_array<Size * 733 / 1000> base58_literal(const char(&string)[Size])
 {
     // log(58) / log(256), rounded up.
-    byte_array<Size * 733 / 1000> out;
+    data_array<Size * 733 / 1000> out;
     DEBUG_ONLY(const auto success =) decode_base58_private(out.data(),
         out.size(), string);
     BITCOIN_ASSERT(success);

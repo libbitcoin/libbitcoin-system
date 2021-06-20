@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(version__factory_3__valid_input__success)
 
     const auto data = expected.to_data(version_maximum);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = message::version::factory(version_maximum, source);
 
     BOOST_REQUIRE(result.is_valid());

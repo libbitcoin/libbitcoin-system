@@ -31,7 +31,7 @@ namespace system {
 template <typename Integer,
     typename Unsigned = std::make_unsigned<Integer>::type,
     if_integer<Integer> = true>
-constexpr Unsigned to_unsigned(Integer value) noexcept;
+inline Unsigned to_unsigned(Integer value) noexcept;
 
 /// Obtain the absolute value of the integer.
 template <typename Integer,
@@ -55,10 +55,10 @@ template <typename Left, typename Right,
 constexpr bool is_greater(Left left, Right right) noexcept;
 template <typename Left, typename Right,
     if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
-constexpr bool is_greater(Left left, Right right) noexcept;
+inline bool is_greater(Left left, Right right) noexcept;
 template <typename Left, typename Right,
     if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
-constexpr bool is_greater(Left left, Right right) noexcept;
+inline bool is_greater(Left left, Right right) noexcept;
 
 /// Use !is_greater(left, right) for (left <= right).
 /// Determine whether the left integer is less than the right.
@@ -67,15 +67,15 @@ template <typename Left, typename Right,
 constexpr bool is_lesser(Left left, Right right) noexcept;
 template <typename Left, typename Right,
     if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
-constexpr bool is_lesser(Left left, Right right) noexcept;
+inline bool is_lesser(Left left, Right right) noexcept;
 template <typename Left, typename Right,
     if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
-constexpr bool is_lesser(Left left, Right right) noexcept;
+inline bool is_lesser(Left left, Right right) noexcept;
 
 /// Return the greater of the two values, cast to the Result type.
 template<typename Result, typename Left, typename Right,
     if_integer<Left> = true, if_integer<Right> = true>
-    inline Result greater(Left left, Right right) noexcept;
+inline Result greater(Left left, Right right) noexcept;
 
 /// Return the lesser of the two values, cast to the Result type.
 template<typename Result, typename Left, typename Right,

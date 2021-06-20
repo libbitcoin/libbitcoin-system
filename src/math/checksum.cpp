@@ -20,10 +20,8 @@
 
 #include <utility>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
@@ -36,8 +34,7 @@ namespace system {
 
 static uint32_t bitcoin_checksum(const data_slice& data)
 {
-    const auto hash = bitcoin_hash(data);
-    return from_little_endian_unsafe<uint32_t>(hash.begin());
+    return from_little_endian<uint32_t>(bitcoin_hash(data));
 }
 
 data_chunk append_checksum(const data_loaf& slices)
@@ -74,7 +71,7 @@ static base32_chunk bech32_expand_prefix(const std::string& prefix)
 {
     const auto size = prefix.size();
     const auto lower = ascii_to_lower(prefix);
-    base32_chunk out(2u * size + 1u, 0x00);
+    base32_chunk out(add1(2u * size), 0x00);
 
     for (size_t index = 0; index < size; ++index)
     {
@@ -122,7 +119,7 @@ static uint32_t bech32_checksum(const base32_chunk& data)
 // BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
 static uint32_t bech32_constant(uint8_t version)
 {
-    return version == 0 ? 0x00000001 : 0x2bc830a3;
+    return is_zero(version) ? 0x00000001 : 0x2bc830a3;
 }
 
 static void bech32_prepend_prefix(base32_chunk& data,

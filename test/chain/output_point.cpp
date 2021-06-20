@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_3__roundtrip__success)
     }));
 
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     auto point = chain::output_point::factory(source);
 
     BOOST_REQUIRE(point.is_valid());

@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_UNICODE_CONVERSION_HPP
 
 #include <string>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

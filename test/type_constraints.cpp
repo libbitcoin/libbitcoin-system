@@ -33,6 +33,7 @@ constexpr bool is_true()
     return !std::is_same<Type, std::enable_if<false, bool>>::value;
 }
 
+// size_t
 static_assert(is_true<if_odd<1>>(), "");
 static_assert(is_true<if_odd<3>>(), "");
 static_assert(is_true<if_odd<5u>>(), "");
@@ -42,6 +43,7 @@ static_assert(is_true<if_odd<0xff>>(), "");
 ////static_assert(!is_true<if_odd<42u>>(), "");
 ////static_assert(!is_true<if_odd<0xfe>>(), "");
 
+// size_t
 static_assert(is_true<if_even<0>>(), "");
 static_assert(is_true<if_even<2>>(), "");
 static_assert(is_true<if_even<42u>>(), "");
@@ -50,6 +52,30 @@ static_assert(is_true<if_even<0xfe>>(), "");
 ////static_assert(!is_true<if_even<3>>(), "");
 ////static_assert(!is_true<if_even<5u>>(), "");
 ////static_assert(!is_true<if_even<0xff>>(), "");
+
+// size_t
+static_assert(is_true<if_non_zero<1>>(), "");
+////static_assert(!is_true<if_non_zero<0>>(), "");;
+
+// size_t
+static_assert(is_true<if_greater<1, 0>>(), "");
+////static_assert(!is_true<if_greater<0, 0>>(), "");
+////static_assert(!is_true<if_greater<0, 1>>(), "");
+
+// size_t
+static_assert(is_true<if_not_greater<0, 0>>(), "");
+static_assert(is_true<if_not_greater<0, 1>>(), "");
+////static_assert(!is_true<if_not_greater<1, 0>>(), "");
+
+// size_t
+static_assert(is_true<if_lesser<0, 1>>(), "");
+////static_assert(!is_true<if_lesser<1, 0>>(), "");
+////static_assert(!is_true<if_lesser<0, 0>>(), "");
+
+// size_t
+static_assert(is_true<if_not_lesser<0, 0>>(), "");
+static_assert(is_true<if_not_lesser<1, 0>>(), "");
+////static_assert(!is_true<if_not_lesser<0, 1>>(), "");
 
 static_assert(is_true<if_byte<bool>>(), "");
 static_assert(is_true<if_byte<char>>(), "");

@@ -20,9 +20,10 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
 
@@ -66,7 +67,7 @@ static bool encode_base2048(base2048_chunk& out, const string_list& in,
         return false;
 
     if (std::any_of(indexes.begin(), indexes.end(),
-        [](const int32_t& index) { return index < 0; }))
+        [](const int32_t& index) { return is_negative(index); }))
         return false;
 
     out.resize(indexes.size());
@@ -127,8 +128,8 @@ std::string decode_base2048(const data_chunk& data,
 base2048_chunk base2048_pack(const data_chunk& unpacked)
 {
     base2048_chunk packed;
-    istream_reader reader(unpacked);
-    istream_bit_reader bit_reader(reader);
+    data_source source(unpacked);
+    bit_reader bit_reader(source);
 
     while (!bit_reader.is_exhausted())
         packed.push_back(bit_reader.read_bits(11));
@@ -140,11 +141,11 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
     // and then packed this will always result in either no pad bits or a full
     // element of zeros that is padding. This should be apparent from the fact
     // that the number of used bits is unchanged. Remainder indicates padding.
-    if ((unpacked.size() * 8) % 11 != 0)
+    if (!is_zero((unpacked.size() * 8) % 11))
     {
         // If pad element is non-zero the unpacking was not base2048_unpack.
         // So we return a failure where the condition is detected.
-        packed.resize(packed.back() == 0x00 ? packed.size() - 1u : 0);
+        packed.resize(is_zero(packed.back()) ? sub1(packed.size()) : zero);
     }
 
     return packed;
@@ -153,8 +154,8 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
 data_chunk base2048_unpack(const base2048_chunk& packed)
 {
     data_chunk unpacked;
-    ostream_writer writer(unpacked);
-    ostream_bit_writer bit_writer(writer);
+    data_sink sink(unpacked);
+    bit_writer bit_writer(sink);
 
     for (const auto& value: packed)
         bit_writer.write_bits(value.convert_to<uint64_t>(), 11);

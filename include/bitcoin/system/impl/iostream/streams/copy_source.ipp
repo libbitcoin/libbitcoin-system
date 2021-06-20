@@ -21,22 +21,25 @@
 
 #include <algorithm>
 #include <iterator>
-#include <limits>
-#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 template <typename Container>
 copy_source<Container>::copy_source(const Container& data) noexcept
-  : from_(data.begin()),
-    size_(limit<size_type>(data.size()))
+  : base_source(limit<size_type>(data.size())),
+    from_(data.begin())    
 {
 }
 
 template <typename Container>
-typename copy_source<Container>::size_type
-copy_source<Container>::do_read(value_type* to, size_type size) noexcept
+copy_source<Container>::~copy_source() noexcept
+{
+}
+
+template <typename Container>
+void copy_source<Container>::do_read(value_type* to, size_type size) noexcept
 {
     // std::copy_n returns iterator past last element copied to.
     std::copy_n(from_, size, to);

@@ -20,8 +20,7 @@
 
 #include <initializer_list>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -112,7 +111,7 @@ bool compact_block::from_data(uint32_t version, const data_chunk& data)
 
 bool compact_block::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -124,7 +123,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
         return false;
 
     nonce_ = source.read_8_bytes_little_endian();
-    auto count = source.read_size_little_endian();
+    auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -136,7 +135,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
     for (size_t id = 0; id < count && source; ++id)
         short_ids_.push_back(source.read_mini_hash());
 
-    count = source.read_size_little_endian();
+    count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -172,7 +171,7 @@ data_chunk compact_block::to_data(uint32_t version) const
 
 void compact_block::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
@@ -180,12 +179,12 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 {
     header_.to_data(sink);
     sink.write_8_bytes_little_endian(nonce_);
-    sink.write_variable_little_endian(short_ids_.size());
+    sink.write_variable(short_ids_.size());
 
     for (const auto& element: short_ids_)
-        sink.write_mini_hash(element);
+        sink.write_bytes(element);
 
-    sink.write_variable_little_endian(transactions_.size());
+    sink.write_variable(transactions_.size());
 
     for (const auto& element: transactions_)
         element.to_data(version, sink);

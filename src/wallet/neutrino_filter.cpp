@@ -22,7 +22,7 @@
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
-#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/golomb_coding.hpp>
 
@@ -33,7 +33,7 @@ namespace neutrino {
 bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 {
     const auto hash = validated_block.hash();
-    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(hash));
+    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(hash));
     data_stack items;
 
     for (const auto& tx: validated_block.transactions())
@@ -66,8 +66,8 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
     items = distinct(std::move(items));
 
     data_sink stream(out_filter);
-    ostream_writer writer(stream);
-    writer.write_variable_little_endian(items.size());
+    bit_writer writer(stream);
+    writer.write_variable(items.size());
     golomb::construct(writer, items, golomb_bits, key,
         golomb_target_false_positive_rate);
     stream.flush();
@@ -80,9 +80,9 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
 {
     data_chunk data;
     data_sink stream(data);
-    ostream_writer sink(stream);
-    sink.write_hash(bitcoin_hash(filter));
-    sink.write_hash(previous_block_hash);
+    byte_writer sink(stream);
+    sink.write_bytes(bitcoin_hash(filter));
+    sink.write_bytes(previous_block_hash);
     stream.flush();
 
     return bitcoin_hash(data);
@@ -95,14 +95,14 @@ bool match_filter(const message::compact_filter& filter,
         return false;
 
     data_source stream(filter.filter());
-    istream_reader reader(stream);
-    const auto set_size = reader.read_variable_little_endian();
+    bit_reader reader(stream);
+    const auto set_size = reader.read_variable();
 
     if (!reader)
         return false;
 
     const auto target = script.to_data(false);
-    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(
+    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(
         filter.block_hash()));
 
     return golomb::match(target, reader, set_size, key, golomb_bits,
@@ -129,13 +129,13 @@ bool match_filter(const message::compact_filter& filter,
         return false;
 
     data_source stream(filter.filter());
-    istream_reader reader(stream);
-    auto set_size = reader.read_variable_little_endian();
+    bit_reader reader(stream);
+    const auto set_size = reader.read_variable();
 
     if (!reader)
         return false;
 
-    const auto key = to_siphash_key(slice<0, half_hash_size, hash_size>(
+    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(
         filter.block_hash()));
 
     return golomb::match(stack, reader, set_size, key, golomb_bits,

@@ -20,6 +20,7 @@
 
 #include <mutex>
 #include <secp256k1.h>
+#include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -44,7 +45,7 @@ secp256k1_initializer::secp256k1_initializer(int flags)
 // Clean up the context on destruct.
 secp256k1_initializer::~secp256k1_initializer()
 {
-    if (context_ != nullptr)
+    if (!is_null(context_))
         secp256k1_context_destroy(context_);
 }
 

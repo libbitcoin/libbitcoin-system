@@ -20,8 +20,7 @@
 
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -99,7 +98,7 @@ bool alert::from_data(uint32_t version, const data_chunk& data)
 
 bool alert::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -107,8 +106,8 @@ bool alert::from_data(uint32_t, reader& source)
 {
     reset();
 
-    payload_ = source.read_bytes(source.read_size_little_endian());
-    signature_ = source.read_bytes(source.read_size_little_endian());
+    payload_ = source.read_bytes(source.read_size());
+    signature_ = source.read_bytes(source.read_size());
 
     if (!source)
         reset();
@@ -130,15 +129,15 @@ data_chunk alert::to_data(uint32_t version) const
 
 void alert::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void alert::to_data(uint32_t, writer& sink) const
 {
-    sink.write_variable_little_endian(payload_.size());
+    sink.write_variable(payload_.size());
     sink.write_bytes(payload_);
-    sink.write_variable_little_endian(signature_.size());
+    sink.write_variable(signature_.size());
     sink.write_bytes(signature_);
 }
 

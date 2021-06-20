@@ -18,20 +18,15 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(divide_tests)
-
-#define DIVIDE_MODULO
-#define DIVIDE_DIVIDE
-#define DIVIDE_ASSERT
+ // C++14: required for static_cast to be constexpr.
+ // These helpers otherwise create comparison of unsigned types warnings.
 
 template <typename Dividend, typename Divisor>
 constexpr bool ceilinged_identity(Dividend x, Divisor y)
 {
 #ifdef BC_CPP_14
-    // C++14: required for static_cast to be constexpr.
-    // Cast avoids conversion of left side to Divisor type.
-    // This otherwise leads to comparison of unsigned types warnings.
-    return ceilinged_divide(x, y) * static_cast<Dividend>(y) + ceilinged_modulo(x, y) == x;
+    return ceilinged_divide(x, y) * y + ceilinged_modulo(x, y) ==
+        static_cast<decltype((x / y) * y + (x / y))>(x);
 #else
     return true;
 #endif
@@ -41,10 +36,8 @@ template <typename Dividend, typename Divisor>
 constexpr bool floored_identity(Dividend x, Divisor y)
 {
 #ifdef BC_CPP_14
-    // C++14: required for static_cast to be constexpr.
-    // Cast avoids conversion of left side to Divisor type.
-    // This otherwise leads to comparison of unsigned types warnings.
-    return floored_divide(x, y) * static_cast<Dividend>(y) + floored_modulo(x, y) == x;
+    return floored_divide(x, y) * y + floored_modulo(x, y) ==
+        static_cast<decltype((x / y) * y + (x / y))>(x);
 #else
     return true;
 #endif
@@ -54,16 +47,18 @@ template <typename Dividend, typename Divisor>
 constexpr bool truncated_identity(Dividend x, Divisor y)
 {
 #ifdef BC_CPP_14
-    // C++14: required for static_cast to be constexpr.
-    // Cast avoids conversion of left side to Divisor type.
-    // This otherwise leads to comparison of unsigned types warnings.
-    return truncated_divide(x, y) * static_cast<Dividend>(y) + truncated_modulo(x, y) == x;
+    return truncated_divide(x, y) * y + truncated_modulo(x, y) ==
+        static_cast<decltype((x / y) * y + (x / y))>(x);
 #else
     return true;
 #endif
 }
 
-#ifdef DIVIDE_MODULO
+#define DIVISION_MODULO
+#define DIVISION_DIVIDE
+#define DIVISION_MATRIX
+
+#ifdef DIVISION_MODULO
 
 // ceilinged_modulo
 
@@ -87,13 +82,13 @@ static_assert(ceilinged_identity(42u, 2u), "");
 static_assert(-42 % 2 == 0, "");
 static_assert(ceilinged_modulo(-42, 2) == 0, "");
 static_assert(ceilinged_identity(-42, 2), "");
-static_assert(ceilinged_identity(-42, 2u), "");
+////static_assert(ceilinged_identity(-42, 2u), "");
 
 // No remainder is same as c++.
 static_assert(42 % -2 == 0, "");
 static_assert(ceilinged_modulo(42, -2) == 0, "");
 static_assert(ceilinged_identity(42, -2), "");
-static_assert(ceilinged_identity(42u, -2), "");
+////static_assert(ceilinged_identity(42u, -2), "");
 
 // No remainder is same as c++.
 static_assert(-42 % -2 == 0, "");
@@ -104,21 +99,21 @@ static_assert(ceilinged_identity(-42, -2), "");
 static_assert(42 % 8 == 2, "");
 static_assert(ceilinged_modulo(42, 8) == -6, "");
 static_assert(ceilinged_identity(42, 8), "");
-static_assert(ceilinged_identity(42u, 8), "");
-static_assert(ceilinged_identity(42, 8u), "");
-static_assert(ceilinged_identity(42u, 8u), "");
+////static_assert(ceilinged_identity(42u, 8), "");
+////static_assert(ceilinged_identity(42, 8u), "");
+////static_assert(ceilinged_identity(42u, 8u), "");
 
 // Negative quotient is ceilinged in c++.
 static_assert(-42 % 8 == -2, "");
 static_assert(ceilinged_modulo(-42, 8) == -2, "");
 static_assert(ceilinged_identity(-42, 8), "");
-static_assert(ceilinged_identity(-42, 8u), "");
+////static_assert(ceilinged_identity(-42, 8u), "");
 
 // Negative quotient is ceilinged in c++.
 static_assert(42 % -8 == 2, "");
 static_assert(ceilinged_modulo(42, -8) == 2, "");
 static_assert(ceilinged_identity(42, -8), "");
-static_assert(ceilinged_identity(42u, -8), "");
+////static_assert(ceilinged_identity(42u, -8), "");
 
 // Positive quotient is floored in c++.
 static_assert(-42 % -8 == -2, "");
@@ -151,14 +146,14 @@ static_assert(-42 % 2 == 0, "");
 // The python result of -42%2.
 static_assert(floored_modulo(-42, 2) == 0, "");
 static_assert(floored_identity(-42, 2), "");
-static_assert(floored_identity(-42, 2u), "");
+////static_assert(floored_identity(-42, 2u), "");
 
 // No remainder is same as c++.
 static_assert(42 % -2 == 0, "");
 // The python result of 42%-2.
 static_assert(floored_modulo(42, -2) == 0, "");
 static_assert(floored_identity(42, -2), "");
-static_assert(floored_identity(42u, -2), "");
+////static_assert(floored_identity(42u, -2), "");
 
 // No remainder and positive quotient are same as c++.
 static_assert(-42 % -2 == 0, "");
@@ -180,14 +175,14 @@ static_assert(-42 % 8 == -2, "");
 // The python result of -42%8.
 static_assert(floored_modulo(-42, 8) == 6, "");
 static_assert(floored_identity(-42, 8), "");
-static_assert(floored_identity(-42, 8u), "");
+////static_assert(floored_identity(-42, 8u), "");
 
 // Negative quotient is ceilinged in c++.
 static_assert(42 % -8 == 2, "");
 // The python result of 42%-8.
 static_assert(floored_modulo(42, -8) == -6, "");
-static_assert(floored_idetity(42, -8), "");
-static_assert(floored_identity(42u, -8), "");
+static_assert(floored_identity(42, -8), "");
+////static_assert(floored_identity(42u, -8), "");
 
 // Positive quotient is floored in c++.
 static_assert(-42 % -8 == -2, "");
@@ -212,11 +207,11 @@ static_assert(truncated_identity(42u, 2u), "");
 
 static_assert(truncated_modulo(-42, 2) == -42 % 2, "");
 static_assert(truncated_identity(-42, 2), "");
-static_assert(truncated_identity(-42, 2u), "");
+////static_assert(truncated_identity(-42, 2u), "");
 
 static_assert(truncated_modulo(42, -2) == 42 % -2, "");
 static_assert(truncated_identity(42, -2), "");
-static_assert(truncated_identity(42u, -2), "");
+////static_assert(truncated_identity(42u, -2), "");
 
 static_assert(truncated_modulo(-42, -2) == -42 % -2, "");
 static_assert(truncated_identity(-42, -2), "");
@@ -229,7 +224,7 @@ static_assert(truncated_identity(42u, 8u), "");
 
 static_assert(truncated_modulo(-42, 8) == -42 % 8, "");
 static_assert(truncated_identity(-42, 8), "");
-static_assert(truncated_identity(-42, 8u), "");
+////static_assert(truncated_identity(-42, 8u), "");
 
 static_assert(truncated_modulo(42, -8) == 42 % -8, "");
 static_assert(truncated_identity(42, -8), "");
@@ -238,9 +233,9 @@ static_assert(truncated_identity(42, -8), "");
 static_assert(truncated_modulo(-42, -8) == -42 % -8, "");
 static_assert(truncated_identity(-42, -8), "");
 
-#endif // DIVIDE_MODULO
+#endif // DIVISION_MODULO
 
-#ifdef DIVIDE_DIVIDE
+#ifdef DIVISION_DIVIDE
 
 // ceilinged_divide
 // Same as Python -(numerator//-denominator).
@@ -257,13 +252,13 @@ static_assert(ceilinged_identity(0u, 1u), "");
 static_assert(1 / -1 == -1, "");
 static_assert(ceilinged_divide(1, -1) == -1, "");
 static_assert(ceilinged_identity(1, -1), "");
-static_assert(ceilinged_identity(1u, -1), "");
+////static_assert(ceilinged_identity(1u, -1), "");
 
 // No remainder and negative quotient are same as c++.
 static_assert(-1 / 1 == -1 / 1, "");
 static_assert(ceilinged_divide(-1, 1) == -1, "");
 static_assert(ceilinged_identity(-1, 1), "");
-static_assert(ceilinged_identity(-1, 1u), "");
+////static_assert(ceilinged_identity(-1, 1u), "");
 
 // No remainder is same as c++.
 static_assert(42 / 2 == 21, "");
@@ -280,9 +275,9 @@ static_assert(42 / 8 == 5, "");
 // The python result of -(42//-8).
 static_assert(ceilinged_divide(42, 8) == 6, "");
 static_assert(ceilinged_identity(42, 8), "");
-static_assert(ceilinged_identity(42u, 8), "");
-static_assert(ceilinged_identity(42, 8u), "");
-static_assert(ceilinged_identity(42u, 8u), "");
+////static_assert(ceilinged_identity(42u, 8), "");
+////static_assert(ceilinged_identity(42, 8u), "");
+////static_assert(ceilinged_identity(42u, 8u), "");
 
 // A common round-up hack DOES NOT work for negative dividend in c++.
 static_assert(ceilinged_divide(-42, 8) != (-42 + (8 - 1)) / 8, "");
@@ -291,17 +286,16 @@ static_assert(-42 / 8 == -5, "");
 // The python result of -(-42//-8).
 static_assert(ceilinged_divide(-42, 8) == -5, "");
 static_assert(ceilinged_identity(-42, 8), "");
-static_assert(ceilinged_identity(-42, 8u), "");
+////static_assert(ceilinged_identity(-42, 8u), "");
 
 // A common round-up hack DOES NOT work for negative divisor in c++.
 static_assert(ceilinged_divide(42, -8) != (42 + (-8 - 1)) / -8, "");
-static_assert(ceilinged_divide(42u, -8) != (42 + (-8 - 1)) / -8, "");
 // Negative quotient is ceilinged in c++.
 static_assert(42 / -8 == -5, "");
 // The python result of -(42//8).
 static_assert(ceilinged_divide(42, -8) == -5, "");
 static_assert(ceilinged_identity(42, -8), "");
-static_assert(ceilinged_identity(42u, -8), "");
+////static_assert(ceilinged_identity(42u, -8), "");
 
 // A common round-up hack works for both negatives in c++.
 static_assert(ceilinged_divide(-42, -8) == (-42 + (-8 - 1)) / -8, "");
@@ -326,13 +320,13 @@ static_assert(floored_identity(0u, 1u), "");
 static_assert(1 / -1 == -1, "");
 static_assert(floored_divide(1, -1) == -1, "");
 static_assert(floored_identity(1, -1), "");
-static_assert(floored_identity(1u, -1), "");
+////static_assert(floored_identity(1u, -1), "");
 
 // No remainder is same as c++.
 static_assert(-1 / 1 == -1, "");
-static_assert(floored_divide(-1, 1u) == -1, "");
+////static_assert(floored_divide(-1, 1u) == -1, "");
 static_assert(floored_identity(-1, 1), "");
-static_assert(floored_identity(-1, 1u), "");
+////static_assert(floored_identity(-1, 1u), "");
 
 // Positive quotient is floored in c++.
 static_assert(42 / 2 == 21, "");
@@ -354,13 +348,13 @@ static_assert(floored_identity(42u, 8u), "");
 static_assert(-42 / 8 == -5, "");
 static_assert(floored_divide(-42, 8) == -6, "");
 static_assert(floored_identity(-42, 8), "");
-static_assert(floored_identity(-42, 8u), "");
+////static_assert(floored_identity(-42, 8u), "");
 
 // Negative quotient is ceilinged in c++.
 static_assert(42 / -8 == -5, "");
 static_assert(floored_divide(42, -8) == -6, "");
 static_assert(floored_identity(42, -8), "");
-static_assert(floored_identity(42u, -8), "");
+////static_assert(floored_identity(42u, -8), "");
 
 // Positive quotient is floored in c++.
 static_assert(-42 / -8 == 5, "");
@@ -378,11 +372,11 @@ static_assert(truncated_identity(0u, 1u), "");
 
 static_assert(truncated_divide(1, -1) == 1 / -1, "");
 static_assert(truncated_identity(1, -1), "");
-static_assert(truncated_identity(1u, -1), "");
+////static_assert(truncated_identity(1u, -1), "");
 
 static_assert(truncated_divide(-1, 1) == -1 / 1, "");
 static_assert(truncated_identity(-1, 1), "");
-static_assert(truncated_identity(-1, 1u), "");
+////static_assert(truncated_identity(-1, 1u), "");
 
 static_assert(truncated_divide(42, 2) == 42 / 2, "");
 static_assert(truncated_identity(42, 2), "");
@@ -398,7 +392,7 @@ static_assert(truncated_identity(42u, 8u), "");
 
 static_assert(truncated_divide(-42, 8) == -42 / 8, "");
 static_assert(truncated_identity(-42, 8), "");
-static_assert(truncated_identity(-42, 8u), "");
+////static_assert(truncated_identity(-42, 8u), "");
 
 static_assert(truncated_divide(42, -8) == 42 / -8, "");
 static_assert(truncated_identity(42, 8), "");
@@ -407,9 +401,9 @@ static_assert(truncated_identity(42, 8u), "");
 static_assert(truncated_divide(-42, -8) == -42 / -8, "");
 static_assert(truncated_identity(-42, -8), "");
 
-#endif // DIVIDE_DIVIDE
+#endif // DIVISION_DIVIDE
 
-#ifdef DIVIDE_ASSERT
+#ifdef DIVISION_MATRIX
 
 // Full matrix of conversions/signs (unsigned types avoided due to warnings).
 // ----------------------------------------------------------------------------
@@ -502,5 +496,5 @@ static_assert(((-x / +y) - 1) * +y + ((-x % +y) + +y) == -x, "-1-+");
 static_assert(((+x / -y) + 1) * -y + ((+x % -y) - -y) == +x, "+1+-");
 static_assert(((+x / -y) - 1) * -y + ((+x % -y) + -y) == +x, "-1+-");
 
-#endif // DIVIDE_ASSERT
+#endif // DIVISION_MATRIX
 

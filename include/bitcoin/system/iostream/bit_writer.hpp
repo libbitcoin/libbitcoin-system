@@ -24,9 +24,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <ostream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/data/byte_writer.hpp>
+#include <bitcoin/system/iostream/byte_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,26 +38,26 @@ class BC_API bit_writer
 {
 public:
     /// Constructors.
-    bit_writer(std::ostream& sink);
-    virtual ~bit_writer();
+    bit_writer(std::ostream& sink) noexcept;
+    ~bit_writer() override;
 
     /// Write one bit (high to low).
-    virtual void write_bit(bool value);
+    virtual void write_bit(bool value) noexcept;
 
     /// Write size bits from an integer (high to low).
-    virtual void write_bits(uint64_t value, uint8_t bits);
+    virtual void write_bits(uint64_t value, uint8_t bits) noexcept;
 
 protected:
-    virtual void do_write(uint8_t byte) override;
-    virtual void do_write(const uint8_t* data, size_t size) override;
-    virtual void do_skip(size_t size) override;
-    virtual void do_flush() override;
-    virtual bool get_valid() const override;
+    void do_write(uint8_t byte) noexcept override;
+    void do_write(const uint8_t* data, size_t size) noexcept override;
+    void do_skip(size_t size) noexcept override;
+    void do_flush() noexcept override;
+    bool get_valid() const noexcept override;
 
 private:
-    bool is_aligned() const;
-    uint8_t shift() const;
-    void dump();
+    bool is_aligned() const noexcept;
+    uint8_t shift() const noexcept;
+    void dump() noexcept;
 
     uint8_t buffer_;
     uint8_t offset_;

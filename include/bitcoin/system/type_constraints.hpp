@@ -37,6 +37,21 @@ using if_odd = enable_if_type<is_odd(Value), bool>;
 template <size_t Value>
 using if_even = enable_if_type<is_even(Value), bool>;
 
+template <size_t Value>
+using if_non_zero = enable_if_type<!is_zero(Value), bool>;
+
+template <size_t Left, size_t Right>
+using if_greater = enable_if_type<(Left > Right), bool>;
+
+template <size_t Left, size_t Right>
+using if_not_greater = enable_if_type<!(Left > Right), bool>;
+
+template <size_t Left, size_t Right>
+using if_lesser = enable_if_type<(Left < Right), bool>;
+
+template <size_t Left, size_t Right>
+using if_not_lesser = enable_if_type<!(Left < Right), bool>;
+
 template <typename Type>
 using if_byte = enable_if_type<is_one(sizeof(Type)), bool>;
 

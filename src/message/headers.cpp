@@ -24,10 +24,9 @@
 #include <istream>
 #include <utility>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/message/inventory.hpp>
 #include <bitcoin/system/message/inventory_vector.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -109,7 +108,7 @@ bool headers::from_data(uint32_t version, const data_chunk& data)
 
 bool headers::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -117,7 +116,7 @@ bool headers::from_data(uint32_t version, reader& source)
 {
     reset();
 
-    const auto count = source.read_size_little_endian();
+    const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_get_headers)
@@ -153,13 +152,13 @@ data_chunk headers::to_data(uint32_t version) const
 
 void headers::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
 void headers::to_data(uint32_t version, writer& sink) const
 {
-    sink.write_variable_little_endian(elements_.size());
+    sink.write_variable(elements_.size());
 
     for (const auto& element: elements_)
         element.to_data(version, sink);

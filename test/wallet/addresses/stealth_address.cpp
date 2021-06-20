@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__construct__decoded__expected_properties)
     BOOST_REQUIRE_EQUAL(address.spend_keys().size(), 1u);
     BOOST_REQUIRE_EQUAL(encode_base16(address.spend_keys()[0]), SPEND_KEY1);
     BOOST_REQUIRE_EQUAL((size_t)address.signatures(), 1u);
-    BOOST_REQUIRE_EQUAL(address.filter().size(), 0u);
+    BOOST_REQUIRE_EQUAL(address.filter().bits(), 0u);
     BOOST_REQUIRE_EQUAL(address.encoded(), STEALTH_ADDRESS);
 }
 

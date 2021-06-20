@@ -51,13 +51,13 @@ constexpr int to_flags(bool compressed)
 
 template <size_t Size>
 bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
-    const byte_array<Size>& point)
+    const data_array<Size>& point)
 {
     return secp256k1_ec_pubkey_parse(context, &out, point.data(), Size) == 1;
 }
 
 template <size_t Size>
-bool serialize(const secp256k1_context* context, byte_array<Size>& out,
+bool serialize(const secp256k1_context* context, data_array<Size>& out,
     const secp256k1_pubkey point)
 {
     auto size = Size;
@@ -68,7 +68,7 @@ bool serialize(const secp256k1_context* context, byte_array<Size>& out,
 
 // parse, add, serialize
 template <size_t Size>
-bool ec_add(const secp256k1_context* context, byte_array<Size>& in_out,
+bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
     const ec_secret& secret)
 {
     secp256k1_pubkey pubkey;
@@ -79,7 +79,7 @@ bool ec_add(const secp256k1_context* context, byte_array<Size>& in_out,
 
 // parse, multiply, serialize
 template <size_t Size>
-bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
+bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
     const ec_secret& secret)
 {
     secp256k1_pubkey pubkey;
@@ -90,7 +90,7 @@ bool ec_multiply(const secp256k1_context* context, byte_array<Size>& in_out,
 
 // parse, negate, serialize
 template <size_t Size>
-bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
+bool ec_negate(const secp256k1_context* context, data_array<Size>& in_out)
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -100,7 +100,7 @@ bool ec_negate(const secp256k1_context* context, byte_array<Size>& in_out)
 
 // create, serialize (secrets are normal)
 template <size_t Size>
-bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
+bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
     const ec_secret& secret)
 {
     secp256k1_pubkey pubkey;
@@ -111,7 +111,7 @@ bool secret_to_public(const secp256k1_context* context, byte_array<Size>& out,
 
 // parse, recover, serialize
 template <size_t Size>
-bool recover_public(const secp256k1_context* context, byte_array<Size>& out,
+bool recover_public(const secp256k1_context* context, data_array<Size>& out,
     const recoverable_signature& recoverable, const hash_digest& hash)
 {
     secp256k1_pubkey pubkey;
@@ -341,7 +341,7 @@ bool parse_endorsement(uint8_t& sighash_type, der_signature& der_signature,
         return false;
 
     sighash_type = endorsement.back();
-    der_signature = { endorsement.begin(), endorsement.end() - 1 };
+    der_signature = { endorsement.begin(), std::prev(endorsement.end()) };
     return true;
 }
 

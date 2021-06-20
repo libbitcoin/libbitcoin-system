@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -45,9 +45,9 @@ void serialize(std::ostream& output, const Value& value,
 /// Specialize template because basic_ostream treats uint8_t as char.
 inline std::string serialize(uint8_t value, const std::string& fallback="");
 
-/// Specialize byte_array to base16 (avoids join and fallback).
+/// Specialize data_array to base16 (avoids join and fallback).
 template <size_t Size>
-std::string serialize(const byte_array<Size>& value,
+std::string serialize(const data_array<Size>& value,
     const std::string& fallback="");
 
 /// Specialize data_chunk to base16 (avoids join and fallback).

@@ -28,7 +28,7 @@ namespace system {
     
 // Call into virtual writer (vs. stream) so derived class can reuse.
 template <typename Integer, if_integer<Integer>>
-void byte_writer::write_big_endian(Integer value)
+void byte_writer::write_big_endian(Integer value) noexcept
 {
     // TODO: reimplement on derived classes and change to this here:
     ////to_big_endian<Integer>(stream_, value);
@@ -39,7 +39,7 @@ void byte_writer::write_big_endian(Integer value)
 
 // Call into virtual writer (vs. stream) so derived class can reuse.
 template <typename Integer, if_integer<Integer>>
-void byte_writer::write_little_endian(Integer value)
+void byte_writer::write_little_endian(Integer value) noexcept
 {
     // TODO: reimplement on derived classes and change to this here:
     ////to_little_endian<Integer>(stream_, value);

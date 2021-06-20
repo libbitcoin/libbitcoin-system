@@ -23,6 +23,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 
@@ -83,7 +84,7 @@ size_t replace(std::string& text, const std::string& from,
 {
     size_t count = 0;
 
-    for (auto position = text.find(from, 0);
+    for (auto position = text.find(from);
         position != std::string::npos;
         position = text.find(from, position + to.length()))
     {
@@ -109,7 +110,7 @@ static string_list splitter(const std::string& text, const std::string& delimite
     string_list tokens;
 
     // Push all but the last token.
-    for (auto position = text.find(delimiter, 0);
+    for (auto position = text.find(delimiter);
         position != std::string::npos;
         position = text.find(delimiter, start))
     {
@@ -251,7 +252,7 @@ bool ends_with(const std::string& text, const std::string& suffix) noexcept
 
 bool starts_with(const std::string& text, const std::string& prefix) noexcept
 {
-    return text.find(prefix) == 0u;
+    return is_zero(text.find(prefix));
 }
 
 } // namespace system

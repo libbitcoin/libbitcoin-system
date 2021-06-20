@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/wallet/context.hpp>

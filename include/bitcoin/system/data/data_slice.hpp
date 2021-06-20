@@ -44,7 +44,7 @@ public:
     typedef uint8_t value_type;
     typedef const value_type* const_pointer;
 
-    // This accomodates the copy_sink until we have a full iterator here.
+    /// For stream source compatibility, until data_slice has an iterator.
     typedef const value_type* const_iterator;
 
     /// Constructors.

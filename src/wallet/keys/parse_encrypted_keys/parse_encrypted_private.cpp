@@ -31,13 +31,13 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const byte_array<parse_encrypted_private::magic_size>
+const data_array<parse_encrypted_private::magic_size>
 parse_encrypted_private::magic_
 {
     { 0x01 }
 };
 
-byte_array<parse_encrypted_private::prefix_size>
+data_array<parse_encrypted_private::prefix_size>
 parse_encrypted_private::prefix_factory(uint8_t address, bool multiplied)
 {
     const auto base = multiplied ? multiplied_context_ : default_context_;
@@ -76,12 +76,12 @@ half_hash parse_encrypted_private::data2() const
 bool parse_encrypted_private::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
-    return (flags() & ek_flag::ec_non_multiplied) == 0;
+    return is_zero(flags() & ek_flag::ec_non_multiplied);
 }
 
 bool parse_encrypted_private::verify_magic() const
 {
-    return slice<0, magic_size>(prefix()) == magic_;
+    return slice<zero, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet

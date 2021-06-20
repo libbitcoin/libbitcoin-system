@@ -23,7 +23,7 @@
 #include <utility>
 #include <bitcoin/system/chain/output_point.hpp>
 #include <bitcoin/system/config/hash256.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/serialization/deserialize.hpp>

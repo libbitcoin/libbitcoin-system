@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
 
     // Reload genesis block.
     data_source stream(raw_block);
-    istream_reader reader(stream);
+    byte_reader reader(stream);
     const auto block = block::factory(version::level::minimum + 1, reader);
 
     BOOST_REQUIRE(block.is_valid());
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
 
     data_chunk raw_reserialization;
     data_sink sink(raw_reserialization);
-    ostream_writer writer(sink);
+    byte_writer writer(sink);
     block.to_data(version::level::minimum, writer);
     sink.flush();
     BOOST_REQUIRE(raw_reserialization == raw_block);

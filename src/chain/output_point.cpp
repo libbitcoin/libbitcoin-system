@@ -23,7 +23,7 @@
 #include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/point.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/addition.hpp>
 
 namespace libbitcoin {
 namespace system {

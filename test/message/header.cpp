@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
 
     const auto data = expected.to_data(version);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
 
     const auto result = message::header::factory(version, source);
 

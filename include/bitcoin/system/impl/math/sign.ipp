@@ -26,10 +26,11 @@ namespace libbitcoin {
 namespace system {
 
 // to_unsigned
-
+    
 template <typename Integer, typename Unsigned, if_integer<Integer>>
-constexpr Unsigned to_unsigned(Integer value) noexcept
+inline Unsigned to_unsigned(Integer value) noexcept
 {
+    // C++14: this can be made constexpr.
     return static_cast<Unsigned>(value);
 }
 
@@ -73,15 +74,17 @@ constexpr bool is_greater(Left left, Right right) noexcept
 
 template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
-constexpr bool is_greater(Left left, Right right) noexcept
+inline bool is_greater(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr (to_unsigned casts).
     return is_negative(right) || (left > to_unsigned(right));
 }
 
 template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
-constexpr bool is_greater(Left left, Right right) noexcept
+inline bool is_greater(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr (to_unsigned casts).
      return !is_negative(left) && (right < to_unsigned(left));
 }
 
@@ -95,15 +98,17 @@ constexpr bool is_lesser(Left left, Right right) noexcept
 
 template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
-constexpr bool is_lesser(Left left, Right right) noexcept
+inline bool is_lesser(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr (to_unsigned casts).
     return is_negative(left) || (to_unsigned(left) < right);
 }
 
 template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
-constexpr bool is_lesser(Left left, Right right) noexcept
+inline bool is_lesser(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr (to_unsigned casts).
     return !is_negative(right) && (to_unsigned(right) > left);
 }
 
@@ -113,6 +118,7 @@ template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 inline Result greater(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr.
     return static_cast<Result>(is_greater(left, right) ? left : right);
 }
 
@@ -122,6 +128,7 @@ template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 inline Result lesser(Left left, Right right) noexcept
 {
+    // C++14: this can be made constexpr.
     return static_cast<Result>(is_lesser(left, right) ? left : right);
 }
 

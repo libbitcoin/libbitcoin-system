@@ -25,7 +25,7 @@
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -112,7 +112,7 @@ bool header::from_data(uint32_t version, const data_chunk& data)
 
 bool header::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -146,7 +146,7 @@ data_chunk header::to_data(uint32_t version) const
 
 void header::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
@@ -155,7 +155,7 @@ void header::to_data(uint32_t version, writer& sink) const
     chain::header::to_data(sink);
 
     if (version != version::level::canonical)
-        sink.write_variable_little_endian(0);
+        sink.write_variable(0);
 }
 
 void header::reset()

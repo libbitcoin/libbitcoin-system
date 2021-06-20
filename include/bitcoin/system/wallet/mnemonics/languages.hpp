@@ -23,7 +23,6 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/data/string.hpp>
 ////#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

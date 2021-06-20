@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,10 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_MAIN_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_MAIN_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_EVERYWHERE_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_EVERYWHERE_HPP
 
 #include <iostream>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_console_streambuf.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ifstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
 
  // See "utf8_about" for more information on Win32 compatibility.
 

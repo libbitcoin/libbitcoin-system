@@ -101,7 +101,7 @@ bool ec_private::is_wif(const data_slice& decoded)
         return false;
 
     return (size == wif_uncompressed_size) ||
-        decoded.data()[1u + ec_secret_size] == compressed_sentinel;
+        decoded[add1(ec_secret_size)] == compressed_sentinel;
 }
 
 // Factories.
@@ -127,7 +127,7 @@ ec_private ec_private::from_compressed(const wif_compressed& wif,
         return {};
 
     const auto versions = to_versions(address, wif.front());
-    const auto secret = slice<1u, ec_secret_size + 1u>(wif);
+    const auto secret = slice<one, add1(ec_secret_size)>(wif);
     return { secret, versions, true };
 }
 
@@ -138,7 +138,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
         return {};
 
     const auto versions = to_versions(address, wif.front());
-    const auto secret = slice<1u, ec_secret_size + 1u>(wif);
+    const auto secret = slice<one, add1(ec_secret_size)>(wif);
     return { secret, versions, false };
 }
 

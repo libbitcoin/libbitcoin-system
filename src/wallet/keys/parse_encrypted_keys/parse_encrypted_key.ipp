@@ -31,7 +31,7 @@ namespace wallet {
 
 template<size_t PrefixSize>
 parse_encrypted_key<PrefixSize>::parse_encrypted_key(
-    const byte_array<PrefixSize>& prefix, const one_byte& flags,
+    const data_array<PrefixSize>& prefix, const one_byte& flags,
     const ek_salt& salt, const ek_entropy& entropy)
   : parse_encrypted_prefix<PrefixSize>(prefix),
     flags_(flags), salt_(salt), entropy_(entropy)
@@ -41,7 +41,7 @@ parse_encrypted_key<PrefixSize>::parse_encrypted_key(
 template<size_t PrefixSize>
 bool parse_encrypted_key<PrefixSize>::compressed() const
 {
-    return (flags() & ek_flag::ec_compressed_key) != 0;
+    return !is_zero(flags() & ek_flag::ec_compressed_key);
 }
 
 template<size_t PrefixSize>
@@ -60,7 +60,7 @@ uint8_t parse_encrypted_key<PrefixSize>::flags() const
 template<size_t PrefixSize>
 bool parse_encrypted_key<PrefixSize>::lot_sequence() const
 {
-    return (flags() & ek_flag::lot_sequence_key) != 0;
+    return !is_zero(flags() & ek_flag::lot_sequence_key);
 }
 
 template<size_t PrefixSize>
@@ -68,7 +68,7 @@ data_chunk parse_encrypted_key<PrefixSize>::owner_salt() const
 {
     // Either 4 or 8 bytes, depending on the lot sequence flags.
     if (lot_sequence())
-        return to_chunk(slice<0, ek_salt_size>(entropy()));
+        return to_chunk(slice<zero, ek_salt_size>(entropy()));
     else
         return to_chunk(entropy());
 }

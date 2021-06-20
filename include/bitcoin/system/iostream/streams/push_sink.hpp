@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_HPP
 
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/iostream/streams/base_sink.hpp>
 
 namespace libbitcoin {
@@ -27,18 +28,23 @@ namespace system {
 /// Sink for boost::iostreams::stream, appends bytes to Container.
 template <typename Container>
 class push_sink
-  : base_sink<Container>
+  : public base_sink<Container>
 {
 public:
+    push_sink() noexcept;
+    virtual ~push_sink() noexcept;
     push_sink(Container& data) noexcept;
 
 protected:
-    virtual size_type do_write(const value_type* from, size_type size) noexcept;
+    virtual void do_write(const value_type* from, size_type size) noexcept;
 
 private:
     Container& sink_;
     typename Container::iterator to_;
 };
+
+template <typename Container>
+using ostream_push = boost::iostreams::stream<push_sink<Container>>;
 
 } // namespace system
 } // namespace libbitcoin

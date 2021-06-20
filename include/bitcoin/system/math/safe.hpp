@@ -26,31 +26,30 @@
 namespace libbitcoin {
 namespace system {
 
+/// Throws overflow_exception on overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_multiply(Integer left, Integer right) noexcept(false);
 
+/// Throws overflow_exception on overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right) noexcept(false);
 
+/// Throws underflow_exception on underflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_subtract(Integer left, Integer right) noexcept(false);
 
+/// Throws overflow_exception on overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 void safe_increment(Integer& value) noexcept(false);
 
+/// Throws underflow_exception on underflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 void safe_decrement(Integer& value) noexcept(false);
 
-template <typename To, typename From, if_same_signed_integer<To, From> = true>
+/// Throws range_exception if From value is above or below To size limits.
+template <typename To, typename From,
+    if_integer<To> = true, if_integer<From> = true>
 To safe_cast(From value) noexcept(false);
-
-template <typename To, typename From,
-    if_unsigned_integer<To> = true, if_signed_integer<From> = true>
-To safe_cast(From signed_value) noexcept(false);
-
-template <typename To, typename From,
-    if_signed_integer<To> = true, if_unsigned_integer<From> = true>
-To safe_cast(From unsigned_value) noexcept(false);
 
 } // namespace system
 } // namespace libbitcoin

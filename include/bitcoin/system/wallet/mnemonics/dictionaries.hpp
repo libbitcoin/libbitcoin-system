@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <iterator>
 #include <string>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 

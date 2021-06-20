@@ -156,12 +156,10 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
 
-    // data_chunk_stream_host host(junk);
-    byte_source<std::array<uint8_t, 64>> source(junk);
-    boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
-
     transaction tx;
-    BOOST_REQUIRE(tx.from_data(version::level::minimum, stream));
+    data_source source(junk);
+    byte_reader reader(source);
+    BOOST_REQUIRE(tx.from_data(version::level::minimum, reader));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
@@ -308,7 +306,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     data_source stream(raw_tx);
-    istream_reader source(stream);
+    byte_reader source(stream);
     const auto tx = transaction::factory(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
@@ -318,7 +316,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
     data_sink ostream(resave);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
     tx.to_data(version::level::minimum, sink);
     ostream.flush();
     BOOST_REQUIRE(resave == raw_tx);
@@ -349,7 +347,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     data_source stream(raw_tx);
-    istream_reader source(stream);
+    byte_reader source(stream);
     const auto tx = transaction::factory(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
@@ -358,7 +356,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
     BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
     data_chunk resave;
     data_sink ostream(resave);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
     tx.to_data(version::level::minimum, sink);
     ostream.flush();
     BOOST_REQUIRE(resave == raw_tx);

@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/iostream/data/bit_reader.hpp>
+#include <bitcoin/system/iostream/bit_reader.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -32,19 +32,20 @@
 namespace libbitcoin {
 namespace system {
 
-bit_reader::bit_reader(std::istream& source)
-  : buffer_(0x00), offset_(byte_bits), byte_reader(source)
+bit_reader::bit_reader(std::istream& source) noexcept
+  : byte_reader(source), buffer_(0x00), offset_(byte_bits)
 {
 }
 
-bit_reader::~bit_reader()
+bit_reader::~bit_reader() noexcept
 {
+    byte_reader::~byte_reader();
 }
 
 // bits
 //-----------------------------------------------------------------------------
 
-bool bit_reader::read_bit()
+bool bit_reader::read_bit() noexcept
 {
     if (is_aligned())
         buffer_ = do_read();
@@ -52,7 +53,7 @@ bool bit_reader::read_bit()
     return !is_zero((buffer_ << offset_++) & 0x80);
 }
 
-uint64_t bit_reader::read_bits(uint8_t bits)
+uint64_t bit_reader::read_bits(uint8_t bits) noexcept
 {
     if (is_zero(bits))
         return 0;
@@ -72,7 +73,7 @@ uint64_t bit_reader::read_bits(uint8_t bits)
 // protected overrides
 //-----------------------------------------------------------------------------
 
-uint8_t bit_reader::do_peek()
+uint8_t bit_reader::do_peek() noexcept
 {
     if (is_aligned())
         return byte_reader::do_peek();
@@ -85,14 +86,14 @@ uint8_t bit_reader::do_peek()
     return hi | lo;
 }
 
-uint8_t bit_reader::do_read()
+uint8_t bit_reader::do_read() noexcept
 {
     uint8_t byte;
     do_read(&byte, one);
     return byte;
 }
 
-void bit_reader::do_read(uint8_t* buffer, size_t size)
+void bit_reader::do_read(uint8_t* buffer, size_t size) noexcept
 {
     if (is_zero(size))
         return;
@@ -114,7 +115,7 @@ void bit_reader::do_read(uint8_t* buffer, size_t size)
     const auto next = buffer[sub1(size)];
 
     // Shift all bytes.
-    for (auto index = sub1(size); index > 0; --index)
+    for (auto index = sub1(size); !is_zero(index); --index)
         buffer[index] =
             ((buffer[index] >> shift()) |
             (buffer[sub1(index)] << offset_));
@@ -129,17 +130,17 @@ void bit_reader::do_read(uint8_t* buffer, size_t size)
     }
 }
 
-bool bit_reader::get_valid() const
+bool bit_reader::get_valid() const noexcept
 {
     return byte_reader::get_valid();
 }
 
-bool bit_reader::get_exhausted() const
+bool bit_reader::get_exhausted() const noexcept
 {
     return is_aligned() && byte_reader::get_exhausted();
 }
 
-void bit_reader::set_invalid()
+void bit_reader::set_invalid() noexcept
 {
     align();
     byte_reader::set_invalid();
@@ -148,17 +149,17 @@ void bit_reader::set_invalid()
 // private
 //-----------------------------------------------------------------------------
 
-void bit_reader::align()
+void bit_reader::align() noexcept
 {
     offset_ = byte_bits;
 }
 
-bool bit_reader::is_aligned() const
+bool bit_reader::is_aligned() const noexcept
 {
     return is_zero(shift());
 }
 
-uint8_t bit_reader::shift() const
+uint8_t bit_reader::shift() const noexcept
 {
     return byte_bits - offset_;
 }

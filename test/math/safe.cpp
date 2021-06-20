@@ -114,8 +114,7 @@ BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_half_times_2__maximum_minus_1)
 
 BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_2_times_half_plus_1__throws_overflow)
 {
-    const auto foo = safe_multiply(size_t(2), add1(half));
-    BOOST_REQUIRE_THROW(1, overflow_exception);
+    BOOST_REQUIRE_THROW(safe_multiply(size_t(2), add1(half)), overflow_exception);
 }
 
 // safe_increment

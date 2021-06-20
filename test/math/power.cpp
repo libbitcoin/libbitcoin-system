@@ -69,12 +69,12 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log__1_1__undefined)
     BOOST_REQUIRE_EQUAL(ceilinged_log(1u, 1u), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_1__1)
+BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_1__0)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1), 1u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1u), 1u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1), 1u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1u), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2, 1u), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1), 0u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log(2u, 1u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_2__1)
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log__2_3__2)
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log__10s__expected)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log<int>(10, 1), 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log<int>(10, 1), 0);
     BOOST_REQUIRE_EQUAL(ceilinged_log<int>(10, 10), 1);
     BOOST_REQUIRE_EQUAL(ceilinged_log<int>(10, 100), 2);
     BOOST_REQUIRE_EQUAL(ceilinged_log<int>(10, 1000), 3);
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2__maximums__sizeof_maximum)
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2__powers_of_2__expected)
 {
     // Third case (2) is redundant with second (2).
-    BOOST_REQUIRE_EQUAL(ceilinged_log2((1u << 0) + 0), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2((1u << 0) + 0), 0u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2((1u << 0) + 1), 1u);
     ////BOOST_REQUIRE_EQUAL(ceilinged_log2((1u << 1) + 0), 1u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2((1u << 1) + 1), 2u);
@@ -282,8 +282,8 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2__powers_of_2__expected)
     BOOST_REQUIRE_EQUAL(ceilinged_log2((1 << 29) + 1), 30u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2((1 << 30) + 0), 30u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2((1 << 30) + 1), 31u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2((1 << 31) + 0), 31u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2((1 << 31) + 1), 32u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2((1ll << 31) + 0), 31u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2((1ll << 31) + 1), 32u);
 }
 
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2__pow2__identity)
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__maximums__sizeof_maximum)
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__powers_of_2__expected)
 {
     // Third case (2) is redundant with second (2).
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1u << 0) + 0)), 1u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1u << 0) + 0)), 0u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1u << 0) + 1)), 1u);
     ////BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1u << 1) + 0)), 1u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1u << 1) + 1)), 2u);
@@ -379,8 +379,8 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__powers_of_2__expected)
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1 << 29) + 1)), 30u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1 << 30) + 0)), 30u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1 << 30) + 1)), 31u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1 << 31) + 0)), 31u);
-    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1 << 31) + 1)), 32u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1ll << 31) + 0)), 31u);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2(uint256_t((1ll << 31) + 1)), 32u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uintx((1ull << 32) + 0)), 32u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uintx((1ull << 32) + 1)), 33u);
     BOOST_REQUIRE_EQUAL(ceilinged_log2(uintx((1ull << 32) + 0)), 32u);
@@ -493,8 +493,8 @@ BOOST_AUTO_TEST_CASE(power__floored_log2__powers_of_2__expected)
     BOOST_REQUIRE_EQUAL(floored_log2<int>((1 << 29) + 1), 29);
     BOOST_REQUIRE_EQUAL(floored_log2((1 << 30) + 0), 30u);
     BOOST_REQUIRE_EQUAL(floored_log2((1 << 30) + 1), 30u);
-    BOOST_REQUIRE_EQUAL(floored_log2((1 << 31) + 0), 31u);
-    BOOST_REQUIRE_EQUAL(floored_log2((1 << 31) + 1), 31u);
+    BOOST_REQUIRE_EQUAL(floored_log2((1ll << 31) + 0), 31u);
+    BOOST_REQUIRE_EQUAL(floored_log2((1ll << 31) + 1), 31u);
 }
 
 BOOST_AUTO_TEST_CASE(power__floored_log2__pow2__identity)

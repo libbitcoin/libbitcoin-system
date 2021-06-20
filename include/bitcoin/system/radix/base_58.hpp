@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_FORMATS_BASE_58_HPP
-#define LIBBITCOIN_SYSTEM_FORMATS_BASE_58_HPP
+#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_58_HPP
+#define LIBBITCOIN_SYSTEM_RADIX_BASE_58_HPP
 
 #include <string>
 #include <bitcoin/system/data/data.hpp>
@@ -34,7 +34,7 @@ BC_API bool is_base58(const std::string& text);
  * @return false if the input is malformed, or the wrong length.
  */
 template <size_t Size>
-bool decode_base58(byte_array<Size>& out, const std::string& in);
+bool decode_base58(data_array<Size>& out, const std::string& in);
 
 /**
  * Converts a base58 string literal to a data array.
@@ -42,7 +42,7 @@ bool decode_base58(byte_array<Size>& out, const std::string& in);
  * TODO: determine if the sizing function is always accurate.
  */
 template <size_t Size>
-byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
+data_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
 
 /**
  * Encode data as base58.

@@ -25,17 +25,14 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/formats/base_58.hpp>
+#include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
-#include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/serialization/serializer.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
@@ -144,22 +141,22 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
 
 hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
 {
-    const auto prefix = from_big_endian_unsafe<uint32_t>(key.begin());
+    const auto prefix = from_big_endian<uint32_t>(key);
     return from_key(key, to_prefixes(prefix, public_prefix));
 }
 
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 {
-    stream_source<hd_key> istream(key);
-    istream_reader reader(istream);
+    data_source source(key);
+    byte_reader reader(source);
 
     const auto prefix = reader.read_4_bytes_big_endian();
     const auto depth = reader.read_byte();
     const auto parent = reader.read_4_bytes_big_endian();
     const auto child = reader.read_4_bytes_big_endian();
-    const auto chain = reader.read_forward<hd_chain_code_size>();
-    reader.read_byte();
-    const auto secret = reader.read_forward<ec_secret_size>();
+    const auto chain = reader.read_hash();
+    reader.skip(one);
+    const auto secret = reader.read_hash();
 
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
@@ -267,7 +264,7 @@ hd_private hd_private::derive_private(uint32_t index) const
     const hd_lineage lineage
     {
         lineage_.prefixes,
-        static_cast<uint8_t>(lineage_.depth + 1),
+        static_cast<uint8_t>(add1(lineage_.depth)),
         fingerprint(),
         index
     };

@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -36,19 +35,11 @@ public:
     typedef std::streamsize size_type;
     typedef typename Container::value_type value_type;
 
-    size_type read(char_type* buffer, size_type count) noexcept
-    {
-        if (count < 1 || is_zero(size_))
-            return negative_one;
-
-        const auto size = std::min(size_, count);
-        do_read(reinterpret_cast<value_type*>(buffer), size);
-        size_ -= size;
-        return size;
-    }
+    size_type read(char_type* buffer, size_type count) noexcept;
 
 protected:
-    virtual size_type do_read(value_type* to,  size_type size) noexcept = 0;
+    base_source(size_type size) noexcept;
+    virtual void do_read(value_type* to,  size_type size) noexcept = 0;
 
     // Size tracks the Container unread bytes remaining.
     size_type size_;
@@ -56,5 +47,7 @@ protected:
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/iostream/streams/base_source.ipp>
 
 #endif

@@ -39,10 +39,10 @@ template <typename Integer, if_integral_integer<Integer> = true>
 Integer from_little_endian(const data_slice& data) noexcept;
 
 template <typename Integer, if_integral_integer<Integer> = true>
-byte_array<sizeof(Integer)> to_big_endian(Integer value) noexcept;
+data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept;
 
 template <typename Integer, if_integral_integer<Integer> = true>
-byte_array<sizeof(Integer)> to_little_endian(Integer value) noexcept;
+data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept;
 
 /// stream -> integral (explicit type), integral -> stream (implicit size)
 /// ---------------------------------------------------------------------------
@@ -84,10 +84,10 @@ template <size_t Bytes>
 uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept;
 
 template <size_t Bytes, typename Integer, if_integer<Integer> = true>
-byte_array<Bytes> to_big_endian(const Integer& value) noexcept;
+data_array<Bytes> to_big_endian(const Integer& value) noexcept;
 
 template <size_t Bytes, typename Integer, if_integer<Integer> = true>
-byte_array<Bytes> to_little_endian(const Integer& value) noexcept;
+data_array<Bytes> to_little_endian(const Integer& value) noexcept;
 
 /// iterator (unknown size) -> integral (implicit size)
 /// ---------------------------------------------------------------------------
@@ -95,11 +95,11 @@ byte_array<Bytes> to_little_endian(const Integer& value) noexcept;
 
 template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
-Integer from_big_endian_unsafe(const Iterator& data) noexcept;
+Integer from_big_endian_unchecked(const Iterator& data) noexcept;
 
 template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
-Integer from_little_endian_unsafe(const Iterator& data) noexcept;
+Integer from_little_endian_unchecked(const Iterator& data) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

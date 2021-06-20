@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <istream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/data/byte_reader.hpp>
+#include <bitcoin/system/iostream/byte_reader.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,27 +37,27 @@ class BC_API bit_reader
 {
 public:
     /// Constructors.
-    bit_reader(std::istream& source);
-    virtual ~bit_reader();
+    bit_reader(std::istream& source) noexcept;
+    ~bit_reader() override;
 
     /// Read one bit (high to low).
-    virtual bool read_bit();
+    virtual bool read_bit() noexcept;
 
     /// Read size bits into an integer (high to low).
-    virtual uint64_t read_bits(uint8_t bits);
+    virtual uint64_t read_bits(uint8_t bits) noexcept;
 
 protected:
-    virtual uint8_t do_peek() override;
-    virtual uint8_t do_read() override;
-    virtual void do_read(uint8_t* buffer, size_t size) override;
-    virtual bool get_valid() const override;
-    virtual bool get_exhausted() const override;
-    virtual void set_invalid() override;
+    uint8_t do_peek() noexcept override;
+    uint8_t do_read() noexcept override;
+    void do_read(uint8_t* buffer, size_t size) noexcept override;
+    bool get_valid() const noexcept override;
+    bool get_exhausted() const noexcept override;
+    void set_invalid() noexcept override;
 
 private:
-    void align();
-    bool is_aligned() const;
-    uint8_t shift() const;
+    void align() noexcept;
+    bool is_aligned() const noexcept;
+    uint8_t shift() const noexcept;
 
     uint8_t buffer_;
     uint8_t offset_;

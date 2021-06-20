@@ -21,10 +21,10 @@
 #include <algorithm>
 #include <iterator>
 #include <utility>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/serialization/serializer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -99,16 +99,11 @@ ec_scalar& ec_scalar::operator=(const ec_secret& secret)
 ec_scalar ec_scalar::from_int64(int64_t value)
 {
     // Shortcircuit writing a zero.
-    if (value == 0)
+    if (is_zero(value))
         return {};
 
-    // ec_secret numeric-byte serialization is big-endian.
-    ec_secret secret = null_hash;
-    auto word_start = std::prev(secret.end(), sizeof(int64_t));
-    auto serial = make_unsafe_serializer(word_start);
-    serial.write_8_bytes_big_endian(static_cast<uint64_t>(absolute(value)));
-
-    return value > 0 ? ec_scalar{ secret } : -ec_scalar{ secret };
+    // All hashes and secrets are stored as big-endian by convention.
+    return to_big_endian<hash_size>(value);
 }
 
 // arithmetic assignment operators

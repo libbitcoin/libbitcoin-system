@@ -28,10 +28,8 @@
 #include <utility>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
@@ -142,16 +140,16 @@ static Data to_little_endian_private(Data&& bytes,
 // These allocate the to-endian outgoing buffer and forward the call.
 
 template <size_t Size, typename Integer>
-static byte_array<Size> to_big_endian_private(Integer value) noexcept
+static data_array<Size> to_big_endian_private(Integer value) noexcept
 {
-    byte_array<Size> out;
+    data_array<Size> out;
     return to_big_endian_private(std::move(out), value);
 }
 
 template <size_t Size, typename Integer>
-static byte_array<Size> to_little_endian_private(Integer value) noexcept
+static data_array<Size> to_little_endian_private(Integer value) noexcept
 {
-    byte_array<Size> out;
+    data_array<Size> out;
     return to_little_endian_private(std::move(out), value);
 }
 
@@ -195,14 +193,14 @@ Integer from_little_endian(const data_slice& data) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-byte_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
+data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
     // Limit sizeof to integral integers.
     return to_big_endian_private<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-byte_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
+data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
     // Limit sizeof to integral integers.
     return to_little_endian_private<sizeof(Integer)>(value);
@@ -302,14 +300,14 @@ uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-byte_array<Bytes> to_big_endian(const Integer& value) noexcept
+data_array<Bytes> to_big_endian(const Integer& value) noexcept
 {
     // Explicit array selection (from any integer including uintx).
     return to_big_endian_private<Bytes>(value);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-byte_array<Bytes> to_little_endian(const Integer& value) noexcept
+data_array<Bytes> to_little_endian(const Integer& value) noexcept
 {
     // Explicit array selection (from any integer including uintx).
     return to_little_endian_private<Bytes>(value);
@@ -320,7 +318,7 @@ byte_array<Bytes> to_little_endian(const Integer& value) noexcept
 // size is unguarded.
 
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
-Integer from_big_endian_unsafe(const Iterator& data) noexcept
+Integer from_big_endian_unchecked(const Iterator& data) noexcept
 {
     // Limit sizeof to integral integers.
     const auto slice = data_slice(data, std::next(data, sizeof(Integer)));
@@ -328,7 +326,7 @@ Integer from_big_endian_unsafe(const Iterator& data) noexcept
 }
 
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
-Integer from_little_endian_unsafe(const Iterator& data) noexcept
+Integer from_little_endian_unchecked(const Iterator& data) noexcept
 {
     // Limit sizeof to integral integers.
     const auto slice = data_slice(data, std::next(data, sizeof(Integer)));

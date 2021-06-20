@@ -36,7 +36,7 @@
 #include <boost/locale.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
@@ -185,7 +185,7 @@ size_t utf8_remainder_size(const char text[], size_t size)
 size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     size_t from_chars)
 {
-    if (from == nullptr || out_to == nullptr || from_chars == 0 ||
+    if (from == nullptr || out_to == nullptr || is_zero(from_chars) ||
         to_bytes < (from_chars * utf8_max_character_size))
         return 0;
 
@@ -205,7 +205,7 @@ size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes)
 {
     remainder = 0;
-    if (from == nullptr || out_to == nullptr || from_bytes == 0 ||
+    if (from == nullptr || out_to == nullptr || is_zero(from_bytes) ||
         to_chars < from_bytes)
         return 0;
 
@@ -276,7 +276,7 @@ void free_environment(char* environment[])
 char** allocate_environment(int argc, wchar_t* argv[])
 {
     // Allocate argument pointer array.
-    const auto size = static_cast<size_t>(argc) + 1u;
+    const auto size = add1(static_cast<size_t>(argc));
     const auto buffer = std::malloc(size * sizeof(char*));
     const auto arguments = reinterpret_cast<char**>(buffer);
 
@@ -298,7 +298,7 @@ char** allocate_environment(int argc, wchar_t* argv[])
         if (size == max_size_t)
             return nullptr;
 
-        arguments[arg] = reinterpret_cast<char*>(std::malloc(size + 1u));
+        arguments[arg] = reinterpret_cast<char*>(std::malloc(add1(size)));
 
         // Out of memory.
         if (arguments[arg] == nullptr)
@@ -343,14 +343,14 @@ int call_utf8_main(int argc, wchar_t* argv[],
     auto environment = allocate_environment(_wenviron);
 
     // If a new environment cannot be allocated control returns immediately.
-    if (environment == nullptr)
+    if (is_null(environment))
         return 0;
 
     environ = environment;
 
     // If new arguments cannot be allocated control returns immediately.
     auto arguments = allocate_environment(argc, argv);
-    if (arguments == nullptr)
+    if (is_null(arguments))
     {
         free_environment(arguments);
         environ = backup;
@@ -375,7 +375,7 @@ std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
     // SetCurrentDirectory during a call of GetFullPathName the value may be
     // corrupted as process-static storage is used to retain the directory.
     auto size = GetFullPathNameW(normal.c_str(), 0, NULL, NULL);
-    if (size == 0)
+    if (is_zero(size))
         return {};
 
     // Despite contradictory documentation, this accepts long relative paths
@@ -384,7 +384,7 @@ std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
     // Add the prefix after calling as required in order to use a long path.
     std::vector<wchar_t> directory(size);
     size = GetFullPathNameW(normal.c_str(), size, directory.data(), NULL);
-    if (size == 0)
+    if (is_zero(size))
         return {};
 
     // The returned size does not include the null terminator, and cannot

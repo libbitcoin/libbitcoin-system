@@ -36,8 +36,8 @@ constexpr uint32_t value32 = 0x01020304;
 const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
 const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
 
-const byte_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
-const byte_array<4> array_reverse{ { 0x04, 0x03, 0x02, 0x01 } };
+const data_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
+const data_array<4> array_reverse{ { 0x04, 0x03, 0x02, 0x01 } };
 
 // matched data
 
@@ -168,7 +168,7 @@ const long_hash bytes64 = base16_array(
     "0102030405060708010203040506070801020304050607080102030405060708");
 
 // This is not a predefined hash size or uintx_t type.
-const byte_array<128> bytes128 = base16_array(
+const data_array<128> bytes128 = base16_array(
     "0102030405060708010203040506070801020304050607080102030405060708"
     "0102030405060708010203040506070801020304050607080102030405060708"
     "0102030405060708010203040506070801020304050607080102030405060708"
@@ -325,14 +325,14 @@ BOOST_AUTO_TEST_CASE(endian__round_trip__uint1024__expected)
 
 #ifdef ENDIAN_ITERATOR_INTEGER
 
-BOOST_AUTO_TEST_CASE(endian__from_big_endian_unsafe__iterator_to_integer__expected)
+BOOST_AUTO_TEST_CASE(endian__from_big_endian_unchecked__iterator_to_integer__expected)
 {
-    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(data_forward.begin()), value32);
+    BOOST_REQUIRE_EQUAL(from_big_endian_unchecked<uint32_t>(data_forward.begin()), value32);
 }
 
-BOOST_AUTO_TEST_CASE(endian__from_little_endian_unsafe__iterator_to_integer__expected)
+BOOST_AUTO_TEST_CASE(endian__from_little_endian_unchecked__iterator_to_integer__expected)
 {
-    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(data_reverse.begin()), value32);
+    BOOST_REQUIRE_EQUAL(from_little_endian_unchecked<uint32_t>(data_reverse.begin()), value32);
 }
 
 #endif // ENDIAN_ITERATOR_INTEGER

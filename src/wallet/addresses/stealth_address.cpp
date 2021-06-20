@@ -29,7 +29,7 @@
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/radix/base_58.hpp>
 
@@ -55,10 +55,6 @@ static constexpr uint8_t max_spend_key_count = max_uint8;
 constexpr size_t min_address_size = version_size + options_size +
     ec_compressed_size + number_keys_size + number_sigs_size +
     filter_length_size + checksum_size;
-
-// Document the assumption that the prefix is defined with an 8 bit block size.
-static_assert(binary::bits_per_block == byte_bits,
-    "The stealth prefix must use an 8 bit block size.");
 
 const uint8_t stealth_address::mainnet_p2kh = 0x2a;
 const uint8_t stealth_address::reuse_key_flag = 1 << 0;
@@ -203,12 +199,12 @@ stealth_address stealth_address::from_stealth(const binary& filter,
         return {};
 
     // Guard against prefix too long.
-    auto prefix_number_bits = filter.size();
+    auto prefix_number_bits = filter.bits();
     if (prefix_number_bits > max_filter_bits)
         return {};
 
     // Coerce signatures to a valid range.
-    const auto maximum = signatures == 0 || signatures > spend_keys_size;
+    const auto maximum = is_zero(signatures) || signatures > spend_keys_size;
     const auto coerced = maximum ? static_cast<uint8_t>(spend_keys_size) :
         signatures;
 
@@ -293,11 +289,11 @@ data_chunk stealth_address::to_chunk() const
 
     // The prefix must be guarded against a size greater than 32
     // so that the bitfield can convert into uint32_t and sized by uint8_t.
-    const auto prefix_number_bits = static_cast<uint8_t>(filter_.size());
+    const auto prefix_number_bits = static_cast<uint8_t>(filter_.bits());
 
     // Serialize the prefix bytes/blocks.
     address.push_back(prefix_number_bits);
-    extend(address, filter_.blocks());
+    extend(address, filter_.data());
 
     append_checksum(address);
     return address;

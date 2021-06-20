@@ -25,7 +25,6 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -110,6 +109,12 @@ template <typename Collection>
 Collection sort(Collection&& list) noexcept;
 template <typename Collection>
 Collection sort(const Collection& list) noexcept;
+
+/// Determine if a collection range starts with another collection.
+template <typename Collection>
+bool starts_with(const typename Collection::const_iterator& begin,
+    const typename Collection::const_iterator& end,
+    const Collection& value) noexcept;
 
 // TODO: test.
 // bit.ly/3vdbF17

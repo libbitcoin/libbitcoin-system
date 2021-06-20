@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_MOVE_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_MOVE_SOURCE_HPP
 
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/iostream/streams/base_source.hpp>
 
 namespace libbitcoin {
@@ -27,18 +28,23 @@ namespace system {
 /// Source for boost::iostreams::stream, moves bytes from Container.
 template <typename Container>
 class move_source
-  : base_source<Container>
+  : public base_source<Container>
 {
 public:
+    move_source() noexcept;
+    virtual ~move_source() noexcept;
     move_source(Container&& data) noexcept;
 
 protected:
-    virtual size_type do_read(value_type* to, size_type size) noexcept;
+    virtual void do_read(value_type* to, size_type size) noexcept;
 
 private:
     Container&& source_;
     typename Container::iterator from_;
 };
+
+template <typename Container>
+using istream_move = boost::iostreams::stream<move_source<Container>>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(headers__factory_3__valid_input__success)
     static const auto version = headers::version_minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = headers::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);

@@ -33,23 +33,23 @@ static constexpr uint8_t ec_even_sign = 2;
 
 /// Private key:
 static constexpr size_t ec_secret_size = 32;
-typedef byte_array<ec_secret_size> ec_secret;
+typedef data_array<ec_secret_size> ec_secret;
 
 typedef std::vector<ec_secret> secret_list;
 
 /// Compressed public key:
 static constexpr size_t ec_compressed_size = 33;
-typedef byte_array<ec_compressed_size> ec_compressed;
+typedef data_array<ec_compressed_size> ec_compressed;
 typedef std::vector<ec_compressed> compressed_list;
 
 /// Uncompressed public key:
 static constexpr size_t ec_uncompressed_size = 65;
-typedef byte_array<ec_uncompressed_size> ec_uncompressed;
+typedef data_array<ec_uncompressed_size> ec_uncompressed;
 typedef std::vector<ec_uncompressed> uncompressed_list;
 
 // Parsed ECDSA signature:
 static constexpr size_t ec_signature_size = 64;
-typedef byte_array<ec_signature_size> ec_signature;
+typedef data_array<ec_signature_size> ec_signature;
 
 // DER encoded signature:
 static constexpr size_t max_der_signature_size = 72;

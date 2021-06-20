@@ -185,7 +185,7 @@ bool stealth_record::from_data(const data_chunk& data, bool wire)
 
 bool stealth_record::from_data(std::istream& stream, bool wire)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, wire);
 }
 
@@ -219,9 +219,10 @@ bool stealth_record::from_data(reader& source, size_t start_height,
         return false;
     }
 
-    prefix_ = source.read_4_bytes_little_endian();
+    const auto prefix = source.read_bytes(sizeof(uint32_t));
+    prefix_ = from_little_endian<uint32_t>(prefix);
 
-    if (!filter.is_prefix_of(prefix_))
+    if (filter != binary(filter.bits(), prefix))
     {
         reset();
         source.skip(serialized_size(false) - 2 * sizeof(uint32_t));
@@ -272,7 +273,7 @@ data_chunk stealth_record::to_data(bool wire) const
 
 void stealth_record::to_data(std::ostream& stream, bool wire) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, wire);
 }
 
@@ -285,9 +286,9 @@ void stealth_record::to_data(writer& sink, bool wire) const
         sink.write_4_bytes_little_endian(prefix_);
     }
 
-    sink.write_hash(unsigned_ephemeral_);
-    sink.write_short_hash(public_key_hash_);
-    sink.write_hash(transaction_hash_);
+    sink.write_bytes(unsigned_ephemeral_);
+    sink.write_bytes(public_key_hash_);
+    sink.write_bytes(transaction_hash_);
 }
 
 // Properties (size, accessors).

@@ -25,12 +25,12 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/formats/base_58.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
@@ -106,8 +106,7 @@ hd_public hd_public::from_secret(const ec_secret& secret,
 
 hd_public hd_public::from_key(const hd_key& key)
 {
-    const auto prefix = from_big_endian_unsafe<uint32_t>(key.begin());
-    return from_key(key, prefix);
+    return from_key(key, from_big_endian<uint32_t>(key));
 }
 
 hd_public hd_public::from_string(const std::string& encoded)
@@ -121,8 +120,8 @@ hd_public hd_public::from_string(const std::string& encoded)
 
 hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
 {
-    stream_source<hd_key> istream(key);
-    istream_reader reader(istream);
+    data_source source(key);
+    byte_reader reader(source);
 
     const auto actual_prefix = reader.read_4_bytes_big_endian();
     const auto depth = reader.read_byte();
@@ -248,8 +247,7 @@ hd_public hd_public::derive_public(uint32_t index) const
 
 uint32_t hd_public::fingerprint() const
 {
-    const auto message_digest = bitcoin_short_hash(point_);
-    return from_big_endian_unsafe<uint32_t>(message_digest.begin());
+    return from_big_endian<uint32_t>(bitcoin_short_hash(point_));
 }
 
 // Operators.

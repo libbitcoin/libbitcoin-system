@@ -21,7 +21,6 @@
 
 #include <cstddef>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
 
@@ -43,15 +42,15 @@ static const size_t checksum_default_size = sizeof(uint32_t);
 /// Append the bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size, size_t Checksum = checksum_default_size>
-byte_array<Size> insert_checksum(const data_loaf& slices);
+data_array<Size> insert_checksum(const data_loaf& slices);
 
 /// Append bitcoin checksum of preceding data to end of existing Size array.
 template <size_t Size, size_t Checksum = checksum_default_size>
-void insert_checksum(byte_array<Size>& data);
+void insert_checksum(data_array<Size>& data);
 
 /// Verify the last bytes are a bitcoin checksum of the preceding bytes.
 template <size_t Size, size_t Checksum = checksum_default_size>
-bool verify_checksum(const byte_array<Size>& data);
+bool verify_checksum(const data_array<Size>& data);
 
 /// Append slices and a four byte bitcoin checksum.
 BC_API data_chunk append_checksum(const data_loaf& slices);

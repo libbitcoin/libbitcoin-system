@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -53,21 +53,21 @@ BOOST_AUTO_TEST_CASE(serialize__uint8__ostream__base10)
     BOOST_REQUIRE_EQUAL(out.str(), "255");
 }
 
-// <byte_array<Size>>
+// <data_array<Size>>
 
-BOOST_AUTO_TEST_CASE(serialize__byte_array__empty__empty)
+BOOST_AUTO_TEST_CASE(serialize__data_array__empty__empty)
 {
     const std::array<uint8_t, 0> value{};
     BOOST_REQUIRE_EQUAL(serialize(value), "");
 }
 
-BOOST_AUTO_TEST_CASE(serialize__byte_array__bytes__base16)
+BOOST_AUTO_TEST_CASE(serialize__data_array__bytes__base16)
 {
     const std::array<uint8_t, 3> value{ { 7, 42, 11 } };
     BOOST_REQUIRE_EQUAL(serialize(value), "072a0b");
 }
 
-BOOST_AUTO_TEST_CASE(serialize__byte_array__ostream__base16)
+BOOST_AUTO_TEST_CASE(serialize__data_array__ostream__base16)
 {
     const std::array<uint8_t, 3> value{ { 7, 42, 11 } };
     std::ostringstream out;

@@ -24,8 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <type_traits>
-#include <bitcoin/system/data/collection.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 #include <bitcoin/system/wallet/mnemonics/languages.hpp>
 

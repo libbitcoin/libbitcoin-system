@@ -22,11 +22,10 @@
 #include <string>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
-#include <bitcoin/system/serialization/read.hpp>
+#include <bitcoin/system/serialization/deserialize.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -67,7 +66,7 @@ bool operation::from_data(const data_chunk& encoded)
 
 bool operation::from_data(std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source);
 }
 
@@ -175,7 +174,7 @@ bool operation::from_string(const std::string& mnemonic)
         if (parts.size() == 1)
         {
             // Extract operation using nominal data size encoding.
-            if (decode_base16(data_, parts[0]))
+            if (decode_base16(data_, parts.front()))
             {
                 code_ = nominal_opcode_from_data(data_);
                 valid_ = true;
@@ -245,7 +244,7 @@ data_chunk operation::to_data() const
 
 void operation::to_data(std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink);
 }
 

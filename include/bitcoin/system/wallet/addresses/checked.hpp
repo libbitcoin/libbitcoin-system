@@ -41,10 +41,10 @@ class checked
 public:
     static constexpr size_t value_size = (Prefix + Payload + Checksum);
 
-    typedef byte_array<Prefix> prefix_type;
-    typedef byte_array<Payload> payload_type;
-    typedef byte_array<Checksum> checksum_type;
-    typedef byte_array<value_size> value_type;
+    typedef data_array<Prefix> prefix_type;
+    typedef data_array<Payload> payload_type;
+    typedef data_array<Checksum> checksum_type;
+    typedef data_array<value_size> value_type;
 
     /// Constructors.
 

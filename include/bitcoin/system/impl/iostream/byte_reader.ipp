@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_READER_IPP
 
 #include <utility>
-#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -30,30 +29,30 @@ namespace system {
 
 // Call into virtual reader (vs. stream) so derived class can reuse.
 template <typename Integer, if_integer<Integer>>
-Integer byte_reader::read_big_endian()
+Integer byte_reader::read_big_endian() noexcept
 {
     return from_big_endian<Integer>(read_bytes(sizeof(Integer)));
 }
 
 // Call into virtual reader (vs. stream) so derived class can reuse.
 template <typename Integer, if_integer<Integer>>
-Integer byte_reader::read_little_endian()
+Integer byte_reader::read_little_endian() noexcept
 {
     return from_little_endian<Integer>(read_bytes(sizeof(Integer)));
 }
 
 // Reader supports directly populating an array, this avoids a copy.
 template <size_t Size>
-byte_array<Size> byte_reader::read_forward()
+data_array<Size> byte_reader::read_forward() noexcept
 {
-    byte_array<Size> out;
+    data_array<Size> out;
     read_bytes(out.data(), Size);
     return std::move(out);
 }
 
 // Reader supports directly populating an array, this avoids a copy.
 template <size_t Size>
-byte_array<Size> byte_reader::read_reverse()
+data_array<Size> byte_reader::read_reverse() noexcept
 {
     // The reverse move override performs no copy.
     return reverse(read_forward<Size>());

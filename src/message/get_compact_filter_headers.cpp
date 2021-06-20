@@ -23,8 +23,7 @@
 
 #include <initializer_list>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -116,7 +115,7 @@ bool get_compact_filter_headers::from_data(uint32_t version,
 bool get_compact_filter_headers::from_data(uint32_t version,
     std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -152,7 +151,7 @@ data_chunk get_compact_filter_headers::to_data(uint32_t version) const
 void get_compact_filter_headers::to_data(uint32_t version,
     std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 
@@ -160,7 +159,7 @@ void get_compact_filter_headers::to_data(uint32_t , writer& sink) const
 {
     sink.write_byte(filter_type_);
     sink.write_4_bytes_little_endian(start_height_);
-    sink.write_hash(stop_hash_);
+    sink.write_bytes(stop_hash_);
 }
 
 size_t get_compact_filter_headers::satoshi_fixed_size()

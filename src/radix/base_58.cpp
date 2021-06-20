@@ -145,7 +145,7 @@ void unpack_char(data_chunk& data, size_t carry)
         carry /= 256;
     }
 
-    BITCOIN_ASSERT(carry == 0);
+    BITCOIN_ASSERT(is_zero(carry));
 }
 
 bool decode_base58(data_chunk& out, const std::string& in)

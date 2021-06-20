@@ -28,7 +28,7 @@
     #include <mutex>
 #endif
 #include <boost/locale.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
@@ -43,7 +43,7 @@ using namespace boost::locale;
 // Local helpers.
 // ----------------------------------------------------------------------------
 
-inline bool is_contained(char32_t value, const char32_interval& interval)
+constexpr bool is_contained(char32_t value, const char32_interval& interval)
 {
     return interval.first <= value && value <= interval.second;
 }
@@ -322,8 +322,8 @@ bool is_combining(char32_t point)
 
     // github.com/python/cpython/blob/main/Modules/unicodedata.c
     const auto data1 = unicode_data1[(point >> 7)];
-    const auto data2 = unicode_data2[(data1 << 7) + (point & ((1 << 7) - 1))];
-    return combining_index[data2] != 0;
+    const auto data2 = unicode_data2[(data1 << 7) + (point & sub1(1 << 7))];
+    return !is_zero(combining_index[data2]);
 }
 
 bool is_diacritic(char32_t point)
@@ -396,11 +396,11 @@ std::string to_compressed_form(const std::string& value)
 
     // Remove a single ascii whitespace between CJK characters.
     // Front and back cannot be between two characters, so skip them.
-    for (size_t point = 1; point < points.size() - 1u; point++)
+    for (size_t point = 1; point < sub1(points.size()); point++)
     {
         if (!(is_ascii_whitespace(points[point]) &&
-            is_chinese_japanese_or_korean(points[point - 1u]) &&
-            is_chinese_japanese_or_korean(points[point + 1u])))
+            is_chinese_japanese_or_korean(points[sub1(point)]) &&
+            is_chinese_japanese_or_korean(points[add1(point)])))
         {
             compressed += points[point];
         }

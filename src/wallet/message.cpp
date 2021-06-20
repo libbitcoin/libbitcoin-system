@@ -20,7 +20,6 @@
 
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 
@@ -42,9 +41,9 @@ hash_digest hash_message(const data_slice& message)
 
     data_chunk data;
     data_sink ostream(data);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
     sink.write_string(prefix);
-    sink.write_variable_little_endian(message.size());
+    sink.write_variable(message.size());
     sink.write_bytes(message.begin(), message.size());
     ostream.flush();
     return bitcoin_hash(data);
@@ -99,16 +98,15 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
         return false;
 
     // Subtract smaller sentinel (guarded above).
-    auto recovery_id = magic - magic_uncompressed;
+    out_recovery_id = magic - magic_uncompressed;
 
     // Obtain compression state (differential exceeds the recovery id range).
-    out_compressed = recovery_id >= magic_differential;
+    out_compressed = out_recovery_id >= magic_differential;
 
     // If compression is indicated subtract differential (guarded above).
     if (out_compressed)
-        recovery_id -= magic_differential;
+        out_recovery_id -= magic_differential;
 
-    out_recovery_id = safe_to_unsigned<uint8_t>(recovery_id);
     return true;
 }
 
@@ -145,7 +143,7 @@ bool verify_message(const data_slice& message, const payment_address& address,
     const message_signature& signature)
 {
     const auto magic = signature.front();
-    const auto compact = slice<1, message_signature_size>(signature);
+    const auto compact = slice<one, message_signature_size>(signature);
 
     bool compressed;
     uint8_t recovery_id;

@@ -164,14 +164,19 @@ constexpr uint64_t siphash_magic_1 = 0x646f72616e646f6d;
 constexpr uint64_t siphash_magic_2 = 0x6c7967656e657261;
 constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
 
-// Common const-expressions.
+// Common constexpr conversions.
 //-----------------------------------------------------------------------------
 
-constexpr int32_t negative_one = -1;
+// The number of bits in a byte (uint8_t)
+constexpr uint8_t byte_bits = 8;
+
+// Use zero, one, two when any unsigned or size_t value is required.
 constexpr size_t zero = 0;
 constexpr size_t one = 1;
 constexpr size_t two = 2;
-constexpr uint8_t byte_bits = 8;
+
+// Use negative_one when returning negative one (or any negative) as sentinel.
+constexpr int32_t negative_one = -1;
 
 template <typename Type>
 constexpr bool is_zero(Type value) noexcept
@@ -208,6 +213,14 @@ constexpr bool is_byte_aligned(Type bits) noexcept
 {
     return is_zero(bits % Type{ byte_bits });
 }
+
+// TODO: test
+template <typename Type>
+constexpr bool is_null(Type value) noexcept
+{
+    return value == nullptr;
+}
+
 template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {

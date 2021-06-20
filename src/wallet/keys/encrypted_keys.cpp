@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <boost/locale.hpp>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/checksum.hpp>
@@ -61,7 +62,7 @@ static hash_digest address_hash(const payment_address& address)
 
 static bool address_salt(ek_salt& salt, const payment_address& address)
 {
-    salt = slice<0, ek_salt_size>(address_hash(address));
+    salt = slice<zero, ek_salt_size>(address_hash(address));
     return true;
 }
 
@@ -105,7 +106,7 @@ static bool address_validate(const ek_salt& salt, const ec_secret& secret,
 
 static hash_digest point_hash(const ec_compressed& point)
 {
-    return slice<1, ec_compressed_size>(point);
+    return slice<one, ec_compressed_size>(point);
 }
 
 static one_byte point_sign(uint8_t byte, const hash_digest& hash)
@@ -187,9 +188,9 @@ static void create_private_key(encrypted_private& out_private,
     const auto combined = splice(slice<quarter, half>(encrypt1),
         slice<half, half + quarter>(seed));
 
-    auto encrypt2 = xor_offset<half, 0, half>(combined, derived1);
+    auto encrypt2 = xor_offset<half, zero, half>(combined, derived1);
     aes256_encrypt(derived2, encrypt2);
-    const auto quarter1 = slice<0, quarter>(encrypt1);
+    const auto quarter1 = slice<zero, quarter>(encrypt1);
     out_private = insert_checksum<ek_private_decoded_size>(
     {
         prefix,
@@ -262,8 +263,8 @@ bool create_key_pair(encrypted_private& out_private,
         derived.first, derived.second, factor, version))
         return false;
 
-    create_private_key(out_private, flags, salt, parse.entropy(), derived.first,
-        derived.second, seed, version);
+    create_private_key(out_private, flags, salt, parse.entropy(),
+        derived.first, derived.second, seed, version);
 
     out_point = point_copy;
     return true;
@@ -294,7 +295,7 @@ static data_chunk normal(const std::string& passphrase)
 static bool create_token(encrypted_token& out_token,
     const std::string& passphrase, const data_slice& owner_salt,
     const ek_entropy& owner_entropy,
-    const byte_array<parse_encrypted_token::prefix_size>& prefix)
+    const data_array<parse_encrypted_token::prefix_size>& prefix)
 {
     BITCOIN_ASSERT(owner_salt.size() == ek_salt_size ||
         owner_salt.size() == ek_entropy_size);
@@ -491,7 +492,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     const auto decrypt1 = xor_data<half>(encrypt.first, derived.first);
 
     aes256_decrypt(derived.second, encrypt.second);
-    const auto decrypt2 = xor_offset<half, 0, half>(encrypt.second, derived.first);
+    const auto decrypt2 = xor_offset<half, zero, half>(encrypt.second, derived.first);
 
     const auto sign_byte = point_sign(parse.sign(), derived.second);
     auto product = splice(sign_byte, decrypt1, decrypt2);

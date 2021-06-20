@@ -25,7 +25,6 @@
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -108,6 +107,16 @@ bool contains(const Collection& list,
         {
             return value == element;
         });
+}
+
+template <typename Collection>
+bool starts_with(const typename Collection::const_iterator& begin,
+    const typename Collection::const_iterator& end,
+    const Collection& value) noexcept
+{
+    // TODO: determine if this guard is necessary for std::equal.
+    return !is_lesser(std::distance(begin, end), value.size()) &&
+        std::equal(value.begin(), value.end(), begin);
 }
 
 // TODO: constrain to std::pair elements.

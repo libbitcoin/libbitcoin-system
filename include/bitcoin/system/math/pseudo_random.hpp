@@ -37,7 +37,7 @@ class BC_API pseudo_random
      * Fill a byte array with randomness using the default random engine.
      */
     template<size_t Size>
-    static void fill(byte_array<Size>& out)
+    static void fill(data_array<Size>& out)
     {
         std::transform(out.begin(), out.end(), out.begin(), [](uint8_t)
         {

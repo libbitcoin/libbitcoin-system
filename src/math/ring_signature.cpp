@@ -23,8 +23,9 @@
 #include <numeric>
 #include <vector>
 #include <secp256k1.h>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/serialization/serializer.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_point.hpp>
 #include <bitcoin/system/wallet/keys/ec_scalar.hpp>
@@ -39,10 +40,11 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
     uint32_t i, uint32_t j)
 {
     // e = H(M || R || i || j)
-    data_chunk data(hash_size + R.size() + sizeof(uint32_t) + sizeof(uint32_t));
-    auto serial = make_unsafe_serializer(data.begin());
+    data_chunk data(hash_size + R.size() + 2u * sizeof(uint32_t));
+    data_sink source(data);
+    byte_writer serial(source);
     serial.write_bytes(R);
-    serial.write_hash(M);
+    serial.write_bytes(M);
     serial.write_4_bytes_big_endian(i);
     serial.write_4_bytes_big_endian(j);
     return sha256_hash(data);
@@ -107,8 +109,7 @@ static bool create_key_indexes(index_list& out, const key_rings& rings,
             return false;
 
         // The cast is safe because indexes cannot exceed max_uint32.
-        const auto index = std::distance(ring.begin(), it);
-        out.push_back(static_cast<uint32_t>(index));
+        out.push_back(static_cast<uint32_t>(std::distance(ring.begin(), it)));
     }
 
     return true;
@@ -145,13 +146,13 @@ static ec_point calculate_last_R_signing(const compressed_list& ring,
 {
     auto R_i_j = salts[i] * ec_point::generator;
     if (!R_i_j)
-        return ec_point();
+        return {};
 
     // Start one above index of known key and loop until the end.
-    for (uint32_t j = known_key_index + 1; j < ring.size(); ++j)
+    for (uint32_t j = add1(known_key_index); j < ring.size(); ++j)
     {
         BITCOIN_ASSERT(j < signature.proofs[i].size());
-        const ec_scalar s = signature.proofs[i][j];
+        const ec_scalar s(signature.proofs[i][j]);
         if (!s)
             return {};
 
@@ -219,7 +220,7 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
         if (!R)
             return false;
 
-        e_i_j = borromean_hash(digest, R.point(), i, j + 1u);
+        e_i_j = borromean_hash(digest, R.point(), i, add1(j));
         if (!e_i_j)
             return false;
     }
@@ -237,7 +238,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
         const auto known_key_index = known_key_indexes[i];
 
         // Calculate starting e value of this current ring.
-        auto e_i_j = borromean_hash(digest, out.challenge, i, 0u);
+        auto e_i_j = borromean_hash(digest, out.challenge, i, zero);
         if (!e_i_j)
             return false;
 
@@ -277,7 +278,7 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
     for (uint32_t j = 0; j < ring.size(); ++j)
     {
         // s_i_j
-        const ec_scalar s = signature.proofs[i][j];
+        const ec_scalar s(signature.proofs[i][j]);
 
         if (!s || !e_i_j)
             return {};
@@ -309,9 +310,8 @@ hash_digest digest(const data_slice& message, const key_rings& rings)
     const auto size = std::accumulate(rings.begin(), rings.end(),
         message.size(), sum);
 
-    data_chunk data;
+    data_chunk data(message);
     data.reserve(size);
-    extend(data, message);
 
     for (const auto& ring: rings)
         for (const auto& key: ring)
@@ -362,13 +362,13 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
         // Calculate first e value for this ring.
-        const auto e_i_0 = borromean_hash(digest, signature.challenge, i, 0);
+        const auto e_i_0 = borromean_hash(digest, signature.challenge, i, zero);
         if (!e_i_0)
             return false;
 
         // Calculate the last R value.
-        const auto last_R = calculate_last_R_verify(rings[i], e_i_0, i,
-            digest, signature);
+        const auto last_R = calculate_last_R_verify(rings[i], e_i_0, i, digest,
+            signature);
         if (!last_R)
             return false;
 

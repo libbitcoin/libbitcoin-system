@@ -36,7 +36,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
     wide_buffer_(wide_buffer)
 {
-    if (wide_size_ == 0u || wide_buffer == nullptr ||
+    if (is_zero(wide_size_) || wide_buffer == nullptr ||
         wide_size_ > (bc::max_size_t / utf8_max_character_size))
         throw runtime_exception("unicode_streambuf paramters");
 
@@ -44,7 +44,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     setg(narrow_, narrow_, narrow_);
 
     // Output buffer is underexposed by 1 byte to accomodate the overflow byte.
-    setp(narrow_, &narrow_[narrow_size_ - 1u]);
+    setp(narrow_, &narrow_[sub1(narrow_size_)]);
 }
 
 unicode_streambuf::~unicode_streambuf()
@@ -67,7 +67,7 @@ std::streambuf::int_type unicode_streambuf::underflow()
     const auto read = wide_buffer_->sgetn(wide_, size);
 
     // Handle read termination.
-    if (read == 0)
+    if (is_zero(read))
         return traits_type::eof();
 
     // Convert utf16 to utf8, returning bytes written.
@@ -75,7 +75,7 @@ std::streambuf::int_type unicode_streambuf::underflow()
         static_cast<size_t>(read));
 
     // Handle conversion failure.
-    if (bytes == 0u)
+    if (is_zero(bytes))
         return traits_type::eof();
 
     // Reset gptr and egptr, eback never changes.
@@ -116,7 +116,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
     // Get the number of bytes in the buffer to convert.
     const auto write = static_cast<size_t>(next - first);
 
-    if (write > 0)
+    if (!is_zero(write))
     {
         // Convert utf8 to utf16, returning chars written and bytes unread.
         const auto chars = to_utf16(unwritten, wide_, narrow_size_, narrow_,
@@ -126,7 +126,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Guard unsigned cast of 64 bit value.
-        if (chars > (max_uint64 >> 1u))
+        if (chars > (max_uint64 >> 1))
             return traits_type::eof();
 
         // Handle write failure as an EOF.
@@ -141,7 +141,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
     // narrow_size_ is necessarily greater than 1 (constructor guard).
     // Reset the pptr to the buffer start, leave pbase and epptr.
     // We could use just pbump for this if it wasn't limited to 'int' width.
-    setp(narrow_, &narrow_[narrow_size_ - 1u]);
+    setp(narrow_, &narrow_[sub1(narrow_size_)]);
 
     // Guard: unwritten has range of [0..3].
     // Reset pptr just after the fractional character.
@@ -154,8 +154,8 @@ std::streambuf::int_type unicode_streambuf::overflow(
 // Flush our output sequence.
 int unicode_streambuf::sync()
 {
-    const int success = 0;
-    const int failure = -1;
+    const int success = zero;
+    const int failure = negative_one;
 
     // We expect EOF to be returned, because we passed it.
     if (overflow(traits_type::eof()) == traits_type::eof())

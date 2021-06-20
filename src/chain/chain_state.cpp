@@ -30,13 +30,13 @@
 #include <bitcoin/system/concurrency/timer.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
-#include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/settings.hpp>
 
 namespace libbitcoin {
@@ -45,7 +45,6 @@ namespace chain {
 
 using namespace bc::system::config;
 using namespace bc::system::machine;
-using namespace boost::adaptors;
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
 static const system::config::checkpoint mainnet_bip30_exception_checkpoint1
@@ -343,6 +342,7 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     uint256_t target(compact(bits_high(values)));
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
+    // limit precomputed from config as uint256_t(compact(proof_of_work_limit))
     auto patch = script::is_enabled(forks, rule_fork::retarget_overflow_patch);
     auto shift = to_int(patch && (floored_log2(target) >= floored_log2(limit)));
 
@@ -387,7 +387,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
-    for (auto bit: reverse(bits))
+    for (auto bit: boost::adaptors::reverse(bits))
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
             proof_of_work_limit))
             return bit;

@@ -23,7 +23,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/config/point.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/serialization/deserialize.hpp>
 

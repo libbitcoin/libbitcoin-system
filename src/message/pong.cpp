@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/message/pong.hpp>
 
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/version.hpp>
 
@@ -78,7 +79,7 @@ bool pong::from_data(uint32_t version, const data_chunk& data)
 
 bool pong::from_data(uint32_t version, std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(version, source);
 }
 
@@ -109,7 +110,7 @@ data_chunk pong::to_data(uint32_t version) const
 
 void pong::to_data(uint32_t version, std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(version, sink);
 }
 

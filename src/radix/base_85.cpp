@@ -52,6 +52,7 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 
 // base85
@@ -62,7 +63,7 @@ namespace libbitcoin {
 namespace system {
 
 // Maps binary to base 85.
-static char encoder[85 + 1] =
+static char encoder[add1(85)] =
 {
     "0123456789"
     "abcdefghij"
@@ -96,21 +97,22 @@ static uint8_t decoder[96] =
 bool encode_base85(std::string& out, const data_slice& in)
 {
     const auto size = in.size();
-    if (size % 4u != 0u)
+    if (!is_zero(size % 4u))
         return false;
 
     const auto encoded_size = size * 5u / 4u;
     std::string encoded;
-    encoded.reserve(encoded_size + 1u);
+    encoded.reserve(add1(encoded_size));
     size_t byte_index = 0;
     uint32_t accumulator = 0;
 
     for (const uint8_t unencoded_byte: in)
     {
         accumulator = accumulator * 256u + unencoded_byte;
-        if (++byte_index % 4u == 0u)
+        if (is_zero(++byte_index % 4u))
         {
-            for (uint32_t divise = 85 * 85 * 85 * 85; divise > 0u; divise /= 85u)
+            for (auto divise = power<uint32_t>(85, 4); !is_zero(divise);
+                divise /= 85u)
                 encoded.push_back(encoder[accumulator / divise % 85u]);
 
             accumulator = 0;
@@ -126,7 +128,7 @@ bool encode_base85(std::string& out, const data_slice& in)
 bool decode_base85(data_chunk& out, const std::string& in)
 {
     const auto length = in.size();
-    if (length % 5u != 0u)
+    if (!is_zero(length % 5u))
         return false;
 
     const auto decoded_size = length * 4u / 5u;
@@ -142,9 +144,10 @@ bool decode_base85(data_chunk& out, const std::string& in)
             return false;
 
         accumulator = accumulator * 85u + decoder[position];
-        if (++char_index % 5u == 0u)
+        if (is_zero(++char_index % 5u))
         {
-            for (uint32_t divise = 256 * 256 * 256; divise > 0u; divise /= 256u)
+            for (auto divise = power<uint32_t>(256, 3); !is_zero(divise);
+                divise /= 256u)
                 decoded.push_back(accumulator / divise % 256u);
 
             accumulator = 0;

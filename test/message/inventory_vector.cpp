@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__factory_3__valid_input__success)
     static const auto version = version::level::minimum;
     const auto data = expected.to_data(version);
     data_source istream(data);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto result = inventory_vector::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

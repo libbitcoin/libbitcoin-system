@@ -63,21 +63,21 @@
 ////// Round trip tests do not see a difference in buffer bit (or byte) ordering,
 ////// so the test cases below test the expected (high endian) buffer as well.
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__bool__uninitialized_stream__false)
+////BOOST_AUTO_TEST_CASE(bit_reader__bool__uninitialized_stream__false)
 ////{
 ////    std::stringstream stream;
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__bool__initialized_empty_stream__true)
+////BOOST_AUTO_TEST_CASE(bit_reader__bool__initialized_empty_stream__true)
 ////{
 ////    std::stringstream stream("");
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
@@ -85,11 +85,11 @@
 ////
 ////// is_exhausted
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__empty_stream__true)
+////BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__empty_stream__true)
 ////{
 ////    std::stringstream stream;
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////
 ////    // The stream is initially valid.
 ////    BOOST_REQUIRE(bit_reader);
@@ -106,11 +106,11 @@
 ////    BOOST_REQUIRE(!stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__non_empty_stream__false)
+////BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__non_empty_stream__false)
 ////{
 ////    std::stringstream stream("abc");
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(!bit_reader.is_exhausted());
 ////    BOOST_REQUIRE(!reader.is_exhausted());
 ////    BOOST_REQUIRE(bit_reader);
@@ -118,11 +118,11 @@
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_past_end__true)
+////BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__read_past_end__true)
 ////{
 ////    std::stringstream stream;
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    bit_reader.read_bit();
 ////    BOOST_REQUIRE(bit_reader.is_exhausted());
 ////    BOOST_REQUIRE(reader.is_exhausted());
@@ -131,11 +131,11 @@
 ////    BOOST_REQUIRE(!stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__is_exhausted__read_bit_from_one_byte__false)
+////BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__read_bit_from_one_byte__false)
 ////{
 ////    std::stringstream stream("a");
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    bit_reader.read_bit();
 ////    BOOST_REQUIRE(!bit_reader.is_exhausted());
 ////
@@ -148,12 +148,12 @@
 ////
 ////// peek_byte
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__peek_byte__nonempty_stream__expected)
+////BOOST_AUTO_TEST_CASE(bit_reader__peek_byte__nonempty_stream__expected)
 ////{
 ////    const uint8_t expected = 'a';
 ////    std::stringstream stream("ab");
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(reader.peek_byte(), expected);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.peek_byte(), expected);
 ////    BOOST_REQUIRE(!bit_reader.is_exhausted());
@@ -163,11 +163,11 @@
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(istream_bit_reader__peek_byte__nonempty_stream__does_not_advance)
+////BOOST_AUTO_TEST_CASE(bit_reader__peek_byte__nonempty_stream__does_not_advance)
 ////{
 ////    std::stringstream stream("a");
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    reader.peek_byte();
 ////    reader.peek_byte();
 ////    bit_reader.peek_byte();
@@ -181,12 +181,12 @@
 ////
 ////// write_bit (read_bit)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_bit__padded__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_bit__padded__round_trip)
 ////{
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(false);
 ////    bit_writer.write_bit(true);
@@ -205,8 +205,8 @@
 ////    bit_writer.flush();
 ////    stream.flush();
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(!bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -230,7 +230,7 @@
 ////
 ////// write_bits (read_bits)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_bits__bits__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_bits__bits__expected_round_trip)
 ////{
 ////    const uint8_t bits = 32;
 ////    const uint64_t expected = 0x000000aaaaaaaa;
@@ -238,8 +238,8 @@
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bits(expected, bits);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -250,15 +250,15 @@
 ////    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bits(bits), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(source);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_bits__not_byte_aligned__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_bits__not_byte_aligned__expected_round_trip)
 ////{
 ////    const uint8_t bits = 32;
 ////    const uint64_t expected = 0x000000aaaaaaaa;
@@ -266,8 +266,8 @@
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(false);
 ////    bit_writer.write_bits(expected, bits);
 ////    BOOST_REQUIRE(bit_writer);
@@ -279,8 +279,8 @@
 ////    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(!bit_reader.read_bit());
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bits(bits), expected);
 ////    BOOST_REQUIRE(bit_reader);
@@ -290,13 +290,13 @@
 ////
 ////// write_byte (read_byte)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_byte__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_byte__byte_aligned__round_trip)
 ////{
 ////    const uint8_t expected = 0xaa;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_byte(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -304,23 +304,23 @@
 ////    bit_writer.flush();
 ////    stream.flush();
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_byte(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_byte__not_byte_aligned__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_byte__not_byte_aligned__expected_round_trip)
 ////{
 ////    const data_chunk expected_buffer{ 0xf5, 0x50 };
 ////    const uint8_t expected_numeric = 0xaa;
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
@@ -336,8 +336,8 @@
 ////    BOOST_REQUIRE_EQUAL(buffer, expected_buffer);
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -351,7 +351,7 @@
 ////
 ////// write_bytes (read_bytes(n))
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_bytes__not_byte_aligned__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_bytes__not_byte_aligned__expected_round_trip)
 ////{
 ////    const uint8_t first_byte = 0xdb;
 ////    const data_chunk expected_buffer{ first_byte, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x00 };
@@ -359,8 +359,8 @@
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_byte(first_byte);
 ////    bit_writer.write_bit(false);
 ////    bit_writer.write_bytes(expected_read);
@@ -373,8 +373,8 @@
 ////    BOOST_REQUIRE_EQUAL(buffer, expected_buffer);
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_byte(), first_byte);
 ////    BOOST_REQUIRE(!bit_reader.read_bit());
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bytes(expected_read.size()), expected_read);
@@ -383,7 +383,7 @@
 ////    BOOST_REQUIRE(source);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_bytes__stringstream__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_bytes__stringstream__expected_round_trip)
 ////{
 ////    const data_chunk expected
 ////    {
@@ -396,8 +396,8 @@
 ////
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bytes(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -407,8 +407,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bytes(expected.size()), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -417,7 +417,7 @@
 ////
 ////// write_bytes (read_bytes())
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__read_bytes__all__expected_length_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__read_bytes__all__expected_length_round_trip)
 ////{
 ////    const data_chunk expected
 ////    {
@@ -430,8 +430,8 @@
 ////
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bytes(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -441,8 +441,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bytes(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -451,65 +451,65 @@
 ////
 ////// write_X_bytes_little_endian (read_X_bytes_little_endian)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_2_bytes_little_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_2_bytes_little_endian__byte_aligned__round_trip)
 ////{
 ////    const uint16_t expected = 43707;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_2_bytes_little_endian(expected);
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_2_bytes_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_4_bytes_little_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_4_bytes_little_endian__byte_aligned__round_trip)
 ////{
 ////    const uint32_t expected = 2898120443;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_4_bytes_little_endian(expected);
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_4_bytes_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_8_bytes_little_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_8_bytes_little_endian__byte_aligned__round_trip)
 ////{
 ////    const uint64_t expected = 0xd4b14be5d8f02abe;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_8_bytes_little_endian(expected);
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_8_bytes_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_8_bytes_little_endian__not_byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_8_bytes_little_endian__not_byte_aligned__round_trip)
 ////{
 ////    const uint64_t expected = 0x0f1e2d3c4b5b6a79;
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
@@ -523,8 +523,8 @@
 ////    sink.flush();
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -538,13 +538,13 @@
 ////
 ////// write_X_bytes_big_endian (read_X_bytes_big_endian)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_2_bytes_big_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_2_bytes_big_endian__byte_aligned__round_trip)
 ////{
 ////    const uint16_t expected = 43707;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_2_bytes_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -552,21 +552,21 @@
 ////    bit_writer.flush();
 ////    stream.flush();
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_2_bytes_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_4_bytes_big_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_4_bytes_big_endian__byte_aligned__round_trip)
 ////{
 ////    const uint32_t expected = 2898120443;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_4_bytes_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -574,21 +574,21 @@
 ////    bit_writer.flush();
 ////    stream.flush();
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_4_bytes_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_8_bytes_big_endian__byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_8_bytes_big_endian__byte_aligned__round_trip)
 ////{
 ////    const uint64_t expected = 0xd4b14be5d8f02abe;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_8_bytes_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -596,22 +596,22 @@
 ////    bit_writer.flush();
 ////    stream.flush();
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_8_bytes_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_8_bytes_big_endian__not_byte_aligned__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_8_bytes_big_endian__not_byte_aligned__round_trip)
 ////{
 ////    const uint64_t expected = 0x0f1e2d3c4b5b6a79;
 ////    data_chunk buffer;
 ////
 ////    data_sink sink(buffer);
-////    ostream_writer writer(sink);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(sink);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
 ////    bit_writer.write_bit(true);
@@ -625,8 +625,8 @@
 ////    sink.flush();
 ////
 ////    data_source source(buffer);
-////    istream_reader reader(source);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(source);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -640,13 +640,13 @@
 ////
 ////// write_variable_little_endian (read_variable_little_endian)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_little_endian__1_byte__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_little_endian__1_byte__round_trip)
 ////{
 ////    const uint64_t expected = 0xaa;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -656,21 +656,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_little_endian__2_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_little_endian__2_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 43707;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -680,21 +680,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint16_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_little_endian__4_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_little_endian__4_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 2898120443;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -704,21 +704,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint32_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_little_endian__8_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_little_endian__8_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 0xd4b14be5d8f02abe;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -728,8 +728,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint64_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_little_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -738,13 +738,13 @@
 ////
 ////// write_variable_big_endian (read_variable_big_endian)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_big_endian__1_byte__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_big_endian__1_byte__round_trip)
 ////{
 ////    const uint64_t expected = 0xaa;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -754,21 +754,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_big_endian__2_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_big_endian__2_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 43707;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -778,21 +778,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint16_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_big_endian__4_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_big_endian__4_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 2898120443;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -802,21 +802,21 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint32_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_variable_big_endian__8_bytes__round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_variable_big_endian__8_bytes__round_trip)
 ////{
 ////    const uint64_t expected = 0xd4b14be5d8f02abe;
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_variable_big_endian(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -826,8 +826,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), sizeof(uint64_t) + sizeof(uint8_t));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_variable_big_endian(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -836,7 +836,7 @@
 ////
 ////// write_X_hash (read_X_hash)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_hash__value__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_hash__value__expected_round_trip)
 ////{
 ////    const hash_digest expected
 ////    {
@@ -850,8 +850,8 @@
 ////
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bytes(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -861,15 +861,15 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_hash(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_short_hash__value__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_short_hash__value__expected_round_trip)
 ////{
 ////    const short_hash expected
 ////    {
@@ -882,8 +882,8 @@
 ////
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_short_hash(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -893,15 +893,15 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_short_hash(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
 ////    BOOST_REQUIRE(stream);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_mini_hash__value__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_mini_hash__value__expected_round_trip)
 ////{
 ////    const mini_hash expected
 ////    {
@@ -912,8 +912,8 @@
 ////
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_mini_hash(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -923,8 +923,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_mini_hash(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -933,13 +933,13 @@
 ////
 ////// write_string (read_string)
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_string__default_length__expected_length_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_string__default_length__expected_length_round_trip)
 ////{
 ////    const std::string expected = "my string data";
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_string(expected);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -949,8 +949,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), (expected.length() + message::variable_uint_size(expected.length())));
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_string(), expected);
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);
@@ -959,13 +959,13 @@
 ////
 ////// write_string(n) (read_string(n))
 ////
-////BOOST_AUTO_TEST_CASE(ostream_bit_writer__write_string__explicit_length__expected_round_trip)
+////BOOST_AUTO_TEST_CASE(bit_writer__write_string__explicit_length__expected_round_trip)
 ////{
 ////    const std::string expected = "my string data";
 ////    std::stringstream stream;
 ////
-////    ostream_writer writer(stream);
-////    ostream_bit_writer bit_writer(writer);
+////    byte_writer writer(stream);
+////    bit_writer bit_writer(writer);
 ////    bit_writer.write_string(expected, 10);
 ////    BOOST_REQUIRE(bit_writer);
 ////    BOOST_REQUIRE(writer);
@@ -975,8 +975,8 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(stream.str().length(), 10u);
 ////
-////    istream_reader reader(stream);
-////    istream_bit_reader bit_reader(reader);
+////    byte_reader reader(stream);
+////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_string(10), expected.substr(0, 10));
 ////    BOOST_REQUIRE(bit_reader);
 ////    BOOST_REQUIRE(reader);

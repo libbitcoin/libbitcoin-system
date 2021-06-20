@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(string__to_string_slice__vector__expected)
 
 BOOST_AUTO_TEST_CASE(string__to_string_slice__array__expected)
 {
-    const byte_array<3> value{ { 'a', 'b', 'c' } };
+    const data_array<3> value{ { 'a', 'b', 'c' } };
     const std::string expected{ "abc" };
     BOOST_REQUIRE_EQUAL(system::to_string(value), expected);
 }

@@ -23,7 +23,6 @@
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
 
 // base16 (hexidecimal):
 // Base 16 is an ascii data encoding with a domain of 16 symbols (characters).

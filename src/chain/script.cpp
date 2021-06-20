@@ -31,7 +31,6 @@
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
@@ -43,7 +42,7 @@
 #include <bitcoin/system/machine/sighash_algorithm.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
@@ -193,7 +192,7 @@ bool script::from_data(const data_chunk& encoded, bool prefix)
 
 bool script::from_data(std::istream& stream, bool prefix)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, prefix);
 }
 
@@ -205,7 +204,7 @@ bool script::from_data(reader& source, bool prefix)
 
     if (prefix)
     {
-        const auto size = source.read_size_little_endian();
+        const auto size = source.read_size();
 
         // The max_script_size constant limits evaluation, but not all scripts
         // evaluate, so use max_block_size to guard memory allocation here.
@@ -335,7 +334,7 @@ data_chunk script::to_data(bool prefix) const
 
 void script::to_data(std::ostream& stream, bool prefix) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, prefix);
 }
 
@@ -343,7 +342,7 @@ void script::to_data(writer& sink, bool prefix) const
 {
     // TODO: optimize by always storing the prefixed serialization.
     if (prefix)
-        sink.write_variable_little_endian(serialized_size(false));
+        sink.write_variable(serialized_size(false));
 
     sink.write_bytes(bytes_);
 }
@@ -446,7 +445,7 @@ const operation::list& script::operations() const
 
     operation op;
     data_source istream(bytes_);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto size = bytes_.size();
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -682,7 +681,7 @@ data_chunk script::to_outputs(const transaction& tx)
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
 
     const auto write = [&](const output& output)
     {
@@ -707,7 +706,7 @@ data_chunk script::to_inpoints(const transaction& tx)
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
 
     const auto write = [&](const input& input)
     {
@@ -732,7 +731,7 @@ data_chunk script::to_sequences(const transaction& tx)
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
 
     const auto write = [&](const input& input)
     {
@@ -780,16 +779,16 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     data_chunk data;
     data.reserve(size);
     data_sink ostream(data);
-    ostream_writer sink(ostream);
+    byte_writer sink(ostream);
 
     // 1. transaction version (4).
     sink.write_little_endian(tx.version());
 
     // 2. inpoints double sha256 hash (32).
-    sink.write_hash(!any ? tx.inpoints_hash() : null_hash);
+    sink.write_bytes(!any ? tx.inpoints_hash() : null_hash);
 
     // 3. sequences double sha256 hash (32).
-    sink.write_hash(!any && all ? tx.sequences_hash() : null_hash);
+    sink.write_bytes(!any && all ? tx.sequences_hash() : null_hash);
 
     // 4. outpoint (32-byte hash + 4-byte little endian).
     input.previous_output().to_data(sink);
@@ -804,7 +803,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     sink.write_little_endian(input.sequence());
 
     // 8. outputs (or output) double hash, or null hash (32).
-    sink.write_hash(all ? tx.outputs_hash() :
+    sink.write_bytes(all ? tx.outputs_hash() :
         (single && input_index < tx.outputs().size() ?
             bitcoin_hash(tx.outputs()[input_index].to_data()) : null_hash));
 
@@ -1368,7 +1367,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
 
     operation op;
     data_source stream(bytes_);
-    istream_reader source(stream);
+    byte_reader source(stream);
     std::vector<data_chunk::iterator> found;
 
     // The exhaustion test handles stream end and op deserialization failure.

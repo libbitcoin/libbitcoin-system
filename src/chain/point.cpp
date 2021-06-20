@@ -23,7 +23,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -153,7 +153,7 @@ bool point::from_data(const data_chunk& data, bool wire)
 
 bool point::from_data(std::istream& stream, bool wire)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, wire);
 }
 
@@ -213,13 +213,13 @@ data_chunk point::to_data(bool wire) const
 
 void point::to_data(std::ostream& stream, bool wire) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, wire);
 }
 
 void point::to_data(writer& sink, bool wire) const
 {
-    sink.write_hash(hash_);
+    sink.write_bytes(hash_);
 
     if (wire)
     {
@@ -296,12 +296,14 @@ uint64_t point::checksum() const
     // Use an offset to the middle of the hash to avoid coincidental mining
     // of values into the front or back of tx hash (not a security feature).
     // Use most possible bits of tx hash to make intentional collision hard.
-    const auto tx = from_little_endian_unsafe<uint64_t>(hash_.begin() + 12);
+    const data_slice slice(std::next(hash_.begin(), 12), hash_.end());
+
+    const auto bits = from_little_endian<uint64_t>(slice);
     const auto index = static_cast<uint64_t>(index_);
 
-    const auto tx_upper_49_bits = tx & mask;
+    const auto hash_upper_49_bits = bits & mask;
     const auto index_lower_15_bits = index & ~mask;
-    return tx_upper_49_bits | index_lower_15_bits;
+    return hash_upper_49_bits | index_lower_15_bits;
 }
 
 // Validation.

@@ -23,12 +23,17 @@
 
 BOOST_AUTO_TEST_SUITE(collection_tests)
 
-// binary_search
+// TODO:
+// contains
+// find_pair_position
+// find_position
+// insert_sorted
 
+// binary_search:
 // Collection must implement [] and .size().
 // Either list members or the search key must implement lexical compare (<, >).
 
-// binary_search - native byte comparison operators
+// binary_search (native byte comparison operators)
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_native__empty__not_found)
 {
@@ -87,7 +92,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_native__reverse_sorted_contained__unl
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), -1);
 }
 
-// binary_search - list element comparison operators
+// binary_search (list element comparison operators)
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_element__three_various_elements_unmatched__not_found)
 {
@@ -110,7 +115,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_element__unsorted_contained__unlucky)
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
-// binary_search - key comparison operators
+// binary_search (key comparison operators)
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_unmatched__not_found)
 {
@@ -133,7 +138,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
-// cast vector
+// cast (vector)
 
 BOOST_AUTO_TEST_CASE(collection__cast_vector__empty__empty)
 {
@@ -166,23 +171,23 @@ BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
-// cast array
+// cast (array)
 
 BOOST_AUTO_TEST_CASE(collection__cast_array__empty__empty)
 {
-    BOOST_REQUIRE(cast<char>(byte_array<0>{}).empty());
+    BOOST_REQUIRE(cast<char>(data_array<0>{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__cast_array__one_element__same)
 {
-    const auto result = cast<char>(byte_array<1>{ 42 });
+    const auto result = cast<char>(data_array<1>{ 42 });
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
     BOOST_REQUIRE_EQUAL(result.front(), 42);
 }
 
 BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
 {
-    const byte_array<2> value{ 42, 24 };
+    const data_array<2> value{ 42, 24 };
     const auto result = cast<uint32_t>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], value[0]);
@@ -387,6 +392,54 @@ BOOST_AUTO_TEST_CASE(collection__sort__const_unsorted__sorted)
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 0, 0, 2, 4, 6, 8 };
     BOOST_REQUIRE_EQUAL(sort(set), expected);
+}
+
+// starts_with
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__empty_empty__true)
+{
+    static const data_chunk buffer;
+    static const data_chunk sequence;
+    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+}
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__not_empty_empty__false)
+{
+    static const data_chunk buffer;
+    static const data_chunk sequence{ 42 };
+    BOOST_REQUIRE(!starts_with(buffer.begin(), buffer.end(), sequence));
+}
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__same_vectors__true)
+{
+    static const data_chunk buffer{ 42 };
+    static const data_chunk sequence{ 42 };
+    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+}
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__matched_vectors__true)
+{
+    static const data_chunk buffer{ 42, 24, 15 };
+    static const data_chunk sequence{ 42 };
+    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+}
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__mismatched_arrays__false)
+{
+    // Must be the same length when using arrays.
+    static const data_array<2> buffer{ { 24, 0 } };
+    static const data_array<2> sequence{ { 24, 42 } };
+    const auto result = starts_with(buffer.begin(), buffer.end(), sequence);
+    BOOST_REQUIRE(!result);
+}
+
+BOOST_AUTO_TEST_CASE(collection__starts_with__matched_arrays__true)
+{
+    // Must be the same length when using arrays.
+    static const data_array<2> buffer{ { 24, 42 } };
+    static const data_array<2> sequence{ { 24, 42 } };
+    const auto result = starts_with(buffer.begin(), buffer.end(), sequence);
+    BOOST_REQUIRE(result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

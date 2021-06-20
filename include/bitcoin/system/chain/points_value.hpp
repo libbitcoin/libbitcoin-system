@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <bitcoin/system/chain/point_value.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {

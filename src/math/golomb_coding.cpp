@@ -19,6 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
+#include <bitcoin/system/math/golomb_coding.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <functional>
@@ -26,16 +28,15 @@
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/integer.hpp>
-#include <bitcoin/system/math/golomb_coding.hpp>
+#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/math/safe.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace golomb {
 
-static void golomb_encode(bit_writer& sink, uint64_t value,
-    uint8_t modulo_exponent)
+static void encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
 {
     const uint64_t quotient = value >> modulo_exponent;
     for (uint64_t index = 0; index < quotient; index++)
@@ -45,7 +46,7 @@ static void golomb_encode(bit_writer& sink, uint64_t value,
     sink.write_bits(value, modulo_exponent);
 }
 
-static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
+static uint64_t decode(bit_reader& source, uint8_t modulo_exponent)
 {
     uint64_t quotient = 0;
     while (source.read_bit())
@@ -58,15 +59,13 @@ static uint64_t golomb_decode(bit_reader& source, uint8_t modulo_exponent)
 static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key)
 {
-    static const auto range_shift = sizeof(uint64_t) * bc::byte_bits;
-
-    return static_cast<uint64_t>((
-        static_cast<uint128_t>(siphash(key, item)) *
-        static_cast<uint128_t>(bound)) >> range_shift);
+    return ((uint128_t(siphash(key, item)) * uint128_t(bound))
+        .convert_to<uint64_t>() >> to_bits(sizeof(uint64_t)));
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
-    uint64_t set_size, uint64_t target_false_positive_rate, const siphash_key& key)
+    uint64_t set_size, uint64_t target_false_positive_rate,
+    const siphash_key& key)
 {
     const auto bound = safe_multiply(target_false_positive_rate, set_size);
 
@@ -74,7 +73,10 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     hashes.reserve(items.size());
 
     std::transform(items.begin(), items.end(), std::back_inserter(hashes),
-        [&](const data_chunk& item){ return hash_to_range(item, bound, key); });
+        [&](const data_chunk& item)
+        {
+            return hash_to_range(item, bound, key);
+        });
 
     std::sort(hashes.begin(), hashes.end(), std::less<uint64_t>());
     return hashes;
@@ -109,31 +111,29 @@ void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
-    ostream_writer writer(stream);
+    bit_writer writer(stream);
     construct(writer, items, bits, entropy, target_false_positive_rate);
 }
 
-void construct(writer& stream, const data_stack& items, uint8_t bits,
+void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
     const half_hash& entropy, uint64_t target_false_positive_rate)
 {
     construct(stream, items, bits, to_siphash_key(entropy),
         target_false_positive_rate);
 }
 
-void construct(writer& stream, const data_stack& items, uint8_t bits,
+void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     const auto set = hashed_set_construct(items, items.size(),
         target_false_positive_rate, entropy);
 
     uint64_t previous = 0;
-    ostream_bit_writer sink(stream);
-
-    std::for_each(set.begin(), set.end(), [&](const uint64_t& value)
+    for (auto value: set)
     {
-        golomb_encode(sink, value - previous, bits);
+        encode(stream, value - previous, bits);
         previous = value;
-    });
+    };
 }
 
 // Single element match
@@ -168,12 +168,12 @@ bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    istream_reader reader(compressed_set);
+    bit_reader reader(compressed_set);
     return match(target, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
-bool match(const data_chunk& target, reader& compressed_set,
+bool match(const data_chunk& target, bit_reader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -181,18 +181,17 @@ bool match(const data_chunk& target, reader& compressed_set,
         bits, target_false_positive_rate);
 }
 
-bool match(const data_chunk& target, reader& compressed_set,
+bool match(const data_chunk& target, bit_reader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
     const auto bound = target_false_positive_rate * set_size;
     const auto range = hash_to_range(target, bound, entropy);
-    istream_bit_reader source(compressed_set);
-    uint64_t previous = 0;
 
+    uint64_t previous = 0;
     for (uint64_t index = 0; index < set_size; index++)
     {
-        const auto value = previous + golomb_decode(source, bits);
+        const auto value = previous + decode(compressed_set, bits);
 
         if (value == range)
             return true;
@@ -238,12 +237,12 @@ bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    istream_reader reader(compressed_set);
+    bit_reader reader(compressed_set);
     return match(targets, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
-bool match(const data_stack& targets, reader& compressed_set,
+bool match(const data_stack& targets, bit_reader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -251,7 +250,7 @@ bool match(const data_stack& targets, reader& compressed_set,
         bits, target_false_positive_rate);
 }
 
-bool match(const data_stack& targets, reader& compressed_set,
+bool match(const data_stack& targets, bit_reader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -263,11 +262,10 @@ bool match(const data_stack& targets, reader& compressed_set,
 
     uint64_t range = 0;
     auto it = set.begin();
-    istream_bit_reader source(compressed_set);
 
     for (uint64_t index = 0; index < set_size && it != set.end(); index++)
     {
-        range += golomb_decode(source, bits);
+        range += decode(compressed_set, bits);
 
         for (auto value = *it; it != set.end(); value = *(it++))
         {

@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace system {
 namespace message {
 
-typedef byte_array<16> ip_address;
+typedef data_array<16> ip_address;
 
 class BC_API network_address
 {

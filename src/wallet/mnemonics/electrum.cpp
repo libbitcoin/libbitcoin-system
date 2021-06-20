@@ -23,9 +23,8 @@
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/divide.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
@@ -142,7 +141,7 @@ electrum::grinding electrum::grinder(const data_chunk& entropy,
         hash = to_chunk(sha512_hash(hash));
         hash.resize(entropy_size);
     }
-    while (limit-- > 0u);
+    while (!is_zero(limit--));
 
     return { {}, {}, start };
 }

@@ -21,24 +21,26 @@
 
 #include <algorithm>
 #include <iterator>
-#include <limits>
-#include <utility>
-#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 template <typename Container>
 move_source<Container>::move_source(Container&& data) noexcept
-  : source_(std::forward(data)),
-    from_(source_.begin()),
-    size_(limit<size_type>(data.size()))
+  : base_source(limit<size_type>(data.size())),
+    source_(std::forward(data)),
+    from_(source_.begin())
 {
 }
 
 template <typename Container>
-typename move_source<Container>::size_type
-move_source<Container>::do_read(value_type* to, size_type size) noexcept
+move_source<Container>::~move_source() noexcept
+{
+}
+
+template <typename Container>
+void move_source<Container>::do_read(value_type* to, size_type size) noexcept
 {
     // std::move does not have a size overload.
     // std::move returns iterator past last element moved.

@@ -149,7 +149,7 @@ bool output::from_data(const data_chunk& data, bool wire)
 
 bool output::from_data(std::istream& stream, bool wire)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, wire);
 }
 
@@ -207,7 +207,7 @@ data_chunk output::to_data(bool wire) const
 
 void output::to_data(std::ostream& stream, bool wire) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink, wire);
 }
 

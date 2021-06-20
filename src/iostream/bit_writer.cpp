@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/iostream/data/bit_writer.hpp>
+#include <bitcoin/system/iostream/bit_writer.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -34,20 +34,21 @@
 namespace libbitcoin {
 namespace system {
 
-bit_writer::bit_writer(std::ostream& sink)
-  : buffer_(0x00), offset_(0), byte_writer(sink)
+bit_writer::bit_writer(std::ostream& sink) noexcept
+  : byte_writer(sink), buffer_(0x00), offset_(0)
 {
 }
 
-bit_writer::~bit_writer()
+bit_writer::~bit_writer() noexcept
 {
-    do_flush();
+    dump();
+    byte_writer::~byte_writer();
 }
 
 // bits
 //-----------------------------------------------------------------------------
 
-void bit_writer::write_bit(bool value)
+void bit_writer::write_bit(bool value) noexcept
 {
     if (is_aligned())
         dump();
@@ -55,7 +56,7 @@ void bit_writer::write_bit(bool value)
     buffer_ |= ((value ? 0x80 : 0x00) >> offset_++);
 }
 
-void bit_writer::write_bits(uint64_t value, uint8_t bits)
+void bit_writer::write_bits(uint64_t value, uint8_t bits) noexcept
 {
     if (is_zero(bits))
         return;
@@ -72,12 +73,12 @@ void bit_writer::write_bits(uint64_t value, uint8_t bits)
 // protected overrides
 //-----------------------------------------------------------------------------
 
-void bit_writer::do_write(uint8_t byte)
+void bit_writer::do_write(uint8_t byte) noexcept
 {
     do_write(&byte, one);
 }
 
-void bit_writer::do_write(const uint8_t* data, size_t size)
+void bit_writer::do_write(const uint8_t* data, size_t size) noexcept
 {
     if (is_zero(size))
         return;
@@ -92,7 +93,7 @@ void bit_writer::do_write(const uint8_t* data, size_t size)
     data_chunk buffer(data, std::next(data, size));
 
     // Shift all bytes.
-    for (auto index = sub1(size); index > 0; --index)
+    for (auto index = sub1(size); !is_zero(index); --index)
         buffer[index] =
             ((buffer[index] << shift()) |
             (buffer[sub1(index)] >> offset_));
@@ -104,7 +105,7 @@ void bit_writer::do_write(const uint8_t* data, size_t size)
     buffer_ = data[sub1(size)] << shift();
 }
 
-void bit_writer::do_skip(size_t size)
+void bit_writer::do_skip(size_t size) noexcept
 {
     const auto offset = offset_;
     dump();
@@ -112,13 +113,13 @@ void bit_writer::do_skip(size_t size)
     byte_writer::do_skip(size);
 }
 
-void bit_writer::do_flush()
+void bit_writer::do_flush() noexcept
 {
     dump();
     byte_writer::do_flush();
 }
 
-bool bit_writer::get_valid() const
+bool bit_writer::get_valid() const noexcept
 {
     return byte_writer::get_valid();
 }
@@ -126,17 +127,17 @@ bool bit_writer::get_valid() const
 // private
 //-----------------------------------------------------------------------------
 
-bool bit_writer::is_aligned() const
+bool bit_writer::is_aligned() const noexcept
 {
     return is_zero(shift());
 }
 
-uint8_t bit_writer::shift() const
+uint8_t bit_writer::shift() const noexcept
 {
     return byte_bits - offset_;
 }
 
-void bit_writer::dump()
+void bit_writer::dump() noexcept
 {
     if (is_zero(offset_))
         return;

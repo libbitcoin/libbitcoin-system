@@ -31,12 +31,12 @@ namespace wallet {
 
 // This prefix results in the prefix "passphrase" in the base58 encoding.
 // The prefix is not modified as the result of variations to address.
-const byte_array<parse_encrypted_token::magic_size> parse_encrypted_token::magic_
+const data_array<parse_encrypted_token::magic_size> parse_encrypted_token::magic_
 {
     { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 }
 };
 
-byte_array<parse_encrypted_token::prefix_size>
+data_array<parse_encrypted_token::prefix_size>
 parse_encrypted_token::prefix_factory(bool lot_sequence)
 {
     const auto context = lot_sequence ? lot_context_ : default_context_;
@@ -75,12 +75,12 @@ one_byte parse_encrypted_token::sign() const
 
 bool parse_encrypted_token::verify_context() const
 {
-    return context() == default_context_ || context() == lot_context_;
+    return (context() == default_context_) || lot_sequence();
 }
 
 bool parse_encrypted_token::verify_magic() const
 {
-    return slice<0, magic_size>(prefix()) == magic_;
+    return slice<zero, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet

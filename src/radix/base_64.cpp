@@ -45,7 +45,7 @@ std::string encode_base64(const data_slice& unencoded)
 {
     std::string encoded;
     const auto size = unencoded.size();
-    const auto padding = (size % 3 != 0) ? 1 : 0;
+    const auto padding = to_int((!is_zero(size % 3)));
     encoded.reserve((size / 3 + padding) * 4);
 
     uint32_t value;
@@ -93,11 +93,11 @@ bool decode_base64(data_chunk& out, const std::string& in)
     const static uint32_t mask = 0x000000ff;
 
     const auto length = in.length();
-    if ((length % 4) != 0)
+    if (!is_zero(length % 4))
         return false;
 
     size_t padding = 0;
-    if (length > 0)
+    if (!is_zero(length))
     {
         if (in[length - 1] == pad)
             padding++;

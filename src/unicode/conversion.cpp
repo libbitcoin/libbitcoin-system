@@ -54,9 +54,9 @@ static std::vector<std::basic_string<CharOut>> to_utf(
     std::vector<std::basic_string<CharOut>> out(in.size());
     std::transform(in.begin(), in.end(), out.begin(),
         [](const std::basic_string<CharIn>& word)
-    {
-        return to_utf<CharOut>(word);
-    });
+        {
+            return to_utf<CharOut>(word);
+        });
 
     return out;
 }

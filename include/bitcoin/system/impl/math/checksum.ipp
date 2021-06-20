@@ -24,14 +24,13 @@
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 template <size_t Size, size_t Checksum>
-byte_array<Size> insert_checksum(const data_loaf& slices)
+data_array<Size> insert_checksum(const data_loaf& slices)
 {
     auto out = build_array<Size>(slices);
     insert_checksum<Size, Checksum>(out);
@@ -39,7 +38,7 @@ byte_array<Size> insert_checksum(const data_loaf& slices)
 }
 
 template <size_t Size, size_t Checksum>
-void insert_checksum(byte_array<Size>& data)
+void insert_checksum(data_array<Size>& data)
 {
     static_assert(Checksum <= Size, "insufficient size");
     static_assert(Checksum <= hash_size, "excessive checksum");
@@ -61,7 +60,7 @@ void insert_checksum(byte_array<Size>& data)
 }
 
 template <size_t Size, size_t Checksum>
-bool verify_checksum(const byte_array<Size>& data)
+bool verify_checksum(const data_array<Size>& data)
 {
     static_assert(Checksum <= Size, "insufficient size");
     static_assert(Checksum <= hash_size, "excessive checksum");

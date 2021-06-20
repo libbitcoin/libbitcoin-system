@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
@@ -87,8 +86,8 @@ public:
     static constexpr size_t word_maximum = 8u * word_multiple;
 
     /// The two arrays of entropy sizes supported by Electrum v1.
-    typedef byte_array<entropy_minimum> minimum_entropy;
-    typedef byte_array<entropy_maximum> maximum_entropy;
+    typedef data_array<entropy_minimum> minimum_entropy;
+    typedef data_array<entropy_maximum> maximum_entropy;
 
     /// The dictionary, limited by identifier, that contains all words.
     /// If 'none' is specified all dictionaries are searched.

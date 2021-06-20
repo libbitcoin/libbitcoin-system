@@ -35,7 +35,7 @@ class parse_encrypted_key
   : public parse_encrypted_prefix<PrefixSize>
 {
 public:
-    parse_encrypted_key(const byte_array<PrefixSize>& prefix,
+    parse_encrypted_key(const data_array<PrefixSize>& prefix,
         const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
 
     bool compressed() const;

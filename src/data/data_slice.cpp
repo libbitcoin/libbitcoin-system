@@ -119,7 +119,7 @@ data_slice::value_type data_slice::front() const noexcept
 data_slice::value_type data_slice::back() const noexcept
 {
     // Guard against begin underrun (return zero).
-    return empty() ? 0x00 : *std::prev(end_, 1);
+    return empty() ? 0x00 : *std::prev(end_);
 }
 
 data_slice::size_type data_slice::size() const noexcept

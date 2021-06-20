@@ -23,7 +23,6 @@
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
@@ -181,13 +180,13 @@ bool mnemonic::is_valid_dictionary(language identifier)
 
 bool mnemonic::is_valid_entropy_size(size_t size)
 {
-    return ((size % entropy_multiple) == 0u &&
+    return (is_zero(size % entropy_multiple) &&
         size >= entropy_minimum && size <= entropy_maximum);
 }
 
 bool mnemonic::is_valid_word_count(size_t count)
 {
-    return ((count % word_multiple) == 0u &&
+    return (is_zero(count % word_multiple) &&
         count >= word_minimum && count <= word_maximum);
 }
 

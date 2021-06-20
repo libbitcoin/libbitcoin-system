@@ -20,26 +20,29 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_IPP
 
 #include <iterator>
-#include <limits>
-#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 template <typename Container>
 push_sink<Container>::push_sink(Container& data) noexcept
-  : sink_(data),
-    to_(data.begin()),
-    size_(limit<size_type>(data.max_size() - data.size()))
+  : base_sink(limit<size_type>(data.max_size() - data.size())),
+    anchor_(), sink_(data), to_(data.begin())
 {
 }
 
 template <typename Container>
-typename push_sink<Container>::size_type
-push_sink<Container>::do_write(const value_type* from, size_type size) noexcept
+push_sink<Container>::~push_sink() noexcept
+{
+}
+
+template <typename Container>
+void push_sink<Container>::do_write(const value_type* from,
+    size_type size) noexcept
 {
     // std::vector.insert returns iterator to first element inserted.
-    sink_.insert(to_, size, from);
+    sink_.insert(to_, from, std::next(from, size));
     to_ = std::next(to_, size);
 }
 

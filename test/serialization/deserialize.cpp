@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -95,9 +95,9 @@ BOOST_AUTO_TEST_CASE(deserialize__uint8__istream__base10)
     BOOST_REQUIRE_EQUAL(out, 0xff);
 }
 
-// <byte_array<Size>>
+// <data_array<Size>>
 
-BOOST_AUTO_TEST_CASE(deserialize__byte_array__empty__empty)
+BOOST_AUTO_TEST_CASE(deserialize__data_array__empty__empty)
 {
     std::array<uint8_t, 0> out;
     const std::array<uint8_t, 0> expected{};
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(deserialize__byte_array__empty__empty)
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__byte_array__bytes__base16)
+BOOST_AUTO_TEST_CASE(deserialize__data_array__bytes__base16)
 {
     std::array<uint8_t, 3> out;
     const std::array<uint8_t, 3> expected{ { 7, 42, 11 } };
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(deserialize__byte_array__bytes__base16)
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__byte_array__istream__base16)
+BOOST_AUTO_TEST_CASE(deserialize__data_array__istream__base16)
 {
     std::array<uint8_t, 3> out;
     const std::array<uint8_t, 3> expected{ { 7, 42, 11 } };

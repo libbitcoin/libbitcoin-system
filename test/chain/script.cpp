@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 {
     const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     data_source istream(raw);
-    istream_reader source(istream);
+    byte_reader source(istream);
     const auto instance = script::factory(source, false);
     BOOST_REQUIRE(instance.is_valid());
 }

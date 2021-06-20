@@ -59,7 +59,7 @@ public:
      * @param[in]  value  The value to initialize with.
      */
     template<size_t Size>
-    base16(const byte_array<Size>& value)
+    base16(const data_array<Size>& value)
       : value_(value.begin(), value.end())
     {
     }

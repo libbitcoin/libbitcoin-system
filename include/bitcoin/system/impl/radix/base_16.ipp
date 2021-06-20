@@ -24,14 +24,13 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 template <size_t Size>
-bool decode_base16(byte_array<Size>& out, const std::string& in)
+bool decode_base16(data_array<Size>& out, const std::string& in)
 {
     data_chunk data(Size);
     if (decode_base16(data, in) && data.size() == Size)
@@ -44,7 +43,7 @@ bool decode_base16(byte_array<Size>& out, const std::string& in)
 }
 
 template <size_t Size>
-bool decode_hash(byte_array<Size>& out, const std::string& in)
+bool decode_hash(data_array<Size>& out, const std::string& in)
 {
     data_chunk data(Size);
     if (decode_base16(data, in.data()) && data.size() == Size)
@@ -71,9 +70,9 @@ data_chunk base16_chunk(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
+data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
 {
-    byte_array<to_half(sub1(Size))> out;
+    data_array<to_half(sub1(Size))> out;
     if (!decode_base16(out, string))
         out.fill(0);
 
@@ -81,9 +80,9 @@ byte_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size])
+data_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size])
 {
-    byte_array<to_half(sub1(Size))> out;
+    data_array<to_half(sub1(Size))> out;
     if (!decode_hash(out, string))
         out.fill(0);
 
@@ -92,14 +91,14 @@ byte_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size])
 
 // DEPRECATED: use base16_array (renamed).
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(sub1(Size))> base16_literal(const char(&string)[Size])
+data_array<to_half(sub1(Size))> base16_literal(const char(&string)[Size])
 {
     return base16_array(string);
 }
 
 // DEPRECATED: use base16_hash (renamed).
 template <size_t Size, if_odd<Size>>
-byte_array<to_half(sub1(Size))> hash_literal(const char(&string)[Size])
+data_array<to_half(sub1(Size))> hash_literal(const char(&string)[Size])
 {
     return base16_hash(string);
 }

@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/mnemonics/language.hpp>
 
 namespace libbitcoin {

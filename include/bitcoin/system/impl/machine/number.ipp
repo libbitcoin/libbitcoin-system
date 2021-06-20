@@ -118,7 +118,7 @@ inline data_chunk number::data() const
 
 inline int32_t number::int32() const
 {
-    return domain_constrain<int32_t>(value_);
+    return limit<int32_t>(value_);
 }
 
 inline int64_t number::int64() const

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SOURCE_HPP
 
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/iostream/streams/base_source.hpp>
 
 namespace libbitcoin {
@@ -27,17 +28,22 @@ namespace system {
 /// Source for boost::iostreams::stream, copies bytes from Container.
 template <typename Container>
 class copy_source
-  : base_source<Container>
+  : public base_source<Container>
 {
 public:
+    copy_source() noexcept;
+    virtual ~copy_source() noexcept;
     copy_source(const Container& data) noexcept;
 
 protected:
-    virtual size_type do_read(value_type* to, size_type size) noexcept;
+    virtual void do_read(value_type* to, size_type size) noexcept;
 
 private:
     typename Container::const_iterator from_;
 };
+
+template <typename Container>
+using istream_copy = boost::iostreams::stream<copy_source<Container>>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODED_SETS
-#define LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODED_SETS
+#ifndef LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODING
+#define LIBBITCOIN_SYSTEM_MATH_GOLOMB_CODING
 
 #include <cstdint>
 #include <istream>
@@ -43,10 +43,10 @@ data_chunk construct(const data_stack& items, uint8_t bits,
 data_chunk construct(const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate);
 
-void construct(writer& stream, const data_stack& items, uint8_t bits,
+void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
     const half_hash& entropy, uint64_t target_false_positive_rate);
 
-void construct(writer& stream, const data_stack& items, uint8_t bits,
+void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate);
 
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
@@ -74,11 +74,11 @@ bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 
-bool match(const data_chunk& target, reader& compressed_set,
+bool match(const data_chunk& target, bit_reader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 
-bool match(const data_chunk& target, reader& compressed_set,
+bool match(const data_chunk& target, bit_reader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 
@@ -101,11 +101,11 @@ bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 
-bool match(const data_stack& targets, reader& compressed_set,
+bool match(const data_stack& targets, bit_reader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 
-bool match(const data_stack& targets, reader& compressed_set,
+bool match(const data_stack& targets, bit_reader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate);
 

@@ -20,7 +20,7 @@
 
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 
 namespace libbitcoin {
@@ -138,7 +138,7 @@ bool heading::from_data(const data_chunk& data)
 
 bool heading::from_data(std::istream& stream)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source);
 }
 
@@ -170,7 +170,7 @@ data_chunk heading::to_data() const
 
 void heading::to_data(std::ostream& stream) const
 {
-    ostream_writer sink(stream);
+    byte_writer sink(stream);
     to_data(sink);
 }
 

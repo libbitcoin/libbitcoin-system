@@ -36,14 +36,15 @@
 #include <bitcoin/system/concurrency/asio.hpp>
 #include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/message/messages.hpp>
+#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/settings.hpp>
 
 namespace libbitcoin {
@@ -159,13 +160,13 @@ block block::factory(reader& source, bool witness)
 
 bool block::from_data(const data_chunk& data, bool witness)
 {
-    data_source istream(data);
-    return from_data(istream, witness);
+    data_source stream(data);
+    return from_data(stream, witness);
 }
 
 bool block::from_data(std::istream& stream, bool witness)
 {
-    istream_reader source(stream);
+    byte_reader source(stream);
     return from_data(source, witness);
 }
 
@@ -179,7 +180,7 @@ bool block::from_data(reader& source, bool witness)
     if (!header_.from_data(source, true))
         return false;
 
-    const auto count = source.read_size_little_endian();
+    const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
@@ -233,15 +234,15 @@ data_chunk block::to_data(bool witness) const
 
 void block::to_data(std::ostream& stream, bool witness) const
 {
-    ostream_writer sink(stream);
-    to_data(sink, witness);
+    byte_writer writer(stream);
+    to_data(writer, witness);
 }
 
 // Full block serialization is always canonical encoding.
 void block::to_data(writer& sink, bool witness) const
 {
     header_.to_data(sink, true);
-    sink.write_variable_little_endian(transactions_.size());
+    sink.write_variable(transactions_.size());
     const auto to = [&sink, witness](const transaction& tx)
     {
         tx.to_data(sink, true, witness);
@@ -369,7 +370,7 @@ hash_digest block::hash() const
 size_t block::locator_size(size_t top)
 {
     size_t size = 0, step = 1;
-    for (auto height = top; height > 0; height = floor_subtract(height, step))
+    for (auto height = top; height > 0; height = floored_subtract(height, step))
         if (++size > 9u)
             step <<= 1;
 
@@ -384,7 +385,7 @@ block::indexes block::locator_heights(size_t top)
     heights.reserve(locator_size(top));
 
     // Start at top block and collect block indexes in reverse.
-    for (auto height = top; height > 0; height = floor_subtract(height, step))
+    for (auto height = top; height > 0; height = floored_subtract(height, step))
     {
         heights.push_back(height);
 
@@ -447,7 +448,7 @@ size_t block::signature_operations(bool bip16, bool bip141) const
 {
     const auto value = [bip16, bip141](size_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.signature_operations(bip16, bip141));
+        return ceilinged_add(total, tx.signature_operations(bip16, bip141));
     };
 
     //*************************************************************************
@@ -656,7 +657,7 @@ uint64_t block::fees() const
 {
     const auto value = [](uint64_t total, const transaction& tx)
     {
-        return ceiling_add(total, tx.fees());
+        return ceilinged_add(total, tx.fees());
     };
 
     const auto& txs = transactions_;
@@ -673,7 +674,7 @@ uint64_t block::claim() const
 uint64_t block::reward(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const
 {
-    return ceiling_add(fees(), subsidy(height, subsidy_interval,
+    return ceilinged_add(fees(), subsidy(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
 

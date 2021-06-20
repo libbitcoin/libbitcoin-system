@@ -99,7 +99,7 @@ payment_address::payment_address(const short_hash& hash, uint8_t prefix)
 
 payment_address payment_address::from_string(const std::string& address)
 {
-    byte_array<payment::value_size> decoded;
+    data_array<payment::value_size> decoded;
     if (!decode_base58(decoded, address) || 
         decoded.size() != payment::value_size)
         return {};
@@ -275,7 +275,7 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { ec_public{ script[1].data() }, p2kh_prefix }
+                { ec_public{ script.front().data() }, p2kh_prefix }
                 ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
@@ -332,7 +332,7 @@ payment_address payment_address::extract_output(
             return
             {
                 // pay_public_key is not p2kh but we conflate for tracking.
-                ec_public{ script[0].data() },
+                ec_public{ script.front().data() },
                 p2kh_prefix
             };
 
