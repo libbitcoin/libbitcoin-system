@@ -102,7 +102,7 @@ data_slice data_slice::from_size(Pointer begin, size_type size) noexcept
         return {};
 
     // Pointer may be a char or uin8_t pointer or iterator type.
-    const auto start = reinterpret_cast<const_pointer>(&begin[0]);
+    const auto start = reinterpret_cast<pointer>(&begin[0]);
     return { start, std::next(start, size), size };
 }
 

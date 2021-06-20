@@ -19,7 +19,6 @@
 #include <bitcoin/system/data/data_slice.hpp>
 
 #include <array>
-#include <ostream>
 #include <initializer_list>
 #include <iterator>
 #include <string>
@@ -54,8 +53,7 @@ data_slice::data_slice(std::initializer_list<value_type> bytes) noexcept
 }
 
 // private
-data_slice::data_slice(const_pointer begin, const_pointer end,
-    size_type size) noexcept
+data_slice::data_slice(pointer begin, pointer end, size_type size) noexcept
   : begin_(begin), end_(end), size_(size)
 {
 }
@@ -93,19 +91,19 @@ bool data_slice::resize(size_t size) noexcept
 // ----------------------------------------------------------------------------
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::data() const noexcept
+data_slice::pointer data_slice::data() const noexcept
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::begin() const noexcept
+data_slice::pointer data_slice::begin() const noexcept
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slice::const_pointer data_slice::end() const noexcept
+data_slice::pointer data_slice::end() const noexcept
 {
     return end_;
 }
@@ -148,12 +146,10 @@ data_slice::value_type data_slice::operator[](size_type index) const noexcept
 
 bool operator==(const data_slice& left, const data_slice& right) noexcept
 {
-    // Compares iterator addresses, not values.
-    ////return left.begin() == right.begin() && left.end() == right.end();
-
     if (left.size() != right.size())
         return false;
 
+    // std::vector performs value comparison, so this does too.
     for (data_slice::size_type index = 0; index < left.size(); ++index)
         if (left[index] != right[index])
             return false;

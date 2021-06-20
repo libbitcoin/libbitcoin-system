@@ -19,32 +19,111 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_HPP
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
+#include <string>
+#include <vector>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
-   
+
+/// Identical to data_slice except pointer is non-const, and therefore does not
+/// accept construction from const sources (excludes string, vector, literal).
+/// Resizable but otherwise non-const iterable wrapper for a memory buffer.
+/// Not a substitute for move overrides or containment.
+/// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
+/// Value (not pointer) iteration past end is safe and returns zeros.
+/// Negative size construction yields a valid empty object.
 class BC_API data_slab
 {
 public:
     typedef size_t size_type;
     typedef uint8_t value_type;
-    typedef value_type* iterator;
 
-    // Avoid conflict with data_chunk construction.
-    data_slab(uint8_t* begin, uint8_t* end) noexcept;
+    /// A pointer to mutable bytes (pointer itself is also mutable).
+    typedef value_type* pointer;
 
-    iterator begin() const noexcept;
-    iterator end() const noexcept;
+    /// For stream source compatibility, until data_slab has an iterator.
+    typedef pointer iterator;
+
+    /// Constructors.
+
+    /// Empty slab.
+    data_slab() noexcept;
+
+    /// Copy construction.
+    data_slab(const data_slab& other) noexcept;
+
+    /// Byte array constructor (casts Byte to uint8_t).
+    template <size_type Size, typename Byte, if_byte<Byte> = true>
+    data_slab(std::array<Byte, Size>& data) noexcept;
+
+    // TODO: restrict to iterator-to-non-const references.
+    /// Byte iterators constructor (casts to uint8_t).
+    template <typename Iterator>
+    data_slab(Iterator& begin, Iterator& end) noexcept;
+
+    // TODO: change to begin/size construction.
+    /// Byte pointer to non-const constructor (casts Byte to uint8_t).
+    template <typename Byte, if_byte<Byte> = true>
+    data_slab(Byte* begin, Byte* end) noexcept;
+
+    /// Methods.
+
+    /// Copy data to an array.
+    /// Underfill is padded with 0x00, excess is truncated.
+    template <size_type Size>
+    std::array<value_type, Size> to_array() const noexcept;
+
+    /// Copy data to a vector.
+    std::vector<value_type> to_chunk() const noexcept;
+
+    /// Convert data to a string (casts uint8_t to char).
+    std::string to_string() const noexcept;
+
+    /// Convert data to a base16 string.
+    std::string encoded() const noexcept;
+
+    /// Resize the slab by decrementing the end pointer.
+    /// This is the only mutable action that can be taken on the slab.
+    /// Returns true if the size was reduced (expansion is not allowed).
+    bool resize(size_t size) noexcept;
+
+    /// Properties.
+    pointer data() const noexcept;
+    pointer begin() const noexcept;
+    pointer end() const noexcept;
+    value_type front() const noexcept;
+    value_type back() const noexcept;
     size_type size() const noexcept;
+    bool empty() const noexcept;
+
+    /// Unary operators.
+    template<size_type Size>
+    operator std::array<value_type, Size>() const noexcept;
+    operator std::vector<value_type>() const noexcept;
+    value_type operator[](size_type index) const noexcept;
 
 private:
-    iterator begin_;
-    iterator end_;
+    data_slab(pointer begin, pointer end, size_type size) noexcept;
+
+    template <typename Iterator>
+    static data_slab from_iterators(Iterator& begin, Iterator& end) noexcept;
+
+    template <typename Pointer>
+    static data_slab from_size(Pointer begin, size_type size) noexcept;
+
+    const pointer begin_;
+    pointer end_;
+    size_type size_;
 };
+
+/// Binary operators.
+bool operator==(const data_slab& left, const data_slab& right) noexcept;
+bool operator!=(const data_slab& left, const data_slab& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

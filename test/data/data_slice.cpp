@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__copy__expected)
     BOOST_REQUIRE_EQUAL(slice.size(), size);
     BOOST_REQUIRE_EQUAL(*slice.data(), 'f');
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
-    BOOST_REQUIRE_EQUAL(slice[size - 1], 'r');
+    BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
 }
 
 // construct, not empty
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     
     // end
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
-    BOOST_REQUIRE_EQUAL(slice[size-1], 'r');
+    BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(slice.end()), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).back(), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).back(), 'r');
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     // The non-char terminator causes the data initializer to be picked up.
     const data_slice slice6({ 'f', 'o', 'o', 'b', 'a', 'r', 0 });
     BOOST_WARN(!slice6.empty());
-    BOOST_WARN_EQUAL(slice6.size(), size + 1);
+    BOOST_WARN_EQUAL(slice6.size(), add1(size));
     BOOST_WARN_EQUAL(slice6.encoded(), encoded + "00");
 
     // construct(initializer - text)

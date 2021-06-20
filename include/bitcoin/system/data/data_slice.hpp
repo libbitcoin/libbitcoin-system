@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/define.hpp>
@@ -31,7 +30,9 @@
 
 namespace libbitcoin {
 namespace system {
-   
+
+/// Identical to data_slab except pointer is const, and therefore accepts
+/// construction from const sources (including literals and initializers).
 /// Resizable but otherwise const iterable wrapper for a memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
@@ -42,10 +43,12 @@ class BC_API data_slice
 public:
     typedef size_t size_type;
     typedef uint8_t value_type;
-    typedef const value_type* const_pointer;
+
+    /// A pointer to non-mutable bytes (pointer itself is mutable).
+    typedef const value_type* pointer;
 
     /// For stream source compatibility, until data_slice has an iterator.
-    typedef const value_type* const_iterator;
+    typedef pointer const_iterator;
 
     /// Constructors.
 
@@ -68,12 +71,13 @@ public:
     template <typename Byte, if_byte<Byte> = true>
     data_slice(const std::vector<Byte>& data) noexcept;
 
-    /// Byte iterators constructor (casts Byte to uint8_t).
+    // TODO: restrict to iterator-to-const references.
+    /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
     data_slice(const Iterator& begin, const Iterator& end) noexcept;
 
     // TODO: change to begin/size construction.
-    /// Byte pointer constructor (casts Byte to uint8_t).
+    /// Byte pointer to const constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
     data_slice(const Byte* begin, const Byte* end) noexcept;
 
@@ -105,9 +109,9 @@ public:
     bool resize(size_t size) noexcept;
 
     /// Properties.
-    const_pointer data() const noexcept;
-    const_pointer begin() const noexcept;
-    const_pointer end() const noexcept;
+    pointer data() const noexcept;
+    pointer begin() const noexcept;
+    pointer end() const noexcept;
     value_type front() const noexcept;
     value_type back() const noexcept;
     size_type size() const noexcept;
@@ -120,7 +124,7 @@ public:
     value_type operator[](size_type index) const noexcept;
 
 private:
-    data_slice(const_pointer begin, const_pointer end, size_type size) noexcept;
+    data_slice(pointer begin, pointer end, size_type size) noexcept;
 
     template <size_type Size, typename Byte>
     static data_slice from_literal(const Byte(&text)[Size]) noexcept;
@@ -132,8 +136,8 @@ private:
     template <typename Pointer>
     static data_slice from_size(Pointer begin, size_type size) noexcept;
 
-    const const_pointer begin_;
-    const_pointer end_;
+    const pointer begin_;
+    pointer end_;
     size_type size_;
 };
 

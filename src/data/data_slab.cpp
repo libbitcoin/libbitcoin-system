@@ -18,30 +18,136 @@
  */
 #include <bitcoin/system/data/data_slab.hpp>
 
-#include <cstdint>
-#include <iterator>
+#include <array>
+#include <string>
+#include <vector>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-data_slab::data_slab(uint8_t* begin, uint8_t* end) noexcept
-  : begin_(begin), end_(end)
+// constructors
+// ----------------------------------------------------------------------------
+
+data_slab::data_slab() noexcept
+  : data_slab(nullptr, nullptr, zero)
 {
 }
 
-data_slab::iterator data_slab::begin() const noexcept
+data_slab::data_slab(const data_slab& other) noexcept
+  : begin_(other.begin_), end_(other.end_), size_(other.size_)
+{
+}
+
+// private
+data_slab::data_slab(pointer begin, pointer end, size_type size) noexcept
+  : begin_(begin), end_(end), size_(size)
+{
+}
+
+// methods
+// ----------------------------------------------------------------------------
+
+std::vector<data_slab::value_type> data_slab::to_chunk() const noexcept
+{
+    return { begin_, end_ };
+}
+
+std::string data_slab::to_string() const noexcept
+{
+    return { begin_, end_ };
+}
+
+// Cannot provide a "decode" factory since the data is not owned.
+std::string data_slab::encoded() const noexcept
+{
+    return encode_base16(to_chunk());
+}
+
+bool data_slab::resize(size_t size) noexcept
+{
+    if (size >= size_)
+        return false;
+
+    end_ = std::next(begin_, size);
+    size_ = size;
+    return true;
+}
+
+// properties
+// ----------------------------------------------------------------------------
+
+// Undefined to dereference >= end.
+data_slab::pointer data_slab::data() const noexcept
 {
     return begin_;
 }
 
-data_slab::iterator data_slab::end() const noexcept
+// Undefined to dereference >= end.
+data_slab::pointer data_slab::begin() const noexcept
+{
+    return begin_;
+}
+
+// Undefined to dereference >= end.
+data_slab::pointer data_slab::end() const noexcept
 {
     return end_;
 }
 
+data_slab::value_type data_slab::front() const noexcept
+{
+    // Guard against end overrun (return zero).
+    return empty() ? 0x00 : *begin_;
+}
+
+data_slab::value_type data_slab::back() const noexcept
+{
+    // Guard against begin underrun (return zero).
+    return empty() ? 0x00 : *std::prev(end_);
+}
+
 data_slab::size_type data_slab::size() const noexcept
 {
-    return static_cast<size_type>(std::distance(begin_, end_));
+    return size_;
+}
+
+bool data_slab::empty() const noexcept
+{
+    return is_zero(size_);
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+data_slab::operator std::vector<data_slab::value_type>() const noexcept
+{
+    return data_slab::to_chunk();
+}
+
+data_slab::value_type data_slab::operator[](size_type index) const noexcept
+{
+    // Guard against end overrun (return zero).
+    return index < size_ ? *std::next(begin_, index) : 0x00;
+}
+
+bool operator==(const data_slab& left, const data_slab& right) noexcept
+{
+    if (left.size() != right.size())
+        return false;
+
+    // std::vector performs value comparison, so this does too.
+    for (data_slab::size_type index = 0; index < left.size(); ++index)
+        if (left[index] != right[index])
+            return false;
+
+    return true;
+}
+
+bool operator!=(const data_slab& left, const data_slab& right) noexcept
+{
+    return !(left == right);
 }
 
 } // namespace system
