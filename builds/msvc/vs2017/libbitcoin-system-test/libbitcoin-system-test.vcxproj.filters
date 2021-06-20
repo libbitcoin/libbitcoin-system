@@ -22,19 +22,22 @@
     <Filter Include="src\data">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\formats">
+    <Filter Include="src\iostream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\iostream">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
+    <Filter Include="src\iostream\streams">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\machine">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\math">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\message">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\radix">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\serialization">
@@ -44,22 +47,22 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics\dictionaries">
+    <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics\dictionaries">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +177,13 @@
     <ClCompile Include="..\..\..\..\test\data\collection.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\data\data.cpp">
+    <ClCompile Include="..\..\..\..\test\data\data_array.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\data_chunk.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\data_slab.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp">
@@ -186,32 +195,35 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_10.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_16.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_2048.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_32.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_58.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_64.cpp">
-      <Filter>src\formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\formats\base_85.cpp">
-      <Filter>src\formats</Filter>
+    <ClCompile Include="..\..\..\..\test\iostream\bit_reader.cpp">
+      <Filter>src\iostream</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\iostream\bit_stream.cpp">
       <Filter>src\iostream</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\iostream\stream.cpp">
+    <ClCompile Include="..\..\..\..\test\iostream\bit_writer.cpp">
       <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\byte_reader.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\byte_writer.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\removed.cpp">
+      <Filter>src\iostream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\streams\copy_sink.cpp">
+      <Filter>src\iostream\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\streams\copy_source.cpp">
+      <Filter>src\iostream\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\streams\move_source.cpp">
+      <Filter>src\iostream\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\iostream\streams\push_sink.cpp">
+      <Filter>src\iostream\streams</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
@@ -225,10 +237,13 @@
     <ClCompile Include="..\..\..\..\test\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\addition.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\divide.cpp">
+    <ClCompile Include="..\..\..\..\test\math\division.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
@@ -247,6 +262,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\safe.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp">
@@ -378,6 +396,27 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_10.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_16.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_32.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_58.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_64.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_85.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\serialization\deserialize.cpp">
       <Filter>src\serialization</Filter>
     </ClCompile>
@@ -385,9 +424,6 @@
       <Filter>src\serialization</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp">
-      <Filter>src\serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serialization\serializer.cpp">
       <Filter>src\serialization</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\settings.cpp">
