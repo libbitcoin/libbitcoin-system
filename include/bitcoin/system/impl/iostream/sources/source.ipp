@@ -36,7 +36,7 @@ template <typename Container>
 typename base_source<Container>::size_type
 base_source<Container>::read(char_type* buffer, size_type count) noexcept
 {
-    if (is_negative(count))
+    if (is_null(buffer) || is_negative(count))
         return negative_one;
 
     const auto size = std::min(size_, count);
