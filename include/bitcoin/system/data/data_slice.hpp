@@ -33,10 +33,10 @@ namespace system {
 
 /// Identical to data_slab except pointer is const, and therefore accepts
 /// construction from const sources (including literals and initializers).
-/// Resizable but otherwise const iterable wrapper for a memory buffer.
+/// Resizable but otherwise const iterable wrapper for const memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
-/// Value (not pointer) iteration past end is safe and returns zeros.
+/// [] iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
 class BC_API data_slice
 {

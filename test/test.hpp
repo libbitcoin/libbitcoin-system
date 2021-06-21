@@ -31,7 +31,7 @@ using namespace bc::system;
 
 namespace std {
 
-// data_chunk/data_array -> base16(data)
+// data_slice -> base16(data)
 std::ostream& operator<<(std::ostream& stream,
     const data_slice& slice) noexcept;
 

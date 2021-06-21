@@ -21,8 +21,8 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -59,6 +59,11 @@ std::vector<data_slab::value_type> data_slab::to_chunk() const noexcept
     return { begin_, end_ };
 }
 
+data_slice data_slab::to_slice() const noexcept
+{
+    return { begin_, end_ };
+}
+
 std::string data_slab::to_string() const noexcept
 {
     return { begin_, end_ };
@@ -67,7 +72,7 @@ std::string data_slab::to_string() const noexcept
 // Cannot provide a "decode" factory since the data is not owned.
 std::string data_slab::encoded() const noexcept
 {
-    return encode_base16(to_chunk());
+    return to_slice().encoded();
 }
 
 bool data_slab::resize(size_t size) noexcept
@@ -131,6 +136,11 @@ data_slab::operator std::vector<data_slab::value_type>() const noexcept
     return data_slab::to_chunk();
 }
 
+data_slab::operator data_slice() const noexcept
+{
+    return data_slab::to_slice();
+}
+
 data_slab::value_type data_slab::operator[](size_type index) const noexcept
 {
     // Guard against end overrun (return zero).
@@ -139,15 +149,7 @@ data_slab::value_type data_slab::operator[](size_type index) const noexcept
 
 bool operator==(const data_slab& left, const data_slab& right) noexcept
 {
-    if (left.size() != right.size())
-        return false;
-
-    // std::vector performs value comparison, so this does too.
-    for (data_slab::size_type index = 0; index < left.size(); ++index)
-        if (left[index] != right[index])
-            return false;
-
-    return true;
+    return left.to_slice() == right.to_slice();
 }
 
 bool operator!=(const data_slab& left, const data_slab& right) noexcept

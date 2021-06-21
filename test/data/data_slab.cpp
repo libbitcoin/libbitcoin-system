@@ -120,8 +120,13 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__copy__expected)
 
 BOOST_AUTO_TEST_CASE(data_slab__construct__text__expected)
 {
-    // construct
-    const data_slab slab(byte);
+    // negative vector
+    std::string negative_string{ "baadf00d" };
+    data_chunk negative_data{ 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' };
+    data_array<8> negative_byte{ { 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' } };
+
+    // construct(string reference)
+    const data_slab slab(string);
 
     // size/data
     BOOST_REQUIRE(!slab.empty());
@@ -140,37 +145,61 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__text__expected)
     BOOST_REQUIRE_EQUAL(slab[sub1(size)], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(slab.end()), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slab).back(), 'r');
+    BOOST_REQUIRE_EQUAL(static_cast<data_slice>(slab).back(), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slab).back(), 'r');
 
     // methods
     BOOST_REQUIRE_EQUAL(slab.encoded(), encoded);
     BOOST_REQUIRE_EQUAL(slab.to_string(), string);
     BOOST_REQUIRE_EQUAL(slab.to_chunk(), data);
+    BOOST_REQUIRE_EQUAL(slab.to_slice(), data);
     BOOST_REQUIRE_EQUAL(slab.to_array<size>(), byte);
 
     // operator==/operator!=
 
-    // data_slab is not configured in test for >> serialization.
-
     // positive left
+    BOOST_REQUIRE(slab == string);
+    BOOST_REQUIRE(!(slab != string));
+    BOOST_REQUIRE(slab == data);
+    BOOST_REQUIRE(!(slab != data));
     BOOST_REQUIRE(slab == byte);
     BOOST_REQUIRE(!(slab != byte));
-    ////BOOST_REQUIRE_EQUAL(slab, byte);
+    BOOST_REQUIRE_EQUAL(slab, string);
+    BOOST_REQUIRE_EQUAL(slab, data);
+    BOOST_REQUIRE_EQUAL(slab, byte);
 
     // negative left
+    BOOST_REQUIRE(slab != negative_string);
+    BOOST_REQUIRE(!(slab == negative_string));
+    BOOST_REQUIRE(slab != negative_data);
+    BOOST_REQUIRE(!(slab == negative_data));
     BOOST_REQUIRE(slab != negative_byte);
     BOOST_REQUIRE(!(slab == negative_byte));
-    ////BOOST_REQUIRE_NE(slab, negative_byte);
+    BOOST_REQUIRE_NE(slab, negative_string);
+    BOOST_REQUIRE_NE(slab, negative_data);
+    BOOST_REQUIRE_NE(slab, negative_byte);
 
     // positive right
+    BOOST_REQUIRE(string == slab);
+    BOOST_REQUIRE(!(string != slab));
+    BOOST_REQUIRE(data == slab);
+    BOOST_REQUIRE(!(data != slab));
     BOOST_REQUIRE(byte == slab);
     BOOST_REQUIRE(!(byte != slab));
-    ////BOOST_REQUIRE_EQUAL(byte, slab);
+    BOOST_REQUIRE_EQUAL(string, slab);
+    BOOST_REQUIRE_EQUAL(data, slab);
+    BOOST_REQUIRE_EQUAL(byte, slab);
 
     // negative right
+    BOOST_REQUIRE(negative_string != slab);
+    BOOST_REQUIRE(!(negative_string == slab));
+    BOOST_REQUIRE(negative_data != slab);
+    BOOST_REQUIRE(!(negative_data == slab));
     BOOST_REQUIRE(negative_byte != slab);
     BOOST_REQUIRE(!(negative_byte == slab));
-    ////BOOST_REQUIRE_NE(negative_byte, slab);
+    BOOST_REQUIRE_NE(negative_string, slab);
+    BOOST_REQUIRE_NE(negative_data, slab);
+    BOOST_REQUIRE_NE(negative_byte, slab);
 }
 
 BOOST_AUTO_TEST_CASE(data_slab__construct__array__expected)

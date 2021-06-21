@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
@@ -32,10 +33,10 @@ namespace system {
 
 /// Identical to data_slice except pointer is non-const, and therefore does not
 /// accept construction from const sources (excludes literal).
-/// Resizable but otherwise non-const iterable wrapper for a memory buffer.
+/// Resizable but otherwise const iterable wrapper for non-const memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
-/// Value (not pointer) iteration past end is safe and returns zeros.
+/// [] iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
 class BC_API data_slab
 {
@@ -90,6 +91,9 @@ public:
     /// Copy data to a vector.
     std::vector<value_type> to_chunk() const noexcept;
 
+    /// Cast buffer to a data_slice.
+    data_slice to_slice() const noexcept;
+
     /// Convert data to a string (casts uint8_t to char).
     std::string to_string() const noexcept;
 
@@ -114,6 +118,7 @@ public:
     template<size_type Size>
     operator std::array<value_type, Size>() const noexcept;
     operator std::vector<value_type>() const noexcept;
+    operator data_slice() const noexcept;
     value_type operator[](size_type index) const noexcept;
 
 private:
