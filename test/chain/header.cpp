@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
     };
 
     const auto data = expected.to_data();
-    data_source istream(data);
+    stream::in::copy istream(data);
 
     const auto result = chain::header::factory(istream);
 
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data();
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
 
     const auto result = chain::header::factory(source);

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/iostream/byte_writer.hpp>
+#include <bitcoin/system/iostream/writers/byte_writer.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -195,7 +195,7 @@ void byte_writer::do_write(const uint8_t* data, size_t size) noexcept
 void byte_writer::do_skip(size_t size) noexcept
 {
     // TODO: verify this behavior using the copy_sink.
-    // TODO: this cannot work with the data_sink (research).
+    // TODO: this cannot work with the stream::out::push (research).
     stream_.seekp(size, std::ios_base::cur);
 }
 

@@ -193,12 +193,12 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     const auto area_bytes = height * row_bytes;
 
     // For reading the qrcode byte stream.
-    data_source image_source(coded);
+    stream::in::copy image_source(coded);
     byte_reader image_reader(image_source);
 
     // For writing the image bit stream.
     data_chunk image_out;
-    data_sink image_sink(image_out);
+    stream::out::push image_sink(image_out);
     bit_writer image_bit_writer(image_sink);
     image_out.reserve(area_bytes);
 
@@ -212,7 +212,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     {
         // For repeatedly writing a row buffer.
         data_chunk row_out;
-        data_sink row_sink(row_out);
+        stream::out::push row_sink(row_out);
         bit_writer row_bit_writer(row_sink);
         row_out.reserve(row_bytes);
 

@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_2__valid_input__success)
         message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
-    data_source istream(data);
+    stream::in::copy istream(data);
     auto result = message::block_transactions::factory(
         message::block_transactions::version_minimum, istream);
 
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
         message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::block_transactions::factory(
         message::block_transactions::version_minimum, source);

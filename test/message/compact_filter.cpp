@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_2__valid_input__success)
     const auto data = expected.to_data(message::compact_filter::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
     const auto data = expected.to_data(message::compact_filter::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, source);
 

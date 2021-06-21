@@ -114,7 +114,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
 data_chunk base32_pack(const base32_chunk& unpacked)
 {
     data_chunk packed;
-    data_sink sink(packed);
+    stream::out::push sink(packed);
     bit_writer bit_writer(sink);
 
     // This is how c++ developers do it. :)
@@ -143,7 +143,7 @@ data_chunk base32_pack(const base32_chunk& unpacked)
 base32_chunk base32_unpack(const data_chunk& packed)
 {
     base32_chunk unpacked;
-    data_source source(packed);
+    stream::in::copy source(packed);
     bit_reader bit_reader(source);
 
     // This is how c++ developers do it. :)

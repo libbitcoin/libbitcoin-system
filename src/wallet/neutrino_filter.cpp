@@ -65,7 +65,7 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
     // Order and remove duplicates.
     items = distinct(std::move(items));
 
-    data_sink stream(out_filter);
+    stream::out::push stream(out_filter);
     bit_writer writer(stream);
     writer.write_variable(items.size());
     golomb::construct(writer, items, golomb_bits, key,
@@ -79,7 +79,7 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter)
 {
     data_chunk data;
-    data_sink stream(data);
+    stream::out::push stream(data);
     byte_writer sink(stream);
     sink.write_bytes(bitcoin_hash(filter));
     sink.write_bytes(previous_block_hash);
@@ -94,7 +94,7 @@ bool match_filter(const message::compact_filter& filter,
     if (script.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    data_source stream(filter.filter());
+    stream::in::copy stream(filter.filter());
     bit_reader reader(stream);
     const auto set_size = reader.read_variable();
 
@@ -128,7 +128,7 @@ bool match_filter(const message::compact_filter& filter,
     if (stack.empty())
         return false;
 
-    data_source stream(filter.filter());
+    stream::in::copy stream(filter.filter());
     bit_reader reader(stream);
     const auto set_size = reader.read_variable();
 

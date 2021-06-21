@@ -159,7 +159,7 @@ input input::factory(reader& source, bool wire, bool witness)
 
 bool input::from_data(const data_chunk& data, bool wire, bool witness)
 {
-    data_source source(data);
+    stream::in::copy source(data);
     byte_reader reader(source);
     return from_data(reader, wire, witness);
 }
@@ -217,7 +217,7 @@ data_chunk input::to_data(bool wire, bool witness) const
     data_chunk data;
     const auto size = serialized_size(wire, witness);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

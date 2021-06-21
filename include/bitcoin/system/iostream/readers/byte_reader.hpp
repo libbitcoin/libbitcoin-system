@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_READER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_READER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BYTE_READER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BYTE_READER_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -125,6 +125,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/byte_reader.ipp>
+#include <bitcoin/system/impl/iostream/readers/byte_reader.ipp>
 
 #endif

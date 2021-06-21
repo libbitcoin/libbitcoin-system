@@ -139,7 +139,7 @@ witness witness::factory(reader& source, bool prefix)
 
 bool witness::from_data(const data_chunk& encoded, bool prefix)
 {
-    data_source istream(encoded);
+    stream::in::copy istream(encoded);
     return from_data(istream, prefix);
 }
 
@@ -227,7 +227,7 @@ data_chunk witness::to_data(bool prefix) const
     data_chunk data;
     const auto size = serialized_size(prefix);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

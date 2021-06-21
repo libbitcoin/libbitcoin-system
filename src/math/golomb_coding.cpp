@@ -96,7 +96,7 @@ data_chunk construct(const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     data_chunk result;
-    data_sink stream(result);
+    stream::out::push stream(result);
     construct(stream, items, bits, entropy, target_false_positive_rate);
     return result;
 }
@@ -151,7 +151,7 @@ bool match(const data_chunk& target, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    data_source source(compressed_set);
+    stream::in::copy source(compressed_set);
     return match(target, source, set_size, entropy, bits,
         target_false_positive_rate);
 }
@@ -220,7 +220,7 @@ bool match(const data_stack& targets, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    data_source source(compressed_set);
+    stream::in::copy source(compressed_set);
     return match(targets, source, set_size, entropy, bits,
         target_false_positive_rate);
 }

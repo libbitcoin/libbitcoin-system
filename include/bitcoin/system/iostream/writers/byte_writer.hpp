@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_WRITER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BYTE_WRITER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BYTE_WRITER_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +26,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/byte_reader.hpp>
+#include <bitcoin/system/iostream/readers/byte_reader.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -106,6 +106,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/byte_writer.ipp>
+#include <bitcoin/system/impl/iostream/writers/byte_writer.ipp>
 
 #endif

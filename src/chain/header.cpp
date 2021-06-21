@@ -189,7 +189,7 @@ header header::factory(reader& source, const hash_digest& hash, bool wire)
 
 bool header::from_data(const data_chunk& data, bool wire)
 {
-    data_source source(data);
+    stream::in::copy source(data);
     byte_reader reader(source);
     return from_data(reader, wire);
 }
@@ -265,7 +265,7 @@ data_chunk header::to_data(bool wire) const
     data_chunk data;
     const auto size = serialized_size(wire);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_2__sufficient_bytes__expected)
     const auto data = expected.to_data();
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = heading::factory(istream);
     BOOST_REQUIRE(result.is_valid());
 }
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_3__sufficient_bytes__expected)
     const auto data = expected.to_data();
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = heading::factory(source);
     BOOST_REQUIRE(result.is_valid());

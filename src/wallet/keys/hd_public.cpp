@@ -120,7 +120,7 @@ hd_public hd_public::from_string(const std::string& encoded)
 
 hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
 {
-    data_source source(key);
+    stream::in::copy source(key);
     byte_reader reader(source);
 
     const auto actual_prefix = reader.read_4_bytes_big_endian();

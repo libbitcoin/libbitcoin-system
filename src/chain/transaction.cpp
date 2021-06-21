@@ -294,7 +294,7 @@ transaction transaction::factory(reader& source, const hash_digest& hash,
 
 bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(istream, wire, witness);
 }
 
@@ -422,7 +422,7 @@ data_chunk transaction::to_data(bool wire, bool witness) const
     // generate_signature_hash extension by addition of the sighash_type.
     data.reserve(size + sizeof(uint8_t));
 
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

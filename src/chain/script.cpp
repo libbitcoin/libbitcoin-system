@@ -186,7 +186,7 @@ script script::factory(reader& source, bool prefix)
 
 bool script::from_data(const data_chunk& encoded, bool prefix)
 {
-    data_source istream(encoded);
+    stream::in::copy istream(encoded);
     return from_data(istream, prefix);
 }
 
@@ -325,7 +325,7 @@ data_chunk script::to_data(bool prefix) const
     data_chunk data;
     const auto size = serialized_size(prefix);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
@@ -444,7 +444,7 @@ const operation::list& script::operations() const
     }
 
     operation op;
-    data_source istream(bytes_);
+    stream::in::copy istream(bytes_);
     byte_reader source(istream);
     const auto size = bytes_.size();
 
@@ -680,7 +680,7 @@ data_chunk script::to_outputs(const transaction& tx)
     auto size = std::accumulate(outs.begin(), outs.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     byte_writer sink(ostream);
 
     const auto write = [&](const output& output)
@@ -705,7 +705,7 @@ data_chunk script::to_inpoints(const transaction& tx)
     auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     byte_writer sink(ostream);
 
     const auto write = [&](const input& input)
@@ -730,7 +730,7 @@ data_chunk script::to_sequences(const transaction& tx)
     auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     byte_writer sink(ostream);
 
     const auto write = [&](const input& input)
@@ -778,7 +778,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 
     data_chunk data;
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     byte_writer sink(ostream);
 
     // 1. transaction version (4).
@@ -1366,7 +1366,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
     const auto value = operation(endorsement, false).to_data();
 
     operation op;
-    data_source stream(bytes_);
+    stream::in::copy stream(bytes_);
     byte_reader source(stream);
     std::vector<data_chunk::iterator> found;
 

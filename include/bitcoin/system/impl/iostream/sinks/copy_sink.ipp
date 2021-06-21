@@ -16,38 +16,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_IPP
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/streams/base_sink.hpp>
+#include <algorithm>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-/// Sink for boost::iostreams::stream, copies bytes to Container.
+    
 template <typename Container>
-class copy_sink
-  : public base_sink<Container>
+copy_sink<Container>::copy_sink(Container& data) noexcept
+  : base_sink(limit<size_type>(data.size())),
+    to_(data.begin())
 {
-public:
-    copy_sink() noexcept;
-    virtual ~copy_sink() noexcept;
-    copy_sink(Container& data) noexcept;
-
-protected:
-    virtual void do_write(const value_type* from, size_type size) noexcept;
-
-private:
-    typename Container::iterator to_;
-};
+}
 
 template <typename Container>
-using ostream_copy = boost::iostreams::stream<copy_sink<Container>>;
+void copy_sink<Container>::do_write(const value_type* from,
+    size_type size) noexcept
+{
+    // std::copy_n returns iterator past last element copied to.
+    to_ = std::copy_n(from, size, to_);
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/streams/copy_sink.ipp>
 
 #endif

@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_2__without_timestamp__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum, false);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::network_address::factory(
         message::version::level::minimum, istream, false);
 
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_3__without_timestamp__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum, false);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::network_address::factory(
         message::version::level::minimum, source, false);
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_2__with_timestamp__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum, true);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::network_address::factory(
         message::version::level::minimum, istream, true);
 
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_3__with_timestamp__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum, true);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::network_address::factory(
         message::version::level::minimum, source, true);

@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_2__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     auto result = message::get_block_transactions::factory(
         message::version::level::minimum, istream);
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::get_block_transactions::factory(
         message::version::level::minimum, source);

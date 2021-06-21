@@ -41,7 +41,7 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
 {
     // e = H(M || R || i || j)
     data_chunk data(hash_size + R.size() + 2u * sizeof(uint32_t));
-    data_sink source(data);
+    stream::out::push source(data);
     byte_writer serial(source);
     serial.write_bytes(R);
     serial.write_bytes(M);

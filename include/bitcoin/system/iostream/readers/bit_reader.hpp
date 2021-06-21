@@ -19,14 +19,14 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BIT_READER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BIT_READER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_READER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_READER_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/byte_reader.hpp>
+#include <bitcoin/system/iostream/readers/byte_reader.hpp>
 
 namespace libbitcoin {
 namespace system {

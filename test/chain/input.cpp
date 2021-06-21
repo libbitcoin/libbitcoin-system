@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
 {
     const auto junk = base16_literal("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     input instance;
-    data_source source(junk);
+    stream::in::copy source(junk);
     byte_reader reader(source);
     BOOST_REQUIRE(instance.from_data(reader));
 }
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(input__factory_1__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(input__factory_2__valid_input__success)
 {
-    data_source stream(valid_raw_input);
+    stream::in::copy stream(valid_raw_input);
     auto instance = input::factory(stream);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(input__factory_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(input__factory_3__valid_input__success)
 {
-    data_source stream(valid_raw_input);
+    stream::in::copy stream(valid_raw_input);
     byte_reader source(stream);
     auto instance = input::factory(source);
     BOOST_REQUIRE(instance.is_valid());

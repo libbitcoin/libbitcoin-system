@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(address__factory_2__roundtrip__success)
     });
 
     const auto data = expected.to_data(version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = address::factory(version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(address__factory_3__roundtrip__success)
     });
 
     const data_chunk data = expected.to_data(version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = address::factory(version::level::minimum, source);
 

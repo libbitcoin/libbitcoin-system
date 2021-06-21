@@ -16,38 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SOURCE_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SOURCE_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_IPP
 
-#include <iostream>
-#include <boost/iostreams/stream.hpp>
+#include <algorithm>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Virtual base class for boost::iostreams::stream sources.
 template <typename Container>
-class base_source
+base_source<Container>::base_source(size_type size) noexcept
+  : size_(size)
 {
-public:
-    typedef char char_type;
-    typedef boost::iostreams::source_tag category;
-    typedef std::streamsize size_type;
-    typedef typename Container::value_type value_type;
+}
 
-    size_type read(char_type* buffer, size_type count) noexcept;
+template <typename Container>
+typename base_source<Container>::size_type
+base_source<Container>::read(char_type* buffer, size_type count) noexcept
+{
+    if (is_negative(count))
+        return negative_one;
 
-protected:
-    base_source(size_type size) noexcept;
-    virtual void do_read(value_type* to,  size_type size) noexcept = 0;
-
-    // Size tracks the Container unread bytes remaining.
-    size_type size_;
-};
+    const auto size = std::min(size_, count);
+    do_read(reinterpret_cast<value_type*>(buffer), size);
+    size_ -= size;
+    return size;
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/streams/base_source.ipp>
 
 #endif

@@ -132,7 +132,7 @@ void heading::reset()
 
 bool heading::from_data(const data_chunk& data)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(istream);
 }
 
@@ -161,7 +161,7 @@ data_chunk heading::to_data() const
     data_chunk data;
     const auto size = satoshi_fixed_size();
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

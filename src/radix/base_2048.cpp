@@ -128,7 +128,7 @@ std::string decode_base2048(const data_chunk& data,
 base2048_chunk base2048_pack(const data_chunk& unpacked)
 {
     base2048_chunk packed;
-    data_source source(unpacked);
+    stream::in::copy source(unpacked);
     bit_reader bit_reader(source);
 
     while (!bit_reader.is_exhausted())
@@ -154,7 +154,7 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
 data_chunk base2048_unpack(const base2048_chunk& packed)
 {
     data_chunk unpacked;
-    data_sink sink(unpacked);
+    stream::out::push sink(unpacked);
     bit_writer bit_writer(sink);
 
     for (const auto& value: packed)

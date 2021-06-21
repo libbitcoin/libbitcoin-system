@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/iostream/bit_reader.hpp>
+#include <bitcoin/system/iostream/readers/bit_reader.hpp>
 
 #include <algorithm>
 #include <cstddef>

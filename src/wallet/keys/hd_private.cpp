@@ -147,7 +147,7 @@ hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
 
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 {
-    data_source source(key);
+    stream::in::copy source(key);
     byte_reader reader(source);
 
     const auto prefix = reader.read_4_bytes_big_endian();

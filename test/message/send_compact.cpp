@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(send_compact__factory_2__valid_input__success)
 {
     const message::send_compact expected{ false, 5 };
     const auto data = expected.to_data(message::send_compact::version_minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::send_compact::factory(
         message::send_compact::version_minimum, istream);
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(send_compact__factory_3__valid_input__success)
 {
     const message::send_compact expected{ true, 257 };
     const auto data = expected.to_data(message::send_compact::version_minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::send_compact::factory(
         message::send_compact::version_minimum, source);

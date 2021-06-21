@@ -105,7 +105,7 @@ void compact_filter::reset()
 
 bool compact_filter::from_data(const data_chunk& data)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(istream);
 }
 
@@ -141,7 +141,7 @@ data_chunk compact_filter::to_data() const
     data_chunk data;
     const auto size = serialized_size();
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
@@ -170,7 +170,7 @@ size_t compact_filter::serialized_size() const
 
 bool compact_filter::from_data(uint32_t version, const data_chunk& data)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(version, istream);
 }
 

@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_2__valid_input__success)
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::get_headers::factory(
         message::get_headers::version_minimum, istream);
 
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::get_headers::version_minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::get_headers::factory(
         message::get_headers::version_minimum, source);

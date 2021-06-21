@@ -16,34 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SINK_IPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SINK_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_COPY_SOURCE_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_COPY_SOURCE_HPP
 
-#include <algorithm>
+#include <boost/iostreams/stream.hpp>
+#include <bitcoin/system/iostream/sources/base_source.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+/// Source for boost::iostreams::stream, copies bytes from Container.
 template <typename Container>
-base_sink<Container>::base_sink(size_type size) noexcept
-  : size_(size)
+class copy_source
+  : public base_source<Container>
 {
-}
+public:
+    copy_source() noexcept;
+    copy_source(const Container& data) noexcept;
 
-template <typename Container>
-typename base_sink<Container>::size_type
-base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
-{
-    if (count < 1)
-        return negative_one;
+protected:
+    virtual void do_read(value_type* to, size_type size) noexcept;
 
-    const auto size = std::min(size_, count);
-    do_write(reinterpret_cast<const value_type*>(buffer), size);
-    size_ -= size;
-    return size;
-}
+private:
+    typename Container::const_iterator from_;
+};
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/iostream/sources/copy_source.ipp>
 
 #endif

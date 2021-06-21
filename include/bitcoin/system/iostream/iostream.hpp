@@ -19,40 +19,58 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 
-#include <iostream>
-#include <iterator>
-#include <limits>
+#include <string>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/bit_reader.hpp>
-#include <bitcoin/system/iostream/bit_writer.hpp>
-#include <bitcoin/system/iostream/byte_reader.hpp>
-#include <bitcoin/system/iostream/byte_writer.hpp>
-#include <bitcoin/system/iostream/streams/base_sink.hpp>
-#include <bitcoin/system/iostream/streams/base_source.hpp>
-#include <bitcoin/system/iostream/streams/copy_sink.hpp>
-#include <bitcoin/system/iostream/streams/push_sink.hpp>
-#include <bitcoin/system/iostream/streams/copy_source.hpp>
-#include <bitcoin/system/iostream/streams/move_source.hpp>
+#include <bitcoin/system/data/data.hpp>
+
+/// Sinks.
+#include <bitcoin/system/iostream/sinks/base_sink.hpp>
+#include <bitcoin/system/iostream/sinks/copy_sink.hpp>
+#include <bitcoin/system/iostream/sinks/push_sink.hpp>
+
+/// Sources.
+#include <bitcoin/system/iostream/sources/base_source.hpp>
+#include <bitcoin/system/iostream/sources/copy_source.hpp>
+#include <bitcoin/system/iostream/sources/move_source.hpp>
+
+/// Readers.
+#include <bitcoin/system/iostream/readers/byte_reader.hpp>
+#include <bitcoin/system/iostream/readers/bit_reader.hpp>
+#include <bitcoin/system/iostream/readers/readers.hpp>
+
+/// Writers.
+#include <bitcoin/system/iostream/writers/byte_writer.hpp>
+#include <bitcoin/system/iostream/writers/bit_writer.hpp>
+#include <bitcoin/system/iostream/writers/writers.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace stream
+{
+    namespace in
+    {
+        // stream::in::move
+        using move = source<data_slab, move_source>;
+        using copy = source<data_slice, copy_source>;
+        using text = source<std::string, copy_source>;
+    }
 
-/// Transitional aliases.
+    namespace out
+    {
+        // stream::out::copy
+        using copy = sink<data_slab, copy_sink>;
+        using push = sink<data_chunk, push_sink>;
+        using text = sink<std::string, copy_sink>;
+    }
+}
 
-/// These were formerly interfaces and are now base classes.
+/// Base class aliases used as interfaces.
 using reader = byte_reader;
 using writer = byte_writer;
 
-/// These are the only sink/source in use presently.
-/// The role of copy_sink was previously served by a specialized writer.
-/// The role of copy_source was previously also served by redundant reader.
-using data_sink = boost::iostreams::stream<push_sink<data_chunk>>;
-using data_source = boost::iostreams::stream<copy_source<data_slice>>;
-
-using icopy = boost::iostreams::stream<copy_source<data_slice>>;
-using imove = boost::iostreams::stream<move_source<data_chunk>>;
-using ocopy = boost::iostreams::stream<copy_sink<data_slice>>;
-using opush = boost::iostreams::stream<push_sink<data_chunk>>;
+/// Original names.
+////using data_source = stream::in::copy;
+////using data_sink = stream::out::push;
 
 } // namespace system
 } // namespace libbitcoin

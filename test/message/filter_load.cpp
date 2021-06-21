@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_2__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::filter_load::factory(
         message::version::level::maximum, istream);
 
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::filter_load::factory(
         message::version::level::maximum, source);

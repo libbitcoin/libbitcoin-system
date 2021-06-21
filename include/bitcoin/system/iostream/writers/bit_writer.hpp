@@ -19,15 +19,15 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BIT_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BIT_WRITER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BIT_WRITER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BIT_WRITER_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <ostream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/byte_writer.hpp>
+#include <bitcoin/system/iostream/writers/byte_writer.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -60,7 +60,7 @@ operation operation::factory(reader& source)
 
 bool operation::from_data(const data_chunk& encoded)
 {
-    data_source istream(encoded);
+    stream::in::copy istream(encoded);
     return from_data(istream);
 }
 
@@ -235,7 +235,7 @@ data_chunk operation::to_data() const
     data_chunk data;
     const auto size = serialized_size();
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

@@ -179,7 +179,7 @@ stealth_record stealth_record::factory(reader& source, bool wire)
 
 bool stealth_record::from_data(const data_chunk& data, bool wire)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(istream, wire);
 }
 
@@ -264,7 +264,7 @@ data_chunk stealth_record::to_data(bool wire) const
     data_chunk data;
     const auto size = serialized_size(wire);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(ostream, wire);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_WRITER_IPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_DATA_BYTE_WRITER_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BYTE_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_WRITERS_BYTE_WRITER_IPP
 
 #include <utility>
 #include <bitcoin/system/serialization/endian.hpp>

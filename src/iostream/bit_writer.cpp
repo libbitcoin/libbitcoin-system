@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/iostream/bit_writer.hpp>
+#include <bitcoin/system/iostream/writers/bit_writer.hpp>
 
 #include <algorithm>
 #include <cstddef>

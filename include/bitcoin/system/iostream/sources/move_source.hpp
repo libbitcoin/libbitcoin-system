@@ -16,41 +16,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_BASE_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_MOVE_SOURCE_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_MOVE_SOURCE_HPP
 
-#include <iostream>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/system/iostream/sources/base_source.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Virtual base class for boost::iostreams::stream sinks.
-/// This class is constructible only so that it may be default constructed
-/// when not used in writer initializations. A default construction is empty
-/// and will therefore accept no writes.
+/// Source for boost::iostreams::stream, moves bytes from Container.
 template <typename Container>
-class base_sink
+class move_source
+  : public base_source<Container>
 {
 public:
-    typedef char char_type;
-    typedef boost::iostreams::sink_tag category;
-    typedef std::streamsize size_type;
-    typedef typename Container::value_type value_type;
-
-    size_type write(const char_type* buffer, size_type count) noexcept;
+    move_source() noexcept;
+    move_source(Container& data) noexcept;
 
 protected:
-    base_sink(size_type size) noexcept;
-    virtual void do_write(const value_type* from, size_type size) noexcept = 0;
+    virtual void do_read(value_type* to, size_type size) noexcept;
 
-    // Size tracks the Container space remaining.
-    size_type size_;
+private:
+    Container& source_;
+    typename Container::iterator from_;
 };
 
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/streams/base_sink.ipp>
+#include <bitcoin/system/impl/iostream/sources/move_source.ipp>
 
 #endif

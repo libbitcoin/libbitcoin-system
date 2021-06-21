@@ -97,7 +97,7 @@ data_chunk v1_decoding::seed_entropy() const
     if (overflows_.size() * sizeof(uint32_t) != entropy_.size())
         return {};
 
-    data_source source(entropy_);
+    stream::in::copy source(entropy_);
     byte_reader reader(source);
     auto it = overflows_.begin();
     std::string hexadecimal;
@@ -150,7 +150,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 {
     string_list words;
     words.reserve(word_count(entropy));
-    data_source source(entropy);
+    stream::in::copy source(entropy);
     byte_reader reader(source);
 
     while (!reader.is_exhausted())
@@ -180,7 +180,7 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
-    data_sink sink(entropy);
+    stream::out::push sink(entropy);
     byte_writer writer(sink);
 
     // See comments above on electrum v1 decoder overflow bug.

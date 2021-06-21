@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(alert__factory_2__roundtrip__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     const auto result = message::alert::factory(message::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(alert__factory_3__roundtrip__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = message::alert::factory(
         message::version::level::minimum, source);

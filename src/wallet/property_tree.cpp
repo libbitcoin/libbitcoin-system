@@ -45,7 +45,6 @@ using namespace pt;
 using namespace bc::system::config;
 using namespace bc::system::machine;
 using namespace bc::system::wallet;
-using namespace boost::iostreams;
 
 // property_tree is very odd in that what one might consider a node or element,
 // having a "containing" name cannot be added into another node without
@@ -492,13 +491,12 @@ ptree property_tree(const bitcoin_uri& uri)
 }
 
 // safe json input parsing
-
 bool property_tree(ptree& out, const std::string& json)
 {
     try
     {
-        stream<array_source> json_stream(json.c_str(), json.size());
-        read_json(json_stream, out);
+        stream::in::text istream(json);
+        read_json(istream, out);
         return true;
     }
     catch (const std::exception&)

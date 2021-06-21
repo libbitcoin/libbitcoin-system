@@ -98,7 +98,7 @@ void network_address::reset()
 bool network_address::from_data(uint32_t version,
     const data_chunk& data, bool with_timestamp)
 {
-    data_source istream(data);
+    stream::in::copy istream(data);
     return from_data(version, istream, with_timestamp);
 }
 
@@ -135,7 +135,7 @@ data_chunk network_address::to_data(uint32_t version,
     data_chunk data;
     const auto size = serialized_size(version, with_timestamp);
     data.reserve(size);
-    data_sink ostream(data);
+    stream::out::push ostream(data);
     to_data(version, ostream, with_timestamp);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

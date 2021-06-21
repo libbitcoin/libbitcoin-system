@@ -82,7 +82,7 @@ uint64_t siphash(const siphash_key& key, const data_slice& message)
 
     constexpr auto eight = sizeof(uint64_t);
     const auto bytes= message.size();
-    data_source source(message);
+    stream::in::copy source(message);
     byte_reader reader(source);
 
     for (size_t index = eight; index <= bytes; index += eight)

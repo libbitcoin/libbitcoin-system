@@ -237,7 +237,7 @@
 ////    const data_chunk expected_buffer{ 0xaa, 0xaa, 0xaa, 0xaa };
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bits(expected, bits);
@@ -249,7 +249,7 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_bits(bits), expected);
@@ -265,7 +265,7 @@
 ////    const data_chunk expected_buffer{ 0x55, 0x55, 0x55, 0x55, 0x00 };
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(false);
@@ -278,7 +278,7 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(expected_buffer, buffer);
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(!bit_reader.read_bit());
@@ -318,7 +318,7 @@
 ////    const uint8_t expected_numeric = 0xaa;
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
@@ -335,7 +335,7 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(buffer, expected_buffer);
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -358,7 +358,7 @@
 ////    const data_chunk expected_read{ 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa };
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_byte(first_byte);
@@ -372,7 +372,7 @@
 ////
 ////    BOOST_REQUIRE_EQUAL(buffer, expected_buffer);
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE_EQUAL(bit_reader.read_byte(), first_byte);
@@ -507,7 +507,7 @@
 ////    const uint64_t expected = 0x0f1e2d3c4b5b6a79;
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
@@ -522,7 +522,7 @@
 ////    bit_writer.flush();
 ////    sink.flush();
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());
@@ -609,7 +609,7 @@
 ////    const uint64_t expected = 0x0f1e2d3c4b5b6a79;
 ////    data_chunk buffer;
 ////
-////    data_sink sink(buffer);
+////    stream::out::push sink(buffer);
 ////    byte_writer writer(sink);
 ////    bit_writer bit_writer(writer);
 ////    bit_writer.write_bit(true);
@@ -624,7 +624,7 @@
 ////    bit_writer.flush();
 ////    sink.flush();
 ////
-////    data_source source(buffer);
+////    stream::in::copy source(buffer);
 ////    byte_reader reader(source);
 ////    bit_reader bit_reader(reader);
 ////    BOOST_REQUIRE(bit_reader.read_bit());

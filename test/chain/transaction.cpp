@@ -459,13 +459,13 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
 ////    static const auto wire = true;
 ////    const auto data_wire = to_chunk(base16_literal(TX3_WIRE_SERIALIZED));
 ////
-////    data_source wire_stream(data_wire);
+////    stream::in::copy wire_stream(data_wire);
 ////    chain::transaction wire_tx;
 ////    BOOST_REQUIRE(wire_tx.from_data(wire_stream, wire));
 ////    BOOST_REQUIRE(data_wire == wire_tx.to_data(wire));
 ////    ////const auto get_store_text = encode_base16(wire_tx.to_data(!wire));
 ////    const auto data_store = to_chunk(base16_literal(TX3_STORE_SERIALIZED_V3));
-////    data_source store_stream(data_store);
+////    stream::in::copy store_stream(data_store);
 ////    chain::transaction store_tx;
 ////    BOOST_REQUIRE(store_tx.from_data(store_stream, !wire));
 ////    BOOST_REQUIRE(data_store == store_tx.to_data(!wire));
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_1__success)
     static const auto raw_tx = to_chunk(base16_literal(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
-    data_source stream(raw_tx);
+    stream::in::copy stream(raw_tx);
     chain::transaction tx = chain::transaction::factory(stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(), 225u);
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_2__success)
     static const auto raw_tx = to_chunk(base16_literal(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
-    data_source stream(raw_tx);
+    stream::in::copy stream(raw_tx);
     chain::transaction tx = chain::transaction::factory(stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);
@@ -546,7 +546,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_1__success)
     static const auto raw_tx = to_chunk(base16_literal(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
-    data_source stream(raw_tx);
+    stream::in::copy stream(raw_tx);
     byte_reader source(stream);
     chain::transaction tx = chain::transaction::factory(source);
     BOOST_REQUIRE(tx.is_valid());
@@ -565,7 +565,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_2__success)
     static const data_chunk raw_tx = to_chunk(base16_literal(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
-    data_source stream(raw_tx);
+    stream::in::copy stream(raw_tx);
     byte_reader source(stream);
     chain::transaction tx = chain::transaction::factory(source);
     BOOST_REQUIRE(tx.is_valid());

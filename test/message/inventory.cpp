@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(inventory__factory_2__valid_input__success)
 
     static const auto version = version::level::minimum;
     const auto data = expected.to_data(version);
-    data_source istream(data);
+    stream::in::copy istream(data);
     auto result = inventory::factory(version, istream);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(inventory__factory_3__valid_input__success)
 
     static const auto version = version::level::minimum;
     const auto data = expected.to_data(version);
-    data_source istream(data);
+    stream::in::copy istream(data);
     byte_reader source(istream);
     const auto result = inventory::factory(version, source);
     BOOST_REQUIRE(result.is_valid());

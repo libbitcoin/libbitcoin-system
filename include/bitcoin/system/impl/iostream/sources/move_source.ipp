@@ -16,39 +16,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_MOVE_SOURCE_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_MOVE_SOURCE_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_MOVE_SOURCE_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_MOVE_SOURCE_IPP
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/streams/base_source.hpp>
+#include <algorithm>
+#include <iterator>
+#include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Source for boost::iostreams::stream, moves bytes from Container.
 template <typename Container>
-class move_source
-  : public base_source<Container>
+move_source<Container>::move_source(Container& data) noexcept
+  : base_source(limit<size_type>(data.size())),
+    source_(data),
+    from_(source_.begin())
 {
-public:
-    move_source() noexcept;
-    virtual ~move_source() noexcept;
-    move_source(Container&& data) noexcept;
-
-protected:
-    virtual void do_read(value_type* to, size_type size) noexcept;
-
-private:
-    Container&& source_;
-    typename Container::iterator from_;
-};
+}
 
 template <typename Container>
-using istream_move = boost::iostreams::stream<move_source<Container>>;
+void move_source<Container>::do_read(value_type* to, size_type size) noexcept
+{
+    // std::move does not have a size overload.
+    // std::move returns iterator past last element moved to.
+    const auto end = std::next(from_, size);
+    std::move(from_, end, to);
+    from_ = end;
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/streams/move_source.ipp>
 
 #endif

@@ -16,38 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SOURCE_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_COPY_SOURCE_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_IPP
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/streams/base_source.hpp>
+#include <algorithm>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Source for boost::iostreams::stream, copies bytes from Container.
 template <typename Container>
-class copy_source
-  : public base_source<Container>
+base_sink<Container>::base_sink(size_type size) noexcept
+  : size_(size)
 {
-public:
-    copy_source() noexcept;
-    virtual ~copy_source() noexcept;
-    copy_source(const Container& data) noexcept;
-
-protected:
-    virtual void do_read(value_type* to, size_type size) noexcept;
-
-private:
-    typename Container::const_iterator from_;
-};
+}
 
 template <typename Container>
-using istream_copy = boost::iostreams::stream<copy_source<Container>>;
+typename base_sink<Container>::size_type
+base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
+{
+    if (is_negative(count))
+        return negative_one;
+
+    const auto size = std::min(size_, count);
+    do_write(reinterpret_cast<const value_type*>(buffer), size);
+    size_ -= size;
+    return size;
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/streams/copy_source.ipp>
 
 #endif

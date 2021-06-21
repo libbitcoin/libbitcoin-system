@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(point__factory_2__roundtrip__success)
 
     BOOST_REQUIRE(raw == data);
 
-    data_source istream(raw);
+    stream::in::copy istream(raw);
     auto point = chain::point::factory(istream);
 
     BOOST_REQUIRE(point.is_valid());
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(point__factory_3__roundtrip__success)
 
     BOOST_REQUIRE(raw == data);
 
-    data_source istream(raw);
+    stream::in::copy istream(raw);
     byte_reader source(istream);
     auto point = chain::point::factory(source);
 

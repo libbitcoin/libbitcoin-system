@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_STREAMS_PUSH_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_PUSH_SINK_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_PUSH_SINK_HPP
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/streams/base_sink.hpp>
+#include <bitcoin/system/iostream/sinks/base_sink.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,7 +32,6 @@ class push_sink
 {
 public:
     push_sink() noexcept;
-    virtual ~push_sink() noexcept;
     push_sink(Container& data) noexcept;
 
 protected:
@@ -43,13 +42,10 @@ private:
     typename Container::iterator to_;
 };
 
-template <typename Container>
-using ostream_push = boost::iostreams::stream<push_sink<Container>>;
-
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/streams/push_sink.ipp>
+#include <bitcoin/system/impl/iostream/sinks/push_sink.ipp>
 
 // TODO: implement rational skip() behavior with insert_sink.
 // TODO: this requires the sink to be "output seekable"
