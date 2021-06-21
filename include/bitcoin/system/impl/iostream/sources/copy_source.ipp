@@ -38,7 +38,7 @@ void copy_source<Container>::do_read(value_type* to, size_type size) noexcept
 {
     // std::copy_n returns iterator past last element copied to.
     std::copy_n(from_, size, to);
-    from_ = std::next(from_, size);
+    std::advance(from_, size);
 }
 
 } // namespace system
