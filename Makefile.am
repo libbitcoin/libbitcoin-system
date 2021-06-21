@@ -594,19 +594,25 @@ include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/data_slice.ipp \
     include/bitcoin/system/impl/data/string.ipp
 
-include_bitcoin_system_impl_iostreamdir = ${includedir}/bitcoin/system/impl/iostream
-include_bitcoin_system_impl_iostream_HEADERS = \
-    include/bitcoin/system/impl/iostream/byte_reader.ipp \
-    include/bitcoin/system/impl/iostream/byte_writer.ipp
+include_bitcoin_system_impl_iostream_readersdir = ${includedir}/bitcoin/system/impl/iostream/readers
+include_bitcoin_system_impl_iostream_readers_HEADERS = \
+    include/bitcoin/system/impl/iostream/readers/byte_reader.ipp
 
-include_bitcoin_system_impl_iostream_streamsdir = ${includedir}/bitcoin/system/impl/iostream/streams
-include_bitcoin_system_impl_iostream_streams_HEADERS = \
-    include/bitcoin/system/impl/iostream/streams/base_sink.ipp \
-    include/bitcoin/system/impl/iostream/streams/base_source.ipp \
-    include/bitcoin/system/impl/iostream/streams/copy_sink.ipp \
-    include/bitcoin/system/impl/iostream/streams/copy_source.ipp \
-    include/bitcoin/system/impl/iostream/streams/move_source.ipp \
-    include/bitcoin/system/impl/iostream/streams/push_sink.ipp
+include_bitcoin_system_impl_iostream_sinksdir = ${includedir}/bitcoin/system/impl/iostream/sinks
+include_bitcoin_system_impl_iostream_sinks_HEADERS = \
+    include/bitcoin/system/impl/iostream/sinks/base_sink.ipp \
+    include/bitcoin/system/impl/iostream/sinks/copy_sink.ipp \
+    include/bitcoin/system/impl/iostream/sinks/push_sink.ipp
+
+include_bitcoin_system_impl_iostream_sourcesdir = ${includedir}/bitcoin/system/impl/iostream/sources
+include_bitcoin_system_impl_iostream_sources_HEADERS = \
+    include/bitcoin/system/impl/iostream/sources/base_source.ipp \
+    include/bitcoin/system/impl/iostream/sources/copy_source.ipp \
+    include/bitcoin/system/impl/iostream/sources/move_source.ipp
+
+include_bitcoin_system_impl_iostream_writersdir = ${includedir}/bitcoin/system/impl/iostream/writers
+include_bitcoin_system_impl_iostream_writers_HEADERS = \
+    include/bitcoin/system/impl/iostream/writers/byte_writer.ipp
 
 include_bitcoin_system_impl_log_featuresdir = ${includedir}/bitcoin/system/impl/log/features
 include_bitcoin_system_impl_log_features_HEADERS = \
@@ -660,20 +666,31 @@ include_bitcoin_system_impl_wallet_mnemonics_HEADERS = \
 
 include_bitcoin_system_iostreamdir = ${includedir}/bitcoin/system/iostream
 include_bitcoin_system_iostream_HEADERS = \
-    include/bitcoin/system/iostream/bit_reader.hpp \
-    include/bitcoin/system/iostream/bit_writer.hpp \
-    include/bitcoin/system/iostream/byte_reader.hpp \
-    include/bitcoin/system/iostream/byte_writer.hpp \
     include/bitcoin/system/iostream/iostream.hpp
 
-include_bitcoin_system_iostream_streamsdir = ${includedir}/bitcoin/system/iostream/streams
-include_bitcoin_system_iostream_streams_HEADERS = \
-    include/bitcoin/system/iostream/streams/base_sink.hpp \
-    include/bitcoin/system/iostream/streams/base_source.hpp \
-    include/bitcoin/system/iostream/streams/copy_sink.hpp \
-    include/bitcoin/system/iostream/streams/copy_source.hpp \
-    include/bitcoin/system/iostream/streams/move_source.hpp \
-    include/bitcoin/system/iostream/streams/push_sink.hpp
+include_bitcoin_system_iostream_readersdir = ${includedir}/bitcoin/system/iostream/readers
+include_bitcoin_system_iostream_readers_HEADERS = \
+    include/bitcoin/system/iostream/readers/bit_reader.hpp \
+    include/bitcoin/system/iostream/readers/byte_reader.hpp \
+    include/bitcoin/system/iostream/readers/readers.hpp
+
+include_bitcoin_system_iostream_sinksdir = ${includedir}/bitcoin/system/iostream/sinks
+include_bitcoin_system_iostream_sinks_HEADERS = \
+    include/bitcoin/system/iostream/sinks/base_sink.hpp \
+    include/bitcoin/system/iostream/sinks/copy_sink.hpp \
+    include/bitcoin/system/iostream/sinks/push_sink.hpp
+
+include_bitcoin_system_iostream_sourcesdir = ${includedir}/bitcoin/system/iostream/sources
+include_bitcoin_system_iostream_sources_HEADERS = \
+    include/bitcoin/system/iostream/sources/base_source.hpp \
+    include/bitcoin/system/iostream/sources/copy_source.hpp \
+    include/bitcoin/system/iostream/sources/move_source.hpp
+
+include_bitcoin_system_iostream_writersdir = ${includedir}/bitcoin/system/iostream/writers
+include_bitcoin_system_iostream_writers_HEADERS = \
+    include/bitcoin/system/iostream/writers/bit_writer.hpp \
+    include/bitcoin/system/iostream/writers/byte_writer.hpp \
+    include/bitcoin/system/iostream/writers/writers.hpp
 
 include_bitcoin_system_logdir = ${includedir}/bitcoin/system/log
 include_bitcoin_system_log_HEADERS = \
