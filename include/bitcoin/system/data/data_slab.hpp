@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Identical to data_slice except pointer is non-const, and therefore does not
-/// accept construction from const sources (excludes string, vector, literal).
+/// accept construction from const sources (excludes literal).
 /// Resizable but otherwise non-const iterable wrapper for a memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
@@ -61,6 +61,11 @@ public:
     template <size_type Size, typename Byte, if_byte<Byte> = true>
     data_slab(std::array<Byte, Size>& data) noexcept;
 
+    // TODO: test.
+    /// Byte vector constructor (casts Byte to uint8_t).
+    template <typename Byte, if_byte<Byte> = true>
+    data_slab(std::vector<Byte>& data) noexcept;
+
     // TODO: restrict to iterator-to-non-const references.
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
@@ -70,6 +75,10 @@ public:
     /// Byte pointer to non-const constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
     data_slab(Byte* begin, Byte* end) noexcept;
+
+    // TODO: test.
+    /// String constructor (casts char to uint8_t).
+    data_slab(std::string& text) noexcept;
 
     /// Methods.
 

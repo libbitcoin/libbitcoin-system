@@ -36,6 +36,12 @@ data_slab::data_slab(std::array<Byte, Size>& data) noexcept
 {
 }
 
+template <typename Byte, if_byte<Byte>>
+data_slab::data_slab(std::vector<Byte>& data) noexcept
+  : data_slab(from_size(data.begin(), data.size()))
+{
+}
+
 template <typename Iterator>
 data_slab::data_slab(Iterator& begin, Iterator& end) noexcept
   : data_slab(from_iterators(begin, end))
