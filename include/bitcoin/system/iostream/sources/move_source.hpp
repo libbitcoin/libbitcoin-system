@@ -31,7 +31,6 @@ class move_source
   : public base_source<Container>
 {
 public:
-    move_source() noexcept;
     move_source(Container& data) noexcept;
 
 protected:

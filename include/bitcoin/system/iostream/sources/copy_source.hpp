@@ -31,7 +31,6 @@ class copy_source
   : public base_source<Container>
 {
 public:
-    copy_source() noexcept;
     copy_source(const Container& data) noexcept;
 
 protected:

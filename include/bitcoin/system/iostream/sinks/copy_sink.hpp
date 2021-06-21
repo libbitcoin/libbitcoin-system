@@ -31,7 +31,6 @@ class copy_sink
   : public base_sink<Container>
 {
 public:
-    copy_sink() noexcept;
     copy_sink(Container& data) noexcept;
 
 protected:

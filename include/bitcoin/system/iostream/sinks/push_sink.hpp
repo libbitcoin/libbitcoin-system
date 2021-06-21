@@ -31,7 +31,6 @@ class push_sink
   : public base_sink<Container>
 {
 public:
-    push_sink() noexcept;
     push_sink(Container& data) noexcept;
 
 protected:
