@@ -152,13 +152,13 @@ void byte_writer::write_string(const std::string& value) noexcept
     write_string(value.data(), value.size());
 }
 
-// context
-//-----------------------------------------------------------------------------
-
 void byte_writer::skip(size_t size) noexcept
 {
     do_skip(size);
 }
+
+// context
+//-----------------------------------------------------------------------------
 
 void byte_writer::flush() noexcept
 {
@@ -192,11 +192,14 @@ void byte_writer::do_write(const uint8_t* data, size_t size) noexcept
     stream_.write(reinterpret_cast<const char*>(data), size);
 }
 
+// TODO: implement forward seek.
 void byte_writer::do_skip(size_t size) noexcept
 {
-    // TODO: verify this behavior using the copy_sink.
-    // TODO: this cannot work with the stream::out::push (research).
-    stream_.seekp(size, std::ios_base::cur);
+    ////// TODO: verify this behavior.
+    ////// TODO: this cannot work with the stream::out::push.
+    ////stream_.seekp(size, std::ios_base::cur);
+    while (!is_zero(size--))
+        write_byte(0x00);
 }
 
 void byte_writer::do_flush() noexcept

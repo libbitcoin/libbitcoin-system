@@ -207,8 +207,7 @@ std::string byte_reader::read_string(size_t size) noexcept
 
 void byte_reader::skip(size_t size) noexcept
 {
-    // Stream source is presumed to not be seekable.
-    read_bytes(size);
+    do_skip(size);
 }
 
 // context
@@ -256,6 +255,15 @@ void byte_reader::do_read(uint8_t* buffer, size_t size) noexcept
 
     // It is not generally more efficient to call stream_.get() for one byte.
     stream_.read(reinterpret_cast<char*>(buffer), size);
+}
+
+// TODO: implement forward seek.
+void byte_reader::do_skip(size_t size) noexcept
+{
+    ////// TODO: verify this behavior.
+    ////stream_.seekp(size, std::ios_base::cur);
+    while (!is_zero(size--))
+        read_byte();
 }
 
 bool byte_reader::get_valid() const noexcept

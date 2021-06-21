@@ -46,10 +46,14 @@ public:
     /// Read size bits into an integer (high to low).
     virtual uint64_t read_bits(uint8_t bits) noexcept;
 
+    /// Advance the iterator.
+    virtual void skip_bits(size_t bits) noexcept;
+
 protected:
     uint8_t do_peek() noexcept override;
     uint8_t do_read() noexcept override;
     void do_read(uint8_t* buffer, size_t size) noexcept override;
+    void do_skip(size_t size) noexcept override;
     bool get_valid() const noexcept override;
     bool get_exhausted() const noexcept override;
     void set_invalid() noexcept override;

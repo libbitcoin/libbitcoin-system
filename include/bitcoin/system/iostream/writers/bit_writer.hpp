@@ -47,6 +47,9 @@ public:
     /// Write size bits from an integer (high to low).
     virtual void write_bits(uint64_t value, uint8_t bits) noexcept;
 
+    /// Advance iterator by writing false.
+    virtual void skip_bits(size_t bits) noexcept;
+
 protected:
     void do_write(uint8_t byte) noexcept override;
     void do_write(const uint8_t* data, size_t size) noexcept override;
