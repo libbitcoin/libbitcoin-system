@@ -38,8 +38,7 @@ void push_sink<Container>::do_write(const value_type* from,
     size_type size) noexcept
 {
     // std::vector.insert returns iterator to first element inserted.
-    sink_.insert(to_, from, std::next(from, size));
-    to_ = std::next(to_, size);
+    to_ = std::next(sink_.insert(to_, from, std::next(from, size)), size);
 }
 
 } // namespace system
