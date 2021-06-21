@@ -20,4 +20,72 @@
 
 BOOST_AUTO_TEST_SUITE(copy_sink_tests)
 
+BOOST_AUTO_TEST_CASE(copy_sink__write__nullptr__false)
+{
+    data_chunk sink;
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), -1);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__empty__true)
+{
+    const std::string from;
+    data_chunk sink{ 0x00 };
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__negative__false)
+{
+    const std::string from{ "a" };
+    data_chunk sink{ 0x00 };
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), -1), -1);
+    BOOST_REQUIRE_EQUAL(sink[0], 0x00);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__past_end__expected)
+{
+    const std::string from{ "a" };
+    data_chunk sink{ 0x00 };
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 2), 1);
+    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__zero__zero)
+{
+    const std::string from{ "a" };
+    data_chunk sink{ 0x00 };
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+    BOOST_REQUIRE_EQUAL(sink[0], 0x00);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__one__expected)
+{
+    const std::string from{ "a" };
+    data_chunk sink{ 0x00 };
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 1), 1);
+    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
+}
+
+BOOST_AUTO_TEST_CASE(copy_sink__write__multiple__correct_tracking)
+{
+    const std::string from{ "abcdef" };
+    data_chunk sink(6, 0x00);
+    copy_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.write(&from[0], 1), 1);
+    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
+    BOOST_REQUIRE_EQUAL(instance.write(&from[1], 2), 2);
+    BOOST_REQUIRE_EQUAL(sink[1], from[1]);
+    BOOST_REQUIRE_EQUAL(sink[2], from[2]);
+    BOOST_REQUIRE_EQUAL(instance.write(&from[3], 3), 3);
+    BOOST_REQUIRE_EQUAL(sink[3], from[3]);
+    BOOST_REQUIRE_EQUAL(sink[4], from[4]);
+    BOOST_REQUIRE_EQUAL(sink[5], from[5]);
+    BOOST_REQUIRE_EQUAL(instance.write(&from[6], 42), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
