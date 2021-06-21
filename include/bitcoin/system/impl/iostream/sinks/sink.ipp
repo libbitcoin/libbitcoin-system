@@ -16,34 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_IPP
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/sinks/sink.hpp>
+#include <algorithm>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Sink for boost::iostreams::stream, copies bytes to Container.
 template <typename Container>
-class copy_sink
-  : public base_sink<Container>
+base_sink<Container>::base_sink(size_type size) noexcept
+  : size_(size)
 {
-public:
-    copy_sink() noexcept;
-    copy_sink(Container& data) noexcept;
+}
 
-protected:
-    virtual void do_write(const value_type* from, size_type size) noexcept;
+template <typename Container>
+typename base_sink<Container>::size_type
+base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
+{
+    if (is_negative(count))
+        return negative_one;
 
-private:
-    typename Container::iterator to_;
-};
+    const auto size = std::min(size_, count);
+    do_write(reinterpret_cast<const value_type*>(buffer), size);
+    size_ -= size;
+    return size;
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/sinks/copy_sink.ipp>
 
 #endif

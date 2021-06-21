@@ -24,12 +24,12 @@
 #include <bitcoin/system/data/data.hpp>
 
 /// Sinks.
-#include <bitcoin/system/iostream/sinks/base_sink.hpp>
+#include <bitcoin/system/iostream/sinks/sink.hpp>
 #include <bitcoin/system/iostream/sinks/copy_sink.hpp>
 #include <bitcoin/system/iostream/sinks/push_sink.hpp>
 
 /// Sources.
-#include <bitcoin/system/iostream/sources/base_source.hpp>
+#include <bitcoin/system/iostream/sources/source.hpp>
 #include <bitcoin/system/iostream/sources/copy_source.hpp>
 #include <bitcoin/system/iostream/sources/move_source.hpp>
 

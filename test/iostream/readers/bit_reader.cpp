@@ -16,34 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_HPP
+#include "../../test.hpp"
+#include <sstream>
 
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/sinks/sink.hpp>
+BOOST_AUTO_TEST_SUITE(bit_reader_tests)
 
-namespace libbitcoin {
-namespace system {
-
-/// Sink for boost::iostreams::stream, copies bytes to Container.
-template <typename Container>
-class copy_sink
-  : public base_sink<Container>
-{
-public:
-    copy_sink() noexcept;
-    copy_sink(Container& data) noexcept;
-
-protected:
-    virtual void do_write(const value_type* from, size_type size) noexcept;
-
-private:
-    typename Container::iterator to_;
-};
-
-} // namespace system
-} // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/sinks/copy_sink.ipp>
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

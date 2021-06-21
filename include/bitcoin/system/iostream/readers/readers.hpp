@@ -22,7 +22,7 @@
 #include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/sources/base_source.hpp>
+#include <bitcoin/system/iostream/sources/source.hpp>
 #include <bitcoin/system/iostream/sources/copy_source.hpp>
 #include <bitcoin/system/iostream/sources/move_source.hpp>
 #include <bitcoin/system/iostream/readers/bit_reader.hpp>

@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_COPY_SOURCE_HPP
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/sources/base_source.hpp>
+#include <bitcoin/system/iostream/sources/source.hpp>
 
 namespace libbitcoin {
 namespace system {

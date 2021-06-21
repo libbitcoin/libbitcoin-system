@@ -16,36 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_IPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_IPP
+#include "../../test.hpp"
+#include <sstream>
 
-#include <algorithm>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/math/sign.hpp>
+BOOST_AUTO_TEST_SUITE(byte_writer_tests)
 
-namespace libbitcoin {
-namespace system {
-
-template <typename Container>
-base_sink<Container>::base_sink(size_type size) noexcept
-  : size_(size)
-{
-}
-
-template <typename Container>
-typename base_sink<Container>::size_type
-base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
-{
-    if (is_negative(count))
-        return negative_one;
-
-    const auto size = std::min(size_, count);
-    do_write(reinterpret_cast<const value_type*>(buffer), size);
-    size_ -= size;
-    return size;
-}
-
-} // namespace system
-} // namespace libbitcoin
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

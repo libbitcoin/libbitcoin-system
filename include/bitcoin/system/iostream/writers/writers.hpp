@@ -22,7 +22,7 @@
 #include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/sinks/base_sink.hpp>
+#include <bitcoin/system/iostream/sinks/sink.hpp>
 #include <bitcoin/system/iostream/sinks/copy_sink.hpp>
 #include <bitcoin/system/iostream/sinks/push_sink.hpp>
 #include <bitcoin/system/iostream/writers/bit_writer.hpp>

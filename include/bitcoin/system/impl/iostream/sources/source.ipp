@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_IPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_IPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_IPP
 
 #include <algorithm>
 #include <bitcoin/system/constants.hpp>

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_BASE_SOURCE_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_HPP
 
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
@@ -54,6 +54,6 @@ using source = boost::iostreams::stream<Source<Container>>;
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/sources/base_source.ipp>
+#include <bitcoin/system/impl/iostream/sources/source.ipp>
 
 #endif

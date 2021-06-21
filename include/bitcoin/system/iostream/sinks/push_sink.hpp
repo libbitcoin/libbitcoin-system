@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_PUSH_SINK_HPP
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/iostream/sinks/base_sink.hpp>
+#include <bitcoin/system/iostream/sinks/sink.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_BASE_SINK_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_HPP
 
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
@@ -57,6 +57,6 @@ using sink = boost::iostreams::stream<Sink<Container>>;
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/iostream/sinks/base_sink.ipp>
+#include <bitcoin/system/impl/iostream/sinks/sink.ipp>
 
 #endif
