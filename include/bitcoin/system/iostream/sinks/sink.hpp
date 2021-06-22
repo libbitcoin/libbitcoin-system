@@ -27,9 +27,6 @@ namespace libbitcoin {
 namespace system {
 
 /// Virtual base class for boost::iostreams::stream sinks.
-/// This class is constructible only so that it may be default constructed
-/// when not used in writer initializations. A default construction is empty
-/// and will therefore accept no writes.
 template <typename Container>
 class base_sink
 {

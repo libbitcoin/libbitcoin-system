@@ -36,12 +36,16 @@ template <typename Container>
 typename base_source<Container>::size_type
 base_source<Container>::read(char_type* buffer, size_type count) noexcept
 {
+    // Boost documents that -1 should be return to indicate eof, but this does
+    // not allow for partial reads. So always return amount read if valid.
     if (is_null(buffer) || is_negative(count))
         return negative_one;
 
     const auto size = std::min(size_, count);
     do_read(reinterpret_cast<value_type*>(buffer), size);
     size_ -= size;
+
+    // eof is indicated by the return of a value less than count.
     return size;
 }
 

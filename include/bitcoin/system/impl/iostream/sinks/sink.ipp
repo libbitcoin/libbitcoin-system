@@ -36,12 +36,16 @@ template <typename Container>
 typename base_sink<Container>::size_type
 base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
 {
+    // Boost documents that an exception should be thrown on write failure,
+    // including insufficient buffer. A negative return is not documented.
     if (is_null(buffer) || is_negative(count))
         return negative_one;
 
     const auto size = std::min(size_, count);
     do_write(reinterpret_cast<const value_type*>(buffer), size);
     size_ -= size;
+
+    // eof is indicated by the return of a value less than count.
     return size;
 }
 
