@@ -71,7 +71,7 @@ void bit_writer::write_bits(uint64_t value, uint8_t bits) noexcept
 }
 
 // TODO: implement forward seek.
-void bit_writer::skip_bits(size_t bits) noexcept
+void bit_writer::skip_bit(size_t bits) noexcept
 {
     while (!is_zero(bits--))
         write_bit(false);
@@ -114,7 +114,7 @@ void bit_writer::do_write(const uint8_t* data, size_t size) noexcept
 
 void bit_writer::do_skip(size_t size) noexcept
 {
-    skip_bits(to_bits(size));
+    skip_bit(to_bits(size));
 }
 
 void bit_writer::do_flush() noexcept

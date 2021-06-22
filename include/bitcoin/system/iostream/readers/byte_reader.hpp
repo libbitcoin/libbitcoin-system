@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <istream>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
@@ -96,7 +97,7 @@ public:
     virtual std::string read_string(size_t size) noexcept;
 
     /// Advance the iterator.
-    virtual void skip(size_t size) noexcept;
+    virtual void skip(size_t size=one) noexcept;
 
     /// The stream is empty (or invalid).
     virtual bool is_exhausted() const noexcept;

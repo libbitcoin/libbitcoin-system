@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/iostream/readers/byte_reader.hpp>
 
@@ -47,7 +48,7 @@ public:
     virtual uint64_t read_bits(uint8_t bits) noexcept;
 
     /// Advance the iterator.
-    virtual void skip_bits(size_t bits) noexcept;
+    virtual void skip_bit(size_t bits=one) noexcept;
 
 protected:
     uint8_t do_peek() noexcept override;

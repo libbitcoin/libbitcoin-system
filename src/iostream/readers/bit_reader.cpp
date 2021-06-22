@@ -71,7 +71,7 @@ uint64_t bit_reader::read_bits(uint8_t bits) noexcept
 }
 
 // TODO: implement forward seek.
-void bit_reader::skip_bits(size_t bits) noexcept
+void bit_reader::skip_bit(size_t bits) noexcept
 {
     while (!is_zero(bits--))
         read_bit();
@@ -139,7 +139,7 @@ void bit_reader::do_read(uint8_t* buffer, size_t size) noexcept
 
 void bit_reader::do_skip(size_t size) noexcept
 {
-    skip_bits(to_bits(size));
+    skip_bit(to_bits(size));
 }
 
 bool bit_reader::get_valid() const noexcept

@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <iterator>
 #include <ostream>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/iostream/writers/byte_writer.hpp>
 
@@ -48,7 +49,7 @@ public:
     virtual void write_bits(uint64_t value, uint8_t bits) noexcept;
 
     /// Advance iterator by writing false.
-    virtual void skip_bits(size_t bits) noexcept;
+    virtual void skip_bit(size_t bits=one) noexcept;
 
 protected:
     void do_write(uint8_t byte) noexcept override;

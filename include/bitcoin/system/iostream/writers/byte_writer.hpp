@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <ostream>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
@@ -37,6 +38,13 @@ class BC_API byte_writer
 {
 public:
     /// Constructors.
+
+    /// std::ostream does not have any indication of seekable.
+    /// so we templatize this class on stream type and implement seek for our
+    /// own types and assume that any external type is seekable. If a
+    /// non-seeakble stream is seeked, behavior is unknow except to the caller.
+    /// Readers can always seek (forward) by reading. Now just need to 
+
     byte_writer(std::ostream& stream) noexcept;
     virtual ~byte_writer() noexcept;
 
@@ -81,7 +89,7 @@ public:
     virtual void write_string(const std::string& value) noexcept;
 
     /// Advance iterator by writing nulls.
-    virtual void skip(size_t size) noexcept;
+    virtual void skip(size_t size=one) noexcept;
 
     /// Flush the buffer.
     virtual void flush() noexcept;
