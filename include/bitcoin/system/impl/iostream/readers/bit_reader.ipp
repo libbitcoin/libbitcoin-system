@@ -19,12 +19,13 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_READER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_READER_IPP
+
 #include <bitcoin/system/iostream/readers/bit_reader.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <istream>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
@@ -32,12 +33,14 @@
 namespace libbitcoin {
 namespace system {
 
-bit_reader::bit_reader(std::istream& source) noexcept
+template <typename IStream>
+bit_reader<IStream>::bit_reader(IStream& source) noexcept
   : byte_reader(source), buffer_(0x00), offset_(byte_bits)
 {
 }
 
-bit_reader::~bit_reader() noexcept
+template <typename IStream>
+bit_reader<IStream>::~bit_reader() noexcept
 {
     byte_reader::~byte_reader();
 }
@@ -45,7 +48,8 @@ bit_reader::~bit_reader() noexcept
 // bits
 //-----------------------------------------------------------------------------
 
-bool bit_reader::read_bit() noexcept
+template <typename IStream>
+bool bit_reader<IStream>::read_bit() noexcept
 {
     if (is_aligned())
         buffer_ = do_read();
@@ -53,11 +57,15 @@ bool bit_reader::read_bit() noexcept
     return !is_zero((buffer_ << offset_++) & 0x80);
 }
 
-uint64_t bit_reader::read_bits(uint8_t bits) noexcept
+// TODO: change bits type to size_t.
+// TODO: templatize on return type and default to all bits (0).
+template <typename IStream>
+uint64_t bit_reader<IStream>::read_bits(uint8_t bits) noexcept
 {
     if (is_zero(bits))
         return 0;
 
+    // limit value of bits parameter to 64.
     auto read_bits = lesser<uint8_t>(to_bits(sizeof(uint64_t)), bits);
 
     uint64_t out = 0;
@@ -71,7 +79,8 @@ uint64_t bit_reader::read_bits(uint8_t bits) noexcept
 }
 
 // TODO: implement forward seek.
-void bit_reader::skip_bit(size_t bits) noexcept
+template <typename IStream>
+void bit_reader<IStream>::skip_bit(size_t bits) noexcept
 {
     while (!is_zero(bits--))
         read_bit();
@@ -80,7 +89,8 @@ void bit_reader::skip_bit(size_t bits) noexcept
 // protected overrides
 //-----------------------------------------------------------------------------
 
-uint8_t bit_reader::do_peek() noexcept
+template <typename IStream>
+uint8_t bit_reader<IStream>::do_peek() noexcept
 {
     if (is_aligned())
         return byte_reader::do_peek();
@@ -93,14 +103,16 @@ uint8_t bit_reader::do_peek() noexcept
     return hi | lo;
 }
 
-uint8_t bit_reader::do_read() noexcept
+template <typename IStream>
+uint8_t bit_reader<IStream>::do_read() noexcept
 {
     uint8_t byte;
     do_read(&byte, one);
     return byte;
 }
 
-void bit_reader::do_read(uint8_t* buffer, size_t size) noexcept
+template <typename IStream>
+void bit_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 {
     if (is_zero(size))
         return;
@@ -137,22 +149,26 @@ void bit_reader::do_read(uint8_t* buffer, size_t size) noexcept
     }
 }
 
-void bit_reader::do_skip(size_t size) noexcept
+template <typename IStream>
+void bit_reader<IStream>::do_skip(size_t size) noexcept
 {
     skip_bit(to_bits(size));
 }
 
-bool bit_reader::get_valid() const noexcept
+template <typename IStream>
+bool bit_reader<IStream>::get_valid() const noexcept
 {
     return byte_reader::get_valid();
 }
 
-bool bit_reader::get_exhausted() const noexcept
+template <typename IStream>
+bool bit_reader<IStream>::get_exhausted() const noexcept
 {
     return is_aligned() && byte_reader::get_exhausted();
 }
 
-void bit_reader::set_invalid() noexcept
+template <typename IStream>
+void bit_reader<IStream>::set_invalid() noexcept
 {
     align();
     byte_reader::set_invalid();
@@ -161,20 +177,25 @@ void bit_reader::set_invalid() noexcept
 // private
 //-----------------------------------------------------------------------------
 
-void bit_reader::align() noexcept
+template <typename IStream>
+void bit_reader<IStream>::align() noexcept
 {
     offset_ = byte_bits;
 }
 
-bool bit_reader::is_aligned() const noexcept
+template <typename IStream>
+bool bit_reader<IStream>::is_aligned() const noexcept
 {
     return is_zero(shift());
 }
 
-uint8_t bit_reader::shift() const noexcept
+template <typename IStream>
+uint8_t bit_reader<IStream>::shift() const noexcept
 {
     return byte_bits - offset_;
 }
 
 } // namespace system
 } // namespace libbitcoin
+
+#endif

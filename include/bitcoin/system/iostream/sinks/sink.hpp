@@ -47,7 +47,9 @@ protected:
 };
 
 /// Alias for defining an ostream from a container and a sink template.
-template <typename Container, template <class = Container> class Sink,
+template <
+    typename Container,
+    template <typename = Container> class Sink,
     if_base_of<base_sink<Container>, Sink<Container>> = true>
 using sink = boost::iostreams::stream<Sink<Container>>;
 

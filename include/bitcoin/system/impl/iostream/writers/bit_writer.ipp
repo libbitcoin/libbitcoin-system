@@ -19,12 +19,11 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/iostream/writers/bit_writer.hpp>
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BIT_WRITER_IPP
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <ostream>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -34,12 +33,14 @@
 namespace libbitcoin {
 namespace system {
 
-bit_writer::bit_writer(std::ostream& sink) noexcept
+template <typename OStream>
+bit_writer<OStream>::bit_writer(OStream& sink) noexcept
   : byte_writer(sink), buffer_(0x00), offset_(0)
 {
 }
 
-bit_writer::~bit_writer() noexcept
+template <typename OStream>
+bit_writer<OStream>::~bit_writer() noexcept
 {
     dump();
     byte_writer::~byte_writer();
@@ -48,7 +49,8 @@ bit_writer::~bit_writer() noexcept
 // bits
 //-----------------------------------------------------------------------------
 
-void bit_writer::write_bit(bool value) noexcept
+template <typename OStream>
+void bit_writer<OStream>::write_bit(bool value) noexcept
 {
     if (is_aligned())
         dump();
@@ -56,11 +58,15 @@ void bit_writer::write_bit(bool value) noexcept
     buffer_ |= ((value ? 0x80 : 0x00) >> offset_++);
 }
 
-void bit_writer::write_bits(uint64_t value, uint8_t bits) noexcept
+// TODO: change bits type to size_t.
+// TODO: templatize on value type and default to all bits (0).
+template <typename OStream>
+void bit_writer<OStream>::write_bits(uint64_t value, uint8_t bits) noexcept
 {
     if (is_zero(bits))
         return;
 
+    // limit value of bits parameter to 64.
     auto write_bits = lesser<uint8_t>(to_bits(sizeof(uint64_t)), bits);
 
     while (write_bits > byte_bits)
@@ -71,7 +77,8 @@ void bit_writer::write_bits(uint64_t value, uint8_t bits) noexcept
 }
 
 // TODO: implement forward seek.
-void bit_writer::skip_bit(size_t bits) noexcept
+template <typename OStream>
+void bit_writer<OStream>::skip_bit(size_t bits) noexcept
 {
     while (!is_zero(bits--))
         write_bit(false);
@@ -80,12 +87,14 @@ void bit_writer::skip_bit(size_t bits) noexcept
 // protected overrides
 //-----------------------------------------------------------------------------
 
-void bit_writer::do_write(uint8_t byte) noexcept
+template <typename OStream>
+void bit_writer<OStream>::do_write(uint8_t byte) noexcept
 {
     do_write(&byte, one);
 }
 
-void bit_writer::do_write(const uint8_t* data, size_t size) noexcept
+template <typename OStream>
+void bit_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
 {
     if (is_zero(size))
         return;
@@ -112,18 +121,21 @@ void bit_writer::do_write(const uint8_t* data, size_t size) noexcept
     buffer_ = data[sub1(size)] << shift();
 }
 
-void bit_writer::do_skip(size_t size) noexcept
+template <typename OStream>
+void bit_writer<OStream>::do_skip(size_t size) noexcept
 {
     skip_bit(to_bits(size));
 }
 
-void bit_writer::do_flush() noexcept
+template <typename OStream>
+void bit_writer<OStream>::do_flush() noexcept
 {
     dump();
     byte_writer::do_flush();
 }
 
-bool bit_writer::get_valid() const noexcept
+template <typename OStream>
+bool bit_writer<OStream>::get_valid() const noexcept
 {
     return byte_writer::get_valid();
 }
@@ -131,17 +143,20 @@ bool bit_writer::get_valid() const noexcept
 // private
 //-----------------------------------------------------------------------------
 
-bool bit_writer::is_aligned() const noexcept
+template <typename OStream>
+bool bit_writer<OStream>::is_aligned() const noexcept
 {
     return is_zero(shift());
 }
 
-uint8_t bit_writer::shift() const noexcept
+template <typename OStream>
+uint8_t bit_writer<OStream>::shift() const noexcept
 {
     return byte_bits - offset_;
 }
 
-void bit_writer::dump() noexcept
+template <typename OStream>
+void bit_writer<OStream>::dump() noexcept
 {
     if (is_zero(offset_))
         return;
@@ -153,3 +168,5 @@ void bit_writer::dump() noexcept
 
 } // namespace system
 } // namespace libbitcoin
+
+#endif

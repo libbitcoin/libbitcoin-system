@@ -33,37 +33,46 @@ namespace libbitcoin {
 namespace system {
 
 /// Construct a member ostream and feed it to a writer.
-template <typename Container, template <class = Container> class Sink,
-    typename Writer, if_base_of<byte_writer, Writer> = true,
-    if_base_of<base_sink<Container>, Sink<Container>> = true>
+/// For std::istream writer, just pass to byte_writer or bit_writer instance.
+template <
+    typename Container,
+    template <typename = Container> class Sink,
+    template <typename = sink<Container, Sink>> class Writer,
+    typename OStream = sink<Container, Sink>>
 class make_writer
-  : public Writer
+  : public Writer<OStream>
 {
 public:
     make_writer(Container& sink) noexcept
-      : sink_(sink), Writer(sink_) {}
-    ~make_writer() noexcept override { Writer::~Writer(); }
+      : sink_(sink), Writer(sink_)
+    {
+    }
+
+    ~make_writer() noexcept override
+    {
+        Writer::~Writer();
+    }
 
 private:
-    sink<Container, Sink> sink_;
+    OStream sink_;
 };
 
 namespace write
 {
     namespace bytes
     {
-        // write::bytes::copy
+        using stream = byte_writer<std::istream>;
         using copy = make_writer<data_slab, copy_sink, byte_writer>;
         using push = make_writer<data_chunk, push_sink, byte_writer>;
-        using text = make_writer<std::string, copy_sink, byte_writer>;
+        using text = make_writer<std::string, push_sink, byte_writer>;
     }
 
     namespace bits
     {
-        // write::bits::copy
+        using stream = bit_writer<std::istream>;
         using copy = make_writer<data_slab, copy_sink, bit_writer>;
         using push = make_writer<data_chunk, push_sink, bit_writer>;
-        using text = make_writer<std::string, copy_sink, bit_writer>;
+        using text = make_writer<std::string, push_sink, bit_writer>;
     }
 }
 

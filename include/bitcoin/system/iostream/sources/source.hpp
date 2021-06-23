@@ -47,7 +47,9 @@ protected:
 };
 
 /// Alias for defining an istream from a container and a source template.
-template <typename Container, template <class = Container> class Source,
+template <
+    typename Container,
+    template <typename = Container> class Source,
     if_base_of<base_source<Container>, Source<Container>> = true>
 using source = boost::iostreams::stream<Source<Container>>;
 

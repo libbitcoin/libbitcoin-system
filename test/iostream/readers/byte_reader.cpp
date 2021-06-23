@@ -21,4 +21,37 @@
 
 BOOST_AUTO_TEST_SUITE(byte_reader_tests)
 
+// is_exhausted/invalidate/bool()/!
+
+BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__empty__true)
+{
+    const data_chunk source;
+    stream::in::copy stream;
+    byte_reader instance(stream);
+    BOOST_REQUIRE(instance.is_exhausted());
+    BOOST_REQUIRE_EQUAL((bool)instance, false);
+    BOOST_REQUIRE_EQUAL(!instance, true);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__not_exhausted__false)
+{
+    const data_chunk source{ 0x00 };
+    stream::in::copy stream;
+    byte_reader instance(stream);
+    BOOST_REQUIRE(!instance.is_exhausted());
+    BOOST_REQUIRE_EQUAL((bool)instance, true);
+    BOOST_REQUIRE_EQUAL(!instance, false);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__exhausted__true)
+{
+    const data_chunk source{ 0x00 };
+    stream::in::copy stream;
+    byte_reader instance(stream);
+    instance.skip();
+    BOOST_REQUIRE(instance.is_exhausted());
+    BOOST_REQUIRE_EQUAL((bool)instance, false);
+    BOOST_REQUIRE_EQUAL(!instance, true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

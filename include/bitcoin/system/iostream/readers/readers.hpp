@@ -33,26 +33,35 @@ namespace libbitcoin {
 namespace system {
 
 /// Construct a member istream and feed it to a reader.
-template <typename Container, template <class = Container> class Source,
-    typename Reader, if_base_of<byte_reader, Reader> = true,
-    if_base_of<base_source<Container>, Source<Container>> = true>
+/// For std::istream reader, just pass to byte_reader or bit_reader instance.
+template <
+    typename Container,
+    template <typename = Container> class Source,
+    template <typename = source<Container, Source>> class Reader,
+    typename IStream = source<Container, Source>>
 class make_reader
-  : public Reader
+  : public Reader<IStream>
 {
 public:
     make_reader(const Container& source) noexcept
-      : source_(source), Reader(source_) {}
-    ~make_reader() noexcept override { Reader::~Reader(); }
+      : source_(source), Reader(source_)
+    {
+    }
+
+    ~make_reader() noexcept override
+    {
+        Reader::~Reader();
+    }
 
 private:
-    source<Container, Source> source_;
+    IStream source_;
 };
 
 namespace read
 {
     namespace bytes
     {
-        // read::bytes::move
+        using stream = byte_reader<std::istream>;
         using move = make_reader<data_slab, move_source, byte_reader>;
         using copy = make_reader<data_slice, copy_source, byte_reader>;
         using text = make_reader<std::string, copy_source, byte_reader>;
@@ -60,7 +69,7 @@ namespace read
 
     namespace bits
     {
-        // read::bits::move
+        using stream = bit_reader<std::istream>;
         using move = make_reader<data_slab, move_source, bit_reader>;
         using copy = make_reader<data_slice, copy_source, bit_reader>;
         using text = make_reader<std::string, copy_source, bit_reader>;

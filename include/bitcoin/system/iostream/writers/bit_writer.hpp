@@ -27,19 +27,21 @@
 #include <iterator>
 #include <ostream>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/interfaces/bitwriter.hpp>
 #include <bitcoin/system/iostream/writers/byte_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
-/// A bit reader that accepts an ostream.
-class BC_API bit_writer
-  : public byte_writer
+
+/// A bit writer that accepts an istream.
+template <typename OStream>
+class bit_writer
+  : public byte_writer<OStream>,
+    public virtual bitwriter
 {
 public:
     /// Constructors.
-    bit_writer(std::ostream& sink) noexcept;
+    bit_writer(OStream& sink) noexcept;
     ~bit_writer() override;
 
     /// Write one bit (high to low).
@@ -69,5 +71,7 @@ private:
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/iostream/writers/bit_writer.ipp>
 
 #endif

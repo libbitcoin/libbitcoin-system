@@ -26,19 +26,22 @@
 #include <cstdint>
 #include <istream>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/iostream/interfaces/bitreader.hpp>
 #include <bitcoin/system/iostream/readers/byte_reader.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /// A bit reader that accepts an istream.
-class BC_API bit_reader
-  : public byte_reader
+template <typename IStream>
+class bit_reader
+  : public byte_reader<IStream>,
+    public virtual bitreader
 {
 public:
     /// Constructors.
-    bit_reader(std::istream& source) noexcept;
+    bit_reader(IStream& source) noexcept;
     ~bit_reader() override;
 
     /// Read one bit (high to low).
@@ -70,5 +73,7 @@ private:
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/iostream/readers/bit_reader.ipp>
 
 #endif

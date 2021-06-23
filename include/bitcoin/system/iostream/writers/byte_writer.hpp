@@ -25,16 +25,17 @@
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/readers/byte_reader.hpp>
+#include <bitcoin/system/iostream/interfaces/bytewriter.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-/// A byte writer that accepts an ostream.
-class BC_API byte_writer
+    
+/// A byte reader that accepts an istream.
+template <typename OStream>
+class byte_writer
+  : public virtual bytewriter
 {
 public:
     /// Constructors.
@@ -45,7 +46,7 @@ public:
     /// non-seeakble stream is seeked, behavior is unknow except to the caller.
     /// Readers can always seek (forward) by reading. Now just need to 
 
-    byte_writer(std::ostream& stream) noexcept;
+    byte_writer(OStream& stream) noexcept;
     virtual ~byte_writer() noexcept;
 
     /// Type-inferenced integer writers.
@@ -71,7 +72,7 @@ public:
     virtual void write_error_code(const code& ec) noexcept;
 
     /// Write until reader is exhausted.
-    virtual void write(byte_reader& in) noexcept;
+    virtual void write(std::istream& in) noexcept;
 
     /// Write one byte.
     virtual void write_byte(uint8_t value) noexcept;
@@ -108,7 +109,7 @@ protected:
     virtual bool get_valid() const noexcept;
 
 private:
-    std::ostream& stream_;
+    OStream& stream_;
 };
 
 } // namespace system

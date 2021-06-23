@@ -16,119 +16,97 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BYTE_READER_HPP
-#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_BYTE_READER_HPP
+#ifndef LIBBITCOIN_SYSTEM_IOSTREAM_READERS_INTERFACES_BYTEREADER_HPP
+#define LIBBITCOIN_SYSTEM_IOSTREAM_READERS_INTERFACES_BYTEREADER_HPP
 
 #include <cstddef>
 #include <cstdint>
-#include <istream>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/interfaces/bytereader.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
     
-/// A byte reader that accepts an istream.
-template <typename IStream>
-class byte_reader
-  : public virtual bytereader
+/// A byte reader interface.
+class bytereader
 {
 public:
-    /// Constructors.
-    byte_reader(IStream& source) noexcept;
-    virtual ~byte_reader() noexcept;
-
     /// Read integer, size determined from paramter type.
     template <typename Integer, if_integer<Integer> = true>
-    Integer read_big_endian() noexcept;
+    Integer read_big_endian() noexcept = 0;
     template <typename Integer, if_integer<Integer> = true>
-    Integer read_little_endian() noexcept;
+    Integer read_little_endian() noexcept = 0;
 
     /// Read big endian (explicit specializations of read_big_endian).
-    virtual uint16_t read_2_bytes_big_endian() noexcept;
-    virtual uint32_t read_4_bytes_big_endian() noexcept;
-    virtual uint64_t read_8_bytes_big_endian() noexcept;
+    virtual uint16_t read_2_bytes_big_endian() noexcept = 0;
+    virtual uint32_t read_4_bytes_big_endian() noexcept = 0;
+    virtual uint64_t read_8_bytes_big_endian() noexcept = 0;
 
     /// Little endian integer readers (specializations of read_little_endian).
-    virtual uint16_t read_2_bytes_little_endian() noexcept;
-    virtual uint32_t read_4_bytes_little_endian() noexcept;
-    virtual uint64_t read_8_bytes_little_endian() noexcept;
+    virtual uint16_t read_2_bytes_little_endian() noexcept = 0;
+    virtual uint32_t read_4_bytes_little_endian() noexcept = 0;
+    virtual uint64_t read_8_bytes_little_endian() noexcept = 0;
 
     /// Read Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
-    virtual uint64_t read_variable() noexcept;
+    virtual uint64_t read_variable() noexcept = 0;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
     /// Returns zero and invalidates stream if would overflow size_t.
-    virtual size_t read_size() noexcept;
+    virtual size_t read_size() noexcept = 0;
 
     /// Convert read_4_bytes_little_endian to an error code.
-    virtual code read_error_code() noexcept;
+    virtual code read_error_code() noexcept = 0;
 
     /// Read size bytes into array.
     template <size_t Size>
-    data_array<Size> read_forward() noexcept;
+    data_array<Size> read_forward() noexcept = 0;
     template <size_t Size>
-    data_array<Size> read_reverse() noexcept;
+    data_array<Size> read_reverse() noexcept = 0;
 
     /// Read hash (explicit specializations of read_forward).
-    virtual mini_hash read_mini_hash() noexcept;
-    virtual short_hash read_short_hash() noexcept;
-    virtual hash_digest read_hash() noexcept;
-    virtual long_hash read_long_hash() noexcept;
+    virtual mini_hash read_mini_hash() noexcept = 0;
+    virtual short_hash read_short_hash() noexcept = 0;
+    virtual hash_digest read_hash() noexcept = 0;
+    virtual long_hash read_long_hash() noexcept = 0;
 
     /// Read/peek one byte (invalidates an empty stream).
-    virtual uint8_t peek_byte() noexcept;
-    virtual uint8_t read_byte() noexcept;
+    virtual uint8_t peek_byte() noexcept = 0;
+    virtual uint8_t read_byte() noexcept = 0;
 
     /// Read all remaining bytes.
-    virtual data_chunk read_bytes() noexcept;
+    virtual data_chunk read_bytes() noexcept = 0;
 
     /// Read size bytes, return size is guaranteed.
-    virtual data_chunk read_bytes(size_t size) noexcept;
-    virtual void read_bytes(uint8_t* buffer, size_t size) noexcept;
+    virtual data_chunk read_bytes(size_t size) noexcept = 0;
+    virtual void read_bytes(uint8_t* buffer, size_t size) noexcept = 0;
 
     /// Read Bitcoin length-prefixed string, same as read_string(read_size()).
-    virtual std::string read_string() noexcept;
+    virtual std::string read_string() noexcept = 0;
 
     /// Read string, truncated at at size or first null.
-    virtual std::string read_string(size_t size) noexcept;
+    virtual std::string read_string(size_t size) noexcept = 0;
 
     /// Advance the iterator.
-    virtual void skip(size_t size=one) noexcept;
+    virtual void skip(size_t size=one) noexcept = 0;
 
     /// The stream is empty (or invalid).
-    virtual bool is_exhausted() const noexcept;
+    virtual bool is_exhausted() const noexcept = 0;
 
     /// Invalidate the stream.
-    virtual void invalidate() noexcept;
+    virtual void invalidate() noexcept = 0;
 
     /// The stream is valid.
-    virtual operator bool() const noexcept;
+    virtual operator bool() const noexcept = 0;
 
     /// The stream is invalid.
-    virtual bool operator!() const noexcept;
-
-protected:
-    virtual uint8_t do_peek() noexcept;
-    virtual uint8_t do_read() noexcept;
-    virtual void do_read(uint8_t* buffer, size_t size) noexcept;
-    virtual void do_skip(size_t size) noexcept;
-    virtual bool get_valid() const noexcept;
-    virtual bool get_exhausted() const noexcept;
-    virtual void set_invalid() noexcept;
-
-private:
-    IStream& stream_;
+    virtual bool operator!() const noexcept = 0;
 };
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/iostream/readers/byte_reader.ipp>
 
 #endif

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_IOSTREAM_IOSTREAM_HPP
 
+#include <iostream>
 #include <string>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -32,6 +33,12 @@
 #include <bitcoin/system/iostream/sources/source.hpp>
 #include <bitcoin/system/iostream/sources/copy_source.hpp>
 #include <bitcoin/system/iostream/sources/move_source.hpp>
+
+/// Iterfaces.
+#include <bitcoin/system/iostream/interfaces/bytereader.hpp>
+#include <bitcoin/system/iostream/interfaces/bitreader.hpp>
+#include <bitcoin/system/iostream/interfaces/bytewriter.hpp>
+#include <bitcoin/system/iostream/interfaces/bitwriter.hpp>
 
 /// Readers.
 #include <bitcoin/system/iostream/readers/byte_reader.hpp>
@@ -49,7 +56,6 @@ namespace stream
 {
     namespace in
     {
-        // stream::in::move
         using move = source<data_slab, move_source>;
         using copy = source<data_slice, copy_source>;
         using text = source<std::string, copy_source>;
@@ -57,16 +63,25 @@ namespace stream
 
     namespace out
     {
-        // stream::out::copy
         using copy = sink<data_slab, copy_sink>;
         using push = sink<data_chunk, push_sink>;
-        using text = sink<std::string, copy_sink>;
+        using text = sink<std::string, push_sink>;
     }
 }
 
-/// Base class aliases used as interfaces.
-using reader = byte_reader;
-using writer = byte_writer;
+/// std::iostream aliases.
+using istream_byte_reader = byte_reader<std::istream>;
+using ostream_byte_writer = byte_writer<std::ostream>;
+using istream_bit_reader = bit_reader<std::istream>;
+using ostream_bit_writer = bit_writer<std::ostream>;
+
+/// std::iostream byte aliases.
+using istream_reader = istream_byte_reader;
+using ostream_writer = ostream_byte_writer;
+
+/// Interface byte aliases.
+using reader = bytereader;
+using writer = bytewriter;
 
 /// Original names.
 ////using data_source = stream::in::copy;
