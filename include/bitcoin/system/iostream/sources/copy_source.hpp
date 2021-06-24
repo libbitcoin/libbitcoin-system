@@ -28,15 +28,22 @@ namespace system {
 /// Source for boost::iostreams::stream, copies bytes from Container.
 template <typename Container>
 class copy_source
-  : public base_source<Container>
+  : public base_source<source::tag::copy, Container>
 {
 public:
     copy_source(const Container& data) noexcept;
+
+    /// detail::random_access direct (seekable)
+    sequence input_sequence() noexcept;
+
+    /// peekable_tag
+    bool putback(char_type) noexcept;
 
 protected:
     virtual void do_read(value_type* to, size_type size) noexcept;
 
 private:
+    const typename Container& container_;
     typename Container::const_iterator from_;
 };
 

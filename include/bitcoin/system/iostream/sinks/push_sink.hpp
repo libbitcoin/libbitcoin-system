@@ -28,7 +28,7 @@ namespace system {
 /// Sink for boost::iostreams::stream, appends bytes to Container.
 template <typename Container>
 class push_sink
-  : public base_sink<Container>
+  : public base_sink<sink::tag::push, Container>
 {
 public:
     push_sink(Container& data) noexcept;

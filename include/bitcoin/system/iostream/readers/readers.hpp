@@ -34,11 +34,10 @@ namespace system {
 
 /// Construct a member istream and feed it to a reader.
 /// For std::istream reader, just pass to byte_reader or bit_reader instance.
-template <
-    typename Container,
+template <typename Container,
     template <typename = Container> class Source,
-    template <typename = source<Container, Source>> class Reader,
-    typename IStream = source<Container, Source>>
+    template <typename = istream<Container, Source>> class Reader,
+    typename IStream = istream<Container, Source>>
 class make_reader
   : public Reader<IStream>
 {

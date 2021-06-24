@@ -20,38 +20,62 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_HPP
 
 #include <iostream>
+#include <locale>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Virtual base class for boost::iostreams::stream sources.
-template <typename Container>
+ /// Virtual base class for boost::iostreams::stream sources.
+template <typename Category, typename Container>
 class base_source
 {
 public:
+    /// device
     typedef char char_type;
+    typedef Category category;
     typedef std::streamsize size_type;
-    typedef boost::iostreams::source_tag category;
     typedef typename Container::value_type value_type;
 
+    /// seekable
+    typedef std::streampos position;
+    typedef std::ios_base::seekdir direction;
+    typedef boost::iostreams::stream_offset offset;
+    typedef std::pair<char_type*, char_type*> sequence;
+
+    /// input
     size_type read(char_type* buffer, size_type count) noexcept;
+
+    /// localizable_tag
+    void imbue(const std::locale& loc) noexcept;
 
 protected:
     base_source(size_type size) noexcept;
+
     virtual void do_read(value_type* to,  size_type size) noexcept = 0;
 
-    // Size tracks the Container unread bytes remaining.
+    /// Size tracks the Container unread bytes remaining.
     size_type size_;
 };
 
-/// Alias for defining an istream from a container and a source template.
-template <
-    typename Container,
-    template <typename = Container> class Source,
-    if_base_of<base_source<Container>, Source<Container>> = true>
-using source = boost::iostreams::stream<Source<Container>>;
+/// Alias for defining an istream from a container and a source.
+template <typename Container, template <typename = Container> class Source,
+    if_base_of<base_source<typename Source<Container>::category, Container>,
+        Source<Container>> = true>
+using istream = boost::iostreams::stream<Source<Container>>;
+
+namespace source
+{
+    using namespace boost::iostreams;
+    namespace tag
+    {
+        struct move : source_tag {};
+        struct copy : source_tag, direct_tag, peekable_tag,
+            detail::random_access {};
+    }
+}
 
 } // namespace system
 } // namespace libbitcoin

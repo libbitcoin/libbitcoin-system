@@ -20,6 +20,8 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_HPP
 
 #include <iostream>
+#include <locale>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
@@ -27,31 +29,51 @@ namespace libbitcoin {
 namespace system {
 
 /// Virtual base class for boost::iostreams::stream sinks.
-template <typename Container>
+template <typename Category, typename Container>
 class base_sink
 {
 public:
+    /// device
     typedef char char_type;
+    typedef Category category;
     typedef std::streamsize size_type;
-    typedef boost::iostreams::sink_tag category;
     typedef typename Container::value_type value_type;
 
+    /// seekable
+    typedef std::streampos position;
+    typedef std::ios_base::seekdir direction;
+    typedef boost::iostreams::stream_offset offset;
+    typedef std::pair<char_type*, char_type*> sequence;
+
+    /// output
     size_type write(const char_type* buffer, size_type count) noexcept;
+
+    /// localizable_tag
+    void imbue(const std::locale& loc) noexcept;
 
 protected:
     base_sink(size_type size) noexcept;
     virtual void do_write(const value_type* from, size_type size) noexcept = 0;
 
-    // Size tracks the Container space remaining.
+    /// Size tracks the Container space remaining.
     size_type size_;
 };
 
-/// Alias for defining an ostream from a container and a sink template.
-template <
-    typename Container,
-    template <typename = Container> class Sink,
-    if_base_of<base_sink<Container>, Sink<Container>> = true>
-using sink = boost::iostreams::stream<Sink<Container>>;
+/// Alias for defining an ostream from a container and a sink.
+template <typename Container, template <typename = Container> class Sink,
+    if_base_of<base_sink<typename Sink<Container>::category, Container>,
+        Sink<Container>> = true>
+using ostream = boost::iostreams::stream<Sink<Container>>;
+
+namespace sink
+{
+    using namespace boost::iostreams;
+    namespace tag
+    {
+        struct push : sink_tag {};
+        struct copy : sink_tag, direct_tag, detail::random_access {};
+    }
+}
 
 } // namespace system
 } // namespace libbitcoin

@@ -28,7 +28,7 @@ namespace system {
 /// Source for boost::iostreams::stream, moves bytes from Container.
 template <typename Container>
 class move_source
-  : public base_source<Container>
+  : public base_source<source::tag::move, Container>
 {
 public:
     move_source(Container& data) noexcept;

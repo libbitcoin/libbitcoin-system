@@ -20,24 +20,24 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_SINK_IPP
 
 #include <algorithm>
+#include <locale>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <typename Container>
-base_sink<Container>::base_sink(size_type size) noexcept
+template <typename Category, typename Container>
+base_sink<Category, Container>::base_sink(size_type size) noexcept
   : size_(size)
 {
 }
 
-template <typename Container>
-typename base_sink<Container>::size_type
-base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
+template <typename Category, typename Container>
+typename base_sink<Category, Container>::size_type
+base_sink<Category, Container>::write(const char_type* buffer,
+    size_type count) noexcept
 {
-    // Boost documents that an exception should be thrown on write failure,
-    // including insufficient buffer. A negative return is not documented.
     if (is_null(buffer) || is_negative(count))
         return negative_one;
 
@@ -47,6 +47,12 @@ base_sink<Container>::write(const char_type* buffer, size_type count) noexcept
 
     // eof is indicated by the return of a value less than count.
     return size;
+}
+
+template <typename Category, typename Container>
+void base_sink<Category, Container>::imbue(const std::locale& loc) noexcept
+{
+    // This is a no-op as all text is treated as UTF8.
 }
 
 } // namespace system

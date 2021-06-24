@@ -35,7 +35,8 @@ move_source<Container>::move_source(Container& data) noexcept
 }
 
 template <typename Container>
-void move_source<Container>::do_read(value_type* to, size_type size) noexcept
+void move_source<Container>::do_read(value_type* to,
+    size_type size) noexcept
 {
     // std::move does not have a size overload.
     // std::move returns iterator past last element moved to.

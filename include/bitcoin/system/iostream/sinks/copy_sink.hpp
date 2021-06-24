@@ -28,15 +28,19 @@ namespace system {
 /// Sink for boost::iostreams::stream, copies bytes to Container.
 template <typename Container>
 class copy_sink
-  : public base_sink<Container>
+  : public base_sink<sink::tag::copy, Container>
 {
 public:
     copy_sink(Container& data) noexcept;
+
+    /// detail::random_access direct (seekable)
+    sequence output_sequence() noexcept;
 
 protected:
     virtual void do_write(const value_type* from, size_type size) noexcept;
 
 private:
+    const typename Container& container_;
     typename Container::iterator to_;
 };
 

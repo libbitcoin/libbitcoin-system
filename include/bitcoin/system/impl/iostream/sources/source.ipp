@@ -20,24 +20,24 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SOURCES_SOURCE_IPP
 
 #include <algorithm>
+#include <locale>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <typename Container>
-base_source<Container>::base_source(size_type size) noexcept
+template <typename Category, typename Container>
+base_source<Category, Container>::base_source(size_type size) noexcept
   : size_(size)
 {
 }
 
-template <typename Container>
-typename base_source<Container>::size_type
-base_source<Container>::read(char_type* buffer, size_type count) noexcept
+template <typename Category, typename Container>
+typename base_source<Category, Container>::size_type
+base_source<Category, Container>::read(char_type* buffer,
+    size_type count) noexcept
 {
-    // Boost documents that -1 should be return to indicate eof, but this does
-    // not allow for partial reads. So always return amount read if valid.
     if (is_null(buffer) || is_negative(count))
         return negative_one;
 
@@ -47,6 +47,12 @@ base_source<Container>::read(char_type* buffer, size_type count) noexcept
 
     // eof is indicated by the return of a value less than count.
     return size;
+}
+
+template <typename Category, typename Container>
+void base_source<Category, Container>::imbue(const std::locale& loc) noexcept
+{
+    // This is a no-op as all text is treated as UTF8.
 }
 
 } // namespace system

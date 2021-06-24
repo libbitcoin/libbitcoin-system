@@ -39,13 +39,6 @@ class byte_writer
 {
 public:
     /// Constructors.
-
-    /// std::ostream does not have any indication of seekable.
-    /// so we templatize this class on stream type and implement seek for our
-    /// own types and assume that any external type is seekable. If a
-    /// non-seeakble stream is seeked, behavior is unknow except to the caller.
-    /// Readers can always seek (forward) by reading. Now just need to 
-
     byte_writer(OStream& stream) noexcept;
     virtual ~byte_writer() noexcept;
 

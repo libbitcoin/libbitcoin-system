@@ -34,11 +34,10 @@ namespace system {
 
 /// Construct a member ostream and feed it to a writer.
 /// For std::istream writer, just pass to byte_writer or bit_writer instance.
-template <
-    typename Container,
+template <typename Container,
     template <typename = Container> class Sink,
-    template <typename = sink<Container, Sink>> class Writer,
-    typename OStream = sink<Container, Sink>>
+    template <typename = ostream<Container, Sink>> class Writer,
+    typename OStream = ostream<Container, Sink>>
 class make_writer
   : public Writer<OStream>
 {
@@ -61,7 +60,7 @@ namespace write
 {
     namespace bytes
     {
-        using stream = byte_writer<std::istream>;
+        using stream = byte_writer<std::ostream>;
         using copy = make_writer<data_slab, copy_sink, byte_writer>;
         using push = make_writer<data_chunk, push_sink, byte_writer>;
         using text = make_writer<std::string, push_sink, byte_writer>;
@@ -69,7 +68,7 @@ namespace write
 
     namespace bits
     {
-        using stream = bit_writer<std::istream>;
+        using stream = bit_writer<std::ostream>;
         using copy = make_writer<data_slab, copy_sink, bit_writer>;
         using push = make_writer<data_chunk, push_sink, bit_writer>;
         using text = make_writer<std::string, push_sink, bit_writer>;

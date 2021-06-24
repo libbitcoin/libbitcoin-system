@@ -56,28 +56,18 @@ namespace stream
 {
     namespace in
     {
-        using move = source<data_slab, move_source>;
-        using copy = source<data_slice, copy_source>;
-        using text = source<std::string, copy_source>;
+        using move = istream<data_slab, move_source>;
+        using copy = istream<data_slice, copy_source>;
+        using text = istream<std::string, copy_source>;
     }
 
     namespace out
     {
-        using copy = sink<data_slab, copy_sink>;
-        using push = sink<data_chunk, push_sink>;
-        using text = sink<std::string, push_sink>;
+        using copy = ostream<data_slab, copy_sink>;
+        using push = ostream<data_chunk, push_sink>;
+        using text = ostream<std::string, push_sink>;
     }
 }
-
-/// std::iostream aliases.
-using istream_byte_reader = byte_reader<std::istream>;
-using ostream_byte_writer = byte_writer<std::ostream>;
-using istream_bit_reader = bit_reader<std::istream>;
-using ostream_bit_writer = bit_writer<std::ostream>;
-
-/// std::iostream byte aliases.
-using istream_reader = istream_byte_reader;
-using ostream_writer = ostream_byte_writer;
 
 /// Interface byte aliases.
 using reader = bytereader;
@@ -91,3 +81,31 @@ using writer = bytewriter;
 } // namespace libbitcoin
 
 #endif
+
+// aggregate tags:
+// std_io_tag      : localizable_tag
+// source_tag      : input, device_tag
+// sink_tag        : output, device_tag
+// istream_tag     : std_io_tag, device_tag
+// ostream_tag     : std_io_tag, device_tag
+// input_seekable  : input, detail::random_access
+// output_seekable : output, detail::random_access
+//
+// input|output:
+// Involves a single sequence of characters, for input|output.
+// device_tag:
+// Default behavior, buffering can be overridden by direct_tag.
+// direct_tag:
+// Device which provides access to its controlled sequences memory
+// regions rather than via a socket-like interface (non-buffering).
+// closable_tag:
+// Filter or device which receives notifications immediately before 
+// stream is closed.
+// localizable_tag:
+// Filter or device that receives notifications when a stream or
+// buffer which contains it has its locale set using imbue|pubimbue.
+// detail::random_access:
+// Seekable device, direct device seek requires input|output_sequence.
+// peekable_tag
+// Peekable device allows a character read from the input sequence to
+// be put back.

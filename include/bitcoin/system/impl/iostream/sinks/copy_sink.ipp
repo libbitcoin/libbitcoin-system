@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_IPP
 
 #include <algorithm>
+#include <utility>
 #include <bitcoin/system/math/limits.hpp>
 
 namespace libbitcoin {
@@ -28,6 +29,7 @@ namespace system {
 template <typename Container>
 copy_sink<Container>::copy_sink(Container& data) noexcept
   : base_sink(limit<size_type>(data.size())),
+    container_(data),
     to_(data.begin())
 {
 }
@@ -38,6 +40,18 @@ void copy_sink<Container>::do_write(const value_type* from,
 {
     // std::copy_n returns iterator past last element copied to.
     to_ = std::copy_n(from, size, to_);
+}
+
+template <typename Container>
+typename copy_sink<Container>::sequence
+copy_sink<Container>::output_sequence() noexcept
+{
+    const value_type* begin = container_.begin();
+    const value_type* end = container_.end();
+
+    return std::make_pair(
+        reinterpret_cast<char_type*>(begin),
+        reinterpret_cast<char_type*>(end));
 }
 
 } // namespace system
