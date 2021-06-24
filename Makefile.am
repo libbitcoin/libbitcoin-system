@@ -97,10 +97,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/data/data_slab.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
-    src/iostream/readers/bit_reader.cpp \
-    src/iostream/readers/byte_reader.cpp \
-    src/iostream/writers/bit_writer.cpp \
-    src/iostream/writers/byte_writer.cpp \
     src/log/file_collector.cpp \
     src/log/file_collector_repository.cpp \
     src/log/file_counter_formatter.cpp \
@@ -595,6 +591,7 @@ include_bitcoin_system_impl_data_HEADERS = \
 
 include_bitcoin_system_impl_iostream_readersdir = ${includedir}/bitcoin/system/impl/iostream/readers
 include_bitcoin_system_impl_iostream_readers_HEADERS = \
+    include/bitcoin/system/impl/iostream/readers/bit_reader.ipp \
     include/bitcoin/system/impl/iostream/readers/byte_reader.ipp
 
 include_bitcoin_system_impl_iostream_sinksdir = ${includedir}/bitcoin/system/impl/iostream/sinks
@@ -611,6 +608,7 @@ include_bitcoin_system_impl_iostream_sources_HEADERS = \
 
 include_bitcoin_system_impl_iostream_writersdir = ${includedir}/bitcoin/system/impl/iostream/writers
 include_bitcoin_system_impl_iostream_writers_HEADERS = \
+    include/bitcoin/system/impl/iostream/writers/bit_writer.ipp \
     include/bitcoin/system/impl/iostream/writers/byte_writer.ipp
 
 include_bitcoin_system_impl_log_featuresdir = ${includedir}/bitcoin/system/impl/log/features
@@ -666,6 +664,13 @@ include_bitcoin_system_impl_wallet_mnemonics_HEADERS = \
 include_bitcoin_system_iostreamdir = ${includedir}/bitcoin/system/iostream
 include_bitcoin_system_iostream_HEADERS = \
     include/bitcoin/system/iostream/iostream.hpp
+
+include_bitcoin_system_iostream_interfacesdir = ${includedir}/bitcoin/system/iostream/interfaces
+include_bitcoin_system_iostream_interfaces_HEADERS = \
+    include/bitcoin/system/iostream/interfaces/bitreader.hpp \
+    include/bitcoin/system/iostream/interfaces/bitwriter.hpp \
+    include/bitcoin/system/iostream/interfaces/reader.hpp \
+    include/bitcoin/system/iostream/interfaces/writer.hpp
 
 include_bitcoin_system_iostream_readersdir = ${includedir}/bitcoin/system/iostream/readers
 include_bitcoin_system_iostream_readers_HEADERS = \

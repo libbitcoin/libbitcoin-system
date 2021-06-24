@@ -103,6 +103,8 @@
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/iostream/interfaces/bitreader.hpp>
+#include <bitcoin/system/iostream/interfaces/bitwriter.hpp>
 #include <bitcoin/system/iostream/readers/bit_reader.hpp>
 #include <bitcoin/system/iostream/readers/byte_reader.hpp>
 #include <bitcoin/system/iostream/readers/readers.hpp>

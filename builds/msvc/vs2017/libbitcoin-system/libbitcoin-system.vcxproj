@@ -163,10 +163,6 @@
     <ClCompile Include="..\..\..\..\src\data\data_slice.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
-    <ClCompile Include="..\..\..\..\src\iostream\readers\bit_reader.cpp" />
-    <ClCompile Include="..\..\..\..\src\iostream\readers\byte_reader.cpp" />
-    <ClCompile Include="..\..\..\..\src\iostream\writers\bit_writer.cpp" />
-    <ClCompile Include="..\..\..\..\src\iostream\writers\byte_writer.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_collector.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_collector_repository.cpp" />
     <ClCompile Include="..\..\..\..\src\log\file_counter_formatter.cpp" />
@@ -410,6 +406,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bitreader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bitwriter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytereader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytewriter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\iostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\readers\bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\readers\byte_reader.hpp" />
@@ -613,6 +613,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slab.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\string.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\readers\bit_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\readers\byte_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\sinks\copy_sink.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\sinks\push_sink.ipp" />
@@ -620,6 +621,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\sources\copy_source.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\sources\move_source.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\sources\source.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\writers\bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\iostream\writers\byte_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\counter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\log\features\gauge.ipp" />
