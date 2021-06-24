@@ -115,8 +115,7 @@ BOOST_AUTO_TEST_CASE(output__factory_2__valid_input_success)
 
 BOOST_AUTO_TEST_CASE(output__factory_3__valid_input_success)
 {
-    stream::in::copy stream(valid_raw_output);
-    byte_reader source(stream);
+    read::bytes::copy source(valid_raw_output);
     auto instance = chain::output::factory(source);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_output.size());

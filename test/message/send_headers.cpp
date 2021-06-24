@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
 {
     const message::send_headers expected{};
     const auto data = expected.to_data(message::version::level::maximum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::send_headers::factory(
         message::version::level::maximum, source);
 
@@ -62,8 +61,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
 BOOST_AUTO_TEST_CASE(from_data_reader_version_prior_bip130_failure)
 {
     data_chunk data{};
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     message::send_headers instance{};
     const auto result = instance.from_data(message::version::level::bip130 - 1, source);
 
@@ -74,8 +72,7 @@ BOOST_AUTO_TEST_CASE(from_data_reader_version_prior_bip130_failure)
 BOOST_AUTO_TEST_CASE(from_data_reader_version_at_least_bip130_success)
 {
     data_chunk data{};
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     message::send_headers instance{};
     const auto result = instance.from_data(message::version::level::bip130, source);
 

@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_reader)
 {
     const message::get_address expected{};
     const auto data = expected.to_data(message::version::level::minimum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::get_address::factory(
         message::version::level::minimum, source);
 

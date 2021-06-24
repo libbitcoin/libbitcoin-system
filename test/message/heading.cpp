@@ -96,8 +96,7 @@ BOOST_AUTO_TEST_CASE(heading__factory_3__sufficient_bytes__expected)
     const auto data = expected.to_data();
     BOOST_REQUIRE_EQUAL(data.size(), heading::satoshi_fixed_size());
 
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = heading::factory(source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);

@@ -222,8 +222,7 @@ BOOST_AUTO_TEST_CASE(address__factory_3__roundtrip__success)
     });
 
     const data_chunk data = expected.to_data(version::level::minimum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = address::factory(version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

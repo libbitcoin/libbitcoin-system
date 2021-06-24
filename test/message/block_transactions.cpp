@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(block_transactions_tests)
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_1__always__invalid)
 {
     message::block_transactions instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_2__always__equals_params)
@@ -58,8 +58,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
 
     auto dup_hash = hash;
     chain::transaction::list dup_transactions = transactions;
-    message::block_transactions instance(std::move(dup_hash),
-        std::move(dup_transactions));
+    message::block_transactions instance(std::move(dup_hash), std::move(dup_transactions));
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
@@ -112,8 +111,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_bytes__failure)
     const data_chunk raw{ 0xab, 0xcd };
     message::block_transactions instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::block_transactions::version_minimum, raw));
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(message::block_transactions::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_transaction_bytes__failure)
@@ -146,8 +144,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_transaction_byt
 
     message::block_transactions instance{};
 
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::block_transactions::version_minimum, raw));
+    BOOST_REQUIRE(!instance.from_data(message::block_transactions::version_minimum, raw));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_version__failure)
@@ -182,13 +179,11 @@ BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_version__failur
     message::block_transactions expected;
     expected.from_data(message::block_transactions::version_minimum, raw);
 
-    const auto data = expected.to_data(
-        message::block_transactions::version_minimum);
+    const auto data = expected.to_data(message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
     message::block_transactions instance;
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(
-        message::block_transactions::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.from_data(message::block_transactions::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__factory_1__valid_input__success)
@@ -223,21 +218,15 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_1__valid_input__success)
     message::block_transactions expected;
     expected.from_data(message::block_transactions::version_minimum, raw);
 
-    const auto data = expected.to_data(
-        message::block_transactions::version_minimum);
+    const auto data = expected.to_data(message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
-    const auto result = message::block_transactions::factory(
-        message::block_transactions::version_minimum, data);
+    const auto result = message::block_transactions::factory(message::block_transactions::version_minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(
-            message::block_transactions::version_minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(
-        message::block_transactions::version_minimum),
-        result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::block_transactions::version_minimum), result.serialized_size(message::block_transactions::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__factory_2__valid_input__success)
@@ -272,21 +261,16 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_2__valid_input__success)
     message::block_transactions expected;
     expected.from_data(message::block_transactions::version_minimum, raw);
 
-    const auto data = expected.to_data(
-        message::block_transactions::version_minimum);
+    const auto data = expected.to_data(message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
     stream::in::copy istream(data);
-    auto result = message::block_transactions::factory(
-        message::block_transactions::version_minimum, istream);
+    auto result = message::block_transactions::factory(message::block_transactions::version_minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::block_transactions::version_minimum));
-    BOOST_REQUIRE_EQUAL(
-        expected.serialized_size(message::block_transactions::version_minimum),
-        result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::block_transactions::version_minimum), result.serialized_size(message::block_transactions::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
@@ -321,21 +305,16 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
     message::block_transactions expected;
     expected.from_data(message::block_transactions::version_minimum, raw);
 
-    const auto data = expected.to_data(
-        message::block_transactions::version_minimum);
+    const auto data = expected.to_data(message::block_transactions::version_minimum);
 
     BOOST_REQUIRE(raw == data);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
-    const auto result = message::block_transactions::factory(
-        message::block_transactions::version_minimum, source);
+    read::bytes::copy source(data);
+    const auto result = message::block_transactions::factory(message::block_transactions::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(),
-        result.serialized_size(message::block_transactions::version_minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::block_transactions::version_minimum),
-        result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(message::block_transactions::version_minimum));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(message::block_transactions::version_minimum), result.serialized_size(message::block_transactions::version_minimum));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__returns_initialized_value)
@@ -472,7 +451,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_assign_equals__always__matches
     message::block_transactions value(hash, transactions);
     BOOST_REQUIRE(value.is_valid());
     message::block_transactions instance;
-    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(hash == instance.block_hash());
@@ -518,7 +497,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__duplicates
         });
 
     message::block_transactions instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
+    BOOST_REQUIRE(!(instance != expected));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__differs__returns_true)

@@ -101,7 +101,7 @@ bool send_headers::from_data(uint32_t version, const data_chunk& data)
 
 bool send_headers::from_data(uint32_t version, std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(version, source);
 }
 

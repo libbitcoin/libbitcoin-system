@@ -512,10 +512,8 @@ BOOST_AUTO_TEST_CASE(version__factory_3__valid_input__success)
         true
     );
 
-
     const auto data = expected.to_data(version_maximum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::version::factory(version_maximum, source);
 
     BOOST_REQUIRE(result.is_valid());

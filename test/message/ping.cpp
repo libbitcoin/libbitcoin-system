@@ -125,8 +125,7 @@ BOOST_AUTO_TEST_CASE(ping__factory_3__minimum_version_round_trip__zero_nonce)
 
     static const auto version = message::version::level::minimum;
     const auto data = value.to_data(version);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::ping::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(result.nonce(), 0u);
@@ -188,8 +187,7 @@ BOOST_AUTO_TEST_CASE(ping__factory_3__bip31_version_round_trip__expected_nonce)
 
     static const auto version = message::version::level::bip31;
     const auto data = expected.to_data(version);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::ping::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(result == expected);

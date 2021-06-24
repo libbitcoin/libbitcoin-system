@@ -351,9 +351,8 @@ BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
     BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
 
     // Reload genesis block.
-    stream::in::copy stream(raw_block);
-    byte_reader reader(stream);
-    const auto block = chain::block::factory(reader);
+    read::bytes::copy source(raw_block);
+    const auto block = chain::block::factory(source);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());

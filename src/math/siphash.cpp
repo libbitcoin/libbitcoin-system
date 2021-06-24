@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/math/siphash.hpp>
 
+#include <tuple>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
@@ -81,16 +82,15 @@ uint64_t siphash(const siphash_key& key, const data_slice& message)
     uint64_t v3 = siphash_magic_3 ^ std::get<1>(key);
 
     constexpr auto eight = sizeof(uint64_t);
-    const auto bytes= message.size();
-    stream::in::copy source(message);
-    byte_reader reader(source);
+    const auto bytes = message.size();
+    read::bytes::copy source(message);
 
     for (size_t index = eight; index <= bytes; index += eight)
         compression_round(v0, v1, v2, v3,
-            reader.read_8_bytes_little_endian());
+            source.read_8_bytes_little_endian());
 
     auto last = is_zero(bytes % eight) ? 0ll :
-        reader.read_8_bytes_little_endian();
+        source.read_8_bytes_little_endian();
 
     last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));
     compression_round(v0, v1, v2, v3, last);

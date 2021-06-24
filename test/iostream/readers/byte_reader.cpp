@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(byte_reader_tests)
+BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // TODO: test all methods against std::istringstream
 // TODO: test against libbitcoin sources.

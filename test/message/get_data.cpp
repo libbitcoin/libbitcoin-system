@@ -203,8 +203,7 @@ BOOST_AUTO_TEST_CASE(get_data__factory_3__valid_input__success)
 
     static const auto version = version::level::maximum;
     const auto data = expected.to_data(version);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = get_data::factory(version, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

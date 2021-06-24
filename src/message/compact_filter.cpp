@@ -111,7 +111,7 @@ bool compact_filter::from_data(const data_chunk& data)
 
 bool compact_filter::from_data(std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source);
 }
 
@@ -150,8 +150,8 @@ data_chunk compact_filter::to_data() const
 
 void compact_filter::to_data(std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(sink);
+    write::bytes::stream out(stream);
+    to_data(out);
 }
 
 void compact_filter::to_data(writer& sink) const
@@ -176,7 +176,7 @@ bool compact_filter::from_data(uint32_t version, const data_chunk& data)
 
 bool compact_filter::from_data(uint32_t version, std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(version, source);
 }
 
@@ -195,8 +195,8 @@ data_chunk compact_filter::to_data(uint32_t) const
 
 void compact_filter::to_data(uint32_t version, std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(version, sink);
+    write::bytes::stream out(stream);
+    to_data(version, out);
 }
 
 void compact_filter::to_data(uint32_t , writer& sink) const

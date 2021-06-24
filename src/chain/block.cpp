@@ -53,7 +53,6 @@ namespace chain {
 
 using namespace bc::system::config;
 using namespace bc::system::machine;
-using namespace boost::adaptors;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -166,7 +165,7 @@ bool block::from_data(const data_chunk& data, bool witness)
 
 bool block::from_data(std::istream& stream, bool witness)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source, witness);
 }
 
@@ -234,8 +233,8 @@ data_chunk block::to_data(bool witness) const
 
 void block::to_data(std::ostream& stream, bool witness) const
 {
-    byte_writer writer(stream);
-    to_data(writer, witness);
+    write::bytes::stream out(stream);
+    to_data(out, witness);
 }
 
 // Full block serialization is always canonical encoding.

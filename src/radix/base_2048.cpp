@@ -128,11 +128,10 @@ std::string decode_base2048(const data_chunk& data,
 base2048_chunk base2048_pack(const data_chunk& unpacked)
 {
     base2048_chunk packed;
-    stream::in::copy source(unpacked);
-    bit_reader bit_reader(source);
+    read::bits::copy source(unpacked);
 
-    while (!bit_reader.is_exhausted())
-        packed.push_back(bit_reader.read_bits(11));
+    while (!source.is_exhausted())
+        packed.push_back(source.read_bits(11));
 
     // Remove an element that is only padding, assumes base2048_unpack encoding.
     // The bit writer writes zeros past end as padding.
@@ -154,13 +153,12 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
 data_chunk base2048_unpack(const base2048_chunk& packed)
 {
     data_chunk unpacked;
-    stream::out::push sink(unpacked);
-    bit_writer bit_writer(sink);
+    write::bits::push sink(unpacked);
 
     for (const auto& value: packed)
-        bit_writer.write_bits(value.convert_to<uint64_t>(), 11);
+        sink.write_bits(value.convert_to<uint16_t>(), 11);
 
-    bit_writer.flush();
+    sink.flush();
 
     // The bit reader reads zeros past end as padding.
     // This is a ((n * 11) / 8) operation, so (8 - ((n * 11) % 8)) are pad.

@@ -300,7 +300,7 @@ bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 
 bool transaction::from_data(std::istream& stream, bool wire, bool witness)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source, wire, witness);
 }
 
@@ -434,8 +434,8 @@ void transaction::to_data(std::ostream& stream, bool wire, bool witness) const
     // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    byte_writer sink(stream);
-    to_data(sink, wire, witness);
+    write::bytes::stream out(stream);
+    to_data(out, wire, witness);
 }
 
 // Witness is not used by outputs, just for template normalization.

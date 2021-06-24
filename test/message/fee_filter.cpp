@@ -101,8 +101,7 @@ BOOST_AUTO_TEST_CASE(fee_filter__factory_3__roundtrip__success)
 {
     const fee_filter expected{ 58246 };
     const auto data = expected.to_data(fee_filter::version_maximum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = fee_filter::factory(fee_filter::version_maximum, source);
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

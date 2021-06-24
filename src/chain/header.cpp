@@ -189,14 +189,13 @@ header header::factory(reader& source, const hash_digest& hash, bool wire)
 
 bool header::from_data(const data_chunk& data, bool wire)
 {
-    stream::in::copy source(data);
-    byte_reader reader(source);
+    read::bytes::copy reader(data);
     return from_data(reader, wire);
 }
 
 bool header::from_data(std::istream& stream, bool wire)
 {
-    byte_reader reader(stream);
+    read::bytes::stream reader(stream);
     return from_data(reader, wire);
 }
 
@@ -274,8 +273,8 @@ data_chunk header::to_data(bool wire) const
 
 void header::to_data(std::ostream& stream, bool wire) const
 {
-    byte_writer sink(stream);
-    to_data(sink, wire);
+    write::bytes::stream out(stream);
+    to_data(out, wire);
 }
 
 void header::to_data(writer& sink, bool) const

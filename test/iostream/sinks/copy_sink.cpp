@@ -18,10 +18,12 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(copy_sink_tests)
+BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // TODO: test imbue.
 // TODO: test output_sequence.
+// TODO: test read/write once read is implemented.
+// TODO: test by creating a stream and invoking stream methods.
 
 BOOST_AUTO_TEST_CASE(copy_sink__write__nullptr__false)
 {

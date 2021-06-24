@@ -151,8 +151,7 @@ BOOST_AUTO_TEST_CASE(filter_add__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::maximum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::filter_add::factory(
         message::version::level::maximum, source);
 

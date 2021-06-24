@@ -146,8 +146,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_3__valid_input__success)
     };
 
     const auto data = expected.to_data(message::version::level::minimum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::get_block_transactions::factory(
         message::version::level::minimum, source);
 

@@ -40,13 +40,13 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
     uint32_t i, uint32_t j)
 {
     // e = H(M || R || i || j)
-    data_chunk data(hash_size + R.size() + 2u * sizeof(uint32_t));
-    stream::out::push source(data);
-    byte_writer serial(source);
-    serial.write_bytes(R);
-    serial.write_bytes(M);
-    serial.write_4_bytes_big_endian(i);
-    serial.write_4_bytes_big_endian(j);
+    data_chunk data;
+    data.reserve(hash_size + R.size() + 2u * sizeof(uint32_t));
+    write::bytes::push out(data);
+    out.write_bytes(R);
+    out.write_bytes(M);
+    out.write_4_bytes_big_endian(i);
+    out.write_4_bytes_big_endian(j);
     return sha256_hash(data);
 }
 

@@ -36,7 +36,7 @@ namespace libbitcoin {
 namespace system {
 namespace golomb {
 
-static void encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
+static void encode(bitwriter& sink, uint64_t value, uint8_t modulo_exponent)
 {
     const uint64_t quotient = value >> modulo_exponent;
     for (uint64_t index = 0; index < quotient; index++)
@@ -46,7 +46,7 @@ static void encode(bit_writer& sink, uint64_t value, uint8_t modulo_exponent)
     sink.write_bits(value, modulo_exponent);
 }
 
-static uint64_t decode(bit_reader& source, uint8_t modulo_exponent)
+static uint64_t decode(bitreader& source, uint8_t modulo_exponent)
 {
     uint64_t quotient = 0;
     while (source.read_bit())
@@ -96,8 +96,8 @@ data_chunk construct(const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     data_chunk result;
-    stream::out::push stream(result);
-    construct(stream, items, bits, entropy, target_false_positive_rate);
+    stream::out::push sink(result);
+    construct(sink, items, bits, entropy, target_false_positive_rate);
     return result;
 }
 
@@ -111,18 +111,18 @@ void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
-    bit_writer writer(stream);
-    construct(writer, items, bits, entropy, target_false_positive_rate);
+    write::bits::stream sink(stream);
+    construct(sink, items, bits, entropy, target_false_positive_rate);
 }
 
-void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
+void construct(bitwriter& sink, const data_stack& items, uint8_t bits,
     const half_hash& entropy, uint64_t target_false_positive_rate)
 {
-    construct(stream, items, bits, to_siphash_key(entropy),
+    construct(sink, items, bits, to_siphash_key(entropy),
         target_false_positive_rate);
 }
 
-void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
+void construct(bitwriter& sink, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     const auto set = hashed_set_construct(items, items.size(),
@@ -131,7 +131,7 @@ void construct(bit_writer& stream, const data_stack& items, uint8_t bits,
     uint64_t previous = 0;
     for (auto value: set)
     {
-        encode(stream, value - previous, bits);
+        encode(sink, value - previous, bits);
         previous = value;
     };
 }
@@ -168,12 +168,12 @@ bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    bit_reader reader(compressed_set);
+    read::bits::stream reader(compressed_set);
     return match(target, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
-bool match(const data_chunk& target, bit_reader& compressed_set,
+bool match(const data_chunk& target, bitreader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -181,7 +181,7 @@ bool match(const data_chunk& target, bit_reader& compressed_set,
         bits, target_false_positive_rate);
 }
 
-bool match(const data_chunk& target, bit_reader& compressed_set,
+bool match(const data_chunk& target, bitreader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -237,12 +237,12 @@ bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    bit_reader reader(compressed_set);
+    read::bits::stream reader(compressed_set);
     return match(targets, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
 
-bool match(const data_stack& targets, bit_reader& compressed_set,
+bool match(const data_stack& targets, bitreader& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
@@ -250,7 +250,7 @@ bool match(const data_stack& targets, bit_reader& compressed_set,
         bits, target_false_positive_rate);
 }
 
-bool match(const data_stack& targets, bit_reader& compressed_set,
+bool match(const data_stack& targets, bitreader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {

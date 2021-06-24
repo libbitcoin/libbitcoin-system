@@ -138,7 +138,7 @@ bool heading::from_data(const data_chunk& data)
 
 bool heading::from_data(std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source);
 }
 
@@ -170,8 +170,8 @@ data_chunk heading::to_data() const
 
 void heading::to_data(std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(sink);
+    write::bytes::stream out(stream);
+    to_data(out);
 }
 
 void heading::to_data(writer& sink) const

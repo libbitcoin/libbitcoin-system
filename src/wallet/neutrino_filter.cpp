@@ -22,6 +22,7 @@
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/golomb_coding.hpp>
@@ -30,11 +31,13 @@ namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
+constexpr auto rate = golomb_target_false_positive_rate;
+
 bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 {
     const auto hash = validated_block.hash();
-    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(hash));
-    data_stack items;
+    const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
+    data_stack scripts;
 
     for (const auto& tx: validated_block.transactions())
     {
@@ -48,7 +51,7 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 
                 const auto& script = prevout.metadata.cache.script();
                 if (!script.empty())
-                    items.push_back(script.to_data(false));
+                    scripts.push_back(script.to_data(false));
             }
         }
 
@@ -58,19 +61,17 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 
             if (!script.empty() &&
                 (script.front().code() != machine::opcode::return_))
-                items.push_back(script.to_data(false));
+                scripts.push_back(script.to_data(false));
         }
     }
 
     // Order and remove duplicates.
-    items = distinct(std::move(items));
+    distinct(std::move(scripts));
 
-    stream::out::push stream(out_filter);
-    bit_writer writer(stream);
-    writer.write_variable(items.size());
-    golomb::construct(writer, items, golomb_bits, key,
-        golomb_target_false_positive_rate);
-    stream.flush();
+    write::bits::push writer(out_filter);
+    writer.write_variable(scripts.size());
+    golomb::construct(writer, scripts, golomb_bits, key, rate);
+    writer.flush();
 
     return true;
 }
@@ -79,11 +80,11 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter)
 {
     data_chunk data;
-    stream::out::push stream(data);
-    byte_writer sink(stream);
-    sink.write_bytes(bitcoin_hash(filter));
-    sink.write_bytes(previous_block_hash);
-    stream.flush();
+    data.reserve(hash_size + hash_size);
+    write::bytes::push out(data);
+    out.write_bytes(bitcoin_hash(filter));
+    out.write_bytes(previous_block_hash);
+    out.flush();
 
     return bitcoin_hash(data);
 }
@@ -94,19 +95,17 @@ bool match_filter(const message::compact_filter& filter,
     if (script.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    stream::in::copy stream(filter.filter());
-    bit_reader reader(stream);
+    read::bits::copy reader(filter.filter());
     const auto set_size = reader.read_variable();
 
     if (!reader)
         return false;
 
     const auto target = script.to_data(false);
-    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(
-        filter.block_hash()));
+    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash());
+    const auto key = to_siphash_key(hash);
 
-    return golomb::match(target, reader, set_size, key, golomb_bits,
-        golomb_target_false_positive_rate);
+    return golomb::match(target, reader, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
@@ -128,18 +127,17 @@ bool match_filter(const message::compact_filter& filter,
     if (stack.empty())
         return false;
 
-    stream::in::copy stream(filter.filter());
-    bit_reader reader(stream);
+    read::bits::copy reader(filter.filter());
     const auto set_size = reader.read_variable();
 
     if (!reader)
         return false;
 
-    const auto key = to_siphash_key(slice<zero, half_hash_size, hash_size>(
-        filter.block_hash()));
+    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash());
+    const auto key = to_siphash_key(hash);
 
-    return golomb::match(stack, reader, set_size, key, golomb_bits,
-        golomb_target_false_positive_rate);
+    stack.shrink_to_fit();
+    return golomb::match(stack, reader, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
@@ -157,10 +155,10 @@ bool match_filter(const message::compact_filter& filter,
     chain::script::list stack;
     stack.reserve(addresses.size());
 
-    std::for_each(addresses.begin(), addresses.end(),
-        [&](const wallet::payment_address& address)
+    std::transform(addresses.begin(), addresses.end(), stack.begin(),
+        [](const wallet::payment_address& address)
         {
-            stack.push_back(address.output_script());
+            return address.output_script();
         });
 
     return match_filter(filter, stack);

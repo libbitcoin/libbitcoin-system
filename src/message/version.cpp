@@ -136,7 +136,7 @@ bool version::from_data(uint32_t version, const data_chunk& data)
 
 bool version::from_data(uint32_t version, std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(version, source);
 }
 
@@ -190,8 +190,8 @@ data_chunk version::to_data(uint32_t version) const
 
 void version::to_data(uint32_t version, std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(version, sink);
+    write::bytes::stream out(stream);
+    to_data(version, out);
 }
 
 void version::to_data(uint32_t version, writer& sink) const

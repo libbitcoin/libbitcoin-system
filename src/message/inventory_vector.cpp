@@ -138,7 +138,7 @@ bool inventory_vector::from_data(uint32_t version,
 bool inventory_vector::from_data(uint32_t version,
     std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(version, source);
 }
 
@@ -171,8 +171,8 @@ data_chunk inventory_vector::to_data(uint32_t version) const
 
 void inventory_vector::to_data(uint32_t version, std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(version, sink);
+    write::bytes::stream out(stream);
+    to_data(version, out);
 }
 
 void inventory_vector::to_data(uint32_t, writer& sink) const

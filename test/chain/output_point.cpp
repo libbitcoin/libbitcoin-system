@@ -170,8 +170,7 @@ BOOST_AUTO_TEST_CASE(output_point__factory_3__roundtrip__success)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     auto point = chain::output_point::factory(source);
 
     BOOST_REQUIRE(point.is_valid());

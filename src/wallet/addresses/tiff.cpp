@@ -162,7 +162,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     // All rows will be stored in a single strip.
     const auto rows = size / row_bytes;
 
-    byte_writer writer(out);
+    write::bytes::stream writer(out);
 
     // =============== Header ===============
 
@@ -272,7 +272,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     // Strip0 (image data).
     writer.write_bytes(data);
 
-    out.flush();
+    writer.flush();
     return true;
 }
 

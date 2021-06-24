@@ -100,8 +100,7 @@ BOOST_AUTO_TEST_CASE(pong__factory_3__round_trip__expected)
 
     static const auto version = message::version::level::minimum;
     const auto data = expected.to_data(version);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::pong::factory(version, source);
 
     BOOST_REQUIRE(result.is_valid());

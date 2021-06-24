@@ -105,7 +105,7 @@ bool network_address::from_data(uint32_t version,
 bool network_address::from_data(uint32_t version,
     std::istream& stream, bool with_timestamp)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(version, source, with_timestamp);
 }
 
@@ -145,8 +145,8 @@ data_chunk network_address::to_data(uint32_t version,
 void network_address::to_data(uint32_t version,
     std::ostream& stream, bool with_timestamp) const
 {
-    byte_writer sink(stream);
-    to_data(version, sink, with_timestamp);
+    write::bytes::stream out(stream);
+    to_data(version, out, with_timestamp);
 }
 
 void network_address::to_data(uint32_t ,

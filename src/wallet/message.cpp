@@ -40,12 +40,11 @@ hash_digest hash_message(const data_slice& message)
     static const std::string prefix("Bitcoin Signed Message:\n");
 
     data_chunk data;
-    stream::out::push ostream(data);
-    byte_writer sink(ostream);
-    sink.write_string(prefix);
-    sink.write_variable(message.size());
-    sink.write_bytes(message.begin(), message.size());
-    ostream.flush();
+    write::bytes::push out(data);
+    out.write_string(prefix);
+    out.write_variable(message.size());
+    out.write_bytes(message);
+    out.flush();
     return bitcoin_hash(data);
 }
 

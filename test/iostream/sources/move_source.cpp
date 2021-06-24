@@ -18,9 +18,10 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(move_source_tests)
+BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // TODO: test imbue.
+// TODO: test by creating a stream and invoking stream methods.
 
 BOOST_AUTO_TEST_CASE(move_source__read__nullptr__false)
 {

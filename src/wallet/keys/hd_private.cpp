@@ -147,16 +147,15 @@ hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
 
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 {
-    stream::in::copy source(key);
-    byte_reader reader(source);
+    read::bytes::copy source(key);
 
-    const auto prefix = reader.read_4_bytes_big_endian();
-    const auto depth = reader.read_byte();
-    const auto parent = reader.read_4_bytes_big_endian();
-    const auto child = reader.read_4_bytes_big_endian();
-    const auto chain = reader.read_hash();
-    reader.skip(one);
-    const auto secret = reader.read_hash();
+    const auto prefix = source.read_4_bytes_big_endian();
+    const auto depth = source.read_byte();
+    const auto parent = source.read_4_bytes_big_endian();
+    const auto child = source.read_4_bytes_big_endian();
+    const auto chain = source.read_hash();
+    source.skip();
+    const auto secret = source.read_hash();
 
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))

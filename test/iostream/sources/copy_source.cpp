@@ -18,12 +18,13 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(copy_source_tests)
+BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // TODO: test imbue.
 // TODO: test peekable_tag.
 // TODO: test input_sequence.
 // TODO: add std::string source tests.
+// TODO: test by creating a stream and invoking stream methods.
 
 BOOST_AUTO_TEST_CASE(copy_source__read__nullptr__false)
 {

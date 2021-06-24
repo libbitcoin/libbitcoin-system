@@ -235,8 +235,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_3__valid_input__success)
     const auto data = expected.to_data(message::compact_filter_checkpoint::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::compact_filter_checkpoint::factory(message::compact_filter_checkpoint::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

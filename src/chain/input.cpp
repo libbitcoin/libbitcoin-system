@@ -159,14 +159,13 @@ input input::factory(reader& source, bool wire, bool witness)
 
 bool input::from_data(const data_chunk& data, bool wire, bool witness)
 {
-    stream::in::copy source(data);
-    byte_reader reader(source);
+    read::bytes::copy reader(data);
     return from_data(reader, wire, witness);
 }
 
 bool input::from_data(std::istream& stream, bool wire, bool witness)
 {
-    byte_reader reader(stream);
+    read::bytes::stream reader(stream);
     return from_data(reader, wire, witness);
 }
 
@@ -226,8 +225,8 @@ data_chunk input::to_data(bool wire, bool witness) const
 
 void input::to_data(std::ostream& stream, bool wire, bool witness) const
 {
-    byte_writer sink(stream);
-    to_data(sink, wire, witness);
+    write::bytes::stream out(stream);
+    to_data(out, wire, witness);
 }
 
 void input::to_data(writer& sink, bool wire, bool witness) const

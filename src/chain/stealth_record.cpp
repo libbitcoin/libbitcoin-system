@@ -185,7 +185,7 @@ bool stealth_record::from_data(const data_chunk& data, bool wire)
 
 bool stealth_record::from_data(std::istream& stream, bool wire)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source, wire);
 }
 
@@ -273,8 +273,8 @@ data_chunk stealth_record::to_data(bool wire) const
 
 void stealth_record::to_data(std::ostream& stream, bool wire) const
 {
-    byte_writer sink(stream);
-    to_data(sink, wire);
+    write::bytes::stream out(stream);
+    to_data(out, wire);
 }
 
 void stealth_record::to_data(writer& sink, bool wire) const

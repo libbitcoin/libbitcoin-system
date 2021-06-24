@@ -546,8 +546,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_1__success)
     static const auto raw_tx = to_chunk(base16_literal(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
-    stream::in::copy stream(raw_tx);
-    byte_reader source(stream);
+    read::bytes::copy source(raw_tx);
     chain::transaction tx = chain::transaction::factory(source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(), 225u);
@@ -565,8 +564,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_2__success)
     static const data_chunk raw_tx = to_chunk(base16_literal(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
-    stream::in::copy stream(raw_tx);
-    byte_reader source(stream);
+    read::bytes::copy source(raw_tx);
     chain::transaction tx = chain::transaction::factory(source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE(tx.hash() == tx_hash);

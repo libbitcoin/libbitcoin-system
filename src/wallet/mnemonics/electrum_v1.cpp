@@ -30,6 +30,7 @@
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
@@ -97,15 +98,14 @@ data_chunk v1_decoding::seed_entropy() const
     if (overflows_.size() * sizeof(uint32_t) != entropy_.size())
         return {};
 
-    stream::in::copy source(entropy_);
-    byte_reader reader(source);
+    read::bytes::copy in(entropy_);
     auto it = overflows_.begin();
     std::string hexadecimal;
 
-    while (!reader.is_exhausted())
+    while (!in.is_exhausted())
     {
         // This is a big-endian read of a big-endian byte stream.
-        const auto value = reader.read_bytes(sizeof(uint32_t));
+        const auto value = in.read_bytes(sizeof(uint32_t));
 
         // This inserts any overflow bits.
         // See comments on the decoder overflow bug.
@@ -150,8 +150,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 {
     string_list words;
     words.reserve(word_count(entropy));
-    stream::in::copy source(entropy);
-    byte_reader reader(source);
+    read::bytes::copy reader(entropy);
 
     while (!reader.is_exhausted())
     {
@@ -180,8 +179,7 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
-    stream::out::push sink(entropy);
-    byte_writer writer(sink);
+    write::bytes::push out(entropy);
 
     // See comments above on electrum v1 decoder overflow bug.
     v1_decoding::overflow overflows(words.size() / word_multiple);
@@ -203,14 +201,14 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
             floored_modulo(tre - dos, size1) * size2;
 
         // Overflow: if true then this mnemonic was not encoded from entropy.
-        *overflow++ = value > static_cast<int64_t>(max_uint32);
+        *overflow++ = is_greater(value, max_uint32);
 
         // Guard: floored modulo with positive divisor is always positive.
         // Casting away a non-zero (overflow bit) will prevent round trip.
-        writer.write_4_bytes_big_endian(static_cast<uint32_t>(value));
+        out.write_4_bytes_big_endian(static_cast<uint32_t>(value));
     }
 
-    sink.flush();
+    out.flush();
     return { entropy, overflows };
 }
 

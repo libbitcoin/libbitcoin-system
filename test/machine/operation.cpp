@@ -257,8 +257,7 @@ BOOST_AUTO_TEST_CASE(operation__factory_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(operation__factory_3__roundtrip__success)
 {
-    stream::in::copy istream(valid_raw_operation);
-    byte_reader source(istream);
+    read::bytes::copy source(valid_raw_operation);
     auto operation = operation::factory(source);
 
     BOOST_REQUIRE(operation.is_valid());

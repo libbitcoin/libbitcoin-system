@@ -193,18 +193,16 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     const auto area_bytes = height * row_bytes;
 
     // For reading the qrcode byte stream.
-    stream::in::copy image_source(coded);
-    byte_reader image_reader(image_source);
+    read::bytes::copy image_reader(coded);
 
     // For writing the image bit stream.
     data_chunk image_out;
-    stream::out::push image_sink(image_out);
-    bit_writer image_bit_writer(image_sink);
     image_out.reserve(area_bytes);
+    write::bits::push image_bit_sink(image_out);
 
     // ------------------------- Write top margin -------------------------
     for (size_t row = 0; row < margin; ++row)
-        image_bit_writer.write_bytes(row_margin);
+        image_bit_sink.write_bytes(row_margin);
     // --------------------------------------------------------------------
 
     // Write each row.
@@ -212,13 +210,12 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     {
         // For repeatedly writing a row buffer.
         data_chunk row_out;
-        stream::out::push row_sink(row_out);
-        bit_writer row_bit_writer(row_sink);
         row_out.reserve(row_bytes);
+        write::bits::push row_bit_sink(row_out);
 
         // ------------------------ Buffer left margin ------------------------
         for (size_t column = 0; column < margin; ++column)
-            row_bit_writer.write_bit(pixel_off);
+            row_bit_sink.write_bit(pixel_off);
         // --------------------------------------------------------------------
 
         // Buffer scaled row pixels.
@@ -229,32 +226,33 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
 
             // Buffer scaled pixel.
             for (size_t scaled = 0; scaled < scale; ++scaled)
-                row_bit_writer.write_bit(pixel_on);
+                row_bit_sink.write_bit(pixel_on);
         }
 
         // ------------------------ Buffer right margin -----------------------
         for (size_t column = 0; column < margin; ++column)
-            row_bit_writer.write_bit(pixel_off);
+            row_bit_sink.write_bit(pixel_off);
         // --------------------------------------------------------------------
 
-        // Flush any partial byte and then flush bytes to data_chunk.
-        row_bit_writer.flush();
+        // Flush to row_out.
+        row_bit_sink.flush();
 
         // Write row buffer scale times.
         for (size_t scaled = 0; scaled < scale; ++scaled)
-            image_bit_writer.write_bytes(row_out);
+            image_bit_sink.write_bytes(row_out);
     }
 
     // ------------------------ Write bottom margin -----------------------
     for (size_t row = 0; row < margin; ++row)
-        image_bit_writer.write_bytes(row_margin);
+        image_bit_sink.write_bytes(row_margin);
     // --------------------------------------------------------------------
 
     // Guard against writer failure and unexpected stream length.
-    if (!image_bit_writer || !image_reader.is_exhausted())
+    if (!image_bit_sink || !image_reader.is_exhausted())
         return {};
 
-    // Flush bytes to data_chunk.
+    // Flush to image_out.
+    image_bit_sink.flush();
     return image_out;
 }
 

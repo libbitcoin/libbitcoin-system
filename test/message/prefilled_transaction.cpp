@@ -130,8 +130,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_3__valid_input__success)
     );
 
     const auto data = expected.to_data(message::version::level::minimum);
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::prefilled_transaction::factory(
         message::version::level::minimum, source);
 

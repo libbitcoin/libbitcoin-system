@@ -114,14 +114,13 @@ bool decode_base32(data_chunk& out, const std::string& in)
 data_chunk base32_pack(const base32_chunk& unpacked)
 {
     data_chunk packed;
-    stream::out::push sink(packed);
-    bit_writer bit_writer(sink);
+    write::bits::push sink(packed);
 
     // This is how c++ developers do it. :)
     for (const auto& value: unpacked)
-        bit_writer.write_bits(static_cast<uint8_t>(value), 5);
+        sink.write_bits(value.convert_to<uint8_t>(), 5);
 
-    bit_writer.flush();
+    sink.flush();
 
     // Remove an element that is only padding, assumes base32_unpack encoding.
     // The bit writer writes zeros past end as padding.
@@ -143,12 +142,11 @@ data_chunk base32_pack(const base32_chunk& unpacked)
 base32_chunk base32_unpack(const data_chunk& packed)
 {
     base32_chunk unpacked;
-    stream::in::copy source(packed);
-    bit_reader bit_reader(source);
+    read::bits::copy source(packed);
 
     // This is how c++ developers do it. :)
-    while (!bit_reader.is_exhausted())
-        unpacked.push_back(bit_reader.read_bits(5));
+    while (!source.is_exhausted())
+        unpacked.push_back(source.read_bits(5));
 
     // The bit reader reads zeros past end as padding.
     // This is a ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.

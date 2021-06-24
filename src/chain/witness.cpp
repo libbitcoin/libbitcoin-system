@@ -145,7 +145,7 @@ bool witness::from_data(const data_chunk& encoded, bool prefix)
 
 bool witness::from_data(std::istream& stream, bool prefix)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source, prefix);
 }
 
@@ -236,8 +236,8 @@ data_chunk witness::to_data(bool prefix) const
 
 void witness::to_data(std::ostream& stream, bool prefix) const
 {
-    byte_writer sink(stream);
-    to_data(sink, prefix);
+    write::bytes::stream out(stream);
+    to_data(out, prefix);
 }
 
 void witness::to_data(writer& sink, bool prefix) const

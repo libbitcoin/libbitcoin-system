@@ -75,8 +75,8 @@ bool get_address::from_data(uint32_t version, const data_chunk& data)
 
 bool get_address::from_data(uint32_t version, std::istream& stream)
 {
-    byte_reader source(stream);
-    return from_data(version, source);
+    read::bytes::stream in(stream);
+    return from_data(version, in);
 }
 
 bool get_address::from_data(uint32_t, reader& source)
@@ -99,8 +99,8 @@ data_chunk get_address::to_data(uint32_t version) const
 
 void get_address::to_data(uint32_t version, std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(version, sink);
+    write::bytes::stream out(stream);
+    to_data(version, out);
 }
 
 void get_address::to_data(uint32_t, writer&) const

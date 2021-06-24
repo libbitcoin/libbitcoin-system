@@ -155,8 +155,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
     const auto data = expected.to_data(message::compact_filter::version_minimum);
     BOOST_REQUIRE(raw == data);
 
-    stream::in::copy istream(data);
-    byte_reader source(istream);
+    read::bytes::copy source(data);
     const auto result = message::compact_filter::factory(message::compact_filter::version_minimum, source);
 
     BOOST_REQUIRE(result.is_valid());

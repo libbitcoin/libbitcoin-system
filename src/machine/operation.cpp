@@ -66,7 +66,7 @@ bool operation::from_data(const data_chunk& encoded)
 
 bool operation::from_data(std::istream& stream)
 {
-    byte_reader source(stream);
+    read::bytes::stream source(stream);
     return from_data(source);
 }
 
@@ -244,8 +244,8 @@ data_chunk operation::to_data() const
 
 void operation::to_data(std::ostream& stream) const
 {
-    byte_writer sink(stream);
-    to_data(sink);
+    write::bytes::stream out(stream);
+    to_data(out);
 }
 
 void operation::to_data(writer& sink) const
