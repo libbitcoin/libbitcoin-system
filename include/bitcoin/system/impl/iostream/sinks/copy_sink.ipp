@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_IOSTREAM_SINKS_COPY_SINK_IPP
 
 #include <algorithm>
+#include <iterator>
 #include <utility>
 #include <bitcoin/system/math/limits.hpp>
 
@@ -46,8 +47,8 @@ template <typename Container>
 typename copy_sink<Container>::sequence
 copy_sink<Container>::output_sequence() noexcept
 {
-    const value_type* begin = container_.begin();
-    const value_type* end = container_.end();
+    const auto begin = container_.data();
+    const auto end = std::next(begin, container_.size());
 
     return std::make_pair(
         reinterpret_cast<char_type*>(begin),

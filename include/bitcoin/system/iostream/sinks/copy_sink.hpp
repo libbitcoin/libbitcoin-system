@@ -25,6 +25,11 @@
 namespace libbitcoin {
 namespace system {
 
+// TODO: make copy_sink readable (implement read and input_sequence).
+// TODO: This will allow it to read and to logically skip bits while writing.
+// TODO: input_sequence must return the same value as output_sequence.
+// TODO: implement read/do_read and set tags accordingly.
+
 /// Sink for boost::iostreams::stream, copies bytes to Container.
 template <typename Container>
 class copy_sink

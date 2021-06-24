@@ -60,23 +60,23 @@ void bit_writer<OStream>::write_bit(bool value) noexcept
 }
 
 template <typename OStream>
-template <typename Integer, if_integer<Integer>>
-void bit_writer<OStream>::write_bits(Integer value, size_t bits) noexcept
+//template <typename Integer, if_integer<Integer>>
+void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 {
     while (bits > byte_bits)
-        do_write((value >> ((bits -= byte_bits))) & 0xff);
+        do_write(static_cast<uint8_t>((value >> ((bits -= byte_bits))) & 0xff));
 
     for (uint8_t bit = 0; bit < bits; ++bit)
-        write_bit((value >> (bits - add1(bit))) & 0x01);
+        write_bit(!is_zero((value >> (bits - add1(bit))) & 0x01));
 }
 
-// TODO: implement forward seek.
-template <typename OStream>
-void bit_writer<OStream>::skip_bit(size_t bits) noexcept
-{
-    while (!is_zero(bits--))
-        write_bit(false);
-}
+////// TODO: we can only skip bytes unless we have an iostream.
+////template <typename OStream>
+////void bit_writer<OStream>::skip_bit(size_t bits) noexcept
+////{
+////    while (!is_zero(bits--))
+////        write_bit(false);
+////}
 
 // protected overrides
 //-----------------------------------------------------------------------------

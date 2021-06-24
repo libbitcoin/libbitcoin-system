@@ -217,6 +217,7 @@ byte_writer<OStream>::operator bool() const noexcept
     return get_valid();
 }
 
+// This should not be necessary with bool() defined, but it is.
 template <typename OStream>
 bool byte_writer<OStream>::operator!() const noexcept
 {
@@ -235,22 +236,15 @@ void byte_writer<OStream>::do_write(uint8_t byte) noexcept
 template <typename OStream>
 void byte_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
 {
-    if (is_zero(size))
-        return;
-
     // It is not generally more efficient to call stream_.put() for one byte.
     stream_.write(reinterpret_cast<const char*>(data), size);
 }
 
-// TODO: implement forward seek.
 template <typename OStream>
 void byte_writer<OStream>::do_skip(size_t size) noexcept
 {
-    ////// TODO: verify this behavior.
-    ////// TODO: this cannot work with the stream::out::push.
-    ////stream_.seekp(size, std::ios_base::cur);
-    while (!is_zero(size--))
-        write_byte(0x00);
+    // "seek put"
+    stream_.seekp(size, std::ios_base::cur);
 }
 
 template <typename OStream>

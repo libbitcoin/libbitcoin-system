@@ -32,6 +32,12 @@
 namespace libbitcoin {
 namespace system {
 
+// Suppress multiple inheritance warnings.
+// The inheritance is virtual, so not actually multiple.
+// But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#pragma warning(push)
+#pragma warning(disable : 4250)
+
 /// Construct a member istream and feed it to a reader.
 /// For std::istream reader, just pass to byte_reader or bit_reader instance.
 template <typename Container,
@@ -43,18 +49,20 @@ class make_reader
 {
 public:
     make_reader(const Container& source) noexcept
-      : source_(source), Reader(source_)
+      : source_(source), Reader<IStream>(source_)
     {
     }
 
-    ~make_reader() noexcept override
-    {
-        Reader::~Reader();
-    }
+    ////~make_reader() noexcept override
+    ////{
+    ////    ~Reader<IStream>();
+    ////}
 
 private:
     IStream source_;
 };
+
+#pragma warning(pop)
 
 namespace read
 {

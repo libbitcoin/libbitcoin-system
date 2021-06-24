@@ -34,8 +34,14 @@
 namespace libbitcoin {
 namespace system {
 
+// Suppress multiple inheritance warnings.
+// The inheritance is virtual, so not actually multiple.
+// But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#pragma warning(push)
+#pragma warning(disable : 4250)
+
 /// A bit writer that accepts an istream.
-template <typename OStream>
+template <typename OStream = std::ostream>
 class bit_writer
   : public byte_writer<OStream>,
     public virtual bitwriter
@@ -43,17 +49,17 @@ class bit_writer
 public:
     /// Constructors.
     bit_writer(OStream& sink) noexcept;
-    ~bit_writer() override;
+    ~bit_writer() noexcept override;
 
     /// Write one bit (high to low).
     virtual void write_bit(bool value) noexcept;
 
     /// Write size bits from an integer (high to low).
-    template <typename Integer, if_integer<Integer> = true>
-    void write_bits(Integer value, size_t bits) noexcept;
+    ////template <typename Integer, if_integer<Integer> = true>
+    virtual void write_bits(uint64_t value, size_t bits) noexcept;
 
-    /// Advance iterator by writing false.
-    virtual void skip_bit(size_t bits=one) noexcept;
+    /////// Advance iterator by writing false.
+    ////virtual void skip_bit(size_t bits=one) noexcept;
 
 protected:
     void do_write(uint8_t byte) noexcept override;
@@ -70,6 +76,8 @@ private:
     uint8_t buffer_;
     uint8_t offset_;
 };
+
+#pragma warning(pop)
 
 } // namespace system
 } // namespace libbitcoin

@@ -34,7 +34,7 @@ namespace libbitcoin {
 namespace system {
     
 /// A byte reader that accepts an istream.
-template <typename IStream>
+template <typename IStream = std::istream>
 class byte_reader
   : public virtual bytereader
 {
@@ -118,8 +118,8 @@ protected:
     virtual uint8_t do_read() noexcept;
     virtual void do_read(uint8_t* buffer, size_t size) noexcept;
     virtual void do_skip(size_t size) noexcept;
-    virtual bool get_valid() const noexcept;
     virtual bool get_exhausted() const noexcept;
+    virtual bool get_valid() const noexcept;
     virtual void set_invalid() noexcept;
 
 private:

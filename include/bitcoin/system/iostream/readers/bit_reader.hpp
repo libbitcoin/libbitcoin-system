@@ -33,8 +33,14 @@
 namespace libbitcoin {
 namespace system {
 
+// Suppress multiple inheritance warnings.
+// The inheritance is virtual, so not actually multiple.
+// But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#pragma warning(push)
+#pragma warning(disable : 4250)
+
 /// A bit reader that accepts an istream.
-template <typename IStream>
+template <typename IStream = std::istream>
 class bit_reader
   : public byte_reader<IStream>,
     public virtual bitreader
@@ -42,14 +48,14 @@ class bit_reader
 public:
     /// Constructors.
     bit_reader(IStream& source) noexcept;
-    ~bit_reader() override;
+    ~bit_reader() noexcept override;
 
     /// Read one bit (high to low).
     virtual bool read_bit() noexcept;
 
     /// Read size bits into an integer (high to low).
-    template <typename Integer, if_integer<Integer> = true>
-    Integer read_bits(size_t bits) noexcept;
+    ////template <typename Integer, if_integer<Integer> = true>
+    virtual uint64_t read_bits(size_t bits) noexcept;
 
     /// Advance the iterator.
     virtual void skip_bit(size_t bits=one) noexcept;
@@ -59,8 +65,8 @@ protected:
     uint8_t do_read() noexcept override;
     void do_read(uint8_t* buffer, size_t size) noexcept override;
     void do_skip(size_t size) noexcept override;
-    bool get_valid() const noexcept override;
     bool get_exhausted() const noexcept override;
+    bool get_valid() const noexcept override;
     void set_invalid() noexcept override;
 
 private:
@@ -71,6 +77,8 @@ private:
     uint8_t buffer_;
     uint8_t offset_;
 };
+
+#pragma warning(pop)
 
 } // namespace system
 } // namespace libbitcoin

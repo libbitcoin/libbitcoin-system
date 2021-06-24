@@ -36,8 +36,11 @@ public:
     /// detail::random_access direct (seekable)
     sequence input_sequence() noexcept;
 
-    /// peekable_tag
-    bool putback(char_type) noexcept;
+    // Should not be necessary for direct seekable devices.
+    // The boost stream wrapper can simply look ahead in the buffer.
+    // Though it would seem read() is also unnecessary for the same reason.
+    /////// peekable_tag
+    ////bool putback(char_type) noexcept;
 
 protected:
     virtual void do_read(value_type* to, size_type size) noexcept;

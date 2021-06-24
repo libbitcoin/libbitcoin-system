@@ -32,6 +32,12 @@
 namespace libbitcoin {
 namespace system {
 
+// Suppress multiple inheritance warnings.
+// The inheritance is virtual, so not actually multiple.
+// But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#pragma warning(push)
+#pragma warning(disable : 4250)
+
 /// Construct a member ostream and feed it to a writer.
 /// For std::istream writer, just pass to byte_writer or bit_writer instance.
 template <typename Container,
@@ -43,18 +49,20 @@ class make_writer
 {
 public:
     make_writer(Container& sink) noexcept
-      : sink_(sink), Writer(sink_)
+      : sink_(sink), Writer<OStream>(sink_)
     {
     }
 
-    ~make_writer() noexcept override
-    {
-        Writer::~Writer();
-    }
+    ////~make_writer() noexcept override
+    ////{
+    ////    ~Writer<OStream>();
+    ////}
 
 private:
     OStream sink_;
 };
+
+#pragma warning(pop)
 
 namespace write
 {

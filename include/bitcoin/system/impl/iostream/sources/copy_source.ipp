@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/limits.hpp>
 
@@ -48,27 +49,27 @@ typename copy_source<Container>::sequence
 copy_source<Container>::input_sequence() noexcept
 {
     // input_sequence requires non-const buffer pointers.
-    const auto begin = const_cast<value_type*>(container_.begin());
-    const auto end = const_cast<value_type*>(container_.end());
+    const auto begin = const_cast<value_type*>(container_.data());
+    const auto end = std::next(begin, container_.size());
 
     return std::make_pair(
         reinterpret_cast<char_type*>(begin),
         reinterpret_cast<char_type*>(end));
 }
 
-template <typename Container>
-bool copy_source<Container>::putback(char_type) noexcept
-{
-    if (from_ == container_.begin())
-        return false;
-
-    // The character value is ignored, as it is presumed to still exist.
-    // This precludes putting back a different character and will not detect an
-    // error of attempting to do so, assuming that is even considered an error.
-    --size_;
-    std::advance(from_, negative_one);
-    return true;
-}
+////template <typename Container>
+////bool copy_source<Container>::putback(char_type) noexcept
+////{
+////    if (from_ == container_.begin())
+////        return false;
+////
+////    // The character value is ignored, as it is presumed to still exist.
+////    // This precludes putting back a different character and will not detect an
+////    // error of attempting to do so, assuming that is even considered an error.
+////    --size_;
+////    std::advance(from_, negative_one);
+////    return true;
+////}
 
 } // namespace system
 } // namespace libbitcoin

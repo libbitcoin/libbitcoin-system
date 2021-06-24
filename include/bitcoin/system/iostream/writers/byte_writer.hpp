@@ -33,7 +33,7 @@ namespace libbitcoin {
 namespace system {
     
 /// A byte reader that accepts an istream.
-template <typename OStream>
+template <typename OStream = std::ostream>
 class byte_writer
   : public virtual bytewriter
 {

@@ -25,29 +25,29 @@
 #include <bitcoin/system/data/data.hpp>
 
 /// Sinks.
-#include <bitcoin/system/iostream/sinks/sink.hpp>
 #include <bitcoin/system/iostream/sinks/copy_sink.hpp>
 #include <bitcoin/system/iostream/sinks/push_sink.hpp>
+#include <bitcoin/system/iostream/sinks/sink.hpp>
 
 /// Sources.
-#include <bitcoin/system/iostream/sources/source.hpp>
 #include <bitcoin/system/iostream/sources/copy_source.hpp>
 #include <bitcoin/system/iostream/sources/move_source.hpp>
+#include <bitcoin/system/iostream/sources/source.hpp>
 
 /// Iterfaces.
-#include <bitcoin/system/iostream/interfaces/bytereader.hpp>
 #include <bitcoin/system/iostream/interfaces/bitreader.hpp>
-#include <bitcoin/system/iostream/interfaces/bytewriter.hpp>
+#include <bitcoin/system/iostream/interfaces/bytereader.hpp>
 #include <bitcoin/system/iostream/interfaces/bitwriter.hpp>
+#include <bitcoin/system/iostream/interfaces/bytewriter.hpp>
 
 /// Readers.
-#include <bitcoin/system/iostream/readers/byte_reader.hpp>
 #include <bitcoin/system/iostream/readers/bit_reader.hpp>
+#include <bitcoin/system/iostream/readers/byte_reader.hpp>
 #include <bitcoin/system/iostream/readers/readers.hpp>
 
 /// Writers.
-#include <bitcoin/system/iostream/writers/byte_writer.hpp>
 #include <bitcoin/system/iostream/writers/bit_writer.hpp>
+#include <bitcoin/system/iostream/writers/byte_writer.hpp>
 #include <bitcoin/system/iostream/writers/writers.hpp>
 
 namespace libbitcoin {

@@ -291,6 +291,7 @@ byte_reader<IStream>::operator bool() const noexcept
     return get_valid();
 }
 
+// This should not be necessary with bool() defined, but it is.
 template <typename IStream>
 bool byte_reader<IStream>::operator!() const noexcept
 {
@@ -317,27 +318,15 @@ uint8_t byte_reader<IStream>::do_read() noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 {
-    if (is_zero(size))
-        return;
-
     // It is not generally more efficient to call stream_.get() for one byte.
     stream_.read(reinterpret_cast<char*>(buffer), size);
 }
 
-// TODO: implement forward seek.
 template <typename IStream>
 void byte_reader<IStream>::do_skip(size_t size) noexcept
 {
-    ////// TODO: verify this behavior.
-    ////stream_.seekp(size, std::ios_base::cur);
-    while (!is_zero(size--))
-        read_byte();
-}
-
-template <typename IStream>
-bool byte_reader<IStream>::get_valid() const noexcept
-{
-    return !!stream_;
+    // "seek get"
+    stream_.seekg(size, std::ios_base::cur);
 }
 
 template <typename IStream>
@@ -348,6 +337,12 @@ bool byte_reader<IStream>::get_exhausted() const noexcept
     // unexpected as the state of the stream, reader and bit reader can change
     // as a result of the peek, which reads and then restores a byte to stream.
     return !stream_ || stream_.peek() == std::istream::traits_type::eof();
+}
+
+template <typename IStream>
+bool byte_reader<IStream>::get_valid() const noexcept
+{
+    return !!stream_;
 }
 
 template <typename IStream>
