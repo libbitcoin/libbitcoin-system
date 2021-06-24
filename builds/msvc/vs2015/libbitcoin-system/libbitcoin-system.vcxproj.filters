@@ -1052,10 +1052,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bitwriter.hpp">
       <Filter>include\bitcoin\system\iostream\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\reader.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytereader.hpp">
       <Filter>include\bitcoin\system\iostream\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\writer.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytewriter.hpp">
       <Filter>include\bitcoin\system\iostream\interfaces</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\iostream.hpp">

@@ -408,8 +408,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bitreader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bitwriter.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\reader.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\writer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytereader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\interfaces\bytewriter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\iostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\readers\bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\iostream\readers\byte_reader.hpp" />

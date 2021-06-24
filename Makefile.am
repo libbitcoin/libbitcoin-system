@@ -669,8 +669,8 @@ include_bitcoin_system_iostream_interfacesdir = ${includedir}/bitcoin/system/ios
 include_bitcoin_system_iostream_interfaces_HEADERS = \
     include/bitcoin/system/iostream/interfaces/bitreader.hpp \
     include/bitcoin/system/iostream/interfaces/bitwriter.hpp \
-    include/bitcoin/system/iostream/interfaces/reader.hpp \
-    include/bitcoin/system/iostream/interfaces/writer.hpp
+    include/bitcoin/system/iostream/interfaces/bytereader.hpp \
+    include/bitcoin/system/iostream/interfaces/bytewriter.hpp
 
 include_bitcoin_system_iostream_readersdir = ${includedir}/bitcoin/system/iostream/readers
 include_bitcoin_system_iostream_readers_HEADERS = \
