@@ -21,4 +21,35 @@
 
 BOOST_AUTO_TEST_SUITE(bit_reader_tests)
 
+// TODO: test all methods against std::istringstream
+// TODO: test against libbitcoin sources.
+
+#define BIT_READER_IS_EXHAUSTED
+
+#ifdef BIT_READER_IS_EXHAUSTED
+
+BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__empty__true)
+{
+    std::istringstream stream;
+    read::bits::stream reader(stream);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__not_exhausted__false)
+{
+    std::istringstream stream{ "a" };
+    read::bits::stream reader(stream);
+    BOOST_REQUIRE(!reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_reader__is_exhausted__exhausted__true)
+{
+    std::istringstream stream{ "a" };
+    read::bits::stream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+#endif // BIT_READER_IS_EXHAUSTED
+
 BOOST_AUTO_TEST_SUITE_END()

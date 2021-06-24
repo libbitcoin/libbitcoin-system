@@ -20,6 +20,11 @@
 
 BOOST_AUTO_TEST_SUITE(copy_source_tests)
 
+// TODO: test imbue.
+// TODO: test peekable_tag.
+// TODO: test input_sequence.
+// TODO: add std::string source tests.
+
 BOOST_AUTO_TEST_CASE(copy_source__read__nullptr__false)
 {
     const data_chunk source{ 0x42 };

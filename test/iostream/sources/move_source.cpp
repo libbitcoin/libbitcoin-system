@@ -20,6 +20,8 @@
 
 BOOST_AUTO_TEST_SUITE(move_source_tests)
 
+// TODO: test imbue.
+
 BOOST_AUTO_TEST_CASE(move_source__read__nullptr__false)
 {
     move_source<data_chunk> instance(data_chunk{ 0x42 });

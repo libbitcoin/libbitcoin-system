@@ -21,4 +21,22 @@
 
 BOOST_AUTO_TEST_SUITE(bit_writer_tests)
 
+// TODO: test all methods against std::ostringstream
+// TODO: test against libbitcoin sinks.
+
+#define BIT_WRITER_IS_EXHAUSTED
+
+#ifdef BIT_WRITER_IS_EXHAUSTED
+
+BOOST_AUTO_TEST_CASE(bit_writer__write_byte__empty__expected)
+{
+    std::ostringstream stream;
+    write::bits::stream writer(stream);
+    writer.write_byte('a');
+    writer.flush();
+    BOOST_REQUIRE_EQUAL(stream.str(), "a");
+}
+
+#endif // BIT_WRITER_IS_EXHAUSTED
+
 BOOST_AUTO_TEST_SUITE_END()

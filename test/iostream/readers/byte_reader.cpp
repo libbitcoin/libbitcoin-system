@@ -21,37 +21,35 @@
 
 BOOST_AUTO_TEST_SUITE(byte_reader_tests)
 
-// is_exhausted/invalidate/bool()/!
+// TODO: test all methods against std::istringstream
+// TODO: test against libbitcoin sources.
+
+#define BYTE_READER_IS_EXHAUSTED
+
+#ifdef BYTE_READER_IS_EXHAUSTED
 
 BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__empty__true)
 {
-    const data_chunk source;
-    stream::in::copy stream;
-    byte_reader instance(stream);
-    BOOST_REQUIRE(instance.is_exhausted());
-    BOOST_REQUIRE_EQUAL((bool)instance, false);
-    BOOST_REQUIRE_EQUAL(!instance, true);
+    std::istringstream stream;
+    read::bytes::stream reader(stream);
+    BOOST_REQUIRE(reader.is_exhausted());
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__not_exhausted__false)
 {
-    const data_chunk source{ 0x00 };
-    stream::in::copy stream;
-    byte_reader instance(stream);
-    BOOST_REQUIRE(!instance.is_exhausted());
-    BOOST_REQUIRE_EQUAL((bool)instance, true);
-    BOOST_REQUIRE_EQUAL(!instance, false);
+    std::istringstream stream{ "a" };
+    read::bytes::stream reader(stream);
+    BOOST_REQUIRE(!reader.is_exhausted());
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__is_exhausted__exhausted__true)
 {
-    const data_chunk source{ 0x00 };
-    stream::in::copy stream;
-    byte_reader instance(stream);
-    instance.skip();
-    BOOST_REQUIRE(instance.is_exhausted());
-    BOOST_REQUIRE_EQUAL((bool)instance, false);
-    BOOST_REQUIRE_EQUAL(!instance, true);
+    std::istringstream stream{ "a" };
+    read::bytes::stream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
+    BOOST_REQUIRE(reader.is_exhausted());
 }
+
+#endif // BYTE_READER_IS_EXHAUSTED
 
 BOOST_AUTO_TEST_SUITE_END()

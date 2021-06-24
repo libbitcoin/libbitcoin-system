@@ -20,6 +20,9 @@
 
 BOOST_AUTO_TEST_SUITE(copy_sink_tests)
 
+// TODO: test imbue.
+// TODO: test output_sequence.
+
 BOOST_AUTO_TEST_CASE(copy_sink__write__nullptr__false)
 {
     data_chunk sink;
