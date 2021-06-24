@@ -115,11 +115,11 @@ void bit_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
     buffer_ = data[sub1(size)] << shift();
 }
 
-template <typename OStream>
-void bit_writer<OStream>::do_skip(size_t size) noexcept
-{
-    skip_bit(to_bits(size));
-}
+////template <typename OStream>
+////void bit_writer<OStream>::do_skip(size_t size) noexcept
+////{
+////    skip_bit(to_bits(size));
+////}
 
 template <typename OStream>
 void bit_writer<OStream>::do_flush() noexcept
