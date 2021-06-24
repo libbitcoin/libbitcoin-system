@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/iostream/interfaces/bytereader.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,7 +40,8 @@ public:
     virtual bool read_bit() noexcept = 0;
 
     /// Read size bits into an integer (high to low).
-    virtual uint64_t read_bits(uint8_t bits) noexcept = 0;
+    template <typename Integer, if_integer<Integer> = true>
+    Integer read_bits(size_t bits) noexcept = 0;
 
     /// Advance the iterator.
     virtual void skip_bit(size_t bits=one) noexcept = 0;

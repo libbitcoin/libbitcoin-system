@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/iostream/interfaces/bytewriter.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,7 +40,8 @@ public:
     virtual void write_bit(bool value) noexcept = 0;
 
     /// Write size bits from an integer (high to low).
-    virtual void write_bits(uint64_t value, uint8_t bits) noexcept = 0;
+    template <typename Integer, if_integer<Integer> = true>
+    void write_bits(Integer value, size_t bits) noexcept = 0;
 
     /// Advance iterator by writing false.
     virtual void skip_bit(size_t bits=one) noexcept = 0;

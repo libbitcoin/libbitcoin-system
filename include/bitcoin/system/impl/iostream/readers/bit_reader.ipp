@@ -29,6 +29,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -57,25 +58,18 @@ bool bit_reader<IStream>::read_bit() noexcept
     return !is_zero((buffer_ << offset_++) & 0x80);
 }
 
-// TODO: change bits type to size_t.
-// TODO: templatize on return type and default to all bits (0).
 template <typename IStream>
-uint64_t bit_reader<IStream>::read_bits(uint8_t bits) noexcept
+template <typename Integer, if_integer<Integer>>
+Integer bit_reader<IStream>::read_bits(size_t bits) noexcept
 {
-    if (is_zero(bits))
-        return 0;
+    Integer out = 0;
+    while (bits > byte_bits)
+        out |= (static_cast<Integer>(do_read()) << ((bits -= byte_bits)));
 
-    // limit value of bits parameter to 64.
-    auto read_bits = lesser<uint8_t>(to_bits(sizeof(uint64_t)), bits);
+    for (uint8_t bit = 0; bit < bits; ++bit)
+        out |= (to_int<Integer>(read_bit()) << (bits - add1(bit)));
 
-    uint64_t out = 0;
-    while (read_bits > byte_bits)
-        out |= (static_cast<uint64_t>(do_read()) << ((read_bits -= byte_bits)));
-
-    for (uint8_t index = 0; index < read_bits; ++index)
-        out |= (to_int<uint64_t>(read_bit()) << (read_bits - add1(index)));
-
-    return out;
+    return static_cast<Integer>(out);
 }
 
 // TODO: implement forward seek.

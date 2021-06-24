@@ -29,6 +29,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -58,22 +59,15 @@ void bit_writer<OStream>::write_bit(bool value) noexcept
     buffer_ |= ((value ? 0x80 : 0x00) >> offset_++);
 }
 
-// TODO: change bits type to size_t.
-// TODO: templatize on value type and default to all bits (0).
 template <typename OStream>
-void bit_writer<OStream>::write_bits(uint64_t value, uint8_t bits) noexcept
+template <typename Integer, if_integer<Integer>>
+void bit_writer<OStream>::write_bits(Integer value, size_t bits) noexcept
 {
-    if (is_zero(bits))
-        return;
+    while (bits > byte_bits)
+        do_write((value >> ((bits -= byte_bits))) & 0xff);
 
-    // limit value of bits parameter to 64.
-    auto write_bits = lesser<uint8_t>(to_bits(sizeof(uint64_t)), bits);
-
-    while (write_bits > byte_bits)
-        do_write((value >> ((write_bits -= byte_bits))) & 0xff);
-
-    for (uint8_t index = 0; index < write_bits; ++index)
-        write_bit((value >> (write_bits - add1(index))) & 0x01);
+    for (uint8_t bit = 0; bit < bits; ++bit)
+        write_bit((value >> (bits - add1(bit))) & 0x01);
 }
 
 // TODO: implement forward seek.
