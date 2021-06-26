@@ -411,6 +411,9 @@
     <ClCompile Include="..\..\..\..\test\settings.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\device.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\flippers\bit_flipper.cpp">
       <Filter>src\stream\flippers</Filter>
     </ClCompile>

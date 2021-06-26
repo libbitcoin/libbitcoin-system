@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\..\..\test\serialization\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\device.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\flippers\bit_flipper.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\flippers\byte_flipper.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\readers\bit_reader.cpp" />

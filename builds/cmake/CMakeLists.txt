@@ -706,6 +706,7 @@ if (with-tests)
         "../../test/serialization/deserialize.cpp"
         "../../test/serialization/endian.cpp"
         "../../test/serialization/serialize.cpp"
+        "../../test/stream/device.cpp"
         "../../test/stream/removed.cpp"
         "../../test/stream/flippers/bit_flipper.cpp"
         "../../test/stream/flippers/byte_flipper.cpp"
