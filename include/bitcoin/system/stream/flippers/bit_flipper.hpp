@@ -37,6 +37,13 @@ namespace system {
 #pragma warning(disable : 4250)
 
 /// A bit reader/writer that accepts an iostream.
+/// Bit actions may lead to unextected read behavior, as they are read and
+/// flushed to the byte reader/writer on byte boundaries. Flushing a
+/// partial write will require a merged read, and reading after a partial
+/// write will require a merged flush. These are not yet implemented.
+/// In general it is not presently advisable to mix byte and byte operations
+/// with the bit flipper. If at all, perform byte operations first, then bit
+/// then flush, at which point the bit position is again on a byte boudary.
 template <typename IOStream = std::iostream>
 class bit_flipper
   : public bit_reader<IOStream>,
