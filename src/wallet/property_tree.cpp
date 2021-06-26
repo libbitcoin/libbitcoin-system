@@ -495,7 +495,7 @@ bool property_tree(ptree& out, const std::string& json)
 {
     try
     {
-        stream::in::copy istream(json);
+        stream::in::from<std::string> istream(json);
         read_json(istream, out);
         return true;
     }

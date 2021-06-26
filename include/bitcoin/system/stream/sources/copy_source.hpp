@@ -20,16 +20,14 @@
 #define LIBBITCOIN_SYSTEM_STREAM_SOURCES_COPY_SOURCE_HPP
 
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/stream/device.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /// Source for boost::iostreams::stream, copies bytes from Container.
-template <typename Container, if_base_of<data_slice, Container> = true>
+template <typename Container>
 class copy_source
   : public device<Container>
 {
@@ -69,7 +67,7 @@ protected:
     }
 
 private:
-    const Container container_;
+    const Container& container_;
     typename Container::const_iterator next_;
 };
 

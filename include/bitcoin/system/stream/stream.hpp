@@ -45,9 +45,14 @@
 
 namespace libbitcoin {
 namespace system {
-
-// Always copy read from a slice and move read from a slab.
+    
+// Streams are not copyable, so factory cannot be used to infer container type.
+// Always copy read from a container reference and move read from a slab.
 // Always copy write to a slab and push write to an insertable container.
+// A data_slice cannot be used for read reference because it accepts any
+// movable data type but requires a long lifetime as a class member.
+// std::string and data_chunk are the only insertable types, so there is no
+// need for template construction to obtain the container type for pushes.
 
 namespace stream
 {
@@ -56,8 +61,10 @@ namespace stream
         /// An input stream that moves data from a data_slab.
         using move = make_stream<move_source<data_slab>>;
 
-        /// An input stream that copies data from a data_slice.
-        using copy = make_stream<copy_source<data_slice>>;
+        /// An input stream that copies data from a Container reference.
+        template <typename Container>
+        using from = make_stream<copy_source<Container>>;
+        using copy = make_stream<copy_source<data_chunk>>;
     }
 
     namespace out
@@ -66,8 +73,8 @@ namespace stream
         using slab = make_stream<copy_sink<data_slab>>;
 
         /// An output stream that inserts data to a container.
-        using push = make_stream<push_sink<data_chunk>>;
         using text = make_stream<push_sink<std::string>>;
+        using push = make_stream<push_sink<data_chunk>>;
     }
 }
 
@@ -81,8 +88,10 @@ namespace read
         /// A byte reader that moves data from a data_slab.
         using move = make_streamer<move_source<data_slab>, byte_reader>;
 
-        /// A byte reader that copies data from a data_slice.
-        using copy = make_streamer<copy_source<data_slice>, byte_reader>;
+        /// A byte reader that copies data from a Container reference.
+        template <typename Container>
+        using from = make_streamer<copy_source<Container>, byte_reader>;
+        using copy = make_streamer<copy_source<data_chunk>, byte_reader>;
     }
 
     namespace bits
@@ -93,8 +102,10 @@ namespace read
         /// A bit reader that moves data from a data_slab.
         using move = make_streamer<move_source<data_slab>, bit_reader>;
 
-        /// A bit reader that copies data from a data_slice.
-        using copy = make_streamer<copy_source<data_slice>, bit_reader>;
+        /// A bit reader that copies data from a Container reference.
+        template <typename Container>
+        using from = make_streamer<copy_source<Container>, bit_reader>;
+        using copy = make_streamer<copy_source<data_chunk>, bit_reader>;
     }
 }
 
@@ -115,8 +126,8 @@ namespace write
         using slab = make_streamer<copy_sink<data_slab>, byte_writer>;
 
         /// A byte writer that inserts data into a container.
-        using push = make_streamer<push_sink<data_chunk>, byte_writer>;
         using text = make_streamer<push_sink<std::string>, byte_writer>;
+        using push = make_streamer<push_sink<data_chunk>, byte_writer>;
     }
 
     namespace bits
@@ -134,8 +145,8 @@ namespace write
         using slab = make_streamer<copy_sink<data_slab>, bit_writer>;
 
         /// A bit writer that inserts data into a container.
-        using push = make_streamer<push_sink<data_chunk>, bit_writer>;
         using text = make_streamer<push_sink<std::string>, bit_writer>;
+        using push = make_streamer<push_sink<data_chunk>, bit_writer>;
     }
 }
 
