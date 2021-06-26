@@ -19,8 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPE_CONSTRAINTS_HPP
 #define LIBBITCOIN_SYSTEM_TYPE_CONSTRAINTS_HPP
 
+#include <cstdint>
 #include <limits>
+#include <string>
 #include <type_traits>
+#include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -28,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 
 // C++14: use enable_if_t.
-template <bool Bool, typename Type=void>
+template <bool Bool, typename Type = void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
 template <size_t Value>
@@ -61,6 +64,11 @@ using if_byte_aligned = enable_if_type<is_byte_aligned(Value), bool>;
 template <typename Base, typename Type>
 using if_base_of = enable_if_type<
     std::is_base_of<Base, Type>::value, bool>;
+
+template <typename Type>
+using if_byte_insertable = enable_if_type<
+    std::is_base_of<std::vector<uint8_t>, Type>::value ||
+    std::is_base_of<std::string, Type>::value, bool>;
 
 template <typename Type>
 using if_integer = enable_if_type<

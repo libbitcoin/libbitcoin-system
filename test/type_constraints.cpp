@@ -18,7 +18,9 @@
  */
 #include "test.hpp"
 
+#include <string>
 #include <type_traits>
+#include <vector>
 
 // The msvc++ compiler dislikes std::is_same outside of template arguments.
 // But visual studio intellisense properly evaluations these assertions.
@@ -103,6 +105,12 @@ static_assert(is_true<if_base_of<base, derived>>(), "");
 ////static_assert(!is_true<if_base_of<uint8_t, uint8_t>>(), "");
 ////static_assert(!is_true<if_base_of<uint8_t, uint32_t>>(), "");
 ////static_assert(!is_true<if_base_of<float, double>>(), "");
+
+static_assert(is_true<if_byte_insertable<std::string>>(), "");
+static_assert(is_true<if_byte_insertable<std::vector<uint8_t>>>(), "");
+////static_assert(!is_true<if_byte_insertable<std::u32string>>(), "");
+////static_assert(!is_true<if_byte_insertable<std::vector<uint32_t>>>(), "");
+////static_assert(!is_true<if_byte_insertable<uint32_t>>(), "");
 
 static_assert(is_true<if_integer<bool>>(), "");
 static_assert(is_true<if_integer<char>>(), "");
