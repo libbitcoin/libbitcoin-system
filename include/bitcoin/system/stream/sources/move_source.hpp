@@ -36,7 +36,8 @@ class move_source
 public:
     typedef Container container;
     struct category
-      : boost::iostreams::source_tag
+      : boost::iostreams::input_seekable,
+        boost::iostreams::direct_tag
     {
     };
 
@@ -48,6 +49,17 @@ public:
     }
 
 protected:
+    sequence do_sequence() noexcept override
+    {
+        // Seeking in reverse after move is safe but reads will be arbitrary.
+        const auto begin = container_.data();
+        const auto end = std::next(begin, container_.size());
+
+        return std::make_pair(
+            reinterpret_cast<char_type*>(begin),
+            reinterpret_cast<char_type*>(end));
+    }
+
     void do_read(value_type* to, size_type size) noexcept override
     {
         // std::move returns iterator past last element moved to.
