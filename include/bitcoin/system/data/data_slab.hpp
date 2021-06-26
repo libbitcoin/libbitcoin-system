@@ -31,10 +31,17 @@
 namespace libbitcoin {
 namespace system {
 
-/// Identical to data_slice except pointer is non-const, and therefore does not
-/// accept construction from const or movable sources.
-/// Because it accepts only references the object is long-lived (unlike slice).
+/// Lifetime:
+/// No prvalues are accepted, as they are not meaningfully-writeable.
+/// The slab does not extend the lifetime of any rvalue passed to it.
+/// The caller must ensure that the references or pointers passed to the slab
+/// are not orphaned during its lifetime, which is consistent with any passage
+/// by reference. See data_slice for a detailed explanation of lifetime.
+/// en.cppreference.com/w/cpp/language/reference#Dangling_references
+
 /// Resizable but otherwise const iterable wrapper for non-const memory buffer.
+/// Identical to data_slice except pointer is non-const, and therefore does not
+/// accept construction from const or movable (non-writeable) sources.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// [] iteration past end is safe and returns zeros.

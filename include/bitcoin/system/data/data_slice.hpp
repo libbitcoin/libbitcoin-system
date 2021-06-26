@@ -31,13 +31,29 @@
 namespace libbitcoin {
 namespace system {
 
+/// Lifetime:
+/// "An rvalue may be used to initialize an rvalue reference, in which case
+/// the lifetime of the object identified by the rvalue is extended until
+/// the scope of the reference ends.":
+/// en.cppreference.com/w/cpp/language/value_category#rvalue
+/// A prvalue has the "same properties" as an rvalue:
+/// en.cppreference.com/w/cpp/language/value_category#prvalue
+/// A temporary is a prvalue, and includes initializer_list, but a copy is not:
+/// en.cppreference.com/w/cpp/language/implicit_conversion#Temporary_materialization
+/// When the data_slice is accepted as a const& it is either passed by
+/// reference or materialized as a prvalue. Any reference to the slice extends
+/// its lifetime to that of the reference. However, the slice does not retain
+/// references to the parameters provided in its construction. Instead pointers
+/// are initialized (copied) from addresses derived from these parameters. As a
+/// result, any temporary used to construct the slice will be orphaned when the
+/// lifetime of the temporary ends, despite retention of the slice by reference,
+/// such as by a class member. The lifetime of a temporary used in 
+/// materialization of a function parameter is the lifetime of the function,
+/// unless extended by reference.
+
+/// Resizable but otherwise const iterable wrapper for const memory buffer.
 /// Identical to data_slab except pointer is const, and therefore accepts
 /// construction from const sources (including literals and initializers).
-/// Because it accepts moveables the instance is short-lived. Its valid scope
-/// is limited to the method/function in which it is created. It cannot be
-/// saved or copied to a class member as its data may become invalid
-/// immediately after it was passed to the class (unlike data_slab).
-/// Resizable but otherwise const iterable wrapper for const memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// [] iteration past end is safe and returns zeros.
