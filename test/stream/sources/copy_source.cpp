@@ -42,27 +42,8 @@ BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
     BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
 }
 
-// output_sequence
-
-BOOST_AUTO_TEST_CASE(copy_source__output_sequence__empty__empty)
-{
-    data_chunk sink;
-    copy_source<data_chunk> instance(sink);
-    const auto sequence = instance.output_sequence();
-    const auto first = reinterpret_cast<char*>(sink.data());
-    const auto second = std::next(first, sink.size());
-    BOOST_REQUIRE_EQUAL(first, sequence.first);
-    BOOST_REQUIRE_EQUAL(second, sequence.second);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
-}
-
-BOOST_AUTO_TEST_CASE(copy_source__output_sequence__not_empty__expected)
-{
-    data_chunk sink(42, 0x00);
-    copy_source<data_chunk> instance(sink);
-    const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
-}
+// read() is not required for direct devices.
+#ifdef UNDEFINED
 
 // read
 
@@ -146,5 +127,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__multiple__correct_tracking)
     BOOST_REQUIRE_EQUAL(to3[2], source[5]);
     BOOST_REQUIRE_EQUAL(instance.read(to0.data(), 42), 0);
 }
+
+#endif // UNDEFINED
 
 BOOST_AUTO_TEST_SUITE_END()

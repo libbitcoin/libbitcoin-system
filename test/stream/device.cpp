@@ -32,6 +32,14 @@ public:
     }
 };
 
+// optimal_buffer_size
+
+BOOST_AUTO_TEST_CASE(device__optimal_buffer_size__always__expected)
+{
+    device_accessor instance;
+    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), 4096);
+}
+
 // input_sequence
 
 BOOST_AUTO_TEST_CASE(device__input_sequence__not_empty__empty)

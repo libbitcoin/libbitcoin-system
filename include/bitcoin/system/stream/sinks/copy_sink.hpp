@@ -19,6 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SINKS_COPY_SINK_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SINKS_COPY_SINK_HPP
 
+#include <algorithm>
+#include <iterator>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -36,7 +39,7 @@ class copy_sink
 public:
     typedef const Container& container;
     struct category
-      : boost::iostreams::seekable,
+      : boost::iostreams::output_seekable,
         boost::iostreams::direct_tag
     {
     };
@@ -49,7 +52,7 @@ public:
     }
 
 protected:
-    sequence do_sequence() noexcept override
+    sequence do_sequence() const noexcept override
     {
         const auto begin = container_.data();
         const auto end = std::next(begin, container_.size());
@@ -59,20 +62,13 @@ protected:
             reinterpret_cast<char_type*>(end));
     }
 
-    void do_read(value_type* to, size_type size) noexcept override
-    {
-        // std::copy_n returns iterator past last element copied to.
-        std::copy_n(next_, size, to);
-        std::advance(next_, size);
-    }
+    ////void do_write(const value_type* from, size_type size) noexcept override
+    ////{
+    ////    // std::copy_n returns iterator past last element copied to.
+    ////    next_ = std::copy_n(from, size, next_);
+    ////}
 
-    void do_write(const value_type* from, size_type size) noexcept override
-    {
-        // std::copy_n returns iterator past last element copied to.
-        next_ = std::copy_n(from, size, next_);
-    }
-
-private:
+protected:
     const Container container_;
     typename Container::iterator next_;
 };

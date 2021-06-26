@@ -19,6 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SOURCES_MOVE_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SOURCES_MOVE_SOURCE_HPP
 
+#include <algorithm>
+#include <iterator>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -49,7 +52,7 @@ public:
     }
 
 protected:
-    sequence do_sequence() noexcept override
+    sequence do_sequence() const noexcept override
     {
         // Seeking in reverse after move is safe but reads will be arbitrary.
         const auto begin = container_.data();
@@ -60,15 +63,15 @@ protected:
             reinterpret_cast<char_type*>(end));
     }
 
-    void do_read(value_type* to, size_type size) noexcept override
-    {
-        // std::move returns iterator past last element moved to.
-        auto end = std::next(next_, size);
-        std::move(next_, end, to);
-        next_ = end;
-    }
+    ////void do_read(value_type* to, size_type size) noexcept override
+    ////{
+    ////    // std::move returns iterator past last element moved to.
+    ////    auto end = std::next(next_, size);
+    ////    std::move(next_, end, to);
+    ////    next_ = end;
+    ////}
 
-private:
+protected:
     const Container container_;
     typename Container::iterator next_;
 };

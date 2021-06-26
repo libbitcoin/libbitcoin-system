@@ -19,8 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SINKS_PUSH_SINK_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SINKS_PUSH_SINK_HPP
 
+#include <iterator>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
@@ -30,6 +32,7 @@ namespace system {
 /// Sink for boost::iostreams::stream, appends bytes to Container.
 /// Container may be any insertable object with contiguous byte data.
 /// This is limited to std::string and std::vector of int8_t/uint8_t.
+/// Push streams are buffered, indirect (inefficient) and require flush.
 template <typename Container, if_byte_insertable<Container> = true>
 class push_sink
   : public device<Container>
@@ -37,7 +40,8 @@ class push_sink
 public:
     typedef Container& container;
     struct category
-      : boost::iostreams::sink_tag
+      : boost::iostreams::sink_tag,
+        boost::iostreams::optimally_buffered_tag
     {
     };
 
@@ -49,13 +53,20 @@ public:
     }
 
 protected:
+    const size_type minimum_buffer_size = 1024;
+
     void do_write(const value_type* from, size_type size) noexcept override
     {
         auto start = container_.insert(next_, from, std::next(from, size));
         next_ = std::next(start, size);
     }
 
-private:
+    size_type do_optimal_buffer_size() const noexcept override
+    {
+        return greater<size_type>(container_.capacity(), minimum_buffer_size);
+    }
+
+protected:
     Container& container_;
     typename Container::iterator next_;
 };

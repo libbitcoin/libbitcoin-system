@@ -19,6 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SOURCES_COPY_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SOURCES_COPY_SOURCE_HPP
 
+#include <algorithm>
+#include <iterator>
+#include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/stream/device.hpp>
@@ -47,7 +50,7 @@ public:
     }
 
 protected:
-    sequence do_sequence() noexcept override
+    sequence do_sequence() const noexcept override
     {
         // input_sequence/output_sequence both require non-const buffer ptrs,
         // but the data member is const, so we must cast it for direct devices.
@@ -59,14 +62,14 @@ protected:
             reinterpret_cast<char_type*>(end));
     }
 
-    void do_read(value_type* to, size_type size) noexcept override
-    {
-        // std::copy_n returns iterator past last element copied to.
-        std::copy_n(next_, size, to);
-        std::advance(next_, size);
-    }
+    ////void do_read(value_type* to, size_type size) noexcept override
+    ////{
+    ////    // std::copy_n returns iterator past last element copied to.
+    ////    std::copy_n(next_, size, to);
+    ////    std::advance(next_, size);
+    ////}
 
-private:
+protected:
     const Container& container_;
     typename Container::const_iterator next_;
 };

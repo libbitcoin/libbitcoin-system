@@ -19,15 +19,15 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 
+#include <cstddef>
 #include <iostream>
-#include <locale>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
+
 /// Virtual base class for boost::iostreams::stream devices.
 template <typename Container>
 class device
@@ -45,18 +45,22 @@ public:
     typedef std::pair<char_type*, char_type*> sequence;
 
     /// seekable input/output (required for direct devices).
-    sequence input_sequence() noexcept;
-    sequence output_sequence() noexcept;
+    sequence input_sequence() const noexcept;
+    sequence output_sequence() const noexcept;
 
     /// input/output devices (may not be required for direct devices).
     size_type read(char_type* buffer, size_type count) noexcept;
     size_type write(const char_type* buffer, size_type count) noexcept;
 
+    /// Buffer allocation, called for indirect devices only.
+    size_type optimal_buffer_size() const noexcept;
+
 protected:
     device(size_type remaining) noexcept;
-    virtual sequence do_sequence() noexcept;
+    virtual sequence do_sequence() const noexcept;
     virtual void do_read(value_type* to, size_type size) noexcept;
     virtual void do_write(const value_type* from, size_type size) noexcept;
+    virtual size_type do_optimal_buffer_size() const noexcept;
 
     size_type remaining_;
 };

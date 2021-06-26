@@ -20,6 +20,23 @@
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__default__1024)
+{
+    const auto default_buffer_size = 1024;
+    data_chunk sink;
+    push_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
+}
+
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_above_minimum__expected)
+{
+    const auto sink_capacity = 1500;
+    data_chunk sink;
+    sink.reserve(sink_capacity);
+    push_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity);
+}
+
 BOOST_AUTO_TEST_CASE(push_sink__write__nullptr__false)
 {
     data_chunk sink;

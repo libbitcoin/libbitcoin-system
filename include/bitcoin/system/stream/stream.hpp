@@ -35,6 +35,7 @@
 #include <bitcoin/system/stream/makers/make_stream.hpp>
 #include <bitcoin/system/stream/makers/make_streamer.hpp>
 #include <bitcoin/system/stream/sinks/copy_sink.hpp>
+#include <bitcoin/system/stream/sinks/flip_sink.hpp>
 #include <bitcoin/system/stream/sinks/push_sink.hpp>
 #include <bitcoin/system/stream/sources/copy_source.hpp>
 #include <bitcoin/system/stream/sources/move_source.hpp>
@@ -73,9 +74,15 @@ namespace stream
         using slab = make_stream<copy_sink<data_slab>>;
 
         /// An output stream that inserts data to a container.
+        /// Container.reserve() may improve performance for expectations > 1kb.
+        /// push_sink is buffered/indirect (inefficient) and requires flush.
+        /// For better performance, size the buffer and use a copy_sink.
         using text = make_stream<push_sink<std::string>>;
         using push = make_stream<push_sink<data_chunk>>;
     }
+
+    /// An input/output stream that copies data to a data_slab.
+    using flip = make_stream<flip_sink<data_slab>>;
 }
 
 namespace read
@@ -120,12 +127,15 @@ namespace write
         using iostream = byte_flipper<std::iostream>;
 
         /// A byte reader/writer of a data_slab.
-        using flip = make_streamer<copy_sink<data_slab>, byte_flipper>;
+        using flip = make_streamer<flip_sink<data_slab>, byte_flipper>;
 
         /// A byte writer that writes data to a data_slab.
         using slab = make_streamer<copy_sink<data_slab>, byte_writer>;
 
         /// A byte writer that inserts data into a container.
+        /// Container.reserve() may improve performance for expectations > 1kb.
+        /// push_sink is buffered/indirect (inefficient) and requires flush.
+        /// For better performance, size the buffer and use a copy_sink.
         using text = make_streamer<push_sink<std::string>, byte_writer>;
         using push = make_streamer<push_sink<data_chunk>, byte_writer>;
     }
@@ -139,12 +149,15 @@ namespace write
         using iostream = bit_flipper<std::iostream>;
 
         /// A bit reader/writer of a data_slab.
-        using flip = make_streamer<copy_sink<data_slab>, bit_flipper>;
+        using flip = make_streamer<flip_sink<data_slab>, bit_flipper>;
 
         /// A bit writer that writes data to a data_slab.
         using slab = make_streamer<copy_sink<data_slab>, bit_writer>;
 
         /// A bit writer that inserts data into a container.
+        /// Container.reserve() may improve performance for expectations > 1kb.
+        /// push_sink is buffered/indirect (inefficient) and requires flush.
+        /// For better performance, size the buffer and use a copy_sink.
         using text = make_streamer<push_sink<std::string>, bit_writer>;
         using push = make_streamer<push_sink<data_chunk>, bit_writer>;
     }

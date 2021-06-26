@@ -20,18 +20,14 @@
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICE_IPP
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
-#include <locale>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-////// Device default is 4096.
-////// Allocated by the iostreams library when a filter or device is attached to a
-////// stream_buffer or stream, or when it is added to a chain.
-////constexpr auto buffer_size = BOOST_IOSTREAMS_DEFAULT_DEVICE_BUFFER_SIZE;
 
 // protected
 template <typename Container>
@@ -43,36 +39,9 @@ device<Container>::device(size_type remaining) noexcept
 // public, device interface
 // ----------------------------------------------------------------------------
 
-////template <typename Container>
-////void device<Container>::imbue(const std::locale& loc) noexcept
-////{
-////    // Required for std_io_tag but a no-op as all text is treated as UTF8.
-////}
-
-////template <typename Container>
-////typename device<Container>::size_type
-////device<Container>::optimal_buffer_size() const noexcept
-////{
-////    return buffer_size;
-////}
-
-////template <typename Container>
-////bool device<Container>::putback(char_type) noexcept
-////{
-////    if (from_ == container_.begin())
-////        return false;
-////
-////    // The character value is ignored, as it is presumed to still exist.
-////    // This precludes putting back a different character and will not detect an
-////    // error of attempting to do so, assuming that is even considered an error.
-////    --size_;
-////    std::advance(from_, negative_one);
-////    return true;
-////}
-
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::input_sequence() noexcept
+device<Container>::input_sequence() const noexcept
 {
     // Required to match output_sequence for read/write devices.
     return do_sequence();
@@ -80,7 +49,7 @@ device<Container>::input_sequence() noexcept
 
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::output_sequence() noexcept
+device<Container>::output_sequence() const noexcept
 {
     // Required to match input_sequence for read/write devices.
     return do_sequence();
@@ -116,88 +85,47 @@ device<Container>::write(const char_type* buffer, size_type count) noexcept
     return size;
 }
 
-////template <typename Container>
-////typename device<Container>::char_type device<Container>::get() noexcept
-////{
-////    char_type character;
-////    do_read(&character, one);
-////    return character;
-////}
-
-////template <typename Container>
-////void device<Container>::put(Sink value, char_type character) noexcept
-////{
-////    do_write(&character, one);
-////}
+template <typename Container>
+typename device<Container>::size_type
+device<Container>::optimal_buffer_size() const noexcept
+{
+    // The buffer size allocated by iostreams upon indirect device construct.
+    return do_optimal_buffer_size();
+}
 
 // protected virtual
 // ----------------------------------------------------------------------------
 
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::do_sequence() noexcept
+device<Container>::do_sequence() const noexcept
 {
-    // not implemented, override.
+    // Not implemented, override.
     return { nullptr, nullptr };
 }
 
-// protected virtual
 template <typename Container>
 void device<Container>::do_read(value_type* buffer, size_type size) noexcept
 {
-    // not implemented, override.
+    // Not implemented, override.
     std::fill(buffer, std::next(buffer, size), 0x00);
 }
 
-// protected virtual
 template <typename Container>
 void device<Container>::do_write(const value_type*, size_type) noexcept
 {
-    // not implemented, override.
+    // Not implemented, override.
+}
+
+template <typename Container>
+typename device<Container>::size_type
+device<Container>::do_optimal_buffer_size() const noexcept
+{
+    // Defaults to 4k bytes, override in indirect devices.
+    return BOOST_IOSTREAMS_DEFAULT_DEVICE_BUFFER_SIZE;
 }
 
 } // namespace system
 } // namespace libbitcoin
 
 #endif
-
-// unfinished.
-////template <typename Container>
-////typename copy_source<Container>::position
-////copy_source<Container>::seek(offset count, direction way) noexcept
-////{
-////    const auto scope = container_.size();
-////    const auto expended = scope - size_;
-////    const auto remaining = size_;
-////
-////    // Boost example code has over overflows depending on types in use.
-////    if (way == std::ios_base::beg)
-////    {
-////        if (!is_negative(count) && is_lesser(count, scope))
-////        {
-////            size_ = container_.size() - count;
-////            from_ = std::next(container_.begin(), count);
-////            return count;
-////        }
-////    }
-////    else if (way == std::ios_base::end)
-////    {
-////        // zero specifies the last byte, not the end.
-////        if (is_negative(count) && is_lesser(absolute(count), scope))
-////        {
-////            size_ = container_.size() + count;
-////            from_ = std::next(container_.begin(), count);
-////            return count;
-////        }
-////    }
-////    else if (way == std::ios_base::cur)
-////    {
-////        if (( is_negative(count) || is_lesser(count, remaining)) &&
-////            (!is_negative(count) || is_lesser(absolute(count), expended))
-////            return set_position(offset count, direction way);
-////    }
-////
-////    // Avoid exceptions. If parameterization is invalid the predictable
-////    // return is zero, resetting the position to start. This is non-standard.
-////    return 0;
-////}
