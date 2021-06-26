@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
 {
     const auto junk = base16_literal("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     input instance;
-    read::bytes::copy reader(junk);
+    read::bytes::from<data_array<64>> reader(junk);
     BOOST_REQUIRE(instance.from_data(reader));
 }
 
