@@ -20,7 +20,7 @@
 
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 
 namespace libbitcoin {

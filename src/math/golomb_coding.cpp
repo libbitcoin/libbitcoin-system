@@ -23,14 +23,13 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <functional>
 #include <iostream>
 #include <iterator>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -52,15 +51,15 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent)
     while (source.read_bit())
         quotient++;
 
-    const auto remainder = source.read_bits(modulo_exponent);
+    const auto remainder = source.read_bits<uint64_t>(modulo_exponent);
     return ((quotient << modulo_exponent) + remainder);
 }
 
 static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key)
 {
-    return ((uint128_t(siphash(key, item)) * uint128_t(bound))
-        .convert_to<uint64_t>() >> to_bits(sizeof(uint64_t)));
+    return (uint128_t(siphash(key, item) * bound) >> to_bits(sizeof(uint64_t)))
+        .convert_to<uint64_t>();
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
@@ -78,7 +77,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
             return hash_to_range(item, bound, key);
         });
 
-    std::sort(hashes.begin(), hashes.end(), std::less<uint64_t>());
+    std::sort(hashes.begin(), hashes.end());
     return hashes;
 }
 
@@ -111,7 +110,7 @@ void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
-    write::bits::stream sink(stream);
+    write::bits::ostream sink(stream);
     construct(sink, items, bits, entropy, target_false_positive_rate);
 }
 
@@ -168,7 +167,7 @@ bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    read::bits::stream reader(compressed_set);
+    read::bits::istream reader(compressed_set);
     return match(target, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }
@@ -237,7 +236,7 @@ bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate)
 {
-    read::bits::stream reader(compressed_set);
+    read::bits::istream reader(compressed_set);
     return match(targets, reader, set_size, entropy, bits,
         target_false_positive_rate);
 }

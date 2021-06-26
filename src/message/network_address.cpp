@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -105,7 +105,7 @@ bool network_address::from_data(uint32_t version,
 bool network_address::from_data(uint32_t version,
     std::istream& stream, bool with_timestamp)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(version, source, with_timestamp);
 }
 
@@ -145,7 +145,7 @@ data_chunk network_address::to_data(uint32_t version,
 void network_address::to_data(uint32_t version,
     std::ostream& stream, bool with_timestamp) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(version, out, with_timestamp);
 }
 

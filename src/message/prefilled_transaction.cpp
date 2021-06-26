@@ -19,9 +19,9 @@
 #include <bitcoin/system/message/prefilled_transaction.hpp>
 
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -100,7 +100,7 @@ bool prefilled_transaction::from_data(uint32_t version,
 bool prefilled_transaction::from_data(uint32_t version,
     std::istream& stream)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(version, source);
 }
 
@@ -132,7 +132,7 @@ data_chunk prefilled_transaction::to_data(uint32_t version) const
 void prefilled_transaction::to_data(uint32_t version,
     std::ostream& stream) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(version, out);
 }
 

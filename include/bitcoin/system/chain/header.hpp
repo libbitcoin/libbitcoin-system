@@ -32,7 +32,7 @@
 #include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {

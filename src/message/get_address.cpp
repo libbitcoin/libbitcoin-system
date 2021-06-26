@@ -19,8 +19,8 @@
 #include <bitcoin/system/message/get_address.hpp>
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -75,7 +75,7 @@ bool get_address::from_data(uint32_t version, const data_chunk& data)
 
 bool get_address::from_data(uint32_t version, std::istream& stream)
 {
-    read::bytes::stream in(stream);
+    read::bytes::istream in(stream);
     return from_data(version, in);
 }
 
@@ -99,7 +99,7 @@ data_chunk get_address::to_data(uint32_t version) const
 
 void get_address::to_data(uint32_t version, std::ostream& stream) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(version, out);
 }
 

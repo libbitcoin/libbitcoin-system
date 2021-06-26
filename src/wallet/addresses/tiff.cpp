@@ -23,8 +23,8 @@
 #include <cmath>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/division.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -162,7 +162,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data, uint16_t width)
     // All rows will be stored in a single strip.
     const auto rows = size / row_bytes;
 
-    write::bytes::stream writer(out);
+    write::bytes::ostream writer(out);
 
     // =============== Header ===============
 

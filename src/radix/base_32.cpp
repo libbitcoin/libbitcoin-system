@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 
 // base32
@@ -146,7 +146,7 @@ base32_chunk base32_unpack(const data_chunk& packed)
 
     // This is how c++ developers do it. :)
     while (!source.is_exhausted())
-        unpacked.push_back(source.read_bits(5));
+        unpacked.push_back(source.read_bits<uint8_t>(5));
 
     // The bit reader reads zeros past end as padding.
     // This is a ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.

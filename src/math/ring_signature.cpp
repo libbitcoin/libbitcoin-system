@@ -24,8 +24,8 @@
 #include <vector>
 #include <secp256k1.h>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_point.hpp>
 #include <bitcoin/system/wallet/keys/ec_scalar.hpp>

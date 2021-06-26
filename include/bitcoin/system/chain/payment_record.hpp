@@ -26,7 +26,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {

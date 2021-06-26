@@ -29,12 +29,12 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/machine/script_version.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -24,8 +24,8 @@
 #include <tuple>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {

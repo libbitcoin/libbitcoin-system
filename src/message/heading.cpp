@@ -19,9 +19,9 @@
 #include <bitcoin/system/message/heading.hpp>
 
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -138,7 +138,7 @@ bool heading::from_data(const data_chunk& data)
 
 bool heading::from_data(std::istream& stream)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source);
 }
 
@@ -170,7 +170,7 @@ data_chunk heading::to_data() const
 
 void heading::to_data(std::ostream& stream) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out);
 }
 

@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
@@ -149,7 +149,7 @@ bool output::from_data(const data_chunk& data, bool wire)
 
 bool output::from_data(std::istream& stream, bool wire)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source, wire);
 }
 
@@ -207,7 +207,7 @@ data_chunk output::to_data(bool wire) const
 
 void output::to_data(std::ostream& stream, bool wire) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire);
 }
 

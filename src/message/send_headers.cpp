@@ -19,8 +19,8 @@
 #include <bitcoin/system/message/send_headers.hpp>
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -101,7 +101,7 @@ bool send_headers::from_data(uint32_t version, const data_chunk& data)
 
 bool send_headers::from_data(uint32_t version, std::istream& stream)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(version, source);
 }
 

@@ -22,8 +22,8 @@
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/message.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -153,7 +153,7 @@ bool point::from_data(const data_chunk& data, bool wire)
 
 bool point::from_data(std::istream& stream, bool wire)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source, wire);
 }
 
@@ -213,7 +213,7 @@ data_chunk point::to_data(bool wire) const
 
 void point::to_data(std::ostream& stream, bool wire) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire);
 }
 

@@ -34,13 +34,13 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/message/message.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -300,7 +300,7 @@ bool transaction::from_data(const data_chunk& data, bool wire, bool witness)
 
 bool transaction::from_data(std::istream& stream, bool wire, bool witness)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source, wire, witness);
 }
 
@@ -434,7 +434,7 @@ void transaction::to_data(std::ostream& stream, bool wire, bool witness) const
     // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire, witness);
 }
 

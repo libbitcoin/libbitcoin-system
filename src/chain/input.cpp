@@ -22,7 +22,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
@@ -165,7 +165,7 @@ bool input::from_data(const data_chunk& data, bool wire, bool witness)
 
 bool input::from_data(std::istream& stream, bool wire, bool witness)
 {
-    read::bytes::stream reader(stream);
+    read::bytes::istream reader(stream);
     return from_data(reader, wire, witness);
 }
 
@@ -225,7 +225,7 @@ data_chunk input::to_data(bool wire, bool witness) const
 
 void input::to_data(std::ostream& stream, bool wire, bool witness) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire, witness);
 }
 

@@ -23,8 +23,8 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -26,8 +26,8 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -195,7 +195,7 @@ bool header::from_data(const data_chunk& data, bool wire)
 
 bool header::from_data(std::istream& stream, bool wire)
 {
-    read::bytes::stream reader(stream);
+    read::bytes::istream reader(stream);
     return from_data(reader, wire);
 }
 
@@ -273,7 +273,7 @@ data_chunk header::to_data(bool wire) const
 
 void header::to_data(std::ostream& stream, bool wire) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire);
 }
 

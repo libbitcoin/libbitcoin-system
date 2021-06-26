@@ -25,8 +25,8 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -185,7 +185,7 @@ bool stealth_record::from_data(const data_chunk& data, bool wire)
 
 bool stealth_record::from_data(std::istream& stream, bool wire)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source, wire);
 }
 
@@ -273,7 +273,7 @@ data_chunk stealth_record::to_data(bool wire) const
 
 void stealth_record::to_data(std::ostream& stream, bool wire) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, wire);
 }
 

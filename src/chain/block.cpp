@@ -38,7 +38,6 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/math/addition.hpp>
@@ -46,6 +45,7 @@
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/settings.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -165,7 +165,7 @@ bool block::from_data(const data_chunk& data, bool witness)
 
 bool block::from_data(std::istream& stream, bool witness)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(source, witness);
 }
 
@@ -233,7 +233,7 @@ data_chunk block::to_data(bool witness) const
 
 void block::to_data(std::ostream& stream, bool witness) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(out, witness);
 }
 

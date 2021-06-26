@@ -24,8 +24,8 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/math/division.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 #include "qrencode/qrencode.h"

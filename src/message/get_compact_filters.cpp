@@ -22,9 +22,9 @@
 #include <bitcoin/system/message/get_compact_filters.hpp>
 
 #include <initializer_list>
-#include <bitcoin/system/iostream/iostream.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -111,7 +111,7 @@ bool get_compact_filters::from_data(uint32_t version, const data_chunk& data)
 
 bool get_compact_filters::from_data(uint32_t version, std::istream& stream)
 {
-    read::bytes::stream source(stream);
+    read::bytes::istream source(stream);
     return from_data(version, source);
 }
 
@@ -146,7 +146,7 @@ data_chunk get_compact_filters::to_data(uint32_t version) const
 
 void get_compact_filters::to_data(uint32_t version, std::ostream& stream) const
 {
-    write::bytes::stream out(stream);
+    write::bytes::ostream out(stream);
     to_data(version, out);
 }
 
