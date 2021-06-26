@@ -426,9 +426,6 @@
     <ClCompile Include="..\..\..\..\test\stream\readers\byte_reader.cpp">
       <Filter>src\stream\readers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\removed.cpp">
-      <Filter>src\stream</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\sinks\copy_sink.cpp">
       <Filter>src\stream\sinks</Filter>
     </ClCompile>
@@ -440,6 +437,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\sources\move_source.cpp">
       <Filter>src\stream\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\stream.cpp">
+      <Filter>src\stream</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\writers\bit_writer.cpp">
       <Filter>src\stream\writers</Filter>
