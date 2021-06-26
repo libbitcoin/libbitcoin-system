@@ -213,6 +213,7 @@
 #include <bitcoin/system/stream/readers/bit_reader.hpp>
 #include <bitcoin/system/stream/readers/byte_reader.hpp>
 #include <bitcoin/system/stream/sinks/copy_sink.hpp>
+#include <bitcoin/system/stream/sinks/flip_sink.hpp>
 #include <bitcoin/system/stream/sinks/push_sink.hpp>
 #include <bitcoin/system/stream/sources/copy_source.hpp>
 #include <bitcoin/system/stream/sources/move_source.hpp>

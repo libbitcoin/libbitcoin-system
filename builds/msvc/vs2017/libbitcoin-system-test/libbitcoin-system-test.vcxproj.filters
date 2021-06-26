@@ -429,6 +429,9 @@
     <ClCompile Include="..\..\..\..\test\stream\sinks\copy_sink.cpp">
       <Filter>src\stream\sinks</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\sinks\flip_sink.cpp">
+      <Filter>src\stream\sinks</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\sinks\push_sink.cpp">
       <Filter>src\stream\sinks</Filter>
     </ClCompile>

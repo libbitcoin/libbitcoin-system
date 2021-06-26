@@ -520,6 +520,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\readers\bit_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\readers\byte_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\copy_sink.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\flip_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\push_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sources\copy_source.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sources\move_source.hpp" />

@@ -411,6 +411,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/stream/readers/bit_reader.cpp \
     test/stream/readers/byte_reader.cpp \
     test/stream/sinks/copy_sink.cpp \
+    test/stream/sinks/flip_sink.cpp \
     test/stream/sinks/push_sink.cpp \
     test/stream/sources/copy_source.cpp \
     test/stream/sources/move_source.cpp \
@@ -805,6 +806,7 @@ include_bitcoin_system_stream_readers_HEADERS = \
 include_bitcoin_system_stream_sinksdir = ${includedir}/bitcoin/system/stream/sinks
 include_bitcoin_system_stream_sinks_HEADERS = \
     include/bitcoin/system/stream/sinks/copy_sink.hpp \
+    include/bitcoin/system/stream/sinks/flip_sink.hpp \
     include/bitcoin/system/stream/sinks/push_sink.hpp
 
 include_bitcoin_system_stream_sourcesdir = ${includedir}/bitcoin/system/stream/sources

@@ -1385,6 +1385,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\copy_sink.hpp">
       <Filter>include\bitcoin\system\stream\sinks</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\flip_sink.hpp">
+      <Filter>include\bitcoin\system\stream\sinks</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\sinks\push_sink.hpp">
       <Filter>include\bitcoin\system\stream\sinks</Filter>
     </ClInclude>

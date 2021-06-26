@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\..\..\test\stream\readers\bit_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\readers\byte_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\sinks\copy_sink.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\sinks\flip_sink.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\sinks\push_sink.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\sources\copy_source.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\sources\move_source.cpp" />

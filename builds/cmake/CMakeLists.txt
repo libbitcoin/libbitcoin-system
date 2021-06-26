@@ -713,6 +713,7 @@ if (with-tests)
         "../../test/stream/readers/bit_reader.cpp"
         "../../test/stream/readers/byte_reader.cpp"
         "../../test/stream/sinks/copy_sink.cpp"
+        "../../test/stream/sinks/flip_sink.cpp"
         "../../test/stream/sinks/push_sink.cpp"
         "../../test/stream/sources/copy_source.cpp"
         "../../test/stream/sources/move_source.cpp"
