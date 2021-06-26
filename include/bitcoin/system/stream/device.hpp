@@ -44,17 +44,6 @@ public:
     typedef boost::iostreams::stream_offset offset;
     typedef std::pair<char_type*, char_type*> sequence;
 
-    //// close is implemented as a no-op by default.
-    //// localizable devices (required for indirect output with std_io_tag).
-    //// void imbue(const std::locale& loc) noexcept;
-    //// optimally_buffered_tag (required for ostream_tag indirect devices).
-    //// size_type optimal_buffer_size() const noexcept;
-    //// peekable sources (may not be required for direct devices).
-    //// bool putback(char_type) noexcept;
-    //// Required for indirect input/output devices (apparently only filters).
-    //// char_type get() noexcept;
-    //// void put(Sink value, char_type character) noexcept;
-
     /// seekable input/output (required for direct devices).
     sequence input_sequence() noexcept;
     sequence output_sequence() noexcept;

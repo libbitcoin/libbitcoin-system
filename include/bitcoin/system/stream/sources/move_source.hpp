@@ -29,17 +29,16 @@ namespace libbitcoin {
 namespace system {
 
 /// Source for boost::iostreams::stream, moves bytes from Container.
-/// Container should be a pointers only, such as data_slab, as otherwise its
-/// data will be copied to the stream upon construct (and moved from there).
 template <typename Container, if_base_of<data_slab, Container> = true>
 class move_source
   : public device<Container>
 {
 public:
-    // istream_tag (compiles)
-    struct category
-      : boost::iostreams::source_tag {};
     typedef Container container;
+    struct category
+      : boost::iostreams::source_tag
+    {
+    };
 
     move_source(Container data) noexcept
       : device(limit<size_type>(data.size())),
@@ -51,7 +50,6 @@ public:
 protected:
     void do_read(value_type* to, size_type size) noexcept override
     {
-        // std::move does not have a size overload.
         // std::move returns iterator past last element moved to.
         auto end = std::next(next_, size);
         std::move(next_, end, to);

@@ -35,13 +35,11 @@ class push_sink
   : public device<Container>
 {
 public:
-    // It is not clear what this does except require imbue.
-    // std_io_tag
-    // These required together, ostream_tag triggers filter requirements.
-    // ostream_tag, optimally_buffered_tag
-    struct category
-      : boost::iostreams::sink_tag {};
     typedef Container& container;
+    struct category
+      : boost::iostreams::sink_tag
+    {
+    };
 
     push_sink(Container& data) noexcept
       : device(limit<size_type>(data.max_size() - data.size())),

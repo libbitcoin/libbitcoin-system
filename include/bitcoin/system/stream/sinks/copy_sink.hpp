@@ -29,19 +29,17 @@ namespace libbitcoin {
 namespace system {
 
 /// Sink for boost::iostreams::stream, copies bytes to Container.
-/// Container must be pointers only, such as data_slab, as otherwise its
-/// data will be copied to the stream upon construct, overwritten and the
-/// data of the original parameter will be unchanged.
 template <typename Container, if_base_of<data_slab, Container> = true>
 class copy_sink
   : public device<Container>
 {
 public:
-    // iostream_tag causes a flush call to rdbuf.
+    typedef Container container;
     struct category
       : boost::iostreams::seekable,
-        boost::iostreams::direct_tag {};
-    typedef Container container;
+        boost::iostreams::direct_tag
+    {
+    };
 
     copy_sink(Container data) noexcept
       : device(limit<size_type>(data.size())),

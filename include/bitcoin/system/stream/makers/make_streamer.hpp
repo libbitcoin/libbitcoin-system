@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_MAKERS_MAKE_STREAMER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_MAKERS_MAKE_STREAMER_HPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/makers/make_stream.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,13 +32,9 @@ namespace system {
 
 /// Construct an output stream and feed it to a writer.
 /// For std::ostream just pass to writer on construct.
-template
-<
-    typename Device,
+template <typename Device,
     template <typename = make_stream<Device>> class Base,
-    typename Stream = make_stream<Device>,
-    typename Streamer = Base<Stream>
->
+    typename Stream = make_stream<Device>, typename Streamer = Base<Stream>>
 class make_streamer
   : public Streamer
 {

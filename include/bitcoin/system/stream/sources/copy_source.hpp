@@ -29,17 +29,17 @@ namespace libbitcoin {
 namespace system {
 
 /// Source for boost::iostreams::stream, copies bytes from Container.
-/// Container may be any iterable object with contiguous byte data.
 template <typename Container, if_base_of<data_slice, Container> = true>
 class copy_source
   : public device<Container>
 {
 public:
-    // istream_tag (compiles)
+    typedef const Container& container;
     struct category
       : boost::iostreams::input_seekable,
-        boost::iostreams::direct_tag {};
-    typedef const Container& container;
+        boost::iostreams::direct_tag
+    {
+    };
 
     copy_source(const Container& data) noexcept
       : device(limit<size_type>(data.size())),

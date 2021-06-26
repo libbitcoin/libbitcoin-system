@@ -24,36 +24,22 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/device.hpp>
-
-/// Makers.
-#include <bitcoin/system/stream/makers/make_stream.hpp>
-#include <bitcoin/system/stream/makers/make_streamer.hpp>
-
-/// Interfaces.
+#include <bitcoin/system/stream/flippers/bit_flipper.hpp>
+#include <bitcoin/system/stream/flippers/byte_flipper.hpp>
 #include <bitcoin/system/stream/interfaces/bitflipper.hpp>
 #include <bitcoin/system/stream/interfaces/byteflipper.hpp>
 #include <bitcoin/system/stream/interfaces/bitreader.hpp>
 #include <bitcoin/system/stream/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/interfaces/bytewriter.hpp>
-
-/// Sinks.
+#include <bitcoin/system/stream/makers/make_stream.hpp>
+#include <bitcoin/system/stream/makers/make_streamer.hpp>
 #include <bitcoin/system/stream/sinks/copy_sink.hpp>
 #include <bitcoin/system/stream/sinks/push_sink.hpp>
-
-/// Sources.
 #include <bitcoin/system/stream/sources/copy_source.hpp>
 #include <bitcoin/system/stream/sources/move_source.hpp>
-
-/// Flippers.
-#include <bitcoin/system/stream/flippers/bit_flipper.hpp>
-#include <bitcoin/system/stream/flippers/byte_flipper.hpp>
-
-/// Readers.
 #include <bitcoin/system/stream/readers/bit_reader.hpp>
 #include <bitcoin/system/stream/readers/byte_reader.hpp>
-
-/// Writers.
 #include <bitcoin/system/stream/writers/bit_writer.hpp>
 #include <bitcoin/system/stream/writers/byte_writer.hpp>
 
@@ -158,39 +144,7 @@ using flipper = byteflipper;
 using reader = bytereader;
 using writer = bytewriter;
 
-/// Original names.
-////using data_source = stream::in::copy;
-////using data_sink = stream::out::push;
-
 } // namespace system
 } // namespace libbitcoin
 
 #endif
-
-// aggregate tags:
-// std_io_tag      : localizable_tag
-// source_tag      : input, device_tag
-// sink_tag        : output, device_tag
-// istream_tag     : std_io_tag, device_tag
-// ostream_tag     : std_io_tag, device_tag
-// input_seekable  : input, detail::random_access
-// output_seekable : output, detail::random_access
-//
-// input|output:
-// Involves a single sequence of characters, for input|output.
-// device_tag:
-// Default behavior, buffering can be overridden by direct_tag.
-// direct_tag:
-// Device which provides access to its controlled sequences memory
-// regions rather than via a socket-like interface (non-buffering).
-// closable_tag:
-// Filter or device which receives notifications immediately before 
-// stream is closed.
-// localizable_tag:
-// Filter or device that receives notifications when a stream or
-// buffer which contains it has its locale set using imbue|pubimbue.
-// detail::random_access:
-// Seekable device, direct device seek requires input|output_sequence.
-// peekable_tag
-// Peekable device allows a character read from the input sequence to
-// be put back.
