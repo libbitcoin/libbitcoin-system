@@ -34,14 +34,14 @@ class copy_sink
   : public device<Container>
 {
 public:
-    typedef Container container;
+    typedef const Container& container;
     struct category
       : boost::iostreams::seekable,
         boost::iostreams::direct_tag
     {
     };
 
-    copy_sink(Container data) noexcept
+    copy_sink(const Container& data) noexcept
       : device(limit<size_type>(data.size())),
         container_(data),
         next_(data.begin())

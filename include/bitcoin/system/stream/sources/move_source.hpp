@@ -34,14 +34,14 @@ class move_source
   : public device<Container>
 {
 public:
-    typedef Container container;
+    typedef const Container& container;
     struct category
       : boost::iostreams::input_seekable,
         boost::iostreams::direct_tag
     {
     };
 
-    move_source(Container data) noexcept
+    move_source(const Container& data) noexcept
       : device(limit<size_type>(data.size())),
         container_(data),
         next_(data.begin())
