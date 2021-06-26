@@ -20,10 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
-// TODO: test imbue.
-// TODO: add std::string sink tests.
-// TODO: test by creating a stream and invoking stream methods.
-
 BOOST_AUTO_TEST_CASE(push_sink__write__nullptr__false)
 {
     data_chunk sink;

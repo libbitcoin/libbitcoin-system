@@ -33,6 +33,10 @@ namespace system {
 
 /// Identical to data_slab except pointer is const, and therefore accepts
 /// construction from const sources (including literals and initializers).
+/// Because it accepts moveables the instance is short-lived. Its valid scope
+/// is limited to the method/function in which it is created. It cannot be
+/// saved or copied to a class member as its data may become invalid
+/// immediately after it was passed to the class (unlike data_slab).
 /// Resizable but otherwise const iterable wrapper for const memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.

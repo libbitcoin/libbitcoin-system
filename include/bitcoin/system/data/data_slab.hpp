@@ -32,7 +32,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Identical to data_slice except pointer is non-const, and therefore does not
-/// accept construction from const sources (excludes literal).
+/// accept construction from const or movable sources.
+/// Because it accepts only references the object is long-lived (unlike slice).
 /// Resizable but otherwise const iterable wrapper for non-const memory buffer.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
