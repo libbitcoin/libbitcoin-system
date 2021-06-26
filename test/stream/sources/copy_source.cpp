@@ -20,16 +20,56 @@
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
-// TODO: test imbue.
-// TODO: test peekable_tag.
-// TODO: test input_sequence.
-// TODO: add std::string source tests.
-// TODO: test by creating a stream and invoking stream methods.
+// input_sequence
+
+BOOST_AUTO_TEST_CASE(copy_source__input_sequence__empty__empty)
+{
+    data_chunk sink;
+    copy_source<data_chunk> instance(sink);
+    const auto sequence = instance.input_sequence();
+    const auto first = reinterpret_cast<char*>(sink.data());
+    const auto second = std::next(first, sink.size());
+    BOOST_REQUIRE_EQUAL(first, sequence.first);
+    BOOST_REQUIRE_EQUAL(second, sequence.second);
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
+}
+
+BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
+{
+    data_chunk sink(42, 0x00);
+    copy_source<data_chunk> instance(sink);
+    const auto sequence = instance.input_sequence();
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
+}
+
+// output_sequence
+
+BOOST_AUTO_TEST_CASE(copy_source__output_sequence__empty__empty)
+{
+    data_chunk sink;
+    copy_source<data_chunk> instance(sink);
+    const auto sequence = instance.output_sequence();
+    const auto first = reinterpret_cast<char*>(sink.data());
+    const auto second = std::next(first, sink.size());
+    BOOST_REQUIRE_EQUAL(first, sequence.first);
+    BOOST_REQUIRE_EQUAL(second, sequence.second);
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
+}
+
+BOOST_AUTO_TEST_CASE(copy_source__output_sequence__not_empty__expected)
+{
+    data_chunk sink(42, 0x00);
+    copy_source<data_chunk> instance(sink);
+    const auto sequence = instance.output_sequence();
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
+}
+
+// read
 
 BOOST_AUTO_TEST_CASE(copy_source__read__nullptr__false)
 {
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(nullptr, 0), -1);
 }
 
@@ -38,7 +78,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__empty__false)
 {
     std::array<char, 0> to;
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
 }
 
@@ -46,7 +86,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__negative__false)
 {
     std::array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), -1);
     BOOST_REQUIRE_EQUAL(to[0], 0x00);
 }
@@ -55,7 +95,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__past_end__expected)
 {
     std::array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 2), 1);
     BOOST_REQUIRE_EQUAL(to[0], source[0]);
 }
@@ -65,7 +105,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__past_end__expected)
 ////{
 ////    std::array<char, max_uint8> to;
 ////    const data_chunk source(add1<int>(max_uint8), 0x42);
-////    copy_source<data_slice> instance(source);
+////    copy_source<data_chunk> instance(source);
 ////    BOOST_REQUIRE_EQUAL(instance.read(to.data(), from.size()), max_uint8);
 ////}
 
@@ -73,7 +113,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__zero__zero)
 {
     std::array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), 0);
     BOOST_REQUIRE_EQUAL(to[0], 0x00);
 }
@@ -82,7 +122,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__one__expected)
 {
     std::array<char, 1> to;
     const data_chunk source{ 0x42 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 1), 1);
     BOOST_REQUIRE_EQUAL(to[0], source[0]);
 }
@@ -94,7 +134,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__multiple__correct_tracking)
     std::array<char, 3> to3;
     std::array<char, 42> to0;
     const data_chunk source{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
-    copy_source<data_slice> instance(source);
+    copy_source<data_chunk> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to1.data(), 1), 1);
     BOOST_REQUIRE_EQUAL(to1[0], source[0]);
     BOOST_REQUIRE_EQUAL(instance.read(to2.data(), 2), 2);
