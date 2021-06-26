@@ -641,10 +641,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\device.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\readers\bit_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\readers\byte_reader.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\sinks\copy_sink.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\sinks\push_sink.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\sources\copy_source.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\sources\move_source.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\writers\bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\writers\byte_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />

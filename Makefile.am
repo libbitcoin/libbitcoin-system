@@ -637,16 +637,6 @@ include_bitcoin_system_impl_stream_readers_HEADERS = \
     include/bitcoin/system/impl/stream/readers/bit_reader.ipp \
     include/bitcoin/system/impl/stream/readers/byte_reader.ipp
 
-include_bitcoin_system_impl_stream_sinksdir = ${includedir}/bitcoin/system/impl/stream/sinks
-include_bitcoin_system_impl_stream_sinks_HEADERS = \
-    include/bitcoin/system/impl/stream/sinks/copy_sink.ipp \
-    include/bitcoin/system/impl/stream/sinks/push_sink.ipp
-
-include_bitcoin_system_impl_stream_sourcesdir = ${includedir}/bitcoin/system/impl/stream/sources
-include_bitcoin_system_impl_stream_sources_HEADERS = \
-    include/bitcoin/system/impl/stream/sources/copy_source.ipp \
-    include/bitcoin/system/impl/stream/sources/move_source.ipp
-
 include_bitcoin_system_impl_stream_writersdir = ${includedir}/bitcoin/system/impl/stream/writers
 include_bitcoin_system_impl_stream_writers_HEADERS = \
     include/bitcoin/system/impl/stream/writers/bit_writer.ipp \
