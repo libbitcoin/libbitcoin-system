@@ -22,6 +22,7 @@
 #include <iterator>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -63,7 +64,9 @@ protected:
 
     size_type do_optimal_buffer_size() const noexcept override
     {
-        return greater<size_type>(container_.capacity(), minimum_buffer_size);
+        // This is only called at stream construct.
+        auto space = floored_subtract(container_.capacity(), container_.size());
+        return greater<size_type>(space, minimum_buffer_size);
     }
 
 protected:
