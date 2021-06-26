@@ -53,8 +53,7 @@ public:
     virtual bool read_bit() noexcept;
 
     /// Read size bits into an integer (high to low).
-    template <typename Integer, if_integer<Integer> = true>
-    Integer read_bits(size_t bits) noexcept;
+    virtual uint64_t read_bits(size_t bits) noexcept;
 
     /// Advance the iterator.
     virtual void skip_bit(size_t bits=one) noexcept;

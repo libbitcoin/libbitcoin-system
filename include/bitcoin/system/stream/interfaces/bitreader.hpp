@@ -40,10 +40,7 @@ public:
     virtual bool read_bit() noexcept = 0;
 
     /// Read size bits into an integer (high to low).
-    template <typename Integer, if_integer<Integer> = true>
-    Integer read_bits(size_t bits) noexcept /* = 0 */;
-
-    // vc++ emits 'constant' error with '= 0' above.
+    virtual uint64_t read_bits(size_t bits) noexcept = 0;
 
     /// Advance the iterator.
     virtual void skip_bit(size_t bits=one) noexcept = 0;

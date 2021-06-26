@@ -51,7 +51,7 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent)
     while (source.read_bit())
         quotient++;
 
-    const auto remainder = source.read_bits<uint64_t>(modulo_exponent);
+    const auto remainder = source.read_bits(modulo_exponent);
     return ((quotient << modulo_exponent) + remainder);
 }
 

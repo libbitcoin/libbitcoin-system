@@ -60,14 +60,6 @@ Integer byte_reader<IStream>::read_big_endian() noexcept
 }
 
 template <typename IStream>
-template <typename Integer, if_integer<Integer>>
-Integer byte_reader<IStream>::read_little_endian() noexcept
-{
-    // Call into virtual reader (vs. stream) so derived class can reuse.
-    return from_little_endian<Integer>(read_bytes(sizeof(Integer)));
-}
-
-template <typename IStream>
 uint16_t byte_reader<IStream>::read_2_bytes_big_endian() noexcept
 {
     return read_big_endian<uint16_t>();
@@ -87,6 +79,14 @@ uint64_t byte_reader<IStream>::read_8_bytes_big_endian() noexcept
 
 // little endian
 //-----------------------------------------------------------------------------
+
+template <typename IStream>
+template <typename Integer, if_integer<Integer>>
+Integer byte_reader<IStream>::read_little_endian() noexcept
+{
+    // Call into virtual reader (vs. stream) so derived class can reuse.
+    return from_little_endian<Integer>(read_bytes(sizeof(Integer)));
+}
 
 template <typename IStream>
 uint16_t byte_reader<IStream>::read_2_bytes_little_endian() noexcept
@@ -165,7 +165,6 @@ template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
     // Reader supports directly populating an array, this avoids a copy.
-    // The reverse move override performs no copy.
     return reverse(read_forward<Size>());
 }
 

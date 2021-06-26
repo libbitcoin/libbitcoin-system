@@ -39,11 +39,8 @@ public:
     /// Write one bit (high to low).
     virtual void write_bit(bool value) noexcept = 0;
 
-    /// Write size bits from an integer (high to low).
-    template <typename Integer, if_integer<Integer> = true>
-    void write_bits(Integer value, size_t bits) noexcept /* = 0 */;
-
-    // vc++ emits 'constant' error with '= 0' above.
+    /// Write size bits from an integer (high to low)
+    virtual void write_bits(uint64_t value, size_t bits) noexcept = 0;
 };
 
 } // namespace system

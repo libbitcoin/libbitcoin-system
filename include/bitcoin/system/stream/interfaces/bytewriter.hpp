@@ -34,12 +34,6 @@ namespace system {
 class bytewriter
 {
 public:
-    /// Type-inferenced integer writers.
-    template <typename Integer, if_integer<Integer> = true>
-    void write_big_endian(Integer value) noexcept = 0;
-    template <typename Integer, if_integer<Integer> = true>
-    void write_little_endian(Integer value) noexcept = 0;
-
     /// Write big endian integers.
     virtual void write_2_bytes_big_endian(uint16_t value) noexcept = 0;
     virtual void write_4_bytes_big_endian(uint32_t value) noexcept = 0;

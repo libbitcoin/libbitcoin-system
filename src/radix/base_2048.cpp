@@ -131,7 +131,7 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
     read::bits::copy source(unpacked);
 
     while (!source.is_exhausted())
-        packed.push_back(source.read_bits<uint16_t>(11));
+        packed.push_back(source.read_bits(11));
 
     // Remove an element that is only padding, assumes base2048_unpack encoding.
     // The bit writer writes zeros past end as padding.

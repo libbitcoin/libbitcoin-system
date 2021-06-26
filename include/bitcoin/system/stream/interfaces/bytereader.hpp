@@ -35,12 +35,6 @@ namespace system {
 class bytereader
 {
 public:
-    /// Read integer, size determined from paramter type.
-    template <typename Integer, if_integer<Integer> = true>
-    Integer read_big_endian() noexcept = 0;
-    template <typename Integer, if_integer<Integer> = true>
-    Integer read_little_endian() noexcept = 0;
-
     /// Read big endian (explicit specializations of read_big_endian).
     virtual uint16_t read_2_bytes_big_endian() noexcept = 0;
     virtual uint32_t read_4_bytes_big_endian() noexcept = 0;
@@ -60,12 +54,6 @@ public:
 
     /// Convert read_4_bytes_little_endian to an error code.
     virtual code read_error_code() noexcept = 0;
-
-    /// Read size bytes into array.
-    template <size_t Size>
-    data_array<Size> read_forward() noexcept = 0;
-    template <size_t Size>
-    data_array<Size> read_reverse() noexcept = 0;
 
     /// Read hash (explicit specializations of read_forward).
     virtual mini_hash read_mini_hash() noexcept = 0;

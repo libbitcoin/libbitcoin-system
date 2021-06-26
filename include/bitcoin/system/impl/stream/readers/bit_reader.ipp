@@ -62,15 +62,14 @@ bool bit_reader<IStream>::read_bit() noexcept
 }
 
 template <typename IStream>
-template <typename Integer, if_integer<Integer>>
-Integer bit_reader<IStream>::read_bits(size_t bits) noexcept
+uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
 {
-    Integer out = 0;
+    uint64_t out = 0;
     while (bits > byte_bits)
-        out |= (static_cast<Integer>(do_read()) << ((bits -= byte_bits)));
+        out |= (static_cast<uint64_t>(do_read()) << ((bits -= byte_bits)));
 
     for (uint8_t bit = 0; bit < bits; ++bit)
-        out |= (to_int<Integer>(read_bit()) << (bits - add1(bit)));
+        out |= (to_int<uint64_t>(read_bit()) << (bits - add1(bit)));
 
     return out;
 }

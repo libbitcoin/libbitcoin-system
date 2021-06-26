@@ -64,18 +64,6 @@ void byte_writer<OStream>::write_big_endian(Integer value) noexcept
 }
 
 template <typename OStream>
-template <typename Integer, if_integer<Integer>>
-void byte_writer<OStream>::write_little_endian(Integer value) noexcept
-{
-    // TODO: reimplement on derived classes and change to this here:
-    ////to_little_endian<Integer>(stream_, value);
-    
-    // Call into virtual writer (vs. stream) so derived class can reuse.
-    // This creates a copy that could be avoided by using stream overload.
-    write_bytes(to_little_endian<Integer>(value));
-}
-
-template <typename OStream>
 void byte_writer<OStream>::write_2_bytes_big_endian(uint16_t value) noexcept
 {
     write_big_endian<uint16_t>(value);
@@ -95,6 +83,18 @@ void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) noexcept
 
 // little endian
 //-----------------------------------------------------------------------------
+
+template <typename OStream>
+template <typename Integer, if_integer<Integer>>
+void byte_writer<OStream>::write_little_endian(Integer value) noexcept
+{
+    // TODO: reimplement on derived classes and change to this here:
+    ////to_little_endian<Integer>(stream_, value);
+
+    // Call into virtual writer (vs. stream) so derived class can reuse.
+    // This creates a copy that could be avoided by using stream overload.
+    write_bytes(to_little_endian<Integer>(value));
+}
 
 template <typename OStream>
 void byte_writer<OStream>::write_2_bytes_little_endian(uint16_t value) noexcept

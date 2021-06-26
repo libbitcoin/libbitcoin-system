@@ -146,7 +146,7 @@ base32_chunk base32_unpack(const data_chunk& packed)
 
     // This is how c++ developers do it. :)
     while (!source.is_exhausted())
-        unpacked.push_back(source.read_bits<uint8_t>(5));
+        unpacked.push_back(source.read_bits(5));
 
     // The bit reader reads zeros past end as padding.
     // This is a ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.

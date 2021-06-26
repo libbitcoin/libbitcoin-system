@@ -63,8 +63,7 @@ void bit_writer<OStream>::write_bit(bool value) noexcept
 }
 
 template <typename OStream>
-template <typename Integer, if_integer<Integer>>
-void bit_writer<OStream>::write_bits(Integer value, size_t bits) noexcept
+void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 {
     while (bits > byte_bits)
         do_write(static_cast<uint8_t>((value >> ((bits -= byte_bits))) & 0xff));
