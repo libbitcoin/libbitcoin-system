@@ -81,6 +81,9 @@ public:
     /// Advance the iterator.
     virtual void skip(size_t size=one) noexcept = 0;
 
+    /// Rewind the iterator.
+    virtual void rewind(size_t size=one) noexcept = 0;
+
     /// The stream is empty (or invalid).
     virtual bool is_exhausted() const noexcept = 0;
 

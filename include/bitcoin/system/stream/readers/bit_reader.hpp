@@ -58,6 +58,9 @@ public:
     /// Advance the iterator.
     virtual void skip_bit(size_t bits=one) noexcept;
 
+    /////// Rewind the iterator.
+    ////virtual void rewind_bit(size_t bits=one) noexcept;
+
 protected:
     uint8_t do_peek() noexcept override;
     uint8_t do_read() noexcept override;

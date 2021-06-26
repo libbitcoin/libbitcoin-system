@@ -269,6 +269,12 @@ void byte_reader<IStream>::skip(size_t size) noexcept
     do_skip(size);
 }
 
+template <typename IStream>
+void byte_reader<IStream>::rewind(size_t size) noexcept
+{
+    do_rewind(size);
+}
+
 // context
 //-----------------------------------------------------------------------------
 
@@ -324,8 +330,15 @@ void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_skip(size_t size) noexcept
 {
-    // "seek get"
     stream_.seekg(size, std::ios_base::cur);
+}
+
+template <typename IStream>
+void byte_reader<IStream>::do_rewind(size_t size) noexcept
+{
+    // Rewind against a move_source is safe but will produce arbitrary values.
+    const auto count = static_cast<IStream::pos_type>(size);
+    stream_.seekg(-count, std::ios_base::cur);
 }
 
 template <typename IStream>
