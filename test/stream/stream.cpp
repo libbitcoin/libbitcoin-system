@@ -33,10 +33,10 @@ void write(std::ostream& stream, int value)
 }
 
 // Verify boost input stream behavior with our copy_source.
-// peek invalidates *only* an empty source.
-// get invalidates on read past end (including on an empty source).
-// peek and get both return zero on an empty source, so always need to use peek
-// to test for exhaustion before reading so as to avoid incorrect invalidation.
+// peek invalidates *only* an empty source. get invalidates on read past
+// end (including on an empty source). peek and get both return zero on an
+// empty source (and eof on an invalid source), so always need to use peek
+// to test for exhaustion before reading so as to avoid end invalidation.
 // These test all of the istream methods utilized by byte_reader (all readers).
 
 BOOST_AUTO_TEST_CASE(stream__eof__always__negative_one)

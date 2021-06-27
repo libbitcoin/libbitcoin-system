@@ -347,8 +347,8 @@ bool byte_reader<IStream>::get_exhausted() const noexcept
 {
     // peek invalidates *only* an empty source. get invalidates on read past
     // end (including on an empty source). peek and get both return zero on an
-    // empty source, so always need to use peek to test for exhaustion before
-    // reading so as to avoid incorrect invalidation.
+    // empty source (and eof on an invalid source), so always need to use peek
+    // to test for exhaustion before reading so as to avoid end invalidation.
     return stream_.peek() == std::istream::traits_type::eof();
 }
 
