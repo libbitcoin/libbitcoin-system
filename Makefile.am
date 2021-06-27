@@ -94,6 +94,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/transaction.cpp \
     src/data/binary.cpp \
     src/data/data_chunk.cpp \
+    src/data/data_reference.cpp \
     src/data/data_slab.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
@@ -331,6 +332,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/collection.cpp \
     test/data/data_array.cpp \
     test/data/data_chunk.cpp \
+    test/data/data_reference.cpp \
     test/data/data_slab.cpp \
     test/data/data_slice.cpp \
     test/data/integer.cpp \
@@ -406,17 +408,17 @@ test_libbitcoin_system_test_SOURCES = \
     test/serialization/serialize.cpp \
     test/stream/device.cpp \
     test/stream/stream.cpp \
-    test/stream/flippers/bit_flipper.cpp \
-    test/stream/flippers/byte_flipper.cpp \
-    test/stream/readers/bit_reader.cpp \
-    test/stream/readers/byte_reader.cpp \
-    test/stream/sinks/copy_sink.cpp \
-    test/stream/sinks/flip_sink.cpp \
-    test/stream/sinks/push_sink.cpp \
-    test/stream/sources/copy_source.cpp \
-    test/stream/sources/move_source.cpp \
-    test/stream/writers/bit_writer.cpp \
-    test/stream/writers/byte_writer.cpp \
+    test/stream/streamers.cpp \
+    test/stream/devices/copy_sink.cpp \
+    test/stream/devices/copy_source.cpp \
+    test/stream/devices/flip_sink.cpp \
+    test/stream/devices/push_sink.cpp \
+    test/stream/streamers/bit_flipper.cpp \
+    test/stream/streamers/bit_reader.cpp \
+    test/stream/streamers/bit_writer.cpp \
+    test/stream/streamers/byte_flipper.cpp \
+    test/stream/streamers/byte_reader.cpp \
+    test/stream/streamers/byte_writer.cpp \
     test/unicode/ascii.cpp \
     test/unicode/code_points.cpp \
     test/unicode/conversion.cpp \
@@ -573,6 +575,7 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/data.hpp \
     include/bitcoin/system/data/data_array.hpp \
     include/bitcoin/system/data/data_chunk.hpp \
+    include/bitcoin/system/data/data_reference.hpp \
     include/bitcoin/system/data/data_slab.hpp \
     include/bitcoin/system/data/data_slice.hpp \
     include/bitcoin/system/data/string.hpp \
@@ -589,6 +592,7 @@ include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/collection.ipp \
     include/bitcoin/system/impl/data/data_array.ipp \
+    include/bitcoin/system/impl/data/data_reference.ipp \
     include/bitcoin/system/impl/data/data_slab.ipp \
     include/bitcoin/system/impl/data/data_slice.ipp \
     include/bitcoin/system/impl/data/string.ipp
@@ -634,15 +638,12 @@ include_bitcoin_system_impl_streamdir = ${includedir}/bitcoin/system/impl/stream
 include_bitcoin_system_impl_stream_HEADERS = \
     include/bitcoin/system/impl/stream/device.ipp
 
-include_bitcoin_system_impl_stream_readersdir = ${includedir}/bitcoin/system/impl/stream/readers
-include_bitcoin_system_impl_stream_readers_HEADERS = \
-    include/bitcoin/system/impl/stream/readers/bit_reader.ipp \
-    include/bitcoin/system/impl/stream/readers/byte_reader.ipp
-
-include_bitcoin_system_impl_stream_writersdir = ${includedir}/bitcoin/system/impl/stream/writers
-include_bitcoin_system_impl_stream_writers_HEADERS = \
-    include/bitcoin/system/impl/stream/writers/bit_writer.ipp \
-    include/bitcoin/system/impl/stream/writers/byte_writer.ipp
+include_bitcoin_system_impl_stream_streamersdir = ${includedir}/bitcoin/system/impl/stream/streamers
+include_bitcoin_system_impl_stream_streamers_HEADERS = \
+    include/bitcoin/system/impl/stream/streamers/bit_reader.ipp \
+    include/bitcoin/system/impl/stream/streamers/bit_writer.ipp \
+    include/bitcoin/system/impl/stream/streamers/byte_reader.ipp \
+    include/bitcoin/system/impl/stream/streamers/byte_writer.ipp
 
 include_bitcoin_system_impl_walletdir = ${includedir}/bitcoin/system/impl/wallet
 include_bitcoin_system_impl_wallet_HEADERS = \
@@ -777,47 +778,34 @@ include_bitcoin_system_serialization_HEADERS = \
 include_bitcoin_system_streamdir = ${includedir}/bitcoin/system/stream
 include_bitcoin_system_stream_HEADERS = \
     include/bitcoin/system/stream/device.hpp \
+    include/bitcoin/system/stream/make_stream.hpp \
+    include/bitcoin/system/stream/make_streamer.hpp \
     include/bitcoin/system/stream/stream.hpp
 
-include_bitcoin_system_stream_flippersdir = ${includedir}/bitcoin/system/stream/flippers
-include_bitcoin_system_stream_flippers_HEADERS = \
-    include/bitcoin/system/stream/flippers/bit_flipper.hpp \
-    include/bitcoin/system/stream/flippers/byte_flipper.hpp
+include_bitcoin_system_stream_devicesdir = ${includedir}/bitcoin/system/stream/devices
+include_bitcoin_system_stream_devices_HEADERS = \
+    include/bitcoin/system/stream/devices/copy_sink.hpp \
+    include/bitcoin/system/stream/devices/copy_source.hpp \
+    include/bitcoin/system/stream/devices/flip_sink.hpp \
+    include/bitcoin/system/stream/devices/push_sink.hpp
 
-include_bitcoin_system_stream_interfacesdir = ${includedir}/bitcoin/system/stream/interfaces
-include_bitcoin_system_stream_interfaces_HEADERS = \
-    include/bitcoin/system/stream/interfaces/bitflipper.hpp \
-    include/bitcoin/system/stream/interfaces/bitreader.hpp \
-    include/bitcoin/system/stream/interfaces/bitwriter.hpp \
-    include/bitcoin/system/stream/interfaces/byteflipper.hpp \
-    include/bitcoin/system/stream/interfaces/bytereader.hpp \
-    include/bitcoin/system/stream/interfaces/bytewriter.hpp
+include_bitcoin_system_stream_streamersdir = ${includedir}/bitcoin/system/stream/streamers
+include_bitcoin_system_stream_streamers_HEADERS = \
+    include/bitcoin/system/stream/streamers/bit_flipper.hpp \
+    include/bitcoin/system/stream/streamers/bit_reader.hpp \
+    include/bitcoin/system/stream/streamers/bit_writer.hpp \
+    include/bitcoin/system/stream/streamers/byte_flipper.hpp \
+    include/bitcoin/system/stream/streamers/byte_reader.hpp \
+    include/bitcoin/system/stream/streamers/byte_writer.hpp
 
-include_bitcoin_system_stream_makersdir = ${includedir}/bitcoin/system/stream/makers
-include_bitcoin_system_stream_makers_HEADERS = \
-    include/bitcoin/system/stream/makers/make_stream.hpp \
-    include/bitcoin/system/stream/makers/make_streamer.hpp
-
-include_bitcoin_system_stream_readersdir = ${includedir}/bitcoin/system/stream/readers
-include_bitcoin_system_stream_readers_HEADERS = \
-    include/bitcoin/system/stream/readers/bit_reader.hpp \
-    include/bitcoin/system/stream/readers/byte_reader.hpp
-
-include_bitcoin_system_stream_sinksdir = ${includedir}/bitcoin/system/stream/sinks
-include_bitcoin_system_stream_sinks_HEADERS = \
-    include/bitcoin/system/stream/sinks/copy_sink.hpp \
-    include/bitcoin/system/stream/sinks/flip_sink.hpp \
-    include/bitcoin/system/stream/sinks/push_sink.hpp
-
-include_bitcoin_system_stream_sourcesdir = ${includedir}/bitcoin/system/stream/sources
-include_bitcoin_system_stream_sources_HEADERS = \
-    include/bitcoin/system/stream/sources/copy_source.hpp \
-    include/bitcoin/system/stream/sources/move_source.hpp
-
-include_bitcoin_system_stream_writersdir = ${includedir}/bitcoin/system/stream/writers
-include_bitcoin_system_stream_writers_HEADERS = \
-    include/bitcoin/system/stream/writers/bit_writer.hpp \
-    include/bitcoin/system/stream/writers/byte_writer.hpp
+include_bitcoin_system_stream_streamers_interfacesdir = ${includedir}/bitcoin/system/stream/streamers/interfaces
+include_bitcoin_system_stream_streamers_interfaces_HEADERS = \
+    include/bitcoin/system/stream/streamers/interfaces/bitflipper.hpp \
+    include/bitcoin/system/stream/streamers/interfaces/bitreader.hpp \
+    include/bitcoin/system/stream/streamers/interfaces/bitwriter.hpp \
+    include/bitcoin/system/stream/streamers/interfaces/byteflipper.hpp \
+    include/bitcoin/system/stream/streamers/interfaces/bytereader.hpp \
+    include/bitcoin/system/stream/streamers/interfaces/bytewriter.hpp
 
 include_bitcoin_system_unicodedir = ${includedir}/bitcoin/system/unicode
 include_bitcoin_system_unicode_HEADERS = \

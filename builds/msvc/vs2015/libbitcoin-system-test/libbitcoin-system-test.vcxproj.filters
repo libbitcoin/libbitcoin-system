@@ -40,41 +40,32 @@
     <Filter Include="src\stream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\stream\flippers">
+    <Filter Include="src\stream\devices">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\stream\readers">
+    <Filter Include="src\stream\streamers">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\sinks">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\sources">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\writers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\keys">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\mnemonics">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\mnemonics\dictionaries">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +184,9 @@
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\data_chunk.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\data_reference.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\data_slab.cpp">
@@ -414,41 +408,41 @@
     <ClCompile Include="..\..\..\..\test\stream\device.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\flippers\bit_flipper.cpp">
-      <Filter>src\stream\flippers</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\devices\copy_sink.cpp">
+      <Filter>src\stream\devices</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\flippers\byte_flipper.cpp">
-      <Filter>src\stream\flippers</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\devices\copy_source.cpp">
+      <Filter>src\stream\devices</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\readers\bit_reader.cpp">
-      <Filter>src\stream\readers</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\devices\flip_sink.cpp">
+      <Filter>src\stream\devices</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\readers\byte_reader.cpp">
-      <Filter>src\stream\readers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\sinks\copy_sink.cpp">
-      <Filter>src\stream\sinks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\sinks\flip_sink.cpp">
-      <Filter>src\stream\sinks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\sinks\push_sink.cpp">
-      <Filter>src\stream\sinks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\sources\copy_source.cpp">
-      <Filter>src\stream\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\sources\move_source.cpp">
-      <Filter>src\stream\sources</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\devices\push_sink.cpp">
+      <Filter>src\stream\devices</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\stream.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\writers\bit_writer.cpp">
-      <Filter>src\stream\writers</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\streamers.cpp">
+      <Filter>src\stream</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stream\writers\byte_writer.cpp">
-      <Filter>src\stream\writers</Filter>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_flipper.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_reader.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_writer.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_flipper.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp">
+      <Filter>src\stream\streamers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\test.cpp">
       <Filter>src</Filter>
