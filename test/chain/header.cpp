@@ -162,7 +162,8 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
         68644
     };
 
-    read::bytes::copy source(expected.to_data());
+    const auto data = expected.to_data();
+    read::bytes::copy source(data);
 
     const auto result = chain::header::factory(source);
 

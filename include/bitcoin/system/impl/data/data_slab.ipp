@@ -23,6 +23,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
+#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

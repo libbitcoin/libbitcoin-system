@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
 
     transaction tx;
-    read::bytes::from<data_array<64>> reader(junk);
+    read::bytes::copy reader(junk);
     BOOST_REQUIRE(tx.from_data(version::level::minimum, reader));
 }
 

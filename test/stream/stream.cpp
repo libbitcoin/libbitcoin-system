@@ -32,48 +32,78 @@ void write(std::ostream& stream, int value)
     serialize(stream, value, "fail");
 }
 
-// move streams are direct.
-BOOST_AUTO_TEST_CASE(stream__in__move__expected)
-{
-    std::string source{ "42" };
-    stream::in::move istream(source);
-    BOOST_REQUIRE_EQUAL(read(istream), 42);
-}
+// stream::in (copy)
+// copy streams are direct.
 
-// from streams are move streams (direct).
-BOOST_AUTO_TEST_CASE(stream__in__from_string__expected)
+BOOST_AUTO_TEST_CASE(stream__in__string__expected)
 {
     const std::string source{ "42" };
-    stream::in::from<std::string> istream(source);
+    stream::in::copy istream(source);
     BOOST_REQUIRE_EQUAL(read(istream), 42);
 }
 
-// from streams are move streams (direct).
-BOOST_AUTO_TEST_CASE(stream__in__from_array__expected)
+BOOST_AUTO_TEST_CASE(stream__in__array__expected)
 {
     const data_array<2> source{ { '4', '2' } };
-    stream::in::from<data_array<2>> istream(source);
+    stream::in::copy istream(source);
     BOOST_REQUIRE_EQUAL(read(istream), 42);
 }
 
-// copy streams are direct.
-BOOST_AUTO_TEST_CASE(stream__in__copy__expected)
+BOOST_AUTO_TEST_CASE(stream__in__data__expected)
 {
     const data_chunk source{ '4', '2' };
     stream::in::copy istream(source);
     BOOST_REQUIRE_EQUAL(read(istream), 42);
 }
 
-// slab streams are direct (flush not required).
-BOOST_AUTO_TEST_CASE(stream__out__slab__expected)
+// stream::out (copy)
+// copy streams are direct.
+
+BOOST_AUTO_TEST_CASE(stream__out__copy_string__expected)
 {
     std::string sink(2, 0x00);
-    stream::out::slab ostream(sink);
+    stream::out::copy ostream(sink);
     write(ostream, 42);
     BOOST_REQUIRE_EQUAL(sink, "42");
 }
 
-// text streams are push treams (indirect) (flush required).
+BOOST_AUTO_TEST_CASE(stream__out__array__expected)
+{
+    data_array<2> sink{ { 0x00, 0x00 } };
+    stream::out::copy ostream(sink);
+    write(ostream, 42);
+    BOOST_REQUIRE_EQUAL(sink, to_array<2>("42"));
+}
+
+BOOST_AUTO_TEST_CASE(stream__out__data__expected)
+{
+    data_chunk sink(2, 0x00);
+    stream::out::copy ostream(sink);
+    write(ostream, 42);
+    BOOST_REQUIRE_EQUAL(sink, to_chunk("42"));
+}
+
+// stream::out (push)
+// push streams are indirect (flush required).
+
+BOOST_AUTO_TEST_CASE(stream__out__into_string__expected)
+{
+    std::string sink;
+    stream::out::into<std::string> ostream(sink);
+    write(ostream, 42);
+    ostream.flush();
+    BOOST_REQUIRE_EQUAL(sink, "42");
+}
+
+BOOST_AUTO_TEST_CASE(stream__out__into_data__expected)
+{
+    data_chunk sink;
+    stream::out::into<data_chunk> ostream(sink);
+    write(ostream, 42);
+    ostream.flush();
+    BOOST_REQUIRE_EQUAL(sink, to_chunk("42"));
+}
+
 BOOST_AUTO_TEST_CASE(stream__out__text__expected)
 {
     std::string sink;
@@ -83,17 +113,18 @@ BOOST_AUTO_TEST_CASE(stream__out__text__expected)
     BOOST_REQUIRE_EQUAL(sink, "42");
 }
 
-// push streams are indirect (flush required).
 BOOST_AUTO_TEST_CASE(stream__out__push__expected)
 {
     data_chunk sink;
     stream::out::push ostream(sink);
     write(ostream, 42);
     ostream.flush();
-    BOOST_REQUIRE_EQUAL(to_string(sink), "42");
+    BOOST_REQUIRE_EQUAL(sink, to_chunk("42"));
 }
 
+// stream::flip
 // flip streams are direct (flush not required).
+
 BOOST_AUTO_TEST_CASE(stream__out__flip__expected)
 {
     data_chunk sink(2, 0x00);
@@ -101,5 +132,10 @@ BOOST_AUTO_TEST_CASE(stream__out__flip__expected)
     write(ostream, 42);
     BOOST_REQUIRE_EQUAL(to_string(sink), "42");
 }
+
+// read::bytes
+// read::bits
+// write::bytes
+// write::bits
 
 BOOST_AUTO_TEST_SUITE_END()
