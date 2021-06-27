@@ -31,7 +31,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sink for boost::iostreams::stream, copies bytes to Container.
+/// Sink for ios::stream, copies bytes to Container.
 template <typename Container, if_base_of<data_slab, Container> = true>
 class copy_sink
   : public device<Container>
@@ -39,8 +39,7 @@ class copy_sink
 public:
     typedef const Container& container;
     struct category
-      : boost::iostreams::output_seekable,
-        boost::iostreams::direct_tag
+      : ios::output_seekable, ios::direct_tag
     {
     };
 
@@ -62,14 +61,8 @@ protected:
             reinterpret_cast<char_type*>(end));
     }
 
-    ////void do_write(const value_type* from, size_type size) noexcept override
-    ////{
-    ////    // std::copy_n returns iterator past last element copied to.
-    ////    next_ = std::copy_n(from, size, next_);
-    ////}
-
-protected:
-    const Container container_;
+private:
+    const Container& container_;
     typename Container::iterator next_;
 };
 

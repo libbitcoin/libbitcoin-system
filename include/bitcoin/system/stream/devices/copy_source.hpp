@@ -31,7 +31,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Source for boost::iostreams::stream, copies bytes from Container.
+/// Source for ios::stream, copies bytes from Container.
 template <typename Container, if_base_of<data_reference, Container> = true>
 class copy_source
   : public device<Container>
@@ -39,8 +39,7 @@ class copy_source
 public:
     typedef const Container& container;
     struct category
-      : boost::iostreams::input_seekable,
-        boost::iostreams::direct_tag
+      : ios::input_seekable, ios::direct_tag
     {
     };
 
@@ -64,14 +63,7 @@ protected:
             reinterpret_cast<char_type*>(end));
     }
 
-    ////void do_read(value_type* to, size_type size) noexcept override
-    ////{
-    ////    // std::copy_n returns iterator past last element copied to.
-    ////    std::copy_n(next_, size, to);
-    ////    std::advance(next_, size);
-    ////}
-
-protected:
+private:
     const Container& container_;
     typename Container::const_iterator next_;
 };

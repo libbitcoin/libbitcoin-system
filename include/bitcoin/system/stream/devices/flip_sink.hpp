@@ -27,31 +27,21 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sink for boost::iostreams::stream, copies bytes to/from Container.
+/// Sink for ios::stream, copies bytes to/from Container.
+// The only derivation is override of copy_sink::category.
+// This allows copy_sink to avoid an unnecessary output_sequence invocation.
 template <typename Container>
 class flip_sink
   : public copy_sink<Container>
 {
 public:
     struct category
-      : boost::iostreams::seekable,
-        boost::iostreams::direct_tag
+      : ios::seekable, ios::direct_tag
     {
-        // The only derivation is override of copy_sink::category.
     };
 
-    flip_sink(const Container& data) noexcept
-      : copy_sink(data)
-    {
-    }
-
-protected:
-    ////void do_read(value_type* to, size_type size) noexcept override
-    ////{
-    ////    // std::copy_n returns iterator past last element copied to.
-    ////    std::copy_n(next_, size, to);
-    ////    std::advance(next_, size);
-    ////}
+    // Constructor inheritance.
+    using copy_sink::copy_sink;
 };
 
 } // namespace system

@@ -27,8 +27,10 @@
 
 namespace libbitcoin {
 namespace system {
+    
+namespace ios = boost::iostreams;
 
-/// Virtual base class for boost::iostreams::stream devices.
+/// Virtual base class for ios::stream devices.
 template <typename Container>
 class device
 {
@@ -41,18 +43,18 @@ public:
     /// seekable types
     typedef std::streampos position;
     typedef std::ios_base::seekdir direction;
-    typedef boost::iostreams::stream_offset offset;
+    typedef std::iostream::off_type offset;
     typedef std::pair<char_type*, char_type*> sequence;
 
-    /// seekable input/output (required for direct devices).
+    /// seekable input/output (direct devices only).
     sequence input_sequence() const noexcept;
     sequence output_sequence() const noexcept;
 
-    /// input/output devices (may not be required for direct devices).
+    /// input/output devices (indirect devices only).
     size_type read(char_type* buffer, size_type count) noexcept;
     size_type write(const char_type* buffer, size_type count) noexcept;
 
-    /// Buffer allocation, called for indirect devices only.
+    /// Buffer allocation (indirect devices only).
     size_type optimal_buffer_size() const noexcept;
 
 protected:

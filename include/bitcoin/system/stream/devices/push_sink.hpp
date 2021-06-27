@@ -30,9 +30,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sink for boost::iostreams::stream, appends bytes to Container.
+/// Sink for ios::stream, appends bytes to Container.
 /// Container may be any insertable object with contiguous byte data.
-/// This is limited to std::string and std::vector of int8_t/uint8_t.
+/// This is limited to std::string and std::vector of uint8_t.
 /// Push streams are buffered, indirect (inefficient) and require flush.
 template <typename Container, if_byte_insertable<Container> = true>
 class push_sink
@@ -41,8 +41,7 @@ class push_sink
 public:
     typedef Container& container;
     struct category
-      : boost::iostreams::sink_tag,
-        boost::iostreams::optimally_buffered_tag
+      : ios::sink_tag, ios::optimally_buffered_tag
     {
     };
 
@@ -71,7 +70,7 @@ protected:
         return is_zero(space) ? default_buffer_size : space;
     }
 
-protected:
+private:
     Container& container_;
     typename Container::iterator next_;
 };
