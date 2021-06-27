@@ -310,13 +310,14 @@ bool byte_reader<IStream>::operator!() const noexcept
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek() noexcept
 {
-    // This invalidates the stream if empty (invalid read).
+    // This invalidates the stream *only* if empty.
     return stream_.peek();
 }
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_read() noexcept
 {
+    // This invalidates the stream if empty or at end.
     return stream_.get();
 }
 
@@ -330,25 +331,25 @@ void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_skip(size_t size) noexcept
 {
-    stream_.seekg(size, std::ios_base::cur);
+    // pos_type is not an integer so cannot use limit cast here.
+    seekg(static_cast<IStream::pos_type>(size));
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_rewind(size_t size) noexcept
 {
-    // Rewind against a move_source is safe but will produce arbitrary values.
-    const auto count = static_cast<IStream::pos_type>(size);
-    stream_.seekg(-count, std::ios_base::cur);
+    // pos_type is not an integer so cannot use limit cast here.
+    seekg(-static_cast<IStream::pos_type>(size));
 }
 
 template <typename IStream>
 bool byte_reader<IStream>::get_exhausted() const noexcept
 {
-    // This will invalidate an empty stream. stream.peek is non-const but this
-    // compiles because the stream_ member is a reference. The behavior can be
-    // unexpected as the state of the stream, reader and bit reader can change
-    // as a result of the peek, which reads and then restores a byte to stream.
-    return !stream_ || stream_.peek() == std::istream::traits_type::eof();
+    // peek invalidates *only* an empty source. get invalidates on read past
+    // end (including on an empty source). peek and get both return zero on an
+    // empty source, so always need to use peek to test for exhaustion before
+    // reading so as to avoid incorrect invalidation.
+    return stream_.peek() == std::istream::traits_type::eof();
 }
 
 template <typename IStream>
@@ -361,6 +362,24 @@ template <typename IStream>
 void byte_reader<IStream>::set_invalid() noexcept
 {
     stream_.setstate(std::istream::failbit);
+}
+
+// private
+// ----------------------------------------------------------------------------
+
+template <typename IStream>
+void byte_reader<IStream>::seekg(typename IStream::pos_type offset) noexcept
+{
+    try
+    {
+        // seekg throwing here does not invalidate the stream!
+        stream_.seekg(offset, std::ios_base::cur);
+    }
+    catch (const std::ios_base::failure&)
+    {
+        // Convert the exception to stream invalidation.
+        set_invalid();
+    }
 }
 
 } // namespace system
