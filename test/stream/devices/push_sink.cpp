@@ -20,15 +20,18 @@
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__default__1024)
+const auto default_buffer_size = 1024;
+
+// The compiler determines capacity, so this may be unreliable to test.
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__default__default)
 {
-    const auto default_buffer_size = 1024;
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_empty__expected)
+// The compiler determines capacity, so this may be unreliable to test.
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_empty__reserve)
 {
     const auto sink_capacity = 1500;
     data_chunk sink;
@@ -37,7 +40,8 @@ BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_empty__expected)
     BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity);
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve__expected)
+// The compiler determines capacity, so this may be unreliable to test.
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_not_empty__expected)
 {
     const auto sink_size = 42;
     const auto sink_capacity = 1500;
@@ -45,6 +49,17 @@ BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve__expected)
     sink.reserve(sink_capacity);
     push_sink<data_chunk> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity - sink_size);
+}
+
+// The compiler determines capacity, so this may be unreliable to test.
+BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__no_reserve_not_empty__default)
+{
+    const auto sink_size = 42;
+    const auto sink_capacity = 42;
+    data_chunk sink(sink_size, 0x00);
+    sink.reserve(sink_capacity);
+    push_sink<data_chunk> instance(sink);
+    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
 }
 
 BOOST_AUTO_TEST_CASE(push_sink__write__nullptr__false)

@@ -54,7 +54,7 @@ public:
     }
 
 protected:
-    const size_type minimum_buffer_size = 1024;
+    const size_type default_buffer_size = 1024;
 
     void do_write(const value_type* from, size_type size) noexcept override
     {
@@ -65,8 +65,10 @@ protected:
     size_type do_optimal_buffer_size() const noexcept override
     {
         // This is only called at stream construct.
+        // The compiler determines capacity, so this may be unreliable to test.
+        // Create a buffer equal to the reserved but unused space, or default.
         auto space = floored_subtract(container_.capacity(), container_.size());
-        return greater<size_type>(space, minimum_buffer_size);
+        return is_zero(space) ? default_buffer_size : space;
     }
 
 protected:

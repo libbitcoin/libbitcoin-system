@@ -127,15 +127,10 @@ BOOST_AUTO_TEST_CASE(stream__out__push__expected)
 
 BOOST_AUTO_TEST_CASE(stream__out__flip__expected)
 {
-    data_chunk sink(2, 0x00);
-    stream::flip ostream(sink);
+    data_chunk data(2, 0x00);
+    stream::flip::copy ostream(data);
     write(ostream, 42);
-    BOOST_REQUIRE_EQUAL(to_string(sink), "42");
+    BOOST_REQUIRE_EQUAL(to_string(data), "42");
 }
-
-// read::bytes
-// read::bits
-// write::bytes
-// write::bits
 
 BOOST_AUTO_TEST_SUITE_END()

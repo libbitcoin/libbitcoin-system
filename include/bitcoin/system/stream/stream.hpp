@@ -73,8 +73,11 @@ namespace stream
         using push = into<data_chunk>;
     }
 
-    /// An input/output stream that copies data to a data_slab.
-    using flip = make_stream<flip_sink<data_slab>>;
+    namespace flip
+    {
+        /// An input/output stream that copies data to a data_slab.
+        using copy = make_stream<flip_sink<data_slab>>;
+    }
 }
 
 namespace read
@@ -105,12 +108,6 @@ namespace write
         /// A byte writer that writes data to a std::ostream.
         using ostream = byte_writer<std::ostream>;
 
-        /// A byte reader/writer of a std::iostream.
-        using iostream = byte_flipper<std::iostream>;
-
-        /// A byte reader/writer of a data_slab (no push and requires own sink).
-        using flip = make_streamer<flip_sink<data_slab>, byte_flipper>;
-
         /// A byte writer that copies data to a data_slab.
         using copy = make_streamer<copy_sink<data_slab>, byte_writer>;
 
@@ -127,12 +124,6 @@ namespace write
         /// A bit writer that writes data to a std::ostream.
         using ostream = bit_writer<std::ostream>;
 
-        /// A bit reader/writer of a std::iostream.
-        using iostream = bit_flipper<std::iostream>;
-
-        /// A bit reader/writer of a data_slab (no push and requires own sink).
-        using flip = make_streamer<flip_sink<data_slab>, bit_flipper>;
-
         /// A bit writer that copies data to a data_slab.
         using copy = make_streamer<copy_sink<data_slab>, bit_writer>;
 
@@ -142,6 +133,27 @@ namespace write
         using into = make_streamer<push_sink<Container>, bit_writer>;
         using text = into<std::string>;
         using push = into<data_chunk>;
+    }
+}
+
+namespace flip
+{
+    namespace bytes
+    {
+        /// A byte reader/writer of a std::iostream.
+        using iostream = byte_flipper<std::iostream>;
+
+        /// A byte reader/writer of a data_slab (no push and requires own sink).
+        using copy = make_streamer<flip_sink<data_slab>, byte_flipper>;
+    }
+
+    namespace bits
+    {
+        /// A bit reader/writer of a std::iostream.
+        using iostream = bit_flipper<std::iostream>;
+
+        /// A bit reader/writer of a data_slab (no push and requires own sink).
+        using copy = make_streamer<flip_sink<data_slab>, bit_flipper>;
     }
 }
 

@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 BOOST_AUTO_TEST_CASE(byte_flipper__write_byte__empty__expected)
 {
     std::stringstream stream;
-    write::bytes::iostream flipper(stream);
+    flip::bytes::iostream flipper(stream);
     flipper.write_byte('a');
     BOOST_REQUIRE_EQUAL(stream.str(), "a");
 }
