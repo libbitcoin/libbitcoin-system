@@ -132,15 +132,15 @@ bool bit_writer<OStream>::get_valid() const noexcept
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
-bool bit_writer<OStream>::is_aligned() const noexcept
-{
-    return is_zero(shift());
-}
-
-template <typename OStream>
 uint8_t bit_writer<OStream>::shift() const noexcept
 {
     return byte_bits - offset_;
+}
+
+template <typename OStream>
+bool bit_writer<OStream>::is_aligned() const noexcept
+{
+    return is_zero(shift());
 }
 
 template <typename OStream>

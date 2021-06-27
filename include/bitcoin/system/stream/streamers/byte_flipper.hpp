@@ -29,6 +29,7 @@ namespace libbitcoin {
 namespace system {
     
 // Suppress multiple inheritance warnings.
+// The only multiple inheritance conflict is two destructors.
 #pragma warning(push)
 #pragma warning(disable : 4250)
 

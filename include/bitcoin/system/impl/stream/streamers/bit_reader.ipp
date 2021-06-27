@@ -174,9 +174,9 @@ void bit_reader<IStream>::set_invalid() noexcept
 //-----------------------------------------------------------------------------
 
 template <typename IStream>
-void bit_reader<IStream>::align() noexcept
+uint8_t bit_reader<IStream>::shift() const noexcept
 {
-    offset_ = byte_bits;
+    return byte_bits - offset_;
 }
 
 template <typename IStream>
@@ -186,9 +186,9 @@ bool bit_reader<IStream>::is_aligned() const noexcept
 }
 
 template <typename IStream>
-uint8_t bit_reader<IStream>::shift() const noexcept
+void bit_reader<IStream>::align() noexcept
 {
-    return byte_bits - offset_;
+    offset_ = byte_bits;
 }
 
 } // namespace system

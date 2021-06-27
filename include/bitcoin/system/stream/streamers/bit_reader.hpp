@@ -71,9 +71,9 @@ protected:
     void set_invalid() noexcept override;
 
 private:
-    void align() noexcept;
-    bool is_aligned() const noexcept;
     uint8_t shift() const noexcept;
+    bool is_aligned() const noexcept;
+    void align() noexcept;
 
     uint8_t buffer_;
     uint8_t offset_;

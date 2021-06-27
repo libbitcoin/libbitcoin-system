@@ -61,8 +61,8 @@ protected:
     bool get_valid() const noexcept override;
 
 private:
-    bool is_aligned() const noexcept;
     uint8_t shift() const noexcept;
+    bool is_aligned() const noexcept;
     void dump() noexcept;
 
     uint8_t buffer_;
