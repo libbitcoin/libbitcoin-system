@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <sstream>
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
@@ -32,113 +33,274 @@ void write(std::ostream& stream, int value)
     serialize(stream, value, "fail");
 }
 
-// Verify boost input stream behavior with our copy_source.
-// peek invalidates *only* an empty source. get invalidates on read past
-// end (including on an empty source). peek and get both return zero on an
-// empty source (and eof on an invalid source), so always need to use peek
-// to test for exhaustion before reading so as to avoid end invalidation.
-// These test all of the istream methods utilized by byte_reader (all readers).
-
-BOOST_AUTO_TEST_CASE(stream__eof__always__negative_one)
+constexpr bool is_set(int state, int flag)
 {
-    BOOST_REQUIRE_EQUAL(std::istream::traits_type::eof(), -1);
+    return (state & flag) == flag;
 }
+
+// Stream state flags (bitmasks).
+// no error, standardized.
+static_assert(std::istream::goodbit == 0, "");
+static_assert(std::istringstream::goodbit == 0, "");
+// associated input sequence has reached eof, implementation-defined.
+static_assert(std::istream::eofbit == 1, "");
+static_assert(std::istringstream::eofbit == 1, "");
+// operation failed (formatting or extraction error), implementation-defined.
+static_assert(std::istream::failbit == 2, "");
+static_assert(std::istringstream::failbit == 2, "");
+// irrecoverable stream error, implementation-defined.
+static_assert(std::istream::badbit == 4, "");
+static_assert(std::istringstream::badbit == 4, "");
+
+// seekg clears eofbit.
+// seekg on failure should set failbit, but neither boost nor sstream do this.
+// read/get past end should set failbit, boost and sstream do this (even on empty).
+// write/put past end should set badbit, boost and sstream do this (even on empty)?
+// If eofbit is set, failbit is generally set on all operations.
+static_assert(std::istream::traits_type::eof() == -1, "");
+static_assert(std::istringstream::traits_type::eof() == -1, "");
+
+// Verify boost input stream behavior with our copy_source and istringstream.
+// These test all of the istream methods utilized by byte_reader (all readers).
+// Empty behavior is inconsistent within and across implementations.
 
 BOOST_AUTO_TEST_CASE(stream__bool__empty__true)
 {
+    std::istringstream isstream;
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(stream__bool__not_empty__true)
 {
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source{ "*" };
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(stream__setstate__failbit__invalid)
+BOOST_AUTO_TEST_CASE(stream__rdstate__non_empty__valid)
 {
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
+    const std::string source{ "*" };
+    stream::in::copy istream(source);
+    BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(stream__setstate__failbit__failbit)
+{
+    std::istringstream isstream{ "*" };
+    isstream.setstate(std::istringstream::failbit);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
     const std::string source{ "*" };
     stream::in::copy istream(source);
     istream.setstate(std::istream::failbit);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__get__to_end__expected_valid)
+BOOST_AUTO_TEST_CASE(stream__get__failbit_empty__failbit)
 {
-    const std::string source{ "*" };
-    stream::in::copy istream(source);
-    BOOST_REQUIRE_EQUAL(istream.get(), '*');
-    BOOST_REQUIRE(istream);
-}
+    std::istringstream isstream;
+    isstream.setstate(std::istringstream::failbit);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), -1);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-BOOST_AUTO_TEST_CASE(stream__bool__get_invalid__eof)
-{
     const std::string source;
     stream::in::copy istream(source);
     istream.setstate(std::istream::failbit);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE_EQUAL(istream.get(), -1);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__bool__get_empty__zero_invalid)
+BOOST_AUTO_TEST_CASE(stream__get__failbit_non_empty__failbit)
 {
+    std::istringstream isstream{ "*" };
+    isstream.setstate(std::istringstream::failbit);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), -1);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    const std::string source{ "*" };
+    stream::in::copy istream(source);
+    istream.setstate(std::istream::failbit);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
+    BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE_EQUAL(istream.get(), -1);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
+}
+
+BOOST_AUTO_TEST_CASE(stream__get__to_end__expected_valid)
+{
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), '*');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
+    const std::string source{ "*" };
+    stream::in::copy istream(source);
+    BOOST_REQUIRE_EQUAL(istream.get(), '*');
+    BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(stream__get__empty__inconsistent)
+{
+    // -1, sets eof and fail, but not bad.
+    std::istringstream isstream;
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), -1);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    // zero, sets bad, but not eof or fail.
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.get(), 0x00);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__get__invalid__eof)
+BOOST_AUTO_TEST_CASE(stream__get__past_end__eofbit_and_failbit)
 {
-    const std::string source;
-    stream::in::copy istream(source);
-    istream.setstate(std::istream::failbit);
-    BOOST_REQUIRE(!istream);
-    BOOST_REQUIRE_EQUAL(istream.get(), -1);
-}
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE_EQUAL(isstream.get(), '*');
+    BOOST_REQUIRE_EQUAL(isstream.get(), -1);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-BOOST_AUTO_TEST_CASE(stream__get__past_end__eof_invalid)
-{
     const std::string source{ "*" };
     stream::in::copy istream(source);
     BOOST_REQUIRE_EQUAL(istream.get(), '*');
     BOOST_REQUIRE_EQUAL(istream.get(), -1);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__peek__empty__zero_invalid)
+BOOST_AUTO_TEST_CASE(stream__peek__empty__inconsistent)
 {
+    // -1, eofbit
+    std::istringstream isstream;
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.peek(), -1);
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    // 0, badbit
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.peek(), 0x00);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__peek__invalid__eof)
+BOOST_AUTO_TEST_CASE(stream__peek__failbit__failbit)
 {
+    std::istringstream isstream;
+    isstream.setstate(std::istringstream::failbit);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE_EQUAL(isstream.peek(), -1);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
     const std::string source;
     stream::in::copy istream(source);
     istream.setstate(std::istream::failbit);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE_EQUAL(istream.peek(), -1);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(stream__peek__past_end__eof_valid)
+BOOST_AUTO_TEST_CASE(stream__peek__past_end__eofbit)
 {
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE_EQUAL(isstream.get(), '*');
+    BOOST_REQUIRE_EQUAL(isstream.peek(), -1);
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
     const std::string source{ "*" };
     stream::in::copy istream(source);
     BOOST_REQUIRE_EQUAL(istream.get(), '*');
     BOOST_REQUIRE_EQUAL(istream.peek(), -1);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(stream__get__peek__expected)
 {
+    std::istringstream isstream{ "+/-" };
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.peek(), '+');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), '+');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.peek(), '/');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), '/');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.peek(), '-');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.get(), '-');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source{ "+/-" };
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
@@ -154,114 +316,257 @@ BOOST_AUTO_TEST_CASE(stream__get__peek__expected)
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.get(), '-');
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(stream__read__empty_zero__valid)
 {
+    std::vector<char> ssink;
+    std::istringstream isstream;
+    BOOST_REQUIRE(isstream);
+    isstream.read(ssink.data(), ssink.size());
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     std::vector<char> sink;
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(stream__read__empty_one__inconsistent)
+{
+    // sets eofbit and failbit
+    std::istringstream isstream;
+    std::vector<char> ssink(1, 0x00);
+    BOOST_REQUIRE(isstream);
+    isstream.read(ssink.data(), ssink.size());
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    // sets badbit
+    const std::string source;
+    std::vector<char> sink(1, 0x00);
+    stream::in::copy istream(source);
+    BOOST_REQUIRE(istream);
+    istream.read(sink.data(), sink.size());
+    BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(stream__read__to_end__expected_valid)
 {
     const std::string source{ "+/-" };
+    std::vector<char> ssink(source.size(), 0x00);
+    std::istringstream isstream{ source };
+    BOOST_REQUIRE(isstream);
+    isstream.read(ssink.data(), ssink.size());
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+    BOOST_REQUIRE_EQUAL(to_string(ssink), source);
+
     std::vector<char> sink(source.size(), 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
     BOOST_REQUIRE_EQUAL(to_string(sink), source);
 }
 
-BOOST_AUTO_TEST_CASE(stream__read__past_end__expected_invalid)
+BOOST_AUTO_TEST_CASE(stream__read__past_end__eofbit_and_failbit)
 {
     const std::string source{ "+/-" };
+    std::vector<char> ssink(add1(source.size()), 0x00);
+    std::istringstream isstream{ source };
+    BOOST_REQUIRE(isstream);
+    isstream.read(ssink.data(), ssink.size());
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+    BOOST_REQUIRE_EQUAL(to_string(ssink).substr(0, source.size()), source);
+
     std::vector<char> sink(add1(source.size()), 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
     BOOST_REQUIRE_EQUAL(to_string(sink).substr(0, source.size()), source);
 }
 
-BOOST_AUTO_TEST_CASE(stream__read__invalid__unchanged_invalid)
+BOOST_AUTO_TEST_CASE(stream__read__failbit__failbit)
 {
     const std::string source{ "+/-" };
+    std::vector<char> ssink(source.size(), 0x00);
+    const auto sexpected = ssink;
+    std::istringstream isstream{ source };
+    isstream.setstate(std::istringstream::failbit);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+    isstream.read(ssink.data(), ssink.size());
+    BOOST_REQUIRE_EQUAL(ssink, sexpected);
+
     std::vector<char> sink(source.size(), 0x00);
-    const auto expected = sink;
+    const auto expected = ssink;
     stream::in::copy istream(source);
     istream.setstate(std::istream::failbit);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
     istream.read(sink.data(), sink.size());
     BOOST_REQUIRE_EQUAL(sink, expected);
 }
 
-BOOST_AUTO_TEST_CASE(stream__seekg__empty_zero__invalid)
+BOOST_AUTO_TEST_CASE(stream__seekg__empty_zero__inconsistent)
 {
+    // valid
+    std::istringstream isstream;
+    BOOST_REQUIRE(isstream);
+    isstream.seekg(0, std::istringstream::cur);
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
+    // failbit
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
-    istream.seekg(0, std::ios_base::cur);
+    istream.seekg(0, std::istream::cur);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(stream__seekg__non_empty_zero__valid)
 {
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE(isstream);
+    isstream.seekg(0, std::istringstream::cur);
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source{ "*" };
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
-    istream.seekg(0, std::ios_base::cur);
+    istream.seekg(0, std::istream::cur);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(stream__seekg__to_end__valid)
 {
+    std::istringstream isstream{ "*" };
+    isstream.seekg(1, std::istringstream::cur);
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source{ "*" };
     stream::in::copy istream(source);
-    istream.seekg(1, std::ios_base::cur);
+    istream.seekg(1, std::istream::cur);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(stream__seekg__get__expected)
 {
+    std::istringstream isstream{ "+/-" };
+    isstream.seekg(2, std::istringstream::cur);
+    BOOST_REQUIRE_EQUAL(isstream.get(), '-');
+    BOOST_REQUIRE(isstream);
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
     const std::string source{ "+/-" };
     stream::in::copy istream(source);
-    istream.seekg(2, std::ios_base::cur);
+    istream.seekg(2, std::istream::cur);
     BOOST_REQUIRE_EQUAL(istream.get(), '-');
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
-// This does not throw?! Empty source behavior is always unique.
-BOOST_AUTO_TEST_CASE(stream__seekg__empty_one__invalid)
+BOOST_AUTO_TEST_CASE(stream__seekg__empty_one__failbit)
 {
+    std::istringstream isstream;
+    isstream.seekg(1, std::istringstream::cur);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
     const std::string source;
     stream::in::copy istream(source);
-    istream.seekg(1, std::ios_base::cur);
-    istream.seekg(42, std::ios_base::cur);
+    istream.seekg(1, std::istream::cur);
     BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-// Throwing does not invalidate the stream!
-BOOST_AUTO_TEST_CASE(stream__seekg__past_begin__throws_invalid)
+BOOST_AUTO_TEST_CASE(stream__seekg__empty_negative_one__failbit)
 {
-    const std::string source{ "*" };
+    std::istringstream isstream;
+    isstream.seekg(-1, std::istringstream::cur);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    const std::string source;
     stream::in::copy istream(source);
-    istream.seekg(1, std::ios_base::cur);
-    BOOST_REQUIRE_THROW(istream.seekg(-2, std::ios_base::cur), std::ios_base::failure);
-    BOOST_REQUIRE(istream);
+    istream.seekg(-1, std::istream::cur);
+    BOOST_REQUIRE(!istream);
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-// Throwing does not invalidate the stream!
-BOOST_AUTO_TEST_CASE(stream__seekg__past_end__throws_invalid)
+BOOST_AUTO_TEST_CASE(stream__seekg__past_begin__inconsistent)
 {
+    // failbit.
+    std::istringstream isstream{ "*" };
+    isstream.seekg(-2, std::istringstream::cur);
+    BOOST_REQUIRE(!isstream);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    // std::istream::failure
     const std::string source{ "*" };
     stream::in::copy istream(source);
-    BOOST_REQUIRE_THROW(istream.seekg(2, std::ios_base::cur), std::ios_base::failure);
+    BOOST_REQUIRE_THROW(istream.seekg(-2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(stream__seekg__past_end__inconsistent)
+{
+    // failbit
+    std::istringstream isstream{ "*" };
+    BOOST_REQUIRE(isstream);
+    isstream.seekg(2, std::istringstream::cur);
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::eofbit));
+    BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
+    BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
+
+    // std::istream::failure
+    const std::string source{ "*" };
+    stream::in::copy istream(source);
+    BOOST_REQUIRE_THROW(istream.seekg(2, std::istream::cur), std::istream::failure);
+    BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
 // stream::in (copy)

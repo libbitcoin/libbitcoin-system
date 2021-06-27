@@ -127,6 +127,7 @@ protected:
     virtual void set_invalid() noexcept;
 
 private:
+    void validate() noexcept;
     void seekg(typename IStream::pos_type offset) noexcept;
 
     IStream& stream_;

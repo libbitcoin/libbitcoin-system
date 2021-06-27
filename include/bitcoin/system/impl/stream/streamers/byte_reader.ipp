@@ -207,6 +207,7 @@ uint8_t byte_reader<IStream>::read_byte() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes() noexcept
 {
+    // TODO: loop seek to end, calculate size, reset and call read_bytes(size).
     data_chunk out;
     while (!is_exhausted())
         out.push_back(read_byte());
@@ -281,18 +282,22 @@ void byte_reader<IStream>::rewind(size_t size) noexcept
 template <typename IStream>
 bool byte_reader<IStream>::is_exhausted() const noexcept
 {
+    // True if !get_valid() or if no bytes remain in the stream.
     return get_exhausted();
 }
 
 template <typename IStream>
 void byte_reader<IStream>::invalidate() noexcept
 {
+    // Permanently invalidate the stream/reader.
     set_invalid();
 }
 
 template <typename IStream>
 byte_reader<IStream>::operator bool() const noexcept
 {
+    // True if any call created an error state, even if there have been
+    // subsequent calls, or if any error state preexists on the stream.
     return get_valid();
 }
 
@@ -310,22 +315,33 @@ bool byte_reader<IStream>::operator!() const noexcept
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek() noexcept
 {
-    // This invalidates the stream *only* if empty.
-    return stream_.peek();
+    // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
+    // eofbit does not cause !!eofbit == true, but badbit does, so we validate
+    // the call the achieve consistent behavior. The reader will be invalid if
+    // the stream is peeked past end, including when empty.
+    const auto value = stream_.peek();
+    validate();
+    return value;
 }
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_read() noexcept
 {
-    // This invalidates the stream if empty or at end.
-    return stream_.get();
+    // Get on empty is inconsistent, so validate the result. The reader will be
+    // invalid if the stream is get past end, including when empty.
+    const auto value = stream_.get();
+    validate();
+    return value;
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 {
     // It is not generally more efficient to call stream_.get() for one byte.
+    // Read on empty is inconsistent, so validate the result. The reader will be
+    // invalid if the stream is get past end, including when empty.
     stream_.read(reinterpret_cast<char*>(buffer), size);
+    validate();
 }
 
 template <typename IStream>
@@ -345,39 +361,82 @@ void byte_reader<IStream>::do_rewind(size_t size) noexcept
 template <typename IStream>
 bool byte_reader<IStream>::get_exhausted() const noexcept
 {
-    // peek invalidates *only* an empty source. get invalidates on read past
-    // end (including on an empty source). peek and get both return zero on an
-    // empty source (and eof on an invalid source), so always need to use peek
-    // to test for exhaustion before reading so as to avoid end invalidation.
-    return stream_.peek() == std::istream::traits_type::eof();
+    // Empty behavior is broadly inconsistent across implementations.
+    // It is also necessary to start many reads, including initial reads, with
+    // an exhaustion check, which must be consistent and not state-changing.
+    // A state change would preclude testing for errors after testing for end.
+    // This method is const because it reliably creates no net state change.
+    // Streams are valid unless read or peeked. Peek does not change stream
+    // position, so it is used to force the stream into a failure state when
+    // empty. peek past end always sets eofbit but peek state on empty is
+    // inconsistent across streams, though a flag is always set. eofbit is set
+    // by istringstream and badbit is set by boost.
+
+    // The stream is considered exhausted if any error state exists.
+    if (stream_.rdstate() != IStream::goodbit)
+        return true;
+
+    // Force a stream error if empty or at eof.
+    stream_.peek();
+
+    // Test for a stream error, which implies it is exhausted.
+    const auto exhausted = (stream_.rdstate() != IStream::goodbit);
+
+    // Restore the valid stream state.
+    stream_.setstate(IStream::goodbit);
+
+    // Return the exhaustion result.
+    return exhausted;
 }
 
 template <typename IStream>
 bool byte_reader<IStream>::get_valid() const noexcept
 {
-    return !!stream_;
+    // zero is the istream documented flag for no error.
+    return stream_.rdstate() == IStream::goodbit;
 }
 
 template <typename IStream>
 void byte_reader<IStream>::set_invalid() noexcept
 {
-    stream_.setstate(std::istream::failbit);
+    // If eofbit is set, failbit is generally set on all operations.
+    // badbit is unrecoverable, set the others to ensure consistency.
+    stream_.setstate(IStream::eofbit | IStream::failbit | IStream::badbit);
 }
 
 // private
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
+void byte_reader<IStream>::validate() noexcept
+{
+    // Ensure that any failure in the call fully invalidates the stream/reader.
+    // Some errors are recoverable, so a sequence of operations without testing
+    // for validity could miss an error on intervening operations. For example,
+    // seekg can reset eofbit and read past doesn't set badbit (recoverable).
+    if (!get_valid())
+        set_invalid();
+}
+
+template <typename IStream>
 void byte_reader<IStream>::seekg(typename IStream::pos_type offset) noexcept
 {
+    // Force these to be consistent by treating zero seek as a no-op.
+    // boost/istringstream both succeed on non-empty zero seek.
+    // istringstream succeeds on empty zero seek, boost sets failbit.
+    if (is_zero(offset))
+        return;
+
+    // Force these to be consistent, and avoid propagating exceptions.
+    // istringstream sets failbit on non-empty over/underflow, boost throws.
+    // boost/istringstream both set failbit on empty over/underflow.
     try
     {
-        // seekg throwing here does not invalidate the stream!
-        stream_.seekg(offset, std::ios_base::cur);
+        stream_.seekg(offset, IStream::cur);
+        validate();
     }
-    catch (const std::ios_base::failure&)
+    catch (const IStream::failure&)
     {
-        // Convert the exception to stream invalidation.
         set_invalid();
     }
 }
