@@ -24,7 +24,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <boost/iostreams/stream.hpp>
 #include <boost/property_tree/ptree.hpp>
 #undef BOOST_BIND_NO_PLACEHOLDERS
 #include <boost/property_tree/json_parser.hpp>

@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <string>
-#include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/stream/devices/copy_sink.hpp>

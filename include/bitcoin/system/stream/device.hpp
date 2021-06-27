@@ -19,11 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 
-#include <cstddef>
 #include <iostream>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

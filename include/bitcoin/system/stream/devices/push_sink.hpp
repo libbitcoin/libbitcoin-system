@@ -20,10 +20,9 @@
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_PUSH_SINK_HPP
 
 #include <iterator>
-#include <boost/iostreams/stream.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/addition.hpp>
-#include <bitcoin/system/math/sign.hpp>
+#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 

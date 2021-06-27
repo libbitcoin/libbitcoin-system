@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SOURCE_HPP
 
-#include <algorithm>
 #include <iterator>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
