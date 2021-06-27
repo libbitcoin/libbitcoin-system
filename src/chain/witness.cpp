@@ -227,7 +227,7 @@ data_chunk witness::to_data(bool prefix) const
     data_chunk data;
     const auto size = serialized_size(prefix);
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

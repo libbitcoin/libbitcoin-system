@@ -324,7 +324,7 @@ data_chunk script::to_data(bool prefix) const
     data_chunk data;
     const auto size = serialized_size(prefix);
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(ostream, prefix);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
@@ -678,7 +678,7 @@ data_chunk script::to_outputs(const transaction& tx)
     auto size = std::accumulate(outs.begin(), outs.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    write::bytes::push out(data);
+    write::bytes::data out(data);
 
     const auto write = [&](const output& output)
     {
@@ -702,7 +702,7 @@ data_chunk script::to_inpoints(const transaction& tx)
     auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    write::bytes::push out(data);
+    write::bytes::data out(data);
 
     const auto write = [&](const input& input)
     {
@@ -726,7 +726,7 @@ data_chunk script::to_sequences(const transaction& tx)
     auto size = std::accumulate(ins.begin(), ins.end(), zero, sum);
     data_chunk data;
     data.reserve(size);
-    write::bytes::push out(data);
+    write::bytes::data out(data);
 
     const auto write = [&](const input& input)
     {
@@ -773,7 +773,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 
     data_chunk data;
     data.reserve(size);
-    write::bytes::push out(data);
+    write::bytes::data out(data);
 
     // 1. transaction version (4).
     out.write_little_endian(tx.version());

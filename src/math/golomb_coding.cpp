@@ -95,7 +95,7 @@ data_chunk construct(const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     data_chunk result;
-    stream::out::push sink(result);
+    stream::out::data sink(result);
     construct(sink, items, bits, entropy, target_false_positive_rate);
     return result;
 }

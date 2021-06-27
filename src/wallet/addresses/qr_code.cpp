@@ -198,7 +198,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     // For writing the image bit stream.
     data_chunk image_out;
     image_out.reserve(area_bytes);
-    write::bits::push image_bit_sink(image_out);
+    write::bits::data image_bit_sink(image_out);
 
     // ------------------------- Write top margin -------------------------
     for (size_t row = 0; row < margin; ++row)
@@ -211,7 +211,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
         // For repeatedly writing a row buffer.
         data_chunk row_out;
         row_out.reserve(row_bytes);
-        write::bits::push row_bit_sink(row_out);
+        write::bits::data row_bit_sink(row_out);
 
         // ------------------------ Buffer left margin ------------------------
         for (size_t column = 0; column < margin; ++column)

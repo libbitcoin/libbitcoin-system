@@ -422,7 +422,7 @@ data_chunk transaction::to_data(bool wire, bool witness) const
     // generate_signature_hash extension by addition of the sighash_type.
     data.reserve(size + sizeof(uint8_t));
 
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

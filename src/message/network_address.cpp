@@ -135,7 +135,7 @@ data_chunk network_address::to_data(uint32_t version,
     data_chunk data;
     const auto size = serialized_size(version, with_timestamp);
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(version, ostream, with_timestamp);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

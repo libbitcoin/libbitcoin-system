@@ -68,7 +68,7 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
     // Order and remove duplicates.
     distinct(std::move(scripts));
 
-    write::bits::push writer(out_filter);
+    write::bits::data writer(out_filter);
     writer.write_variable(scripts.size());
     golomb::construct(writer, scripts, golomb_bits, key, rate);
     writer.flush();
@@ -81,7 +81,7 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
 {
     data_chunk data;
     data.reserve(hash_size + hash_size);
-    write::bytes::push out(data);
+    write::bytes::data out(data);
     out.write_bytes(bitcoin_hash(filter));
     out.write_bytes(previous_block_hash);
     out.flush();

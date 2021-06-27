@@ -114,7 +114,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
 data_chunk base32_pack(const base32_chunk& unpacked)
 {
     data_chunk packed;
-    write::bits::push sink(packed);
+    write::bits::data sink(packed);
 
     // This is how c++ developers do it. :)
     for (const auto& value: unpacked)

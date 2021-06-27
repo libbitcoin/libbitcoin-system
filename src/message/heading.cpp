@@ -161,7 +161,7 @@ data_chunk heading::to_data() const
     data_chunk data;
     const auto size = satoshi_fixed_size();
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

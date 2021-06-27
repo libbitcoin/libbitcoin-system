@@ -153,7 +153,7 @@ base2048_chunk base2048_pack(const data_chunk& unpacked)
 data_chunk base2048_unpack(const base2048_chunk& packed)
 {
     data_chunk unpacked;
-    write::bits::push sink(unpacked);
+    write::bits::data sink(unpacked);
 
     for (const auto& value: packed)
         sink.write_bits(value.convert_to<uint16_t>(), 11);

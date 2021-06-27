@@ -179,7 +179,7 @@ v1_decoding electrum_v1::decoder(const string_list& words, language identifier)
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
-    write::bytes::push out(entropy);
+    write::bytes::data out(entropy);
 
     // See comments above on electrum v1 decoder overflow bug.
     v1_decoding::overflow overflows(words.size() / word_multiple);

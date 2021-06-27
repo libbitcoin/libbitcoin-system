@@ -65,12 +65,11 @@ namespace stream
         /// An output stream that copies data to a data_slab.
         using copy = make_stream<copy_sink<data_slab>>;
 
-        // TODO: change to push, text, data.
         /// An output stream that inserts data to a container.
         template <typename Container>
-        using into = make_stream<push_sink<Container>>;
-        using text = into<std::string>;
-        using push = into<data_chunk>;
+        using push = make_stream<push_sink<Container>>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
     }
 
     namespace flip
@@ -111,12 +110,11 @@ namespace write
         /// A byte writer that copies data to a data_slab.
         using copy = make_streamer<copy_sink<data_slab>, byte_writer>;
 
-        // TODO: change to push, text, data.
         /// A byte writer that inserts data into a container.
         template <typename Container>
-        using into = make_streamer<push_sink<Container>, byte_writer>;
-        using text = into<std::string>;
-        using push = into<data_chunk>;
+        using push = make_streamer<push_sink<Container>, byte_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
     }
 
     namespace bits
@@ -127,12 +125,11 @@ namespace write
         /// A bit writer that copies data to a data_slab.
         using copy = make_streamer<copy_sink<data_slab>, bit_writer>;
 
-        // TODO: change to push, text, data.
         /// A bit writer that inserts data into a container.
         template <typename Container>
-        using into = make_streamer<push_sink<Container>, bit_writer>;
-        using text = into<std::string>;
-        using push = into<data_chunk>;
+        using push = make_streamer<push_sink<Container>, bit_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
     }
 }
 

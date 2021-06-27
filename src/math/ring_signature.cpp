@@ -42,7 +42,7 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
     // e = H(M || R || i || j)
     data_chunk data;
     data.reserve(hash_size + R.size() + 2u * sizeof(uint32_t));
-    write::bytes::push out(data);
+    write::bytes::data out(data);
     out.write_bytes(R);
     out.write_bytes(M);
     out.write_4_bytes_big_endian(i);

@@ -148,7 +148,7 @@ data_chunk filter_load::to_data(uint32_t version) const
     data_chunk data;
     const auto size = serialized_size(version);
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(version, ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);

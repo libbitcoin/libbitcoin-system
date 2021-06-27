@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(write__bytes__into_string__expected)
 {
     std::string sink;
     sink.reserve(1);
-    write::bytes::into<std::string> writer(sink);
+    write::bytes::push<std::string> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink, "*");
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(write__bytes__into_data__expected)
 {
     data_chunk sink;
     sink.reserve(1);
-    write::bytes::into<data_chunk> writer(sink);
+    write::bytes::push<data_chunk> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink.front(), '*');
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(write__bytes__text__expected)
 {
     std::string sink{ "+/" };
     sink.reserve(3);
-    write::bytes::into<std::string> writer(sink);
+    write::bytes::push<std::string> writer(sink);
     writer.write_byte('-');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink, "+/-");
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(write__bytes__push__expected)
 {
     data_chunk sink;
     sink.reserve(1);
-    write::bytes::into<data_chunk> writer(sink);
+    write::bytes::push<data_chunk> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink.front(), '*');
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(write__bits__into_string__expected)
 {
     std::string sink;
     sink.reserve(1);
-    write::bits::into<std::string> writer(sink);
+    write::bits::push<std::string> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink, "*");
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(write__bits__into_data__expected)
 {
     data_chunk sink;
     sink.reserve(1);
-    write::bits::into<data_chunk> writer(sink);
+    write::bits::push<data_chunk> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink.front(), '*');
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(write__bits__text__expected)
 {
     std::string sink{ "+/" };
     sink.reserve(3);
-    write::bits::into<std::string> writer(sink);
+    write::bits::push<std::string> writer(sink);
     writer.write_byte('-');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink, "+/-");
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(write__bits__push__expected)
 {
     data_chunk sink;
     sink.reserve(1);
-    write::bits::into<data_chunk> writer(sink);
+    write::bits::push<data_chunk> writer(sink);
     writer.write_byte('*');
     writer.flush();
     BOOST_REQUIRE_EQUAL(sink.front(), '*');

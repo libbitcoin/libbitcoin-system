@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(stream__out__data__expected)
 BOOST_AUTO_TEST_CASE(stream__out__into_string__expected)
 {
     std::string sink;
-    stream::out::into<std::string> ostream(sink);
+    stream::out::push<std::string> ostream(sink);
     write(ostream, 42);
     ostream.flush();
     BOOST_REQUIRE_EQUAL(sink, "42");
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(stream__out__into_string__expected)
 BOOST_AUTO_TEST_CASE(stream__out__into_data__expected)
 {
     data_chunk sink;
-    stream::out::into<data_chunk> ostream(sink);
+    stream::out::push<data_chunk> ostream(sink);
     write(ostream, 42);
     ostream.flush();
     BOOST_REQUIRE_EQUAL(sink, to_chunk("42"));
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(stream__out__text__expected)
 BOOST_AUTO_TEST_CASE(stream__out__push__expected)
 {
     data_chunk sink;
-    stream::out::push ostream(sink);
+    stream::out::data ostream(sink);
     write(ostream, 42);
     ostream.flush();
     BOOST_REQUIRE_EQUAL(sink, to_chunk("42"));

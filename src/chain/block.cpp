@@ -221,13 +221,9 @@ bool block::is_valid() const
 
 data_chunk block::to_data(bool witness) const
 {
-    data_chunk data;
-    const auto size = serialized_size(witness);
-    data.reserve(size);
-    stream::out::push ostream(data);
+    data_chunk data(serialized_size(witness));
+    stream::out::copy ostream(data);
     to_data(ostream, witness);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

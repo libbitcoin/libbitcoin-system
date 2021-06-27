@@ -216,7 +216,7 @@ data_chunk input::to_data(bool wire, bool witness) const
     data_chunk data;
     const auto size = serialized_size(wire, witness);
     data.reserve(size);
-    stream::out::push ostream(data);
+    stream::out::data ostream(data);
     to_data(ostream, wire, witness);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == size);
