@@ -28,7 +28,7 @@ namespace system {
 
 
 template <typename Result, typename Integer,
-    if_integer<Result>, if_integer<Integer>>
+    if_integral_integer<Result>, if_integral_integer<Integer>>
 inline Result limit(Integer value) noexcept
 {
     // Casts are not constexpr.

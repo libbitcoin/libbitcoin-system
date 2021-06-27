@@ -26,7 +26,7 @@ namespace system {
 
 /// Cast a value to Result, constrained to the limits of both types.
 template <typename Result, typename Integer,
-    if_integer<Result> = true, if_integer<Integer> = true>
+    if_integral_integer<Result> = true, if_integral_integer<Integer> = true>
 inline Result limit(Integer value) noexcept;
 
 /// Cast a value to Result, constrained to the specified limits.
