@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    stream::out::push ostream(resave);
+    stream::out::data ostream(resave);
     tx.to_data(version::level::minimum, ostream);
     ostream.flush();
     BOOST_REQUIRE(resave == raw_tx);
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
     // Re-save tx and compare against original.
     BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
     data_chunk resave;
-    stream::out::push ostream(resave);
+    stream::out::data ostream(resave);
     tx.to_data(version::level::minimum, ostream);
     ostream.flush();
     BOOST_REQUIRE(resave == raw_tx);
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    write::bytes::push out(resave);
+    write::bytes::data out(resave);
     tx.to_data(version::level::minimum, out);
     out.flush();
     BOOST_REQUIRE(resave == raw_tx);
@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
     // Re-save tx and compare against original.
     BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
     data_chunk resave;
-    write::bytes::push out(resave);
+    write::bytes::data out(resave);
     tx.to_data(version::level::minimum, out);
     out.flush();
     BOOST_REQUIRE(resave == raw_tx);

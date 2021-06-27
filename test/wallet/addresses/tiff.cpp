@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__rectangular_image__true)
 
     data_chunk bitmap(size, 'x');
     data_chunk tiff;
-    stream::out::push stream(tiff);
+    stream::out::data stream(tiff);
     BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
 }
 
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__mismatched_image_size__false)
 
     data_chunk bitmap(size, 'x');
     data_chunk tiff;
-    stream::out::push stream(tiff);
+    stream::out::data stream(tiff);
     BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__empty__false)
     static const auto width = 1u;
     static const data_chunk bitmap;
     data_chunk tiff;
-    stream::out::push stream(tiff);
+    stream::out::data stream(tiff);
     BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__width_0__false)
     static const auto width = 0u;
     static const data_chunk bitmap{ 'x' };
     data_chunk tiff;
-    stream::out::push stream(tiff);
+    stream::out::data stream(tiff);
     BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__perfect_square__expected_true)
     };
 
     data_chunk tiff;
-    stream::out::push stream(tiff);
+    stream::out::data stream(tiff);
     BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
 
     // Encode as base16 so that failure message is intelligible.
