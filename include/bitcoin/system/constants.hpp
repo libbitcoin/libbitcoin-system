@@ -181,19 +181,19 @@ constexpr int32_t negative_one = -1;
 template <typename Type>
 constexpr bool is_zero(Type value) noexcept
 {
-    return value == Type{ zero };
+    return value == 0;
 }
 
 template <typename Type>
 constexpr bool is_one(Type value) noexcept
 {
-    return value == Type{ one };
+    return value == 1;
 }
 
 template <typename Type>
 constexpr Type lo_bit(Type value) noexcept
 {
-    return value % Type{ two };
+    return value % 2;
 }
 
 template <typename Type>
@@ -211,7 +211,7 @@ constexpr bool is_odd(Type value) noexcept
 template <typename Type>
 constexpr bool is_byte_aligned(Type bits) noexcept
 {
-    return is_zero(bits % Type{ byte_bits });
+    return is_zero(bits % 8);
 }
 
 // TODO: test
@@ -224,25 +224,25 @@ constexpr bool is_null(Type value) noexcept
 template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
-    return bytes * Type{ byte_bits };
+    return bytes * 8;
 }
 
 template <typename Type>
 constexpr Type to_bytes(Type bits) noexcept
 {
-    return bits / Type{ byte_bits };
+    return bits / 8;
 }
 
 template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
-    return value / Type{ two };
+    return value / 2;
 }
 
 template <typename Type = int>
 constexpr Type to_int(bool value) noexcept
 {
-    return value ? Type{ one } : Type{ zero };
+    return value ? 1 : 0;
 }
 
 template <typename Type>
@@ -254,13 +254,13 @@ constexpr bool to_bool(Type value) noexcept
 template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
-    return value + Type{ one };
+    return value + 1;
 }
 
 template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
-    return value - Type{ one };
+    return value - 1;
 }
 
 } // namespace libbitcoin
