@@ -95,9 +95,10 @@ protected:
     virtual void do_write(uint8_t byte) noexcept;
     virtual void do_write(const uint8_t* data, size_t size) noexcept;
     virtual void do_flush() noexcept;
-    virtual bool get_valid() const noexcept;
 
 private:
+    bool valid() const noexcept;
+    void invalid() noexcept;
     void validate() noexcept;
 
     OStream& stream_;

@@ -131,9 +131,6 @@ constexpr uint8_t varint_two_bytes = 0xfd;
 constexpr uint8_t varint_four_bytes = 0xfe;
 constexpr uint8_t varint_eight_bytes = 0xff;
 
-// String padding sentinel.
-constexpr uint8_t string_terminator = 0x00;
-
 // Witness serialization values (bip141).
 //-----------------------------------------------------------------------------
 

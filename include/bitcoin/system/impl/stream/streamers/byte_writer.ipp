@@ -32,6 +32,8 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// All public methods must rely on protected for stream state except validity.
 
 // constructors
 //-----------------------------------------------------------------------------
@@ -186,7 +188,7 @@ void byte_writer<OStream>::write_string(const std::string& value,
 {
     const auto length = std::min(size, value.size());
     write_bytes(reinterpret_cast<const uint8_t*>(value.data()), length);
-    write_bytes(data_chunk(size - length, string_terminator));
+    write_bytes(data_chunk(size - length, '\0'));
 }
 
 template <typename OStream>
@@ -208,18 +210,19 @@ void byte_writer<OStream>::flush() noexcept
 template <typename OStream>
 byte_writer<OStream>::operator bool() const noexcept
 {
-    return get_valid();
+    return valid();
 }
 
 // This should not be necessary with bool() defined, but it is.
 template <typename OStream>
 bool byte_writer<OStream>::operator!() const noexcept
 {
-    return !get_valid();
+    return !valid();
 }
 
 // protected virtual
 //-----------------------------------------------------------------------------
+// These may only call non-virtual (private) methods (due to overriding).
 
 template <typename OStream>
 void byte_writer<OStream>::do_write(uint8_t byte) noexcept
@@ -243,14 +246,24 @@ void byte_writer<OStream>::do_flush() noexcept
     validate();
 }
 
+// private
+//-----------------------------------------------------------------------------
+// These may only call other private methods (due to overriding).
+
 template <typename OStream>
-bool byte_writer<OStream>::get_valid() const noexcept
+bool byte_writer<OStream>::valid() const noexcept
 {
+    // zero is the istream documented flag for no error.
     return stream_.rdstate() == OStream::goodbit;
 }
 
-// private
-//-----------------------------------------------------------------------------
+template <typename OStream>
+void byte_writer<OStream>::invalid() noexcept
+{
+    // If eofbit is set, failbit is generally set on all operations.
+    // badbit is unrecoverable, set the others to ensure consistency.
+    stream_.setstate(OStream::eofbit | OStream::failbit | OStream::badbit);
+}
 
 template <typename OStream>
 void byte_writer<OStream>::validate() noexcept
@@ -258,8 +271,8 @@ void byte_writer<OStream>::validate() noexcept
     // Ensure that any failure in the call fully invalidates the stream/writer.
     // Some errors are recoverable, so a sequence of operations without testing
     // for validity could miss an error on intervening operations.
-    if (!get_valid())
-        stream_.setstate(OStream::eofbit | OStream::failbit | OStream::badbit);
+    if (!valid())
+        invalid();
 }
 
 } // namespace system

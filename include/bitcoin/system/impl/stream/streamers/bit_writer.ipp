@@ -122,12 +122,6 @@ void bit_writer<OStream>::do_flush() noexcept
     byte_writer::do_flush();
 }
 
-template <typename OStream>
-bool bit_writer<OStream>::get_valid() const noexcept
-{
-    return byte_writer::get_valid();
-}
-
 // private
 //-----------------------------------------------------------------------------
 

@@ -67,8 +67,6 @@ protected:
     void do_read(uint8_t* buffer, size_t size) noexcept override;
     void do_skip(size_t size) noexcept override;
     bool get_exhausted() const noexcept override;
-    bool get_valid() const noexcept override;
-    void set_invalid() noexcept override;
 
 private:
     uint8_t shift() const noexcept;

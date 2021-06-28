@@ -154,20 +154,7 @@ void bit_reader<IStream>::do_skip(size_t size) noexcept
 template <typename IStream>
 bool bit_reader<IStream>::get_exhausted() const noexcept
 {
-    return is_aligned() && byte_reader::get_exhausted();
-}
-
-template <typename IStream>
-bool bit_reader<IStream>::get_valid() const noexcept
-{
-    return byte_reader::get_valid();
-}
-
-template <typename IStream>
-void bit_reader<IStream>::set_invalid() noexcept
-{
-    align();
-    byte_reader::set_invalid();
+    return !(*this) || (is_aligned() && byte_reader::get_exhausted());
 }
 
 // private

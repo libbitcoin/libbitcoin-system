@@ -34,6 +34,10 @@
 namespace libbitcoin {
 namespace system {
 
+// All public methods must rely on protected for stream state except validity.
+
+constexpr uint8_t pad = 0x00;
+
 // constructors
 //-----------------------------------------------------------------------------
 
@@ -133,7 +137,7 @@ size_t byte_reader<IStream>::read_size() noexcept
     // Return zero allows follow-on use before testing reader state.
     if (size > max_size_t)
     {
-        invalidate();
+        invalid();
         return zero;
     }
 
@@ -154,8 +158,9 @@ template <typename IStream>
 template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_forward() noexcept
 {
+    // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
-    data_array<Size> out;
+    data_array<Size> out{};
     read_bytes(out.data(), Size);
     return std::move(out);
 }
@@ -164,7 +169,6 @@ template <typename IStream>
 template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
-    // Reader supports directly populating an array, this avoids a copy.
     return reverse(read_forward<Size>());
 }
 
@@ -207,11 +211,18 @@ uint8_t byte_reader<IStream>::read_byte() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes() noexcept
 {
-    // TODO: calculate size remaining, call read_bytes(size).
-    data_chunk out;
-    while (!is_exhausted())
-        out.push_back(read_byte());
+    // Isolating get_exhausted to first call is an optimization (must clear).
+    if (get_exhausted())
+        return {};
 
+    // This will always produce at least one (zero) terminating byte.
+    data_chunk out;
+    while (valid())
+        out.push_back(do_read());
+
+    clear();
+    out.resize(sub1(out.size()));
+    out.shrink_to_fit();
     return std::move(out);
 }
 
@@ -242,26 +253,25 @@ std::string byte_reader<IStream>::read_string() noexcept
     return read_string(read_size());
 }
 
-// Removes trailing zeros, required for bitcoin string comparisons.
 template <typename IStream>
 std::string byte_reader<IStream>::read_string(size_t size) noexcept
 {
+    // Isolating get_exhausted to first call is an optimization (must clear).
+    if (get_exhausted())
+        return {};
+
+    // This will produce one (zero) terminating byte if size exceeds available.
     std::string out;
-    out.reserve(size);
-    auto terminated = false;
+    out.reserve(add1(size));
+    while (!is_zero(size--) && valid())
+        out.push_back(do_read());
 
-    // TODO: calculate size remaining, call read_bytes(min(size, remain)).
-    while (!is_zero(size--) && !is_exhausted())
-    {
-        const auto byte = read_byte();
-        terminated |= (byte == string_terminator);
-
-        // Stop pushing characters at the first null.
-        if (!terminated)
-            out.push_back(byte);
-    }
-
+    // Removes zero and all after, required for bitcoin string comparisons.
+    const auto position = out.find('\0');
+    out.resize(position == std::string::npos ? out.size() : position);
     out.shrink_to_fit();
+
+    clear();
     return out;
 }
 
@@ -291,7 +301,7 @@ template <typename IStream>
 void byte_reader<IStream>::invalidate() noexcept
 {
     // Permanently invalidate the stream/reader.
-    set_invalid();
+    invalid();
 }
 
 template <typename IStream>
@@ -299,19 +309,19 @@ byte_reader<IStream>::operator bool() const noexcept
 {
     // True if any call created an error state, even if there have been
     // subsequent calls, or if any error state preexists on the stream.
-    return get_valid();
+    return valid();
 }
 
 // This should not be necessary with bool() defined, but it is.
 template <typename IStream>
 bool byte_reader<IStream>::operator!() const noexcept
 {
-    return !get_valid();
+    return !valid();
 }
 
 // protected virtual
 //-----------------------------------------------------------------------------
-// Stream state is not checked on reads, stream should return 0x00 if failed.
+// These may only call non-virtual (private) methods (due to overriding).
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek() noexcept
@@ -322,7 +332,7 @@ uint8_t byte_reader<IStream>::do_peek() noexcept
     // the stream is peeked past end, including when empty.
     const auto value = stream_.peek();
     validate();
-    return value;
+    return valid() ? value : pad;
 }
 
 template <typename IStream>
@@ -332,12 +342,13 @@ uint8_t byte_reader<IStream>::do_read() noexcept
     // invalid if the stream is get past end, including when empty.
     const auto value = stream_.get();
     validate();
-    return value;
+    return valid() ? value : pad;
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 {
+    // partially-failed reads here will be populated by the stream, not padded.
     // It is not generally more efficient to call stream_.get() for one byte.
     // Read on empty is inconsistent, so validate the result. The reader will be
     // invalid if the stream is get past end, including when empty.
@@ -375,40 +386,35 @@ bool byte_reader<IStream>::get_exhausted() const noexcept
     // inconsistent across streams, though a flag is always set. eofbit is set
     // by istringstream and badbit is set by boost.
 
-    // The stream is considered exhausted if any error state exists.
-    if (stream_.rdstate() != IStream::goodbit)
+    if (!valid())
         return true;
 
-    // Force a stream error if empty or at eof.
+    // Peek to force error on eof, save condition, restore valid stream state.
     stream_.peek();
-
-    // Test for a stream error, which implies it is exhausted.
-    const auto exhausted = (stream_.rdstate() != IStream::goodbit);
-
-    // Restore the valid stream state (clears all error state flags).
+    const auto eof = !valid();
     stream_.clear();
 
-    // Return the exhaustion result.
-    return exhausted;
+    return eof;
 }
 
+// private
+// ----------------------------------------------------------------------------
+// These may only call other private methods (due to overriding).
+
 template <typename IStream>
-bool byte_reader<IStream>::get_valid() const noexcept
+bool byte_reader<IStream>::valid() const noexcept
 {
     // zero is the istream documented flag for no error.
     return stream_.rdstate() == IStream::goodbit;
 }
 
 template <typename IStream>
-void byte_reader<IStream>::set_invalid() noexcept
+void byte_reader<IStream>::invalid() noexcept
 {
     // If eofbit is set, failbit is generally set on all operations.
     // badbit is unrecoverable, set the others to ensure consistency.
     stream_.setstate(IStream::eofbit | IStream::failbit | IStream::badbit);
 }
-
-// private
-// ----------------------------------------------------------------------------
 
 template <typename IStream>
 void byte_reader<IStream>::validate() noexcept
@@ -417,8 +423,14 @@ void byte_reader<IStream>::validate() noexcept
     // Some errors are recoverable, so a sequence of operations without testing
     // for validity could miss an error on intervening operations. For example,
     // seekg can reset eofbit and read past doesn't set badbit (recoverable).
-    if (!get_valid())
-        set_invalid();
+    if (!valid())
+        invalid();
+}
+
+template <typename IStream>
+void byte_reader<IStream>::clear() noexcept
+{
+    stream_.clear();
 }
 
 template <typename IStream>
@@ -440,7 +452,7 @@ void byte_reader<IStream>::seekg(typename IStream::pos_type offset) noexcept
     }
     catch (const IStream::failure&)
     {
-        set_invalid();
+        invalid();
     }
 }
 

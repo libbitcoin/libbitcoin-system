@@ -123,11 +123,12 @@ protected:
     virtual void do_skip(size_t size) noexcept;
     virtual void do_rewind(size_t size) noexcept;
     virtual bool get_exhausted() const noexcept;
-    virtual bool get_valid() const noexcept;
-    virtual void set_invalid() noexcept;
 
 private:
+    bool valid() const noexcept;
+    void invalid() noexcept;
     void validate() noexcept;
+    void clear() noexcept;
     void seekg(typename IStream::pos_type offset) noexcept;
 
     IStream& stream_;

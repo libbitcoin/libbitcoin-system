@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 
 // Suppress multiple inheritance warnings.
-// The only multiple inheritance conflict is two destructors.
+// The only multiple inheritance conflict is destructors and bool/!.
 #pragma warning(push)
 #pragma warning(disable : 4250)
 
@@ -64,6 +64,18 @@ public:
         // Flush writes before reads (only writes matter).
         bit_writer::~bit_writer();
         bit_reader::~bit_reader();
+    }
+
+    operator bool() const noexcept override
+    {
+        // Rely on reader implementation, both are trivial and identical.
+        return bit_reader::operator bool();
+    }
+
+    bool operator!() const noexcept override
+    {
+        // Rely on reader implementation, both are trivial and identical.
+        return bit_reader::operator!();
     }
 };
 

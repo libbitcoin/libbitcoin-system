@@ -58,7 +58,6 @@ protected:
     void do_write(uint8_t byte) noexcept override;
     void do_write(const uint8_t* data, size_t size) noexcept override;
     void do_flush() noexcept override;
-    bool get_valid() const noexcept override;
 
 private:
     uint8_t shift() const noexcept;
