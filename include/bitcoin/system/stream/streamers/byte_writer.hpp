@@ -98,6 +98,8 @@ protected:
     virtual bool get_valid() const noexcept;
 
 private:
+    void validate() noexcept;
+
     OStream& stream_;
 };
 

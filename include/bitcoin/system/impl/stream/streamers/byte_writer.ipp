@@ -225,6 +225,7 @@ template <typename OStream>
 void byte_writer<OStream>::do_write(uint8_t byte) noexcept
 {
     stream_.put(byte);
+    validate();
 }
 
 template <typename OStream>
@@ -232,18 +233,33 @@ void byte_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
 {
     // It is not generally more efficient to call stream_.put() for one byte.
     stream_.write(reinterpret_cast<const char*>(data), size);
+    validate();
 }
 
 template <typename OStream>
 void byte_writer<OStream>::do_flush() noexcept
 {
     stream_.flush();
+    validate();
 }
 
 template <typename OStream>
 bool byte_writer<OStream>::get_valid() const noexcept
 {
-    return !!stream_;
+    return stream_.rdstate() == OStream::goodbit;
+}
+
+// private
+//-----------------------------------------------------------------------------
+
+template <typename OStream>
+void byte_writer<OStream>::validate() noexcept
+{
+    // Ensure that any failure in the call fully invalidates the stream/writer.
+    // Some errors are recoverable, so a sequence of operations without testing
+    // for validity could miss an error on intervening operations.
+    if (!get_valid())
+        stream_.setstate(OStream::eofbit | OStream::failbit | OStream::badbit);
 }
 
 } // namespace system
