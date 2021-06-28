@@ -207,7 +207,7 @@ uint8_t byte_reader<IStream>::read_byte() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes() noexcept
 {
-    // TODO: loop seek to end, calculate size, reset and call read_bytes(size).
+    // TODO: calculate size remaining, call read_bytes(size).
     data_chunk out;
     while (!is_exhausted())
         out.push_back(read_byte());
@@ -250,6 +250,7 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
     out.reserve(size);
     auto terminated = false;
 
+    // TODO: calculate size remaining, call read_bytes(min(size, remain)).
     while (!is_zero(size--) && !is_exhausted())
     {
         const auto byte = read_byte();
@@ -382,8 +383,8 @@ bool byte_reader<IStream>::get_exhausted() const noexcept
     // Test for a stream error, which implies it is exhausted.
     const auto exhausted = (stream_.rdstate() != IStream::goodbit);
 
-    // Restore the valid stream state.
-    stream_.setstate(IStream::goodbit);
+    // Restore the valid stream state (clears all error state flags).
+    stream_.clear();
 
     // Return the exhaustion result.
     return exhausted;
