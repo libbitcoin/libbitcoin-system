@@ -100,6 +100,26 @@ BOOST_AUTO_TEST_CASE(istream__rdstate__non_empty__valid)
     BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(istream__clear__all_flags_set__cleared)
+{
+    std::istringstream isstream{ "*" };
+    isstream.setstate(std::istream::eofbit);
+    isstream.setstate(std::istream::failbit);
+    isstream.setstate(std::istream::badbit);
+    BOOST_REQUIRE_NE(isstream.rdstate(), 0);
+    isstream.clear();
+    BOOST_REQUIRE_EQUAL(isstream.rdstate(), 0);
+
+    const std::string source{ "*" };
+    stream::in::copy istream(source);
+    istream.setstate(std::istream::eofbit);
+    istream.setstate(std::istream::failbit);
+    istream.setstate(std::istream::badbit);
+    BOOST_REQUIRE_NE(istream.rdstate(), 0);
+    istream.clear();
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+}
+
 BOOST_AUTO_TEST_CASE(istream__setstate__failbit__failbit)
 {
     std::istringstream isstream{ "*" };
