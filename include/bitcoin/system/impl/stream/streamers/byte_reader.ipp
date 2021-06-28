@@ -265,6 +265,9 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
     return out;
 }
 
+// context
+//-----------------------------------------------------------------------------
+
 template <typename IStream>
 void byte_reader<IStream>::skip(size_t size) noexcept
 {
@@ -276,9 +279,6 @@ void byte_reader<IStream>::rewind(size_t size) noexcept
 {
     do_rewind(size);
 }
-
-// context
-//-----------------------------------------------------------------------------
 
 template <typename IStream>
 bool byte_reader<IStream>::is_exhausted() const noexcept
@@ -348,14 +348,16 @@ void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_skip(size_t size) noexcept
 {
-    // pos_type is not an integer so cannot use limit cast here.
+    // pos_type is not an integer so cannot use limit cast here,
+    // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
     seekg(static_cast<IStream::pos_type>(size));
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_rewind(size_t size) noexcept
 {
-    // pos_type is not an integer so cannot use limit cast here.
+    // pos_type is not an integer so cannot use limit cast here,
+    // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
     seekg(-static_cast<IStream::pos_type>(size));
 }
 
