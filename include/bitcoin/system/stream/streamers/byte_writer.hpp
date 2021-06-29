@@ -64,8 +64,8 @@ public:
     /// Call write_4_bytes_little_endian with integer value of error code.
     virtual void write_error_code(const code& ec) noexcept;
 
-    /// Write until reader is exhausted.
-    virtual void write(std::istream& in) noexcept;
+    /// Write into buffer until stream is exhausted.
+    virtual std::istream& write(std::istream& in) noexcept;
 
     /// Write one byte.
     virtual void write_byte(uint8_t value) noexcept;
@@ -76,11 +76,11 @@ public:
     /// Write size bytes.
     virtual void write_bytes(const uint8_t* data, size_t size) noexcept;
 
-    /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    virtual void write_string(const std::string& value, size_t size) noexcept;
-
     /// Write string to specified length, padded with nulls as required.
     virtual void write_string(const std::string& value) noexcept;
+
+    /// Write Bitcoin length-prefixed string (prefixed by write_variable).
+    virtual void write_string(const std::string& value, size_t size) noexcept;
 
     /// Flush the buffer.
     virtual void flush() noexcept;
@@ -92,14 +92,14 @@ public:
     virtual bool operator!() const noexcept;
 
 protected:
-    virtual void do_write(uint8_t byte) noexcept;
-    virtual void do_write(const uint8_t* data, size_t size) noexcept;
+    virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;
     virtual void do_flush() noexcept;
 
 private:
     bool valid() const noexcept;
     void invalid() noexcept;
     void validate() noexcept;
+    void flusher() noexcept;
 
     OStream& stream_;
 };

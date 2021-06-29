@@ -55,15 +55,10 @@ public:
     void write_bits(uint64_t value, size_t bits) noexcept;
 
 protected:
-    void do_write(uint8_t byte) noexcept override;
-    void do_write(const uint8_t* data, size_t size) noexcept override;
+    void do_write_bytes(const uint8_t* data, size_t size) noexcept override;
     void do_flush() noexcept override;
 
 private:
-    uint8_t shift() const noexcept;
-    bool is_aligned() const noexcept;
-    void dump() noexcept;
-
     uint8_t buffer_;
     uint8_t offset_;
 };

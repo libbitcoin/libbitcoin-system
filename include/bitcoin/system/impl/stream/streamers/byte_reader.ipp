@@ -29,6 +29,7 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/stream/streamers/byte_writer.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -161,7 +162,7 @@ data_array<Size> byte_reader<IStream>::read_forward() noexcept
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
     data_array<Size> out{};
-    read_bytes(out.data(), Size);
+    do_read_bytes(out.data(), Size);
     return std::move(out);
 }
 
@@ -170,6 +171,15 @@ template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
     return reverse(read_forward<Size>());
+}
+
+template <typename IStream>
+std::ostream& byte_reader<IStream>::read(std::ostream& out) noexcept
+{
+    // This creates an intermediate buffer the size of the stream.
+    // This is presumed to be more optimal than looping individual bytes.
+    write::bytes::ostream(out).write_bytes(read_bytes());
+    return out;
 }
 
 template <typename IStream>
@@ -199,13 +209,15 @@ long_hash byte_reader<IStream>::read_long_hash() noexcept
 template <typename IStream>
 uint8_t byte_reader<IStream>::peek_byte() noexcept
 {
-    return do_peek();
+    return do_peek_byte();
 }
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::read_byte() noexcept
 {
-    return do_read();
+    uint8_t value = pad;
+    do_read_bytes(&value, one);
+    return value;
 }
 
 template <typename IStream>
@@ -218,7 +230,7 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
     // This will always produce at least one (zero) terminating byte.
     data_chunk out;
     while (valid())
-        out.push_back(do_read());
+        out.push_back(read_byte());
 
     clear();
     out.resize(sub1(out.size()));
@@ -229,19 +241,16 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
 {
-    if (is_zero(size))
-        return {};
-
     data_chunk out(no_fill_allocator);
     out.resize(size);
-    do_read(out.data(), size);
+    do_read_bytes(out.data(), size);
     return std::move(out);
 }
 
 template <typename IStream>
 void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
 {
-    do_read(buffer, size);
+    do_read_bytes(buffer, size);
 }
 
 // strings
@@ -264,9 +273,9 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
     std::string out;
     out.reserve(add1(size));
     while (!is_zero(size--) && valid())
-        out.push_back(do_read());
+        out.push_back(read_byte());
 
-    // Removes zero and all after, required for bitcoin string comparisons.
+    // Removes zero and all after, required for bitcoin string deserialization.
     const auto position = out.find('\0');
     out.resize(position == std::string::npos ? out.size() : position);
     out.shrink_to_fit();
@@ -279,21 +288,34 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
 //-----------------------------------------------------------------------------
 
 template <typename IStream>
-void byte_reader<IStream>::skip(size_t size) noexcept
+void byte_reader<IStream>::skip_byte() noexcept
 {
-    do_skip(size);
+    do_skip_bytes(one);
+}
+
+
+template <typename IStream>
+void byte_reader<IStream>::skip_bytes(size_t size) noexcept
+{
+    do_skip_bytes(size);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::rewind(size_t size) noexcept
+void byte_reader<IStream>::rewind_byte() noexcept
 {
-    do_rewind(size);
+    do_rewind_bytes(one);
+}
+
+template <typename IStream>
+void byte_reader<IStream>::rewind_bytes(size_t size) noexcept
+{
+    do_rewind_bytes(size);
 }
 
 template <typename IStream>
 bool byte_reader<IStream>::is_exhausted() const noexcept
 {
-    // True if !get_valid() or if no bytes remain in the stream.
+    // True if invalid or if no bytes remain in the stream.
     return get_exhausted();
 }
 
@@ -324,7 +346,7 @@ bool byte_reader<IStream>::operator!() const noexcept
 // These may only call non-virtual (private) methods (due to overriding).
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::do_peek() noexcept
+uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 {
     // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
@@ -336,20 +358,11 @@ uint8_t byte_reader<IStream>::do_peek() noexcept
 }
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::do_read() noexcept
+void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 {
-    // Get on empty is inconsistent, so validate the result. The reader will be
-    // invalid if the stream is get past end, including when empty.
-    const auto value = stream_.get();
-    validate();
-    return valid() ? value : pad;
-}
-
-template <typename IStream>
-void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
-{
-    // partially-failed reads here will be populated by the stream, not padded.
     // It is not generally more efficient to call stream_.get() for one byte.
+    // partially-failed reads here will be populated by the stream, not padded.
+    // However, both copy_source and stringstream will zero-fill partial reads.
     // Read on empty is inconsistent, so validate the result. The reader will be
     // invalid if the stream is get past end, including when empty.
     stream_.read(reinterpret_cast<char*>(buffer), size);
@@ -357,7 +370,7 @@ void byte_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::do_skip(size_t size) noexcept
+void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
@@ -365,7 +378,7 @@ void byte_reader<IStream>::do_skip(size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::do_rewind(size_t size) noexcept
+void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.

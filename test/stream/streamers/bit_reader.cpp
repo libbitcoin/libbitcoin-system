@@ -25,12 +25,11 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 constexpr uint8_t pad = 0x00;
 
 // Exact copy of the byte_reader tests, replaced by read::bits::istream.
-////#define BIT_READER_CONTEXT
-////#define BIT_READER_BIG_ENDIAN
-////#define BIT_READER_LITTLE_ENDIAN
-////#define BIT_READER_BYTES
-////#define BIT_READER_BYTES
-////#define BIT_READER_STRINGS
+#define BIT_READER_CONTEXT
+#define BIT_READER_BIG_ENDIAN
+#define BIT_READER_LITTLE_ENDIAN
+#define BIT_READER_BYTES
+#define BIT_READER_STRINGS
 
 #ifdef BIT_READER_CONTEXT
 
@@ -157,7 +156,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__skip__default_empty__invalid)
 {
     std::istringstream stream;
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE(!reader);
 }
 
@@ -165,7 +164,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__skip__default_single__exhausted)
 {
     std::istringstream stream{ "*" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
 }
@@ -175,7 +174,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__skip__end__exhausted)
     const auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bits::istream reader(stream);
-    reader.skip(size);
+    reader.skip_bytes(size);
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
 }
@@ -185,7 +184,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__skip__past_end__invalid)
     const auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bits::istream reader(stream);
-    reader.skip(add1(size));
+    reader.skip_bytes(add1(size));
     BOOST_REQUIRE(!reader);
 }
 
@@ -197,7 +196,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__rewind__default_single__expected)
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     BOOST_REQUIRE(reader.is_exhausted());
-    reader.rewind();
+    reader.rewind_byte();
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     BOOST_REQUIRE(reader.is_exhausted());
@@ -210,12 +209,12 @@ BOOST_AUTO_TEST_CASE(bit_reader__rewind__skip_to_end_rewind_to_middle__expected)
     const std::string value(size, 0x00);
     std::istringstream stream{ value + "*" + value };
     read::bits::istream reader(stream);
-    reader.skip(size);
+    reader.skip_bytes(size);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
-    reader.skip(size);
+    reader.skip_bytes(size);
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
-    reader.rewind(add1(size));
+    reader.rewind_bytes(add1(size));
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     BOOST_REQUIRE(reader);
 }
@@ -225,8 +224,8 @@ BOOST_AUTO_TEST_CASE(bit_reader__rewind__past_begin__invalid)
     const auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bits::istream reader(stream);
-    reader.skip(size);
-    reader.rewind(add1(size));
+    reader.skip_bytes(size);
+    reader.rewind_bytes(add1(size));
     BOOST_REQUIRE(!reader);
 }
 
@@ -398,7 +397,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__one_byte__expected)
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x08);
-    reader.rewind(1);
+    reader.rewind_bytes(1);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x08);
     BOOST_REQUIRE(reader);
 }
@@ -409,7 +408,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__two_bytes__expected)
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0708);
-    reader.rewind(3);
+    reader.rewind_bytes(3);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0708);
     BOOST_REQUIRE(reader);
 }
@@ -420,7 +419,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__four_bytes__expected)
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x05060708);
-    reader.rewind(5);
+    reader.rewind_bytes(5);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x05060708);
     BOOST_REQUIRE(reader);
 }
@@ -431,7 +430,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__eight_bytes__expected)
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708);
-    reader.rewind(9);
+    reader.rewind_bytes(9);
 
     if (sizeof(size_t) < sizeof(uint64_t))
     {
@@ -458,11 +457,10 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_error_code__empty__default_invalid)
 
 BOOST_AUTO_TEST_CASE(bit_reader__read_error_code__value__expected)
 {
-    const char code = error::insufficient_work;
-    const std::string value{ code, 0x00, 0x00, 0x00, '*' };
+    const std::string value{ (char)error::insufficient_work, 0x00, 0x00, 0x00, '*' };
     std::stringstream stream{ value };
     read::bits::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_error_code().value(), code);
+    BOOST_REQUIRE_EQUAL(reader.read_error_code(), error::insufficient_work);
     BOOST_REQUIRE(reader);
 }
 
@@ -485,7 +483,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_forward__not_empty__expected)
     const data_array<4> expected{ 0x01, 0x02, 0x03, 0x04 };
     std::istringstream stream{ "*" + to_string(expected) + "*" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE_EQUAL(reader.read_forward<4>(), expected);
     BOOST_REQUIRE(reader);
 }
@@ -515,7 +513,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_reverse__not_empty__expected)
     const data_array<4> expected{ 0x04, 0x03, 0x02, 0x01 };
     std::istringstream stream{ "*" + to_string(value) + "*" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE_EQUAL(reader.read_reverse<4>(), expected);
     BOOST_REQUIRE(reader);
 }
@@ -528,6 +526,29 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_reverse__past_end__padded_invalid)
     read::bits::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_reverse<4>(), expected);
     BOOST_REQUIRE(!reader);
+}
+
+// read
+
+BOOST_AUTO_TEST_CASE(bit_reader__read__empty__empty)
+{
+    std::istringstream in;
+    std::ostringstream out;
+    read::bits::istream reader(in);
+    BOOST_REQUIRE(reader.read(out));
+    BOOST_REQUIRE(out.str().empty());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(bit_reader__read__value__expected)
+{
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    std::istringstream in{ expected };
+    std::ostringstream out;
+    read::bits::istream reader(in);
+    BOOST_REQUIRE(reader.read(out));
+    BOOST_REQUIRE_EQUAL(out.str(), expected);
+    BOOST_REQUIRE(reader);
 }
 
 // read_mini_hash
@@ -619,7 +640,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__peek_byte__end__pad_invalid)
 {
     std::istringstream stream{ "abc" };
     read::bits::istream reader(stream);
-    reader.skip(3);
+    reader.skip_bytes(3);
     BOOST_REQUIRE_EQUAL(reader.peek_byte(), pad);
     BOOST_REQUIRE_EQUAL(reader.peek_byte(), pad);
     BOOST_REQUIRE_EQUAL(reader.peek_byte(), pad);
@@ -652,7 +673,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_byte__end__pad_invalid)
 {
     std::istringstream stream{ "abc" };
     read::bits::istream reader(stream);
-    reader.skip(3);
+    reader.skip_bytes(3);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), pad);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), pad);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), pad);
@@ -683,7 +704,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes0__end__empty_valid)
 {
     std::istringstream stream{ "abc" };
     read::bits::istream reader(stream);
-    reader.skip(3);
+    reader.skip_bytes(3);
     BOOST_REQUIRE(reader.read_bytes().empty());
     BOOST_REQUIRE(reader);
 }
@@ -692,7 +713,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes0__not_empty__expected)
 {
     std::istringstream stream{ "*abc" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE_EQUAL(reader.read_bytes(), to_chunk("abc"));
     BOOST_REQUIRE(reader);
 }
@@ -711,7 +732,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes1__end_zero__empty_valid)
 {
     std::istringstream stream{ "abc" };
     read::bits::istream reader(stream);
-    reader.skip(3);
+    reader.skip_bytes(3);
     BOOST_REQUIRE(reader.read_bytes(0).empty());
     BOOST_REQUIRE(reader);
 }
@@ -720,7 +741,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes1__to_end__expected)
 {
     std::istringstream stream{ "*abc" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE_EQUAL(reader.read_bytes(3), to_chunk("abc"));
     BOOST_REQUIRE(reader);
 }
@@ -729,7 +750,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes1__middle__expected)
 {
     std::istringstream stream{ "*abc*" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     BOOST_REQUIRE_EQUAL(reader.read_bytes(3), to_chunk("abc"));
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
     BOOST_REQUIRE(reader);
@@ -759,7 +780,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes2__end_zero__empty_valid)
     data_chunk sink;
     std::istringstream stream{ "abc" };
     read::bits::istream reader(stream);
-    reader.skip(3);
+    reader.skip_bytes(3);
     reader.read_bytes(sink.data(), 0);
     BOOST_REQUIRE(reader);
 }
@@ -769,7 +790,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes2__to_end__expected)
     data_chunk sink(3, 0x00);
     std::istringstream stream{ "*abc" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     reader.read_bytes(sink.data(), sink.size());
     BOOST_REQUIRE_EQUAL(sink, to_chunk("abc"));
     BOOST_REQUIRE(reader);
@@ -780,7 +801,7 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_bytes2__middle__expected)
     data_chunk sink(3, 0x00);
     std::istringstream stream{ "*abc*" };
     read::bits::istream reader(stream);
-    reader.skip();
+    reader.skip_byte();
     reader.read_bytes(sink.data(), sink.size());
     BOOST_REQUIRE_EQUAL(sink, to_chunk("abc"));
     BOOST_REQUIRE_EQUAL(stream.get(), '*');

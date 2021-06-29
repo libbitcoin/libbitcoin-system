@@ -25,7 +25,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 
@@ -56,23 +55,21 @@ public:
     virtual uint64_t read_bits(size_t bits) noexcept;
 
     /// Advance the iterator.
-    virtual void skip_bit(size_t bits=one) noexcept;
+    virtual void skip_bit() noexcept;
+    virtual void skip_bits(size_t bits) noexcept;
 
     /////// Rewind the iterator.
-    ////virtual void rewind_bit(size_t bits=one) noexcept;
+    ////virtual void rewind_bit() noexcept;
+    ////virtual void rewind_bits(size_t bits) noexcept;
 
 protected:
-    uint8_t do_peek() noexcept override;
-    uint8_t do_read() noexcept override;
-    void do_read(uint8_t* buffer, size_t size) noexcept override;
-    void do_skip(size_t size) noexcept override;
+    uint8_t do_peek_byte() noexcept override;
+    void do_read_bytes(uint8_t* buffer, size_t size) noexcept override;
+    void do_skip_bytes(size_t size) noexcept override;
+    ////void do_rewind_bytes(size_t size) noexcept override;
     bool get_exhausted() const noexcept override;
 
 private:
-    uint8_t shift() const noexcept;
-    bool is_aligned() const noexcept;
-    void align() noexcept;
-
     uint8_t buffer_;
     uint8_t offset_;
 };

@@ -46,7 +46,9 @@ bit_writer<OStream>::bit_writer(OStream& sink) noexcept
 template <typename OStream>
 bit_writer<OStream>::~bit_writer() noexcept
 {
-    dump();
+    if (!is_zero(offset_))
+        byte_writer::do_write_bytes(&buffer_, one);
+
     byte_writer::~byte_writer();
 }
 
@@ -56,96 +58,44 @@ bit_writer<OStream>::~bit_writer() noexcept
 template <typename OStream>
 void bit_writer<OStream>::write_bit(bool value) noexcept
 {
-    if (is_aligned())
-        dump();
-
     buffer_ |= ((value ? 0x80 : 0x00) >> offset_++);
+
+    if (offset_ == byte_bits)
+    {
+        byte_writer::do_write_bytes(&buffer_, one);
+        buffer_ = 0x00;
+        offset_ = 0;
+    }
 }
 
 template <typename OStream>
 void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 {
-    while (bits > byte_bits)
-        do_write(static_cast<uint8_t>((value >> ((bits -= byte_bits))) & 0xff));
+    bits = lesser<size_t>(to_bits(sizeof(uint64_t)), bits);
 
-    for (uint8_t bit = 0; bit < bits; ++bit)
-        write_bit(!is_zero((value >> (bits - add1(bit))) & 0x01));
+    for (auto bit = bits; !is_zero(bit); --bit)
+        write_bit(!is_zero((value >> sub1(bit)) & to_int<uint64_t>(true)));
 }
 
 // protected overrides
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
-void bit_writer<OStream>::do_write(uint8_t byte) noexcept
+void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
+    size_t size) noexcept
 {
-    do_write(&byte, one);
+    // TODO: Suboptimal but simple.
+    for (size_t byte = 0; byte < size; ++byte)
+        write_bits(data[byte], byte_bits);
 }
-
-template <typename OStream>
-void bit_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
-{
-    if (is_zero(size))
-        return;
-
-    if (is_zero(offset_))
-    {
-        byte_writer::do_write(data, size);
-        return;
-    }
-
-    // Create a mutable copy for shifting.
-    data_chunk buffer(data, std::next(data, size));
-
-    // Shift all bytes.
-    for (auto index = sub1(size); !is_zero(index); --index)
-        buffer[index] =
-            ((buffer[index] << shift()) |
-            (buffer[sub1(index)] >> offset_));
-
-    // Or buffer into first byte.
-    buffer[0] = (buffer_ | (buffer[0] >> offset_));
-
-    byte_writer::do_write(data, size);
-    buffer_ = data[sub1(size)] << shift();
-}
-
-////template <typename OStream>
-////void bit_writer<OStream>::do_skip(size_t size) noexcept
-////{
-////    skip_bit(to_bits(size));
-////}
 
 template <typename OStream>
 void bit_writer<OStream>::do_flush() noexcept
 {
-    dump();
+    if (!is_zero(offset_))
+        byte_writer::do_write_bytes(&buffer_, one);
+
     byte_writer::do_flush();
-}
-
-// private
-//-----------------------------------------------------------------------------
-
-template <typename OStream>
-uint8_t bit_writer<OStream>::shift() const noexcept
-{
-    return byte_bits - offset_;
-}
-
-template <typename OStream>
-bool bit_writer<OStream>::is_aligned() const noexcept
-{
-    return is_zero(shift());
-}
-
-template <typename OStream>
-void bit_writer<OStream>::dump() noexcept
-{
-    if (is_zero(offset_))
-        return;
-
-    byte_writer::do_write(buffer_);
-    buffer_ = 0x00;
-    offset_ = 0;
 }
 
 } // namespace system

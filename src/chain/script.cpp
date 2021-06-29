@@ -1369,7 +1369,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
         // Track all found values for later deletion.
         for (; starts_with(it, bytes_.end(), value); it += value.size())
         {
-            source.skip(value.size());
+            source.skip_bytes(value.size());
             found.push_back(it);
         }
 

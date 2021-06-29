@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SINK_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SINK_HPP
 
-#include <iterator>
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -51,12 +50,9 @@ public:
 protected:
     sequence do_sequence() const noexcept override
     {
-        const auto begin = container_.data();
-        const auto end = std::next(begin, container_.size());
-
         return std::make_pair(
-            reinterpret_cast<char_type*>(begin),
-            reinterpret_cast<char_type*>(end));
+            reinterpret_cast<char_type*>(container_.begin()),
+            reinterpret_cast<char_type*>(container_.end()));
     }
 
 private:

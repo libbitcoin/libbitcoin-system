@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SOURCE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SOURCE_HPP
 
-#include <iterator>
 #include <utility>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -54,8 +53,8 @@ protected:
     {
         // input_sequence/output_sequence both require non-const buffer ptrs,
         // but the data member is const, so we must cast it for direct devices.
-        const auto begin = const_cast<value_type*>(container_.data());
-        const auto end = std::next(begin, container_.size());
+        const auto begin = const_cast<value_type*>(container_.begin());
+        const auto end = const_cast<value_type*>(container_.end());
 
         return std::make_pair(
             reinterpret_cast<char_type*>(begin),

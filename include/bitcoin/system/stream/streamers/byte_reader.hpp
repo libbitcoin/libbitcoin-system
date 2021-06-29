@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -75,6 +74,9 @@ public:
     template <size_t Size>
     data_array<Size> read_reverse() noexcept;
 
+    /// Read into stream until buffer is exhausted.
+    std::ostream& read(std::ostream& out) noexcept;
+
     /// Read hash (explicit specializations of read_forward).
     virtual mini_hash read_mini_hash() noexcept;
     virtual short_hash read_short_hash() noexcept;
@@ -99,10 +101,12 @@ public:
     virtual std::string read_string(size_t size) noexcept;
 
     /// Advance the iterator.
-    virtual void skip(size_t size=one) noexcept;
+    virtual void skip_byte() noexcept;
+    virtual void skip_bytes(size_t size) noexcept;
 
     /// Rewind the iterator.
-    virtual void rewind(size_t size=one) noexcept;
+    virtual void rewind_byte() noexcept;
+    virtual void rewind_bytes(size_t size) noexcept;
 
     /// The stream is empty (or invalid).
     virtual bool is_exhausted() const noexcept;
@@ -117,11 +121,10 @@ public:
     virtual bool operator!() const noexcept;
 
 protected:
-    virtual uint8_t do_peek() noexcept;
-    virtual uint8_t do_read() noexcept;
-    virtual void do_read(uint8_t* buffer, size_t size) noexcept;
-    virtual void do_skip(size_t size) noexcept;
-    virtual void do_rewind(size_t size) noexcept;
+    virtual uint8_t do_peek_byte() noexcept;
+    virtual void do_read_bytes(uint8_t* buffer, size_t size) noexcept;
+    virtual void do_skip_bytes(size_t size) noexcept;
+    virtual void do_rewind_bytes(size_t size) noexcept;
     virtual bool get_exhausted() const noexcept;
 
 private:

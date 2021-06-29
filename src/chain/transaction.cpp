@@ -323,7 +323,7 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
         if (marker)
         {
             // Skip over the peeked witness flag.
-            source.skip(1);
+            source.skip_byte();
             read(source, inputs_, wire, witness);
             read(source, outputs_, wire, witness);
             read_witnesses(source, inputs_);

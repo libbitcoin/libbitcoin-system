@@ -28,6 +28,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -47,7 +48,7 @@ byte_writer<OStream>::byte_writer(OStream& sink) noexcept
 template <typename OStream>
 byte_writer<OStream>::~byte_writer() noexcept
 {
-    do_flush();
+    flusher();
 }
 
 // big endian
@@ -150,52 +151,54 @@ void byte_writer<OStream>::write_error_code(const code& ec) noexcept
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
-void byte_writer<OStream>::write(std::istream& in) noexcept
+std::istream& byte_writer<OStream>::write(std::istream& in) noexcept
 {
-    while (in)
-        write_byte(in.get());
+    // This creates an intermediate buffer the size of the stream.
+    // This is presumed to be more optimal than looping individual bytes.
+    write_bytes(read::bytes::istream(in).read_bytes());
+    return in;
 }
 
 template <typename OStream>
 void byte_writer<OStream>::write_byte(uint8_t value) noexcept
 {
-    do_write(value);
+    do_write_bytes(&value, one);
 }
 
 template <typename OStream>
 void byte_writer<OStream>::write_bytes(const data_slice& data) noexcept
 {
-    const auto size = data.size();
-    if (is_zero(size))
-        return;
-
-    write_bytes(data.data(), size);
+    do_write_bytes(data.data(), data.size());
 }
 
 template <typename OStream>
 void byte_writer<OStream>::write_bytes(const uint8_t* data,
     size_t size) noexcept
 {
-    do_write(data, size);
+    do_write_bytes(data, size);
 }
 
 // strings
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
+void byte_writer<OStream>::write_string(const std::string& value) noexcept
+{
+    write_variable(value.size());
+    write_string(value, value.size());
+}
+
+template <typename OStream>
 void byte_writer<OStream>::write_string(const std::string& value,
     size_t size) noexcept
 {
     const auto length = std::min(size, value.size());
-    write_bytes(reinterpret_cast<const uint8_t*>(value.data()), length);
-    write_bytes(data_chunk(size - length, '\0'));
-}
 
-template <typename OStream>
-void byte_writer<OStream>::write_string(const std::string& value) noexcept
-{
-    write_variable(value.size());
-    write_string(value.data(), value.size());
+    // Write the substring without creating a copy.
+    write_bytes(data_slice(value).data(), length);
+
+    // Pad to length with zeros, required for bitcoin string serialization.
+    write_bytes(data_chunk(size - length, '\0'));
 }
 
 // context
@@ -225,14 +228,8 @@ bool byte_writer<OStream>::operator!() const noexcept
 // These may only call non-virtual (private) methods (due to overriding).
 
 template <typename OStream>
-void byte_writer<OStream>::do_write(uint8_t byte) noexcept
-{
-    stream_.put(byte);
-    validate();
-}
-
-template <typename OStream>
-void byte_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
+void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
+    size_t size) noexcept
 {
     // It is not generally more efficient to call stream_.put() for one byte.
     stream_.write(reinterpret_cast<const char*>(data), size);
@@ -242,7 +239,7 @@ void byte_writer<OStream>::do_write(const uint8_t* data, size_t size) noexcept
 template <typename OStream>
 void byte_writer<OStream>::do_flush() noexcept
 {
-    stream_.flush();
+    flusher();
     validate();
 }
 
@@ -273,6 +270,12 @@ void byte_writer<OStream>::validate() noexcept
     // for validity could miss an error on intervening operations.
     if (!valid())
         invalid();
+}
+
+template <typename OStream>
+void byte_writer<OStream>::flusher() noexcept
+{
+    stream_.flush();
 }
 
 } // namespace system

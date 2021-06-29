@@ -215,7 +215,7 @@ bool stealth_record::from_data(reader& source, size_t start_height,
     if (height_ < start_height)
     {
         reset();
-        source.skip(serialized_size(false) - sizeof(uint32_t));
+        source.skip_bytes(serialized_size(false) - sizeof(uint32_t));
         return false;
     }
 
@@ -225,7 +225,7 @@ bool stealth_record::from_data(reader& source, size_t start_height,
     if (filter != binary(filter.bits(), prefix))
     {
         reset();
-        source.skip(serialized_size(false) - 2 * sizeof(uint32_t));
+        source.skip_bytes(serialized_size(false) - 2 * sizeof(uint32_t));
         return false;
     }
 

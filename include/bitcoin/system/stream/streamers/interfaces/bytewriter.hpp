@@ -51,7 +51,7 @@ public:
     virtual void write_error_code(const code& ec) noexcept = 0;
 
     /// Write until reader is exhausted.
-    virtual void write(std::istream& in) noexcept = 0;
+    virtual std::istream& write(std::istream& in) noexcept = 0;
 
     /// Write one byte.
     virtual void write_byte(uint8_t value) noexcept = 0;

@@ -21,8 +21,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <string>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/hash.hpp>
@@ -55,6 +55,9 @@ public:
     /// Convert read_4_bytes_little_endian to an error code.
     virtual code read_error_code() noexcept = 0;
 
+    /// Read into stream until buffer is exhausted.
+    virtual std::ostream& read(std::ostream& out) noexcept = 0;
+
     /// Read hash (explicit specializations of read_forward).
     virtual mini_hash read_mini_hash() noexcept = 0;
     virtual short_hash read_short_hash() noexcept = 0;
@@ -79,10 +82,12 @@ public:
     virtual std::string read_string(size_t size) noexcept = 0;
 
     /// Advance the iterator.
-    virtual void skip(size_t size=one) noexcept = 0;
+    virtual void skip_byte() noexcept = 0;
+    virtual void skip_bytes(size_t size) noexcept = 0;
 
     /// Rewind the iterator.
-    virtual void rewind(size_t size=one) noexcept = 0;
+    virtual void rewind_byte() noexcept = 0;
+    virtual void rewind_bytes(size_t size) noexcept = 0;
 
     /// The stream is empty (or invalid).
     virtual bool is_exhausted() const noexcept = 0;

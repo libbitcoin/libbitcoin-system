@@ -154,7 +154,7 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
     const auto parent = source.read_4_bytes_big_endian();
     const auto child = source.read_4_bytes_big_endian();
     const auto chain = source.read_hash();
-    source.skip();
+    source.skip_byte();
     const auto secret = source.read_hash();
 
     // Validate the prefix against the provided value.

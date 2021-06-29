@@ -39,7 +39,7 @@ namespace system {
 
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) noexcept
-  : byte_reader(source), buffer_(0x00), offset_(byte_bits)
+  : byte_reader(source), buffer_(0x00), offset_(0)
 {
 }
 
@@ -55,127 +55,94 @@ bit_reader<IStream>::~bit_reader() noexcept
 template <typename IStream>
 bool bit_reader<IStream>::read_bit() noexcept
 {
-    if (is_aligned())
-        buffer_ = do_read();
+    if (is_zero(offset_))
+    {
+        byte_reader::do_read_bytes(&buffer_, one);
+        offset_ = byte_bits;
+    }
 
-    return !is_zero((buffer_ << offset_++) & 0x80);
+    return !is_zero((buffer_ << (byte_bits - offset_--)) & 0x80);
 }
 
 template <typename IStream>
 uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
 {
     uint64_t out = 0;
-    while (bits > byte_bits)
-        out |= (static_cast<uint64_t>(do_read()) << ((bits -= byte_bits)));
+    bits = lesser<size_t>(to_bits(sizeof(uint64_t)), bits);
 
-    for (uint8_t bit = 0; bit < bits; ++bit)
-        out |= (to_int<uint64_t>(read_bit()) << (bits - add1(bit)));
+    for (auto bit = bits; !is_zero(bit); --bit)
+        out |= (to_int<uint64_t>(read_bit()) << sub1(bit));
 
     return out;
 }
 
-// TODO: utilize base class forward seek.
 template <typename IStream>
-void bit_reader<IStream>::skip_bit(size_t bits) noexcept
+void bit_reader<IStream>::skip_bit() noexcept
 {
-    while (!is_zero(bits--))
-        read_bit();
+    read_bit();
 }
+
+template <typename IStream>
+void bit_reader<IStream>::skip_bits(size_t bits) noexcept
+{
+    read_bits(bits);
+}
+
+////template <typename IStream>
+////void bit_reader<IStream>::rewind_bit() noexcept
+////{
+////}
+////
+////template <typename IStream>
+////void bit_reader<IStream>::rewind_bits(size_t bits) noexcept
+////{
+////}
 
 // protected overrides
 //-----------------------------------------------------------------------------
 
 template <typename IStream>
-uint8_t bit_reader<IStream>::do_peek() noexcept
+uint8_t bit_reader<IStream>::do_peek_byte() noexcept
 {
-    if (is_aligned())
-        return byte_reader::do_peek();
+    if (offset_ == byte_bits)
+        return byte_reader::do_peek_byte();
 
-    if (is_zero(offset_))
-        return buffer_;
-
-    const uint8_t hi = buffer_ << offset_;
-    const uint8_t lo = byte_reader::do_peek() >> shift();
+    const uint8_t hi = buffer_ << (byte_bits - offset_);
+    const uint8_t lo = byte_reader::do_peek_byte() >> offset_;
     return hi | lo;
 }
 
 template <typename IStream>
-uint8_t bit_reader<IStream>::do_read() noexcept
+void bit_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 {
-    uint8_t byte;
-    do_read(&byte, one);
-    return byte;
+    // TODO: Suboptimal but simple.
+    for (size_t byte = 0; byte < size; ++byte)
+        buffer[byte] = static_cast<uint8_t>(read_bits(byte_bits));
 }
 
 template <typename IStream>
-void bit_reader<IStream>::do_read(uint8_t* buffer, size_t size) noexcept
+void bit_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
-    if (is_zero(size))
-        return;
-
-    if (is_zero(offset_))
-    {
-        byte_reader::do_read(buffer, sub1(size));
-        buffer[sub1(size)] = 0x00;
-    }
-    else
-    {
-        byte_reader::do_read(buffer, size);
-    }
-
-    if (is_aligned())
-        return;
-
-    // Save last byte.
-    const auto next = buffer[sub1(size)];
-
-    // Shift all bytes.
-    for (auto index = sub1(size); !is_zero(index); --index)
-        buffer[index] =
-            ((buffer[index] >> shift()) |
-            (buffer[sub1(index)] << offset_));
-
-    // Or buffer into first byte.
-    buffer[0] = ((buffer[0] >> shift()) | (buffer_ << offset_));
-
-    if (is_zero(offset_))
-    {
-        align();
-        buffer_ = next;
-    }
+    // Loop to avoid overflow in multiplying bit_bytes * size.
+    for (size_t byte = 0; byte < size; ++byte)
+        skip_bits(byte_bits);
 }
 
-template <typename IStream>
-void bit_reader<IStream>::do_skip(size_t size) noexcept
-{
-    skip_bit(to_bits(size));
-}
+////template <typename IStream>
+////void bit_reader<IStream>::do_rewind_bytes(size_t size) noexcept
+////{
+////    // Loop to avoid overflow in multiplying bit_bytes * size.
+////    for (size_t byte = 0; byte < size; ++byte)
+////        rewind_bits(bit_bytes);
+////}
 
 template <typename IStream>
 bool bit_reader<IStream>::get_exhausted() const noexcept
 {
-    return !(*this) || (is_aligned() && byte_reader::get_exhausted());
-}
+    if (byte_reader::operator!())
+        return true;
 
-// private
-//-----------------------------------------------------------------------------
-
-template <typename IStream>
-uint8_t bit_reader<IStream>::shift() const noexcept
-{
-    return byte_bits - offset_;
-}
-
-template <typename IStream>
-bool bit_reader<IStream>::is_aligned() const noexcept
-{
-    return is_zero(shift());
-}
-
-template <typename IStream>
-void bit_reader<IStream>::align() noexcept
-{
-    offset_ = byte_bits;
+    return is_zero(offset_) && byte_reader::get_exhausted();
 }
 
 } // namespace system
