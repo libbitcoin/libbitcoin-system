@@ -25,16 +25,20 @@
 namespace libbitcoin {
 namespace system {
 
-// to_unsigned
+// C++14: all inlines (i.e. with casts) can be made constexpr.
+
+// TODO: test.
+template <typename Integer, typename Signed, if_integer<Integer>>
+inline Signed to_signed(Integer value) noexcept
+{
+    return static_cast<Signed>(value);
+}
     
 template <typename Integer, typename Unsigned, if_integer<Integer>>
 inline Unsigned to_unsigned(Integer value) noexcept
 {
-    // C++14: this can be made constexpr.
     return static_cast<Unsigned>(value);
 }
-
-// absolute
 
 template <typename Integer, typename Absolute, if_signed_integer<Integer>>
 constexpr Absolute absolute(Integer value) noexcept
@@ -49,12 +53,9 @@ constexpr Absolute absolute(Integer value) noexcept
     return value;
 }
 
-// is_negative
-
 template <typename Integer, if_signed_integer<Integer>>
 constexpr bool is_negative(Integer value) noexcept
 {
-    // std::signbit is limited to floating point types.
     return value < 0;
 }
 
@@ -63,8 +64,6 @@ constexpr bool is_negative(Integer) noexcept
 {
     return false;
 }
-
-// is_greater
 
 template <typename Left, typename Right, if_same_signed_integer<Left, Right>>
 constexpr bool is_greater(Left left, Right right) noexcept
@@ -76,7 +75,6 @@ template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
 inline bool is_greater(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr (to_unsigned casts).
     return is_negative(right) || (left > to_unsigned(right));
 }
 
@@ -84,11 +82,8 @@ template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
 inline bool is_greater(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr (to_unsigned casts).
      return !is_negative(left) && (right < to_unsigned(left));
 }
-
-// is_lesser
 
 template <typename Left, typename Right, if_same_signed_integer<Left, Right>>
 constexpr bool is_lesser(Left left, Right right) noexcept
@@ -100,7 +95,6 @@ template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
 inline bool is_lesser(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr (to_unsigned casts).
     return is_negative(left) || (to_unsigned(left) < right);
 }
 
@@ -108,28 +102,23 @@ template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
 inline bool is_lesser(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr (to_unsigned casts).
     return !is_negative(right) && (to_unsigned(right) > left);
 }
-
-// greater
 
 template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 inline Result greater(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr.
-    return static_cast<Result>(is_greater(left, right) ? left : right);
+    return is_greater(left, right) ? static_cast<Result>(left) :
+        static_cast<Result>(right);
 }
-
-// lesser
 
 template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 inline Result lesser(Left left, Right right) noexcept
 {
-    // C++14: this can be made constexpr.
-    return static_cast<Result>(is_lesser(left, right) ? left : right);
+    return is_lesser(left, right) ? static_cast<Result>(left) :
+        static_cast<Result>(right);
 }
 
 } // namespace system

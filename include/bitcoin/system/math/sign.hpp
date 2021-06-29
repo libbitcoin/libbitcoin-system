@@ -27,7 +27,13 @@ namespace system {
 
 /// All operations below support signed and unsigned integer parameters.
 
-/// Cast to the smallest unsigned integer type to hold the maximum signed value.
+/// Cast to smallest signed integer type to hold the maximum unsigned value.
+template <typename Integer,
+    typename Signed = std::make_signed<Integer>::type,
+    if_integer<Integer> = true>
+inline Signed to_signed(Integer value) noexcept;
+
+/// Cast to smallest unsigned integer type to hold the maximum signed value.
 template <typename Integer,
     typename Unsigned = std::make_unsigned<Integer>::type,
     if_integer<Integer> = true>
