@@ -27,10 +27,12 @@ static_assert(negative_one == -1, "");
 static_assert(is_zero(0), "");
 static_assert(!is_zero(1u), "");
 static_assert(!is_zero(0xff), "");
+static_assert(std::is_same<decltype(is_zero<int16_t>(0)), bool>::value, "");
 
 static_assert(is_one(1), "");
 static_assert(!is_one(0u), "");
 static_assert(!is_one(0xff), "");
+static_assert(std::is_same<decltype(is_one<int16_t>(0)), bool>::value, "");
 
 static_assert(lo_bit(0) == 0, "");
 static_assert(lo_bit(2u) == 0, "");
@@ -40,6 +42,7 @@ static_assert(lo_bit(1) == 1, "");
 static_assert(lo_bit(3u) == 1, "");
 static_assert(lo_bit(5) == 1, "");
 static_assert(lo_bit(max_uint32) == 1, "");
+static_assert(std::is_same<decltype(lo_bit<int16_t>(0)), int16_t>::value, "");
 
 static_assert(is_even(0), "");
 static_assert(is_even(2u), "");
@@ -49,6 +52,7 @@ static_assert(!is_even(1), "");
 static_assert(!is_even(3u), "");
 static_assert(!is_even(0xff), "");
 static_assert(!is_even(max_uint32), "");
+static_assert(std::is_same<decltype(is_even<int16_t>(0)), bool>::value, "");
 
 static_assert(is_odd(1), "");
 static_assert(is_odd(3u), "");
@@ -58,6 +62,7 @@ static_assert(!is_odd(0u), "");
 static_assert(!is_odd(2), "");
 static_assert(!is_odd(10), "");
 static_assert(!is_odd(max_uint32 - 1u), "");
+static_assert(std::is_same<decltype(is_odd<int16_t>(0)), bool>::value, "");
 
 static_assert(is_byte_aligned(0), "");
 static_assert(is_byte_aligned(8), "");
@@ -67,37 +72,45 @@ static_assert(!is_byte_aligned(1), "");
 static_assert(!is_byte_aligned(2), "");
 static_assert(!is_byte_aligned(-42), "");
 static_assert(!is_byte_aligned(0xff), "");
+static_assert(std::is_same<decltype(is_byte_aligned<int16_t>(0)), bool>::value, "");
 
 static_assert(to_bits(0) == 0 * 8, "");
 static_assert(to_bits(1u) == 1u * 8u, "");
 static_assert(to_bits(-42) == -42 * 8, "");
 static_assert(to_bits(0xff) == 0xff * 8, "");
+static_assert(std::is_same<decltype(to_bits<int16_t>(0)), int16_t>::value, "");
 
 static_assert(to_bytes(0) == 0 / 8, "");
 static_assert(to_bytes(1u) == 1u / 8u, "");
 static_assert(to_bytes(-42) == -42 / 8, "");
 static_assert(to_bytes(0xff) == 0xff / 8, "");
+static_assert(std::is_same<decltype(to_bytes<int16_t>(0)), int16_t>::value, "");
 
 static_assert(to_half(0) == 0 / 2, "");
 static_assert(to_half(1u) == 1u / 2u, "");
 static_assert(to_half(-42) == -42 / 2, "");
 static_assert(to_half(0xff) == 0xff / 2, "");
+static_assert(std::is_same<decltype(to_half<int16_t>(0)), int16_t>::value, "");
 
 static_assert(to_int(true) == 1, "");
 static_assert(to_int(false) == 0, "");
+static_assert(std::is_same<decltype(to_int<int16_t>(0)), int16_t>::value, "");
 
 static_assert(to_bool(1), "");
 static_assert(to_bool(-1), "");
 static_assert(to_bool(-42), "");
 static_assert(to_bool(42), "");
 static_assert(!to_bool(0), "");
+static_assert(std::is_same<decltype(to_bool<int16_t>(0)), bool>::value, "");
 
 static_assert(add1(0) == 0 + 1, "");
 static_assert(add1(1u) == 1u + 1u, "");
 static_assert(add1(-42) == -42 + 1, "");
 static_assert(add1(0xff) == 0xff + 1, "");
+static_assert(std::is_same<decltype(add1<int16_t>(0)), int16_t>::value, "");
 
 static_assert(sub1(0xff) == 0xff - 1, "");
 static_assert(sub1(1u) == 1u - 1u, "");
 static_assert(sub1(-42) == -42 - 1, "");
 static_assert(sub1(0xff) == 0xff - 1, "");
+static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value, "");
