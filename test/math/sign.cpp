@@ -18,11 +18,39 @@
  */
 #include "../test.hpp"
 
-// Test helper to verify output signedness.
+// Test helpers to verify output signedness.
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr bool is_unsigned(Integer) { return false; }
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr bool is_unsigned(Integer) { return true; }
+
+// to_signed
+static_assert(!is_unsigned(to_signed(-1)), "");
+static_assert(!is_unsigned(to_signed(0)), "");
+static_assert(!is_unsigned(to_signed(0u)), "");
+static_assert(!is_unsigned(to_signed(1)), "");
+static_assert(!is_unsigned(to_signed(1u)), "");
+static_assert(to_signed(-2) == -2, "");
+static_assert(to_signed(-1) == -1, "");
+static_assert(to_signed(0) == 0, "");
+static_assert(to_signed(0u) == 0, "");
+static_assert(to_signed(1) == 1, "");
+static_assert(to_signed(1u) == 1, "");
+static_assert(to_signed(2u) == 2, "");
+
+// to_unsigned
+static_assert(is_unsigned(to_unsigned(-1)), "");
+static_assert(is_unsigned(to_unsigned(0)), "");
+static_assert(is_unsigned(to_unsigned(0u)), "");
+static_assert(is_unsigned(to_unsigned(1)), "");
+static_assert(is_unsigned(to_unsigned(1u)), "");
+static_assert(to_unsigned(-2) == 0xfffffffe, "");
+static_assert(to_unsigned(-1) == 0xffffffff, "");
+static_assert(to_unsigned(0) == 0u, "");
+static_assert(to_unsigned(0u) == 0u, "");
+static_assert(to_unsigned(1) == 1u, "");
+static_assert(to_unsigned(1u) == 1u, "");
+static_assert(to_unsigned(2u) == 2u, "");
 
 // absolute
 static_assert(is_unsigned(absolute(-1)), "");
@@ -84,23 +112,9 @@ static_assert(!is_lesser(1u, 1u), "");
 static_assert(is_lesser(0, 1), "");
 static_assert(is_lesser(-1, 0), "");
 
-// to_unsigned (C++14: required for constexpr cast)
-////static_assert(is_unsigned(to_unsigned(-1)), "");
-////static_assert(is_unsigned(to_unsigned(0)), "");
-////static_assert(is_unsigned(to_unsigned(0u)), "");
-////static_assert(is_unsigned(to_unsigned(1)), "");
-////static_assert(is_unsigned(to_unsigned(1u)), "");
-////static_assert(to_unsigned(-2) == 0xfffffffe, "");
-////static_assert(to_unsigned(-1) == 0xffffffff, "");
-////static_assert(to_unsigned(0) == 0u, "");
-////static_assert(to_unsigned(0u) == 0u, "");
-////static_assert(to_unsigned(1) == 1u, "");
-////static_assert(to_unsigned(1u) == 1u, "");
-////static_assert(to_unsigned(2u) == 2u, "");
-
-// C++14: required for constexpr casts:
-
 // greater
+
+static_assert(greater<signed>(1, 0) == 1, "");
 
 BOOST_AUTO_TEST_CASE(greater__signed__different__expected)
 {

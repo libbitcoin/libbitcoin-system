@@ -41,6 +41,7 @@
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/math/addition.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/hash.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/message/message.hpp>
@@ -422,10 +423,9 @@ void block::strip_witness()
 uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
-    static const auto overflow = to_bits(sizeof(uint64_t));
     auto subsidy = initial_block_subsidy_satoshi;
     const auto halvings = height / subsidy_interval;
-    subsidy >>= (bip42 && halvings >= overflow ? 0 : halvings);
+    subsidy >>= (bip42 && (halvings >= bit_width<uint64_t>()) ? 0 : halvings);
     return subsidy;
 }
 

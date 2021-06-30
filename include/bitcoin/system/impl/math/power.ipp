@@ -32,6 +32,7 @@ namespace system {
 // TODO: test all with uintx.
 
 // C++14: All functions below can be made constexpr.
+// C++11: no local variables, loops, or multiple returns.
 
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent, typename Base, typename Value,

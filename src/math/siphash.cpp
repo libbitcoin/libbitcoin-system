@@ -24,6 +24,7 @@
 #include <tuple>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -32,12 +33,6 @@ namespace system {
 
 constexpr uint64_t finalization = 0x00000000000000ff;
 constexpr uint64_t max_encoded_byte_count = (1 << byte_bits);
-
-// NOTE: C++20 provides std::rotl which could replace this function.
-constexpr auto rotate_left(uint64_t value, uint8_t shift)
-{
-    return (value << shift) | (value >> (to_bits(sizeof(uint64_t)) - shift));
-}
 
 constexpr void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
 {

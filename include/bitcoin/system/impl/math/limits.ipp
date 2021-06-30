@@ -29,18 +29,16 @@ namespace system {
 
 template <typename Result, typename Integer,
     if_integral_integer<Result>, if_integral_integer<Integer>>
-inline Result limit(Integer value) noexcept
+constexpr Result limit(Integer value) noexcept
 {
-    // Casts are not constexpr.
     return limit(value, std::numeric_limits<Result>::min(),
         std::numeric_limits<Result>::max());
 }
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
-inline Result limit(Integer value, Result minimum, Result maximum) noexcept
+constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 {
-    // Casts are not constexpr.
     return is_lesser(value, minimum) ? minimum :
         (is_greater(value, maximum) ? maximum :
             static_cast<Result>(value));

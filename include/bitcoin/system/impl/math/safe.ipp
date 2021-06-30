@@ -28,6 +28,8 @@
 namespace libbitcoin {
 namespace system {
 
+// throw is not constexpr at least through C++20.
+
 // TODO: generalize to any integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_multiply(Integer left, Integer right)

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
+#include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -26,8 +27,11 @@
 namespace libbitcoin {
 namespace system {
 
+// C++20: std::rotr(+shift) can replace rotate_right.
+// C++20: std::rotr(-shift) can replace rotate_left.
+
 template <typename Value, if_integral_integer<Value>>
-constexpr size_t bit_width()
+constexpr size_t bit_width(Value)
 {
     return to_bits(sizeof(Value));
 }
@@ -60,6 +64,7 @@ constexpr Value bit_left(size_t offset)
 template <typename Value, if_integral_integer<Value>>
 constexpr void set_right(Value& target, size_t offset, bool state)
 {
+    // C++14: local variables allowed in constexpr.
     state ?
         target |= bit_right<Value>(offset) :
         target &= ~bit_right<Value>(offset);
@@ -68,6 +73,7 @@ constexpr void set_right(Value& target, size_t offset, bool state)
 template <typename Value, if_integral_integer<Value>>
 constexpr void set_left(Value& target, size_t offset, bool state)
 {
+    // C++14: local variables allowed in constexpr.
     state ?
         target |= bit_left<Value>(offset) :
         target &= ~bit_left<Value>(offset);
@@ -83,6 +89,26 @@ template <typename Value, if_integral_integer<Value>>
 constexpr bool get_left(Value value, size_t offset)
 {
     return !is_zero(value & bit_left<Value>(offset));
+}
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value rotate_right(Value value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto width = bit_width<Value>();
+    return
+        (value << (width - (shift % width)) |
+        (value >> (shift % width)));
+}
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value rotate_left(Value value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto width = bit_width<Value>();
+    return
+        (value << (shift % width)) |
+        (value >> (width - (shift % width)));
 }
 
 } // namespace system

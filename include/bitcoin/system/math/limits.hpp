@@ -27,14 +27,14 @@ namespace system {
 /// Cast a value to Result, constrained to the limits of both types.
 template <typename Result, typename Integer,
     if_integral_integer<Result> = true, if_integral_integer<Integer> = true>
-inline Result limit(Integer value) noexcept;
+constexpr Result limit(Integer value) noexcept;
 
 /// Cast a value to Result, constrained to the specified limits.
 /// Casting positive to/from negative will change the sign of the result unless
 /// the specified limits constrain the result otherwise.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
-inline Result limit(Integer value, Result minimum, Result maximum) noexcept;
+constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

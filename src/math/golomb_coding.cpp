@@ -28,6 +28,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -58,7 +59,7 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent)
 static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key)
 {
-    return (uint128_t(siphash(key, item) * bound) >> to_bits(sizeof(uint64_t)))
+    return (uint128_t(siphash(key, item) * bound) >> bit_width<uint64_t>())
         .convert_to<uint64_t>();
 }
 

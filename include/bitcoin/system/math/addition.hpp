@@ -27,12 +27,12 @@ namespace system {
 /// left + right after cast of each to Result type.
 template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
-inline Result add(Left left, Right right) noexcept;
+constexpr Result add(Left left, Right right) noexcept;
 
 /// left - right after cast of each to Result type.
 template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
-inline Result subtract(Left left, Right right) noexcept;
+constexpr Result subtract(Left left, Right right) noexcept;
 
 /// Integer maximum if would overflow return, otherwise the sum.
 template <typename Integer, if_unsigned_integer<Integer> = true>

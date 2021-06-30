@@ -26,18 +26,17 @@ namespace libbitcoin {
 namespace system {
 
 // TODO: test with uintx.
-// Casts are not constexpr.
 
 template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
-inline Result add(Left left, Right right) noexcept
+constexpr Result add(Left left, Right right) noexcept
 {
     return static_cast<Result>(left) + static_cast<Result>(right);
 }
 
 template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
-inline Result subtract(Left left, Right right) noexcept
+constexpr Result subtract(Left left, Right right) noexcept
 {
     return static_cast<Result>(left) - static_cast<Result>(right);
 }

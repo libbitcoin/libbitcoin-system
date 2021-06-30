@@ -19,15 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BITS_HPP
 #define LIBBITCOIN_SYSTEM_MATH_BITS_HPP
 
+#include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// The number of bits representable in an instance of Value.
+/// The number of bits representable in the type of Value.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr size_t bit_width();
+constexpr size_t bit_width(Value optional=0);
 
 /// An instance of value with only the low order bit set (0x...1).
 template <typename Value, if_integral_integer<Value> = true>
@@ -60,6 +61,14 @@ constexpr bool get_right(Value value, size_t offset=zero);
 /// Extract a bit from value, offset relative to highest order bit.
 template <typename Value, if_integral_integer<Value> = true>
 constexpr bool get_left(Value value, size_t offset=zero);
+
+/// Rotate the bits of Value to the right by amount 'shift'.
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value rotate_right(Value value, size_t shift);
+
+/// Rotate the bits of Value to the left by amount 'shift'.
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value rotate_left(Value value, size_t shift);
 
 } // namespace system
 } // namespace libbitcoin
