@@ -27,8 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-// C++20: std::rotr(+shift) can replace rotate_right.
-// C++20: std::rotr(-shift) can replace rotate_left.
+// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 
 template <typename Value, if_integral_integer<Value>>
 constexpr size_t bit_width(Value)

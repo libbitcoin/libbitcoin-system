@@ -296,6 +296,11 @@ static_assert(rotate_right<uint8_t>(0x81, 6) == 0x06, "");
 static_assert(rotate_right<uint8_t>(0x81, 7) == 0x03, "");
 static_assert(rotate_right<uint8_t>(0x81, 8) == 0x81, "");
 
+// en.cppreference.com/w/cpp/numeric/rotr
+static_assert(rotate_right<uint8_t>(0x1d, 0) == 0x1d, "");
+static_assert(rotate_right<uint8_t>(0x1d, 1) == 0x8e, "");
+static_assert(rotate_right<uint8_t>(0x1d, 9) == 0x8e, "");
+
 // rotate_left
 static_assert(rotate_left<uint8_t>(0x00, 0) == 0x00, "");
 static_assert(rotate_left<uint8_t>(0x00, 1) == 0x00, "");
@@ -323,10 +328,9 @@ static_assert(rotate_left<uint8_t>(0x81, 6) == 0x60, "");
 static_assert(rotate_left<uint8_t>(0x81, 7) == 0xc0, "");
 static_assert(rotate_left<uint8_t>(0x81, 8) == 0x81, "");
 
-// en.cppreference.com/w/cpp/numeric/rotr
-static_assert(rotate_right<uint8_t>(0x1d, 0) == 0x1d, "");
-static_assert(rotate_right<uint8_t>(0x1d, 1) == 0x8e, "");
-static_assert(rotate_right<uint8_t>(0x1d, 9) == 0x8e, "");
+// en.cppreference.com/w/cpp/numeric/rotl
+static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d, "");
 static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a, "");
+static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a, "");
 
 // rotate_left
