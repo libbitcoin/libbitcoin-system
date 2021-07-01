@@ -71,7 +71,7 @@ template <typename IStream>
 uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
 {
     uint64_t out = 0;
-    bits = lesser<size_t>(bit_width(out), bits);
+    bits = lesser<size_t>(width(out), bits);
 
     // 'bits' refers to the count of the rightmost bits in 'out'.
     // Those bits are written from left to right using a right-relative offset.

@@ -59,8 +59,8 @@ constexpr size_t min_address_size = version_size + options_size +
 
 const uint8_t stealth_address::mainnet_p2kh = 0x2a;
 const uint8_t stealth_address::reuse_key_flag = 1 << 0;
-const size_t stealth_address::min_filter_bits = bit_width<uint8_t>();
-const size_t stealth_address::max_filter_bits = bit_width<uint32_t>();
+const size_t stealth_address::min_filter_bits = width<uint8_t>();
+const size_t stealth_address::max_filter_bits = width<uint32_t>();
 
 stealth_address::stealth_address()
   : valid_(false), version_(0), scan_key_(null_ec_compressed),

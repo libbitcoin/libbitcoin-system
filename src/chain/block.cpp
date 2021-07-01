@@ -425,7 +425,7 @@ uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
 {
     auto subsidy = initial_block_subsidy_satoshi;
     const auto halvings = height / subsidy_interval;
-    subsidy >>= (bip42 && (halvings >= bit_width<uint64_t>()) ? 0 : halvings);
+    subsidy >>= (bip42 && (halvings >= width<uint64_t>()) ? 0 : halvings);
     return subsidy;
 }
 
