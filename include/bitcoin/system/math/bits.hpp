@@ -48,11 +48,17 @@ constexpr Value bit_left(size_t offset);
 
 /// Set a bit in target, offset relative to lowest order bit.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr void set_right(Value& target, size_t offset=zero, bool state=true);
+constexpr Value set_right(Value& target, size_t offset=zero, bool state=true);
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value set_right(const Value& target, size_t offset=zero,
+    bool state=true);
 
 /// Set a bit in target, offset relative to highest order bit.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr void set_left(Value& target, size_t offset=zero, bool state=true);
+constexpr Value set_left(Value& target, size_t offset=zero, bool state=true);
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value set_left(const Value& target, size_t offset=zero,
+    bool state=true);
 
 /// Extract a bit from value, offset relative to lowest order bit.
 template <typename Value, if_integral_integer<Value> = true>
@@ -64,19 +70,31 @@ constexpr bool get_left(Value value, size_t offset=zero);
 
 /// Rotate the bits of Value to the right by amount 'shift'.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value rotate_right(Value value, size_t shift);
+constexpr Value rotate_right(Value& value, size_t shift);
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value rotate_right(const Value& value, size_t shift);
 
 /// Rotate the bits of Value to the left by amount 'shift'.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value rotate_left(Value value, size_t shift);
+constexpr Value rotate_left(Value& value, size_t shift);
+template <typename Value, if_integral_integer<Value> = true>
+constexpr Value rotate_left(const Value& value, size_t shift);
 
 /// A bitmask with low order count of bits zero.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_right(size_t bits);
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_right(Value& target, size_t bits);
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_right(const Value& target, size_t bits);
 
 /// A bitmask with high order count of bits zero.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_left(size_t bits);
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_left(Value& target, size_t bits);
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_left(const Value& target, size_t bits);
 
 } // namespace system
 } // namespace libbitcoin

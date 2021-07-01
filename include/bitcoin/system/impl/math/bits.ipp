@@ -62,22 +62,41 @@ constexpr Value bit_left(size_t offset)
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr void set_right(Value& target, size_t offset, bool state)
+constexpr Value set_right(Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    state ?
-        target |= bit_right<Value>(offset) :
-        target &= ~bit_right<Value>(offset);
+    return state ?
+        ((target |= bit_right<Value>(offset))) :
+        ((target &= ~bit_right<Value>(offset)));
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr void set_left(Value& target, size_t offset, bool state)
+constexpr Value set_right(const Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    state ?
-        target |= bit_left<Value>(offset) :
-        target &= ~bit_left<Value>(offset);
+    return state ?
+        target | bit_right<Value>(offset) :
+        target & ~bit_right<Value>(offset);
 }
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value set_left(Value& target, size_t offset, bool state)
+{
+    // C++14: local variables allowed in constexpr.
+    return state ?
+        ((target |= bit_left<Value>(offset))) :
+        ((target &= ~bit_left<Value>(offset)));
+}
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value set_left(const Value& target, size_t offset, bool state)
+{
+    // C++14: local variables allowed in constexpr.
+    return state ?
+        target | bit_left<Value>(offset) :
+        target & ~bit_left<Value>(offset);
+}
+
 
 template <typename Value, if_integral_integer<Value>>
 constexpr bool get_right(Value value, size_t offset)
@@ -92,17 +111,37 @@ constexpr bool get_left(Value value, size_t offset)
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_right(Value value, size_t shift)
+constexpr Value rotate_right(Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto width = bit_width<Value>();
+    return ((value = 
+        (value << (width - (shift % width)) |
+        (value >> (shift % width)))));
+}
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value rotate_right(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
     constexpr auto width = bit_width<Value>();
     return
-        (value << (width - (shift % width)) |
-        (value >> (shift % width)));
+        (value << (width - (shift % width))) |
+        (value >> (shift % width));
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_left(Value value, size_t shift)
+constexpr Value rotate_left(Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto width = bit_width<Value>();
+    return ((value =
+        (value << (shift % width)) |
+        (value >> (width - (shift % width)))));
+}
+
+template <typename Value, if_integral_integer<Value>>
+constexpr Value rotate_left(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
     constexpr auto width = bit_width<Value>();
@@ -118,9 +157,33 @@ constexpr Value mask_right(size_t bits)
 }
 
 template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_right(Value& value, size_t bits)
+{
+    return ((value &= mask_right<Value>(bits)));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_right(const Value& value, size_t bits)
+{
+    return value & mask_right<Value>(bits);
+}
+
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_left(size_t bits)
 {
     return std::numeric_limits<Value>::max() >> bits;
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_left(Value& value, size_t bits)
+{
+    return ((value &= mask_left<Value>(bits)));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_left(const Value& value, size_t bits)
+{
+    return value & mask_left<Value>(bits);
 }
 
 } // namespace system
