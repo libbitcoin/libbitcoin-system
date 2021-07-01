@@ -42,7 +42,7 @@ public:
     byte_reader(IStream& source) noexcept;
     virtual ~byte_reader() noexcept;
 
-    /// Read integer, size determined from paramter type.
+    /// Read integer, size determined from parameter type.
     template <typename Integer, if_integer<Integer> = true>
     Integer read_big_endian() noexcept;
     template <typename Integer, if_integer<Integer> = true>

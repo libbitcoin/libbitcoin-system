@@ -38,7 +38,7 @@ namespace system {
 
 // We throw for division by zero and other basic math parameterization errors
 // because the functions are public and are otherwise unguarded. When calling
-// them internally we first verify paramters to prevent hitting the exception.
+// them internally we first verify parameters to prevent hitting the exception.
 // This behavior is no different than when using c++ math operators directly.
 
 // We do not generally catch or throw for out of memory conditions as they are

@@ -29,7 +29,7 @@
 // base10
 // Base 10 is an ascii data encoding with a domain of 10 symbols (characters).
 // 10 is not a power of 2 so base10 not a bit mapping.
-// base10 is 10^n, with power determined by the paramter 'decimal_places'.
+// base10 is 10^n, with power determined by the parameter 'decimal_places'.
 // Conversion range is limited to [0..2^64-1], decoded as uint64_t.
 // Encoding uses arabic numeral characters ['0'..'9'] and supports negative
 // powers using the '.' character delimiter. Leading zeros and trailing

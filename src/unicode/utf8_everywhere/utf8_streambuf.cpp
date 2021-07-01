@@ -38,7 +38,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
 {
     if (is_zero(wide_size_) || wide_buffer == nullptr ||
         wide_size_ > (bc::max_size_t / utf8_max_character_size))
-        throw runtime_exception("unicode_streambuf paramters");
+        throw runtime_exception("unicode_streambuf parameters");
 
     // Input buffer is not yet populated, reflect zero length buffer here.
     setg(narrow_, narrow_, narrow_);

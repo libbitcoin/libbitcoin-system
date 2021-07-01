@@ -337,7 +337,7 @@ const string_list similar_words
 };
 
 // The electrum test vectors do not include 2fa/2faw prefixes, so these are added.
-// Menomics generated using seed prefixer, with following paramters.
+// Menomics generated using seed prefixer, with following parameters.
 
 // 17 null bytes, seed_prefix:standard, language::it, 340 iterations.
 const auto mnemonic_standard = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
@@ -352,7 +352,7 @@ const auto mnemonic_two_factor_authentication = "orfano verbale vessillo sabato 
 const auto mnemonic_two_factor_authentication_witness = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
 
 // The electrum test vectors do not include 2fa negative test vectors, so these are added.
-// Menomics generated using seed prefixer, with 2fa hack disabled, with following paramters.
+// Menomics generated using seed prefixer, with 2fa hack disabled, with following parameters.
 
 // 16 null bytes, seed_prefix:two_factor_authentication, language::pt, 734 iterations.
 const auto mnemonic_two_factor_authentication11 = "pneu jararaca olhar labareda extrato engenho descanso maroto coquetel roxo mestre";

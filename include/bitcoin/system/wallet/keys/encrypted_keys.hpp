@@ -93,7 +93,7 @@ enum ek_flag : uint8_t
 
 /**
  * Create an encrypted private key from an intermediate passphrase.
- * The `out_point` paramter is always compressed, so to use it it should be
+ * The `out_point` parameter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_point    The ec compressed public key of the new key pair.
@@ -110,7 +110,7 @@ BC_API bool create_key_pair(encrypted_private& out_private,
 /**
  * DEPRECATED (scenario)
  * Create an encrypted key pair from an intermediate passphrase.
- * The `out_point` paramter is always compressed, so to use it it should be
+ * The `out_point` parameter is always compressed, so to use it it should be
  * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.

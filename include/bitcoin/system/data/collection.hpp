@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Find the position of an element in a *lexically sorted* collection.
-/// It is the responsibility of the caller to ensure that paramters implement
+/// It is the responsibility of the caller to ensure that parameters implement
 /// sufficient comparison operator overloads (LT and GT). Either the 'list' 
 /// elements must implement (at least) member comparison operator overloads or
 /// the 'value' parameter must implement binary comparison operator overloads.

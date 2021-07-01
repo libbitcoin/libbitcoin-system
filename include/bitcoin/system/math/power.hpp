@@ -33,7 +33,7 @@ namespace system {
 /// "value / 0". The resolution is to not make this call in production code
 /// (the warning is beneficial) and to use a non-const base 0 in tests.
 
-/// All operations below support signed and unsigned template paramters.
+/// All operations below support signed and unsigned template parameters.
 
 /// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).

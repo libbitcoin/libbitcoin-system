@@ -18,8 +18,6 @@
  */
 #include "../test.hpp"
 
-// TODO: fix up return types (now default to size_t).
-
 BOOST_AUTO_TEST_SUITE(power_tests)
 
 // use a non-const zero for log base tests to avoid compiler warning against
@@ -616,7 +614,9 @@ BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__power_2__identity)
     BOOST_REQUIRE_EQUAL(floored_log2<unsigned>(uintx(power(2u, 15u))), 15u);
 }
 
-// pow2
+// TODO: test power return types (default to size_t).
+
+// power2
 
 BOOST_AUTO_TEST_CASE(power__pow2__0__1)
 {
