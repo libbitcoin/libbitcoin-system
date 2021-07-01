@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
 #define LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
 
+#include <type_traits>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -36,10 +37,13 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to c++ % for negative quotients.
+/// The result is signed because positive operands yield a negative result.
+/// Native operators would convert a negative logical result to its two's
+/// complement representation, which is not generally useful as the negative.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend% divisor);
+    -> typename std::make_signed<decltype(dividend % divisor)>::type;
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to c++ % for positive quotients.

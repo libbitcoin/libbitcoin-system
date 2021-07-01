@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_IPP
 #define LIBBITCOIN_SYSTEM_MATH_IPP
 
+#include <type_traits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -26,7 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-// TODO: rename to division.hpp.
 // TODO: test with uintx.
 
 // local
@@ -70,10 +70,12 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
         (is_ceilinged(dividend, divisor) ? 0 : 1);
 }
 
+// Always negative logical result, but operands may be unsigned.
+// So convert the result to unsigned type of the same size.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend % divisor)
+    -> typename std::make_signed<decltype(dividend % divisor)>::type
 {
     return truncated_modulo(dividend, divisor) -
         (is_ceilinged(dividend, divisor) ? 0 : divisor);
@@ -88,6 +90,7 @@ constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
         (is_floored(dividend, divisor) ? 0 : 1);
 }
 
+// Always positive result.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
