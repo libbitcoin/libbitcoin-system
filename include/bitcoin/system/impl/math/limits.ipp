@@ -28,7 +28,7 @@ namespace system {
 
 
 template <typename Result, typename Integer,
-    if_integral_integer<Result>, if_integral_integer<Integer>>
+    if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value) noexcept
 {
     return limit(value, std::numeric_limits<Result>::min(),

@@ -54,6 +54,8 @@ static_assert(limit<uint32_t>(max_uint64) == max_uint32, "");
 static_assert(limit< int64_t>(max_uint64) == max_int64, "");
 static_assert(limit<uint64_t>(max_uint64) == max_uint64, "");
 
+static_assert(std::is_same<decltype(limit<uint8_t>(0)), uint8_t>::value, "");
+
 static_assert(limit(size_t(0),   size_t(0), size_t(0))  == size_t(0),  "");
 static_assert(limit(size_t(25), size_t(50), size_t(60)) == size_t(50), "");
 static_assert(limit(size_t(50), size_t(50), size_t(60)) == size_t(50), "");
@@ -93,3 +95,5 @@ static_assert(limit(-50, -60, 50) == -50, "");
 static_assert(limit(-55, -60, 50) == -55, "");
 static_assert(limit(-60, -60, 50) == -60, "");
 static_assert(limit(-75, -60, 50) == -60, "");
+
+static_assert(std::is_same<decltype(limit<uint8_t>(0, 0, 0)), uint8_t>::value, "");
