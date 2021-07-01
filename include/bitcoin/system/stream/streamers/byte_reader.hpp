@@ -75,7 +75,7 @@ public:
     data_array<Size> read_reverse() noexcept;
 
     /// Read into stream until buffer is exhausted.
-    std::ostream& read(std::ostream& out) noexcept;
+    virtual std::ostream& read(std::ostream& out) noexcept;
 
     /// Read hash (explicit specializations of read_forward).
     virtual mini_hash read_mini_hash() noexcept;
