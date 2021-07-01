@@ -644,6 +644,7 @@ if (with-tests)
         "../../test/machine/opcode.cpp"
         "../../test/machine/operation.cpp"
         "../../test/math/addition.cpp"
+        "../../test/math/bits.cpp"
         "../../test/math/checksum.cpp"
         "../../test/math/division.cpp"
         "../../test/math/elliptic_curve.cpp"

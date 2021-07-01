@@ -216,6 +216,9 @@
     <ClCompile Include="..\..\..\..\test\math\addition.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\bits.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
       <Filter>src\math</Filter>
     </ClCompile>

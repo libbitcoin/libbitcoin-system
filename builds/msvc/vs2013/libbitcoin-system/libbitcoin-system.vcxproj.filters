@@ -1130,6 +1130,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\addition.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bits.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\checksum.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
@@ -1700,6 +1703,9 @@
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\bits.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\checksum.ipp">

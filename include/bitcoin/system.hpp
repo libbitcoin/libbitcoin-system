@@ -132,6 +132,7 @@
 #include <bitcoin/system/machine/script_version.hpp>
 #include <bitcoin/system/machine/sighash_algorithm.hpp>
 #include <bitcoin/system/math/addition.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/math/crypto.hpp>
 #include <bitcoin/system/math/division.hpp>

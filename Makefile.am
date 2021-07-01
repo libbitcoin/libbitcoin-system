@@ -342,6 +342,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/machine/opcode.cpp \
     test/machine/operation.cpp \
     test/math/addition.cpp \
+    test/math/bits.cpp \
     test/math/checksum.cpp \
     test/math/division.cpp \
     test/math/elliptic_curve.cpp \
@@ -615,6 +616,7 @@ include_bitcoin_system_impl_machine_HEADERS = \
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/addition.ipp \
+    include/bitcoin/system/impl/math/bits.ipp \
     include/bitcoin/system/impl/math/checksum.ipp \
     include/bitcoin/system/impl/math/division.ipp \
     include/bitcoin/system/impl/math/hash.ipp \
@@ -698,6 +700,7 @@ include_bitcoin_system_machine_HEADERS = \
 include_bitcoin_system_mathdir = ${includedir}/bitcoin/system/math
 include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/addition.hpp \
+    include/bitcoin/system/math/bits.hpp \
     include/bitcoin/system/math/checksum.hpp \
     include/bitcoin/system/math/crypto.hpp \
     include/bitcoin/system/math/division.hpp \
