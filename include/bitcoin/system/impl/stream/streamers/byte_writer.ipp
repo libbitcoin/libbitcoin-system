@@ -36,6 +36,9 @@ namespace system {
     
 // All public methods must rely on protected for stream state except validity.
 
+template <typename OStream>
+const uint8_t byte_writer<OStream>::pad = 0x00;
+
 // constructors
 //-----------------------------------------------------------------------------
     
@@ -198,7 +201,7 @@ void byte_writer<OStream>::write_string(const std::string& value,
     write_bytes(data_slice(value).data(), length);
 
     // Pad to length with zeros, required for bitcoin string serialization.
-    write_bytes(data_chunk(size - length, '\0'));
+    write_bytes(data_chunk(size - length, pad));
 }
 
 // context

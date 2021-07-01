@@ -96,6 +96,8 @@ protected:
     virtual void do_flush() noexcept;
 
 private:
+    static const uint8_t pad;
+
     bool valid() const noexcept;
     void invalid() noexcept;
     void validate() noexcept;

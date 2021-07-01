@@ -128,11 +128,13 @@ protected:
     virtual bool get_exhausted() const noexcept;
 
 private:
+    static const uint8_t pad;
+
     bool valid() const noexcept;
     void invalid() noexcept;
     void validate() noexcept;
     void clear() noexcept;
-    void seekg(typename IStream::pos_type offset) noexcept;
+    void seeker(typename IStream::pos_type offset) noexcept;
 
     IStream& stream_;
 };

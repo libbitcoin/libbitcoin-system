@@ -59,7 +59,13 @@ protected:
     void do_flush() noexcept override;
 
 private:
-    uint8_t buffer_;
+    static const uint8_t pad;
+
+    void unload() noexcept;
+    void flusher() noexcept;
+    constexpr uint8_t shift() const noexcept;
+
+    uint8_t byte_;
     uint8_t offset_;
 };
 

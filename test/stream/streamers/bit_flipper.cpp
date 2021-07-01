@@ -29,8 +29,8 @@ constexpr uint8_t pad = 0x00;
 #define BIT_FLIPPER_READER_CONTEXT
 #define BIT_FLIPPER_READER_BIG_ENDIAN
 #define BIT_FLIPPER_READER_LITTLE_ENDIAN
-////#define BIT_FLIPPER_READER_BYTES
-////#define BIT_FLIPPER_READER_STRINGS
+#define BIT_FLIPPER_READER_BYTES
+#define BIT_FLIPPER_READER_STRINGS
 
 // Exact copy of all but 2 byte_writer tests, replaced by flip::bits::iostream.
 #define BIT_FLIPPER_WRITER

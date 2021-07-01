@@ -205,8 +205,8 @@ BOOST_AUTO_TEST_CASE(bit_reader__rewind__default_single__expected)
 
 BOOST_AUTO_TEST_CASE(bit_reader__rewind__skip_to_end_rewind_to_middle__expected)
 {
-    const auto size = 42;
-    const std::string value(size, 0x00);
+    const auto size = 1;
+    const std::string value(size, 0x42);
     std::istringstream stream{ value + "*" + value };
     read::bits::istream reader(stream);
     reader.skip_bytes(size);

@@ -27,6 +27,7 @@
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/serialization/endian.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -34,21 +35,22 @@
 namespace libbitcoin {
 namespace system {
 
+template <typename OStream>
+const uint8_t bit_writer<OStream>::pad = 0x00;
+
 // constructors
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) noexcept
-  : byte_writer(sink), buffer_(0x00), offset_(0)
+  : byte_writer(sink), byte_(pad), offset_(0)
 {
 }
 
 template <typename OStream>
 bit_writer<OStream>::~bit_writer() noexcept
 {
-    if (!is_zero(offset_))
-        byte_writer::do_write_bytes(&buffer_, one);
-
+    flusher();
     byte_writer::~byte_writer();
 }
 
@@ -58,23 +60,24 @@ bit_writer<OStream>::~bit_writer() noexcept
 template <typename OStream>
 void bit_writer<OStream>::write_bit(bool value) noexcept
 {
-    buffer_ |= ((value ? 0x80 : 0x00) >> offset_++);
+    // Insert bit into byte.
+    set_left(byte_, offset_++, value);
 
-    if (offset_ == byte_bits)
-    {
-        byte_writer::do_write_bytes(&buffer_, one);
-        buffer_ = 0x00;
-        offset_ = 0;
-    }
+    // unload resets offset_ to zero.
+    if (is_zero(shift()))
+        unload();
 }
 
 template <typename OStream>
 void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 {
-    bits = lesser<size_t>(to_bits(sizeof(uint64_t)), bits);
+    bits = lesser<size_t>(bit_width(value), bits);
 
+    // 'bits' refers to the count of the rightmost bits in 'value'.
+    // Those bits are read from left to right using a right-relative offset.
+    // Subtract one for size-to-index translation, avoiding iterator underflow.
     for (auto bit = bits; !is_zero(bit); --bit)
-        write_bit(!is_zero((value >> sub1(bit)) & to_int<uint64_t>(true)));
+        write_bit(get_right(value, sub1(bit)));
 }
 
 // protected overrides
@@ -84,7 +87,7 @@ template <typename OStream>
 void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) noexcept
 {
-    // TODO: Suboptimal but simple.
+    // Suboptimal becase shifts each bit and writes single bytes, but simple.
     for (size_t byte = 0; byte < size; ++byte)
         write_bits(data[byte], byte_bits);
 }
@@ -92,10 +95,35 @@ void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
 template <typename OStream>
 void bit_writer<OStream>::do_flush() noexcept
 {
-    if (!is_zero(offset_))
-        byte_writer::do_write_bytes(&buffer_, one);
-
+    flusher();
     byte_writer::do_flush();
+}
+
+// private
+//-----------------------------------------------------------------------------
+
+// This is the only byte write and offset change.
+template <typename OStream>
+void bit_writer<OStream>::unload() noexcept
+{
+    byte_writer::do_write_bytes(&byte_, one);
+    byte_ = pad;
+    offset_ = 0;
+}
+
+template <typename OStream>
+void bit_writer<OStream>::flusher() noexcept
+{
+    if (!is_zero(offset_))
+        unload();
+}
+
+template <typename OStream>
+constexpr uint8_t bit_writer<OStream>::shift() const noexcept
+{
+    // If shift is zero then eight bits have been written, so time to dump.
+    // If offset is zero then no bits have been written since last dump.
+    return byte_bits - offset_;
 }
 
 } // namespace system

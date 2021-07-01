@@ -37,7 +37,8 @@ namespace system {
 
 // All public methods must rely on protected for stream state except validity.
 
-constexpr uint8_t pad = 0x00;
+template <typename IStream>
+const uint8_t byte_reader<IStream>::pad = 0x00;
 
 // constructors
 //-----------------------------------------------------------------------------
@@ -276,7 +277,7 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
         out.push_back(read_byte());
 
     // Removes zero and all after, required for bitcoin string deserialization.
-    const auto position = out.find('\0');
+    const auto position = out.find(pad);
     out.resize(position == std::string::npos ? out.size() : position);
     out.shrink_to_fit();
 
@@ -374,7 +375,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seekg(static_cast<IStream::pos_type>(size));
+    seeker(static_cast<IStream::pos_type>(size));
 }
 
 template <typename IStream>
@@ -382,7 +383,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seekg(-static_cast<IStream::pos_type>(size));
+    seeker(-static_cast<IStream::pos_type>(size));
 }
 
 template <typename IStream>
@@ -447,7 +448,7 @@ void byte_reader<IStream>::clear() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::seekg(typename IStream::pos_type offset) noexcept
+void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
 {
     // Force these to be consistent by treating zero seek as a no-op.
     // boost/istringstream both succeed on non-empty zero seek.

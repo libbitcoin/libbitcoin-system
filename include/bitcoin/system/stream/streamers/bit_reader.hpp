@@ -58,19 +58,26 @@ public:
     virtual void skip_bit() noexcept;
     virtual void skip_bits(size_t bits) noexcept;
 
-    /////// Rewind the iterator.
-    ////virtual void rewind_bit() noexcept;
-    ////virtual void rewind_bits(size_t bits) noexcept;
+    /// Rewind the iterator.
+    virtual void rewind_bit() noexcept;
+    virtual void rewind_bits(size_t bits) noexcept;
 
 protected:
     uint8_t do_peek_byte() noexcept override;
     void do_read_bytes(uint8_t* buffer, size_t size) noexcept override;
     void do_skip_bytes(size_t size) noexcept override;
-    ////void do_rewind_bytes(size_t size) noexcept override;
+    void do_rewind_bytes(size_t size) noexcept override;
     bool get_exhausted() const noexcept override;
 
 private:
-    uint8_t buffer_;
+    static const uint8_t pad;
+
+    void load() noexcept;
+    void reload() noexcept;
+    uint8_t peek() noexcept;
+    constexpr uint8_t shift() const noexcept;
+
+    uint8_t byte_;
     uint8_t offset_;
 };
 
