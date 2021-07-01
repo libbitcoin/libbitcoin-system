@@ -28,162 +28,233 @@
 namespace libbitcoin {
 namespace system {
 
-// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
+// complements
 
-template <typename Value, if_integral_integer<Value>>
-constexpr size_t bit_width(Value)
+template <typename Integer, if_integer<Integer>>
+constexpr Integer ones_complement(Integer value) noexcept
 {
-    return to_bits(sizeof(Value));
+    return ~value;
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Integer, if_integer<Integer>>
+constexpr Integer twos_complement(Integer value) noexcept
+{
+    return add1(ones_complement(value));
+}
+
+// bits
+
+template <typename Value, if_integer<Value>>
 constexpr Value bit_lo()
 {
     return to_int<Value>(true) << zero;
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value bit_hi()
 {
     // sub1 for size-to-index translation.
-    return to_int<Value>(true) << sub1(bit_width<Value>());
+    return to_int<Value>(true) << sub1(width<Value>());
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value bit_right(size_t offset)
 {
     return bit_lo<Value>() << offset;
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value bit_left(size_t offset)
 {
     return bit_hi<Value>() >> offset;
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
+constexpr Value bit_all()
+{
+    return ones_complement<Value>(0);
+}
+
+// width
+
+// Avoid sizeof as it is incorrect for non-itegral types, such as uintx.
+// "For integer types, this is the number of bits not counting the sign
+// bit and the padding bits (if any)"
+// en.cppreference.com/w/cpp/types/numeric_limits/digits
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t width(Value)
+{
+    return std::numeric_limits<Value>::digits;
+}
+
+template <typename Value, if_signed_integer<Value>>
+constexpr size_t width(Value)
+{
+    return add1(std::numeric_limits<Value>::digits);
+}
+
+// set
+
+template <typename Value, if_integer<Value>>
 constexpr Value set_right(Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    return state ?
-        ((target |= bit_right<Value>(offset))) :
-        ((target &= ~bit_right<Value>(offset)));
+    return state ? ((target |= bit_right<Value>(offset))) :
+        ((target &= ones_complement(bit_right<Value>(offset))));
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value set_right(const Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    return state ?
-        target | bit_right<Value>(offset) :
-        target & ~bit_right<Value>(offset);
+    return state ? target | bit_right<Value>(offset) :
+        target & ones_complement(bit_right<Value>(offset));
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value set_left(Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    return state ?
-        ((target |= bit_left<Value>(offset))) :
-        ((target &= ~bit_left<Value>(offset)));
+    return state ? ((target |= bit_left<Value>(offset))) :
+        ((target &= ones_complement(bit_left<Value>(offset))));
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value set_left(const Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
-    return state ?
-        target | bit_left<Value>(offset) :
-        target & ~bit_left<Value>(offset);
+    return state ? target | bit_left<Value>(offset) :
+        target & ones_complement(bit_left<Value>(offset));
 }
 
+// get
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr bool get_right(Value value, size_t offset)
 {
     return !is_zero(value & bit_right<Value>(offset));
 }
 
-template <typename Value, if_integral_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr bool get_left(Value value, size_t offset)
 {
     return !is_zero(value & bit_left<Value>(offset));
 }
 
-template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_right(Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    constexpr auto width = bit_width<Value>();
-    return ((value = 
-        (value << (width - (shift % width)) |
-        (value >> (shift % width)))));
-}
+// mask
 
-template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_right(const Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    constexpr auto width = bit_width<Value>();
-    return
-        (value << (width - (shift % width))) |
-        (value >> (shift % width));
-}
-
-template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_left(Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    constexpr auto width = bit_width<Value>();
-    return ((value =
-        (value << (shift % width)) |
-        (value >> (width - (shift % width)))));
-}
-
-template <typename Value, if_integral_integer<Value>>
-constexpr Value rotate_left(const Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    constexpr auto width = bit_width<Value>();
-    return
-        (value << (shift % width)) |
-        (value >> (width - (shift % width)));
-}
-
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_right(size_t bits)
 {
-    return std::numeric_limits<Value>::max() << bits;
+    return bit_all<Value>() << bits;
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_right(Value& value, size_t bits)
 {
     return ((value &= mask_right<Value>(bits)));
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_right(const Value& value, size_t bits)
 {
     return value & mask_right<Value>(bits);
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_left(size_t bits)
 {
-    return std::numeric_limits<Value>::max() >> bits;
+    return bit_all<Value>() >> bits;
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_left(Value& value, size_t bits)
 {
     return ((value &= mask_left<Value>(bits)));
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value mask_left(const Value& value, size_t bits)
 {
     return value & mask_left<Value>(bits);
+}
+
+// flag
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_right(size_t bits)
+{
+    return ones_complement(bit_all<Value>() << bits);
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_right(Value& value, size_t bits)
+{
+    return ((value |= flag_right<Value>(bits)));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_right(const Value& value, size_t bits)
+{
+    return value | flag_right<Value>(bits);
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_left(size_t bits)
+{
+    return ones_complement(bit_all<Value>() >> bits);
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_left(Value& value, size_t bits)
+{
+    return ((value |= flag_left<Value>(bits)));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value flag_left(const Value& value, size_t bits)
+{
+    return value | flag_left<Value>(bits);
+}
+
+// rotate
+
+// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
+// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
+
+template <typename Value, if_integer<Value>>
+constexpr Value rotate_right(Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto bits = width<Value>();
+    return ((value = (value << (bits - (shift % bits)) |
+        (value >> (shift % bits)))));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value rotate_right(const Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto bits = width<Value>();
+    return (value << (bits - (shift % bits))) | (value >> (shift % bits));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value rotate_left(Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto bits = width<Value>();
+    return ((value = (value << (shift % bits)) |
+        (value >> (bits - (shift % bits)))));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value rotate_left(const Value& value, size_t shift)
+{
+    // C++14: local variables allowed in constexpr.
+    constexpr auto bits = width<Value>();
+    return (value << (shift % bits)) | (value >> (bits - (shift % bits)));
 }
 
 } // namespace system
