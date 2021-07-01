@@ -333,4 +333,32 @@ static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d, "");
 static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a, "");
 static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a, "");
 
-// rotate_left
+constexpr auto foo = int8_t(0xff) << 3;
+
+// mask_right
+static_assert(mask_right<uint8_t>(0) == 0xff, "");
+static_assert(mask_right<uint8_t>(1) == 0xfe, "");
+static_assert(mask_right<uint8_t>(2) == 0xfc, "");
+static_assert(mask_right<uint8_t>(3) == 0xf8, "");
+static_assert(mask_right<uint8_t>(4) == 0xf0, "");
+static_assert(mask_right<uint8_t>(5) == 0xe0, "");
+static_assert(mask_right<uint8_t>(6) == 0xc0, "");
+static_assert(mask_right<uint8_t>(7) == 0x80, "");
+static_assert(mask_right<uint8_t>(8) == 0x00, "");
+static_assert(mask_right<uint16_t>(8) == 0xff00, "");
+static_assert(mask_right<uint32_t>(8) == 0xffffff00, "");
+static_assert(mask_right<uint64_t>(8) == 0xffffffffffffff00, "");
+
+// mask_left
+static_assert(mask_left<uint8_t>(0) == 0xff, "");
+static_assert(mask_left<uint8_t>(1) == 0x7f, "");
+static_assert(mask_left<uint8_t>(2) == 0x3f, "");
+static_assert(mask_left<uint8_t>(3) == 0x1f, "");
+static_assert(mask_left<uint8_t>(4) == 0x0f, "");
+static_assert(mask_left<uint8_t>(5) == 0x07, "");
+static_assert(mask_left<uint8_t>(6) == 0x03, "");
+static_assert(mask_left<uint8_t>(7) == 0x01, "");
+static_assert(mask_left<uint8_t>(8) == 0x00, "");
+static_assert(mask_left<uint16_t>(8) == 0x00ff, "");
+static_assert(mask_left<uint32_t>(8) == 0x00ffffff, "");
+static_assert(mask_left<uint64_t>(8) == 0x00ffffffffffffff, "");

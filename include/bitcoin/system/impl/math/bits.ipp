@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
 #include <cstddef>
+#include <limits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/type_constraints.hpp>
@@ -108,6 +109,18 @@ constexpr Value rotate_left(Value value, size_t shift)
     return
         (value << (shift % width)) |
         (value >> (width - (shift % width)));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_right(size_t bits)
+{
+    return std::numeric_limits<Value>::max() << bits;
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value mask_left(size_t bits)
+{
+    return std::numeric_limits<Value>::max() >> bits;
 }
 
 } // namespace system

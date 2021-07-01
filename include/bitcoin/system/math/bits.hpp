@@ -70,6 +70,14 @@ constexpr Value rotate_right(Value value, size_t shift);
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value rotate_left(Value value, size_t shift);
 
+/// A bitmask with low order count of bits zero.
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_right(size_t bits);
+
+/// A bitmask with high order count of bits zero.
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value mask_left(size_t bits);
+
 } // namespace system
 } // namespace libbitcoin
 
