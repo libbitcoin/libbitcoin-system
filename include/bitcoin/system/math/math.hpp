@@ -21,6 +21,7 @@
 
 // Generic math.
 #include <bitcoin/system/math/addition.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
