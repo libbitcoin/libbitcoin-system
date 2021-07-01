@@ -30,7 +30,7 @@ namespace system {
 
 // throw is not constexpr at least through C++20.
 
-// TODO: generalize to any integers.
+// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_multiply(Integer left, Integer right)
 {
@@ -43,7 +43,7 @@ Integer safe_multiply(Integer left, Integer right)
     return left * right;
 }
 
-// TODO: generalize to any integers.
+// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_add(Integer left, Integer right)
 {
@@ -53,7 +53,7 @@ Integer safe_add(Integer left, Integer right)
     return left + right;
 }
 
-// TODO: generalize to any integers.
+// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_subtract(Integer left, Integer right)
 {
@@ -63,14 +63,14 @@ Integer safe_subtract(Integer left, Integer right)
     return left - right;
 }
 
-// TODO: generalize to any integers.
+// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 void safe_increment(Integer& value)
 {
     value = safe_add(value, one);
 }
 
-// TODO: generalize to any integers.
+// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 void safe_decrement(Integer& value)
 {
