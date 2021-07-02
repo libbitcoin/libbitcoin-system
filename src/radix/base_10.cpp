@@ -19,10 +19,14 @@
 #include <bitcoin/system/radix/base_10.hpp>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <iomanip>
+#include <iterator>
 #include <sstream>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/serialization/deserialize.hpp>
 #include <bitcoin/system/serialization/serialize.hpp>
 
@@ -72,16 +76,15 @@ bool decode_base10(uint64_t& out, const std::string& amount,
         return false;
 
     // Add digits to the end if there are too few.
-    auto actual_places = value.end() - point;
-    if (actual_places < decimal_places)
-        value.append(decimal_places - actual_places, '0');
+    auto actual_places = std::distance(point, value.end());
+    value.append(floored_subtract<size_t>(decimal_places, actual_places), '0');
 
     // Remove digits from the end if there are too many.
     // Value is truncated if trailing digits are non-zero.
     auto truncated = false;
     if (actual_places > decimal_places)
     {
-        auto end = point + decimal_places;
+        auto end = std::next(point, decimal_places);
         truncated = !std::all_of(end, value.end(), is_character<'0'>);
         value.erase(end, value.end());
     }
@@ -105,8 +108,8 @@ std::string encode_base10(uint64_t amount, uint8_t decimal_places)
 {
     std::ostringstream stream;
     stream.fill('0');
-    stream.width(add1(decimal_places));
-    serialize(stream, amount, "");
+    stream.width(add1<uint16_t>(decimal_places));
+    stream << amount;
     auto text = stream.str();
     text.insert(text.size() - decimal_places, one, '.');
     trim_right(text, { "0" });
