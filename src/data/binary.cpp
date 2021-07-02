@@ -18,30 +18,19 @@
  */
 #include <bitcoin/system/data/binary.hpp>
 
-#include <algorithm>
 #include <iostream>
 #include <string>
 #include <utility>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/math/addition.hpp>
-#include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
-
-// See std::bitset (fixed size), std::vector<bool>, and boost::dynamic_bitset
-// for other options. boost::dynamic_bitset supports serialization and is the
-// most comprehensive. We use uintx as the contained bit vector because of our
-// endian support. dynamic_bitset would give us serialization but we would have
-// to implement endianed byte conversion (using block append iteration). Uintx
-// provides all potentially-necessary operations and reduces boost dependency.
+#include <bitcoin/system/data/data_chunk.hpp>
+#include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-using namespace boost::multiprecision;
-constexpr auto capacity = std::numeric_limits<binary::size_type>::max();
+constexpr uint8_t pad = 0x00;
 
 constexpr bool is_binary(char character) noexcept
 {
@@ -57,17 +46,17 @@ bool binary::is_base2(const std::string& text) noexcept
 // ----------------------------------------------------------------------------
 
 binary::binary() noexcept
-  : bits_(0), size_(0)
+  : bits_(0), bytes_()
 {
 }
 
 binary::binary(binary&& other) noexcept
-  : bits_(std::move(other.bits_)), size_(other.size_)
+  : bits_(other.bits_), bytes_(std::move(other.bytes_))
 {
 }
 
 binary::binary(const binary& other) noexcept
-  : bits_(other.bits_), size_(other.size_)
+  : bits_(other.bits_), bytes_(other.bytes_)
 {
 }
 
@@ -76,90 +65,91 @@ binary::binary(const std::string& bits) noexcept
 {
 }
 
-// Size parameter controls the extent of serialization.
-binary::binary(size_type size, const data_slice& data) noexcept
-  : binary(from_data(size, data))
+binary::binary(size_t bits, const data_slice& data) noexcept
+  : binary(from_data(bits, data.to_chunk()))
 {
 }
 
 // private
-binary::binary(size_type size, const uintx& number) noexcept
-  : bits_(number), size_(size)
+binary::binary(data_chunk&& bytes, size_t bits) noexcept
+  : bits_(bits), bytes_(bytes)
 {
 }
 
 // factories
 // ----------------------------------------------------------------------------
 
-// TODO: endianness.
-binary binary::from_data(size_type size, const data_slice& data) noexcept
+binary binary::from_data(size_t bits, data_chunk&& data) noexcept
 {
-    if (data.size() > ceilinged_divide(capacity, byte_bits))
-        return {};
+    data.resize(ceilinged_divide(bits, byte_bits), pad);
 
-    // If data bits provided is greater than size, shift the excess out.
-    const auto bits = static_cast<size_type>(to_bits(data.size()));
-    auto number = from_little_endian(data);
-    number >>= floored_subtract(bits, size);
-    return { size, number };
+    if (!data.empty())
+        mask_right(data.back(), absolute(ceilinged_modulo(bits, byte_bits)));
+
+    return { std::move(data), bits };
 }
 
-// TODO: endianness.
 binary binary::from_string(const std::string bits) noexcept
 {
-    if ((bits.length() > capacity) || !binary::is_base2(bits))
+    if (!binary::is_base2(bits))
         return {};
 
-    uintx number;
-    for (size_type bit = 0; bit < bits.length(); ++bit)
-        if (bits[bit] == '1') bit_set(number, bit);
+    auto length = bits.length();
+    data_chunk data(ceilinged_divide(length, byte_bits), pad);
+    write::bits::copy writer(data);
 
-    return { static_cast<size_type>(bits.length()), number };
+    for (const auto bit: bits)
+        writer.write_bit(bit == '1');
+
+    writer.flush();
+    return { std::move(data), length };
 }
 
 // methods
 // ----------------------------------------------------------------------------
 
-// TODO: endianness.
 std::string binary::encoded() const noexcept
 {
-    std::string bits(size_, '\0');
-    auto character = bits.begin();
-    auto self = *this;
+    std::string text(to_bits(bytes_.size()), pad);
+    write::bytes::copy writer(text);
+    read::bits::copy reader(bytes_);
 
-    for (size_type bit = 0; bit < bits.length(); ++bit)
-        *character++ = self[bit] ? '1' : '0';
+    while (!reader.is_exhausted())
+        writer.write_byte(reader.read_bit() ? '1' : '0');
 
-    return bits;
+    // trim up to 7 characters of padding.
+    text.resize(bits_);
+    text.shrink_to_fit();
+    return text;
 }
 
-// TODO: endianness.
-data_chunk binary::data() const noexcept
+const data_chunk& binary::data() const noexcept
 {
-    // If converted byte size is less than size, pad little-endian.
-    auto buffer = to_little_endian(bits_);
-    buffer.resize(bytes(), 0x00);
-    return buffer;
+    return bytes_;
 }
 
-binary::size_type binary::bytes() const noexcept
+size_t binary::bytes() const noexcept
 {
-    return ceilinged_divide(size_, static_cast<size_type>(byte_bits));
+    return bytes_.size();
 }
 
-binary::size_type binary::bits() const noexcept
+size_t binary::bits() const noexcept
 {
-    return size_;
+    return bits_;
 }
 
 // operators
 // ----------------------------------------------------------------------------
-// For information on implementing a reference operator[] against a proxy, see:
-// en.cppreference.com/w/cpp/utility/bitset/reference
 
-bool binary::operator[](size_type index) const noexcept
+binary::operator const data_chunk&() const noexcept
 {
-    return bit_test(bits_, index);
+    return bytes_;
+}
+
+bool binary::operator[](size_t index) const noexcept
+{
+    const auto byte = to_bytes(index);
+    return (byte < bits_) && get_left(bytes_[byte], index % byte_bits);
 }
 
 bool binary::operator<(const binary& other) const noexcept
@@ -169,15 +159,15 @@ bool binary::operator<(const binary& other) const noexcept
 
 binary& binary::operator=(binary&& other) noexcept
 {
-    bits_ = std::move(other.bits_);
-    size_ = other.size_;
+    bits_ = other.bits_;
+    bytes_ = std::move(other.bytes_);
     return *this;
 }
 
 binary& binary::operator=(const binary& other) noexcept
 {
     bits_ = other.bits_;
-    size_ = other.size_;
+    bytes_ = other.bytes_;
     return *this;
 }
 

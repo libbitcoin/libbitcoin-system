@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_DATA_BINARY_HPP
 
 #include <cstddef>
-#include <cstdint>
+#include <functional>
+#include <iostream>
 #include <string>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
@@ -34,9 +34,6 @@ namespace system {
 class BC_API binary
 {
 public:
-    /// uintx is limited to unsigned.
-    typedef uint32_t size_type;
-
     /// True if all characters are '0' or '1'.
     static bool is_base2(const std::string& text) noexcept;
 
@@ -45,27 +42,28 @@ public:
     binary(binary&& other) noexcept;
     binary(const binary& other) noexcept;
     binary(const std::string& bits) noexcept;
-    binary(size_type size, const data_slice& data) noexcept;
+    binary(size_t bits, const data_slice& data) noexcept;
 
     /// Methods.
     std::string encoded() const noexcept;
-    data_chunk data() const noexcept;
-    size_type bytes() const noexcept;
-    size_type bits() const noexcept;
+    const data_chunk& data() const noexcept;
+    size_t bytes() const noexcept;
+    size_t bits() const noexcept;
 
     /// Operators.
-    bool operator[](size_type index) const noexcept;
+    operator const data_chunk&() const noexcept;
+    bool operator[](size_t index) const noexcept;
     bool operator<(const binary& other) const noexcept;
     binary& operator=(binary&& other) noexcept;
     binary& operator=(const binary& other) noexcept;
 
 private:
-    static binary from_data(size_type size, const data_slice& data) noexcept;
+    binary(data_chunk&& bytes, size_t bits) noexcept;
     static binary from_string(const std::string bits) noexcept;
-    binary(size_type size, const uintx& number) noexcept;
+    static binary from_data(size_t size, data_chunk&& bytes) noexcept;
 
-    uintx bits_;
-    size_type size_;
+    size_t bits_;
+    data_chunk bytes_;
 };
 
 bool operator==(const binary& left, const binary& right) noexcept;

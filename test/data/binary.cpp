@@ -20,133 +20,317 @@
 
 BOOST_AUTO_TEST_SUITE(binary_tests)
 
-// TODO: test:
-// construct(default)
-// construct(move/copy)
-// assign (move/copy)
-// bytes
-// >>
-// []
-// <
-// ==/!=
+// is_base2
 
-BOOST_AUTO_TEST_CASE(binary__construct__bytes_32__expected_encoded)
+BOOST_AUTO_TEST_CASE(binary__is_base2__empty__true)
 {
-    const data_chunk blocks{ { 0xba, 0xad, 0xf0, 0x0d } };
-    const binary prefix(32, blocks);
-    BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010101011011111000000001101");
+    BOOST_REQUIRE(binary::is_base2(""));
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__bytes_32__expected_data)
+BOOST_AUTO_TEST_CASE(binary__is_base2__non_empty_valid__true)
 {
-    const data_chunk data{ { 0xba, 0xad, 0xf0, 0x0d } };
-    const binary prefix(32, data);
-    BOOST_REQUIRE(prefix.data() == data);
+    BOOST_REQUIRE(binary::is_base2("0"));
+    BOOST_REQUIRE(binary::is_base2("1"));
+    BOOST_REQUIRE(binary::is_base2("1010101000111010011001"));
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__bytes_32__expected_out)
+BOOST_AUTO_TEST_CASE(binary__is_base2__invalid__false)
 {
-    const data_chunk blocks{ { 0xba, 0xad, 0xf0, 0x0d } };
-    const binary prefix(32, blocks);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(stream.str(), "10111010101011011111000000001101");
+    BOOST_REQUIRE(!binary::is_base2("02"));
+    BOOST_REQUIRE(!binary::is_base2("30"));
+    BOOST_REQUIRE(!binary::is_base2("04"));
+    BOOST_REQUIRE(!binary::is_base2("50"));
+    BOOST_REQUIRE(!binary::is_base2("06"));
+    BOOST_REQUIRE(!binary::is_base2("70"));
+    BOOST_REQUIRE(!binary::is_base2("18"));
+    BOOST_REQUIRE(!binary::is_base2("91"));
+    BOOST_REQUIRE(!binary::is_base2("1a"));
+    BOOST_REQUIRE(!binary::is_base2("Z1"));
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__uint32_8__expected_encoded)
+// construct default
+
+BOOST_AUTO_TEST_CASE(binary__construct__default__zero_empty)
 {
-    const binary prefix(8, to_little_endian<uint32_t>(0x0df0adba));
-    BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010");
+    const binary instance;
+    BOOST_REQUIRE(instance.encoded().empty());
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.bytes(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.bits(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__uint32_32__expected_encoded)
+// construct move
+
+BOOST_AUTO_TEST_CASE(binary__construct__move__expected)
 {
-    const binary prefix(32, to_little_endian<uint32_t>(0x0df0adba));
-    BOOST_REQUIRE_EQUAL(prefix.encoded(), "10111010101011011111000000001101");
+    const auto expected = "101";
+    binary instance1(expected);
+    const binary instance2(std::move(instance1));
+    BOOST_REQUIRE_EQUAL(instance2.encoded(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__string__expected_data)
+// construct copy
+
+BOOST_AUTO_TEST_CASE(binary__construct__copy__expected)
 {
-    const data_chunk data{ { 0xba, 0xad, 0xf0, 0x0d } };
-    const binary prefix("10111010101011011111000000001101");
-    BOOST_REQUIRE(prefix.data() == data);
+    const auto expected = "101";
+    const binary instance1(expected);
+    const binary instance2(instance1);
+    BOOST_REQUIRE_EQUAL(instance2, instance1);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__empty__empty)
+// construct string
+
+BOOST_AUTO_TEST_CASE(binary__construct_string__invalid__zero_empty)
 {
-    const data_chunk bytes;
-    const binary prefix(0, bytes);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 0u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 0u);
-    BOOST_REQUIRE(stream.str().empty());
+    const binary instance("42");
+    BOOST_REQUIRE(instance.encoded().empty());
+    BOOST_REQUIRE(((const data_chunk&)instance).empty());
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.bytes(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.bits(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__zero_bits__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__empty__zero_empty)
 {
-    const data_chunk blocks{ { 0x00, 0x00, 0x00, 0x00 } };
-    const binary prefix(0, blocks);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 0u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 0u);
-    BOOST_REQUIRE(stream.str().empty());
+    const binary instance("");
+    BOOST_REQUIRE(instance.encoded().empty());
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__one_bit__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__0__0)
 {
-    data_chunk bytes{ { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
-    auto prefix = binary(1, bytes);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 1u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 1u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "1");
+    const auto expected = "0";
+    const binary instance(expected);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__two_same_bits__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__1__1)
 {
-    const data_chunk bytes{ { 0x01, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42 } };
-    const auto prefix = binary(2, bytes);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 2u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 1u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "00");
+    const auto expected = "1";
+    const binary instance(expected);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__two_different_bits__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__1010__1010)
 {
-    const data_chunk blocks{ { 0x42, 0x42, 0x42, 0x01 } };
-    const binary prefix(2, blocks);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 2u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 1u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "01");
+    const auto expected = "1010";
+    const binary instance(expected);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__16_zero_bits__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__0101__0100)
 {
-    const data_chunk blocks{ { 0x00, 0x00 } };
-    const binary prefix(16, blocks);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 16u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 2u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "0000000000000000");
+    const auto expected = "0101";
+    const binary instance(expected);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(binary__construct__16_non_zero_bits__expected)
+BOOST_AUTO_TEST_CASE(binary__construct_string__bits__expected)
 {
-    const data_chunk bytes{ { 0xFF, 0x00 } };
-    const auto prefix = binary(16, bytes);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.bits(), 16u);
-    BOOST_REQUIRE_EQUAL(prefix.data().size(), 2u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "1111111100000000");
+    const auto expected = "10111010101011011111000000001101";
+    const binary instance(expected);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
+}
+
+// construct data
+
+// This data-text relation from original test cases, ensures endianness consistency.
+BOOST_AUTO_TEST_CASE(binary__construct_data__32_bits__expected)
+{
+    const auto expected = "10111010101011011111000000001101";
+    const binary instance(32, { 0xba, 0xad, 0xf0, 0x0d });
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(binary__construct_data__zero_empty__zero_empty)
+{
+    const binary instance(0, data_chunk{});
+    BOOST_REQUIRE(instance.encoded().empty());
+    BOOST_REQUIRE(((const data_chunk&)instance).empty());
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.bytes(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.bits(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(binary__construct_data__zero_not_empty__zero_empty)
+{
+    data_chunk data(42, 0x00);
+    const binary instance(0, data);
+    BOOST_REQUIRE(instance.encoded().empty());
+    BOOST_REQUIRE(((const data_chunk&)instance).empty());
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.bytes(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.bits(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(binary__construct_data__matched_size__expected)
+{
+    const data_chunk data{ 0xba, 0xad, 0xf0, 0xfd };
+    const auto bytes = data.size();
+    const auto bits = to_bits(bytes);
+    const binary instance(bits, data);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "10111010101011011111000011111101");
+    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, data);
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+    BOOST_REQUIRE_EQUAL(instance.bytes(), bytes);
+    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
+}
+
+BOOST_AUTO_TEST_CASE(binary__construct_data__lower_size__expected)
+{
+    const data_chunk data{ 0xba, 0xad, 0xf0, 0xfd };
+    const data_chunk expected{ 0xba, 0xad, 0xf0, mask_right<uint8_t>(0xfd, 4) };
+    const auto bits = to_bits(data.size()) - 4;
+    const binary instance(bits, data);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "1011101010101101111100001111");
+    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, expected);
+    BOOST_REQUIRE_EQUAL(instance.data(), expected);
+    BOOST_REQUIRE_EQUAL(instance.bytes(), expected.size());
+    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
+}
+
+BOOST_AUTO_TEST_CASE(binary__construct_data__higher_size__expected)
+{
+    const data_chunk data{ 0xba, 0xad, 0xf0, 0x0d };
+    const data_chunk expected{ 0xba, 0xad, 0xf0, 0x0d, 0x00 };
+    const auto bits = to_bits(data.size()) + 4;
+    const binary instance(bits, data);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "101110101010110111110000000011010000");
+    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, expected);
+    BOOST_REQUIRE_EQUAL(instance.data(), expected);
+    BOOST_REQUIRE_EQUAL(instance.bytes(), expected.size());
+    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
+}
+
+// assign move
+
+BOOST_AUTO_TEST_CASE(binary__assign__move__expected)
+{
+    const auto expected = "101";
+    binary instance1(expected);
+    binary instance2;
+    instance2 = std::move(instance1);
+    BOOST_REQUIRE_EQUAL(instance2.encoded(), expected);
+}
+
+// assign copy
+
+BOOST_AUTO_TEST_CASE(binary__assign__copy__expected)
+{
+    const auto expected = "101";
+    binary instance1(expected);
+    binary instance2 = instance1;
+    BOOST_REQUIRE_EQUAL(instance2, instance1);
+}
+
+// equality
+
+BOOST_AUTO_TEST_CASE(binary__equality__same__true)
+{
+    BOOST_REQUIRE(binary{} == binary{});
+    BOOST_REQUIRE(binary("0") == binary("0"));
+    BOOST_REQUIRE(binary("101") == binary("101"));
+}
+
+BOOST_AUTO_TEST_CASE(binary__equality__different__false)
+{
+    BOOST_REQUIRE(!(binary("1") == binary("0")));
+    BOOST_REQUIRE(!(binary("010") == binary("10")));
+    BOOST_REQUIRE(!(binary("01") == binary("010")));
+}
+
+// inequality
+
+BOOST_AUTO_TEST_CASE(binary__inequality__different__true)
+{
+    BOOST_REQUIRE(binary("1") != binary("0"));
+    BOOST_REQUIRE(binary("010") != binary("10"));
+    BOOST_REQUIRE(binary("01") != binary("010"));
+}
+
+BOOST_AUTO_TEST_CASE(binary__inequality__same__false)
+{
+    BOOST_REQUIRE(!(binary{} != binary{}));
+    BOOST_REQUIRE(!(binary("0") != binary("0")));
+    BOOST_REQUIRE(!(binary("101") != binary("101")));
+}
+
+// operator<
+
+BOOST_AUTO_TEST_CASE(binary__lesser__same__false)
+{
+    BOOST_REQUIRE(!(binary{} < binary{}));
+    BOOST_REQUIRE(!(binary("0") < binary("0")));
+    BOOST_REQUIRE(!(binary("101") < binary("101")));
+}
+
+// operator<
+
+BOOST_AUTO_TEST_CASE(binary__lesser__lesser__true)
+{
+    BOOST_REQUIRE(binary{} < binary("0"));
+    BOOST_REQUIRE(binary{} < binary("1"));
+    BOOST_REQUIRE(binary{} < binary("00"));
+    BOOST_REQUIRE(binary{} < binary("01"));
+    BOOST_REQUIRE(binary("0") < binary("1"));
+    BOOST_REQUIRE(binary("0") < binary("01"));
+    BOOST_REQUIRE(binary("1") < binary("11"));
+}
+
+BOOST_AUTO_TEST_CASE(binary__lesser__greater__false)
+{
+    BOOST_REQUIRE(!(binary("0") < binary{}));
+    BOOST_REQUIRE(!(binary("1") < binary{}));
+    BOOST_REQUIRE(!(binary("1") < binary("00")));
+    BOOST_REQUIRE(!(binary("1") < binary("01")));
+    BOOST_REQUIRE(!(binary("01") < binary("000")));
+    BOOST_REQUIRE(!(binary("10") < binary("011")));
+}
+
+// operator[]
+
+BOOST_AUTO_TEST_CASE(binary__index__overflow__false)
+{
+    const binary instance{};
+    BOOST_REQUIRE_EQUAL(instance[0], false);
+    BOOST_REQUIRE_EQUAL(instance[42], false);
+}
+
+BOOST_AUTO_TEST_CASE(binary__index__contained__expected)
+{
+    const binary instance{ "1010111010" };
+    BOOST_REQUIRE_EQUAL(instance[0], true);
+    BOOST_REQUIRE_EQUAL(instance[1], false);
+    BOOST_REQUIRE_EQUAL(instance[2], true);
+    BOOST_REQUIRE_EQUAL(instance[3], false);
+    BOOST_REQUIRE_EQUAL(instance[4], true);
+    BOOST_REQUIRE_EQUAL(instance[5], true);
+    BOOST_REQUIRE_EQUAL(instance[6], true);
+    BOOST_REQUIRE_EQUAL(instance[7], false);
+    BOOST_REQUIRE_EQUAL(instance[8], true);
+    BOOST_REQUIRE_EQUAL(instance[9], false);
+}
+
+// stream >>
+
+BOOST_AUTO_TEST_CASE(binary__stream__in__expected)
+{
+    const auto expected = "101";
+    std::stringstream in{ expected };
+    binary instance;
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
+}
+
+// stream <<
+
+BOOST_AUTO_TEST_CASE(binary__stream__out__expected)
+{
+    const auto expected = "101";
+    std::stringstream out;
+    const binary instance{ expected };
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
