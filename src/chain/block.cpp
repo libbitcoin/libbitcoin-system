@@ -40,10 +40,7 @@
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/machine/opcode.hpp>
 #include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/math/addition.hpp>
-#include <bitcoin/system/math/bits.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -251,13 +248,12 @@ hash_list block::to_hashes(bool witness) const
 {
     hash_list out;
     out.reserve(transactions_.size());
-    const auto to_hash = [&out, witness](const transaction& tx)
+    std::transform(transactions_.begin(), transactions_.end(), out.begin(),
+    [&out, witness](const transaction& tx)
     {
-        out.push_back(tx.hash(witness));
-    };
+        return tx.hash(witness);
+    });
 
-    // Hash ordering matters, don't use std::transform here.
-    std::for_each(transactions_.begin(), transactions_.end(), to_hash);
     return out;
 }
 
@@ -361,6 +357,7 @@ hash_digest block::hash() const
 
 // Utilities.
 //-----------------------------------------------------------------------------
+// TODO: move to messages.
 
 // This predicts the size of locator_heights output.
 size_t block::locator_size(size_t top)
@@ -425,8 +422,20 @@ uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
 {
     auto subsidy = initial_block_subsidy_satoshi;
     const auto halvings = height / subsidy_interval;
-    subsidy >>= (bip42 && (halvings >= width<uint64_t>()) ? 0 : halvings);
-    return subsidy;
+
+    //*************************************************************************
+    // CONSENSUS: bip42 compensates for c++ undefined behavior of a right
+    // shift of a number of bits greater or equal to the shifted integer width.
+    // However, being undefined, the result of this operation may vary by
+    // compiler. For example, msvc returns zero, which is the bip42 result.
+    // The implementation below explicitly implements the presumed pre-bip42
+    // behavior, and the specified bip42 behavior when bip42 is enabled.
+    //*************************************************************************
+    const auto reduce = bip42 ?
+        limit(halvings, uint64_t(0), sub1(width<uint64_t>())) :
+        halvings % width(subsidy_interval);
+
+    return subsidy >> reduce;
 }
 
 // Returns max_size_t in case of overflow or unpopulated chain state.
