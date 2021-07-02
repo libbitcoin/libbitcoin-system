@@ -22,12 +22,43 @@
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
+#define ENDIAN_NEGATIVE
 #define ENDIAN_DATA_INTEGER
 #define ENDIAN_STREAM_INTEGER
 #define ENDIAN_ARRAY_UINTX
 #define ENDIAN_ITERATOR_INTEGER
 #define ENDIAN_SYMMETRIC_ROUND_TRIPS
 #define ENDIAN_ASYMMETRIC_ROUND_TRIPS
+
+#ifdef ENDIAN_NEGATIVE
+
+// negatives
+
+BOOST_AUTO_TEST_CASE(to_big_endian__negative__full__expected)
+{
+    const data_array<mini_hash_size> full_mini_hash{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
+    BOOST_REQUIRE_EQUAL(to_big_endian<mini_hash_size>(-1), full_mini_hash);
+}
+
+BOOST_AUTO_TEST_CASE(to_big_endian__negative__partial__expected)
+{
+    const data_array<mini_hash_size> half_mini_big{ { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 } };
+    BOOST_REQUIRE_EQUAL(to_big_endian<mini_hash_size>(mask_right(-1, 24)), half_mini_big);
+}
+
+BOOST_AUTO_TEST_CASE(to_little_endian__negative__full__expected)
+{
+    const data_array<mini_hash_size> full_mini_hash{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
+    BOOST_REQUIRE_EQUAL(to_little_endian<mini_hash_size>(-1), full_mini_hash);
+}
+
+BOOST_AUTO_TEST_CASE(to_little_endian__negative__partial__expected)
+{
+    const data_array<mini_hash_size> half_mini_little{ { 0x00, 0x00, 0x00, 0xff, 0xff, 0xff } };
+    BOOST_REQUIRE_EQUAL(to_little_endian<mini_hash_size>(mask_right(-1, 24)), half_mini_little);
+}
+
+#endif // ENDIAN_NEGATIVE
 
 #ifdef ENDIAN_DATA_INTEGER
 
