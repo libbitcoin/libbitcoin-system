@@ -102,8 +102,17 @@ ec_scalar ec_scalar::from_int64(int64_t value)
     if (is_zero(value))
         return {};
 
+    ec_secret secret = null_hash;
+    write::bytes::copy writer(
+    { 
+        std::prev(secret.end(), sizeof(value)),
+        secret.end()
+    });
+
     // All hashes and secrets are stored as big-endian by convention.
-    return to_big_endian<hash_size>(value);
+    writer.write_8_bytes_big_endian(absolute(value));
+
+    return value > 0 ? ec_scalar{ secret } : -ec_scalar{ secret };
 }
 
 // arithmetic assignment operators
