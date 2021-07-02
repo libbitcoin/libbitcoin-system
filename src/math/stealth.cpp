@@ -22,7 +22,6 @@
 #include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/binary.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/script_pattern.hpp>
 #include <bitcoin/system/math/elliptic_curve.hpp>
@@ -48,7 +47,6 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 
     // A stealth prefix is the full 32 bits (prefix to the hash).
     // A stealth filter is a leftmost substring of the stealth prefix.
-    ////constexpr size_t size = binary::bits_per_block * sizeof(uint32_t);
 
     const auto script_hash = bitcoin_hash(script.to_data(false));
     out_prefix = from_little_endian<uint32_t>(script_hash);
