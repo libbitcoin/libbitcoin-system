@@ -26,13 +26,18 @@
 namespace libbitcoin {
 namespace system {
 
-
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value) noexcept
 {
-    return limit(value, std::numeric_limits<Result>::min(),
-        std::numeric_limits<Result>::max());
+    return limit(value, std::numeric_limits<Result>::max());
+}
+
+template <typename Result, typename Integer,
+    if_integer<Result>, if_integer<Integer>>
+constexpr Result limit(Integer value, Result maximum) noexcept
+{
+    return limit(value, std::numeric_limits<Result>::min(), maximum);
 }
 
 template <typename Result, typename Integer,
