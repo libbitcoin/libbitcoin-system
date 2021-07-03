@@ -31,7 +31,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -45,7 +45,6 @@ class BC_API block
 {
 public:
     typedef std::vector<block> list;
-    typedef std::vector<size_t> indexes;
 
     // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
     struct validation
@@ -124,12 +123,6 @@ public:
     void set_transactions(transaction::list&& value);
 
     hash_digest hash() const;
-
-    // Utilities.
-    //-------------------------------------------------------------------------
-
-    static size_t locator_size(size_t top);
-    static indexes locator_heights(size_t top);
 
     /// Clear witness from all inputs (does not change default hash).
     void strip_witness();

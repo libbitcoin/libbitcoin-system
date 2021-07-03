@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/message/get_blocks.hpp>
 
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -52,6 +53,39 @@ get_blocks get_blocks::factory(uint32_t version,
     get_blocks instance;
     instance.from_data(version, source);
     return instance;
+}
+
+// This predicts the size of locator_heights output.
+size_t get_blocks::locator_size(size_t top)
+{
+    size_t size = 0, step = 1;
+    for (auto height = top; height > 0; height = floored_subtract(height, step))
+        if (++size > 9u)
+            step <<= 1;
+
+    return ++size;
+}
+
+// This algorithm is a network best practice, not a consensus rule.
+get_blocks::indexes get_blocks::locator_heights(size_t top)
+{
+    size_t step = 1;
+    indexes heights;
+    heights.reserve(locator_size(top));
+
+    // Start at top block and collect block indexes in reverse.
+    for (auto height = top; height > 0; height = floored_subtract(height, step))
+    {
+        heights.push_back(height);
+
+        // Push top 10 indexes then back off exponentially.
+        if (heights.size() > 9u)
+            step <<= 1;
+    }
+
+    // Push the genesis block index.
+    heights.push_back(0);
+    return heights;
 }
 
 get_blocks::get_blocks()

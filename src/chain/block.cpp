@@ -355,46 +355,6 @@ hash_digest block::hash() const
     return header_.hash();
 }
 
-// Utilities.
-//-----------------------------------------------------------------------------
-// TODO: move to messages.
-
-// This predicts the size of locator_heights output.
-size_t block::locator_size(size_t top)
-{
-    size_t size = 0, step = 1;
-    for (auto height = top; height > 0; height = floored_subtract(height, step))
-        if (++size > 9u)
-            step <<= 1;
-
-    return ++size;
-}
-
-// This algorithm is a network best practice, not a consensus rule.
-block::indexes block::locator_heights(size_t top)
-{
-    size_t step = 1;
-    indexes heights;
-    heights.reserve(locator_size(top));
-
-    // Start at top block and collect block indexes in reverse.
-    for (auto height = top; height > 0; height = floored_subtract(height, step))
-    {
-        heights.push_back(height);
-
-        // Push top 10 indexes then back off exponentially.
-        if (heights.size() > 9u)
-            step <<= 1;
-    }
-
-    // Push the genesis block index.
-    heights.push_back(0);
-    return heights;
-}
-
-// Utilities.
-//-----------------------------------------------------------------------------
-
 // Clear witness from all inputs (does not change default transaction hash).
 void block::strip_witness()
 {
@@ -420,22 +380,17 @@ void block::strip_witness()
 uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
-    auto subsidy = initial_block_subsidy_satoshi;
     const auto halvings = height / subsidy_interval;
 
     //*************************************************************************
     // CONSENSUS: bip42 compensates for c++ undefined behavior of a right
     // shift of a number of bits greater or equal to the shifted integer width.
     // However, being undefined, the result of this operation may vary by
-    // compiler. For example, msvc returns zero, which is the bip42 result.
-    // The implementation below explicitly implements the presumed pre-bip42
-    // behavior, and the specified bip42 behavior when bip42 is enabled.
+    // compiler. The call below explicitly implements the presumed pre-bip42
+    // behavior (shift overflow modulo) by default, and the specified bip42
+    // behavior (shift overflow to zero) when bip42 is enabled.
     //*************************************************************************
-    const auto reduce = bip42 ?
-        limit(halvings, uint64_t(0), sub1(width<uint64_t>())) :
-        halvings % width(subsidy_interval);
-
-    return subsidy >> reduce;
+    return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
 }
 
 // Returns max_size_t in case of overflow or unpopulated chain state.
