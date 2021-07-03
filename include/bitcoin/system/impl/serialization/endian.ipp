@@ -41,9 +41,16 @@ namespace system {
 // High order bits are padded when read (from) is insufficient.
 // High order bits are ignored when write (to) is insufficient.
 
-// convertors
+// integer convertors
 // ----------------------------------------------------------------------------
-// These do the byte-integer translations.
+// C++ standard: "Right-shift on signed integral types is an arithmetic right
+// shift, which performs sign-extension". In other words, repeatedly shifting
+// -1 of any integer width will produce "1" bits, indefinitely.
+// C++ standard: "The [shift] behavior is undefined if ... greater than or
+// equal to the width of the promoted left operand." So we must be careful to
+// not shift bytes by byte_bits (8). For this reason we specialize on byte-size
+// integers. This also presents a performance optimization for byte conversion,
+// which is close to a no-op.
 
 template <typename Integer>
 static Integer from_big_endian_private(size_t size,
@@ -57,8 +64,12 @@ static Integer from_big_endian_private(size_t size,
     // 0x0000 |= 0x01[0] => 0x0001
     // 0x0100 |= 0x02[1] => 0x0102
 
-    Integer value = 0;
+    Integer value(0);
     const auto bytes = std::min(size, data.size());
+
+    // Avoid 8 << 8 (undefined).
+    if (sizeof(Integer) == one)
+        return is_zero(bytes) ? value : data.back();
 
     for (size_t byte = 0; byte < bytes; ++byte)
     {
@@ -81,8 +92,12 @@ static Integer from_little_endian_private(size_t size,
     // 0x0000 |= 0x02[1] => 0x0002
     // 0x0200 |= 0x01[0] => 0x0201
 
-    Integer value = 0;
+    Integer value(0);
     const auto bytes = std::min(size, data.size());
+
+    // Avoid 8 << 8 (undefined).
+    if (sizeof(Integer) == one)
+        return is_zero(bytes) ? value : data.front();
 
     for (auto byte = bytes; byte > 0; --byte)
     {
@@ -105,6 +120,10 @@ static Data to_big_endian_private(Data&& bytes,
     // 0x0102 >> 8 => 0x0001
     // 0x0001 >> 8 => 0x0000
 
+    // Avoid 8 >> 8 (undefined).
+    if (sizeof(Integer) == one)
+        return { value };
+
     for (auto& byte: boost::adaptors::reverse(bytes))
     {
         byte = static_cast<uint8_t>(value);
@@ -125,6 +144,10 @@ static Data to_little_endian_private(Data&& bytes,
     // (uint8_t)0x0001 => 0x01[1]
     // 0x0102 >> 8 => 0x0001
     // 0x0001 >> 8 => 0x0000
+
+    // Avoid 8 >> 8 (undefined).
+    if (sizeof(Integer) == one)
+        return { value };
 
     for (auto& byte: bytes)
     {
@@ -249,7 +272,6 @@ void to_little_endian(std::ostream& stream, Integer value) noexcept
 // uintx => data_chunk
 // ----------------------------------------------------------------------------
 
-// TODO: test.
 inline uintx from_big_endian(const data_slice& data) noexcept
 {
     // Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is
@@ -257,7 +279,6 @@ inline uintx from_big_endian(const data_slice& data) noexcept
     return from_big_endian_private<uintx>(data.size(), data);
 }
 
-// TODO: test.
 inline uintx from_little_endian(const data_slice& data) noexcept
 {
     // Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is
@@ -265,7 +286,6 @@ inline uintx from_little_endian(const data_slice& data) noexcept
     return from_little_endian_private<uintx>(data.size(), data);
 }
 
-// TODO: test.
 template <typename Integer, if_non_integral_integer<Integer>>
 data_chunk to_big_endian(const Integer& value) noexcept
 {
@@ -273,7 +293,6 @@ data_chunk to_big_endian(const Integer& value) noexcept
     return to_big_endian_private<Integer>(value);
 }
 
-// TODO: test.
 template <typename Integer, if_non_integral_integer<Integer>>
 data_chunk to_little_endian(const Integer& value) noexcept
 {

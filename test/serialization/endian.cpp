@@ -22,13 +22,45 @@
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
+#define ENDIAN_BYTE
 #define ENDIAN_NEGATIVE
-#define ENDIAN_DATA_INTEGER
+#define ENDIAN_VARIABLE_SIZE
+#define ENDIAN_FIXED_SIZE
 #define ENDIAN_STREAM_INTEGER
 #define ENDIAN_ARRAY_UINTX
 #define ENDIAN_ITERATOR_INTEGER
 #define ENDIAN_SYMMETRIC_ROUND_TRIPS
 #define ENDIAN_ASYMMETRIC_ROUND_TRIPS
+
+#ifdef ENDIAN_BYTE
+
+// single byte (specialized)
+
+BOOST_AUTO_TEST_CASE(from_big_endian__single_byte__array__expected)
+{
+    const data_chunk data{ 0x42 };
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint8_t>(data), data[0]);
+}
+
+BOOST_AUTO_TEST_CASE(from_little_endian__single_byte__array__expected)
+{
+    const data_chunk data{ 0x42 };
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint8_t>(data), data[0]);
+}
+
+BOOST_AUTO_TEST_CASE(to_big_endian__single_byte__array__expected)
+{
+    const data_array<1> data{ { 0x42 } };
+    BOOST_REQUIRE_EQUAL(to_big_endian(data[0]), data);
+}
+
+BOOST_AUTO_TEST_CASE(to_little_endian__single_byte__array__expected)
+{
+    const data_array<1> data{ { 0x42 } };
+    BOOST_REQUIRE_EQUAL(to_little_endian(data[0]), data);
+}
+
+#endif // ENDIAN_BYTE
 
 #ifdef ENDIAN_NEGATIVE
 
@@ -60,12 +92,65 @@ BOOST_AUTO_TEST_CASE(to_little_endian__negative__partial__expected)
 
 #endif // ENDIAN_NEGATIVE
 
-#ifdef ENDIAN_DATA_INTEGER
+#ifdef ENDIAN_VARIABLE_SIZE
 
 constexpr uint32_t value32 = 0x01020304;
-
 const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
 const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
+
+// matched data
+
+BOOST_AUTO_TEST_CASE(endian__from_big_endian__data_to_integer__expected)
+{
+    BOOST_REQUIRE_EQUAL(from_big_endian(data_forward), value32);
+}
+
+BOOST_AUTO_TEST_CASE(endian__from_little_endian__data_to_integer__expected)
+{
+    BOOST_REQUIRE_EQUAL(from_little_endian(data_reverse), value32);
+}
+
+BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_data__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_big_endian<uintx>(value32), data_forward);
+}
+
+BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_data__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_little_endian<uintx>(value32), data_reverse);
+}
+
+// short data
+
+BOOST_AUTO_TEST_CASE(endian__from_big_endian__data_to_integer_short__expected)
+{
+    // 4 bytes of data for an 8 byte integer.
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint64_t>(data_forward), value32);
+}
+
+BOOST_AUTO_TEST_CASE(endian__from_little_endian__data_to_integer_short__expected)
+{
+    // 4 bytes of data for an 8 byte integer.
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(data_reverse), value32);
+}
+
+// long data
+
+BOOST_AUTO_TEST_CASE(endian__from_big_endian__data_to_integer_long__expected)
+{
+    // 4 bytes of data for an 2 byte integer.
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(data_forward), value32 >> 16);
+}
+
+BOOST_AUTO_TEST_CASE(endian__from_little_endian__data_to_integer_long__expected)
+{
+    // 4 bytes of data for an 2 byte integer.
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(data_reverse), value32 & 0x0000ffff);
+}
+
+#endif // ENDIAN_VARIABLE_SIZE
+
+#ifdef ENDIAN_FIXED_SIZE
 
 const data_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
 const data_array<4> array_reverse{ { 0x04, 0x03, 0x02, 0x01 } };
@@ -120,7 +205,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__data_to_integer_long__expected)
     BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(data_reverse), value32 & 0x0000ffff);
 }
 
-#endif // ENDIAN_DATA_INTEGER
+#endif // ENDIAN_FIXED_SIZE
 
 #ifdef ENDIAN_STREAM_INTEGER
 
