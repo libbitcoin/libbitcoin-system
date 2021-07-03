@@ -35,6 +35,7 @@ namespace system {
 /// The data_slice type is not deserializable (cannot hold data).
 
 /// Deserialize to untrimmed/unsplit text, call deserialize(Value, string).
+/// Stream configuration is not honored for value conversion from text.
 template <typename Value>
 bool deserialize(Value& out, std::istream& input);
 

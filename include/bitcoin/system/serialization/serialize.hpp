@@ -38,6 +38,7 @@ namespace system {
 /// though its array serialization can truncate or zero-pad the output by Size.
 
 /// Call serialize(Value, fallback) and send to ostream.
+/// Stream configuration is not honored for value conversion to text.
 template <typename Value>
 void serialize(std::ostream& output, const Value& value,
     const std::string& fallback);
