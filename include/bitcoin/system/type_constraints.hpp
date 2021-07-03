@@ -56,7 +56,7 @@ template <size_t Left, size_t Right>
 using if_not_lesser = enable_if_type<!(Left < Right), bool>;
 
 template <typename Type>
-using if_byte = enable_if_type<is_one(sizeof(Type)), bool>;
+using if_byte = enable_if_type<width<Type>() == byte_bits, bool>;
 
 template <size_t Value>
 using if_byte_aligned = enable_if_type<is_byte_aligned(Value), bool>;

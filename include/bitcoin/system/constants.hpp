@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/version.hpp>
 
@@ -211,7 +212,6 @@ constexpr bool is_byte_aligned(Type bits) noexcept
     return is_zero(bits % 8);
 }
 
-// TODO: test
 template <typename Type>
 constexpr bool is_null(Type value) noexcept
 {
@@ -258,6 +258,12 @@ template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
     return value - 1;
+}
+
+template <typename Type>
+constexpr size_t width(Type value=Type{}) noexcept
+{
+    return std::is_same<Type, bool>::value ? one : to_bits(sizeof(value));
 }
 
 } // namespace libbitcoin

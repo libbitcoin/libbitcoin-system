@@ -74,6 +74,14 @@ static_assert(!is_byte_aligned(-42), "");
 static_assert(!is_byte_aligned(0xff), "");
 static_assert(std::is_same<decltype(is_byte_aligned<int16_t>(0)), bool>::value, "");
 
+constexpr void* pointer = "";
+constexpr void* null_pointer = nullptr;
+static_assert(is_null(nullptr), "");
+static_assert(is_null(null_pointer), "");
+static_assert(is_null(std::nullptr_t{}), "");
+static_assert(!is_null(pointer), "");
+static_assert(std::is_same<decltype(is_null(nullptr)), bool>::value, "");
+
 static_assert(to_bits(0) == 0 * 8, "");
 static_assert(to_bits(1u) == 1u * 8u, "");
 static_assert(to_bits(-42) == -42 * 8, "");
@@ -114,3 +122,17 @@ static_assert(sub1(1u) == 1u - 1u, "");
 static_assert(sub1(-42) == -42 - 1, "");
 static_assert(sub1(0xff) == 0xff - 1, "");
 static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value, "");
+
+constexpr uint32_t value = 42;
+static_assert(width<bool>() == 1, "");
+static_assert(width<char>() == 8, "");
+static_assert(width<int8_t>() == 8, "");
+static_assert(width<uint8_t>() == 8, "");
+static_assert(width<int16_t>() == 16, "");
+static_assert(width<uint16_t>() == 16, "");
+static_assert(width<int32_t>() == 32, "");
+static_assert(width<uint32_t>() == 32, "");
+static_assert(width<int64_t>() == 64, "");
+static_assert(width<uint64_t>() == 64, "");
+static_assert(width(value) == to_bits(sizeof(value)), "");
+static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value, "");
