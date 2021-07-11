@@ -300,14 +300,14 @@ void alert_payload::to_data(uint32_t, writer& sink) const
 size_t alert_payload::serialized_size(uint32_t) const
 {
     size_t size = 40u +
-        variable_uint_size(comment_.size()) + comment_.size() +
-        variable_uint_size(status_bar_.size()) + status_bar_.size() +
-        variable_uint_size(reserved_.size()) + reserved_.size() +
-        variable_uint_size(set_cancel_.size()) + (4 * set_cancel_.size()) +
-        variable_uint_size(set_sub_version_.size());
+        variable_size(comment_.size()) + comment_.size() +
+        variable_size(status_bar_.size()) + status_bar_.size() +
+        variable_size(reserved_.size()) + reserved_.size() +
+        variable_size(set_cancel_.size()) + (4 * set_cancel_.size()) +
+        variable_size(set_sub_version_.size());
 
     for (const auto& sub_version : set_sub_version_)
-        size += variable_uint_size(sub_version.size()) + sub_version.size();
+        size += variable_size(sub_version.size()) + sub_version.size();
 
     return size;
 }

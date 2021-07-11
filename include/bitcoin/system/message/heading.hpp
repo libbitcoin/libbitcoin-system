@@ -25,9 +25,9 @@
 #include <string>
 #include <boost/array.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/checksum.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

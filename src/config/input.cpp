@@ -25,7 +25,7 @@
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/serialization/deserialize.hpp>
+#include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -40,7 +40,7 @@ static bool decode_input(chain::input& input, const std::string& tuple)
     if (tokens.size() != 2 && tokens.size() != 3)
         return false;
 
-    input.set_sequence(max_input_sequence);
+    input.set_sequence(chain::max_input_sequence);
     input.set_previous_output(point(tokens[0] + ":" + tokens[1]));
 
     // TODO: remove stealth inputs.
@@ -87,7 +87,7 @@ input::input(const input& other)
 }
 
 input::input(const chain::input_point& value)
-  : value_({value, {}, max_input_sequence})
+  : value_({value, {}, chain::max_input_sequence})
 {
 }
 

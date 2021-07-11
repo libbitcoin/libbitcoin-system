@@ -24,14 +24,12 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
-#include <bitcoin/system/wallet/mnemonics/languages.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -65,15 +63,11 @@ private:
 /// Converts entropy to mnemonic.
 /// Derives master keys from menemonic or entropy.
 class BC_API electrum_v1
-  : public languages
+  : public words::languages
 {
 public:
-    typedef wallet::dictionary<1626> dictionary;
-    typedef wallet::dictionaries<2, dictionary::size()> dictionaries;
-
-    /// Publish Electrum v1 word lists.
-    static const dictionary::words en;
-    static const dictionary::words pt;
+    typedef words::electrum_v1::catalog dictionary;
+    typedef words::electrum_v1::catalogs dictionaries;
 
     /// Supports 128 or 256 bits of entropy.
     static constexpr size_t entropy_multiple = 4;

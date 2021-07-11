@@ -36,9 +36,8 @@
 #include <boost/locale.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
 // TODO: rename the classes in these sources.
@@ -368,8 +367,19 @@ int call_utf8_main(int argc, wchar_t* argv[],
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
 std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
 {
+    const auto replace_all = [](std::string text, char from, char to)
+    {
+        for (auto position = text.find(from); position != std::string::npos;
+            position = text.find(from, position + sizeof(char)))
+        {
+            text.replace(position, sizeof(char), { to });
+        }
+
+        return text;
+    };
+
     // Separator normalization required by use of length extender.
-    const auto normal = to_utf16(replace_copy(path.string(), "/", "\\"));
+    const auto normal = to_utf16(replace_all(path.string(), '/', '\\'));
 
     // GetFullPathName is not thread safe. If another thread calls
     // SetCurrentDirectory during a call of GetFullPathName the value may be

@@ -22,18 +22,16 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/radix/base_2048.hpp>
-#include <bitcoin/system/unicode/normalization.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/radix/radix.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
-#include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -65,16 +63,16 @@ static const auto index_bits = static_cast<uint8_t>(floored_log2(
 const electrum::dictionaries electrum::dictionaries_
 {
     {
-        electrum::dictionary{ language::en, electrum::en },
-        electrum::dictionary{ language::es, electrum::es },
-        electrum::dictionary{ language::it, electrum::it },
-        electrum::dictionary{ language::fr, electrum::fr },
-        electrum::dictionary{ language::cs, electrum::cs },
-        electrum::dictionary{ language::pt, electrum::pt },
-        electrum::dictionary{ language::ja, electrum::ja },
-        electrum::dictionary{ language::ko, electrum::ko },
-        electrum::dictionary{ language::zh_Hans, electrum::zh_Hans },
-        electrum::dictionary{ language::zh_Hant, electrum::zh_Hant }
+        electrum::dictionary{ language::en, words::electrum::en },
+        electrum::dictionary{ language::es, words::electrum::es },
+        electrum::dictionary{ language::it, words::electrum::it },
+        electrum::dictionary{ language::fr, words::electrum::fr },
+        electrum::dictionary{ language::cs, words::electrum::cs },
+        electrum::dictionary{ language::pt, words::electrum::pt },
+        electrum::dictionary{ language::ja, words::electrum::ja },
+        electrum::dictionary{ language::ko, words::electrum::ko },
+        electrum::dictionary{ language::zh_Hans, words::electrum::zh_Hans },
+        electrum::dictionary{ language::zh_Hant, words::electrum::zh_Hant }
     }
 };
 

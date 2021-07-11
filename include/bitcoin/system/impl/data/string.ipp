@@ -19,21 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_STRING_IPP
 #define LIBBITCOIN_SYSTEM_DATA_STRING_IPP
 
-#include <string>
-#include <bitcoin/system/serialization/endian.hpp>
-#include <bitcoin/system/type_constraints.hpp>
-
 namespace libbitcoin {
 namespace system {
-
-template <typename Integer, if_integer<Integer>>
-std::string to_string(Integer value, bool big_endian) noexcept
-{
-    const auto bytes = big_endian ? to_big_endian(value) :
-        to_little_endian(value);
-
-    return { bytes.begin(), bytes.end() };
-}
 
 } // namespace system
 } // namespace libbitcoin

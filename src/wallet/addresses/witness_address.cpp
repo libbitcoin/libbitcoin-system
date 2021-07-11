@@ -22,22 +22,18 @@
 #include <cstdint>
 #include <string>
 #include <utility>
-#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/radix/base_32.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
+#include <bitcoin/system/radix/radix.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
-
-using namespace bc::system::machine;
 
 constexpr char separator = '1';
 constexpr uint8_t version_0 = 0;

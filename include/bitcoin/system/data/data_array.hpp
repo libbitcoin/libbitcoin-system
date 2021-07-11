@@ -23,9 +23,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <vector>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -49,6 +51,10 @@ inline one_byte to_array(uint8_t byte) noexcept;
 /// to_array(to_string(data)) == data.
 template <size_t Size>
 data_array<Size> to_array(const data_slice& bytes) noexcept;
+
+/// Create a data stack from vector of data array.
+template <size_t Size>
+data_stack to_stack(const std::vector<data_array<Size>>& values) noexcept;
 
 /// Concatenate several data slices into a single array.
 /// Underfill is padded with 0x00, excess is truncated.

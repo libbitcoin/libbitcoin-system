@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
+#include <bitcoin/system/optional.hpp>
 
 BOOST_AUTO_TEST_SUITE(uri_reader_tests)
 
@@ -91,9 +91,9 @@ struct custom_reader
     std::string mypath;
 
     // Use optionals when there is a semantic distinction between no value and default value.
-    boost::optional<std::string> myfragment;
-    boost::optional<std::string> myparam1;
-    boost::optional<std::string> myparam2;
+    optional<std::string> myfragment;
+    optional<std::string> myparam1;
+    optional<std::string> myparam2;
 
 private:
     bool strict_;

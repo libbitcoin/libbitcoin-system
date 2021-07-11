@@ -26,11 +26,10 @@
 #include <cstdint>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/bits.hpp>
-#include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
-#include <bitcoin/system/type_constraints.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {

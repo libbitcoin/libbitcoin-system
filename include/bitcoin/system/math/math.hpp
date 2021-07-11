@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_HPP
 #define LIBBITCOIN_SYSTEM_MATH_HPP
 
-// Generic math.
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/division.hpp>
@@ -27,16 +26,5 @@
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/math/pseudo_random.hpp>
-
-// Crypto math.
-#include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/math/crypto.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/golomb_coding.hpp>
-#include <bitcoin/system/math/ring_signature.hpp>
-#include <bitcoin/system/math/siphash.hpp>
-#include <bitcoin/system/math/stealth.hpp>
 
 #endif

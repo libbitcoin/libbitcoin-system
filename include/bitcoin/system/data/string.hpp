@@ -20,20 +20,14 @@
 #define LIBBITCOIN_SYSTEM_DATA_STRING_HPP
 
 #include <string>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 
 namespace libbitcoin {
 namespace system {
     
-/// std::to_string is a formatter (and not thread safe).
-/// Use system::serialize for string formatting.
-/// Cast integer bytes directly into the string member.
-template <typename Integer, if_integer<Integer> = true>
-std::string to_string(Integer value, bool big_endian=true) noexcept;
-
 /// Use system::serialize for string formatting.
 /// Casts bytes directly into the string member.
 /// to_string(to_chunk(string)) == string.

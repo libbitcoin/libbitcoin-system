@@ -25,11 +25,11 @@
 #include <ostream>
 #include <string>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

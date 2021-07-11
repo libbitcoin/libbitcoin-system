@@ -24,16 +24,16 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <bitcoin/system/concurrency/thread.hpp>
+#include <bitcoin/system/chain/enums/rule_fork.hpp>
+#include <bitcoin/system/chain/enums/script_pattern.hpp>
+#include <bitcoin/system/chain/enums/script_version.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/machine/script_pattern.hpp>
-#include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -41,15 +41,10 @@ namespace system {
 namespace chain {
 
 class transaction;
-class witness;
 
 class BC_API script
 {
 public:
-    typedef machine::operation operation;
-    typedef machine::rule_fork rule_fork;
-    typedef machine::script_pattern script_pattern;
-    typedef machine::script_version script_version;
     typedef std::vector<script> list;
 
     /// Consensus sentinel.
@@ -159,9 +154,9 @@ public:
     static data_chunk to_sequences(const transaction& tx);
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, rule_fork fork)
+    static inline bool is_enabled(uint32_t active_forks, rule_fork fork)
     {
-        return (fork & active_forks) != 0;
+        return !is_zero(fork & active_forks);
     }
 
     /// Consensus patterns.

@@ -19,11 +19,11 @@
 #include <bitcoin/system/wallet/addresses/stealth_sender.hpp>
 
 #include <cstdint>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/stealth.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
+#include <bitcoin/system/wallet/keys/stealth.hpp>
 
 namespace libbitcoin {
 namespace system {

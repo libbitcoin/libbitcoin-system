@@ -24,9 +24,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

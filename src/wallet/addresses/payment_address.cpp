@@ -24,19 +24,16 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/math/checksum.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/radix/base_58.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
-
-using namespace bc::system::machine;
 
 const uint8_t payment_address::mainnet_p2kh = 0x00;
 const uint8_t payment_address::mainnet_p2sh = 0x05;
@@ -271,7 +268,7 @@ payment_address::list payment_address::extract_input(
         // Given lack of context (prevout) sign_key_hash is always ambiguous
         // with sign_script_hash, so return both potentially-correct addresses.
         // A server can differentiate by extracting from the previous output.
-        case script_pattern::sign_key_hash:
+        case chain::script_pattern::sign_key_hash:
         {
             return
             {
@@ -279,7 +276,7 @@ payment_address::list payment_address::extract_input(
                 ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
-        case script_pattern::sign_script_hash:
+        case chain::script_pattern::sign_script_hash:
         {
             return
             {
@@ -292,15 +289,15 @@ payment_address::list payment_address::extract_input(
         // Given lack of context (prevout) sign_public_key is always ambiguous
         // with sign_script_hash (though actual conflict seems very unlikely).
         // A server can obtain by extracting from the previous output.
-        case script_pattern::sign_public_key:
+        case chain::script_pattern::sign_public_key:
 
         // There are no addresses in sign_multisig script, signatures only.
         // Nonstandard (non-zero) first op sign_multisig may conflict with
         // sign_key_hash and/or sign_script_hash (or will be non_standard).
         // A server can obtain the public keys extracting from the previous
         // output, but bare multisig does not associate a payment address.
-        case script_pattern::sign_multisig:
-        case script_pattern::non_standard:
+        case chain::script_pattern::sign_multisig:
+        case chain::script_pattern::non_standard:
         default:
         {
             return {};
@@ -316,19 +313,19 @@ payment_address payment_address::extract_output(
 
     switch (pattern)
     {
-        case script_pattern::pay_key_hash:
+        case chain::script_pattern::pay_key_hash:
             return
             {
                 to_array<short_hash_size>(script[2].data()),
                 p2kh_prefix
             };
-        case script_pattern::pay_script_hash:
+        case chain::script_pattern::pay_script_hash:
             return
             { 
                 to_array<short_hash_size>(script[1].data()),
                 p2sh_prefix
             };
-        case script_pattern::pay_public_key:
+        case chain::script_pattern::pay_public_key:
             return
             {
                 // pay_public_key is not p2kh but we conflate for tracking.
@@ -337,9 +334,9 @@ payment_address payment_address::extract_output(
             };
 
         // Bare multisig and null data do not associate a payment address.
-        case script_pattern::pay_multisig:
-        case script_pattern::pay_null_data:
-        case script_pattern::non_standard:
+        case chain::script_pattern::pay_multisig:
+        case chain::script_pattern::pay_null_data:
+        case chain::script_pattern::non_standard:
         default:
             return {};
     }

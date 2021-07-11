@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAM_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAM_HPP
 
-#include <iostream>
-#include <string>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/stream/binary.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/stream/devices/copy_sink.hpp>
 #include <bitcoin/system/stream/devices/copy_source.hpp>
@@ -41,124 +39,8 @@
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
-
-namespace libbitcoin {
-namespace system {
-    
-/// Streams are not copyable, so factory cannot be used for type inference.
-/// All sources and sinks (devices) accept only const and non-const references.
-/// Insert requires the container type, but there are only two (string/chunk).
-/// Container.reserve() may improve performance for all push streaming.
-/// push_sink is buffered/indirect (inefficient) and requires flush.
-/// For better performance, use Container.resize() and use a copy_sink.
-namespace stream
-{
-    namespace in
-    {
-        /// An input stream that moves data from a data_reference.
-        using copy = make_stream<copy_source<data_reference>>;
-    }
-
-    namespace out
-    {
-        /// An output stream that copies data to a data_slab.
-        using copy = make_stream<copy_sink<data_slab>>;
-
-        /// An output stream that inserts data to a container.
-        template <typename Container>
-        using push = make_stream<push_sink<Container>>;
-        using text = push<std::string>;
-        using data = push<data_chunk>;
-    }
-
-    namespace flip
-    {
-        /// An input/output stream that copies data to a data_slab.
-        using copy = make_stream<flip_sink<data_slab>>;
-    }
-}
-
-namespace read
-{
-    namespace bytes
-    {
-        /// A byte reader that reads data from a std::istream.
-        using istream = byte_reader<std::istream>;
-
-        /// A byte reader that copies data from a data_reference.
-        using copy = make_streamer<copy_source<data_reference>, byte_reader>;
-    }
-
-    namespace bits
-    {
-        /// A bit reader that reads data from a std::istream.
-        using istream = bit_reader<std::istream>;
-
-        /// A bit reader that moves data from a data_reference.
-        using copy = make_streamer<copy_source<data_reference>, bit_reader>;
-    }
-}
-
-namespace write
-{
-    namespace bytes
-    {
-        /// A byte writer that writes data to a std::ostream.
-        using ostream = byte_writer<std::ostream>;
-
-        /// A byte writer that copies data to a data_slab.
-        using copy = make_streamer<copy_sink<data_slab>, byte_writer>;
-
-        /// A byte writer that inserts data into a container.
-        template <typename Container>
-        using push = make_streamer<push_sink<Container>, byte_writer>;
-        using text = push<std::string>;
-        using data = push<data_chunk>;
-    }
-
-    namespace bits
-    {
-        /// A bit writer that writes data to a std::ostream.
-        using ostream = bit_writer<std::ostream>;
-
-        /// A bit writer that copies data to a data_slab.
-        using copy = make_streamer<copy_sink<data_slab>, bit_writer>;
-
-        /// A bit writer that inserts data into a container.
-        template <typename Container>
-        using push = make_streamer<push_sink<Container>, bit_writer>;
-        using text = push<std::string>;
-        using data = push<data_chunk>;
-    }
-}
-
-namespace flip
-{
-    namespace bytes
-    {
-        /// A byte reader/writer of a std::iostream.
-        using iostream = byte_flipper<std::iostream>;
-
-        /// A byte reader/writer of a data_slab (no push and requires own sink).
-        using copy = make_streamer<flip_sink<data_slab>, byte_flipper>;
-    }
-
-    namespace bits
-    {
-        /// A bit reader/writer of a std::iostream.
-        using iostream = bit_flipper<std::iostream>;
-
-        /// A bit reader/writer of a data_slab (no push and requires own sink).
-        using copy = make_streamer<flip_sink<data_slab>, bit_flipper>;
-    }
-}
-
-/// Interface byte aliases.
-using flipper = byteflipper;
-using reader = bytereader;
-using writer = bytewriter;
-
-} // namespace system
-} // namespace libbitcoin
+#include <bitcoin/system/stream/streamers.hpp>
+#include <bitcoin/system/stream/streams.hpp>
+#include <bitcoin/system/stream/stream_result.hpp>
 
 #endif

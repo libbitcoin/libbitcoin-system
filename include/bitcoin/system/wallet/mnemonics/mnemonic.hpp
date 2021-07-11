@@ -22,15 +22,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
-#include <bitcoin/system/wallet/mnemonics/languages.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,23 +39,11 @@ namespace wallet {
 /// Converts valid menemonic to entropy.
 /// Derives master keys from menemonic or entropy, and optional passphrase.
 class BC_API mnemonic
-  : public languages
+  : public words::languages
 {
 public:
-    typedef wallet::dictionary<2048> dictionary;
-    typedef wallet::dictionaries<10, dictionary::size()> dictionaries;
-
-    /// Publish BIP39 word lists.
-    static const dictionary::words en;
-    static const dictionary::words es;
-    static const dictionary::words it;
-    static const dictionary::words fr;
-    static const dictionary::words cs;
-    static const dictionary::words pt;
-    static const dictionary::words ja;
-    static const dictionary::words ko;
-    static const dictionary::words zh_Hans;
-    static const dictionary::words zh_Hant;
+    typedef words::mnemonic::catalog dictionary;
+    typedef words::mnemonic::catalogs dictionaries;
 
     /// Supports 128 to 256 bits of entropy, in multiples of 32.
     static constexpr size_t entropy_multiple = 4;

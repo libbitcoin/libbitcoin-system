@@ -129,7 +129,7 @@ bool compact_filter_checkpoint::from_data(uint32_t version, reader& source)
 
     // TODO: is this the corrected protocol limit?
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         filter_headers_.reserve(count);
@@ -179,7 +179,7 @@ void compact_filter_checkpoint::to_data(uint32_t , writer& sink) const
 size_t compact_filter_checkpoint::serialized_size(uint32_t ) const
 {
     return sizeof(filter_type_) + hash_size +
-        variable_uint_size(filter_headers_.size()) +
+        variable_size(filter_headers_.size()) +
         (filter_headers_.size() * hash_size);
 }
 

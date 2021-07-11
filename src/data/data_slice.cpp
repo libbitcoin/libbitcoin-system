@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {

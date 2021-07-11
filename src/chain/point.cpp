@@ -21,8 +21,8 @@
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

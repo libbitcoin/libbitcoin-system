@@ -23,8 +23,8 @@
 #include <string>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,9 +32,11 @@ namespace system {
 template <size_t Size>
 bool decode_base16(data_array<Size>& out, const std::string& in)
 {
-    data_chunk data(Size);
+    data_chunk data;
+    data.reserve(Size);
     if (decode_base16(data, in) && data.size() == Size)
     {
+        // TODO: avoid this copy.
         std::copy(data.begin(), data.end(), out.begin());
         return true;
     }
@@ -45,9 +47,11 @@ bool decode_base16(data_array<Size>& out, const std::string& in)
 template <size_t Size>
 bool decode_hash(data_array<Size>& out, const std::string& in)
 {
-    data_chunk data(Size);
+    data_chunk data;
+    data.reserve(Size);
     if (decode_base16(data, in.data()) && data.size() == Size)
     {
+        // TODO: avoid this copy.
         std::reverse_copy(data.begin(), data.end(), out.begin());
         return true;
     }

@@ -26,12 +26,12 @@
 namespace libbitcoin {
 namespace system {
 
+namespace mp = boost::multiprecision;
+
 /// Template for constructing uintx types.
 template <uint32_t Bits>
-using uintx_t = boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<Bits, Bits,
-        boost::multiprecision::unsigned_magnitude,
-        boost::multiprecision::unchecked, void>>;
+using uintx_t = mp::number<mp::cpp_int_backend<Bits, Bits,
+    mp::unsigned_magnitude, mp::unchecked, void>>;
 
 // Cannot generalize because no boost support for unsigned arbitrary precision.
 // Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types

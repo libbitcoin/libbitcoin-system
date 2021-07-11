@@ -21,10 +21,10 @@
 
 #include <istream>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace system {

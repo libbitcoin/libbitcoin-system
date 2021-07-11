@@ -116,7 +116,7 @@ bool block_transactions::from_data(uint32_t version, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         transactions_.resize(count);
@@ -165,7 +165,7 @@ void block_transactions::to_data(uint32_t, writer& sink) const
 
 size_t block_transactions::serialized_size(uint32_t) const
 {
-    auto size = hash_size + variable_uint_size(transactions_.size());
+    auto size = hash_size + variable_size(transactions_.size());
 
     for (const auto& element: transactions_)
         size += element.serialized_size(true);

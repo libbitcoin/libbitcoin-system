@@ -24,7 +24,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/stream.hpp>
-#include <bitcoin/system/unicode/ascii.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 // base32
 // Base 32 is an ascii data encoding with a domain of 32 symbols (characters).

@@ -22,15 +22,14 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/radix/base_2048.hpp>
-#include <bitcoin/system/unicode/normalization.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/radix/radix.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -49,16 +48,16 @@ static const auto index_bits = static_cast<uint8_t>(
 const mnemonic::dictionaries mnemonic::dictionaries_
 {
     {
-        mnemonic::dictionary{ language::en, mnemonic::en },
-        mnemonic::dictionary{ language::es, mnemonic::es },
-        mnemonic::dictionary{ language::it, mnemonic::it },
-        mnemonic::dictionary{ language::fr, mnemonic::fr },
-        mnemonic::dictionary{ language::cs, mnemonic::cs },
-        mnemonic::dictionary{ language::pt, mnemonic::pt },
-        mnemonic::dictionary{ language::ja, mnemonic::ja },
-        mnemonic::dictionary{ language::ko, mnemonic::ko },
-        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
-        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
+        mnemonic::dictionary{ language::en, words::mnemonic::en },
+        mnemonic::dictionary{ language::es, words::mnemonic::es },
+        mnemonic::dictionary{ language::it, words::mnemonic::it },
+        mnemonic::dictionary{ language::fr, words::mnemonic::fr },
+        mnemonic::dictionary{ language::cs, words::mnemonic::cs },
+        mnemonic::dictionary{ language::pt, words::mnemonic::pt },
+        mnemonic::dictionary{ language::ja, words::mnemonic::ja },
+        mnemonic::dictionary{ language::ko, words::mnemonic::ko },
+        mnemonic::dictionary{ language::zh_Hans, words::mnemonic::zh_Hans },
+        mnemonic::dictionary{ language::zh_Hant, words::mnemonic::zh_Hant }
     }
 };
 

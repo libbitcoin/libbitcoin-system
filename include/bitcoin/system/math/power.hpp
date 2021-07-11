@@ -20,8 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
 #include <cstddef>
-#include <bitcoin/system/data/uintx.hpp>
-#include <bitcoin/system/type_constraints.hpp>
+#include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

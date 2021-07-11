@@ -27,12 +27,12 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/addition.hpp>
-#include <bitcoin/system/serialization/deserialize.hpp>
-#include <bitcoin/system/serialization/serialize.hpp>
+#include <bitcoin/system/serial/deserialize.hpp>
+#include <bitcoin/system/serial/serialize.hpp>
 
 // base10
 // Base 10 is an ascii data encoding with a domain of 10 symbols (characters).
-// 10 is not a power of 2 so base10 not a bit mapping.
+// 10 is not a power of 2 so base10 is not a bit mapping.
 // base10 is 10^n, with power determined by the parameter 'decimal_places'.
 // Conversion range is limited to [0..2^64-1], decoded as uint64_t.
 // Encoding uses arabic numeral characters ['0'..'9'] and supports negative

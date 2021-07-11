@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
 #include <limits>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

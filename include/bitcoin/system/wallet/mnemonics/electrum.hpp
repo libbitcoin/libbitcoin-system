@@ -22,17 +22,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionaries.hpp>
-#include <bitcoin/system/wallet/mnemonics/dictionary.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -61,20 +60,8 @@ public:
         none
     };
 
-    typedef wallet::dictionary<2048> dictionary;
-    typedef wallet::dictionaries<10, dictionary::size()> dictionaries;
-
-    /// Publish Electrum word lists (same as BIP39 word lists).
-    static const dictionary::words& en;
-    static const dictionary::words& es;
-    static const dictionary::words& it;
-    static const dictionary::words& fr;
-    static const dictionary::words& cs;
-    static const dictionary::words& pt;
-    static const dictionary::words& ja;
-    static const dictionary::words& ko;
-    static const dictionary::words& zh_Hans;
-    static const dictionary::words& zh_Hant;
+    typedef words::electrum::catalog dictionary;
+    typedef words::electrum::catalogs dictionaries;
 
     // Supports 132 to 506 bits of entropy (12 to 46 words).
     // Entropy byte limits are rounded up to 17 to 64 bytes.

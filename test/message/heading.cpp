@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(heading__maximum_payload_size__non_witness__matches_expecte
 
 BOOST_AUTO_TEST_CASE(heading__maximum_payload_size__witness__matches_expected)
 {
-    BOOST_REQUIRE_EQUAL(max_block_weight, heading::maximum_payload_size(0u, true));
+    BOOST_REQUIRE_EQUAL(chain::max_block_weight, heading::maximum_payload_size(0u, true));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

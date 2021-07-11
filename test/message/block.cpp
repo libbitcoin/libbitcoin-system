@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_7__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
 
 BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
 
 BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
 {
-    const chain::block genesis = settings(config::settings::mainnet).genesis_block;
+    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 

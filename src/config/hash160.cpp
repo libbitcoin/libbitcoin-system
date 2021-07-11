@@ -20,9 +20,9 @@
 
 #include <sstream>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {

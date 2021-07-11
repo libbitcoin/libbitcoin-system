@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/message/prefilled_transaction.hpp>
 
-#include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -145,7 +144,7 @@ void prefilled_transaction::to_data(uint32_t ,
 
 size_t prefilled_transaction::serialized_size(uint32_t) const
 {
-    return variable_uint_size(index_) + transaction_.serialized_size(true);
+    return variable_size(index_) + transaction_.serialized_size(true);
 }
 
 uint64_t prefilled_transaction::index() const

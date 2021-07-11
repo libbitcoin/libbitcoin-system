@@ -21,10 +21,10 @@
 
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/stream/device.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

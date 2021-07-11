@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

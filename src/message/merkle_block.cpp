@@ -19,8 +19,6 @@
 #include <bitcoin/system/message/merkle_block.hpp>
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/chain/block.hpp>
-#include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
@@ -134,7 +132,7 @@ bool merkle_block::from_data(uint32_t version, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         hashes_.reserve(count);
@@ -189,8 +187,8 @@ void merkle_block::to_data(uint32_t, writer& sink) const
 size_t merkle_block::serialized_size(uint32_t) const
 {
     return header_.serialized_size() + 4u +
-        variable_uint_size(hashes_.size()) + (hash_size * hashes_.size()) +
-        variable_uint_size(flags_.size()) + flags_.size();
+        variable_size(hashes_.size()) + (hash_size * hashes_.size()) +
+        variable_size(flags_.size()) + flags_.size();
 }
 
 chain::header& merkle_block::header()

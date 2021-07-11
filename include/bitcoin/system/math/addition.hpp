@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_ADDITION_HPP
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_HPP
 
-#include <bitcoin/system/type_constraints.hpp>
+#include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

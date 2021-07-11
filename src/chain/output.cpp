@@ -21,15 +21,16 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>
-#include <bitcoin/system/wallet/addresses/payment_address.hpp>
+
+// If required change to bc::checked.
+////#include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-
-using namespace bc::system::wallet;
 
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
@@ -51,7 +52,7 @@ output::output()
 
 output::output(output&& other)
   : metadata(other.metadata),
-    addresses_(other.addresses_cache()),
+    ////addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(std::move(other.script_))
 {
@@ -59,7 +60,7 @@ output::output(output&& other)
 
 output::output(const output& other)
   : metadata(other.metadata),
-    addresses_(other.addresses_cache()),
+    ////addresses_(other.addresses_cache()),
     value_(other.value_),
     script_(other.script_)
 {
@@ -79,19 +80,19 @@ output::output(uint64_t value, const chain::script& script)
 {
 }
 
-// Private cache access for copy/move construction.
-output::addresses_ptr output::addresses_cache() const
-{
-    shared_lock lock(mutex_);
-    return addresses_;
-}
+////// Private cache access for copy/move construction.
+////output::addresses_ptr output::addresses_cache() const
+////{
+////    shared_lock lock(mutex_);
+////    return addresses_;
+////}
 
 // Operators.
 //-----------------------------------------------------------------------------
 
 output& output::operator=(output&& other)
 {
-    addresses_ = other.addresses_cache();
+    ////addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
     metadata = std::move(other.metadata);
@@ -100,7 +101,7 @@ output& output::operator=(output&& other)
 
 output& output::operator=(const output& other)
 {
-    addresses_ = other.addresses_cache();
+    ////addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = other.script_;
     metadata = other.metadata;
@@ -259,66 +260,66 @@ const chain::script& output::script() const
 void output::set_script(const chain::script& value)
 {
     script_ = value;
-    invalidate_cache();
+    ////invalidate_cache();
 }
 
 void output::set_script(chain::script&& value)
 {
     script_ = std::move(value);
-    invalidate_cache();
+    ////invalidate_cache();
 }
 
-// protected
-void output::invalidate_cache() const
-{
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    mutex_.lock_upgrade();
+////// protected
+////void output::invalidate_cache() const
+////{
+////    ///////////////////////////////////////////////////////////////////////////
+////    // Critical Section
+////    mutex_.lock_upgrade();
+////
+////    if (addresses_)
+////    {
+////        mutex_.unlock_upgrade_and_lock();
+////        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////        addresses_.reset();
+////        //---------------------------------------------------------------------
+////        mutex_.unlock_and_lock_upgrade();
+////    }
+////
+////    mutex_.unlock_upgrade();
+////    ///////////////////////////////////////////////////////////////////////////
+////}
 
-    if (addresses_)
-    {
-        mutex_.unlock_upgrade_and_lock();
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        addresses_.reset();
-        //---------------------------------------------------------------------
-        mutex_.unlock_and_lock_upgrade();
-    }
+////payment_address output::address(uint8_t p2kh_version,
+////    uint8_t p2sh_version) const
+////{
+////    const auto value = addresses(p2kh_version, p2sh_version);
+////    return value.empty() ? payment_address{} : value.front();
+////}
 
-    mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-}
-
-payment_address output::address(uint8_t p2kh_version,
-    uint8_t p2sh_version) const
-{
-    const auto value = addresses(p2kh_version, p2sh_version);
-    return value.empty() ? payment_address{} : value.front();
-}
-
-payment_address::list output::addresses(uint8_t p2kh_version,
-    uint8_t p2sh_version) const
-{
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    mutex_.lock_upgrade();
-
-    if (!addresses_)
-    {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
-        addresses_ = std::make_shared<payment_address::list>(
-            payment_address::extract_output(script_, p2kh_version,
-                p2sh_version));
-        mutex_.unlock_and_lock_upgrade();
-        //---------------------------------------------------------------------
-    }
-
-    const auto addresses = *addresses_;
-    mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    return addresses;
-}
+////payment_address::list output::addresses(uint8_t p2kh_version,
+////    uint8_t p2sh_version) const
+////{
+////    ///////////////////////////////////////////////////////////////////////////
+////    // Critical Section
+////    mutex_.lock_upgrade();
+////
+////    if (!addresses_)
+////    {
+////        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////        mutex_.unlock_upgrade_and_lock();
+////        addresses_ = std::make_shared<payment_address::list>(
+////            payment_address::extract_output(script_, p2kh_version,
+////                p2sh_version));
+////        mutex_.unlock_and_lock_upgrade();
+////        //---------------------------------------------------------------------
+////    }
+////
+////    const auto addresses = *addresses_;
+////    mutex_.unlock_upgrade();
+////    ///////////////////////////////////////////////////////////////////////////
+////
+////    return addresses;
+////}
 
 // Validation helpers.
 //-----------------------------------------------------------------------------

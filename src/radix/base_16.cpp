@@ -96,6 +96,8 @@ std::string encode_base16(const data_slice& data)
 std::string encode_hash(const data_slice& hash)
 {
     data_chunk data(hash.size());
+
+    // TODO: avoid this copy.
     std::reverse_copy(hash.begin(), hash.end(), data.begin());
     return encode_base16(data);
 }

@@ -19,19 +19,19 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
-#include <boost/optional.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/concurrency/asio.hpp>
-#include <bitcoin/system/concurrency/thread.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/mutex.hpp>
+#include <bitcoin/system/optional.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -50,19 +50,19 @@ public:
     struct validation
     {
         // Organize
-        asio::nanoseconds deserialize;
-        asio::nanoseconds check;
-        asio::nanoseconds associate;
+        std::chrono::nanoseconds deserialize;
+        std::chrono::nanoseconds check;
+        std::chrono::nanoseconds associate;
 
         // Validate
-        ////asio::nanoseconds deserialize;
-        asio::nanoseconds populate;
-        asio::nanoseconds accept;
-        asio::nanoseconds connect;
-        asio::nanoseconds candidate;
-        asio::nanoseconds confirm;
-        asio::nanoseconds catalog;
-        asio::nanoseconds filter;
+        ////std::chrono::nanoseconds deserialize;
+        std::chrono::nanoseconds populate;
+        std::chrono::nanoseconds accept;
+        std::chrono::nanoseconds connect;
+        std::chrono::nanoseconds candidate;
+        std::chrono::nanoseconds confirm;
+        std::chrono::nanoseconds catalog;
+        std::chrono::nanoseconds filter;
 
         float cache_efficiency;
     };
@@ -176,20 +176,18 @@ protected:
     void reset();
 
 private:
-    typedef boost::optional<size_t> optional_size;
-
     optional_size total_inputs_cache() const;
     optional_size non_coinbase_inputs_cache() const;
 
     chain::header header_;
     transaction::list transactions_;
 
-    // These share a mutext as they are not expected to contend.
-    mutable boost::optional<bool> segregated_;
+    // These share a mutex as they are not expected to contend.
+    mutable optional_flag segregated_;
     mutable optional_size total_inputs_;
     mutable optional_size non_coinbase_inputs_;
-    mutable boost::optional<size_t> base_size_;
-    mutable boost::optional<size_t> total_size_;
+    mutable optional_size base_size_;
+    mutable optional_size total_size_;
     mutable upgrade_mutex mutex_;
 };
 

@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(operation_tests)
 
-using namespace bc::system::machine;
+using namespace bc::system::chain;
 
 const auto valid_raw_operation = base16_chunk("0900ff11ee22bb33aa44");
 
@@ -399,25 +399,25 @@ BOOST_AUTO_TEST_CASE(operation__to_string__push_four_size_0x112233__4_0x112233)
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
 {
     operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(machine::rule_fork::no_rules), "nop2");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::no_rules), "nop2");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_bip65_rule__checklocktimeverify)
 {
     operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(machine::rule_fork::bip65_rule), "checklocktimeverify");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::bip65_rule), "checklocktimeverify");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_no_rules__nop3)
 {
     operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(machine::rule_fork::no_rules), "nop3");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::no_rules), "nop3");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify)
 {
     operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(machine::rule_fork::bip112_rule), "checksequenceverify");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::bip112_rule), "checksequenceverify");
 }
 
 // from_string

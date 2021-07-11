@@ -22,12 +22,11 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace system {

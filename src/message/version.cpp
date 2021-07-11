@@ -219,7 +219,7 @@ size_t version::serialized_size(uint32_t version) const
         address_receiver_.serialized_size(version, false) +
         address_sender_.serialized_size(version, false) +
         sizeof(nonce_) +
-        variable_uint_size(user_agent_.size()) + user_agent_.size() +
+        variable_size(user_agent_.size()) + user_agent_.size() +
         sizeof(start_height_);
 
     if (value_ >= level::bip37)

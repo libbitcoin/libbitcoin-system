@@ -63,7 +63,6 @@ static_assert(twos_complement<uint8_t>(0xfc) == 4, "");
 static_assert(std::is_same<decltype(twos_complement<int32_t>(0)), int32_t>::value, "");
 
 // bit_all
-static_assert(bit_all<bool>() == true, "");
 static_assert(bit_all<uint8_t>() == 0xff, "");
 static_assert(bit_all<int8_t>() == -1, "");
 static_assert(bit_all<int16_t>() == -1, "");
@@ -75,7 +74,6 @@ static_assert(bit_all<uint64_t>() == 0xffffffffffffffff, "");
 static_assert(std::is_same<decltype(bit_all<int32_t>()), int32_t>::value, "");
 
 // bit_hi
-static_assert(bit_hi<bool>() == true, "");
 static_assert(bit_hi<char>() == char(0x80), "");
 static_assert(bit_hi<int8_t>() == int8_t(0x80), "");
 static_assert(bit_hi<uint8_t>() == uint8_t(0x80), "");
@@ -88,7 +86,6 @@ static_assert(bit_hi<uint64_t>() == uint64_t(0x8000000000000000), "");
 static_assert(std::is_same<decltype(bit_hi<int32_t>()), int32_t>::value, "");
 
 // bit_lo
-static_assert(bit_lo<bool>() == true, "");
 static_assert(bit_lo<char>() == char(1), "");
 static_assert(bit_lo<int8_t>() == int8_t(1), "");
 static_assert(bit_lo<uint8_t>() == uint8_t(1), "");

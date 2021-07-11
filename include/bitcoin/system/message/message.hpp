@@ -182,9 +182,6 @@ data_chunk serialize(uint32_t version, const Message& packet,
 /// Compute an internal representation of the message checksum.
 BC_API uint32_t network_checksum(const data_slice& data);
 
-// TODO: move to stream class.
-BC_API size_t variable_uint_size(uint64_t value);
-
 } // namespace message
 } // namespace system
 } // namespace libbitcoin

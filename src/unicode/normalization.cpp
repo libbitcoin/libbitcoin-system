@@ -28,6 +28,7 @@
     #include <mutex>
 #endif
 #include <boost/locale.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>

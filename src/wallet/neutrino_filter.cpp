@@ -22,14 +22,20 @@
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/golomb_coding.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace neutrino {
+
+// Golomb-Rice related values (bip158).
+constexpr uint8_t neutrino_filter_type = 0x00;
+constexpr uint8_t golomb_bits = 19;
+constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
 constexpr auto rate = golomb_target_false_positive_rate;
 
@@ -60,18 +66,19 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
             const auto& script = output.script();
 
             if (!script.empty() &&
-                (script.front().code() != machine::opcode::return_))
+                (script.front().code() != chain::opcode::return_))
                 scripts.push_back(script.to_data(false));
         }
     }
 
     // Order and remove duplicates.
-    distinct(std::move(scripts));
+    distinct(scripts);
 
-    write::bits::data writer(out_filter);
+    stream::out::data stream(out_filter);
+    write::bytes::ostream writer(stream);
     writer.write_variable(scripts.size());
-    golomb::construct(writer, scripts, golomb_bits, key, rate);
-    writer.flush();
+    golomb::construct(stream, scripts, golomb_bits, key, rate);
+    stream.flush();
 
     return true;
 }
@@ -95,7 +102,8 @@ bool match_filter(const message::compact_filter& filter,
     if (script.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    read::bits::copy reader(filter.filter());
+    stream::in::copy stream(filter.filter());
+    read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
     if (!reader)
@@ -105,7 +113,7 @@ bool match_filter(const message::compact_filter& filter,
     const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash());
     const auto key = to_siphash_key(hash);
 
-    return golomb::match(target, reader, set_size, key, golomb_bits, rate);
+    return golomb::match(target, stream, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
@@ -127,7 +135,8 @@ bool match_filter(const message::compact_filter& filter,
     if (stack.empty())
         return false;
 
-    read::bits::copy reader(filter.filter());
+    stream::in::copy stream(filter.filter());
+    read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
     if (!reader)
@@ -137,7 +146,7 @@ bool match_filter(const message::compact_filter& filter,
     const auto key = to_siphash_key(hash);
 
     stack.shrink_to_fit();
-    return golomb::match(stack, reader, set_size, key, golomb_bits, rate);
+    return golomb::match(stack, stream, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const message::compact_filter& filter,
@@ -152,8 +161,8 @@ bool match_filter(const message::compact_filter& filter,
     if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    chain::script::list stack;
-    stack.reserve(addresses.size());
+    chain::script::list stack(no_fill_allocator);
+    stack.resize(addresses.size());
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
         [](const wallet::payment_address& address)

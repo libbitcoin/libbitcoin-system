@@ -22,8 +22,6 @@
 #include <cstddef>
 #include <istream>
 #include <utility>
-#include <bitcoin/system/chain/header.hpp>
-#include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -61,7 +59,7 @@ size_t header::satoshi_fixed_size(uint32_t version)
 {
     const auto canonical = (version == version::level::canonical);
     return chain::header::satoshi_fixed_size() +
-        (canonical ? 0 : variable_uint_size(0));
+        (canonical ? 0 : variable_size(0));
 }
 
 header::header()

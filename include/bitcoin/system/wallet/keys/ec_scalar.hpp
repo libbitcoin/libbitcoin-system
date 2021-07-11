@@ -21,8 +21,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace system {

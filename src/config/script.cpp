@@ -29,9 +29,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost;
-using namespace boost::program_options;
-
 script::script()
   : value_()
 {
@@ -93,7 +90,7 @@ std::istream& operator>>(std::istream& input, script& argument)
 
 std::ostream& operator<<(std::ostream& output, const script& argument)
 {
-    static constexpr auto flags = machine::rule_fork::all_rules;
+    static constexpr auto flags = chain::rule_fork::all_rules;
     output << argument.value_.to_string(flags);
     return output;
 }

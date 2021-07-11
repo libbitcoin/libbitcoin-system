@@ -28,21 +28,16 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/machine/script_pattern.hpp>
-#include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/machine/sighash_algorithm.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/message/message.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
+#include <bitcoin/system/machine/machine.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -110,14 +105,14 @@ script::script(const data_chunk& encoded, bool prefix)
 }
 
 // Private cache access for move construction.
-script::operation::list& script::operations_move()
+operation::list& script::operations_move()
 {
     shared_lock lock(mutex_);
     return operations_;
 }
 
 // Private cache access for copy construction.
-const script::operation::list& script::operations_copy() const
+const operation::list& script::operations_copy() const
 {
     shared_lock lock(mutex_);
     return operations_;
@@ -287,7 +282,7 @@ size_t script::serialized_size(const operation::list& ops)
         return total + op.serialized_size();
     };
 
-    return std::accumulate(ops.begin(), ops.end(), size_t{0}, op_size);
+    return std::accumulate(ops.begin(), ops.end(), zero, op_size);
 }
 
 // protected
@@ -423,7 +418,7 @@ size_t script::serialized_size(bool prefix) const
     auto size = bytes_.size();
 
     if (prefix)
-        size += message::variable_uint_size(size);
+        size += variable_size(size);
 
     return size;
 }
@@ -500,12 +495,12 @@ inline sighash_algorithm to_sighash_enum(uint8_t sighash_type)
 {
     switch (sighash_type & sighash_algorithm::mask)
     {
-        case sighash_algorithm::single:
-            return sighash_algorithm::single;
-        case sighash_algorithm::none:
-            return sighash_algorithm::none;
+        case sighash_algorithm::hash_single:
+            return sighash_algorithm::hash_single;
+        case sighash_algorithm::hash_none:
+            return sighash_algorithm::hash_none;
         default:
-            return sighash_algorithm::all;
+            return sighash_algorithm::hash_all;
     }
 }
 
@@ -514,8 +509,8 @@ static hash_digest sign_none(const transaction& tx, uint32_t input_index,
 {
     input::list ins;
     const auto& inputs = tx.inputs();
-    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
-    ins.reserve(any ? 1 : inputs.size());
+    const auto any = !is_zero(sighash_type & sighash_algorithm::anyone_can_pay);
+    ins.reserve(any ? one : inputs.size());
 
     BITCOIN_ASSERT(input_index < inputs.size());
     const auto& self = inputs[input_index];
@@ -546,8 +541,8 @@ static hash_digest sign_single(const transaction& tx, uint32_t input_index,
 {
     input::list ins;
     const auto& inputs = tx.inputs();
-    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
-    ins.reserve(any ? 1 : inputs.size());
+    const auto any = !is_zero(sighash_type & sighash_algorithm::anyone_can_pay);
+    ins.reserve(any ? one : inputs.size());
 
     BITCOIN_ASSERT(input_index < inputs.size());
     const auto& self = inputs[input_index];
@@ -585,8 +580,8 @@ static hash_digest sign_all(const transaction& tx, uint32_t input_index,
 {
     input::list ins;
     const auto& inputs = tx.inputs();
-    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
-    ins.reserve(any ? 1 : inputs.size());
+    const auto any = !is_zero(sighash_type & sighash_algorithm::anyone_can_pay);
+    ins.reserve(any ? one : inputs.size());
 
     BITCOIN_ASSERT(input_index < inputs.size());
     const auto& self = inputs[input_index];
@@ -619,7 +614,7 @@ static bool is_index_overflow(const transaction& tx, uint32_t input_index,
 {
     return input_index >= tx.inputs().size() ||
         (input_index >= tx.outputs().size() && 
-            sighash == sighash_algorithm::single);
+            sighash == sighash_algorithm::hash_single);
 }
 
 // TODO: optimize to prevent script reconstruction.
@@ -654,12 +649,12 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     // The sighash serializations are isolated for clarity and optimization.
     switch (sighash)
     {
-        case sighash_algorithm::none:
+        case sighash_algorithm::hash_none:
             return sign_none(tx, input_index, stripped, sighash_type);
-        case sighash_algorithm::single:
+        case sighash_algorithm::hash_single:
             return sign_single(tx, input_index, stripped, sighash_type);
         default:
-        case sighash_algorithm::all:
+        case sighash_algorithm::hash_all:
             return sign_all(tx, input_index, stripped, sighash_type);
     }
 }
@@ -760,10 +755,10 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 {
     const auto sighash = to_sighash_enum(sighash_type);
 
-    const auto any = (sighash_type & sighash_algorithm::anyone_can_pay) != 0;
-    const auto single = (sighash == sighash_algorithm::single);
-    //// const auto none = (sighash == sighash_algorithm::none);
-    const auto all = (sighash == sighash_algorithm::all);
+    const auto any = !is_zero(sighash_type & sighash_algorithm::anyone_can_pay);
+    const auto single = (sighash == sighash_algorithm::hash_single);
+    //// const auto none = (sighash == sighash_algorithm::hash_none);
+    const auto all = (sighash == sighash_algorithm::hash_all);
 
     // Unlike unversioned algorithm this does not allow an invalid input index.
     BITCOIN_ASSERT(input_index < tx.inputs().size());
@@ -986,7 +981,7 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
     if (number != points)
         return false;
 
-    for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
+    for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
         if (!is_public_key(op->data()))
             return false;
 
@@ -1053,8 +1048,11 @@ bool script::is_sign_multisig_pattern(const operation::list& ops)
 {
     return ops.size() >= 2
         && ops[0].code() == opcode::push_size_0
-        && std::all_of(ops.begin() + 1, ops.end(), [](const operation& op)
-            { return is_endorsement(op.data()); });
+        && std::all_of(std::next(ops.begin()), ops.end(),
+            [](const operation& op)
+            {
+                return is_endorsement(op.data());
+            });
 }
 
 bool script::is_sign_public_key_pattern(const operation::list& ops)
@@ -1132,16 +1130,8 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
 operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     const compressed_list& points)
 {
-    data_stack chunks;
-    chunks.reserve(points.size());
-    const auto conversion = [&chunks](const ec_compressed& point)
-    {
-        chunks.push_back(to_chunk(point));
-    };
-
-    // Operation ordering matters, don't use std::transform here.
-    std::for_each(points.begin(), points.end(), conversion);
-    return to_pay_multisig_pattern(signatures, chunks);
+    return to_pay_multisig_pattern(signatures,
+        to_stack<ec_compressed_size>(points));
 }
 
 // TODO: expand this to a 20 signature limit.
@@ -1364,7 +1354,7 @@ void script::find_and_delete_(const data_chunk& endorsement)
 
     // The exhaustion test handles stream end and op deserialization failure.
     for (auto it = bytes_.begin(); !source.is_exhausted();
-        it += source ? op.serialized_size() : 0)
+        it += (source ? op.serialized_size() : zero))
     {
         // Track all found values for later deletion.
         for (; starts_with(it, bytes_.end(), value); it += value.size())

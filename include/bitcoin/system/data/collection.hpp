@@ -93,20 +93,20 @@ bool is_sorted(const Collection& list) noexcept;
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
-Collection distinct(Collection&& list) noexcept;
+Collection& distinct(Collection& list) noexcept;
 template <typename Collection>
 Collection distinct(const Collection& list) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
-Collection reverse(Collection&& list) noexcept;
+Collection& reverse(Collection& list) noexcept;
 template <typename Collection>
 Collection reverse(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>
-Collection sort(Collection&& list) noexcept;
+Collection& sort(Collection& list) noexcept;
 template <typename Collection>
 Collection sort(const Collection& list) noexcept;
 

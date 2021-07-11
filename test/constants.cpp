@@ -64,15 +64,19 @@ static_assert(!is_odd(10), "");
 static_assert(!is_odd(max_uint32 - 1u), "");
 static_assert(std::is_same<decltype(is_odd<int16_t>(0)), bool>::value, "");
 
-static_assert(is_byte_aligned(0), "");
-static_assert(is_byte_aligned(8), "");
-static_assert(is_byte_aligned(16), "");
-static_assert(is_byte_aligned(128), "");
-static_assert(!is_byte_aligned(1), "");
-static_assert(!is_byte_aligned(2), "");
-static_assert(!is_byte_aligned(-42), "");
-static_assert(!is_byte_aligned(0xff), "");
-static_assert(std::is_same<decltype(is_byte_aligned<int16_t>(0)), bool>::value, "");
+static_assert(is_integer<uint8_t>(), "");
+static_assert(is_integer<uint16_t>(), "");
+static_assert(is_integer<uint32_t>(), "");
+static_assert(is_integer<uint64_t>(), "");
+static_assert(is_integer<size_t>(), "");
+static_assert(is_integer<int8_t>(), "");
+static_assert(is_integer<int16_t>(), "");
+static_assert(is_integer<int32_t>(), "");
+static_assert(is_integer<int64_t>(), "");
+static_assert(is_integer<char>(), "");
+static_assert(is_integer<wchar_t>(), "");
+static_assert(!is_integer<bool>(), "");
+static_assert(!is_integer<std::string> (), "");
 
 constexpr void* pointer = "";
 constexpr void* null_pointer = nullptr;
@@ -124,8 +128,23 @@ static_assert(sub1(0xff) == 0xff - 1, "");
 static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value, "");
 
 constexpr uint32_t value = 42;
-static_assert(width<bool>() == 1, "");
-static_assert(width<char>() == 8, "");
+static_assert(width<bool>() == to_bits(sizeof(char)), "");
+static_assert(width<char>() == to_bits(sizeof(char)), "");
+static_assert(width<short>() == to_bits(sizeof(short)), "");
+static_assert(width<int>() == to_bits(sizeof(int)), "");
+static_assert(width<long>() == to_bits(sizeof(long)), "");
+static_assert(width<long long>() == to_bits(sizeof(long long)), "");
+static_assert(width<signed char>() == to_bits(sizeof(signed char)), "");
+static_assert(width<signed short>() == to_bits(sizeof(signed short)), "");
+static_assert(width<signed int>() == to_bits(sizeof(signed int)), "");
+static_assert(width<signed long>() == to_bits(sizeof(signed long)), "");
+static_assert(width<signed long long>() == to_bits(sizeof(signed long long)), "");
+static_assert(width<unsigned char>() == to_bits(sizeof(unsigned char)), "");
+static_assert(width<unsigned short>() == to_bits(sizeof(unsigned short)), "");
+static_assert(width<unsigned int>() == to_bits(sizeof(unsigned int)), "");
+static_assert(width<unsigned long>() == to_bits(sizeof(unsigned long)), "");
+static_assert(width<unsigned long long>() == to_bits(sizeof(unsigned long long)), "");
+static_assert(width<wchar_t>() == to_bits(sizeof(wchar_t)), "");
 static_assert(width<int8_t>() == 8, "");
 static_assert(width<uint8_t>() == 8, "");
 static_assert(width<int16_t>() == 16, "");
@@ -136,3 +155,30 @@ static_assert(width<int64_t>() == 64, "");
 static_assert(width<uint64_t>() == 64, "");
 static_assert(width(value) == to_bits(sizeof(value)), "");
 static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value, "");
+
+BOOST_AUTO_TEST_SUITE(constants_tests)
+
+BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
+{
+    // TODO: set to the actual value.
+    BOOST_REQUIRE_EQUAL(width<uintx>(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(constants__width__uintx_t__expected)
+{
+    // TODO: set these to the actual values.
+    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 5u);
+    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 11u);
+    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 48u);
+    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 128u);
+    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 160u);
+    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 256u);
+    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 512u);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+static_assert(variable_size(1) == 1u, "");
+static_assert(variable_size(0xfe) == 3u, "");
+static_assert(variable_size(0x10000) == 5u, "");
+static_assert(variable_size(0x100000000) == 9u, "");

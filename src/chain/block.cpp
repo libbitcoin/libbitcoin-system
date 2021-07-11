@@ -31,26 +31,23 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
+#include <bitcoin/system/chain/enums/rule_fork.hpp>
 #include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/concurrency/asio.hpp>
-#include <bitcoin/system/config/checkpoint.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/message/message.hpp>
+#include <bitcoin/system/mutex.hpp>
+#include <bitcoin/system/optional.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-
-using namespace bc::system::config;
-using namespace bc::system::machine;
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -93,13 +90,13 @@ block::block(chain::header&& header, transaction::list&& transactions)
 {
 }
 
-block::optional_size block::total_inputs_cache() const
+optional_size block::total_inputs_cache() const
 {
     shared_lock lock(mutex_);
     return total_inputs_;
 }
 
-block::optional_size block::non_coinbase_inputs_cache() const
+optional_size block::non_coinbase_inputs_cache() const
 {
     shared_lock lock(mutex_);
     return non_coinbase_inputs_;
@@ -170,8 +167,6 @@ bool block::from_data(std::istream& stream, bool witness)
 // Full block deserialization is always canonical encoding.
 bool block::from_data(reader& source, bool witness)
 {
-    const auto start = asio::steady_clock::now();
-
     reset();
 
     if (!header_.from_data(source, true))
@@ -197,7 +192,6 @@ bool block::from_data(reader& source, bool witness)
     if (!source)
         reset();
 
-    metadata.deserialize = asio::steady_clock::now() - start;
     return source;
 }
 
@@ -246,13 +240,14 @@ void block::to_data(writer& sink, bool witness) const
 
 hash_list block::to_hashes(bool witness) const
 {
-    hash_list out;
-    out.reserve(transactions_.size());
+    hash_list out(no_fill_allocator);
+    out.resize(transactions_.size());
+
     std::transform(transactions_.begin(), transactions_.end(), out.begin(),
-    [&out, witness](const transaction& tx)
-    {
-        return tx.hash(witness);
-    });
+        [&out, witness](const transaction& tx)
+        {
+            return tx.hash(witness);
+        });
 
     return out;
 }
@@ -269,7 +264,7 @@ size_t block::serialized_size(bool witness) const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (witness && total_size_ != boost::none)
+    if (witness && !is_none(total_size_))
     {
         value = total_size_.get();
         mutex_.unlock_upgrade();
@@ -277,7 +272,7 @@ size_t block::serialized_size(bool witness) const
         return value;
     }
 
-    if (!witness && base_size_ != boost::none)
+    if (!witness && !is_none(base_size_))
     {
         value = base_size_.get();
         mutex_.unlock_upgrade();
@@ -295,7 +290,7 @@ size_t block::serialized_size(bool witness) const
 
     const auto& txs = transactions_;
     value = header_.serialized_size(true) +
-        message::variable_uint_size(transactions_.size()) +
+        variable_size(transactions_.size()) +
         std::accumulate(txs.begin(), txs.end(), zero, sum);
 
     if (witness)
@@ -332,21 +327,21 @@ const transaction::list& block::transactions() const
 void block::set_transactions(const transaction::list& value)
 {
     transactions_ = value;
-    segregated_ = boost::none;
-    total_inputs_ = boost::none;
-    non_coinbase_inputs_ = boost::none;
-    base_size_ = boost::none;
-    total_size_ = boost::none;
+    segregated_ = none;
+    total_inputs_ = none;
+    non_coinbase_inputs_ = none;
+    base_size_ = none;
+    total_size_ = none;
 }
 
 void block::set_transactions(transaction::list&& value)
 {
     transactions_ = std::move(value);
-    segregated_ = boost::none;
-    total_inputs_ = boost::none;
-    non_coinbase_inputs_ = boost::none;
-    base_size_ = boost::none;
-    total_size_ = boost::none;
+    segregated_ = none;
+    total_inputs_ = none;
+    non_coinbase_inputs_ = none;
+    base_size_ = none;
+    total_size_ = none;
 }
 
 // Convenience property.
@@ -368,7 +363,7 @@ void block::strip_witness()
     unique_lock lock(mutex_);
 
     segregated_ = false;
-    total_size_ = boost::none;
+    total_size_ = none;
     std::for_each(transactions_.begin(), transactions_.end(), strip);
     ///////////////////////////////////////////////////////////////////////////
 }
@@ -427,7 +422,7 @@ size_t block::total_non_coinbase_inputs() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (non_coinbase_inputs_ != boost::none)
+    if (!is_none(non_coinbase_inputs_))
     {
         value = non_coinbase_inputs_.get();
         mutex_.unlock_upgrade();
@@ -461,7 +456,7 @@ size_t block::total_inputs() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (total_inputs_ != boost::none)
+    if (!is_none(total_inputs_))
     {
         value = total_inputs_.get();
         mutex_.unlock_upgrade();
@@ -680,7 +675,7 @@ bool block::is_segregated() const
     // Critical Section
     mutex_.lock_upgrade();
 
-    if (segregated_ != boost::none)
+    if (!is_none(segregated_))
     {
         value = segregated_.get();
         mutex_.unlock_upgrade();

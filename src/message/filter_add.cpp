@@ -109,7 +109,7 @@ bool filter_add::from_data(uint32_t version, reader& source)
 
     const auto size = source.read_size();
 
-    if (size > max_filter_add)
+    if (size > chain::max_filter_add)
         source.invalidate();
     else
         data_ = source.read_bytes(size);
@@ -149,7 +149,7 @@ void filter_add::to_data(uint32_t, writer& sink) const
 
 size_t filter_add::serialized_size(uint32_t) const
 {
-    return variable_uint_size(data_.size()) + data_.size();
+    return variable_size(data_.size()) + data_.size();
 }
 
 data_chunk& filter_add::data()

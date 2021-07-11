@@ -19,12 +19,34 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_WALLET_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_WALLET_HPP
 
-#include <bitcoin/system/wallet/addresses/addresses.hpp>
+#include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
+#include <bitcoin/system/wallet/addresses/checked.hpp>
+#include <bitcoin/system/wallet/addresses/payment_address.hpp>
+#include <bitcoin/system/wallet/addresses/qr_code.hpp>
+#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
+#include <bitcoin/system/wallet/addresses/stealth_receiver.hpp>
+#include <bitcoin/system/wallet/addresses/stealth_sender.hpp>
+#include <bitcoin/system/wallet/addresses/tiff.hpp>
+#include <bitcoin/system/wallet/addresses/uri.hpp>
+#include <bitcoin/system/wallet/addresses/uri_reader.hpp>
+#include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
-#include <bitcoin/system/wallet/keys/keys.hpp>
+#include <bitcoin/system/wallet/keys/ec_point.hpp>
+#include <bitcoin/system/wallet/keys/ec_private.hpp>
+#include <bitcoin/system/wallet/keys/ec_public.hpp>
+#include <bitcoin/system/wallet/keys/ec_scalar.hpp>
+#include <bitcoin/system/wallet/keys/ek_private.hpp>
+#include <bitcoin/system/wallet/keys/ek_public.hpp>
+#include <bitcoin/system/wallet/keys/ek_token.hpp>
+#include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
+#include <bitcoin/system/wallet/keys/hd_private.hpp>
+#include <bitcoin/system/wallet/keys/hd_public.hpp>
+#include <bitcoin/system/wallet/keys/mini_keys.hpp>
+#include <bitcoin/system/wallet/keys/stealth.hpp>
 #include <bitcoin/system/wallet/message.hpp>
-#include <bitcoin/system/wallet/mnemonics/mnemonics.hpp>
+#include <bitcoin/system/wallet/mnemonics/electrum.hpp>
+#include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
+#include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
-#include <bitcoin/system/wallet/property_tree.hpp>
 
 #endif

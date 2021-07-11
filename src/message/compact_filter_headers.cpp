@@ -139,7 +139,7 @@ bool compact_filter_headers::from_data(uint32_t version, reader& source)
 
     // TODO: is this the corrected protocol limit?
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         filter_hashes_.reserve(count);
@@ -190,7 +190,7 @@ void compact_filter_headers::to_data(uint32_t , writer& sink) const
 size_t compact_filter_headers::serialized_size(uint32_t ) const
 {
     return sizeof(filter_type_) + hash_size + hash_size +
-        variable_uint_size(filter_hashes_.size()) +
+        variable_size(filter_hashes_.size()) +
         (filter_hashes_.size() * hash_size);
 }
 

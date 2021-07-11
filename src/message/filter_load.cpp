@@ -121,14 +121,14 @@ bool filter_load::from_data(uint32_t version, reader& source)
 
     const auto size = source.read_size();
 
-    if (size > max_filter_load)
+    if (size > chain::max_filter_load)
         source.invalidate();
     else
         filter_ = source.read_bytes(size);
 
     hash_functions_ = source.read_4_bytes_little_endian();
 
-    if (hash_functions_ > max_filter_functions)
+    if (hash_functions_ > chain::max_filter_functions)
         source.invalidate();
 
     tweak_ = source.read_4_bytes_little_endian();
@@ -172,7 +172,7 @@ void filter_load::to_data(uint32_t, writer& sink) const
 
 size_t filter_load::serialized_size(uint32_t) const
 {
-    return 1u + 4u + 4u + variable_uint_size(filter_.size()) +
+    return 1u + 4u + 4u + variable_size(filter_.size()) +
         filter_.size();
 }
 

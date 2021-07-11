@@ -48,14 +48,14 @@ size_t heading::maximum_size()
 size_t heading::maximum_payload_size(uint32_t, bool witness)
 {
     static constexpr size_t vector = sizeof(uint32_t) + hash_size;
-    static constexpr size_t maximum = 3u + vector * max_inventory;
+    static constexpr size_t maximum = 3u + vector * chain::max_inventory;
     static_assert(maximum <= max_size_t, "maximum_payload_size overflow");
-    return witness ? max_block_weight : maximum;
+    return witness ? chain::max_block_weight : maximum;
 }
 
 size_t heading::satoshi_fixed_size()
 {
-    return sizeof(uint32_t) + command_size + sizeof(uint32_t) +
+    return sizeof(uint32_t) + chain::command_size + sizeof(uint32_t) +
         sizeof(uint32_t);
 }
 
@@ -146,7 +146,7 @@ bool heading::from_data(reader& source)
 {
     reset();
     magic_ = source.read_4_bytes_little_endian();
-    command_ = source.read_string(command_size);
+    command_ = source.read_string(chain::command_size);
     payload_size_ = source.read_4_bytes_little_endian();
     checksum_ = source.read_4_bytes_little_endian();
 
@@ -177,7 +177,7 @@ void heading::to_data(std::ostream& stream) const
 void heading::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(magic_);
-    sink.write_string(command_, command_size);
+    sink.write_string(command_, chain::command_size);
     sink.write_4_bytes_little_endian(payload_size_);
     sink.write_4_bytes_little_endian(checksum_);
 }

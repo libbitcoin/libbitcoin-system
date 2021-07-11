@@ -22,7 +22,7 @@
 #include <istream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/message/prefilled_transaction.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 

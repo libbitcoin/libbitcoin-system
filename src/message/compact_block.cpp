@@ -126,7 +126,7 @@ bool compact_block::from_data(uint32_t version, reader& source)
     auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         short_ids_.reserve(count);
@@ -138,13 +138,13 @@ bool compact_block::from_data(uint32_t version, reader& source)
     count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         transactions_.resize(count);
 
     // Order is required.
-    for (auto& tx : transactions_)
+    for (auto& tx: transactions_)
         if (!tx.from_data(version, source))
             break;
 
@@ -193,9 +193,9 @@ void compact_block::to_data(uint32_t version, writer& sink) const
 size_t compact_block::serialized_size(uint32_t version) const
 {
     auto size = chain::header::satoshi_fixed_size() +
-        variable_uint_size(short_ids_.size()) +
+        variable_size(short_ids_.size()) +
         (short_ids_.size() * 6u) +
-        variable_uint_size(transactions_.size()) + 8u;
+        variable_size(transactions_.size()) + 8u;
 
     for (const auto& tx: transactions_)
         size += tx.serialized_size(version);

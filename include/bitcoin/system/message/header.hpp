@@ -23,10 +23,9 @@
 #include <cstddef>
 #include <istream>
 #include <memory>
-#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

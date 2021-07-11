@@ -19,7 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_HPP
 
-#include <bitcoin/system/data/binary.hpp>
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>

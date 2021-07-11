@@ -940,7 +940,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address1__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
     BOOST_REQUIRE(address.identifier() == type::version_0_p2kh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("751e76e8199196d454941c45d1b3a323f1433bd6"));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "zero [751e76e8199196d454941c45d1b3a323f1433bd6]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [751e76e8199196d454941c45d1b3a323f1433bd6]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address2__expected)
@@ -949,7 +949,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address2__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
     BOOST_REQUIRE(address.identifier() == type::version_0_p2sh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "zero [1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address3__expected)
@@ -962,7 +962,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address3__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 1u);
     BOOST_REQUIRE(address.identifier() == type::unknown);
     BOOST_REQUIRE_EQUAL(address.program(), to_chunk(program));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "1 [751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "1 [751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address4__expected)
@@ -975,7 +975,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address4__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 16u);
     BOOST_REQUIRE(address.identifier() == type::unknown);
     BOOST_REQUIRE_EQUAL(address.program(), to_chunk(program));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "16 [751e]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "16 [751e]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address5__expected)
@@ -988,7 +988,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address5__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 2u);
     BOOST_REQUIRE(address.identifier() == type::unknown);
     BOOST_REQUIRE_EQUAL(address.program(), to_chunk(program));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "2 [751e76e8199196d454941c45d1b3a323]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "2 [751e76e8199196d454941c45d1b3a323]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address6__expected)
@@ -998,7 +998,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address6__expected)
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
     BOOST_REQUIRE(address.identifier() == type::version_0_p2sh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(machine::all_rules), "zero [000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433]");
 }
 
 // BIP173: The following list gives invalid segwit addresses and the reason for their invalidity.

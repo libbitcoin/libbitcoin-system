@@ -20,11 +20,9 @@
 #define LIBBITCOIN_SYSTEM_POWER_IPP
 
 #include <cstddef>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

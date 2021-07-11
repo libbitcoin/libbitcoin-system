@@ -21,9 +21,8 @@
 #include <algorithm>
 #include <iterator>
 #include <utility>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/sign.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

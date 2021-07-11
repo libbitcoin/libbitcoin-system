@@ -21,12 +21,28 @@
 
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+// width (see constants.hpp for width<>()).
+
+template <typename Integer, if_integer<Integer>>
+inline size_t bit_width(Integer value) noexcept
+{
+    // C++20: std::bit_width.
+    return add1(floored_log2(value));
+}
+
+template <typename Integer, if_integer<Integer>>
+inline size_t byte_width(Integer value) noexcept
+{
+    return ceilinged_divide(bit_width(value), byte_bits);
+}
 
 // complements
 

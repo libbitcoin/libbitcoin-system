@@ -25,16 +25,14 @@
 #include <vector>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/math/sign.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -137,8 +135,8 @@ static const auto size2 = power(size, 2);
 const electrum_v1::dictionaries electrum_v1::dictionaries_
 {
     {
-        electrum_v1::dictionary{ language::en, electrum_v1::en },
-        electrum_v1::dictionary{ language::pt, electrum_v1::pt }
+        electrum_v1::dictionary{ language::en, words::electrum_v1::en },
+        electrum_v1::dictionary{ language::pt, words::electrum_v1::pt }
     }
 };
 
@@ -425,6 +423,7 @@ electrum_v1& electrum_v1::operator=(electrum_v1 other)
 void swap(electrum_v1& left, electrum_v1& right)
 {
     using std::swap;
+    using namespace bc::system::words;
 
     // Must be unqualified (no std namespace).
     swap(static_cast<languages&>(left), static_cast<languages&>(right));

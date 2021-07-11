@@ -328,10 +328,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_final__locktime_zero__returns_true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_final__locktime_less_block_time_greater_threshold__returns_true)
 {
-    static const size_t height = locktime_threshold + 100;
+    static const size_t height = chain::locktime_threshold + 100;
     static const uint32_t time = 100;
     chain::transaction instance;
-    instance.set_locktime(locktime_threshold + 50);
+    instance.set_locktime(chain::locktime_threshold + 50);
     BOOST_REQUIRE(instance.is_final(height, time));
 }
 
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_final__locktime_inputs_final__returns_true)
     static const size_t height = 100;
     static const uint32_t time = 100;
     chain::input input;
-    input.set_sequence(max_input_sequence);
+    input.set_sequence(chain::max_input_sequence);
     chain::transaction instance(0u, 101u, { input }, {});
     BOOST_REQUIRE(instance.is_final(height, time));
 }
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locktime_conflict__input_max_sequence__retu
     chain::input::list inputs;
 
     inputs.emplace_back();
-    inputs.back().set_sequence(max_input_sequence);
+    inputs.back().set_sequence(chain::max_input_sequence);
     chain::transaction instance(0, 2143u, std::move(inputs), {});
     BOOST_REQUIRE(instance.is_locktime_conflict());
 }
@@ -663,7 +663,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_below_min__
     instance.inputs().back().previous_output().set_index(chain::point::null_index);
     instance.inputs().back().previous_output().set_hash(null_hash);
     BOOST_REQUIRE(instance.is_coinbase());
-    BOOST_REQUIRE(instance.inputs().back().script().serialized_size(false) < min_coinbase_size);
+    BOOST_REQUIRE(instance.inputs().back().script().serialized_size(false) < chain::min_coinbase_size);
     BOOST_REQUIRE(instance.is_oversized_coinbase());
 }
 
@@ -674,9 +674,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_below_min__
 ////    inputs.emplace_back();
 ////    inputs.back().previous_output().set_index(chain::point::null_index);
 ////    inputs.back().previous_output().set_hash(null_hash);
-////    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(max_coinbase_size + 10), false));
+////    BOOST_REQUIRE(inputs.back().script().from_data(data_chunk(chain::max_coinbase_size + 10), false));
 ////    BOOST_REQUIRE(instance.is_coinbase());
-////    BOOST_REQUIRE(inputs.back().script().serialized_size(false) > max_coinbase_size);
+////    BOOST_REQUIRE(inputs.back().script().serialized_size(false) > chain::max_coinbase_size);
 ////    BOOST_REQUIRE(instance.is_oversized_coinbase());
 ////}
 ////

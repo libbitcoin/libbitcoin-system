@@ -25,8 +25,8 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

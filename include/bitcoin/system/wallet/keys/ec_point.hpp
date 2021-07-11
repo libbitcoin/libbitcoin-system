@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WALLET_KEYS_EC_POINT_HPP
 
 #include <cstdint>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/wallet/keys/ec_scalar.hpp>
 
 namespace libbitcoin {

@@ -20,9 +20,8 @@
 
 #include <cstdint>
 #include <utility>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {

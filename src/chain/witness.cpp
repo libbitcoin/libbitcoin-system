@@ -26,13 +26,13 @@
 #include <string>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/message/message.hpp>
+#include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -199,7 +199,7 @@ size_t witness::serialized_size(const data_stack& stack)
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
         const auto size = element.size();
-        return total + message::variable_uint_size(size) + size;
+        return total + variable_size(size) + size;
     };
 
     return std::accumulate(stack.begin(), stack.end(), zero, sum);
@@ -325,7 +325,7 @@ witness::iterator witness::end() const
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? message::variable_uint_size(stack_.size()) : 0u) +
+    return (prefix ? variable_size(stack_.size()) : 0u) +
         serialized_size(stack_);
 }
 
@@ -361,9 +361,8 @@ bool witness::is_reserved_pattern(const data_stack& stack)
         stack[0].size() == hash_size;
 }
 
-// private
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-operation::list witness::to_pay_key_hash(data_chunk&& program)
+inline operation::list to_pay_key_hash(data_chunk&& program)
 {
     BITCOIN_ASSERT(program.size() == short_hash_size);
 

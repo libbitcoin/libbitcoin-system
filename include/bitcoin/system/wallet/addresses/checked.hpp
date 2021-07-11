@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_CHECKED_HPP
 
 #include <cstddef>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/checksum.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,7 +34,8 @@ namespace wallet {
 /// that leverage the same technique. The behavior is unique to bitcoin.
 /// This class is optimized to transport value_type (only) at no material
 /// cost over a simple array, while simplifying parsing and checksumming.
-template <size_t Prefix, size_t Payload, size_t Checksum = checksum_default_size>
+template <size_t Prefix, size_t Payload,
+    size_t Checksum = checksum_default_size>
 class checked
   : public data_slice
 {
@@ -82,7 +83,8 @@ private:
 
 /// Comparison operators.
 
-template <size_t Prefix, size_t Payload, size_t Checksum = checksum_default_size>
+template <size_t Prefix, size_t Payload,
+    size_t Checksum = checksum_default_size>
 bool operator==(
     const checked<Prefix, Payload, Checksum>& left,
     const checked<Prefix, Payload, Checksum>& right)
@@ -90,7 +92,8 @@ bool operator==(
     return left.value() == right.value();
 }
 
-template <size_t Prefix, size_t Payload, size_t Checksum = checksum_default_size>
+template <size_t Prefix, size_t Payload,
+    size_t Checksum = checksum_default_size>
 bool operator!=(
     const checked<Prefix, Payload, Checksum>& left,
     const checked<Prefix, Payload, Checksum>& right)

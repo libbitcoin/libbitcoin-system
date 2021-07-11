@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/math/addition.hpp>
 

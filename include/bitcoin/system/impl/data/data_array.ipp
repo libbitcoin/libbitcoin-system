@@ -25,8 +25,10 @@
 #include <iterator>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/data/collection.hpp>
+#include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -40,6 +42,22 @@ template <size_t Size>
 data_array<Size> to_array(const data_slice& bytes) noexcept
 {
     return bytes.to_array<Size>();
+}
+
+// TODO: test.
+template <size_t Size>
+data_stack to_stack(const std::vector<data_array<Size>>& values) noexcept
+{
+    data_stack chunks(no_fill_allocator);
+    chunks.resize(values.size());
+
+    std::transform(values.begin(), values.end(), chunks.begin(),
+        [](const data_array<Size>& value)
+        {
+            return to_chunk(value);
+        });
+
+    return std::move(chunks);
 }
 
 template <size_t Size>

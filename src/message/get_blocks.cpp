@@ -146,7 +146,7 @@ bool get_blocks::from_data(uint32_t, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_get_blocks)
+    if (count > chain::max_get_blocks)
         source.invalidate();
     else
         start_hashes_.reserve(count);
@@ -193,7 +193,7 @@ void get_blocks::to_data(uint32_t version, writer& sink) const
 
 size_t get_blocks::serialized_size(uint32_t) const
 {
-    return size_t(36) + variable_uint_size(start_hashes_.size()) +
+    return size_t(36) + variable_size(start_hashes_.size()) +
         hash_size * start_hashes_.size();
 }
 

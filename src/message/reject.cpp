@@ -195,8 +195,8 @@ void reject::to_data(uint32_t, writer& sink) const
 
 size_t reject::serialized_size(uint32_t) const
 {
-    size_t size = 1u + variable_uint_size(message_.size()) +
-        message_.size() + variable_uint_size(reason_.size()) + reason_.size();
+    size_t size = 1u + variable_size(message_.size()) +
+        message_.size() + variable_size(reason_.size()) + reason_.size();
 
     if ((message_ == block::command) ||
         (message_ == transaction::command))

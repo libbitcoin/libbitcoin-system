@@ -23,12 +23,11 @@
 #include <string>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/serialization/deserialize.hpp>
-#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
+#include <bitcoin/system/wallet/wallet.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -106,7 +105,8 @@ std::istream& operator>>(std::istream& input, output& argument)
             throw istream_exception(tuple);
 
         data_chunk seed;
-        if (!decode_base16(seed, tokens[2]) || seed.size() < minimum_seed_size)
+        if (!decode_base16(seed, tokens[2]) ||
+            seed.size() < chain::minimum_seed_size)
             throw istream_exception(tuple);
 
         ec_secret ephemeral_secret;

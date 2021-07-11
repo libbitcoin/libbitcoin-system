@@ -21,9 +21,9 @@
 
 #include <array>
 #include <vector>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

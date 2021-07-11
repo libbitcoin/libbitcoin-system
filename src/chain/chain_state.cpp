@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -27,31 +28,23 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/concurrency/timer.hpp>
-#include <bitcoin/system/config/checkpoint.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/chain/check_point.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/math/addition.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-using namespace bc::system::config;
-using namespace bc::system::machine;
-
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-static const system::config::checkpoint mainnet_bip30_exception_checkpoint1
+static const check_point mainnet_bip30_exception_checkpoint1
 {
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
 };
-static const system::config::checkpoint mainnet_bip30_exception_checkpoint2
+static const check_point mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
 };
@@ -69,7 +62,7 @@ inline bool is_enforced(size_t count, size_t enforcement_threshold)
     return count >= enforcement_threshold;
 }
 
-inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
+inline bool is_bip30_exception(const check_point& check, bool mainnet)
 {
     return mainnet &&
         ((check == mainnet_bip30_exception_checkpoint1) ||
@@ -226,15 +219,15 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
 {
     // Mainnet doesn't use bits in retargeting.
     if (script::is_enabled(forks, rule_fork::difficult))
-        return 1;
+        return one;
 
     // Regtest bypasses all retargeting.
     if (!script::is_enabled(forks, rule_fork::retarget))
-        return 1;
+        return one;
 
     // Testnet uses mainnet retargeting on interval.
     if (is_retarget_height(height, retargeting_interval))
-        return 1;
+        return one;
 
     // Testnet requires all bits for inter-interval retargeting.
     return std::min(height, retargeting_interval);
@@ -246,7 +239,7 @@ size_t chain_state::version_count(size_t height, uint32_t forks,
     if (script::is_enabled(forks, rule_fork::bip90_rule) ||
         !script::is_enabled(forks, rule_fork::bip34_activations))
     {
-        return 0;
+        return zero;
     }
 
     return std::min(height, activation_sample);
@@ -270,7 +263,7 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
 }
 
 size_t chain_state::bip9_bit0_height(size_t height,
-    const config::checkpoint& bip9_bit0_active_checkpoint)
+    const check_point& bip9_bit0_active_checkpoint)
 {
     const auto activation_height = bip9_bit0_active_checkpoint.height();
     // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
@@ -278,7 +271,7 @@ size_t chain_state::bip9_bit0_height(size_t height,
 }
 
 size_t chain_state::bip9_bit1_height(size_t height,
-    const config::checkpoint& bip9_bit1_active_checkpoint)
+    const check_point& bip9_bit1_active_checkpoint)
 {
     const auto activation_height = bip9_bit1_active_checkpoint.height();
 
@@ -441,10 +434,10 @@ size_t chain_state::retarget_distance(size_t height,
 
 // static
 chain_state::map chain_state::get_map(size_t height,
-    const checkpoints& /* checkpoints */, uint32_t forks,
+    const check_points& /* checkpoints */, uint32_t forks,
     size_t retargeting_interval, size_t activation_sample,
-    const config::checkpoint& bip9_bit0_active_checkpoint,
-    const config::checkpoint& bip9_bit1_active_checkpoint)
+    const check_point& bip9_bit0_active_checkpoint,
+    const check_point& bip9_bit1_active_checkpoint)
 {
     if (is_zero(height))
         return {};
@@ -600,8 +593,8 @@ chain_state::chain_state(const chain_state& top,
 }
 
 chain_state::data chain_state::to_block(const chain_state& pool,
-    const block& block, const config::checkpoint& bip9_bit0_active_checkpoint,
-    const config::checkpoint& bip9_bit1_active_checkpoint)
+    const block& block, const check_point& bip9_bit0_active_checkpoint,
+    const check_point& bip9_bit1_active_checkpoint)
 {
     // Copy data from presumed same-height pool state.
     auto data = pool.data_;
@@ -681,7 +674,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 }
 
 // Constructor (from raw data).
-chain_state::chain_state(data&& values, const checkpoints& checkpoints,
+chain_state::chain_state(data&& values, const check_points& checkpoints,
     uint32_t forks, uint32_t stale_seconds, const system::settings& settings)
   : data_(std::move(values)),
     forks_(forks),
@@ -701,11 +694,22 @@ bool chain_state::is_valid() const
     return !is_zero(data_.height);
 }
 
+/// Current zulu (utc) time in seconds since epoch, using the wall clock.
+/// Although not defined, epoch is almost always: 00:00, Jan 1 1970 UTC.
+/// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
+inline uint64_t zulu_time_seconds()
+{
+    using wall_clock = std::chrono::system_clock;
+    const auto now = wall_clock::now();
+    return static_cast<uint64_t>(wall_clock::to_time_t(now));
+}
+
 // If there is a zero limit then the chain is never considered stale.
 bool chain_state::is_stale() const
 {
     return !is_zero(stale_seconds_) && data_.timestamp.self <
-        floored_subtract(static_cast<uint32_t>(zulu_time()), stale_seconds_);
+        floored_subtract(zulu_time_seconds(),
+            static_cast<uint64_t>(stale_seconds_));
 }
 
 // Properties.
@@ -754,15 +758,29 @@ bool chain_state::is_enabled(rule_fork fork) const
     return script::is_enabled(active_.forks, fork);
 }
 
+// Checkpoints.
+//-----------------------------------------------------------------------------
+
 bool chain_state::is_checkpoint_conflict(const hash_digest& hash) const
 {
-    return !checkpoint::validate(hash, data_.height, checkpoints_);
+    const auto it = std::find_if(checkpoints_.begin(), checkpoints_.end(),
+        [&](const check_point& item)
+        {
+            return data_.height == item.height();
+        });
+    
+    return it != checkpoints_.end() && it->hash() == hash;
 }
 
 bool chain_state::is_under_checkpoint() const
 {
-    // This assumes that the checkpoints are sorted.
-    return checkpoint::covered(data_.height, checkpoints_);
+    // False if empty.
+    // This is optimial if checkpoints are sorted by increasing height.
+    return std::any_of(checkpoints_.rbegin(), checkpoints_.rend(),
+        [&](const check_point& item)
+        {
+            return data_.height <= item.height();
+        });
 }
 
 } // namespace chain

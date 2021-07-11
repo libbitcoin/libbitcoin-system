@@ -21,10 +21,18 @@
 
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/type_constraints.hpp>
+#include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+/// The number of bits required to store the value.
+template <typename Integer, if_integer<Integer> = true>
+inline size_t bit_width(Integer value) noexcept;
+
+/// The number of bytes required to store the value.
+template <typename Integer, if_integer<Integer> = true>
+inline size_t byte_width(Integer value) noexcept;
 
 /// Two's complement (~n), the bit inversion of any integer.
 template <typename Integer, if_integer<Integer> = true>

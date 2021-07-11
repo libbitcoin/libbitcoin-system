@@ -106,7 +106,7 @@ bool address::from_data(uint32_t version, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_address)
+    if (count > chain::max_address)
         source.invalidate();
     else
         addresses_.resize(count);
@@ -149,7 +149,7 @@ void address::to_data(uint32_t version, writer& sink) const
 
 size_t address::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(addresses_.size()) +
+    return variable_size(addresses_.size()) +
         (addresses_.size() * network_address::satoshi_fixed_size(version, true));
 }
 

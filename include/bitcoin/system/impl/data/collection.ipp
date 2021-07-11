@@ -23,6 +23,7 @@
 #include <array>
 #include <cstddef>
 #include <iterator>
+#include <utility>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 
@@ -199,10 +200,10 @@ bool is_distinct(const Collection& list) noexcept
     // By providing both overloads this is not only ensured but the benefit of
     // move is exposed to callers, as both options are explicitly available.
     // This is the approach implemented in the C++ std library.
-    // Mutable parameter : ref.
-    // Integral parameter: copy.
-    // Const sufficient  : const ref.
-    // Non-const required: move with const ref overload that calls into move.
+    // Mutable parameter      : ref.
+    // Integral parameter     : copy.
+    // Non-mutable parameter  : const ref.
+    // Non-mutable param copy : move with const ref overload that calls into move.
     auto copy = list;
     return is_distinct(copy);
 }
@@ -217,7 +218,7 @@ bool is_sorted(const Collection& list) noexcept
 // TODO: specialize vector and generalize on element type.
 // Collection requires erase and shrink_to_fit methods (vector).
 template <typename Collection>
-Collection distinct(Collection&& list) noexcept
+Collection& distinct(Collection& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
@@ -228,13 +229,12 @@ Collection distinct(Collection&& list) noexcept
 template <typename Collection>
 Collection distinct(const Collection& list) noexcept
 {
-    // See above comments.
     auto copy = list;
-    return distinct(copy);
+    return std::move(distinct(copy));
 }
 
 template <typename Collection>
-Collection reverse(Collection&& list) noexcept
+Collection& reverse(Collection& list) noexcept
 {
     std::reverse(std::begin(list), std::end(list));
     return list;
@@ -243,26 +243,24 @@ Collection reverse(Collection&& list) noexcept
 template <typename Collection>
 Collection reverse(const Collection& list) noexcept
 {
-    // See above comments.
     auto copy = list;
-    return reverse(copy);
+    return std::move(reverse(copy));
 }
 
-// TODO: provide optional comparison function.
+// TODO: provide optional comparison function parameter.
 template <typename Collection>
-Collection sort(Collection&& list) noexcept
+Collection& sort(Collection& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     return list;
 }
 
-// TODO: provide optional comparison function.
+// TODO: provide optional comparison function parameter.
 template <typename Collection>
 Collection sort(const Collection& list) noexcept
 {
-    // See above comments.
     auto copy = list;
-    return sort(copy);
+    return std::move(sort(copy));
 }
 
 } // namespace system

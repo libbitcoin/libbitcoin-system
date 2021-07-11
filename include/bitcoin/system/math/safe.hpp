@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
 #include <limits>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {

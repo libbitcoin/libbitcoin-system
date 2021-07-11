@@ -25,12 +25,12 @@
 #include <string>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/serialization/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
-#include <bitcoin/system/type_constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -171,7 +171,7 @@ template <typename IStream>
 template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
-    return reverse(read_forward<Size>());
+    return std::move(system::reverse(read_forward<Size>()));
 }
 
 template <typename IStream>

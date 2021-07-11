@@ -22,6 +22,7 @@
 #include <bitcoin/system/message/compact_filter.hpp>
 
 #include <initializer_list>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/message/message.hpp>
 #include <bitcoin/system/message/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -125,7 +126,7 @@ bool compact_filter::from_data(reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    if (count > chain::max_block_size)
         source.invalidate();
     else
         filter_ = source.read_bytes(count);
@@ -165,7 +166,7 @@ void compact_filter::to_data(writer& sink) const
 size_t compact_filter::serialized_size() const
 {
     return sizeof(filter_type_) + hash_size +
-        message::variable_uint_size(filter_.size()) + filter_.size();
+        variable_size(filter_.size()) + filter_.size();
 }
 
 bool compact_filter::from_data(uint32_t version, const data_chunk& data)

@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(byte_writer__flush__not_empty_sstream__expected)
     BOOST_REQUIRE(writer);
 }
 
-#endif // BYTE_READER_CONTEXT
+#endif // BYTE_WRITER_CONTEXT
 
 #ifdef BYTE_WRITER_BIG_ENDIAN
 
@@ -117,7 +117,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_big_endian__uint8_t__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_big_endian<uint8_t>(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint8_t>(0x42));
+    const std::string expected{ 0x42 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -126,7 +127,9 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_big_endian__size_t__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_big_endian<size_t>(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<size_t>(0x42));
+    std::string expected(sizeof(size_t), 0x00);
+    expected.back() = 0x42;
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -137,7 +140,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_2_bytes_big_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_2_bytes_big_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint16_t>(0x42));
+    const std::string expected{ 0x00, 0x42 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -148,7 +152,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_4_bytes_big_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_4_bytes_big_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint32_t>(0x42));
+    const std::string expected{ 0x00, 0x00, 0x00, 0x42 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -159,7 +164,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_8_bytes_big_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_8_bytes_big_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint64_t>(0x42));
+    const std::string expected{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -174,7 +180,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_little_endian__uint8_t__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_little_endian<uint8_t>(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint8_t>(0x42, false));
+    const std::string expected{ 0x42 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -183,7 +190,9 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_little_endian__size_t__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_little_endian<size_t>(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<size_t>(0x42, false));
+    std::string expected(sizeof(size_t), 0x00);
+    expected.front() = 0x42;
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -194,7 +203,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_2_bytes_little_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_2_bytes_little_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint16_t>(0x42, false));
+    const std::string expected{ 0x42, 0x00 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -205,7 +215,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_4_bytes_little_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_4_bytes_little_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint32_t>(0x42, false));
+    const std::string expected{ 0x42, 0x00, 0x00, 0x00 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -216,7 +227,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_8_bytes_little_endian__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_8_bytes_little_endian(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint64_t>(0x42, false));
+    const std::string expected{ 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -269,7 +281,7 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_error_code__value__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_error_code(error::insufficient_work);
-    const auto expected = to_string<uint32_t>(error::insufficient_work, false);
+    const std::string expected{ (char)error::insufficient_work, 0x00, 0x00, 0x00, 0x00 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -283,7 +295,7 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_error_code__value__expected)
 BOOST_AUTO_TEST_CASE(byte_writer__write__empty__empty)
 {
     std::istringstream in;
-    std::ostringstream out;
+    std::stringstream out;
     write::bytes::ostream writer(out);
     BOOST_REQUIRE(writer.write(in));
     BOOST_REQUIRE(out.str().empty());
@@ -294,7 +306,7 @@ BOOST_AUTO_TEST_CASE(byte_writer__write__value__expected)
 {
     const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
     std::istringstream in{ expected };
-    std::ostringstream out;
+    std::stringstream out;
     write::bytes::ostream writer(out);
     BOOST_REQUIRE(writer.write(in));
     BOOST_REQUIRE_EQUAL(out.str(), expected);
@@ -308,7 +320,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_byte__always__expected)
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
     writer.write_byte(0x42);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string<uint8_t>(0x42));
+    const std::string expected{ 0x00 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -365,10 +378,10 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_string1__one_byte__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    const auto size = to_half(varint_two_bytes);
+    constexpr auto size = to_half(varint_two_bytes);
     const std::string expected(size, '*');
     writer.write_string(expected);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string(size) + expected);
+    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\x7e" } + expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -376,10 +389,10 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_string1__two_bytes__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    const auto size = varint_two_bytes;
+    constexpr auto size = varint_two_bytes;
     const std::string expected(size, '*');
     writer.write_string(expected);
-    BOOST_REQUIRE_EQUAL(stream.str(), to_string(varint_two_bytes) + to_string<uint16_t>(size, false) + expected);
+    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xfd\xfd\0" } + expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -391,10 +404,10 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_string1__two_bytes__expected)
 ////    const auto size = add1<uint32_t>(max_uint16);
 ////    const std::string expected(size, '*');
 ////    writer.write_string(expected);
-////    BOOST_REQUIRE_EQUAL(stream.str(), to_string(varint_four_bytes) + to_string<uint32_t>(size, false) + expected);
+////    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xfe\xfe\0\0\0" } + expected);
 ////    BOOST_REQUIRE(writer);
 ////}
-
+////
 ////// Too much memory allocation required to test.
 ////BOOST_AUTO_TEST_CASE(byte_writer__write_string1__eight_bytes__expected)
 ////{
@@ -403,7 +416,7 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_string1__two_bytes__expected)
 ////    const auto size = add1<uint64_t>(max_uint32);
 ////    const std::string expected(size, '*');
 ////    writer.write_string(expected);
-////    BOOST_REQUIRE_EQUAL(stream.str(), to_string(varint_eight_bytes) + to_string<uint64_t>(size, false) + expected);
+////    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xff\xff\0\0\0\0\0\0\0" } + expected);
 ////    BOOST_REQUIRE(writer);
 ////}
 

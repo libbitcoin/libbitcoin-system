@@ -19,6 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_DEFINE_HPP
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
+// Other #define declarations here.
+#include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/version.hpp>
+
 // Create bc namespace alias.
 namespace libbitcoin {
 namespace system {
@@ -26,6 +30,8 @@ namespace system {
 } // namespace libbitcoin
 
 namespace bc = libbitcoin;
+
+#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
 // See http://gcc.gnu.org/wiki/Visibility
 

@@ -143,8 +143,8 @@ void alert::to_data(uint32_t, writer& sink) const
 
 size_t alert::serialized_size(uint32_t) const
 {
-    return variable_uint_size(payload_.size()) + payload_.size() +
-        variable_uint_size(signature_.size()) + signature_.size();
+    return variable_size(payload_.size()) + payload_.size() +
+        variable_size(signature_.size()) + signature_.size();
 }
 
 data_chunk& alert::payload()

@@ -21,12 +21,6 @@
 
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/number.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/operation.hpp>
 #include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/machine/script_pattern.hpp>
-#include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/machine/sighash_algorithm.hpp>
 
 #endif

@@ -24,8 +24,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/stream/stream.hpp>
-#include <bitcoin/system/wallet/mnemonics/language.hpp>
-#include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
+#include <bitcoin/system/words/words.hpp>
 
 // base2048
 // Base 2048 is an ascii data encoding with a domain of 2048 symbols (words).
@@ -36,30 +35,28 @@
 namespace libbitcoin {
 namespace system {
 
-using namespace wallet;
-
 // Use the BIP39 dictionary set.
 // This allows the encoding to map to BIP39 in any language.
-static const mnemonic::dictionaries base2048
+static const words::mnemonic::catalogs base2048
 {
     {
-        mnemonic::dictionary{ language::en, mnemonic::en },
-        mnemonic::dictionary{ language::es, mnemonic::es },
-        mnemonic::dictionary{ language::it, mnemonic::it },
-        mnemonic::dictionary{ language::fr, mnemonic::fr },
-        mnemonic::dictionary{ language::cs, mnemonic::cs },
-        mnemonic::dictionary{ language::pt, mnemonic::pt },
-        mnemonic::dictionary{ language::ja, mnemonic::ja },
-        mnemonic::dictionary{ language::ko, mnemonic::ko },
-        mnemonic::dictionary{ language::zh_Hans, mnemonic::zh_Hans },
-        mnemonic::dictionary{ language::zh_Hant, mnemonic::zh_Hant }
+        words::mnemonic::catalog{ language::en, words::mnemonic::en },
+        words::mnemonic::catalog{ language::es, words::mnemonic::es },
+        words::mnemonic::catalog{ language::it, words::mnemonic::it },
+        words::mnemonic::catalog{ language::fr, words::mnemonic::fr },
+        words::mnemonic::catalog{ language::cs, words::mnemonic::cs },
+        words::mnemonic::catalog{ language::pt, words::mnemonic::pt },
+        words::mnemonic::catalog{ language::ja, words::mnemonic::ja },
+        words::mnemonic::catalog{ language::ko, words::mnemonic::ko },
+        words::mnemonic::catalog{ language::zh_Hans, words::mnemonic::zh_Hans },
+        words::mnemonic::catalog{ language::zh_Hant, words::mnemonic::zh_Hant }
     }
 };
 
 // encode
 
 static bool encode_base2048(base2048_chunk& out, const string_list& in,
-    wallet::language language)
+    language language)
 {
     // Empty if words not contained in dictionary.
     const auto indexes = base2048.index(in, language);
@@ -78,7 +75,7 @@ static bool encode_base2048(base2048_chunk& out, const string_list& in,
 }
 
 bool encode_base2048_list(data_chunk& out, const string_list& in,
-    wallet::language language)
+    language language)
 {
     base2048_chunk packed;
     if (!encode_base2048(packed, in, language))
@@ -89,7 +86,7 @@ bool encode_base2048_list(data_chunk& out, const string_list& in,
 }
 
 bool encode_base2048(data_chunk& out, const std::string& in,
-    wallet::language language)
+    language language)
 {
     out.clear();
 
@@ -100,9 +97,9 @@ bool encode_base2048(data_chunk& out, const std::string& in,
 // decode
 
 static string_list decode_base2048(const base2048_chunk& data,
-    wallet::language language)
+    language language)
 {
-    mnemonic::dictionaries::search indexes(data.size());
+    words::mnemonic::catalogs::search indexes(data.size());
     std::transform(data.begin(), data.end(), indexes.begin(),
         [](const uint11_t& index) { return index.convert_to<size_t>(); });
 
@@ -110,14 +107,12 @@ static string_list decode_base2048(const base2048_chunk& data,
     return base2048.at(indexes, language);
 }
 
-string_list decode_base2048_list(const data_chunk& data,
-    wallet::language language)
+string_list decode_base2048_list(const data_chunk& data, language language)
 {
     return decode_base2048(base2048_pack(data), language);
 }
 
-std::string decode_base2048(const data_chunk& data,
-    wallet::language language)
+std::string decode_base2048(const data_chunk& data, language language)
 {
     // Empty chunk returns empty string, consistent with encoding empty string.
     return join(decode_base2048_list(data, language));

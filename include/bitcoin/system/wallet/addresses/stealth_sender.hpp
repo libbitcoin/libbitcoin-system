@@ -20,11 +20,10 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_SENDER_HPP
 
 #include <cstdint>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/data/binary.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 

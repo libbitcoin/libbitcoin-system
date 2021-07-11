@@ -21,7 +21,7 @@
 
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 
 namespace libbitcoin {
 namespace system {

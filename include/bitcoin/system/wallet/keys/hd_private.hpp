@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_KEY_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_KEY_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_HPP
 
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/keys/hd_public.hpp>

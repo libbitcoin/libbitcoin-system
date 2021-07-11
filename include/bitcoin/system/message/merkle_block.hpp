@@ -22,8 +22,7 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <bitcoin/system/chain/block.hpp>
-#include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>

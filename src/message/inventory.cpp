@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <initializer_list>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/message/inventory.hpp>
 #include <bitcoin/system/message/inventory_vector.hpp>
 #include <bitcoin/system/message/message.hpp>
@@ -131,7 +131,7 @@ bool inventory::from_data(uint32_t version, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_inventory)
+    if (count > chain::max_inventory)
         source.invalidate();
     else
         inventories_.resize(count);
@@ -197,7 +197,7 @@ void inventory::reduce(inventory_vector::list& out, type_id type) const
 
 size_t inventory::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(inventories_.size()) +
+    return variable_size(inventories_.size()) +
         inventories_.size() * inventory_vector::satoshi_fixed_size(version);
 }
 

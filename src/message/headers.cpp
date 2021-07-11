@@ -119,7 +119,7 @@ bool headers::from_data(uint32_t version, reader& source)
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
-    if (count > max_get_headers)
+    if (count > chain::max_get_headers)
         source.invalidate();
     else
         elements_.resize(count);
@@ -209,7 +209,7 @@ void headers::to_inventory(inventory_vector::list& out,
 
 size_t headers::serialized_size(uint32_t version) const
 {
-    return variable_uint_size(elements_.size()) +
+    return variable_size(elements_.size()) +
         (elements_.size() * header::satoshi_fixed_size(version));
 }
 
