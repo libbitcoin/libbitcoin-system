@@ -13,10 +13,13 @@
     <Filter Include="src\chain">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\concurrency">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+    <Filter Include="src\chain\enums">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\crypto">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\data">
@@ -34,38 +37,41 @@
     <Filter Include="src\radix">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\serialization">
+    <Filter Include="src\serial">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\streamers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\keys">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics\dictionaries">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\words">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\words\catalogs">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -78,8 +84,14 @@
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\check_point.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp">
+      <Filter>src\chain\enums</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <Filter>src\chain</Filter>
@@ -117,18 +129,6 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\concurrency\file_lock.cpp">
-      <Filter>src\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\concurrency\flush_lock.cpp">
-      <Filter>src\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\concurrency\interprocess_lock.cpp">
-      <Filter>src\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\concurrency\thread.cpp">
-      <Filter>src\concurrency</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\authority.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -153,9 +153,6 @@
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -174,8 +171,26 @@
     <ClCompile Include="..\..\..\..\test\constants.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\data\binary.cpp">
-      <Filter>src\data</Filter>
+    <ClCompile Include="..\..\..\..\test\constraints.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\hash.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp">
+      <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\collection.cpp">
       <Filter>src\data</Filter>
@@ -204,9 +219,6 @@
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\machine\opcode.cpp">
-      <Filter>src\machine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\operation.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
@@ -219,16 +231,7 @@
     <ClCompile Include="..\..\..\..\test\math\bits.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\checksum.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\division.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\hash.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
@@ -237,22 +240,10 @@
     <ClCompile Include="..\..\..\..\test\math\power.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\pseudo_random.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\safe.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\siphash.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\math\stealth.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\address.cpp">
@@ -339,9 +330,6 @@
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\messages.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\network_address.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -375,6 +363,9 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\property_tree.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
@@ -396,17 +387,20 @@
     <ClCompile Include="..\..\..\..\test\radix\base_85.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serialization\deserialize.cpp">
-      <Filter>src\serialization</Filter>
+    <ClCompile Include="..\..\..\..\test\serial\deserialize.cpp">
+      <Filter>src\serial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serialization\endian.cpp">
-      <Filter>src\serialization</Filter>
+    <ClCompile Include="..\..\..\..\test\serial\endian.cpp">
+      <Filter>src\serial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serialization\serialize.cpp">
-      <Filter>src\serialization</Filter>
+    <ClCompile Include="..\..\..\..\test\serial\serialize.cpp">
+      <Filter>src\serial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\settings.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\binary.cpp">
+      <Filter>src\stream</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\device.cpp">
       <Filter>src\stream</Filter>
@@ -448,9 +442,6 @@
       <Filter>src\stream\streamers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\test.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\type_constraints.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp">
@@ -537,31 +528,16 @@
     <ClCompile Include="..\..\..\..\test\wallet\keys\hd_public.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\keys\stealth.cpp">
+      <Filter>src\wallet\keys</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp">
       <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\dictionaries.cpp">
-      <Filter>src\wallet\mnemonics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum.cpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum_v1.cpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\dictionaries\mnemonic.cpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\dictionary.cpp">
-      <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\electrum.cpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.cpp">
-      <Filter>src\wallet\mnemonics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\languages.cpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
@@ -570,40 +546,40 @@
     <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\property_tree.cpp">
-      <Filter>src\wallet</Filter>
+    <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\catalogs\electrum_v1.cpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\catalogs\mnemonic.cpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\dictionaries.cpp">
+      <Filter>src\words</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\dictionary.cpp">
+      <Filter>src\words</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\languages.cpp">
+      <Filter>src\words</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\hash.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\machine\number.hpp">
       <Filter>src\machine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\math\hash.hpp">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\math\siphash.hpp">
-      <Filter>src\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries.hpp">
-      <Filter>src\wallet\mnemonics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum.hpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries\electrum_v1.hpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionaries\mnemonic.hpp">
-      <Filter>src\wallet\mnemonics\dictionaries</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\dictionary.hpp">
-      <Filter>src\wallet\mnemonics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp">
       <Filter>src\wallet\mnemonics</Filter>
@@ -611,11 +587,26 @@
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\languages.hpp">
-      <Filter>src\wallet\mnemonics</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp">
       <Filter>src\wallet\mnemonics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\catalogs\electrum.hpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\catalogs\electrum_v1.hpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\catalogs\mnemonic.hpp">
+      <Filter>src\words\catalogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\dictionaries.hpp">
+      <Filter>src\words</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\dictionary.hpp">
+      <Filter>src\words</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\words\languages.hpp">
+      <Filter>src\words</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
