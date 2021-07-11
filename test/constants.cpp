@@ -160,20 +160,18 @@ BOOST_AUTO_TEST_SUITE(constants_tests)
 
 BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
 {
-    // TODO: set to the actual value.
-    BOOST_REQUIRE_EQUAL(width<uintx>(), 0u);
+    BOOST_REQUIRE_EQUAL(width<uintx>(), 192u);
 }
 
 BOOST_AUTO_TEST_CASE(constants__width__uintx_t__expected)
 {
-    // TODO: set these to the actual values.
-    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 5u);
-    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 11u);
-    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 48u);
-    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 128u);
-    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 160u);
-    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 256u);
-    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 512u);
+    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 8u);
+    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 16u);
+    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 64u);
+    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 192u);
+    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 256u);
+    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 320u);
+    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 576u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
