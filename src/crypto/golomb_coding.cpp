@@ -85,8 +85,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     const siphash_key& key)
 {
     const auto bound = safe_multiply(target_false_positive_rate, set_size);
-    std::vector<uint64_t> hashes(no_fill_allocator);
-    hashes.resize(items.size());
+    std::vector<uint64_t> hashes(items.size(), no_fill_allocator);
 
     std::transform(items.begin(), items.end(), hashes.begin(),
         [&](const data_chunk& item)
@@ -111,8 +110,9 @@ data_chunk construct(const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate)
 {
     data_chunk result;
-    stream::out::data sink(result);
-    construct(sink, items, bits, entropy, target_false_positive_rate);
+    stream::out::data stream(result);
+    construct(stream, items, bits, entropy, target_false_positive_rate);
+    stream.flush();
     return result;
 }
 
@@ -128,6 +128,7 @@ void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
 {
     write::bits::ostream sink(stream);
     construct(sink, items, bits, entropy, target_false_positive_rate);
+    sink.flush();
 }
 
 static void construct(bitwriter& sink, const data_stack& items, uint8_t bits,

@@ -86,14 +86,7 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter)
 {
-    data_chunk data;
-    data.reserve(hash_size + hash_size);
-    write::bytes::data out(data);
-    out.write_bytes(bitcoin_hash(filter));
-    out.write_bytes(previous_block_hash);
-    out.flush();
-
-    return bitcoin_hash(data);
+    return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
 }
 
 bool match_filter(const message::compact_filter& filter,
@@ -161,8 +154,7 @@ bool match_filter(const message::compact_filter& filter,
     if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    chain::script::list stack(no_fill_allocator);
-    stack.resize(addresses.size());
+    chain::script::list stack(addresses.size(), no_fill_allocator);
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
         [](const wallet::payment_address& address)
