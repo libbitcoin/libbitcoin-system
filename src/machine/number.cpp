@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace system {
 namespace machine {
-    
+
 using namespace bc::system::chain;
 
 // TODO: create unsigned ceilinged_add and floored_sbtract.
@@ -38,7 +38,7 @@ static const uint64_t unsigned_max_int64 = max_int64;
 static const uint64_t absolute_min_int64 = min_int64;
 
 number::number()
-  : number(0)
+  : number(numbers::positive_0)
 {
 }
 
@@ -62,11 +62,11 @@ bool number::set_data(const data_chunk& data, size_t max_size)
         return true;
 
     value_ = from_little_endian<int64_t>(data);
-    const auto negative_bit = get_left(data.back());
+    const auto negative_bit_set = get_left(data.back());
 
     // Clear the negative bit and negate the value.
     // The bit is the leftmost of the bits decoded (offset from right).
-    if (negative_bit)
+    if (negative_bit_set)
         value_ = -set_right(value_, sub1(to_bits(data.size())), false);
 
     return true;
@@ -78,19 +78,16 @@ data_chunk number::data() const
     if (is_zero(value_))
         return {};
 
-    auto positive = absolute(value_);
+    auto data = to_little_endian_chunk(absolute(value_));
+    const auto negative_bit_set = get_left(data.back());
     const auto negative = is_negative(value_);
 
-    // TODO: optimize with to_little_endian_chunk.
-    auto data = to_chunk(to_little_endian(positive));
-    const auto negative_bit = get_left(data.back());
-
     // Push a 0x80 byte that will be popped off when converting to an integral.
-    if (negative_bit && negative)
+    if (negative_bit_set && negative)
         data.push_back(numbers::negative_sign);
 
     // Push a 0x00 byte to make the most significant byte non-negative again.
-    else if (negative_bit)
+    else if (negative_bit_set)
         data.push_back(numbers::positive_0);
 
     // Set the negative bit, since it will be subtracted and interpreted as
@@ -189,7 +186,7 @@ bool number::operator!=(const number& other) const
 
 number number::operator+(int64_t value) const
 {
-    BITCOIN_ASSERT_MSG(value == 0 ||
+    BITCOIN_ASSERT_MSG(is_zero(value) ||
         (value > 0 && value_ <= max_int64 - value) ||
         (value < 0 && value_ >= min_int64 - value), "overflow");
 
@@ -198,7 +195,7 @@ number number::operator+(int64_t value) const
 
 number number::operator-(int64_t value) const
 {
-    BITCOIN_ASSERT_MSG(value == 0 ||
+    BITCOIN_ASSERT_MSG(is_zero(value) ||
         (value > 0 && value_ >= min_int64 + value) ||
         (value < 0 && value_ <= max_int64 + value), "underflow");
 
@@ -239,7 +236,7 @@ number& number::operator-=(const number& other)
 
 number& number::operator+=(int64_t value)
 {
-    BITCOIN_ASSERT_MSG(value == 0 ||
+    BITCOIN_ASSERT_MSG(is_zero(value) ||
         (value > 0 && value_ <= max_int64 - value) ||
         (value < 0 && value_ >= min_int64 - value), "overflow");
 
@@ -249,7 +246,7 @@ number& number::operator+=(int64_t value)
 
 number& number::operator-=(int64_t value)
 {
-    BITCOIN_ASSERT_MSG(value == 0 ||
+    BITCOIN_ASSERT_MSG(is_zero(value) ||
         (value > 0 && value_ >= min_int64 + value) ||
         (value < 0 && value_ <= max_int64 + value), "underflow");
 
