@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_error_code__value__expected)
     std::ostringstream stream;
     write::bits::ostream writer(stream);
     writer.write_error_code(error::insufficient_work);
-    const std::string expected{ (char)error::insufficient_work, 0x00, 0x00, 0x00, 0x00 };
+    const std::string expected{ (char)error::insufficient_work, 0x00, 0x00, 0x00 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -319,8 +319,7 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_byte__always__expected)
     std::ostringstream stream;
     write::bits::ostream writer(stream);
     writer.write_byte(0x42);
-    const std::string expected{ 0x00 };
-    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE_EQUAL(stream.str().front(), 0x42);
     BOOST_REQUIRE(writer);
 }
 
@@ -389,9 +388,12 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_string1__two_bytes__expected)
     std::ostringstream stream;
     write::bits::ostream writer(stream);
     constexpr auto size = varint_two_bytes;
-    const std::string expected(size, '*');
+    std::string expected(size, '*');
     writer.write_string(expected);
-    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xfd\xfd\0" } + expected);
+    expected.insert(expected.begin(), 0x00);
+    expected.insert(expected.begin(), '\xfd');
+    expected.insert(expected.begin(), '\xfd');
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
 
@@ -401,9 +403,13 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_string1__two_bytes__expected)
 ////    std::ostringstream stream;
 ////    write::bits::ostream writer(stream);
 ////    const auto size = add1<uint32_t>(max_uint16);
-////    const std::string expected(size, '*');
+////    std::string expected(size, '*');
 ////    writer.write_string(expected);
-////    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xfe\xfe\0\0\0" } + expected);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x01);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), '\xfe');
 ////    BOOST_REQUIRE(writer);
 ////}
 ////
@@ -413,9 +419,17 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_string1__two_bytes__expected)
 ////    std::ostringstream stream;
 ////    write::bits::ostream writer(stream);
 ////    const auto size = add1<uint64_t>(max_uint32);
-////    const std::string expected(size, '*');
+////    std::string expected(size, '*');
 ////    writer.write_string(expected);
-////    BOOST_REQUIRE_EQUAL(stream.str(), std::string{ "\xff\xff\0\0\0\0\0\0\0" } + expected);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x01);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), 0x00);
+////    expected.insert(expected.begin(), '\xff');
 ////    BOOST_REQUIRE(writer);
 ////}
 
