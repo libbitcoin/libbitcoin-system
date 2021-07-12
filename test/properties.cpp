@@ -18,9 +18,9 @@
  */
 #include "test.hpp"
 
-BOOST_AUTO_TEST_SUITE(property_tree_tests)
+BOOST_AUTO_TEST_SUITE(properties_tests)
 
-BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_json)
+BOOST_AUTO_TEST_CASE(properties__property_tree__value__expected_json)
 {
     const std::string json
     {
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_json)
     BOOST_REQUIRE_EQUAL(tree.get<std::string>("arguments"), std::string("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
 }
 
-BOOST_AUTO_TEST_CASE(property_tree__property_tree__value__expected_empty)
+BOOST_AUTO_TEST_CASE(properties__property_tree__value__expected_empty)
 {
     const std::string invalid_json
     {

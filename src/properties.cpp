@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <bitcoin/system/property_tree.hpp>
+#include <bitcoin/system/properties.hpp>
 
 #include <cstdint>
 #include <functional>
