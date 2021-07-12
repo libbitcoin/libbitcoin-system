@@ -125,9 +125,9 @@ static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
 // ----------------------------------------------------------------------------
 
 static const auto size = static_cast<int>(electrum_v1::dictionary::size());
-static const auto size0 = power(size, 0);
-static const auto size1 = power(size, 1);
-static const auto size2 = power(size, 2);
+static const auto size0 = power<int64_t>(size, 0);
+static const auto size1 = power<int64_t>(size, 1);
+static const auto size2 = power<int64_t>(size, 2);
 
 // private static
 // ----------------------------------------------------------------------------
