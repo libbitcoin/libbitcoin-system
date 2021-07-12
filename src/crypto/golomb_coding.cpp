@@ -76,8 +76,8 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent)
 static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key)
 {
-    return (uint128_t(siphash(key, item) * bound) >> width<uint64_t>())
-        .convert_to<uint64_t>();
+    const auto product = uint128_t(siphash(key, item)) * uint128_t(bound);
+    return (product >> width<uint64_t>()).convert_to<uint64_t>();
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
