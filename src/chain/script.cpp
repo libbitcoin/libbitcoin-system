@@ -802,6 +802,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     // 10. hash type of the signature (4 [not 1]).
     out.write_4_bytes_little_endian(sighash_type);
 
+    out.flush();
     BITCOIN_ASSERT(data.size() == size);
     return bitcoin_hash(data);
 }
