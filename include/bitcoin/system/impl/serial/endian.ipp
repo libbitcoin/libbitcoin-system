@@ -165,30 +165,30 @@ static Data to_little(Data&& bytes, Integer value) noexcept
     return bytes;
 }
 
-// allocators
+// integer => data (value-sized) or array (explicit size)
 // ----------------------------------------------------------------------------
 // These allocate the to-endian outgoing buffer and forward the call.
 
-template <size_t Size, typename Integer>
-static data_array<Size> to_big_array(Integer value) noexcept
+template <size_t Size, typename Integer, if_integer<Integer>>
+data_array<Size> to_big_endian_array(Integer value) noexcept
 {
     return to_big(data_array<Size>{}, value);
 }
 
-template <size_t Size, typename Integer>
-static data_array<Size> to_little_array(Integer value) noexcept
+template <size_t Size, typename Integer, if_integer<Integer>>
+data_array<Size> to_little_endian_array(Integer value) noexcept
 {
     return to_little(data_array<Size>{}, value);
 }
 
-template <typename Integer>
-static data_chunk to_big_chunk(Integer value) noexcept
+template <typename Integer, if_integer<Integer>>
+data_chunk to_big_endian_chunk(Integer value) noexcept
 {
     return to_big(data_chunk(byte_width(value), no_fill_allocator), value);
 }
 
-template <typename Integer>
-static data_chunk to_little_chunk(Integer value) noexcept
+template <typename Integer, if_integer<Integer>>
+data_chunk to_little_endian_chunk(Integer value) noexcept
 {
     return to_little(data_chunk(byte_width(value), no_fill_allocator), value);
 }
@@ -214,14 +214,14 @@ template <typename Integer, if_integral_integer<Integer>>
 data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
     // Limit sizeof to integral integers.
-    return to_big_array<sizeof(Integer)>(value);
+    return to_big_endian_array<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
     // Limit sizeof to integral integers.
-    return to_little_array<sizeof(Integer)>(value);
+    return to_little_endian_array<sizeof(Integer)>(value);
 }
 
 // data => uintx
@@ -248,14 +248,14 @@ template <typename Integer, if_base_of<Integer, uintx>>
 data_chunk to_big_endian(const Integer& value) noexcept
 {
     // data_chunk size determined by uintx (vs. type).
-    return to_big_chunk(value);
+    return to_big_endian_chunk(value);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 data_chunk to_little_endian(const Integer& value) noexcept
 {
     // data_chunk size determined by uintx (vs. type).
-    return to_little_chunk(value);
+    return to_little_endian_chunk(value);
 }
 
 // data => uintx_t<to_bits(Bytes)>
@@ -277,13 +277,13 @@ uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
 template <size_t Bytes, typename Integer, if_integer<Integer>>
 data_array<Bytes> to_big_endian(const Integer& value) noexcept
 {
-    return to_big_array<Bytes>(value);
+    return to_big_endian_array<Bytes>(value);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
 data_array<Bytes> to_little_endian(const Integer& value) noexcept
 {
-    return to_little_array<Bytes>(value);
+    return to_little_endian_array<Bytes>(value);
 }
 
 // stream <=> integral
