@@ -141,7 +141,14 @@ constexpr Type sub1(Type value) noexcept
 }
 
 template <typename Type>
-constexpr size_t width(Type value=0) noexcept
+constexpr size_t width() noexcept
+{
+    // This is not always a logical size for non-integral types.
+    return to_bits(sizeof(Type));
+}
+
+template <typename Type>
+constexpr size_t width(Type value) noexcept
 {
     // This is not always a logical size for non-integral types.
     return to_bits(sizeof(value));

@@ -36,15 +36,15 @@ BOOST_AUTO_TEST_SUITE(endian_tests)
 
 // single byte (specialized)
 
-BOOST_AUTO_TEST_CASE(from_big_endian__single_byte__array__expected)
+BOOST_AUTO_TEST_CASE(from_big_endian__single_byte__chunk__expected)
 {
-    const data_chunk data{ 0x42 };
+    const data_chunk data{ 0x42, 0xff };
     BOOST_REQUIRE_EQUAL(from_big_endian<uint8_t>(data), data[0]);
 }
 
-BOOST_AUTO_TEST_CASE(from_little_endian__single_byte__array__expected)
+BOOST_AUTO_TEST_CASE(from_little_endian__single_byte__chunk___expected)
 {
-    const data_chunk data{ 0x42 };
+    const data_chunk data{ 0x42, 0xff };
     BOOST_REQUIRE_EQUAL(from_little_endian<uint8_t>(data), data[0]);
 }
 
