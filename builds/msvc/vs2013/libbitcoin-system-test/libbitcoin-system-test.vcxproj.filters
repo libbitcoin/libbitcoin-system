@@ -363,7 +363,7 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\property_tree.cpp">
+    <ClCompile Include="..\..\..\..\test\properties.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp">

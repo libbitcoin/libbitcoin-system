@@ -278,7 +278,7 @@ add_definitions(
 #------------------------------------------------------------------------------
 add_library( ${CANONICAL_LIB_NAME}
     "../../src/error.cpp"
-    "../../src/property_tree.cpp"
+    "../../src/properties.cpp"
     "../../src/settings.cpp"
     "../../src/chain/block.cpp"
     "../../src/chain/block_filter.cpp"
@@ -571,7 +571,7 @@ if (with-tests)
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
         "../../test/main.cpp"
-        "../../test/property_tree.cpp"
+        "../../test/properties.cpp"
         "../../test/settings.cpp"
         "../../test/test.cpp"
         "../../test/test.hpp"

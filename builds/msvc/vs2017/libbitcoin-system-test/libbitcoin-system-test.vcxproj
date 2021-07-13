@@ -184,7 +184,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\test\property_tree.cpp" />
+    <ClCompile Include="..\..\..\..\test\properties.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />

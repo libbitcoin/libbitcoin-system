@@ -227,7 +227,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\src\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\src\property_tree.cpp" />
+    <ClCompile Include="..\..\..\..\src\properties.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -437,7 +437,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\message\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\property_tree.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\properties.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp" />
