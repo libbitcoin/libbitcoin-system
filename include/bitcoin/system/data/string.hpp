@@ -82,6 +82,4 @@ BC_API bool starts_with(const std::string& text,
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/data/string.ipp>
-
 #endif
