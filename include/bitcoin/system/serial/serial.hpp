@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/serial/deserialize.hpp>
 #include <bitcoin/system/serial/endian.hpp>
+#include <bitcoin/system/serial/properties.hpp>
 #include <bitcoin/system/serial/serialize.hpp>
 
 #endif
