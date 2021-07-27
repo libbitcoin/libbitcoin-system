@@ -351,6 +351,15 @@ bool is_chinese_japanese_or_korean(char32_t point)
     return false;
 }
 
+// TODO: test.
+bool has_whitespace(const std::string& value)
+{
+    return std::any_of(value.begin(), value.end(), [](char character)
+    {
+        return is_whitespace(character);
+    });
+}
+
 std::string to_non_combining_form(const std::string& value)
 {
     if (value.empty())

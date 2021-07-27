@@ -77,6 +77,15 @@ std::string ascii_to_upper(const std::string& text)
     return copy;
 }
 
+// TODO: test.
+bool has_ascii_whitespace(const std::string& text)
+{
+    return std::any_of(text.begin(), text.end(), [](char character)
+    {
+        return is_ascii_whitespace(character);
+    });
+}
+
 bool has_mixed_ascii_case(const std::string& text)
 {
     auto lower = false;

@@ -44,6 +44,9 @@ BC_API bool is_combining(char32_t point);
 BC_API bool is_diacritic(char32_t point);
 BC_API bool is_chinese_japanese_or_korean(char32_t point);
 
+/// True if text contains whitespace.
+BC_API bool has_whitespace(const std::string& value);
+
 /// Remove combining class characters.
 BC_API std::string to_non_combining_form(const std::string& value);
 

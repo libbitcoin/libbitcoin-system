@@ -36,6 +36,9 @@ BC_API std::string ascii_to_lower(const std::string& text);
 /// Convert each ASCII letter in text to upper case.
 BC_API std::string ascii_to_upper(const std::string& text);
 
+/// True if text contains ASCII whitespace.
+BC_API bool has_ascii_whitespace(const std::string& text);
+
 /// True if text has upper and lower ASCII case letters.
 BC_API bool has_mixed_ascii_case(const std::string& text);
 
