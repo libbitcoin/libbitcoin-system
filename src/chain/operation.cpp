@@ -251,8 +251,8 @@ opcode operation::opcode_from_data(const data_chunk& data,
 
 opcode operation::opcode_from_positive(uint8_t value)
 {
-    BITCOIN_ASSERT(value >= number::positive_1);
-    BITCOIN_ASSERT(value <= number::positive_16);
+    BITCOIN_ASSERT(value >= numbers::positive_1);
+    BITCOIN_ASSERT(value <= numbers::positive_16);
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     return static_cast<opcode>(value + op_81 - 1);
 }
