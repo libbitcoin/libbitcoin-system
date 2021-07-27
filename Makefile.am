@@ -169,6 +169,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/radix/base_58.cpp \
     src/radix/base_64.cpp \
     src/radix/base_85.cpp \
+    src/serial/properties.cpp \
     src/stream/binary.cpp \
     src/unicode/ascii.cpp \
     src/unicode/code_points.cpp \
@@ -379,6 +380,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/radix/base_85.cpp \
     test/serial/deserialize.cpp \
     test/serial/endian.cpp \
+    test/serial/properties.cpp \
     test/serial/serialize.cpp \
     test/stream/binary.cpp \
     test/stream/device.cpp \
@@ -564,8 +566,7 @@ include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/data_array.ipp \
     include/bitcoin/system/impl/data/data_reference.ipp \
     include/bitcoin/system/impl/data/data_slab.ipp \
-    include/bitcoin/system/impl/data/data_slice.ipp \
-    include/bitcoin/system/impl/data/string.ipp
+    include/bitcoin/system/impl/data/data_slice.ipp
 
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
@@ -685,6 +686,7 @@ include_bitcoin_system_serialdir = ${includedir}/bitcoin/system/serial
 include_bitcoin_system_serial_HEADERS = \
     include/bitcoin/system/serial/deserialize.hpp \
     include/bitcoin/system/serial/endian.hpp \
+    include/bitcoin/system/serial/properties.hpp \
     include/bitcoin/system/serial/serial.hpp \
     include/bitcoin/system/serial/serialize.hpp
 
