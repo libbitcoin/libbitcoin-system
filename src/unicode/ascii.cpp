@@ -77,7 +77,6 @@ std::string ascii_to_upper(const std::string& text)
     return copy;
 }
 
-// TODO: test.
 bool has_ascii_whitespace(const std::string& text)
 {
     return std::any_of(text.begin(), text.end(), [](char character)

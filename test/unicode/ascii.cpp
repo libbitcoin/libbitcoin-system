@@ -155,6 +155,34 @@ BOOST_AUTO_TEST_CASE(ascii__ascii_to_upper__mixed__raised)
     BOOST_REQUIRE_EQUAL(ascii_to_upper(value), expected);
 }
 
+// has_ascii_whitespace
+
+BOOST_AUTO_TEST_CASE(ascii__has_ascii_whitespace__empty__false)
+{
+    BOOST_REQUIRE(!has_ascii_whitespace(""));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__has_ascii_whitespace__spaces__true)
+{
+    // ASCII whitespace characters (C whitespace).
+    BOOST_REQUIRE(has_ascii_whitespace("\t"));
+    BOOST_REQUIRE(has_ascii_whitespace("\n"));
+    BOOST_REQUIRE(has_ascii_whitespace("\v"));
+    BOOST_REQUIRE(has_ascii_whitespace("\f"));
+    BOOST_REQUIRE(has_ascii_whitespace("\r"));
+    BOOST_REQUIRE(has_ascii_whitespace("\x20"));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__has_ascii_whitespace__foo_bar__true)
+{
+    BOOST_REQUIRE(has_ascii_whitespace("foo bar"));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__has_ascii_whitespace__foobar__false)
+{
+    BOOST_REQUIRE(!has_ascii_whitespace("foobar"));
+}
+
 // has_mixed_ascii_case
 
 BOOST_AUTO_TEST_CASE(ascii__has_mixed_ascii_case__empty__false)
