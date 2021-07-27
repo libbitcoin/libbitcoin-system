@@ -108,7 +108,8 @@ bool properties::is_complex() const noexcept
 
 // private
 std::ostream& properties::write(std::ostream& stream,
-    format format, size_t depth, bool flat, const std::string& name) const noexcept
+    format format, size_t depth, bool flat,
+    const std::string& name) const noexcept
 {
     const auto end = flat ? "" : ("\n" + std::string(depth * tab, ' '));
     const auto start = flat ? "" : (is_zero(depth) ? "" : end);
@@ -240,13 +241,9 @@ std::ostream& properties::write(std::ostream& stream,
                 {
                     // Unquoted rendering for contiguous text.
                     if (has_whitespace(value_))
-                    {
                         stream << "\"" << value_ << "\"";
-                    }
                     else
-                    {
                         stream << value_;
-                    }
 
                     return stream;
                 }
@@ -289,10 +286,13 @@ std::ostream& properties::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        for (auto child = children_.begin(); child != std::prev(children_.end()); ++child)
-                            child->second.write(stream, format, add1(depth), flat) << ",";
+                        for (auto child = children_.begin();
+                            child != std::prev(children_.end()); ++child)
+                            child->second.write(stream, format, add1(depth),
+                                flat) << ",";
 
-                        children_.back().second.write(stream, format, add1(depth), flat);
+                        children_.back().second.write(stream, format,
+                            add1(depth), flat);
                     }
 
                     stream << end << "]";
@@ -305,11 +305,14 @@ std::ostream& properties::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        // Info uses space or line feed array element separation.
-                        for (auto child = children_.begin(); child != std::prev(children_.end()); ++child)
-                            child->second.write(stream, format, add1(depth), flat) << (flat ? " " : "");
+                        // Info uses space or line feed array element sep.
+                        for (auto child = children_.begin();
+                            child != std::prev(children_.end()); ++child)
+                            child->second.write(stream, format, add1(depth),
+                                flat) << (flat ? " " : "");
 
-                        children_.back().second.write(stream, format, add1(depth), flat);
+                        children_.back().second.write(stream, format,
+                            add1(depth), flat);
                     }
 
                     stream << end << "}";
@@ -318,7 +321,8 @@ std::ostream& properties::write(std::ostream& stream,
                 case format::xml:
                 {
                     for (const auto& child: children_)
-                        child.second.write(stream, format, depth, flat, child.first);
+                        child.second.write(stream, format, depth, flat,
+                            child.first);
 
                     return stream;
                 }
@@ -338,10 +342,13 @@ std::ostream& properties::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        for (auto child = children_.begin(); child != std::prev(children_.end()); ++child)
-                            child->second.write(stream, format, add1(depth), flat, child->first) << ",";
+                        for (auto child = children_.begin();
+                            child != std::prev(children_.end()); ++child)
+                            child->second.write(stream, format, add1(depth),
+                                flat, child->first) << ",";
 
-                        children_.back().second.write(stream, format, add1(depth), flat, children_.back().first);
+                        children_.back().second.write(stream, format,
+                            add1(depth), flat, children_.back().first);
                     }
 
                     stream << end << "}";
@@ -353,11 +360,14 @@ std::ostream& properties::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        // Info uses comma or line feed for named property separation.
-                        for (auto child = children_.begin(); child != std::prev(children_.end()); ++child)
-                            child->second.write(stream, format, add1(depth), flat, child->first) << (flat ? "," : "");
+                        // Info uses comma or line feed for named prop sep.
+                        for (auto child = children_.begin();
+                            child != std::prev(children_.end()); ++child)
+                            child->second.write(stream, format, add1(depth),
+                                flat, child->first) << (flat ? "," : "");
 
-                        children_.back().second.write(stream, format, add1(depth), flat, children_.back().first);
+                        children_.back().second.write(stream, format,
+                            add1(depth), flat, children_.back().first);
                     }
 
                     stream << end << "}";
@@ -366,7 +376,8 @@ std::ostream& properties::write(std::ostream& stream,
                 case format::xml:
                 {
                     for (const auto& child: children_)
-                        child.second.write(stream, format, depth, flat, child.first);
+                        child.second.write(stream, format, depth, flat,
+                            child.first);
 
                     return stream;
                 }
