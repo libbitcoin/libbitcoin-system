@@ -633,8 +633,8 @@ BOOST_AUTO_TEST_CASE(normalization__has_whitespace__spaces__true)
     BOOST_REQUIRE(has_whitespace("\r"));
     BOOST_REQUIRE(has_whitespace("\x20"));
 
-    // no-break space (not ASCII space)
-    BOOST_REQUIRE(has_whitespace("\xa0"));
+    // no-break space (not ASCII)
+    BOOST_REQUIRE(has_whitespace("\xc2\xa0"));
 }
 
 BOOST_AUTO_TEST_CASE(normalization__has_whitespace__foo_bar__true)

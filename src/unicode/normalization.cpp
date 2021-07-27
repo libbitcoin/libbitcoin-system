@@ -353,7 +353,11 @@ bool is_chinese_japanese_or_korean(char32_t point)
 
 bool has_whitespace(const std::string& value)
 {
-    return std::any_of(value.begin(), value.end(), [](char character)
+    if (value.empty())
+        return false;
+
+    const auto points = to_utf32(value);
+    return std::any_of(points.begin(), points.end(), [](char32_t character)
     {
         return is_whitespace(character);
     });
