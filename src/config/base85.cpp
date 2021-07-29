@@ -84,10 +84,7 @@ std::ostream& operator<<(std::ostream& output, const base85& argument)
 
     // Base85 requires four byte alignment.
     if (!encode_base85(decoded, argument.value_))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(std::iostream::failure(decoded));
-    }
+        throw ostream_exception(decoded);
 
     output << decoded;
     return output;
