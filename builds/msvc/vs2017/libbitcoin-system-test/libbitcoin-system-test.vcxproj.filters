@@ -393,7 +393,7 @@
     <ClCompile Include="..\..\..\..\test\serial\endian.cpp">
       <Filter>src\serial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serial\properties.cpp">
+    <ClCompile Include="..\..\..\..\test\serial\props.cpp">
       <Filter>src\serial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\serial\serialize.cpp">

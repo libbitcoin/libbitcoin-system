@@ -26,30 +26,21 @@
 namespace libbitcoin {
 namespace system {
 
-/**
- * The secret for aes256 block cypher.
- */
+/// The secret for aes256 block cypher.
 constexpr uint8_t aes256_key_size = 32;
 typedef data_array<aes256_key_size> aes_secret;
 
-/**
- * The data block for use with aes256 block cypher.
- */
+/// The data block for use with aes256 block cypher.
 constexpr uint8_t aes256_block_size = 16;
 typedef data_array<aes256_block_size> aes_block;
 
-/**
- * Perform aes256 encryption on the specified data block.
- */
+/// Perform aes256 encryption on the specified data block.
 BC_API void aes256_encrypt(const aes_secret& key, aes_block& block);
 
-/**
- * Perform aes256 decryption on the specified data block.
- */
+/// Perform aes256 decryption on the specified data block.
 BC_API void aes256_decrypt(const aes_secret& key, aes_block& block);
 
 } // namespace system
 } // namespace libbitcoin
 
 #endif
-

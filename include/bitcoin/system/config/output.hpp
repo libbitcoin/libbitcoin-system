@@ -30,23 +30,12 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper to convert between a base58-string:number and
- * a vector of chain::output.
- */
+/// Serialization helper to convert between a base58-string:number and a
+/// vector of chain::output.
 class BC_API output
 {
 public:
-
-    /**
-     * Default constructor.
-     */
     output();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  tuple  The value to initialize with.
-     */
     output(const std::string& tuple);
 
     /// Parsed properties
@@ -56,20 +45,9 @@ public:
     const chain::script& script() const;
     const short_hash& pay_to_hash() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& input, output& argument);
 
 private:
-
-    /**
-     * The transaction output state of this object.
-     * This data is translated to an output given expected version information.
-     */
     bool is_stealth_;
     uint64_t amount_;
     uint8_t version_;

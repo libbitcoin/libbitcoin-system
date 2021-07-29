@@ -40,7 +40,7 @@ namespace system {
 /// Deleting prvalue constructors prevents passage or materialization of
 /// temporaries.
 
-/// Resizable but otherwise const iterable wrapper for const memory buffer.
+/// Downsizable but otherwise const iterable wrapper for const buffer.
 /// Identical to data_slice except does not accept prvalues.
 /// Not a substitute for move overrides or containment.
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.

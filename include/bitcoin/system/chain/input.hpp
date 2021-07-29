@@ -111,12 +111,6 @@ public:
     uint32_t sequence() const;
     void set_sequence(uint32_t value);
 
-    /////// The first payment address extracted (may be invalid).
-    ////typename wallet::payment_address address() const;
-
-    /////// The payment addresses extracted from this input as a standard script.
-    ////typename wallet::payment_address::list addresses() const;
-
     // Utilities.
     //-------------------------------------------------------------------------
 
@@ -132,21 +126,11 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const;
     bool extract_reserved_hash(hash_digest& out) const;
     bool extract_embedded_script(chain::script& out) const;
-    ////bool extract_witness_script(chain::script& out,
-    ////    const chain::script& prevout) const;
 
 protected:
     void reset();
-    ////void invalidate_cache() const;
 
 private:
-    ////typedef std::shared_ptr<typename wallet::payment_address::list> addresses_ptr;
-
-    ////addresses_ptr addresses_cache() const;
-
-    ////mutable upgrade_mutex mutex_;
-    ////mutable addresses_ptr addresses_;
-
     output_point previous_output_;
     chain::script script_;
     chain::witness witness_;

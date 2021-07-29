@@ -156,7 +156,7 @@
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/serial/deserialize.hpp>
 #include <bitcoin/system/serial/endian.hpp>
-#include <bitcoin/system/serial/properties.hpp>
+#include <bitcoin/system/serial/props.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/serial/serialize.hpp>
 #include <bitcoin/system/stream/binary.hpp>

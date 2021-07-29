@@ -33,11 +33,11 @@ template <uint32_t Bits>
 using uintx_t = mp::number<mp::cpp_int_backend<Bits, Bits,
     mp::unsigned_magnitude, mp::unchecked, void>>;
 
-// Cannot generalize because no boost support for unsigned arbitrary precision.
-// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
-// but is not a base type. Use of signed types here would also not generalize
-// as boost uses a different allocator for arbitrary precision. So we are stuck
-// with this seam, requiring template specialization for uintx.
+/// Cannot generalize because no boost support for unsigned arbitrary precision.
+/// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
+/// but is not a base type. Use of signed types here would also not generalize
+/// as boost uses a different allocator for arbitrary precision. So we are stuck
+/// with this seam, requiring template specialization for uintx.
 typedef boost::multiprecision::cpp_int uintx;
 
 typedef uintx_t<5> uint5_t;

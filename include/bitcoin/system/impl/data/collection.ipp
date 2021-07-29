@@ -115,7 +115,6 @@ bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept
 {
-    // TODO: determine if this guard is necessary for std::equal.
     return !is_lesser(std::distance(begin, end), value.size()) &&
         std::equal(value.begin(), value.end(), begin);
 }

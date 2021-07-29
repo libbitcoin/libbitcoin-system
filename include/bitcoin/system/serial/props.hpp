@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SERIAL_PROPERTIES_HPP
-#define LIBBITCOIN_SYSTEM_SERIAL_PROPERTIES_HPP
+#ifndef LIBBITCOIN_SYSTEM_SERIAL_PROPS_HPP
+#define LIBBITCOIN_SYSTEM_SERIAL_PROPS_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -39,7 +39,7 @@ namespace system {
 /// Specialized types are not used for value because they must be stored in the
 /// children collection, which then must be able to specialize serialization.
 /// TODO: Escape sequences and JSON exponents and fractions are not supported.
-class BC_API properties
+class BC_API props
 {
 public:
     typedef enum class truth
@@ -56,27 +56,27 @@ public:
     } format;
 
     /// Move/copy construct.
-    properties(properties&& other) noexcept;
-    properties(const properties& other) noexcept;
+    props(props&& other) noexcept;
+    props(const props& other) noexcept;
 
     /// "null" property value.
-    properties() noexcept;
+    props() noexcept;
 
     /// "true" or "false" property value.
-    properties(truth boolean) noexcept;
+    props(truth boolean) noexcept;
 
     /// number property value. 
-    properties(int64_t number) noexcept;
+    props(int64_t number) noexcept;
 
     /// string property value, whitespace is not trimmed.
-    properties(const std::string& text) noexcept;
+    props(const std::string& text) noexcept;
 
     /// Serialize the properties to the specified format.
     std::ostream& write(std::ostream& stream, format format,
         bool flat=true) const noexcept;
 
 protected:
-    typedef std::pair<std::string, properties> named_properties;
+    typedef std::pair<std::string, props> named_props;
     typedef enum class type
     {
         null_,
@@ -89,8 +89,8 @@ protected:
         invalid_
     } type;
 
-    static properties from_number(int64_t number) noexcept;
-    properties(type type, const std::string& text={}) noexcept;
+    static props from_number(int64_t number) noexcept;
+    props(type type, const std::string& text={}) noexcept;
     bool is_complex() const noexcept;
     std::ostream& write(std::ostream& stream, format format,
         size_t depth, bool flat) const noexcept;
@@ -99,35 +99,34 @@ protected:
 
     const type type_;
     std::string value_;
-    std::vector<named_properties> children_;
+    std::vector<named_props> children_;
 };
 
-class BC_API array_properties
-  : public properties
+class BC_API array_props
+  : public props
 {
 public:
     /// Construct an array properties value, name applied to all children.
-    array_properties(const std::string& name) noexcept;
-    array_properties(const std::string& name,
-        std::initializer_list<properties> values) noexcept;
+    array_props(const std::string& name) noexcept;
+    array_props(const std::string& name,
+        std::initializer_list<props> values) noexcept;
 
     /// Add child array property values.
-    array_properties& add(const properties& value) noexcept;
-    array_properties& add(std::initializer_list<properties> values) noexcept;
+    array_props& add(const props& value) noexcept;
+    array_props& add(std::initializer_list<props> values) noexcept;
 };
 
-class BC_API object_properties
-  : public properties
+class BC_API object_props
+  : public props
 {
 public:
     /// Construct an object properties value, each child is explicitly named.
-    object_properties() noexcept;
-    object_properties(std::initializer_list<named_properties> values) noexcept;
+    object_props() noexcept;
+    object_props(std::initializer_list<named_props> values) noexcept;
 
     /// Add child object property values.
-    object_properties& add(const named_properties& value) noexcept;
-    object_properties& add(
-        std::initializer_list<named_properties> values) noexcept;
+    object_props& add(const named_props& value) noexcept;
+    object_props& add(std::initializer_list<named_props> values) noexcept;
 };
 
 } // namespace system

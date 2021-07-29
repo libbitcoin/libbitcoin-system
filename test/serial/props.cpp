@@ -18,246 +18,246 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(properties_tests)
+BOOST_AUTO_TEST_SUITE(props_tests)
 
 // null
 
-BOOST_AUTO_TEST_CASE(properties__write__null_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__null_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance;
-    instance.write(stream, properties::format::json);
+    props instance;
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "null");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__null_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__null_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance;
-    instance.write(stream, properties::format::info);
+    props instance;
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "null");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__null_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__null_xml__valid_expected)
 {
     std::ostringstream stream;
-    properties instance;
-    instance.write(stream, properties::format::xml);
+    props instance;
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE(stream.str().empty());
 }
 
 // true
 
-BOOST_AUTO_TEST_CASE(properties__write__true_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__true_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::true_);
-    instance.write(stream, properties::format::json);
+    props instance(props::truth::true_);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "true");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__true_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__true_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::true_);
-    instance.write(stream, properties::format::info);
+    props instance(props::truth::true_);
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "true");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__true_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__true_xml__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::true_);
-    instance.write(stream, properties::format::xml);
+    props instance(props::truth::true_);
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "true");
 }
 
 // false
 
-BOOST_AUTO_TEST_CASE(properties__write__false_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__false_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::false_);
-    instance.write(stream, properties::format::json);
+    props instance(props::truth::false_);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "false");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__false_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__false_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::false_);
-    instance.write(stream, properties::format::info);
+    props instance(props::truth::false_);
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "false");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__false_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__false_xml__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(properties::truth::false_);
-    instance.write(stream, properties::format::xml);
+    props instance(props::truth::false_);
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "false");
 }
 
 // string
 
-BOOST_AUTO_TEST_CASE(properties__write__string_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__string_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance("string");
-    instance.write(stream, properties::format::json);
+    props instance("string");
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "\"string\"");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__unspaced_string_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__unspaced_string_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance("string");
-    instance.write(stream, properties::format::info);
+    props instance("string");
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "string");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__spaced_string_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__spaced_string_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance("spaced string");
-    instance.write(stream, properties::format::json);
+    props instance("spaced string");
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "\"spaced string\"");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__string_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__string_xml__valid_expected)
 {
     std::ostringstream stream;
-    properties instance("string");
-    instance.write(stream, properties::format::xml);
+    props instance("string");
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "string");
 }
 
 // number
 
-BOOST_AUTO_TEST_CASE(properties__write__positive_number_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__positive_number_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(42);
-    instance.write(stream, properties::format::json);
+    props instance(42);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "42");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__negative_number_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__negative_number_json__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(-42);
-    instance.write(stream, properties::format::json);
+    props instance(-42);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "-42");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__minimum_number_json__invalid)
+BOOST_AUTO_TEST_CASE(props__write__minimum_number_json__invalid)
 {
     std::ostringstream stream;
-    properties instance(min_int64);
-    instance.write(stream, properties::format::json);
+    props instance(min_int64);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(!stream);
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__maximum_number_json__invalid)
+BOOST_AUTO_TEST_CASE(props__write__maximum_number_json__invalid)
 {
     std::ostringstream stream;
-    properties instance(max_int64);
-    instance.write(stream, properties::format::json);
+    props instance(max_int64);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(!stream);
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__positive_number_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__positive_number_info__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(42);
-    instance.write(stream, properties::format::info);
+    props instance(42);
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "42");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__positive_number_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__positive_number_xml__valid_expected)
 {
     std::ostringstream stream;
-    properties instance(42);
-    instance.write(stream, properties::format::xml);
+    props instance(42);
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "42");
 }
 
 // array
 
-BOOST_AUTO_TEST_CASE(properties__write__array_json_empty__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__array_json_empty__valid_expected)
 {
     std::ostringstream stream;
-    array_properties instance("child");
-    instance.write(stream, properties::format::json);
+    array_props instance("child");
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "[]");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__array_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__array_json__valid_expected)
 {
     std::ostringstream stream;
-    array_properties instance("child", { 0, 1 });
+    array_props instance("child", { 0, 1 });
     instance.add({ 2 });
     instance.add({ 3 });
-    instance.write(stream, properties::format::json);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "[0,1,2,3]");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__array_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__array_info__valid_expected)
 {
     std::ostringstream stream;
-    array_properties instance("child", { 0, 1 });
+    array_props instance("child", { 0, 1 });
     instance.add({ 2 });
     instance.add({ 3 });
-    instance.write(stream, properties::format::info);
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{0 1 2 3}");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__array_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__array_xml__valid_expected)
 {
     std::ostringstream stream;
-    array_properties instance("child", { 0, 1 });
+    array_props instance("child", { 0, 1 });
     instance.add({ 2 });
     instance.add({ 3 });
-    instance.write(stream, properties::format::xml);
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "<child>0</child><child>1</child><child>2</child><child>3</child>");
 }
 
 // object
 
-BOOST_AUTO_TEST_CASE(properties__write__object_json_empty__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__object_json_empty__valid_expected)
 {
     std::ostringstream stream;
-    object_properties instance{};
-    instance.write(stream, properties::format::json);
+    object_props instance{};
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{}");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__object_json__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__object_json__valid_expected)
 {
     std::ostringstream stream;
-    object_properties instance
+    object_props instance
     ({
         { "child0", { 0 } },
         { "child1", { 1 } } 
@@ -267,15 +267,15 @@ BOOST_AUTO_TEST_CASE(properties__write__object_json__valid_expected)
         { "child2", { 2 } },
         { "child3", { 3 } }
     });
-    instance.write(stream, properties::format::json);
+    instance.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{\"child0\":0,\"child1\":1,\"child2\":2,\"child3\":3}");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__object_info__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__object_info__valid_expected)
 {
     std::ostringstream stream;
-    object_properties instance
+    object_props instance
     ({
         { "child0", { 0 } },
         { "child1", { 1 } } 
@@ -285,15 +285,15 @@ BOOST_AUTO_TEST_CASE(properties__write__object_info__valid_expected)
         { "child2", { 2 } },
         { "child3", { 3 } }
     });
-    instance.write(stream, properties::format::info);
+    instance.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{child0 0,child1 1,child2 2,child3 3}");
 }
  
-BOOST_AUTO_TEST_CASE(properties__write__object_xml__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__object_xml__valid_expected)
 {
     std::ostringstream stream;
-    object_properties instance
+    object_props instance
     ({
         { "child0", { 0 } },
         { "child1", { 1 } } 
@@ -303,43 +303,43 @@ BOOST_AUTO_TEST_CASE(properties__write__object_xml__valid_expected)
         { "child2", { 2 } },
         { "child3", { 3 } }
     });
-    instance.write(stream, properties::format::xml);
+    instance.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "<child0>0</child0><child1>1</child1><child2>2</child2><child3>3</child3>");
 }
 
 // complex object
 
-static const object_properties root
+static const object_props root
 {
     {
         "month",
-        object_properties
+        object_props
         {
             { "year", 2021 },
-            { "sundays", array_properties{ "sunday", { 4, 11, 18, 25 } } },
-            { "mondays", array_properties{ "monday", { 5, 12, 19, 26 } } },
-            { "tuesdays", array_properties{ "tuesday", { 6, 13, 20, 27 } } },
-            { "wednesdays", array_properties{ "wednesday", { 7, 14, 21, 28 } } },
-            { "thursdays", array_properties{ "thursday", { 1, 8, 15, 22, 29 } } },
-            { "fridays", array_properties{ "friday", { 2, 9, 16, 23, 30 } } },
-            { "saturdays", array_properties{ "saturday", { 3, 10, 17, 24, 31 } } }
+            { "sundays", array_props{ "sunday", { 4, 11, 18, 25 } } },
+            { "mondays", array_props{ "monday", { 5, 12, 19, 26 } } },
+            { "tuesdays", array_props{ "tuesday", { 6, 13, 20, 27 } } },
+            { "wednesdays", array_props{ "wednesday", { 7, 14, 21, 28 } } },
+            { "thursdays", array_props{ "thursday", { 1, 8, 15, 22, 29 } } },
+            { "fridays", array_props{ "friday", { 2, 9, 16, 23, 30 } } },
+            { "saturdays", array_props{ "saturday", { 3, 10, 17, 24, 31 } } }
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_json_flat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_json_flat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::json);
+    root.write(stream, props::format::json);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{\"month\":{\"year\":2021,\"sundays\":[4,11,18,25],\"mondays\":[5,12,19,26],\"tuesdays\":[6,13,20,27],\"wednesdays\":[7,14,21,28],\"thursdays\":[1,8,15,22,29],\"fridays\":[2,9,16,23,30],\"saturdays\":[3,10,17,24,31]}}");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_json_unflat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_json_unflat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::json, false);
+    root.write(stream, props::format::json, false);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), 
         "{\n"
@@ -403,19 +403,19 @@ BOOST_AUTO_TEST_CASE(properties__write__complex_object_json_unflat__valid_expect
     );
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_info_flat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_info_flat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::info);
+    root.write(stream, props::format::info);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "{month {year 2021,sundays {4 11 18 25},mondays {5 12 19 26},tuesdays {6 13 20 27},wednesdays {7 14 21 28},thursdays {1 8 15 22 29},fridays {2 9 16 23 30},saturdays {3 10 17 24 31}}}");
 }
 
 // TODO: clean up spaces.
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_info_unflat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_info_unflat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::info, false);
+    root.write(stream, props::format::info, false);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), 
         "{\n"
@@ -479,18 +479,18 @@ BOOST_AUTO_TEST_CASE(properties__write__complex_object_info_unflat__valid_expect
     );
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_xml_flat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_xml_flat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::xml);
+    root.write(stream, props::format::xml);
     BOOST_REQUIRE(stream);
     BOOST_REQUIRE_EQUAL(stream.str(), "<month><year>2021</year><sundays><sunday>4</sunday><sunday>11</sunday><sunday>18</sunday><sunday>25</sunday></sundays><mondays><monday>5</monday><monday>12</monday><monday>19</monday><monday>26</monday></mondays><tuesdays><tuesday>6</tuesday><tuesday>13</tuesday><tuesday>20</tuesday><tuesday>27</tuesday></tuesdays><wednesdays><wednesday>7</wednesday><wednesday>14</wednesday><wednesday>21</wednesday><wednesday>28</wednesday></wednesdays><thursdays><thursday>1</thursday><thursday>8</thursday><thursday>15</thursday><thursday>22</thursday><thursday>29</thursday></thursdays><fridays><friday>2</friday><friday>9</friday><friday>16</friday><friday>23</friday><friday>30</friday></fridays><saturdays><saturday>3</saturday><saturday>10</saturday><saturday>17</saturday><saturday>24</saturday><saturday>31</saturday></saturdays></month>");
 }
 
-BOOST_AUTO_TEST_CASE(properties__write__complex_object_xml_unflat__valid_expected)
+BOOST_AUTO_TEST_CASE(props__write__complex_object_xml_unflat__valid_expected)
 {
     std::ostringstream stream;
-    root.write(stream, properties::format::xml, false);
+    root.write(stream, props::format::xml, false);
     BOOST_REQUIRE(stream);
 
     BOOST_REQUIRE_EQUAL(stream.str(),

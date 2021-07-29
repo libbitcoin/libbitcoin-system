@@ -29,69 +29,27 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper for base2 encoded data.
- */
+/// Serialization helper for base2 encoded data.
 class BC_API base2
 {
 public:
 
-    /**
-     * Default constructor.
-     */
     base2();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  bin  The value to initialize with.
-     */
+    base2(const base2& other);
+    base2(const binary& value);
     base2(const std::string& binary);
 
-    /**
-     * @param[in]  value  The value to initialize with.
-     */
-    base2(const binary& value);
-
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    base2(const base2& other);
-
-    /**
-     * Get number of bits in value.
-     */
+    /// Get number of bits.
     size_t size() const;
 
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type reference.
-     */
     operator const binary&() const;
 
-    /**
-     * Overload stream in. If input is invalid sets no bytes in argument.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& input,
         base2& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
     friend std::ostream& operator<<(std::ostream& output,
         const base2& argument);
 
 private:
-
-    /**
-     * The state of this object.
-     */
     binary value_;
 };
 

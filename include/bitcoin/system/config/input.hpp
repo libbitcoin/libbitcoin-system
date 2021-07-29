@@ -28,71 +28,23 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper stub for chain::input.
- */
+/// Serialization helper stub for chain::input.
 class BC_API input
 {
 public:
-
-    /**
-     * Default constructor.
-     */
     input();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  tuple  The value to initialize with.
-     */
-    input(const std::string& tuple);
-
-    /**
-     * Initialization constructor. Only the point is retained.
-     * @param[in]  value  The value to initialize with.
-     */
-    input(const chain::input& value);
-
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
     input(const input& other);
-
-    /**
-     * Initialization constructor. Aspects of the input other than the point
-     * are defaulted.
-     * @param[in]  value  The value to initialize with.
-     */
+    input(const std::string& tuple);
+    input(const chain::input& value);
     input(const chain::input_point& value);
 
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
     operator const chain::input&() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& stream, input& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
     friend std::ostream& operator<<(std::ostream& output,
         const input& argument);
 
 private:
-
-    /**
-     * The state of this object.
-     */
     chain::input value_;
 };
 

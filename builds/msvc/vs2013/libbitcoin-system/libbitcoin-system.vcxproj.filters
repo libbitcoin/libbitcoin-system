@@ -549,7 +549,7 @@
     <ClCompile Include="..\..\..\..\src\radix\base_85.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\serial\properties.cpp">
+    <ClCompile Include="..\..\..\..\src\serial\props.cpp">
       <Filter>src\serial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\settings.cpp">
@@ -1145,7 +1145,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\endian.hpp">
       <Filter>include\bitcoin\system\serial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\properties.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\props.hpp">
       <Filter>include\bitcoin\system\serial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serial.hpp">

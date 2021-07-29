@@ -34,9 +34,7 @@ namespace system {
 class BC_API pseudo_random
 {
   public:
-    /**
-     * Fill a byte array with randomness using the default random engine.
-     */
+    /// Fill a byte array with randomness using the default random engine.
     template<size_t Size>
     static void fill(data_array<Size>& out)
     {
@@ -46,29 +44,18 @@ class BC_API pseudo_random
         });
     }
 
-    /**
-     * Fill a byte vector with randomness using the default random engine.
-     */
+    /// Fill a byte vector with randomness using the default random engine.
     static void fill(data_chunk& out);
 
-    /**
-     * Generate a pseudo random number within the uint8_t domain.
-     * Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
-     * @return  The number.
-     */
+    /// Generate a pseudo random number within the uint8_t domain.
+    /// Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
     static uint8_t next();
 
-    /**
-     * Generate a pseudo random number within [begin, end].
-     * Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
-     * @return  The number.
-     */
+    /// Generate a pseudo random number within [begin, end].
+    /// Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
     static uint8_t next(uint8_t begin, uint8_t end);
 
-    /**
-     * Generate a pseudo random number within the Type domain.
-     * @return  The number.
-     */
+    /// Generate a pseudo random number within the Type domain.
     template<typename Type, if_integer<Type> = true>
     static Type next()
     {
@@ -76,33 +63,25 @@ class BC_API pseudo_random
             std::numeric_limits<Type>::max());
     }
 
-    /**
-     * Generate a pseudo random number within [begin, end].
-     * @return  The number.
-     */
-    template<typename Type, if_integer<Type> = true>
-    static Type next(Type begin, Type end)
+    /// Generate a pseudo random integer value within [begin, end].
+    template<typename Integer, if_integer<Integer> = true>
+    static Integer next(Integer begin, Integer end)
     {
-        std::uniform_int_distribution<Type> distribution(begin, end);
+        std::uniform_int_distribution<Integer> distribution(begin, end);
         return distribution(get_twister());
     }
 
-    /**
-     * Shuffle a container elements using the random engine.
-     */
+    /// Shuffle a container elements using the random engine.
     template<class Container>
     static void shuffle(Container& out)
     {
         std::shuffle(out.begin(), out.end(), get_twister());
     }
 
-    /**
-     * Convert a time duration to a value in the range [max/ratio, max].
-     * @param[in]  maximum  The maximum value to return.
-     * @param[in]  ratio    The determinant of the minimum duration as the inverse
-     *                      portion of the maximum duration.
-     * @return              The randomized duration.
-     */
+    /// Convert a time duration to a value in the range [max/ratio, max].
+    /// maximum is the maximum value to return. ratio is the determinant
+    /// of the minimum duration as the inverse portion of the maximum
+    /// duration. Returns the randomized duration.
     static std::chrono::steady_clock::duration duration(
         const std::chrono::steady_clock::duration& maximum, uint8_t ratio=2);
 

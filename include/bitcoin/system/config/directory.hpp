@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -22,6 +22,8 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
+
+// TODO: move to utf8_everwhere?
 
 namespace libbitcoin {
 namespace system {

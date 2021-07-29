@@ -28,65 +28,23 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper for base58 encoded text.
- */
+/// Serialization helper for base58 encoded text.
 class BC_API base58
 {
 public:
-
-    /**
-     * Default constructor.
-     */
     base58();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  base58  The value to initialize with.
-     */
+    base58(const base58& other);
     base58(const std::string& base58);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
     base58(const data_chunk& value);
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    base58(const base58& other);
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type reference.
-     */
     operator const data_chunk&() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& input,
         base58& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
     friend std::ostream& operator<<(std::ostream& output,
         const base58& argument);
 
 private:
-
-    /**
-     * The state of this object.
-     */
     data_chunk value_;
 };
 

@@ -51,7 +51,7 @@ namespace system {
 /// materialization of a function parameter is the lifetime of the function,
 /// unless extended by reference.
 
-/// Resizable but otherwise const iterable wrapper for const memory buffer.
+/// Downsizable but otherwise const iterable wrapper for const buffer.
 /// Identical to data_slab except pointer is const, and therefore accepts
 /// construction from const sources (including literals and initializers).
 /// Not a substitute for move overrides or containment.

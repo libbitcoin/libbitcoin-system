@@ -112,16 +112,6 @@ public:
     void set_script(const chain::script& value);
     void set_script(chain::script&& value);
 
-    /////// The first payment address extracted (may be invalid).
-    ////typename wallet::payment_address address(
-    ////    uint8_t typename p2kh_version=wallet::payment_address::mainnet_p2kh,
-    ////    uint8_t typename p2sh_version=wallet::payment_address::mainnet_p2sh) const;
-
-    /////// The payment addresses extracted from this output as a standard script.
-    ////typename wallet::payment_address::list addresses(
-    ////    uint8_t typename p2kh_version=wallet::payment_address::mainnet_p2kh,
-    ////    uint8_t typename p2sh_version=wallet::payment_address::mainnet_p2sh) const;
-
     // Validation.
     //-------------------------------------------------------------------------
 
@@ -134,16 +124,8 @@ public:
 
 protected:
     void reset();
-    ////void invalidate_cache() const;
 
 private:
-    ////typedef std::shared_ptr<typename wallet::payment_address::list> addresses_ptr;
-
-    ////addresses_ptr addresses_cache() const;
-
-    ////mutable upgrade_mutex mutex_;
-    ////mutable addresses_ptr addresses_;
-
     uint64_t value_;
     chain::script script_;
 };

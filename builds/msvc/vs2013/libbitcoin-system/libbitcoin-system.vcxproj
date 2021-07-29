@@ -227,9 +227,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\src\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\src\properties.cpp">
-      <ObjectFileName>$(IntDir)src_properties.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\properties.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -237,9 +235,7 @@
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_64.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_85.cpp" />
-    <ClCompile Include="..\..\..\..\src\serial\properties.cpp">
-      <ObjectFileName>$(IntDir)src_serial_properties.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\src\settings.cpp" />
     <ClCompile Include="..\..\..\..\src\stream\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\ascii.cpp" />
@@ -453,7 +449,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\radix.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\deserialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\endian.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\properties.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\props.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serial.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\settings.hpp" />

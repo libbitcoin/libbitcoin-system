@@ -28,72 +28,25 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper to convert between serialized and deserialized satoshi
- * transaction.
- */
+/// Serialization helper for transactions.
 class BC_API transaction
 {
 public:
-
-    /**
-     * Default constructor.
-     */
     transaction();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  hexcode  The value to initialize with.
-     */
+    transaction(const transaction& other);
     transaction(const std::string& hexcode);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
     transaction(const chain::transaction& value);
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    transaction(const transaction& other);
-
-    /**
-     * Return a reference to the data member.
-     * @return  A reference to the object's internal data.
-     */
     chain::transaction& data();
 
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
     operator const chain::transaction&() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& input,
         transaction& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
     friend std::ostream& operator<<(std::ostream& output,
         const transaction& argument);
 
 private:
-
-    /**
-     * The state of this object's transaction data.
-     */
     chain::transaction value_;
 };
 

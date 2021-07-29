@@ -39,7 +39,7 @@ namespace system {
 /// by reference. See data_slice for a detailed explanation of lifetime.
 /// en.cppreference.com/w/cpp/language/reference#Dangling_references
 
-/// Resizable but otherwise const iterable wrapper for non-const memory buffer.
+/// Downsizable but otherwise const iterable wrapper for non-const buffer.
 /// Identical to data_slice except pointer is non-const, and therefore does not
 /// accept construction from const or movable (non-writeable) sources.
 /// Not a substitute for move overrides or containment.

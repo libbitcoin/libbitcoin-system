@@ -28,89 +28,28 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper to convert between serialized and deserialized satoshi
- * block.
- */
+/// Serialization helper to convert between serialized and deserialized block.
 class BC_API block
 {
 public:
-
-    /**
-     * Default constructor.
-     */
     block();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  hexcode  The value to initialize with.
-     */
+    block(const block& other);
     block(const std::string& hexcode);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
     block(const chain::block& value);
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    block(const block& other);
-
-    /**
-     * Copy assignment operator.
-     * @param[in]  other  The object to copy into self on assignment.
-     */
     block& operator=(const block& other);
-
-    /**
-     * Move assignment operator.
-     * @param[in]  other  The object to move into self on assignment.
-     */
     block& operator=(chain::block&& other);
-
-    /**
-     * Override the equality operator.
-     * @param[in]  other  The other object with which to compare.
-     */
     bool operator==(const block& other) const;
 
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
     operator const chain::block&() const;
 
-    /**
-     * Get the block as a string.
-     * @return hex string of block.
-     */
     std::string to_string() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
     friend std::istream& operator>>(std::istream& input, block& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
     friend std::ostream& operator<<(std::ostream& output,
         const block& argument);
 
 private:
-
-    /**
-     * The state of this object's block data.
-     */
     chain::block value_;
 };
 
