@@ -23,7 +23,6 @@
 #include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -35,13 +34,12 @@ class BC_API hash160
 public:
     hash160();
     hash160(const hash160& other);
-    hash160(const std::string& hexcode);
     hash160(const short_hash& value);
+    hash160(const std::string& hexcode);
 
     operator const short_hash&() const;
 
-    friend std::istream& operator>>(std::istream& input,
-        hash160& argument);
+    friend std::istream& operator>>(std::istream& input, hash160& argument);
     friend std::ostream& operator<<(std::ostream& output,
         const hash160& argument);
 
