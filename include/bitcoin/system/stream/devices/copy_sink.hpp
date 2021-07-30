@@ -22,7 +22,7 @@
 #include <utility>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
 namespace libbitcoin {
@@ -41,18 +41,18 @@ public:
     };
 
     copy_sink(const Container& data) noexcept
-      : device(limit<size_type>(data.size())),
+      : device(limit<device::size_type>(data.size())),
         container_(data),
         next_(data.begin())
     {
     }
 
 protected:
-    sequence do_sequence() const noexcept override
+    device::sequence do_sequence() const noexcept override
     {
         return std::make_pair(
-            reinterpret_cast<char_type*>(container_.begin()),
-            reinterpret_cast<char_type*>(container_.end()));
+            reinterpret_cast<device::char_type*>(container_.begin()),
+            reinterpret_cast<device::char_type*>(container_.end()));
     }
 
 private:

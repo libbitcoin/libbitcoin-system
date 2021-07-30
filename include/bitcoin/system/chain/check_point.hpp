@@ -47,7 +47,7 @@ public:
     explicit check_point(const std::string& hash, size_t height) noexcept;
 
     template <size_t Size, if_size<Size, add1(two * hash_size)> = true>
-    check_point::check_point(const char(&string)[Size], size_t height) noexcept
+    check_point(const char(&string)[Size], size_t height) noexcept
       : check_point(std::string(string), height)
     {
     }

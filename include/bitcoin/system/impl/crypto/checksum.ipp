@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_CRYPTO_CHECKSUM_IPP
-#define LIBBITCOIN_SYSTEM_CHECKSUM_IPP
+#define LIBBITCOIN_CRYPTO_CHECKSUM_IPP
 
 #include <algorithm>
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 
 namespace libbitcoin {

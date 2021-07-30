@@ -57,7 +57,7 @@ data_stack to_stack(const std::vector<data_array<Size>>& values) noexcept
             return to_chunk(value);
         });
 
-    return std::move(chunks);
+    return chunks;
 }
 
 template <size_t Size>

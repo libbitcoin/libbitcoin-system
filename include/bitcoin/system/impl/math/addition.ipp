@@ -44,15 +44,17 @@ constexpr Result subtract(Left left, Right right) noexcept
 template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
 {
-    constexpr auto maximum = std::numeric_limits<Integer>::max();
-    return (left > (maximum - right)) ? maximum : (left + right);
+    // C++14: local variables allowed in constexpr.
+    ////constexpr auto maximum = std::numeric_limits<Integer>::max();
+    return (left > (std::numeric_limits<Integer>::max() - right)) ?
+        std::numeric_limits<Integer>::max() : (left + right);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer floored_subtract(Integer left, Integer right) noexcept
 {
-    constexpr auto minimum = std::numeric_limits<Integer>::min();
-    return (right >= left) ? minimum : (left - right);
+    return (right >= left) ? std::numeric_limits<Integer>::min() :
+        (left - right);
 }
 
 } // namespace system

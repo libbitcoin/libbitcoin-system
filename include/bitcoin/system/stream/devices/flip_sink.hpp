@@ -38,8 +38,10 @@ public:
     {
     };
 
-    // Constructor inheritance.
-    using copy_sink::copy_sink;
+    flip_sink(const Container& data) noexcept
+      : copy_sink(data)
+    {
+    }
 };
 
 } // namespace system

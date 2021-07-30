@@ -224,34 +224,36 @@ template <typename Value, if_integer<Value>>
 constexpr Value rotate_left(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
-    constexpr auto bits = width<Value>();
-    return ((value = (value << (shift % bits)) |
-        (value >> (bits - (shift % bits)))));
+    ////constexpr auto bits = width<Value>();
+    return ((value = (value << (shift % width<Value>())) |
+        (value >> (width<Value>() - (shift % width<Value>())))));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value rotate_left(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
-    constexpr auto bits = width<Value>();
-    return (value << (shift % bits)) | (value >> (bits - (shift % bits)));
+    ////constexpr auto bits = width<Value>();
+    return (value << (shift % width<Value>())) |
+        (value >> (width<Value>() - (shift % width<Value>())));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value rotate_right(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
-    constexpr auto bits = width<Value>();
-    return ((value = (value << (bits - (shift % bits)) |
-        (value >> (shift % bits)))));
+    ////constexpr auto bits = width<Value>();
+    return ((value = (value << (width<Value>() - (shift % width<Value>())) |
+        (value >> (shift % width<Value>())))));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value rotate_right(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
-    constexpr auto bits = width<Value>();
-    return (value << (bits - (shift % bits))) | (value >> (shift % bits));
+    ////constexpr auto bits = width<Value>();
+    return (value << (width<Value>() - (shift % width<Value>()))) |
+        (value >> (shift % width<Value>()));
 }
 
 // shift
@@ -267,29 +269,37 @@ constexpr Value rotate_right(const Value& value, size_t shift)
 template <typename Value, if_integer<Value>>
 constexpr Value shift_left(Value& value, size_t shift, bool overflow)
 {
-    constexpr auto bits = width<Value>();
-    return (overflow && shift >= bits) ? ((value = 0)) : ((value <<= (shift % bits)));
+    // C++14: local variables allowed in constexpr.
+    ////constexpr auto bits = width<Value>();
+    return (overflow && shift >= width<Value>()) ? ((value = 0)) :
+        ((value <<= (shift % width<Value>())));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
 {
-    constexpr auto bits = width<Value>();
-    return (overflow && shift >= bits) ? 0 : value << (shift % bits);
+    // C++14: local variables allowed in constexpr.
+    ////constexpr auto bits = width<Value>();
+    return (overflow && shift >= width<Value>()) ? 0 :
+        value << (shift % width<Value>());
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value shift_right(Value& value, size_t shift, bool overflow)
 {
-    constexpr auto bits = width<Value>();
-    return (overflow && shift >= bits) ? ((value = 0)) : ((value >>= (shift % bits)));
+    // C++14: local variables allowed in constexpr.
+    ////constexpr auto bits = width<Value>();
+    return (overflow && shift >= width<Value>()) ? ((value = 0)) :
+        ((value >>= (shift % width<Value>())));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift, bool overflow)
 {
-    constexpr auto bits = width<Value>();
-    return (overflow && shift >= bits) ? 0 : value >> (shift % bits);
+    // C++14: local variables allowed in constexpr.
+    ////constexpr auto bits = width<Value>();
+    return (overflow && shift >= width<Value>()) ? 0 :
+        value >> (shift % width<Value>());
 }
 
 } // namespace system
