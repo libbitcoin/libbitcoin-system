@@ -96,7 +96,7 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
             return element;
         });
 
-    return std::move(out);
+    return out;
 }
 
 template <typename Collection>
@@ -177,7 +177,7 @@ pop(Collection& stack) noexcept
 
     auto element = stack.back();
     stack.pop_back();
-    return std::move(element);
+    return element;
 }
 
 template <typename Collection>

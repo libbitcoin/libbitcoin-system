@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <istream>
 #include <string>
-#include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -164,7 +163,7 @@ data_array<Size> byte_reader<IStream>::read_forward() noexcept
     // Reader supports directly populating an array, this avoids a copy.
     data_array<Size> out{};
     do_read_bytes(out.data(), Size);
-    return std::move(out);
+    return out;
 }
 
 template <typename IStream>
@@ -236,7 +235,7 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
     clear();
     out.resize(sub1(out.size()));
     out.shrink_to_fit();
-    return std::move(out);
+    return out;
 }
 
 template <typename IStream>
@@ -245,7 +244,7 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
     data_chunk out(no_fill_allocator);
     out.resize(size);
     do_read_bytes(out.data(), size);
-    return std::move(out);
+    return out;
 }
 
 template <typename IStream>
@@ -464,7 +463,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
         stream_.seekg(offset, IStream::cur);
         validate();
     }
-    catch (const IStream::failure&)
+    catch (const typename IStream::failure&)
     {
         invalid();
     }

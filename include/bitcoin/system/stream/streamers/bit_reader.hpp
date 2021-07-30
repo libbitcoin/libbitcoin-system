@@ -34,8 +34,10 @@ namespace system {
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4250)
+#endif // _MSC_VER
 
 /// A bit reader that accepts an istream.
 template <typename IStream = std::istream>
@@ -75,13 +77,15 @@ private:
     void load() noexcept;
     void reload() noexcept;
     uint8_t peek() noexcept;
-    constexpr uint8_t shift() const noexcept;
+    uint8_t shift() const noexcept;
 
     uint8_t byte_;
     uint8_t offset_;
 };
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace system
 } // namespace libbitcoin

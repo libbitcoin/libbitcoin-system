@@ -39,7 +39,7 @@ public:
     };
 
     flip_sink(const Container& data) noexcept
-      : copy_sink(data)
+      : copy_sink<Container>(data)
     {
     }
 };

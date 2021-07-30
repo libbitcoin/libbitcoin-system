@@ -27,8 +27,10 @@ namespace system {
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4250)
+#endif // _MSC_VER
 
 /// Construct an output stream and feed it to a writer.
 /// For std::ostream just pass to writer on construct.
@@ -46,14 +48,15 @@ public:
 
     ~make_streamer() noexcept override
     {
-        Streamer::~Streamer();
     }
 
 protected:
     Stream stream_;
 };
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace system
 } // namespace libbitcoin

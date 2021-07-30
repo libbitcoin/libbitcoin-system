@@ -42,15 +42,15 @@ const uint8_t bit_writer<OStream>::pad = 0x00;
 
 template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) noexcept
-  : byte_writer(sink), byte_(pad), offset_(0)
+  : byte_writer<OStream>(sink), byte_(pad), offset_(0)
 {
 }
 
 template <typename OStream>
 bit_writer<OStream>::~bit_writer() noexcept
 {
+    // Derived virtual destructor called before base destructor.
     flusher();
-    byte_writer::~byte_writer();
 }
 
 // bits
@@ -95,7 +95,7 @@ template <typename OStream>
 void bit_writer<OStream>::do_flush() noexcept
 {
     flusher();
-    byte_writer::do_flush();
+    byte_writer<OStream>::do_flush();
 }
 
 // private
@@ -105,7 +105,7 @@ void bit_writer<OStream>::do_flush() noexcept
 template <typename OStream>
 void bit_writer<OStream>::unload() noexcept
 {
-    byte_writer::do_write_bytes(&byte_, one);
+    byte_writer<OStream>::do_write_bytes(&byte_, one);
     byte_ = pad;
     offset_ = 0;
 }
@@ -118,7 +118,7 @@ void bit_writer<OStream>::flusher() noexcept
 }
 
 template <typename OStream>
-constexpr uint8_t bit_writer<OStream>::shift() const noexcept
+uint8_t bit_writer<OStream>::shift() const noexcept
 {
     // If shift is zero then eight bits have been written, so time to dump.
     // If offset is zero then no bits have been written since last dump.

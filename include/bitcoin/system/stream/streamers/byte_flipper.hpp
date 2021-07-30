@@ -27,11 +27,13 @@
 
 namespace libbitcoin {
 namespace system {
-    
+
 // Suppress multiple inheritance warnings.
 // The only multiple inheritance conflict is destructors and bool/!.
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4250)
+#endif // _MSC_VER
 
 /// A byte reader/writer that accepts an iostream.
 template <typename IOStream = std::iostream>
@@ -42,7 +44,7 @@ class byte_flipper
 {
 public:
     byte_flipper(IOStream& stream) noexcept
-      : byte_reader(stream), byte_writer(stream)
+      : byte_reader<IOStream>(stream), byte_writer<IOStream>(stream)
     {
         // Base constructions only capture references.
         // There are two references to the iostream:
@@ -52,25 +54,25 @@ public:
 
     ~byte_flipper() noexcept override
     {
-        // Flush writes before reads (only writes matter).
-        byte_writer::~byte_writer();
-        byte_reader::~byte_reader();
+        // Two base destructor calls order is unimportant (only writes flush).
     }
 
     operator bool() const noexcept override
     {
         // Rely on reader implementation, both are trivial and identical.
-        return byte_reader::operator bool();
+        return byte_reader<IOStream>::operator bool();
     }
 
     bool operator!() const noexcept override
     {
         // Rely on reader implementation, both are trivial and identical.
-        return byte_reader::operator!();
+        return byte_reader<IOStream>::operator!();
     }
 };
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace system
 } // namespace libbitcoin

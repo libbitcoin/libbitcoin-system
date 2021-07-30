@@ -48,13 +48,13 @@ namespace system {
 // which is close to a no-op.
 
 template <typename Integer, if_byte<Integer> = true>
-static Integer from_big(size_t size, const data_slice& data) noexcept
+static Integer from_big(size_t, const data_slice& data) noexcept
 {
     return data.empty() ? 0 : data.front();
 }
 
 template <typename Integer, if_byte<Integer> = true>
-static Integer from_little(size_t size, const data_slice& data) noexcept
+static Integer from_little(size_t, const data_slice& data) noexcept
 {
     return data.empty() ? 0 : data.front();
 }

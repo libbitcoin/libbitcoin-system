@@ -42,14 +42,13 @@ const uint8_t bit_reader<IStream>::pad = 0x00;
 
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) noexcept
-  : byte_reader(source), byte_(pad), offset_(byte_bits)
+  : byte_reader<IStream>(source), byte_(pad), offset_(byte_bits)
 {
 }
 
 template <typename IStream>
 bit_reader<IStream>::~bit_reader() noexcept
 {
-    byte_reader::~byte_reader();
 }
 
 // bits
@@ -154,10 +153,10 @@ void bit_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 template <typename IStream>
 bool bit_reader<IStream>::get_exhausted() const noexcept
 {
-    if (byte_reader::operator!())
+    if (byte_reader<IStream>::operator!())
         return true;
 
-    return is_zero(shift()) && byte_reader::get_exhausted();
+    return is_zero(shift()) && byte_reader<IStream>::get_exhausted();
 }
 
 // private
@@ -169,7 +168,7 @@ void bit_reader<IStream>::load() noexcept
     // The next bit read will be from this byte.
     byte_ = pad;
     offset_ = 0;
-    byte_reader::do_read_bytes(&byte_, one);
+    byte_reader<IStream>::do_read_bytes(&byte_, one);
 }
 
 template <typename IStream>
@@ -177,19 +176,19 @@ void bit_reader<IStream>::reload() noexcept
 {
     byte_ = pad;
     offset_ = byte_bits;
-    byte_reader::do_rewind_bytes(two);
-    byte_reader::do_read_bytes(&byte_, one);
+    byte_reader<IStream>::do_rewind_bytes(two);
+    byte_reader<IStream>::do_read_bytes(&byte_, one);
 }
 
 // This is the only byte peek.
 template <typename IStream>
 uint8_t bit_reader<IStream>::peek() noexcept
 {
-    return byte_reader::do_peek_byte();
+    return byte_reader<IStream>::do_peek_byte();
 }
 
 template <typename OStream>
-constexpr uint8_t bit_reader<OStream>::shift() const noexcept
+uint8_t bit_reader<OStream>::shift() const noexcept
 {
     // If shift is zero then eight bits have been read, so time to load.
     // If offset is zero then no bits have been read since last load.

@@ -42,7 +42,8 @@ public:
     };
 
     copy_source(const Container& data) noexcept
-      : device(limit<typename device<Container>::size_type>(data.size())),
+      : device<Container>(limit<typename device<Container>::size_type>(
+          data.size())),
         container_(data),
         next_(data.begin())
     {

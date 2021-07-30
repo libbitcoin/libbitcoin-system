@@ -44,8 +44,8 @@ public:
     };
 
     push_sink(Container& data) noexcept
-      : device(limit<typename device<Container>::size_type>(data.max_size() -
-          data.size())),
+      : device<Container>(limit<typename device<Container>::size_type>(
+          data.max_size() - data.size())),
         container_(data),
         next_(data.end())
     {
