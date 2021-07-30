@@ -41,18 +41,20 @@ public:
     };
 
     copy_sink(const Container& data) noexcept
-      : device(limit<device::size_type>(data.size())),
+      : device(limit<typename device<Container>::size_type>(data.size())),
         container_(data),
         next_(data.begin())
     {
     }
 
 protected:
-    device::sequence do_sequence() const noexcept override
+    typename device<Container>::sequence do_sequence() const noexcept override
     {
         return std::make_pair(
-            reinterpret_cast<device::char_type*>(container_.begin()),
-            reinterpret_cast<device::char_type*>(container_.end()));
+            reinterpret_cast<typename device<Container>::char_type*>(
+                container_.begin()),
+            reinterpret_cast<typename device<Container>::char_type*>(
+                container_.end()));
     }
 
 private:

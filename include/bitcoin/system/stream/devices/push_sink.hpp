@@ -44,22 +44,25 @@ public:
     };
 
     push_sink(Container& data) noexcept
-      : device(limit<size_type>(data.max_size() - data.size())),
+      : device(limit<typename device<Container>::size_type>(data.max_size() -
+          data.size())),
         container_(data),
         next_(data.end())
     {
     }
 
 protected:
-    const size_type default_buffer_size = 1024;
+    const typename device<Container>::size_type default_buffer_size = 1024;
 
-    void do_write(const value_type* from, size_type size) noexcept override
+    void do_write(const typename device<Container>::value_type* from,
+        typename device<Container>::size_type size) noexcept override
     {
         auto start = container_.insert(next_, from, std::next(from, size));
         next_ = std::next(start, size);
     }
 
-    size_type do_optimal_buffer_size() const noexcept override
+    typename device<Container>::size_type do_optimal_buffer_size()
+        const noexcept override
     {
         // This is only called at stream construct.
         // The compiler determines capacity, so this may be unreliable to test.

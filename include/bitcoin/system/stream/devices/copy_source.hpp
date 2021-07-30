@@ -42,23 +42,25 @@ public:
     };
 
     copy_source(const Container& data) noexcept
-      : device(limit<device::size_type>(data.size())),
+      : device(limit<typename device<Container>::size_type>(data.size())),
         container_(data),
         next_(data.begin())
     {
     }
 
 protected:
-    device::sequence do_sequence() const noexcept override
+    typename device<Container>::sequence do_sequence() const noexcept override
     {
         // input_sequence/output_sequence both require non-const buffer ptrs,
         // but the data member is const, so we must cast it for direct devices.
-        const auto begin = const_cast<device::value_type*>(container_.begin());
-        const auto end = const_cast<device::value_type*>(container_.end());
+        const auto begin = const_cast<typename device<Container>::value_type*>(
+            container_.begin());
+        const auto end = const_cast<typename device<Container>::value_type*>(
+            container_.end());
 
         return std::make_pair(
-            reinterpret_cast<device::char_type*>(begin),
-            reinterpret_cast<device::char_type*>(end));
+            reinterpret_cast<typename device<Container>::char_type*>(begin),
+            reinterpret_cast<typename device<Container>::char_type*>(end));
     }
 
 private:
