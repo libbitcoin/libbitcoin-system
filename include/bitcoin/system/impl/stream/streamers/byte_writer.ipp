@@ -158,7 +158,7 @@ std::istream& byte_writer<OStream>::write(std::istream& in) noexcept
 {
     // This creates an intermediate buffer the size of the stream.
     // This is presumed to be more optimal than looping individual bytes.
-    write_bytes(read::bytes::istream(in).read_bytes());
+    write_bytes(byte_reader<std::istream>(in).read_bytes());
     return in;
 }
 

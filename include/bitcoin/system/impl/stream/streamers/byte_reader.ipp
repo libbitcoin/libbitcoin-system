@@ -179,7 +179,7 @@ std::ostream& byte_reader<IStream>::read(std::ostream& out) noexcept
 {
     // This creates an intermediate buffer the size of the stream.
     // This is presumed to be more optimal than looping individual bytes.
-    write::bytes::ostream(out).write_bytes(read_bytes());
+    byte_writer<std::ostream>(out).write_bytes(read_bytes());
     return out;
 }
 
@@ -375,7 +375,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(static_cast<IStream::pos_type>(size));
+    seeker(static_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
@@ -383,7 +383,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 {
     // pos_type is not an integer so cannot use limit cast here,
     // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(-static_cast<IStream::pos_type>(size));
+    seeker(-static_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
