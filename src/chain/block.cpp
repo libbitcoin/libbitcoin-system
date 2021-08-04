@@ -244,7 +244,7 @@ hash_list block::to_hashes(bool witness) const
     out.resize(transactions_.size());
 
     std::transform(transactions_.begin(), transactions_.end(), out.begin(),
-        [&out, witness](const transaction& tx)
+        [witness](const transaction& tx)
         {
             return tx.hash(witness);
         });
