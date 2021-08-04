@@ -647,7 +647,7 @@ void operation::reset()
 
 data_chunk operation::to_data() const
 {
-    data_chunk data(no_fill_allocator);
+    data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
     stream::out::copy ostream(data);
     to_data(ostream);

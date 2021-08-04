@@ -85,7 +85,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     const siphash_key& key)
 {
     const auto bound = safe_multiply(target_false_positive_rate, set_size);
-    std::vector<uint64_t> hashes(items.size(), no_fill_allocator);
+    std::vector<uint64_t> hashes(items.size(), default_allocator<uint64_t>{});
 
     std::transform(items.begin(), items.end(), hashes.begin(),
         [&](const data_chunk& item)

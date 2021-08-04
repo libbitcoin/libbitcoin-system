@@ -904,7 +904,7 @@ bool transaction::is_missing_previous_outputs() const
 
 point::list transaction::previous_outputs() const
 {
-    point::list out(no_fill_allocator);
+    point::list out(default_allocator<point>{});
     out.resize(inputs_.size());
 
     std::transform(inputs_.begin(), inputs_.end(), out.begin(),
@@ -937,7 +937,7 @@ point::list transaction::missing_previous_outputs() const
 hash_list transaction::missing_previous_transactions() const
 {
     const auto points = missing_previous_outputs();
-    hash_list hashes(no_fill_allocator);
+    hash_list hashes(default_allocator<hash_digest>{});
     hashes.resize(points.size());
 
     std::transform(points.begin(), points.end(), hashes.begin(),

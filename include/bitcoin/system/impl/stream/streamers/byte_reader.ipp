@@ -241,7 +241,7 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
 {
-    data_chunk out(no_fill_allocator);
+    data_chunk out(no_fill_byte_allocator);
     out.resize(size);
     do_read_bytes(out.data(), size);
     return out;

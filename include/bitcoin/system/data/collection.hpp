@@ -152,7 +152,7 @@ public:
     }
 };
 
-static default_allocator<uint8_t> no_fill_allocator{};
+static default_allocator<uint8_t> no_fill_byte_allocator{};
 
 } // namespace system
 } // namespace libbitcoin

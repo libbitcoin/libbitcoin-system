@@ -184,13 +184,13 @@ data_array<Size> to_little_endian_array(Integer value) noexcept
 template <typename Integer, if_integer<Integer>>
 data_chunk to_big_endian_chunk(Integer value) noexcept
 {
-    return to_big(data_chunk(byte_width(value), no_fill_allocator), value);
+    return to_big(data_chunk(byte_width(value), no_fill_byte_allocator), value);
 }
 
 template <typename Integer, if_integer<Integer>>
 data_chunk to_little_endian_chunk(Integer value) noexcept
 {
-    return to_little(data_chunk(byte_width(value), no_fill_allocator), value);
+    return to_little(data_chunk(byte_width(value), no_fill_byte_allocator), value);
 }
 
 // data => integral, integral => byte_array

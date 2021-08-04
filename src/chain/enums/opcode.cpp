@@ -673,7 +673,7 @@ bool opcode_from_string(opcode& out_code, const std::string& value)
 
 std::string opcode_to_hexadecimal(opcode code)
 {
-    return "0x" + encode_base16({ { static_cast<uint8_t>(code) } });
+    return "0x" + encode_base16({ static_cast<uint8_t>(code) });
 }
 
 bool opcode_from_hexadecimal(opcode& out_code, const std::string& value)
