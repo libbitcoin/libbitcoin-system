@@ -154,8 +154,9 @@ bool match_filter(const message::compact_filter& filter,
     if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
-    chain::script::list stack(addresses.size(),
-        default_allocator<chain::script>{});
+    static default_allocator<chain::script> no_fill_allocator{};
+    chain::script::list stack(no_fill_allocator);
+    stack.resize(addresses.size());
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
         [](const wallet::payment_address& address)

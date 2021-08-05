@@ -240,7 +240,8 @@ void block::to_data(writer& sink, bool witness) const
 
 hash_list block::to_hashes(bool witness) const
 {
-    hash_list out(default_allocator<hash_digest>{});
+    static default_allocator<hash_digest> no_fill_allocator{};
+    hash_list out(no_fill_allocator);
     out.resize(transactions_.size());
 
     std::transform(transactions_.begin(), transactions_.end(), out.begin(),

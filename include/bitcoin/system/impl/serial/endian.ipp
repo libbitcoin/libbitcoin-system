@@ -25,6 +25,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
@@ -184,13 +185,17 @@ data_array<Size> to_little_endian_array(Integer value) noexcept
 template <typename Integer, if_integer<Integer>>
 data_chunk to_big_endian_chunk(Integer value) noexcept
 {
-    return to_big(data_chunk(byte_width(value), no_fill_byte_allocator), value);
+    data_chunk chunk(no_fill_byte_allocator);
+    chunk.resize(byte_width(value));
+    return to_big(std::move(chunk), value);
 }
 
 template <typename Integer, if_integer<Integer>>
 data_chunk to_little_endian_chunk(Integer value) noexcept
 {
-    return to_little(data_chunk(byte_width(value), no_fill_byte_allocator), value);
+    data_chunk chunk(no_fill_byte_allocator);
+    chunk.resize(byte_width(value));
+    return to_little(std::move(chunk), value);
 }
 
 // data => integral, integral => byte_array

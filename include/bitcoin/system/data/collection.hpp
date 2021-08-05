@@ -152,6 +152,7 @@ public:
     }
 };
 
+// C++14: std::vector(size_t, allocator) construction.
 static default_allocator<uint8_t> no_fill_byte_allocator{};
 
 } // namespace system
