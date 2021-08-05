@@ -78,12 +78,12 @@ static_assert(is_integer<wchar_t>(), "");
 static_assert(!is_integer<bool>(), "");
 static_assert(!is_integer<std::string> (), "");
 
-constexpr void* pointer = "";
-constexpr void* null_pointer = nullptr;
+////constexpr void* pointer = "";
+////constexpr void* null_pointer = nullptr;
 static_assert(is_null(nullptr), "");
-static_assert(is_null(null_pointer), "");
+////static_assert(is_null(null_pointer), "");
 static_assert(is_null(std::nullptr_t{}), "");
-static_assert(!is_null(pointer), "");
+////static_assert(!is_null(pointer), "");
 static_assert(std::is_same<decltype(is_null(nullptr)), bool>::value, "");
 
 static_assert(to_bits(0) == 0 * 8, "");
