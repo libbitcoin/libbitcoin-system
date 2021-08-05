@@ -64,14 +64,14 @@ template <typename Data, typename Integer, if_byte<Integer> = true>
 static Data to_big(Data&& bytes, Integer value) noexcept
 {
     bytes.front() = static_cast<uint8_t>(value);
-    return bytes;
+    return std::move(bytes);
 }
 
 template <typename Data, typename Integer, if_byte<Integer> = true>
 static Data to_little(Data&& bytes, Integer value) noexcept
 {
     bytes.front() = static_cast<uint8_t>(value);
-    return bytes;
+    return std::move(bytes);
 }
 
 // integer convertors
@@ -143,7 +143,7 @@ static Data to_big(Data&& bytes, Integer value) noexcept
         value >>= byte_bits;
     }
 
-    return bytes;
+    return std::move(bytes);
 }
 
 template <typename Data, typename Integer, if_bytes<Integer> = true>
@@ -163,7 +163,7 @@ static Data to_little(Data&& bytes, Integer value) noexcept
         value >>= byte_bits;
     }
 
-    return bytes;
+    return std::move(bytes);
 }
 
 // integer => data (value-sized) or array (explicit size)
