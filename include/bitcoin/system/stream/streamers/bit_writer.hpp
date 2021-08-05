@@ -51,10 +51,10 @@ public:
     ~bit_writer() noexcept override;
 
     /// Write one bit (high to low).
-    virtual void write_bit(bool value) noexcept;
+    void write_bit(bool value) noexcept override;
 
     /// Write size bits from an integer (high to low).
-    void write_bits(uint64_t value, size_t bits) noexcept;
+    void write_bits(uint64_t value, size_t bits) noexcept override;
 
 protected:
     void do_write_bytes(const uint8_t* data, size_t size) noexcept override;

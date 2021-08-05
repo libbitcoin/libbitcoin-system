@@ -51,18 +51,18 @@ public:
     ~bit_reader() noexcept override;
 
     /// Read one bit (high to low).
-    virtual bool read_bit() noexcept;
+    bool read_bit() noexcept override;
 
     /// Read size bits into an integer (high to low).
-    virtual uint64_t read_bits(size_t bits) noexcept;
+    uint64_t read_bits(size_t bits) noexcept override;
 
     /// Advance the iterator.
-    virtual void skip_bit() noexcept;
-    virtual void skip_bits(size_t bits) noexcept;
+    void skip_bit() noexcept override;
+    void skip_bits(size_t bits) noexcept override;
 
     /// Rewind the iterator.
-    virtual void rewind_bit() noexcept;
-    virtual void rewind_bits(size_t bits) noexcept;
+    void rewind_bit() noexcept override;
+    void rewind_bits(size_t bits) noexcept override;
 
 protected:
     uint8_t do_peek_byte() noexcept override;

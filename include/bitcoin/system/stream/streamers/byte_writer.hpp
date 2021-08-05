@@ -49,47 +49,47 @@ public:
     void write_little_endian(Integer value) noexcept;
 
     /// Write big endian integers.
-    virtual void write_2_bytes_big_endian(uint16_t value) noexcept;
-    virtual void write_4_bytes_big_endian(uint32_t value) noexcept;
-    virtual void write_8_bytes_big_endian(uint64_t value) noexcept;
+    void write_2_bytes_big_endian(uint16_t value) noexcept override;
+    void write_4_bytes_big_endian(uint32_t value) noexcept override;
+    void write_8_bytes_big_endian(uint64_t value) noexcept override;
 
     /// Write little endian integers.
-    virtual void write_2_bytes_little_endian(uint16_t value) noexcept;
-    virtual void write_4_bytes_little_endian(uint32_t value) noexcept;
-    virtual void write_8_bytes_little_endian(uint64_t value) noexcept;
+    void write_2_bytes_little_endian(uint16_t value) noexcept override;
+    void write_4_bytes_little_endian(uint32_t value) noexcept override;
+    void write_8_bytes_little_endian(uint64_t value) noexcept override;
 
     /// Write Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
-    virtual void write_variable(uint64_t value) noexcept;
+    void write_variable(uint64_t value) noexcept override;
 
     /// Call write_4_bytes_little_endian with integer value of error code.
-    virtual void write_error_code(const code& ec) noexcept;
+    void write_error_code(const code& ec) noexcept override;
 
     /// Write into buffer until stream is exhausted.
-    virtual std::istream& write(std::istream& in) noexcept;
+    std::istream& write(std::istream& in) noexcept override;
 
     /// Write one byte.
-    virtual void write_byte(uint8_t value) noexcept;
+    void write_byte(uint8_t value) noexcept override;
 
     /// Write all bytes.
-    virtual void write_bytes(const data_slice& data) noexcept;
+    void write_bytes(const data_slice& data) noexcept override;
 
     /// Write size bytes.
-    virtual void write_bytes(const uint8_t* data, size_t size) noexcept;
+    void write_bytes(const uint8_t* data, size_t size) noexcept override;
 
     /// Write string to specified length, padded with nulls as required.
-    virtual void write_string(const std::string& value) noexcept;
+    void write_string(const std::string& value) noexcept override;
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    virtual void write_string(const std::string& value, size_t size) noexcept;
+    void write_string(const std::string& value, size_t size) noexcept override;
 
     /// Flush the buffer.
-    virtual void flush() noexcept;
+    void flush() noexcept override;
 
     /// The stream is valid.
-    virtual operator bool() const noexcept;
+    operator bool() const noexcept;
 
     /// The stream is invalid.
-    virtual bool operator!() const noexcept;
+    bool operator!() const noexcept;
 
 protected:
     virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;

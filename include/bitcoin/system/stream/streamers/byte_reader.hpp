@@ -49,24 +49,24 @@ public:
     Integer read_little_endian() noexcept;
 
     /// Read big endian (explicit specializations of read_big_endian).
-    virtual uint16_t read_2_bytes_big_endian() noexcept;
-    virtual uint32_t read_4_bytes_big_endian() noexcept;
-    virtual uint64_t read_8_bytes_big_endian() noexcept;
+    uint16_t read_2_bytes_big_endian() noexcept override;
+    uint32_t read_4_bytes_big_endian() noexcept override;
+    uint64_t read_8_bytes_big_endian() noexcept override;
 
     /// Little endian integer readers (specializations of read_little_endian).
-    virtual uint16_t read_2_bytes_little_endian() noexcept;
-    virtual uint32_t read_4_bytes_little_endian() noexcept;
-    virtual uint64_t read_8_bytes_little_endian() noexcept;
+    uint16_t read_2_bytes_little_endian() noexcept override;
+    uint32_t read_4_bytes_little_endian() noexcept override;
+    uint64_t read_8_bytes_little_endian() noexcept override;
 
     /// Read Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
-    virtual uint64_t read_variable() noexcept;
+    uint64_t read_variable() noexcept override;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
     /// Returns zero and invalidates stream if would overflow size_t.
-    virtual size_t read_size() noexcept;
+    size_t read_size() noexcept override;
 
     /// Convert read_4_bytes_little_endian to an error code.
-    virtual code read_error_code() noexcept;
+    code read_error_code() noexcept override;
 
     /// Read size bytes into array.
     template <size_t Size>
@@ -75,50 +75,50 @@ public:
     data_array<Size> read_reverse() noexcept;
 
     /// Read into stream until buffer is exhausted.
-    virtual std::ostream& read(std::ostream& out) noexcept;
+    std::ostream& read(std::ostream& out) noexcept override;
 
     /// Read hash (explicit specializations of read_forward).
-    virtual mini_hash read_mini_hash() noexcept;
-    virtual short_hash read_short_hash() noexcept;
-    virtual hash_digest read_hash() noexcept;
-    virtual long_hash read_long_hash() noexcept;
+    mini_hash read_mini_hash() noexcept override;
+    short_hash read_short_hash() noexcept override;
+    hash_digest read_hash() noexcept override;
+    long_hash read_long_hash() noexcept override;
 
     /// Read/peek one byte (invalidates an empty stream).
-    virtual uint8_t peek_byte() noexcept;
-    virtual uint8_t read_byte() noexcept;
+    uint8_t peek_byte() noexcept override;
+    uint8_t read_byte() noexcept override;
 
     /// Read all remaining bytes.
-    virtual data_chunk read_bytes() noexcept;
+    data_chunk read_bytes() noexcept override;
 
     /// Read size bytes, return size is guaranteed.
-    virtual data_chunk read_bytes(size_t size) noexcept;
-    virtual void read_bytes(uint8_t* buffer, size_t size) noexcept;
+    data_chunk read_bytes(size_t size) noexcept override;
+    void read_bytes(uint8_t* buffer, size_t size) noexcept override;
 
     /// Read Bitcoin length-prefixed string, same as read_string(read_size()).
-    virtual std::string read_string() noexcept;
+    std::string read_string() noexcept override;
 
     /// Read string, truncated at at size or first null.
-    virtual std::string read_string(size_t size) noexcept;
+    std::string read_string(size_t size) noexcept override;
 
     /// Advance the iterator.
-    virtual void skip_byte() noexcept;
-    virtual void skip_bytes(size_t size) noexcept;
+    void skip_byte() noexcept override;
+    void skip_bytes(size_t size) noexcept override;
 
     /// Rewind the iterator.
-    virtual void rewind_byte() noexcept;
-    virtual void rewind_bytes(size_t size) noexcept;
+    void rewind_byte() noexcept override;
+    void rewind_bytes(size_t size) noexcept override;
 
     /// The stream is empty (or invalid).
-    virtual bool is_exhausted() const noexcept;
+    bool is_exhausted() const noexcept override;
 
     /// Invalidate the stream.
-    virtual void invalidate() noexcept;
+    void invalidate() noexcept override;
 
     /// The stream is valid.
-    virtual operator bool() const noexcept;
+    operator bool() const noexcept override;
 
     /// The stream is invalid.
-    virtual bool operator!() const noexcept;
+    bool operator!() const noexcept override;
 
 protected:
     virtual uint8_t do_peek_byte() noexcept;

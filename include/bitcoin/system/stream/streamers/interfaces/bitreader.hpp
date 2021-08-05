@@ -44,9 +44,9 @@ public:
     virtual void skip_bit() noexcept = 0;
     virtual void skip_bits(size_t bits) noexcept = 0;
 
-    /////// Rewind the iterator.
-    ////virtual void rewind_bit() noexcept = 0;
-    ////virtual void rewind_bit(size_t bits) noexcept = 0;
+    /// Rewind the iterator.
+    virtual void rewind_bit() noexcept = 0;
+    virtual void rewind_bits(size_t bits) noexcept = 0;
 };
 
 } // namespace system
