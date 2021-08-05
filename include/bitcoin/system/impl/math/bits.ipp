@@ -24,6 +24,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
