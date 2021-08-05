@@ -86,10 +86,10 @@ public:
     void flush() noexcept override;
 
     /// The stream is valid.
-    operator bool() const noexcept;
+    operator bool() const noexcept override;
 
     /// The stream is invalid.
-    bool operator!() const noexcept;
+    bool operator!() const noexcept override;
 
 protected:
     virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;
