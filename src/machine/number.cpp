@@ -33,10 +33,6 @@ namespace machine {
 
 using namespace bc::system::chain;
 
-// TODO: create unsigned ceilinged_add and floored_sbtract.
-static const uint64_t unsigned_max_int64 = max_int64;
-static const uint64_t absolute_min_int64 = min_int64;
-
 number::number()
   : number(numbers::positive_0)
 {
