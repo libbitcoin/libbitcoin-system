@@ -25,9 +25,9 @@
 // The msvc++ compiler dislikes std::is_same outside of template arguments.
 // But visual studio intellisense properly evaluations these assertions.
 
-class base : noncopyable { int foo; };
-class not_derived { int bar; };
-class derived : base { int bar; };
+class base : noncopyable {};
+class not_derived {};
+class derived : base {};
 
 template <typename Type>
 constexpr bool is_true()
