@@ -121,19 +121,19 @@ std::ostream& props::write(std::ostream& stream, format format, size_t depth,
 
     switch (format)
     {
-        case format::json:
+        case props::format::json:
         {
             // JSON quotes names and uses colon for property name delimiter.
             stream << start << "\"" << name << "\":";
             return write(stream, format, is_simple() ? zero : depth, flat);
         }
-        case format::info:
+        case props::format::info:
         {
             // Info does not quote and uses space for property name delimiter.
             stream << start << name << " ";
             return write(stream, format, is_simple() ? zero : depth, flat);
         }
-        case format::xml:
+        case props::format::xml:
         {
             stream << start << "<" << name << ">";
 
@@ -171,13 +171,13 @@ std::ostream& props::write(std::ostream& stream,
             stream << start;
             switch (format)
             {
-                case format::json:
-                case format::info:
+                case props::format::json:
+                case props::format::info:
                 {
                     stream << null_text;
                     return stream;
                 }
-                case format::xml:
+                case props::format::xml:
                 {
                     // This no-value is distinct from empty quotes (string).
                     return stream;
@@ -193,9 +193,9 @@ std::ostream& props::write(std::ostream& stream,
             stream << start;
             switch (format)
             {
-                case format::json:
-                case format::info:
-                case format::xml:
+                case props::format::json:
+                case props::format::info:
+                case props::format::xml:
                 {
                     // For XML this is unique to our implementation.
                     stream << true_text;
@@ -212,9 +212,9 @@ std::ostream& props::write(std::ostream& stream,
             stream << start;
             switch (format)
             {
-                case format::json:
-                case format::info:
-                case format::xml:
+                case props::format::json:
+                case props::format::info:
+                case props::format::xml:
                 {
                     // For XML this is unique to our implementation.
                     stream << false_text;
@@ -231,12 +231,12 @@ std::ostream& props::write(std::ostream& stream,
             stream << start;
             switch (format)
             {
-                case format::json:
+                case props::format::json:
                 {
                     stream << "\"" << value_ << "\"";
                     return stream;
                 }
-                case format::info:
+                case props::format::info:
                 {
                     // Unquoted rendering for contiguous text.
                     if (has_whitespace(value_))
@@ -246,7 +246,7 @@ std::ostream& props::write(std::ostream& stream,
 
                     return stream;
                 }
-                case format::xml:
+                case props::format::xml:
                 {
                     stream << value_;
                     return stream;
@@ -262,9 +262,9 @@ std::ostream& props::write(std::ostream& stream,
             stream << start;
             switch (format)
             {
-                case format::json:
-                case format::info:
-                case format::xml:
+                case props::format::json:
+                case props::format::info:
+                case props::format::xml:
                 {
                     stream << value_;
                     return stream;
@@ -279,7 +279,7 @@ std::ostream& props::write(std::ostream& stream,
         {
             switch (format)
             {
-                case format::json:
+                case props::format::json:
                 {
                     stream << start << "[";
 
@@ -297,7 +297,7 @@ std::ostream& props::write(std::ostream& stream,
                     stream << end << "]";
                     return stream;
                 }
-                case format::info:
+                case props::format::info:
                 {
                     // Info array uses curved array braces, not square.
                     stream << start << "{";
@@ -317,7 +317,7 @@ std::ostream& props::write(std::ostream& stream,
                     stream << end << "}";
                     return stream;
                 }
-                case format::xml:
+                case props::format::xml:
                 {
                     for (const auto& child: children_)
                         child.second.write(stream, format, depth, flat,
@@ -335,7 +335,7 @@ std::ostream& props::write(std::ostream& stream,
         {
             switch (format)
             {
-                case format::json:
+                case props::format::json:
                 {
                     stream << start << "{";
 
@@ -353,7 +353,7 @@ std::ostream& props::write(std::ostream& stream,
                     stream << end << "}";
                     return stream;
                 }
-                case format::info:
+                case props::format::info:
                 {
                     stream << start << "{";
 
@@ -372,7 +372,7 @@ std::ostream& props::write(std::ostream& stream,
                     stream << end << "}";
                     return stream;
                 }
-                case format::xml:
+                case props::format::xml:
                 {
                     for (const auto& child: children_)
                         child.second.write(stream, format, depth, flat,
