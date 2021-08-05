@@ -39,7 +39,8 @@ constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
 constexpr uint64_t finalization = 0x00000000000000ff;
 constexpr uint64_t max_encoded_byte_count = (1 << byte_bits);
 
-constexpr void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
+// GCC requires return value for constexpr (non-standard).
+constexpr bool sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
 {
     v0 += v1;
     v2 += v3;
@@ -58,15 +59,18 @@ constexpr void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
     v3 ^= v0;
 
     v2 = rotate_left(v2, 32);
+    return true;
 }
 
-constexpr void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+// GCC requires return value for constexpr (non-standard).
+constexpr bool compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     uint64_t& v3, uint64_t word)
 {
     v3 ^= word;
     sip_round(v0, v1, v2, v3);
     sip_round(v0, v1, v2, v3);
     v0 ^= word;
+    return true;
 }
 
 uint64_t siphash(const half_hash& hash, const data_slice& message)
