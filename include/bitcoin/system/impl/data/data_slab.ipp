@@ -44,13 +44,13 @@ data_slab::data_slab(std::vector<Byte>& data) noexcept
 }
 
 template <typename Iterator>
-data_slab::data_slab(Iterator& begin, Iterator& end) noexcept
+data_slab::data_slab(const Iterator& begin, const Iterator& end) noexcept
   : data_slab(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_byte<Byte>>
-data_slab::data_slab(Byte* begin, Byte* end) noexcept
+data_slab::data_slab(const Byte* begin, const Byte* end) noexcept
   : data_slab(from_iterators(begin, end))
 {
 }
@@ -60,7 +60,8 @@ data_slab::data_slab(Byte* begin, Byte* end) noexcept
 
 // static
 template <typename Iterator>
-data_slab data_slab::from_iterators(Iterator& begin, Iterator& end) noexcept
+data_slab data_slab::from_iterators(const Iterator& begin,
+    const Iterator& end) noexcept
 {
     // An end iterator can be anything, so convert to size.
     const auto size = std::distance(begin, end);
@@ -75,7 +76,7 @@ data_slab data_slab::from_iterators(Iterator& begin, Iterator& end) noexcept
 
 // static
 template <typename Pointer>
-data_slab data_slab::from_size(Pointer begin, size_type size) noexcept
+data_slab data_slab::from_size(const Pointer begin, size_type size) noexcept
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
     if (is_zero(size))

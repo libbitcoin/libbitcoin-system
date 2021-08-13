@@ -46,7 +46,8 @@ data_slab::data_slab(std::string& text) noexcept
 }
 
 // private
-data_slab::data_slab(pointer begin, pointer end, size_type size) noexcept
+data_slab::data_slab(const pointer begin, const pointer end,
+    size_type size) noexcept
   : begin_(begin), end_(end), size_(size)
 {
 }

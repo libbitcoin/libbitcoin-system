@@ -257,11 +257,11 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__iterators__expected)
     BOOST_REQUIRE_EQUAL(slab1.size(), size);
     BOOST_REQUIRE_EQUAL(slab1.encoded(), encoded);
 
-    ////// construct(iterators)
-    ////const data_slab slab2 = { string.begin(), string.end() };
-    ////BOOST_REQUIRE(!slab2.empty());
-    ////BOOST_REQUIRE_EQUAL(slab2.size(), size);
-    ////BOOST_REQUIRE_EQUAL(slab2.encoded(), encoded);
+    // construct(iterators)
+    const data_slab slab2 = { string.begin(), string.end() };
+    BOOST_REQUIRE(!slab2.empty());
+    BOOST_REQUIRE_EQUAL(slab2.size(), size);
+    BOOST_REQUIRE_EQUAL(slab2.encoded(), encoded);
 }
 
 // resize

@@ -78,12 +78,12 @@ public:
     // TODO: restrict to iterator-to-non-const references.
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
-    data_slab(Iterator& begin, Iterator& end) noexcept;
+    data_slab(const Iterator& begin, const Iterator& end) noexcept;
 
     // TODO: change to begin/size construction.
     /// Byte pointer to non-const constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
-    data_slab(Byte* begin, Byte* end) noexcept;
+    data_slab(const Byte* begin, const Byte* end) noexcept;
 
     // TODO: test.
     /// String constructor (casts char to uint8_t).
@@ -130,13 +130,14 @@ public:
     value_type operator[](size_type index) const noexcept;
 
 private:
-    data_slab(pointer begin, pointer end, size_type size) noexcept;
+    data_slab(const pointer begin, const pointer end, size_type size) noexcept;
 
     template <typename Iterator>
-    static data_slab from_iterators(Iterator& begin, Iterator& end) noexcept;
+    static data_slab from_iterators(const Iterator& begin,
+        const Iterator& end) noexcept;
 
     template <typename Pointer>
-    static data_slab from_size(Pointer begin, size_type size) noexcept;
+    static data_slab from_size(const Pointer begin, size_type size) noexcept;
 
     const pointer begin_;
     pointer end_;
