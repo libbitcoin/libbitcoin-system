@@ -26,6 +26,8 @@
 namespace libbitcoin {
 namespace system {
 
+/// Offsets that exceed value bit width are undefined:
+
 /// The number of bits required to store the value.
 template <typename Integer, if_integer<Integer> = true>
 inline size_t bit_width(Integer value) noexcept;
@@ -85,61 +87,63 @@ constexpr Value set_right(const Value& target, size_t offset=zero,
     bool state=true);
 
 /// A set of bitflags with high order count of bits set.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_left(size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_left(Value& target, size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_left(const Value& target, size_t bits);
 
 /// A set of bitflags with low order count of bits set.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_right(size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_right(Value& target, size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value flag_right(const Value& target, size_t bits);
 
 /// A set of bitmasks with high order count of bits unset.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_left(size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_left(Value& target, size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_left(const Value& target, size_t bits);
 
 /// A set of bitmasks with low order count of bits unset.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_right(size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_right(Value& target, size_t bits);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value mask_right(const Value& target, size_t bits);
 
+/// Offsets that exceed value bit width are well-defined:
+
 /// Rotate the bits of Value to the left by amount 'shift'.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_left(Value& value, size_t shift);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_left(const Value& value, size_t shift);
 
 /// Rotate the bits of Value to the right by amount 'shift'.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_right(Value& value, size_t shift);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_right(const Value& value, size_t shift);
 
 /// Shift the bits of Value to the left by amount 'shift'.
 /// Set 'overflow' to false to modulo shift by Value width.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value shift_left(Value& value, size_t shift, bool overflow=true);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value shift_left(const Value& value, size_t shift, bool overflow=true);
 
 /// Shift the bits of Value to the right by amount 'shift'.
 /// Set 'overflow' to false to modulo shift by Value width.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value shift_right(Value& value, size_t shift, bool overflow=true);
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value shift_right(const Value& value, size_t shift, bool overflow=true);
 
 } // namespace system

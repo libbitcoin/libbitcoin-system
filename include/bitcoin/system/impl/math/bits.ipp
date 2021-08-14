@@ -71,6 +71,7 @@ template <typename Value, if_integer<Value>>
 constexpr Value bit_hi()
 {
     // sub1 for size-to-index translation.
+    // a << b is undefined for negative a, but shift into a negative is valid.
     return to_int<Value>(true) << sub1(width<Value>());
 }
 
@@ -83,12 +84,23 @@ constexpr Value bit_lo()
 template <typename Value, if_integer<Value>>
 constexpr Value bit_left(size_t offset)
 {
-    return bit_hi<Value>() >> offset;
+    // a >> b is implementation-dependent for negative a:
+    // "or negative a, the value of a >> b is implementation-defined (in most
+    // implementations, this performs arithmetic right shift, so that the
+    // result remains negative)." - so always shift from the right.
+    // en.cppreference.com/w/cpp/language/operator_arithmetic
+    return bit_right<Value>(sub1(width<Value>()) - offset);
 }
 
+// undefined if offset >= width<Value>()
 template <typename Value, if_integer<Value>>
 constexpr Value bit_right(size_t offset)
 {
+    // a << b is undefined for negative a, but shift into a negative is valid:
+    // "For signed and non-negative a, if a**b is representable in the unsigned
+    // version of the return type, then that value, converted to signed, is the
+    // value of a << b (this makes it legal to create INT_MIN as 1<<31)."
+    // en.cppreference.com/w/cpp/language/operator_arithmetic
     return bit_lo<Value>() << offset;
 }
 
@@ -142,75 +154,86 @@ constexpr Value set_right(const Value& target, size_t offset, bool state)
 
 // flag
 
-template <typename Value, if_integer<Value>>
+// Flags support only unsigned Value because:
+// C++ standard: "Right-shift on signed integral types is an arithmetic right
+// shift, which performs sign-extension". In other words, repeatedly shifting
+// -1 of any integer width will produce "1" bits, indefinitely.
+// This is an implementation limitation and could otherwise be supported.
+
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_left(size_t bits)
 {
     return ones_complement(bit_all<Value>() >> bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_left(Value& value, size_t bits)
 {
     return ((value |= flag_left<Value>(bits)));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_left(const Value& value, size_t bits)
 {
     return value | flag_left<Value>(bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_right(size_t bits)
 {
     return ones_complement(bit_all<Value>() << bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_right(Value& value, size_t bits)
 {
     return ((value |= flag_right<Value>(bits)));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value flag_right(const Value& value, size_t bits)
 {
     return value | flag_right<Value>(bits);
 }
 
+// All below support only unsigned Value because:
+// a << b is undefined for negative a.
+// a >> b is implementation-dependent for negative a.
+// This is an implementation limitation and could otherwise be supported.
+
 // mask
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_left(size_t bits)
 {
     return bit_all<Value>() >> bits;
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_left(Value& value, size_t bits)
 {
     return ((value &= mask_left<Value>(bits)));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_left(const Value& value, size_t bits)
 {
     return value & mask_left<Value>(bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_right(size_t bits)
 {
     return bit_all<Value>() << bits;
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_right(Value& value, size_t bits)
 {
     return ((value &= mask_right<Value>(bits)));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_right(const Value& value, size_t bits)
 {
     return value & mask_right<Value>(bits);
@@ -221,7 +244,7 @@ constexpr Value mask_right(const Value& value, size_t bits)
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_left(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
@@ -230,7 +253,7 @@ constexpr Value rotate_left(Value& value, size_t shift)
         (value >> (width<Value>() - (shift % width<Value>())))));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_left(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
@@ -239,7 +262,7 @@ constexpr Value rotate_left(const Value& value, size_t shift)
         (value >> (width<Value>() - (shift % width<Value>())));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_right(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
@@ -248,7 +271,7 @@ constexpr Value rotate_right(Value& value, size_t shift)
         (value >> (shift % width<Value>())))));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_right(const Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
@@ -267,7 +290,7 @@ constexpr Value rotate_right(const Value& value, size_t shift)
 // overflow true shifts shift % width(value), which cannot zeroize the value.
 // These are both default behaviors of different compilers.
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_left(Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
@@ -276,7 +299,7 @@ constexpr Value shift_left(Value& value, size_t shift, bool overflow)
         ((value <<= (shift % width<Value>())));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
@@ -285,7 +308,7 @@ constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
         value << (shift % width<Value>());
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_right(Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
@@ -294,7 +317,7 @@ constexpr Value shift_right(Value& value, size_t shift, bool overflow)
         ((value >>= (shift % width<Value>())));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
