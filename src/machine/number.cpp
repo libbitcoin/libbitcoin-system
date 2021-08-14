@@ -49,6 +49,11 @@ number::number(int64_t value)
 // The data is interpreted as little-endian.
 bool number::set_data(const data_chunk& data, size_t max_size)
 {
+    // Bitcoin defined max script number sizes are 4 and 5 bytes.
+    // The negation technique below requires that the value_ sign bit is never
+    // set following conversion from little endian data, so guard here.
+    BITCOIN_ASSERT_MSG(max_size < sizeof(value_), "invalid number size");
+
     if (data.size() > max_size)
         return false;
 
