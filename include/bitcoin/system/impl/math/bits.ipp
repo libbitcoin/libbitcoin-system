@@ -120,8 +120,9 @@ constexpr bool get_left(Value value, size_t offset)
 
 // set
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_integer<Value>>
-constexpr Value set_left(Value& target, size_t offset, bool state)
+inline Value set_left(Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
     return state ? ((target |= bit_left<Value>(offset))) :
@@ -136,8 +137,9 @@ constexpr Value set_left(const Value& target, size_t offset, bool state)
         target & ones_complement(bit_left<Value>(offset));
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_integer<Value>>
-constexpr Value set_right(Value& target, size_t offset, bool state)
+inline Value set_right(Value& target, size_t offset, bool state)
 {
     // C++14: local variables allowed in constexpr.
     return state ? ((target |= bit_right<Value>(offset))) :
@@ -166,8 +168,9 @@ constexpr Value flag_left(size_t bits)
     return ones_complement(bit_all<Value>() >> bits);
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_left(Value& value, size_t bits)
+inline Value flag_left(Value& value, size_t bits)
 {
     return ((value |= flag_left<Value>(bits)));
 }
@@ -184,8 +187,9 @@ constexpr Value flag_right(size_t bits)
     return ones_complement(bit_all<Value>() << bits);
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_right(Value& value, size_t bits)
+inline Value flag_right(Value& value, size_t bits)
 {
     return ((value |= flag_right<Value>(bits)));
 }
@@ -209,8 +213,9 @@ constexpr Value mask_left(size_t bits)
     return bit_all<Value>() >> bits;
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_left(Value& value, size_t bits)
+inline Value mask_left(Value& value, size_t bits)
 {
     return ((value &= mask_left<Value>(bits)));
 }
@@ -227,8 +232,9 @@ constexpr Value mask_right(size_t bits)
     return bit_all<Value>() << bits;
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_right(Value& value, size_t bits)
+inline Value mask_right(Value& value, size_t bits)
 {
     return ((value &= mask_right<Value>(bits)));
 }
@@ -244,8 +250,9 @@ constexpr Value mask_right(const Value& value, size_t bits)
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value rotate_left(Value& value, size_t shift)
+inline Value rotate_left(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -262,8 +269,9 @@ constexpr Value rotate_left(const Value& value, size_t shift)
         (value >> (width<Value>() - (shift % width<Value>())));
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value rotate_right(Value& value, size_t shift)
+inline Value rotate_right(Value& value, size_t shift)
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -290,8 +298,9 @@ constexpr Value rotate_right(const Value& value, size_t shift)
 // overflow true shifts shift % width(value), which cannot zeroize the value.
 // These are both default behaviors of different compilers.
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value shift_left(Value& value, size_t shift, bool overflow)
+inline Value shift_left(Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -308,8 +317,9 @@ constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
         value << (shift % width<Value>());
 }
 
+// constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value shift_right(Value& value, size_t shift, bool overflow)
+inline Value shift_right(Value& value, size_t shift, bool overflow)
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
