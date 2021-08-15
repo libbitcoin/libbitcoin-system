@@ -61,7 +61,7 @@ static_assert(ceilinged_identity(0u, 1u), "");
 static_assert(42 % 2 == 0, "");
 static_assert(ceilinged_modulo(42, 2) == 0, "");
 static_assert(ceilinged_identity(42, 2), "");
-static_assert(ceilinged_identity(42u, 2), "");;
+static_assert(ceilinged_identity(42u, 2), "");
 static_assert(ceilinged_identity(42, 2u), "");
 static_assert(ceilinged_identity(42u, 2u), "");
 
