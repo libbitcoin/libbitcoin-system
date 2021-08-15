@@ -18,40 +18,27 @@
  */
 #include "../test.hpp"
 
- // C++14: required for static_cast to be constexpr.
  // These helpers otherwise create comparison of unsigned types warnings.
 
 template <typename Dividend, typename Divisor>
 constexpr bool ceilinged_identity(Dividend x, Divisor y)
 {
-#ifdef BC_CPP_14
     return ceilinged_divide(x, y) * y + ceilinged_modulo(x, y) ==
         static_cast<decltype((x / y) * y + (x / y))>(x);
-#else
-    return true;
-#endif
 }
 
 template <typename Dividend, typename Divisor>
 constexpr bool floored_identity(Dividend x, Divisor y)
 {
-#ifdef BC_CPP_14
     return floored_divide(x, y) * y + floored_modulo(x, y) ==
         static_cast<decltype((x / y) * y + (x / y))>(x);
-#else
-    return true;
-#endif
 }
 
 template <typename Dividend, typename Divisor>
 constexpr bool truncated_identity(Dividend x, Divisor y)
 {
-#ifdef BC_CPP_14
     return truncated_divide(x, y) * y + truncated_modulo(x, y) ==
         static_cast<decltype((x / y) * y + (x / y))>(x);
-#else
-    return true;
-#endif
 }
 
 #define DIVISION_MODULO
