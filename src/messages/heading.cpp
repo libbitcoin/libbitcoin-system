@@ -72,16 +72,16 @@ size_t heading::maximum_size()
 // According to protocol documentation get_blocks is limited only by the
 // general maximum payload size of 0x02000000 (33,554,432). But this is an
 // absurd limit for a message that is properly [10 + log2(height) + 1]. Since
-// protocol limits height to 2^32 this is 43. Even with expansion to 2^62
+// protocol limits height to 2^32 this is 43. Even with expansion to 2^64
 // this is limited to 75. So limit payloads to the max inventory payload size.
 // Post-Witness:
 // The maximum block size inclusive of witness is greater than 1,800,003, so
 // with witness-enabled block size (4,000,000).
+// This calculation should be revisited given any protocol change.
 size_t heading::maximum_payload_size(uint32_t, bool witness)
 {
-    static constexpr size_t vector = sizeof(uint32_t) + hash_size;
-    static constexpr size_t maximum = 3u + vector * max_inventory;
-    static_assert(maximum <= max_size_t, "maximum_payload_size overflow");
+    constexpr size_t vector = sizeof(uint32_t) + hash_size;
+    constexpr size_t maximum = 3u + vector * max_inventory;
     return witness ? chain::max_block_weight : maximum;
 }
 
