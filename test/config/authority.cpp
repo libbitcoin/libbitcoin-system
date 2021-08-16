@@ -35,40 +35,40 @@ using namespace boost::program_options;
 #define BC_AUTHORITY_IPV6_BOGUS_IPV4_ADDRESS "[::ffff:0:39]:256"
 
 // tools.ietf.org/html/rfc4291#section-2.5.2
-constexpr message::ip_address test_unspecified_ip_address =
+constexpr messages::ip_address test_unspecified_ip_address =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 // tools.ietf.org/html/rfc4291#section-2.5.5.2
-constexpr message::ip_address test_mapped_ip_address =
+constexpr messages::ip_address test_mapped_ip_address =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0xff, 0xff, 0x01, 0x02, 0xf0, 0x01
 };
 
 // tools.ietf.org/html/rfc4291#section-2.5.5.1
-constexpr message::ip_address test_compatible_ip_address =
+constexpr messages::ip_address test_compatible_ip_address =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0xf0, 0x01
 };
 
-constexpr message::ip_address test_ipv6_address =
+constexpr messages::ip_address test_ipv6_address =
 {
     0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
 };
 
-static bool ip_equal(const message::ip_address& left,
-    const message::ip_address& right)
+static bool ip_equal(const messages::ip_address& left,
+    const messages::ip_address& right)
 {
     return std::equal(left.begin(), left.end(), right.begin());
 }
 
-static bool net_equal(const message::network_address& left,
-    const message::network_address& right)
+static bool net_equal(const messages::network_address& left,
+    const messages::network_address& right)
 {
     return ip_equal(left.ip(), right.ip()) && (left.port() == right.port());
 }
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(authority__port__ipv6_authority__expected)
 BOOST_AUTO_TEST_CASE(authority__port__network_address__expected)
 {
     const uint16_t expected_port = 42;
-    const message::network_address address
+    const messages::network_address address
     {
         0, 0, test_ipv6_address, expected_port
     };
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(authority__ip__ipv6_compatible_alternative_authority__expec
 BOOST_AUTO_TEST_CASE(authority__ip__network_address__expected)
 {
     const auto& expected_ip = test_ipv6_address;
-    const message::network_address address
+    const messages::network_address address
     {
         0, 0, test_ipv6_address, 42
     };
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_SUITE(authority__to_network_address)
 
 BOOST_AUTO_TEST_CASE(authority__to_network_address__default__ipv6_unspecified)
 {
-    const message::network_address expected_address
+    const messages::network_address expected_address
     {
         0, 0, test_unspecified_ip_address, 0,
     };
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__default__ipv6_unspecified)
 
 BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_mapped_ip_address__ipv4)
 {
-    const message::network_address expected_address
+    const messages::network_address expected_address
     {
         0, 0, test_mapped_ip_address, 42,
     };
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_mapped_ip_address__ipv4
 
 BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_compatible_ip_address__ipv6_alternative)
 {
-    const message::network_address expected_address
+    const messages::network_address expected_address
     {
         0, 0, test_compatible_ip_address, 42,
     };
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_compatible_ip_address__
 
 BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv6_address__ipv6_compressed)
 {
-    const message::network_address expected_address
+    const messages::network_address expected_address
     {
         0, 0, test_ipv6_address, 42,
     };

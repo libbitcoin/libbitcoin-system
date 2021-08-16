@@ -28,7 +28,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/message/network_address.hpp>
+#include <bitcoin/system/messages/network_address.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -120,12 +120,12 @@ authority::authority(const std::string& authority)
 }
 
 // This is the format returned from peers on the bitcoin network.
-authority::authority(const message::network_address& address)
+authority::authority(const messages::network_address& address)
   : authority(address.ip(), address.port())
 {
 }
 
-static ip::address_v6 to_boost_address(const message::ip_address& in)
+static ip::address_v6 to_boost_address(const messages::ip_address& in)
 {
     ip::address_v6::bytes_type bytes;
     BITCOIN_ASSERT(bytes.size() == in.size());
@@ -134,16 +134,16 @@ static ip::address_v6 to_boost_address(const message::ip_address& in)
     return out;
 }
 
-static message::ip_address to_bc_address(const ip::address_v6& in)
+static messages::ip_address to_bc_address(const ip::address_v6& in)
 {
-    message::ip_address out;
+    messages::ip_address out;
     const auto bytes = in.to_bytes();
     BITCOIN_ASSERT(bytes.size() == out.size());
     std::copy_n(bytes.begin(), bytes.size(), out.begin());
     return out;
 }
 
-authority::authority(const message::ip_address& ip, uint16_t port)
+authority::authority(const messages::ip_address& ip, uint16_t port)
   : ip_(to_boost_address(ip)), port_(port)
 {
 }
@@ -174,7 +174,7 @@ ip::address_v6 authority::asio_ip() const
     return ip_;
 }
 
-message::ip_address authority::ip() const
+messages::ip_address authority::ip() const
 {
     return to_bc_address(ip_);
 }
@@ -190,11 +190,11 @@ std::string authority::to_hostname() const
     return ipv4_hostname.empty() ? to_ipv6_hostname(ip_) : ipv4_hostname;
 }
 
-message::network_address authority::to_network_address() const
+messages::network_address authority::to_network_address() const
 {
     static constexpr uint32_t services = 0;
     static constexpr uint32_t timestamp = 0;
-    const message::network_address network_address
+    const messages::network_address network_address
     {
         timestamp, services, ip(), port(),
     };

@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/message/message.hpp>
+#include <bitcoin/system/messages/messages.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -38,14 +38,14 @@ public:
     compact_filter();
     compact_filter(const compact_filter& other);
     compact_filter(const std::string& hexcode);
-    compact_filter(const message::compact_filter& value);
+    compact_filter(const messages::compact_filter& value);
 
     compact_filter& operator=(const compact_filter& other);
-    compact_filter& operator=(message::compact_filter&& other);
+    compact_filter& operator=(messages::compact_filter&& other);
 
     bool operator==(const compact_filter& other) const;
 
-    operator const message::compact_filter&() const;
+    operator const messages::compact_filter&() const;
 
     std::string to_string() const;
 
@@ -55,7 +55,7 @@ public:
         const compact_filter& argument);
 
 private:
-    message::compact_filter value_;
+    messages::compact_filter value_;
 };
 
 } // namespace config

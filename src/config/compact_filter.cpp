@@ -41,7 +41,7 @@ compact_filter::compact_filter(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-compact_filter::compact_filter(const message::compact_filter& value)
+compact_filter::compact_filter(const messages::compact_filter& value)
   : value_(value)
 {
 }
@@ -53,11 +53,11 @@ compact_filter::compact_filter(const compact_filter& other)
 
 compact_filter& compact_filter::operator=(const compact_filter& other)
 {
-    value_ = message::compact_filter(other.value_);
+    value_ = messages::compact_filter(other.value_);
     return *this;
 }
 
-compact_filter& compact_filter::operator=(message::compact_filter&& other)
+compact_filter& compact_filter::operator=(messages::compact_filter&& other)
 {
     value_ = std::move(other);
     return *this;
@@ -68,7 +68,7 @@ bool compact_filter::operator==(const compact_filter& other) const
     return value_ == other.value_;
 }
 
-compact_filter::operator const message::compact_filter&() const
+compact_filter::operator const messages::compact_filter&() const
 {
     return value_;
 }

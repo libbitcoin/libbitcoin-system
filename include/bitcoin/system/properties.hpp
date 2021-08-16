@@ -26,7 +26,7 @@
 ////#include <bitcoin/system/chain/chain.hpp>
 ////#include <bitcoin/system/config/config.hpp>
 ////#include <bitcoin/system/define.hpp>
-////#include <bitcoin/system/message/message.hpp>
+////#include <bitcoin/system/messages/messages.hpp>
 ////#include <bitcoin/system/wallet/wallet.hpp>
 ////
 ////namespace pt = boost::property_tree;
@@ -296,14 +296,14 @@
 //// * @param[in]  filter  The compact filter.
 //// * @return             A property list.
 //// */
-////BC_API pt::ptree property_list(const message::compact_filter& filter);
+////BC_API pt::ptree property_list(const messages::compact_filter& filter);
 ////
 /////**
 //// * Generate a property tree for a compact_filter.
 //// * @param[in]  filter  The compact filter.
 //// * @return             A property tree.
 //// */
-////BC_API pt::ptree property_tree(const message::compact_filter& filter);
+////BC_API pt::ptree property_tree(const messages::compact_filter& filter);
 ////
 /////**
 //// * Generate a property list for a compact_filter_checkpoint.
@@ -312,7 +312,7 @@
 //// * @return                 A property list.
 //// */
 ////BC_API pt::ptree property_list(
-////    const message::compact_filter_checkpoint& checkpoint, bool json);
+////    const messages::compact_filter_checkpoint& checkpoint, bool json);
 ////
 /////**
 //// * Generate a property tree for a compact_filter_checkpoint.
@@ -321,14 +321,14 @@
 //// * @return                 A property tree.
 //// */
 ////BC_API pt::ptree property_tree(
-////    const message::compact_filter_checkpoint& checkpoint, bool json);
+////    const messages::compact_filter_checkpoint& checkpoint, bool json);
 ////
 /////**
 //// * Generate a property list for a compact_filter_headers.
 //// * @param[in]  headers  The compact filter headers.
 //// * @return              A property list.
 //// */
-////BC_API pt::ptree property_list(const message::compact_filter_headers& headers,
+////BC_API pt::ptree property_list(const messages::compact_filter_headers& headers,
 ////    bool json);
 ////
 /////**
@@ -337,7 +337,7 @@
 //// * @param[in]  json     Use json array formatting.
 //// * @return              A property tree.
 //// */
-////BC_API pt::ptree property_tree(const message::compact_filter_headers& headers,
+////BC_API pt::ptree property_tree(const messages::compact_filter_headers& headers,
 ////    bool json);
 ////
 /////**

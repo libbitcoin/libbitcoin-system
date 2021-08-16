@@ -398,7 +398,7 @@
 ////
 ////// compact_filter
 ////
-////ptree property_list(const message::compact_filter& filter)
+////ptree property_list(const messages::compact_filter& filter)
 ////{
 ////    ptree tree;
 ////    tree.put("block", hash256(filter.block_hash()));
@@ -408,7 +408,7 @@
 ////    return tree;
 ////}
 ////
-////ptree property_tree(const message::compact_filter& filter)
+////ptree property_tree(const messages::compact_filter& filter)
 ////{
 ////    ptree tree;
 ////    tree.add_child("compact_filter", property_list(filter));
@@ -417,7 +417,7 @@
 ////
 ////// compact_filter_checkpoint
 ////
-////ptree property_list(const message::compact_filter_checkpoint& checkpoint,
+////ptree property_list(const messages::compact_filter_checkpoint& checkpoint,
 ////    bool json)
 ////{
 ////    ptree tree;
@@ -429,7 +429,7 @@
 ////    return tree;
 ////}
 ////
-////ptree property_tree(const message::compact_filter_checkpoint& checkpoint,
+////ptree property_tree(const messages::compact_filter_checkpoint& checkpoint,
 ////    bool json)
 ////{
 ////    ptree tree;
@@ -439,7 +439,7 @@
 ////
 ////// compact_filter_headers
 ////
-////ptree property_list(const message::compact_filter_headers& headers, bool json)
+////ptree property_list(const messages::compact_filter_headers& headers, bool json)
 ////{
 ////    ptree tree;
 ////    tree.put("stop_hash", hash256(headers.stop_hash()));
@@ -452,7 +452,7 @@
 ////    return tree;
 ////}
 ////
-////ptree property_tree(const message::compact_filter_headers& headers, bool json)
+////ptree property_tree(const messages::compact_filter_headers& headers, bool json)
 ////{
 ////    ptree tree;
 ////    tree.add_child("compact_filter_headers", property_list(headers, json));

@@ -70,7 +70,7 @@
     <Filter Include="include\bitcoin\system\math">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\message">
+    <Filter Include="include\bitcoin\system\messages">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\radix">
@@ -145,7 +145,7 @@
     <Filter Include="src\machine">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\message">
+    <Filter Include="src\messages">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\radix">
@@ -405,125 +405,125 @@
     <ClCompile Include="..\..\..\..\src\machine\program.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\address.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\address.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\alert.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\alert.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\alert_payload.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\alert_payload.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\block.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\block.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\block_transactions.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\block_transactions.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\compact_block.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\compact_block.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\compact_filter.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\compact_filter.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\compact_filter_checkpoint.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\compact_filter_checkpoint.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\compact_filter_headers.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\compact_filter_headers.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\fee_filter.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\fee_filter.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\filter_add.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\filter_add.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\filter_clear.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\filter_clear.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\filter_load.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\filter_load.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_address.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_address.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_block_transactions.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_block_transactions.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_blocks.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_checkpoint.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_compact_filter_checkpoint.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_compact_filter_headers.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_compact_filter_headers.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_compact_filters.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_compact_filters.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_data.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_data.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\get_headers.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\get_headers.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\header.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\header.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\headers.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\headers.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\heading.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\heading.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\inventory.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\inventory.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\inventory_vector.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\memory_pool.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\memory_pool.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\merkle_block.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\merkle_block.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\message.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\message.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\network_address.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\network_address.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\not_found.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\not_found.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\ping.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\ping.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\pong.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\pong.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\prefilled_transaction.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\prefilled_transaction.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\reject.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\reject.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\send_compact.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\send_compact.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\send_headers.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\send_headers.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\transaction.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\transaction.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\verack.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\verack.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\version.cpp">
-      <Filter>src\message</Filter>
+    <ClCompile Include="..\..\..\..\src\messages\version.cpp">
+      <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\properties.cpp">
       <Filter>src</Filter>
@@ -986,125 +986,128 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\address.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\alert_payload.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_payload.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\block.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\block_transactions.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\block_transactions.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_block.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_filter.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_checkpoint.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_filter_checkpoint.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\compact_filter_headers.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_filter_headers.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\fee_filter.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\fee_filter.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_add.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\filter_add.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_clear.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\filter_clear.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\filter_load.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\filter_load.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_address.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_address.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_block_transactions.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_block_transactions.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_blocks.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_blocks.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_checkpoint.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_compact_filter_checkpoint.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filter_headers.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_compact_filter_headers.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_compact_filters.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_compact_filters.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_data.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_data.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\get_headers.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_headers.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\header.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\header.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\headers.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\headers.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\heading.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\heading.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\inventory.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\inventory_vector.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory_vector.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\memory_pool.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\memory_pool.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\merkle_block.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\merkle_block.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\message.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\message.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\network_address.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\messages.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\not_found.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\network_address.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\ping.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\not_found.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\pong.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\ping.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\prefilled_transaction.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\pong.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\reject.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\prefilled_transaction.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\send_compact.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\reject.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\send_headers.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\send_compact.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\transaction.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\send_headers.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\verack.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\transaction.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\message\version.hpp">
-      <Filter>include\bitcoin\system\message</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\verack.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\version.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\mutex.hpp">
       <Filter>include\bitcoin\system</Filter>

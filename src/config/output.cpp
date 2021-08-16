@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/config/output.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -34,6 +35,12 @@ namespace system {
 namespace config {
 
 using namespace boost::program_options;
+
+// The minimum safe length of a seed in bits (multiple of 8).
+constexpr size_t minimum_seed_bits = 128;
+
+// The minimum safe length of a seed in bytes (16).
+constexpr size_t minimum_seed_size = minimum_seed_bits / 8u;
 
 output::output()
   : is_stealth_(false), amount_(0), version_(0), script_(),
@@ -106,7 +113,7 @@ std::istream& operator>>(std::istream& input, output& argument)
 
         data_chunk seed;
         if (!decode_base16(seed, tokens[2]) ||
-            seed.size() < chain::minimum_seed_size)
+            seed.size() < minimum_seed_size)
             throw istream_exception(tuple);
 
         ec_secret ephemeral_secret;

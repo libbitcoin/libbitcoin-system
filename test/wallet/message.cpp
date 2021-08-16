@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(message_tests)
+BOOST_AUTO_TEST_SUITE(messages_tests)
 
 using namespace bc::system::wallet;
 
@@ -36,7 +36,7 @@ using namespace bc::system::wallet;
 // Generated using Electrum and above SECRET (compressed):
 #define ELECTRUM_SIGNATURE "1f1429ddc5e03888411065e4b36eec7de4901d580d51e6209798b9c06fdd39461a4884679f35d1e8d7321fe01f3401ed916732383f6b5f8a688ea9ae4321fbf4ae"
 
-BOOST_AUTO_TEST_SUITE(message__recovery_magic)
+BOOST_AUTO_TEST_SUITE(messages__recovery_magic)
 
 BOOST_AUTO_TEST_CASE(message__recovery_id_to_magic__uncompressed_valid__expected)
 {
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(message__magic_to_recovery_id__invalid__false)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(message__sign_message)
+BOOST_AUTO_TEST_SUITE(messages__sign_message)
 
 BOOST_AUTO_TEST_CASE(message__sign_message__compressed__expected)
 {
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(message__sign_message_wif__uncompressed__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(message__verify_message)
+BOOST_AUTO_TEST_SUITE(messages__verify_message)
 
 BOOST_AUTO_TEST_CASE(message__verify_message__compressed__expected)
 {

@@ -89,7 +89,7 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
 }
 
-bool match_filter(const message::compact_filter& filter,
+bool match_filter(const messages::compact_filter& filter,
     const chain::script& script)
 {
     if (script.empty() || filter.filter_type() != neutrino_filter_type)
@@ -109,7 +109,7 @@ bool match_filter(const message::compact_filter& filter,
     return golomb::match(target, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const message::compact_filter& filter,
+bool match_filter(const messages::compact_filter& filter,
     const chain::script::list& scripts)
 {
     if (scripts.empty() || filter.filter_type() != neutrino_filter_type)
@@ -142,13 +142,13 @@ bool match_filter(const message::compact_filter& filter,
     return golomb::match(stack, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const message::compact_filter& filter,
+bool match_filter(const messages::compact_filter& filter,
     const wallet::payment_address& address)
 {
     return match_filter(filter, address.output_script());
 }
 
-bool match_filter(const message::compact_filter& filter,
+bool match_filter(const messages::compact_filter& filter,
     const wallet::payment_address::list& addresses)
 {
     if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
