@@ -72,7 +72,10 @@ constexpr Value bit_hi()
 {
     // sub1 for size-to-index translation.
     // a << b is undefined for negative a, but shift into a negative is valid.
-    return to_int<Value>(true) << sub1(width<Value>());
+    // The << operator promotes the left operand to int, causing an overflow
+    // warning when the value is coerced from a positive to a negative. So we
+    // must explicitly cast the result back to the intended (Value) type.
+    return static_cast<Value>(to_int<Value>(true) << sub1(width<Value>()));
 }
 
 template <typename Value, if_integer<Value>>
