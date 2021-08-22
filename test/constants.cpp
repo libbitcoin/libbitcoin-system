@@ -158,21 +158,22 @@ static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value, "");
 
 BOOST_AUTO_TEST_SUITE(constants_tests)
 
-BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
-{
-    BOOST_REQUIRE_EQUAL(width<uintx>(), 192u);
-}
-
-BOOST_AUTO_TEST_CASE(constants__width__uintx_t__expected)
-{
-    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 8u);
-    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 16u);
-    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 64u);
-    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 192u);
-    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 256u);
-    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 320u);
-    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 576u);
-}
+// These results are inconsistent across platforms, and unimportant.
+////BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
+////{
+////    BOOST_REQUIRE_EQUAL(width<uintx>(), 192u);
+////}
+////
+////BOOST_AUTO_TEST_CASE(constants__width__uintx_t__expected)
+////{
+////    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 8u);
+////    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 16u);
+////    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 64u);
+////    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 192u);
+////    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 256u);
+////    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 320u);
+////    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 576u);
+////}
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -111,13 +111,13 @@ BOOST_AUTO_TEST_CASE(device__read__nullptr__false)
     BOOST_REQUIRE_EQUAL(instance.read(nullptr, 0), -1);
 }
 
-// zero-size array .data is null pointer.
-BOOST_AUTO_TEST_CASE(device__read__empty__false)
-{
-    std::array<char, 0> to;
-    device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
-}
+// zero-size array .data is null pointer in msvc, but empty on other platforms.
+////BOOST_AUTO_TEST_CASE(device__read__empty__false)
+////{
+////    std::array<char, 0> to;
+////    device_accessor instance;
+////    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
+////}
 
 BOOST_AUTO_TEST_CASE(device__read__negative__false)
 {

@@ -218,11 +218,18 @@ BOOST_AUTO_TEST_CASE(istream__get__empty__inconsistent)
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
+
+    // zero on msvc, -1 on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE_EQUAL(istream.get(), 0x00);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
     BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
+#else
+    istream.get();
+    BOOST_REQUIRE(!istream);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(istream__get__past_end__eofbit_and_failbit)
@@ -260,11 +267,18 @@ BOOST_AUTO_TEST_CASE(istream__peek__empty__inconsistent)
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
+
+    // zero on msvc, -1 on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE_EQUAL(istream.peek(), 0x00);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
     BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
+#else
+    istream.peek();
+    BOOST_REQUIRE(!istream);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(istream__peek__failbit__failbit)
@@ -573,11 +587,17 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__inconsistent)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
     // std::istream::failure
+    // Throws on msvc, not on other platforms.
     const std::string source{ "*" };
     stream::in::copy istream(source);
+#ifdef _MSC_VER
     BOOST_REQUIRE_THROW(istream.seekg(-2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+#else
+    istream.seekg(-2, std::istream::cur);
+    BOOST_REQUIRE(!istream);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
@@ -591,11 +611,17 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
     // std::istream::failure
+    // Throws on msvc, not on other platforms.
     const std::string source{ "*" };
     stream::in::copy istream(source);
+#ifdef _MSC_VER
     BOOST_REQUIRE_THROW(istream.seekg(2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
+#else
+    istream.seekg(2, std::istream::cur);
+    BOOST_REQUIRE(!istream);
+#endif
 }
 
 #endif // STREAM_ISTREAM
@@ -692,7 +718,11 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     osstream.put('*');
     BOOST_REQUIRE(!is_set(osstream.rdstate(), std::ostringstream::eofbit));
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
+
+    // badbit on msvc, not on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
+#endif
 
     // failbit
     std::string sink(1, 0x00);
@@ -713,7 +743,11 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     tstream.flush();
     BOOST_REQUIRE(!is_set(tstream.rdstate(), std::ostream::eofbit));
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
+
+    // badbit on msvc, not on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(ostream__put__always__expected)
@@ -821,7 +855,11 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(!osstream);
     BOOST_REQUIRE(!is_set(osstream.rdstate(), std::ostringstream::eofbit));
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
+
+    // badbit on msvc, not on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
+#endif
     BOOST_REQUIRE(osstream.str().empty());
 
     std::string sink(source.size(), 0x00);
@@ -833,7 +871,11 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(!ostream);
     BOOST_REQUIRE(!is_set(ostream.rdstate(), std::ostream::eofbit));
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::failbit));
+
+    // badbit on msvc, not on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::badbit));
+#endif
     BOOST_REQUIRE_EQUAL(sink, expected);
 
     std::string text;
@@ -845,7 +887,11 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(!tstream);
     BOOST_REQUIRE(!is_set(tstream.rdstate(), std::ostream::eofbit));
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
+
+    // badbit on msvc, not on other platforms.
+#ifdef _MSC_VER
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
+#endif
     BOOST_REQUIRE(text.empty());
 }
 
