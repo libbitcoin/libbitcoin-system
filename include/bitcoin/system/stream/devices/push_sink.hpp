@@ -46,8 +46,7 @@ public:
     push_sink(Container& data) noexcept
       : device<Container>(limit<typename device<Container>::size_type>(
           data.max_size() - data.size())),
-        container_(data),
-        next_(data.end())
+        container_(data)
     {
     }
 
@@ -57,8 +56,7 @@ protected:
     void do_write(const typename device<Container>::value_type* from,
         typename device<Container>::size_type size) noexcept override
     {
-        auto start = container_.insert(next_, from, std::next(from, size));
-        next_ = std::next(start, size);
+        container_.insert(container_.end(), from, std::next(from, size));
     }
 
     typename device<Container>::size_type do_optimal_buffer_size()
@@ -73,7 +71,6 @@ protected:
 
 private:
     Container& container_;
-    typename Container::iterator next_;
 };
 
 } // namespace system
