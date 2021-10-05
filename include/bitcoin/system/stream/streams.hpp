@@ -41,7 +41,7 @@ namespace stream
 {
     namespace in
     {
-        /// An input stream that moves data from a data_reference.
+        /// An input stream that copies data from a data_reference.
         using copy = make_stream<copy_source<data_reference>>;
     }
 
