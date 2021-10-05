@@ -235,7 +235,7 @@ bool ec_private::operator<(const ec_private& other) const
 bool ec_private::operator==(const ec_private& other) const
 {
     return compress_ == other.compress_ && version_ == other.version_ &&
-        *static_cast<const ec_scalar*>(this) == other;
+        *static_cast<const ec_scalar*>(this) == static_cast<const ec_scalar>(other);
 }
 
 bool ec_private::operator!=(const ec_private& other) const

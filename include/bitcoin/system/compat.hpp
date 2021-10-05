@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_COMPAT_HPP
 #define LIBBITCOIN_SYSTEM_COMPAT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 

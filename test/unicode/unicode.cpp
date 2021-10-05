@@ -493,7 +493,9 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__ascii__expected)
     uint8_t truncated;
     const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
 
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
+    // Only one of the two following checks are required
+    BOOST_REQUIRE(utf16 == expected_utf16);
+    BOOST_REQUIRE_EQUAL(wcscmp(utf16, expected_utf16.c_str()), 0);
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
     BOOST_REQUIRE_EQUAL(truncated, 0u);
 }
@@ -511,7 +513,9 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii__expected)
     uint8_t truncated;
     const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
 
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
+    // Only one of the two following checks are required
+    BOOST_REQUIRE(utf16 == expected_utf16);
+    BOOST_REQUIRE_EQUAL(wcscmp(utf16, expected_utf16.c_str()), 0);
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
     BOOST_REQUIRE_EQUAL(truncated, 0u);
 }
@@ -539,8 +543,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation1__expected)
     uint8_t truncated;
     const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
 
-    BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
+    BOOST_REQUIRE(truncated == expected_truncated);
+    BOOST_REQUIRE(utf16 == expected_utf16);
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
 }
 
@@ -567,8 +571,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__expected)
     uint8_t truncated;
     const auto size = to_utf16(truncated, utf16, sizeof(utf16), utf8.c_str(), (int)utf8.size());
 
-    BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
+    BOOST_REQUIRE(truncated == expected_truncated);
+    BOOST_REQUIRE(utf16 == expected_utf16);
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
 }
 
