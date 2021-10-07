@@ -1,0 +1,136 @@
+name: Run tests
+
+on:
+  push:
+    branches:
+      - $default-branch
+      - 'ci/github-actions'
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+              name: "Ubuntu gcc static",
+              os: ubuntu-latest,
+              cc: "gcc-10",
+              cxx: "g++-10",
+              link: "--disable-shared",
+              ndebug: "",
+              cflags: "-Og -g --coverage",
+              cxxflags: "-Og -g --coverage",
+            }
+          - {
+              name: "Ubuntu gcc dynamic",
+              os: ubuntu-latest,
+              cc: "gcc-10",
+              cxx: "g++-10",
+              link: "--disable-static",
+              ndebug: "",
+              cflags: "-Os",
+              cxxflags: "-Os",
+            }
+          - {
+              name: "Ubuntu clang static",
+              os: ubuntu-latest,
+              cc: "clang",
+              cxx: "clang++",
+              link: "--disable-shared",
+              ndebug: "",
+              cflags: "-Os",
+              cxxflags: "-Os",
+            }
+          - {
+              name: "Ubuntu clang dynamic",
+              os: ubuntu-latest,
+              cc: "clang",
+              cxx: "clang++",
+              link: "--disable-static",
+              ndebug: "--disable-ndebug",
+              cflags: "-Os",
+              cxxflags: "-Os",
+            }
+          - {
+              name: "macOs clang static",
+              os: macOs-latest,
+              cc: "clang",
+              cxx: "clang++",
+              link: "--disable-shared",
+              ndebug: "",
+              cflags: "",
+              cxxflags: "",
+            }
+          # TODO: rpath changes introduced as part of SIP in OSX 10.5+ break "macOs clang dynamic".
+          # - {
+          #     name: "macOs clang dynamic",
+          #     os: macOs-latest,
+          #     cc: "clang",
+          #     cxx: "clang++",
+          #     link: "--disable-static",
+          #     enable_rpath: "--enable-rpath",
+          #     ndebug: "",
+          #     cflags: "",
+          #     cxxflags: "",
+          #   }
+
+    env:
+      CC: ${{ matrix.config.cc }}
+      CXX: ${{ matrix.config.cxx }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install build essentials (linux)
+      if: runner.os == 'Linux'
+      run:  |
+        sudo apt-get update
+        sudo apt-get install build-essential autoconf automake libtool pkg-config git
+
+    - name: Install build essentials (macos)
+      if: runner.os == 'macOs'
+      run: |
+        brew install automake
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      id: dependencies-cache
+      with:
+        path: |
+          ${{ github.workspace }}/dependencies/
+          ${{ github.workspace }}/build/
+        key: ${{ runner.os }}-${{ matrix.config.os }}-${{ matrix.config.cc }}-${{ matrix.config.link }}-${{ hashFiles('install.sh') }}
+
+    - name: Build target without cache
+      if: steps.dependencies-cache.outputs.cache-hit != 'true'
+      run: >-
+        ./install.sh
+        --enable-isystem
+        --with-icu
+        --build-icu
+        --build-boost
+        ${{ matrix.config.link }}
+        --build-dir=${{github.workspace}}/build/
+        --prefix=${{github.workspace}}/dependencies/
+        CFLAGS='${{ matrix.config.cflags }}'
+        CXXFLAGS='${{ matrix.config.cxxflags }}'
+
+
+    - name: Build target with cache
+      if: steps.dependencies-cache.outputs.cache-hit == 'true'
+      run: >-
+        ./install.sh
+        --enable-isystem
+        --with-icu
+        --with-boost=${{github.workspace}}/dependencies/
+        ${{ matrix.config.link }}
+        --build-dir=${{github.workspace}}/build/
+        --prefix=${{github.workspace}}/dependencies/
+        CFLAGS='${{ matrix.config.cflags }}'
+        CXXFLAGS='${{ matrix.config.cxxflags }}'

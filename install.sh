@@ -731,6 +731,9 @@ build_from_travis()
     if [[ $TRAVIS == true ]]; then
         build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
         make_tests "$JOBS"
+    elif [[ $CI == true ]]; then
+        build_from_local "Local $GITHUB_WORKSPACE" "$JOBS" "${OPTIONS[@]}" "$@"
+        make_tests "$JOBS"
     else
         build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
         push_directory "$BUILD_DIR"

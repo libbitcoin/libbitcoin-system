@@ -18,4 +18,10 @@ BOOST_UNIT_TEST_OPTIONS=\
 
 # Run tests.
 #==============================================================================
-./test/libbitcoin-system-test ${BOOST_UNIT_TEST_OPTIONS} > test.log
+
+# If running in github, send errors to std output
+if [[ $CI == true ]]; then
+    ./test/libbitcoin-system-test ${BOOST_UNIT_TEST_OPTIONS}
+else
+    ./test/libbitcoin-system-test ${BOOST_UNIT_TEST_OPTIONS} > test.log
+fi
