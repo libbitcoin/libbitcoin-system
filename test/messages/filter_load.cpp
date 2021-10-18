@@ -150,8 +150,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_2__valid_input__success)
 
     const auto data = expected.to_data(messages::version::level::maximum);
     stream::in::copy istream(data);
-    const auto result = messages::filter_load::factory(
-        messages::version::level::maximum, istream);
+    const auto result = messages::filter_load::factory(messages::version::level::maximum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -173,8 +172,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_3__valid_input__success)
 
     const auto data = expected.to_data(messages::version::level::maximum);
     read::bytes::copy source(data);
-    const auto result = messages::filter_load::factory(
-        messages::version::level::maximum, source);
+    const auto result = messages::filter_load::factory(messages::version::level::maximum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -185,7 +183,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_1__always__returns_initialized_value)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -196,7 +194,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_1__always__returns_initialized
 
 BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_2__always__returns_initialized_value)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -207,7 +205,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_2__always__returns_initialized
 
 BOOST_AUTO_TEST_CASE(filter_load__filter_setter_1__roundtrip__success)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     messages::filter_load instance;
     BOOST_REQUIRE(filter != instance.filter());
     instance.set_filter(filter);
@@ -216,7 +214,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__filter_setter_2__roundtrip__success)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     data_chunk dup = filter;
 
     messages::filter_load instance;
@@ -227,7 +225,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__hash_functions_accessor__always__returns_initialized_value)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -247,7 +245,7 @@ BOOST_AUTO_TEST_CASE(filter_load__hash_functions_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__tweak_accessor__always__returns_initialized_value)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -267,7 +265,7 @@ BOOST_AUTO_TEST_CASE(filter_load__tweak_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__flags_accessor__always__returns_initialized_value)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -287,7 +285,7 @@ BOOST_AUTO_TEST_CASE(filter_load__flags_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_assign_equals__always__matches_equivalent)
 {
-    const data_chunk filter = { 0x0f, 0xf0, 0x55, 0xaa };
+    const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
     uint32_t tweak = 36u;
     uint8_t flags = 0xae;
@@ -308,8 +306,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_assign_equals__always__matches_equiva
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__returns_true)
 {
-    const messages::filter_load expected(
-        { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
+    const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     messages::filter_load instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -317,8 +314,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__returns_t
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__returns_false)
 {
-    const messages::filter_load expected(
-        { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
+    const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     messages::filter_load instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -326,8 +322,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__returns_fals
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__duplicates__returns_false)
 {
-    const messages::filter_load expected(
-        { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
+    const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     messages::filter_load instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -335,8 +330,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__duplicates__retur
 
 BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__differs__returns_true)
 {
-    const messages::filter_load expected(
-        { 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
+    const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
     messages::filter_load instance;
     BOOST_REQUIRE(instance != expected);

@@ -170,7 +170,9 @@ BOOST_AUTO_TEST_CASE(alert__factory_1__roundtrip__success)
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(messages::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
+
+    const auto value = result.serialized_size(messages::version::level::minimum);
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), value);
 }
 
 BOOST_AUTO_TEST_CASE(alert__factory_2__roundtrip__success)
@@ -188,7 +190,9 @@ BOOST_AUTO_TEST_CASE(alert__factory_2__roundtrip__success)
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(messages::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
+
+    const auto value = result.serialized_size(messages::version::level::minimum);
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), value);
 }
 
 BOOST_AUTO_TEST_CASE(alert__factory_3__roundtrip__success)
@@ -206,7 +210,9 @@ BOOST_AUTO_TEST_CASE(alert__factory_3__roundtrip__success)
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(messages::version::level::minimum));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
+
+    const auto value = result.serialized_size(messages::version::level::minimum);
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), value);
 }
 
 BOOST_AUTO_TEST_CASE(alert__payload_accessor_1__always__returns_initialized)
@@ -303,40 +309,28 @@ BOOST_AUTO_TEST_CASE(alert__operator_assign_equals__always__matches_equivalent)
 
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__duplicates__returns_true)
 {
-    const messages::alert expected(
-        base16_chunk("0123456789abcdef"),
-        base16_chunk("fedcba9876543210"));
-
+    const messages::alert expected(base16_chunk("0123456789abcdef"), base16_chunk("fedcba9876543210"));
     messages::alert instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_equals__differs__returns_false)
 {
-    const messages::alert expected(
-        base16_chunk("0123456789abcdef"),
-        base16_chunk("fedcba9876543210"));
-
+    const messages::alert expected(base16_chunk("0123456789abcdef"), base16_chunk("fedcba9876543210"));
     messages::alert instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__duplicates__returns_false)
 {
-    const messages::alert expected(
-        base16_chunk("0123456789abcdef"),
-        base16_chunk("fedcba9876543210"));
-
+    const messages::alert expected(base16_chunk("0123456789abcdef"), base16_chunk("fedcba9876543210"));
     messages::alert instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
 BOOST_AUTO_TEST_CASE(alert__operator_boolean_not_equals__differs__returns_true)
 {
-    const messages::alert expected(
-        base16_chunk("0123456789abcdef"),
-        base16_chunk("fedcba9876543210"));
-
+    const messages::alert expected(base16_chunk("0123456789abcdef"), base16_chunk("fedcba9876543210"));
     messages::alert instance;
     BOOST_REQUIRE(instance != expected);
 }
