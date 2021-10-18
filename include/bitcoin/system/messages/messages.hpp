@@ -45,6 +45,7 @@
 #include <bitcoin/system/messages/header.hpp>
 #include <bitcoin/system/messages/headers.hpp>
 #include <bitcoin/system/messages/heading.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/inventory_vector.hpp>
 #include <bitcoin/system/messages/memory_pool.hpp>

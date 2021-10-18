@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/messages/block_transactions.hpp>
 
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -25,7 +26,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier block_transactions::id = identifier::block_transactions;
 const std::string block_transactions::command = "blocktxn";
 const uint32_t block_transactions::version_minimum = version::level::bip152;
 const uint32_t block_transactions::version_maximum = version::level::bip152;

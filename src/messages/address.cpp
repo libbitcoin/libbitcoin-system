@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/messages/address.hpp>
 
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,6 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+const identifier address::id = identifier::address;
 const std::string address::command = "addr";
 const uint32_t address::version_minimum = version::level::minimum;
 const uint32_t address::version_maximum = version::level::maximum;

@@ -25,6 +25,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/prefilled_transaction.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -90,6 +91,7 @@ public:
     bool operator==(const compact_block& other) const;
     bool operator!=(const compact_block& other) const;
 
+    static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;

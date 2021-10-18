@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/alert.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,7 +27,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier alert::id = identifier::alert;
 const std::string alert::command = "alert";
 const uint32_t alert::version_minimum = version::level::minimum;
 const uint32_t alert::version_maximum = version::level::maximum;

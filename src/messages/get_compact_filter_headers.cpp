@@ -22,6 +22,7 @@
 #include <bitcoin/system/messages/get_compact_filter_headers.hpp>
 
 #include <initializer_list>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -29,7 +30,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier get_compact_filter_headers::id = identifier::get_compact_filter_headers;
 const std::string get_compact_filter_headers::command = "getcfheaders";
 const uint32_t get_compact_filter_headers::version_minimum = version::level::minimum;
 const uint32_t get_compact_filter_headers::version_maximum = version::level::maximum;

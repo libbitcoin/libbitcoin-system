@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/inventory_vector.hpp>
 #include <bitcoin/system/messages/version.hpp>
@@ -28,7 +29,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier get_data::id = identifier::get_data;
 const std::string get_data::command = "getdata";
 const uint32_t get_data::version_minimum = version::level::minimum;
 const uint32_t get_data::version_maximum = version::level::maximum;

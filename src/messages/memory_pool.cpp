@@ -19,13 +19,15 @@
 #include <bitcoin/system/messages/memory_pool.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier memory_pool::id = identifier::memory_pool;
 const std::string memory_pool::command = "mempool";
 const uint32_t memory_pool::version_minimum = version::level::bip35;
 const uint32_t memory_pool::version_maximum = version::level::maximum;

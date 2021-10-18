@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/pong.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -26,6 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+const identifier pong::id = identifier::pong;
 const std::string pong::command = "pong";
 const uint32_t pong::version_minimum = version::level::minimum;
 const uint32_t pong::version_maximum = version::level::maximum;

@@ -23,6 +23,7 @@
 #include <initializer_list>
 #include <istream>
 #include <utility>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/inventory_vector.hpp>
 #include <bitcoin/system/messages/message.hpp>
@@ -33,6 +34,7 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+const identifier headers::id = identifier::headers;
 const std::string headers::command = "headers";
 const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;

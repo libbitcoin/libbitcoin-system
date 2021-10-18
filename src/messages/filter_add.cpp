@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/filter_add.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,7 +27,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier filter_add::id = identifier::filter_add;
 const std::string filter_add::command = "filteradd";
 const uint32_t filter_add::version_minimum = version::level::bip37;
 const uint32_t filter_add::version_maximum = version::level::maximum;

@@ -178,62 +178,81 @@ BOOST_AUTO_TEST_CASE(heading__inequality__different__true)
     BOOST_REQUIRE(instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(heading__type__all_cases__match_expected)
+BOOST_AUTO_TEST_CASE(heading__id__default__unknown)
 {
     messages::heading instance;
-    BOOST_REQUIRE(messages::message_type::unknown == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::unknown);
+}
+
+BOOST_AUTO_TEST_CASE(heading__id__set__expected)
+{
+    messages::heading instance;
     instance.set_command(messages::address::command);
-    BOOST_REQUIRE(messages::message_type::address == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::address);
     instance.set_command(messages::alert::command);
-    BOOST_REQUIRE(messages::message_type::alert == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::alert);
     instance.set_command(messages::block::command);
-    BOOST_REQUIRE(messages::message_type::block == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::block);
     instance.set_command(messages::block_transactions::command);
-    BOOST_REQUIRE(messages::message_type::block_transactions == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::block_transactions);
     instance.set_command(messages::compact_block::command);
-    BOOST_REQUIRE(messages::message_type::compact_block == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::compact_block);
+    instance.set_command(messages::compact_filter::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::compact_filter);
+    instance.set_command(messages::compact_filter_checkpoint::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::compact_filter_checkpoint);
+    instance.set_command(messages::compact_filter_headers::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::compact_filter_headers);
+    instance.set_command(messages::fee_filter::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::fee_filter);
     instance.set_command(messages::filter_add::command);
-    BOOST_REQUIRE(messages::message_type::filter_add == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::filter_add);
     instance.set_command(messages::filter_clear::command);
-    BOOST_REQUIRE(messages::message_type::filter_clear == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::filter_clear);
     instance.set_command(messages::filter_load::command);
-    BOOST_REQUIRE(messages::message_type::filter_load == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::filter_load);
     instance.set_command(messages::get_address::command);
-    BOOST_REQUIRE(messages::message_type::get_address == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_address);
     instance.set_command(messages::get_block_transactions::command);
-    BOOST_REQUIRE(messages::message_type::get_block_transactions == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_block_transactions);
     instance.set_command(messages::get_blocks::command);
-    BOOST_REQUIRE(messages::message_type::get_blocks == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_blocks);
+    instance.set_command(messages::get_compact_filter_checkpoint::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_compact_filter_checkpoint);
+    instance.set_command(messages::get_compact_filter_headers::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_compact_filter_headers);
+    instance.set_command(messages::get_compact_filters::command);
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_compact_filters);
     instance.set_command(messages::get_data::command);
-    BOOST_REQUIRE(messages::message_type::get_data == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_data);
     instance.set_command(messages::get_headers::command);
-    BOOST_REQUIRE(messages::message_type::get_headers == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::get_headers);
     instance.set_command(messages::headers::command);
-    BOOST_REQUIRE(messages::message_type::headers == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::headers);
     instance.set_command(messages::inventory::command);
-    BOOST_REQUIRE(messages::message_type::inventory == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::inventory);
     instance.set_command(messages::memory_pool::command);
-    BOOST_REQUIRE(messages::message_type::memory_pool == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::memory_pool);
     instance.set_command(messages::merkle_block::command);
-    BOOST_REQUIRE(messages::message_type::merkle_block == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::merkle_block);
     instance.set_command(messages::not_found::command);
-    BOOST_REQUIRE(messages::message_type::not_found == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::not_found);
     instance.set_command(messages::ping::command);
-    BOOST_REQUIRE(messages::message_type::ping == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::ping);
     instance.set_command(messages::pong::command);
-    BOOST_REQUIRE(messages::message_type::pong == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::pong);
     instance.set_command(messages::reject::command);
-    BOOST_REQUIRE(messages::message_type::reject == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::reject);
     instance.set_command(messages::send_compact::command);
-    BOOST_REQUIRE(messages::message_type::send_compact == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::send_compact);
     instance.set_command(messages::send_headers::command);
-    BOOST_REQUIRE(messages::message_type::send_headers == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::send_headers);
     instance.set_command(messages::transaction::command);
-    BOOST_REQUIRE(messages::message_type::transaction == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::transaction);
     instance.set_command(messages::verack::command);
-    BOOST_REQUIRE(messages::message_type::verack == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::verack);
     instance.set_command(messages::version::command);
-    BOOST_REQUIRE(messages::message_type::version == instance.type());
+    BOOST_REQUIRE(instance.id() == messages::identifier::version);
 }
 
 BOOST_AUTO_TEST_CASE(heading__maximum_size__always__matches_satoshi_fixed_size)

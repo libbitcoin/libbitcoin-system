@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/compact_block.hpp>
 
 #include <initializer_list>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,7 +27,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier compact_block::id = identifier::compact_block;
 const std::string compact_block::command = "cmpctblock";
 const uint32_t compact_block::version_minimum = version::level::bip152;
 const uint32_t compact_block::version_maximum = version::level::bip152;

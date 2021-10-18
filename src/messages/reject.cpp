@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/reject.hpp>
 
 #include <bitcoin/system/messages/block.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/transaction.hpp>
 #include <bitcoin/system/messages/version.hpp>
@@ -27,7 +28,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier reject::id = identifier::reject;
 const std::string reject::command = "reject";
 const uint32_t reject::version_minimum = version::level::bip61;
 const uint32_t reject::version_maximum = version::level::maximum;

@@ -22,58 +22,24 @@
 #include <cstdint>
 #include <cstddef>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
 
-enum class message_type
-{
-    unknown,
-    address,
-    alert,
-    block,
-    block_transactions,
-    compact_block,
-    compact_filter,
-    compact_filter_checkpoint,
-    compact_filter_headers,
-    fee_filter,
-    filter_add,
-    filter_clear,
-    filter_load,
-    get_address,
-    get_block_transactions,
-    get_blocks,
-    get_compact_filter_checkpoint,
-    get_compact_filter_headers,
-    get_compact_filters,
-    get_data,
-    get_headers,
-    headers,
-    inventory,
-    memory_pool,
-    merkle_block,
-    not_found,
-    ping,
-    pong,
-    reject,
-    send_compact,
-    send_headers,
-    transaction,
-    verack,
-    version
-};
-
 class BC_API heading
 {
 public:
+    typedef std::shared_ptr<heading> ptr;
+
     static size_t maximum_size();
     static size_t maximum_payload_size(uint32_t version, bool witness);
     static size_t satoshi_fixed_size();
@@ -87,6 +53,9 @@ public:
     heading(const heading& other);
     heading(heading&& other);
 
+    identifier id() const;
+    uint32_t payload_size() const;
+
     uint32_t magic() const;
     void set_magic(uint32_t value);
 
@@ -94,9 +63,6 @@ public:
     void set_command(const std::string& value);
     void set_command(std::string&& value);
 
-    uint32_t payload_size() const;
-
-    message_type type() const;
     bool verify_checksum(const data_slice& body) const;
 
     bool from_data(const data_chunk& data);

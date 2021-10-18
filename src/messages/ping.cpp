@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/ping.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -26,6 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+const identifier ping::id = identifier::ping;
 const std::string ping::command = "ping";
 const uint32_t ping::version_minimum = version::level::minimum;
 const uint32_t ping::version_maximum = version::level::maximum;

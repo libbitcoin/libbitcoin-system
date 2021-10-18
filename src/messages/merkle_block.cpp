@@ -20,6 +20,7 @@
 
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -27,7 +28,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier merkle_block::id = identifier::merkle_block;
 const std::string merkle_block::command = "merkleblock";
 const uint32_t merkle_block::version_minimum = version::level::bip37;
 const uint32_t merkle_block::version_maximum = version::level::maximum;

@@ -19,13 +19,15 @@
 #include <bitcoin/system/messages/get_address.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier get_address::id = identifier::get_address;
 const std::string get_address::command = "getaddr";
 const uint32_t get_address::version_minimum = version::level::minimum;
 const uint32_t get_address::version_maximum = version::level::maximum;

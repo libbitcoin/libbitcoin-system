@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <istream>
 #include <utility>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -29,8 +30,7 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
-const std::string header::command = "headers";
+    
 const uint32_t header::version_minimum = version::level::minimum;
 const uint32_t header::version_maximum = version::level::maximum;
 

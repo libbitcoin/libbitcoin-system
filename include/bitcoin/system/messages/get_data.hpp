@@ -28,6 +28,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/inventory_vector.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -69,6 +70,7 @@ public:
     bool operator==(const get_data& other) const;
     bool operator!=(const get_data& other) const;
 
+    static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;

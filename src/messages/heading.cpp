@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/messages/heading.hpp>
 
+#include <map>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/messages/address.hpp>
 #include <bitcoin/system/messages/alert.hpp>
@@ -40,6 +41,7 @@
 #include <bitcoin/system/messages/get_data.hpp>
 #include <bitcoin/system/messages/get_headers.hpp>
 #include <bitcoin/system/messages/headers.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/memory_pool.hpp>
@@ -214,77 +216,56 @@ void heading::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(checksum_);
 }
 
-message_type heading::type() const
-{
-    // TODO: convert to static map.
-    if (command_ == address::command)
-        return message_type::address;
-    if (command_ == alert::command)
-        return message_type::alert;
-    if (command_ == block::command)
-        return message_type::block;
-    if (command_ == block_transactions::command)
-        return message_type::block_transactions;
-    if (command_ == compact_block::command)
-        return message_type::compact_block;
-    if (command_ == compact_filter::command)
-        return message_type::compact_filter;
-    if (command_ == compact_filter_checkpoint::command)
-        return message_type::compact_filter_checkpoint;
-    if (command_ == compact_filter_headers::command)
-        return message_type::compact_filter_headers;
-    if (command_ == fee_filter::command)
-        return message_type::fee_filter;
-    if (command_ == filter_add::command)
-        return message_type::filter_add;
-    if (command_ == filter_clear::command)
-        return message_type::filter_clear;
-    if (command_ == filter_load::command)
-        return message_type::filter_load;
-    if (command_ == get_address::command)
-        return message_type::get_address;
-    if (command_ == get_block_transactions::command)
-        return message_type::get_block_transactions;
-    if (command_ == get_blocks::command)
-        return message_type::get_blocks;
-    if (command_ == get_compact_filter_checkpoint::command)
-        return message_type::get_compact_filter_checkpoint;
-    if (command_ == get_compact_filter_headers::command)
-        return message_type::get_compact_filter_headers;
-    if (command_ == get_compact_filters::command)
-        return message_type::get_compact_filters;
-    if (command_ == get_data::command)
-        return message_type::get_data;
-    if (command_ == get_headers::command)
-        return message_type::get_headers;
-    if (command_ == headers::command)
-        return message_type::headers;
-    if (command_ == inventory::command)
-        return message_type::inventory;
-    if (command_ == memory_pool::command)
-        return message_type::memory_pool;
-    if (command_ == merkle_block::command)
-        return message_type::merkle_block;
-    if (command_ == not_found::command)
-        return message_type::not_found;
-    if (command_ == ping::command)
-        return message_type::ping;
-    if (command_ == pong::command)
-        return message_type::pong;
-    if (command_ == reject::command)
-        return message_type::reject;
-    if (command_ == send_compact::command)
-        return message_type::send_compact;
-    if (command_ == send_headers::command)
-        return message_type::send_headers;
-    if (command_ == transaction::command)
-        return message_type::transaction;
-    if (command_ == verack::command)
-        return message_type::verack;
-    if (command_ == version::command)
-        return message_type::version;
+#define COMMAND_ID(name) { name::command, name::id }
 
-    return message_type::unknown;
+identifier heading::id() const
+{
+    // Internal to function avoids static initialization race.
+    static const std::map<std::string, identifier> identifiers
+    {
+        COMMAND_ID(address),
+        COMMAND_ID(alert),
+        COMMAND_ID(block),
+        COMMAND_ID(block_transactions),
+        COMMAND_ID(compact_block),
+        COMMAND_ID(compact_filter),
+        COMMAND_ID(compact_filter_checkpoint),
+        COMMAND_ID(compact_filter_headers),
+        COMMAND_ID(fee_filter),
+        COMMAND_ID(filter_add),
+        COMMAND_ID(filter_clear),
+        COMMAND_ID(filter_load),
+        COMMAND_ID(get_address),
+        COMMAND_ID(get_block_transactions),
+        COMMAND_ID(get_blocks),
+        COMMAND_ID(get_compact_filter_checkpoint),
+        COMMAND_ID(get_compact_filter_headers),
+        COMMAND_ID(get_compact_filters),
+        COMMAND_ID(get_data),
+        COMMAND_ID(get_headers),
+        COMMAND_ID(headers),
+        COMMAND_ID(inventory),
+        COMMAND_ID(memory_pool),
+        COMMAND_ID(merkle_block),
+        COMMAND_ID(not_found),
+        COMMAND_ID(ping),
+        COMMAND_ID(pong),
+        COMMAND_ID(reject),
+        COMMAND_ID(send_compact),
+        COMMAND_ID(send_headers),
+        COMMAND_ID(transaction),
+        COMMAND_ID(verack),
+        COMMAND_ID(version)
+    };
+
+    const auto it = identifiers.find(command_);
+    return (it == identifiers.end() ? identifier::unknown : it->second);
+}
+#undef COMMAND_ID
+
+uint32_t heading::payload_size() const
+{
+    return payload_size_;
 }
 
 uint32_t heading::magic() const
@@ -310,11 +291,6 @@ void heading::set_command(const std::string& value)
 void heading::set_command(std::string&& value)
 {
     command_ = std::move(value);
-}
-
-uint32_t heading::payload_size() const
-{
-    return payload_size_;
 }
 
 bool heading::verify_checksum(const data_slice& body) const

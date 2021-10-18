@@ -28,6 +28,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/get_blocks.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -62,6 +63,7 @@ public:
     bool operator==(const get_headers& other) const;
     bool operator!=(const get_headers& other) const;
 
+    static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;

@@ -20,13 +20,15 @@
 
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier send_compact::id = identifier::send_compact;
 const std::string send_compact::command = "sendcmpct";
 const uint32_t send_compact::version_minimum = version::level::bip152;
 const uint32_t send_compact::version_maximum = version::level::bip152;

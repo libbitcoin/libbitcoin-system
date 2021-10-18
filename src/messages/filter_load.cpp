@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/filter_load.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,7 +27,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier filter_load::id = identifier::filter_load;
 const std::string filter_load::command = "filterload";
 const uint32_t filter_load::version_minimum = version::level::bip37;
 const uint32_t filter_load::version_maximum = version::level::maximum;

@@ -19,13 +19,15 @@
 #include <bitcoin/system/messages/send_headers.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier send_headers::id = identifier::send_headers;
 const std::string send_headers::command = "sendheaders";
 const uint32_t send_headers::version_minimum = version::level::bip130;
 const uint32_t send_headers::version_maximum = version::level::maximum;

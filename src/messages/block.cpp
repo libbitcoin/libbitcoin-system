@@ -24,13 +24,15 @@
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier block::id = identifier::block;
 const std::string block::command = "block";
 const uint32_t block::version_minimum = version::level::minimum;
 const uint32_t block::version_maximum = version::level::maximum;

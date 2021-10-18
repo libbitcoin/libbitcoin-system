@@ -282,6 +282,7 @@ namespace error {
         return std::error_condition(e, get_error_category_instance());
     }
 
+    // TODO: move to libbitcoin-network.
     error_code_t boost_to_error_code(const boost_code& ec)
     {
         namespace boost_error = boost::system::errc;
@@ -412,6 +413,7 @@ namespace error {
         }
     }
 
+    // TODO: move to libbitcoin-protocol.
     error_code_t posix_to_error_code(int ec)
     {
         // TODO: expand mapping for database scenario.

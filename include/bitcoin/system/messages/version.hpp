@@ -26,6 +26,7 @@
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/network_address.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -181,8 +182,10 @@ public:
     bool operator==(const version& other) const;
     bool operator!=(const version& other) const;
 
+    static const identifier id;
     static const std::string command;
-//    static const bounds version;
+
+    // static const bounds version;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 

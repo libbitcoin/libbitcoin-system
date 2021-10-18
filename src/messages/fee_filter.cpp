@@ -19,13 +19,15 @@
 #include <bitcoin/system/messages/fee_filter.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier fee_filter::id = identifier::fee_filter;
 const std::string fee_filter::command = "feefilter";
 const uint32_t fee_filter::version_minimum = version::level::bip133;
 const uint32_t fee_filter::version_maximum = version::level::bip133;

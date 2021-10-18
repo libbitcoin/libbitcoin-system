@@ -19,12 +19,14 @@
 #include <bitcoin/system/messages/get_headers.hpp>
 
 #include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier get_headers::id = identifier::get_headers;
 const std::string get_headers::command = "getheaders";
 const uint32_t get_headers::version_minimum = version::level::headers;
 const uint32_t get_headers::version_maximum = version::level::maximum;

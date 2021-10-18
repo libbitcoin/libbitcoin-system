@@ -22,13 +22,15 @@
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier transaction::id = identifier::transaction;
 const std::string transaction::command = "tx";
 const uint32_t transaction::version_minimum = version::level::minimum;
 const uint32_t transaction::version_maximum = version::level::maximum;

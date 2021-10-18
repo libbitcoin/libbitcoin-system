@@ -20,13 +20,15 @@
 
 #include <initializer_list>
 #include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
 #include <bitcoin/system/messages/version.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier not_found::id = identifier::not_found;
 const std::string not_found::command = "notfound";
 const uint32_t not_found::version_minimum = version::level::bip37;
 const uint32_t not_found::version_maximum = version::level::maximum;

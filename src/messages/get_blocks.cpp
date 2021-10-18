@@ -19,6 +19,7 @@
 #include <bitcoin/system/messages/get_blocks.hpp>
 
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -26,7 +27,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier get_blocks::id = identifier::get_blocks;
 const std::string get_blocks::command = "getblocks";
 const uint32_t get_blocks::version_minimum = version::level::minimum;
 const uint32_t get_blocks::version_maximum = version::level::maximum;

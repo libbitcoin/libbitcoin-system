@@ -19,13 +19,15 @@
 #include <bitcoin/system/messages/filter_clear.hpp>
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier filter_clear::id = identifier::filter_clear;
 const std::string filter_clear::command = "filterclear";
 const uint32_t filter_clear::version_minimum = version::level::bip37;
 const uint32_t filter_clear::version_maximum = version::level::maximum;

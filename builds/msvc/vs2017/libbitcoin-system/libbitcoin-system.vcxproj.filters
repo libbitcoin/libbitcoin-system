@@ -1052,6 +1052,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\heading.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\identifier.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>

@@ -23,6 +23,7 @@
 
 #include <initializer_list>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -30,7 +31,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier compact_filter::id = identifier::compact_filter;
 const std::string compact_filter::command = "cfilter";
 const uint32_t compact_filter::version_minimum = version::level::minimum;
 const uint32_t compact_filter::version_maximum = version::level::maximum;

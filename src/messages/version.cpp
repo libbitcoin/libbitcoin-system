@@ -19,14 +19,17 @@
 #include <bitcoin/system/messages/version.hpp>
 
 #include <algorithm>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier version::id = identifier::version;
 const std::string version::command = "version";
+
 //const bounds messages::version::version = { level::minimum, level::maximum };
 const uint32_t messages::version::version_minimum = level::minimum;
 const uint32_t messages::version::version_maximum = level::maximum;

@@ -420,6 +420,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\heading.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\identifier.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory_vector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\memory_pool.hpp" />

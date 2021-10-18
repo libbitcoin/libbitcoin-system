@@ -22,6 +22,7 @@
 #include <bitcoin/system/messages/compact_filter_checkpoint.hpp>
 
 #include <initializer_list>
+#include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -29,7 +30,8 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
+    
+const identifier compact_filter_checkpoint::id = identifier::compact_filter_checkpoint;
 const std::string compact_filter_checkpoint::command = "cfcheckpt";
 const uint32_t compact_filter_checkpoint::version_minimum = version::level::minimum;
 const uint32_t compact_filter_checkpoint::version_maximum = version::level::maximum;
