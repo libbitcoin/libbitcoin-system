@@ -1109,6 +1109,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && !is_final(state.height(), state.median_time_past()))
         return error::transaction_non_final;
 
+    // TODO: currently tautological, as maximum_transaction_version is max_uint32.
     if (transaction_pool && version() > state.maximum_transaction_version())
         return error::transaction_version;
 
@@ -1118,8 +1119,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (is_confirmed_double_spend())
         return error::double_spend;
 
-    // This relates height to maturity of spent coinbase. Since reorg is the
-    // only way to decrease height and reorg invalidates, this is cache safe.
+    // This relates height to maturity of spent coinbase.
+    // Since reorganization may decrease height, this is not cache safe.
+    // A decrease in validated height invalidate validation cache.
     else if (!is_mature(state.height()))
         return error::coinbase_maturity;
 
@@ -1129,7 +1131,7 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     else if (bip68 && is_locked(state.height(), state.median_time_past()))
         return error::sequence_locked;
 
-    // This recomputes sigops to include p2sh from prevouts if bip16 is true.
+    // This recomputes sigops to include (if bip16 is true) p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16, bip141) > max_sigops)
         return error::transaction_embedded_sigop_limit;
 

@@ -177,6 +177,7 @@ bool witness::from_data(reader& source, bool prefix)
     {
         // Witness prefix is an element count, not byte length (unlike script).
         // On wire each witness is prefixed with number of elements (bip144).
+        // And each witness is also prefixed with its byte length.
         for (auto count = source.read_size(); count > 0; --count)
              stack_.push_back(read_element(source));
     }

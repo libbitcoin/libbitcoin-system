@@ -649,6 +649,7 @@ bool block::is_valid_coinbase_script(size_t height) const
     return script::is_coinbase_pattern(script.operations(), height);
 }
 
+// TODO: merkle root is generated twice in validation.
 bool block::is_valid_witness_commitment() const
 {
     if (transactions_.empty() || transactions_.front().inputs().empty())
@@ -747,20 +748,22 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         proof_of_work_limit, scrypt))))
         return ec;
 
-    // TODO: relates to total of tx.size(false) (pool cache).
+    // Relates to total of tx.size (pool cache tx.size(false)).
     else if (serialized_size(false) > max_block_size)
         return error::block_size_limit;
 
     else if (transactions_.empty())
         return error::empty_block;
 
+    // Coinbase transactions are not pooled but (cache is_coinbase).
     else if (!transactions_.front().is_coinbase())
         return error::first_not_coinbase;
 
+    // Coinbase transactions are not pooled but (cache is_coinbase).
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
-    // TODO: determinable from tx pool graph.
+    // Determinable from tx pool graph (cannot cache, must navigate).
     else if (is_forward_reference())
         return error::forward_reference;
 
@@ -768,11 +771,11 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     ////else if (!is_distinct_transaction_set())
     ////    return error::internal_duplicate;
 
-    // TODO: determinable from tx pool graph.
+    // Determinable from tx pool graph (cannot cache, must navigate).
     else if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
-    // TODO: relates height to tx.hash(false) (pool cache).
+    // Relates height to tx.hash (pool cache tx.hash(false)).
     else if (!is_valid_merkle_root())
         return error::merkle_mismatch;
 
@@ -816,28 +819,29 @@ code block::accept(const chain_state& state,
     else if (state.is_under_checkpoint())
         return error::success;
 
-    // TODO: relates height to total of tx.size(true) (pool cache).
+    // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
     else if (bip141 && weight() > max_block_weight)
         return error::block_weight_limit;
 
+    // Relates block height to coinbase.
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
-    // TODO: relates height to total of tx.fee (pool cach).
+    // Relates block height to total of tx.fee (pool cache tx.fee).
     else if (!is_valid_coinbase_claim(state.height(),
         settings.subsidy_interval_blocks, settings.initial_subsidy(), bip42))
         return error::coinbase_value_limit;
 
-    // TODO: relates median time past to tx.locktime (pool cache min tx.time).
+    // Relates block time to each tx.locktime (pool cache tx.locktime).
     else if (!is_final(state.height(), block_time))
         return error::block_non_final;
 
-    // TODO: relates height to tx.hash(true) (pool cache).
+    // Relates block header to coinbase.
+    // This causes a second merkle root computation (uncached).
     else if (bip141 && !is_valid_witness_commitment())
         return error::invalid_witness_commitment;
 
-    // TODO: determine if performance benefit is worth excluding sigops here.
-    // TODO: relates block limit to total of tx.sigops (pool cache).
+    // Relates block limit to total of tx.sigops (pool cache tx.sigops).
     else if (transactions && signature_operations(bip16, bip141) > max_sigops)
         return error::block_embedded_sigop_limit;
 
