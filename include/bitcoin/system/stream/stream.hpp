@@ -43,4 +43,14 @@
 #include <bitcoin/system/stream/streams.hpp>
 #include <bitcoin/system/stream/stream_result.hpp>
 
+//*****************************************************************************
+// CONSENSUS:
+// Serialization must be consensus-normalized for the purpose of hashing
+// headers and transactions, otherwise valid transactions will seen as invalid.
+// Deserialization is neither a consensus nor a DoS consideration. It does not
+// matter in what form an object is obtained, just that hash serialization is
+// consensus-normalized. The 'write_variable()' method writes variable integers
+// in consensus-normal form, and all other byte writer methods are explicit.
+//*****************************************************************************
+
 #endif

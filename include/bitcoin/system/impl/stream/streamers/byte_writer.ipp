@@ -120,6 +120,8 @@ void byte_writer<OStream>::write_8_bytes_little_endian(uint64_t value) noexcept
     write_little_endian<uint64_t>(value);
 }
 
+// Normal consensus form.
+// There is exactly one representation for any number in the domain.
 template <typename OStream>
 void byte_writer<OStream>::write_variable(uint64_t value) noexcept
 {
@@ -144,6 +146,7 @@ void byte_writer<OStream>::write_variable(uint64_t value) noexcept
     }
 }
 
+// Normal client-server form.
 template <typename OStream>
 void byte_writer<OStream>::write_error_code(const code& ec) noexcept
 {
@@ -183,6 +186,7 @@ void byte_writer<OStream>::write_bytes(const uint8_t* data,
 
 // strings
 //-----------------------------------------------------------------------------
+// Normal p2p form (consensus hash no strings).
 
 template <typename OStream>
 void byte_writer<OStream>::write_string(const std::string& value) noexcept
