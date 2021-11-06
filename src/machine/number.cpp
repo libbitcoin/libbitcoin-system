@@ -68,10 +68,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
     // Clear the negative bit and negate the value.
     // The bit is the leftmost of the bits decoded (offset from right).
     if (negative_bit_set)
-    {
-        auto value = set_right(value_, sub1(to_bits(data.size())), false);
-        value_ = -value;
-    }
+        value_ = -set_right(value_, sub1(to_bits(data.size())), false);
 
     return true;
 }
@@ -97,7 +94,7 @@ data_chunk number::data() const
     // Set the negative bit, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
     else if (negative)
-        set_left(data.back());
+        set_left_into(data.back());
 
     return data;
 }

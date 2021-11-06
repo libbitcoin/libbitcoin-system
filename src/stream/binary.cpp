@@ -84,7 +84,8 @@ binary binary::from_data(size_t bits, data_chunk&& data) noexcept
     data.resize(ceilinged_divide(bits, byte_bits), pad);
 
     if (!data.empty())
-        mask_right(data.back(), absolute(ceilinged_modulo(bits, byte_bits)));
+        mask_right_into(data.back(),
+            absolute(ceilinged_modulo(bits, byte_bits)));
 
     return { std::move(data), bits };
 }

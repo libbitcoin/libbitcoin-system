@@ -60,7 +60,7 @@ template <typename OStream>
 void bit_writer<OStream>::write_bit(bool value) noexcept
 {
     // Insert bit into byte.
-    set_left(byte_, offset_++, value);
+    set_left_into(byte_, offset_++, value);
 
     // unload resets offset_ to zero.
     if (is_zero(shift()))

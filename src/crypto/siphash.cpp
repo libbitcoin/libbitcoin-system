@@ -44,21 +44,21 @@ static void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2, uint64_t& v3)
 {
     v0 += v1;
     v2 += v3;
-    v1 = rotate_left(v1, 13);
-    v3 = rotate_left(v3, 16);
+    rotate_left_into(v1, 13);
+    rotate_left_into(v3, 16);
     v1 ^= v0;
     v3 ^= v2;
 
-    v0 = rotate_left(v0, 32);
+    rotate_left_into(v0, 32);
 
     v2 += v1;
     v0 += v3;
-    v1 = rotate_left(v1, 17);
-    v3 = rotate_left(v3, 21);
+    rotate_left_into(v1, 17);
+    rotate_left_into(v3, 21);
     v1 ^= v2;
     v3 ^= v0;
 
-    v2 = rotate_left(v2, 32);
+    rotate_left_into(v2, 32);
 }
 
 // C++14: can make constexpr.

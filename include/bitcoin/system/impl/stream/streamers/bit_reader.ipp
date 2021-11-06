@@ -75,7 +75,7 @@ uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
     // Those bits are written from left to right using a right-relative offset.
     // Subtract one for size-to-index translation, avoiding iterator underflow.
     for (auto bit = bits; !is_zero(bit); --bit)
-        set_right(out, sub1(bit), read_bit());
+        set_right_into(out, sub1(bit), read_bit());
 
     return out;
 }
