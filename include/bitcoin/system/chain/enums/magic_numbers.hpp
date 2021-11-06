@@ -64,17 +64,14 @@ constexpr uint64_t satoshi_per_bitcoin = 100000000;
 //-----------------------------------------------------------------------------
 
 constexpr size_t relative_locktime_min_version = 2;
-constexpr size_t relative_locktime_seconds_shift = 9;
-constexpr uint32_t relative_locktime_mask = 0x0000ffff;
-constexpr uint32_t relative_locktime_disabled = 0x80000000;
-constexpr uint32_t relative_locktime_time_locked = 0x00400000;
+constexpr size_t relative_locktime_disabled_bit = 31;
+constexpr size_t relative_locktime_time_locked_bit = 22;
+constexpr size_t relative_locktime_seconds_shift_left = 9;
+constexpr size_t relative_locktime_mask_left = 16;
 
 // Witness serialization consensus constants (bip141).
 //-----------------------------------------------------------------------------
 
-constexpr uint8_t witness_marker = 0x00;
-constexpr uint8_t witness_flag = 0x01;
-constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr size_t fast_sigops_factor = 4;
 constexpr size_t max_fast_sigops = fast_sigops_factor * max_block_sigops;
 constexpr size_t light_weight_factor = 4;
@@ -83,6 +80,9 @@ constexpr size_t base_size_contribution = 3;
 constexpr size_t total_size_contribution = 1;
 constexpr size_t min_witness_program = 2;
 constexpr size_t max_witness_program = 40;
+constexpr uint32_t witness_head = 0xaa21a9ed;
+constexpr uint8_t witness_marker = 0x00;
+constexpr uint8_t witness_enabled = 0x01;
 
 // Policy constants.
 //-----------------------------------------------------------------------------

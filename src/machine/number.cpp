@@ -68,7 +68,10 @@ bool number::set_data(const data_chunk& data, size_t max_size)
     // Clear the negative bit and negate the value.
     // The bit is the leftmost of the bits decoded (offset from right).
     if (negative_bit_set)
-        value_ = -set_right(value_, sub1(to_bits(data.size())), false);
+    {
+        auto value = set_right(value_, sub1(to_bits(data.size())), false);
+        value_ = -value;
+    }
 
     return true;
 }

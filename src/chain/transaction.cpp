@@ -313,11 +313,13 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
         read(source, inputs_, wire, witness);
 
         // Detect witness as no inputs (marker) and expected flag (bip144).
-        const auto marker = inputs_.size() == witness_marker &&
-            source.peek_byte() == witness_flag;
+        const auto witness_transaction =
+            inputs_.size() == witness_marker &&
+            source.peek_byte() == witness_enabled;
 
         // This is always enabled so caller should validate with is_segregated.
-        if (marker)
+        // No premature check for empty witnesses, is caught in validation.
+        if (witness_transaction)
         {
             // Skip over the peeked witness flag.
             source.skip_byte();
@@ -338,14 +340,8 @@ bool transaction::from_data(reader& source, bool wire, bool witness)
         // Witness data is managed internal to inputs.
         read(source, outputs_, wire, witness);
         read(source, inputs_, wire, witness);
-        const auto locktime = source.read_variable();
-        const auto version = source.read_variable();
-
-        if (locktime > max_uint32 || version > max_uint32)
-            source.invalidate();
-
-        locktime_ = static_cast<uint32_t>(locktime);
-        version_ = static_cast<uint32_t>(version);
+        locktime_ = static_cast<uint32_t>(source.read_variable());
+        version_ = static_cast<uint32_t>(source.read_variable());
     }
 
     // TODO: optimize by having reader skip witness data.
@@ -444,12 +440,13 @@ void transaction::to_data(writer& sink, bool wire, bool witness) const
         witness &= is_segregated();
 
         // Wire (satoshi protocol) serialization.
+        // If witness then this requires the witness-allowed bit to be valid.
         sink.write_4_bytes_little_endian(version_);
 
         if (witness)
         {
             sink.write_byte(witness_marker);
-            sink.write_byte(witness_flag);
+            sink.write_byte(witness_enabled);
             write(sink, inputs_, wire, witness);
             write(sink, outputs_, wire, witness);
             write_witnesses(sink, inputs_);
@@ -509,7 +506,7 @@ size_t transaction::serialized_size(bool wire, bool witness) const
 
     // Must be both witness and wire encoding for bip144 serialization.
     return ((wire && witness) ? sizeof(witness_marker) : zero)
-        + ((wire && witness) ? sizeof(witness_flag) : zero)
+        + ((wire && witness) ? sizeof(witness_enabled) : zero)
         + (wire ? sizeof(version_) : variable_size(version_))
         + (wire ? sizeof(locktime_) : variable_size(locktime_))
         + variable_size(inputs_.size())
@@ -1062,6 +1059,8 @@ code transaction::check(uint64_t max_money, bool transaction_pool) const
     else if (transaction_pool && is_coinbase())
         return error::coinbase_transaction;
 
+    // This is redundant when executing within a block object.
+    // However, must be checked if accepting block transactions before blocks.
     else if (transaction_pool && is_internal_double_spend())
         return error::transaction_internal_double_spend;
 
@@ -1102,6 +1101,9 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && state.is_under_checkpoint())
         return error::premature_validation;
 
+    // This is deceptive, as number of inputs deserialized is zero, but this is
+    // only a serialization distinction. The transaction becomes constructed
+    // with inputs for consensus purposes. Old p2p nodes will reject the tx.
     // A segregated tx should appear empty if bip141 is not enabled.
     if (!bip141 && is_segregated())
         return error::empty_transaction;
@@ -1113,24 +1115,31 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
     if (transaction_pool && version() > state.maximum_transaction_version())
         return error::transaction_version;
 
+    // requires prevouts
     else if (is_missing_previous_outputs())
         return error::missing_previous_output;
 
+    // requires prevouts
     else if (is_confirmed_double_spend())
         return error::double_spend;
 
+    // requires prevouts
+    // TODO: rename to is_spent_coinbase_mature/error::imature_coinbase (?)
     // This relates height to maturity of spent coinbase.
     // Since reorganization may decrease height, this is not cache safe.
     // A decrease in validated height invalidate validation cache.
     else if (!is_mature(state.height()))
         return error::coinbase_maturity;
 
+    // requires prevouts
     else if (is_overspent())
         return error::spend_exceeds_value;
 
+    // requires prevouts
     else if (bip68 && is_locked(state.height(), state.median_time_past()))
         return error::sequence_locked;
 
+    // requires prevouts
     // This recomputes sigops to include (if bip16 is true) p2sh from prevouts.
     else if (transaction_pool && signature_operations(bip16, bip141) > max_sigops)
         return error::transaction_embedded_sigop_limit;

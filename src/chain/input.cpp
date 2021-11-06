@@ -402,19 +402,20 @@ bool input::is_segregated() const
 
 bool input::is_locked(size_t block_height, uint32_t median_time_past) const
 {
-    if (!is_zero(sequence_ & relative_locktime_disabled))
+    if (get_right(sequence_, relative_locktime_disabled_bit))
         return false;
 
     // bip68: a minimum block-height constraint over the input's age.
-    const auto minimum = (sequence_ & relative_locktime_mask);
     const auto& prevout = previous_output_.metadata;
+    const auto minimum = mask_left(sequence_, relative_locktime_mask_left);
 
-    if (!is_zero(sequence_ & relative_locktime_time_locked))
+    if (get_right(sequence_, relative_locktime_time_locked_bit))
     {
         // Median time past must be monotonically-increasing by block.
         BITCOIN_ASSERT(median_time_past >= prevout.median_time_past);
         const auto age_seconds = median_time_past - prevout.median_time_past;
-        return age_seconds < (minimum << relative_locktime_seconds_shift);
+        return age_seconds < shift_left(minimum,
+            relative_locktime_seconds_shift_left);
     }
 
     BITCOIN_ASSERT(block_height >= prevout.height);

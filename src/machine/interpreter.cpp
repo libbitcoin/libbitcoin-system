@@ -235,7 +235,7 @@ interpreter::result interpreter::op_rot2(program& program)
     auto copy_5 = *position_5;
     auto copy_4 = *position_4;
 
-    program.erase(position_5, position_4 + 1);
+    program.erase(position_5, add1(position_4));
     program.push_move(std::move(copy_5));
     program.push_move(std::move(copy_4));
     return error::success;
@@ -855,11 +855,11 @@ interpreter::result interpreter::op_check_sequence_verify(
     if (stack < 0)
         return error::op_check_sequence_verify3;
 
-    // The top stack item is positive, so conversion is safe.
-    const auto sequence = absolute(stack.int64());
+    // The top stack item is positive, and only 32 bits are ever tested.
+    const auto sequence = static_cast<uint32_t>(absolute(stack.int64()));
 
     // BIP112: the stack sequence is disabled, treat as nop3.
-    if (!is_zero(sequence & relative_locktime_disabled))
+    if (get_right(sequence, relative_locktime_disabled_bit))
         return op_nop(opcode::nop3);
 
     // BIP112: the stack sequence is enabled and tx version less than 2.
@@ -869,17 +869,17 @@ interpreter::result interpreter::op_check_sequence_verify(
     const auto tx_sequence = tx.inputs()[input_index].sequence();
 
     // BIP112: the transaction sequence is disabled.
-    if (!is_zero(tx_sequence & relative_locktime_disabled))
+    if (get_right(tx_sequence, relative_locktime_disabled_bit))
         return error::op_check_sequence_verify5;
 
     // BIP112: the stack sequence type differs from that of tx input.
-    if ((sequence & relative_locktime_time_locked) !=
-        (tx_sequence & relative_locktime_time_locked))
+    if (get_right(sequence, relative_locktime_time_locked_bit) !=
+        get_right(tx_sequence, relative_locktime_time_locked_bit))
         return error::op_check_sequence_verify6;
 
-    // BIP112: the masked stack sequence is greater than the tx sequence.
-    return (sequence & relative_locktime_mask) >
-        (tx_sequence & relative_locktime_mask) ?
+    // BIP112: the unmasked stack sequence is greater than that of tx sequence.
+    return (mask_left(sequence, relative_locktime_mask_left)) >
+        (mask_left(tx_sequence, relative_locktime_mask_left)) ?
         error::op_check_sequence_verify7 : error::success;
 }
 

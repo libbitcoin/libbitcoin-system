@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_below_min
 BOOST_AUTO_TEST_CASE(input__is_locked__disabled_block_type_sequence_age_below_minimum__false)
 {
     static const auto age = 7u;
-    static const auto sequence_disabled_block_type_minimum = relative_locktime_disabled | (age + 1);
+    static const auto sequence_disabled_block_type_minimum = bit_right<uint32_t>(relative_locktime_disabled_bit) | add1(age);
     input instance({}, {}, sequence_disabled_block_type_minimum);
     auto& prevout = instance.previous_output().metadata;
     prevout.height = 42;
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_block_type_sequence_age_below_mi
 BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_equals_minimum__false)
 {
     static const auto age = 7u;
-    static const auto age_seconds = 7u << relative_locktime_seconds_shift;
-    static const auto sequence_enabled_time_type_minimum = relative_locktime_time_locked | age;
+    static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
+    static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | age;
     input instance({}, {}, sequence_enabled_time_type_minimum);
     auto& prevout = instance.previous_output().metadata;
     prevout.median_time_past = 42;
@@ -207,8 +207,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_equals_min
 BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_above_minimum__false)
 {
     static const auto age = 7u;
-    static const auto age_seconds = 7u << relative_locktime_seconds_shift;
-    static const auto sequence_enabled_time_type_minimum = relative_locktime_time_locked | (age - 1);
+    static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
+    static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | sub1(age);
     input instance({}, {}, sequence_enabled_time_type_minimum);
     auto& prevout = instance.previous_output().metadata;
     prevout.median_time_past = 42;
@@ -218,8 +218,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_above_mini
 BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_below_minimum__true)
 {
     static const auto age = 7u;
-    static const auto age_seconds = 7u << relative_locktime_seconds_shift;
-    static const auto sequence_enabled_time_type_minimum = relative_locktime_time_locked | (age + 1);
+    static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
+    static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | add1(age);
     input instance({}, {}, sequence_enabled_time_type_minimum);
     auto& prevout = instance.previous_output().metadata;
     prevout.median_time_past = 42;
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_below_mini
 BOOST_AUTO_TEST_CASE(input__is_locked__disabled_time_type_sequence_age_below_minimum__false)
 {
     static const auto age = 7u;
-    static const auto age_seconds = 7u << relative_locktime_seconds_shift;
-    static const auto sequence_disabled_time_type_minimum = relative_locktime_disabled | relative_locktime_time_locked | (age + 1);
+    static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
+    static const auto sequence_disabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_disabled_bit) | bit_right<uint32_t>(relative_locktime_time_locked_bit) | add1(age);
     input instance({}, {}, sequence_disabled_time_type_minimum);
     auto& prevout = instance.previous_output().metadata;
     prevout.median_time_past = 42;
