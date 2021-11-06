@@ -288,7 +288,7 @@ static_assert(std::is_same<decltype(get_right<int32_t>(0, 0)), bool>::value, "")
 ////template <typename Type>
 ////constexpr bool set_left_test(Type value, size_t offset, bool state, Type expected)
 ////{
-////    return (set_left(value, offset, state) == expected) && (value == expected);
+////    return (set_left_into(value, offset, state) == expected) && (value == expected);
 ////}
 
 // set_left
@@ -345,7 +345,7 @@ static_assert(std::is_same<decltype(set_left<uint8_t>(0, 0, false)), uint8_t>::v
 ////template <typename Type>
 ////constexpr bool set_right_test(Type value, size_t offset, bool state, Type expected)
 ////{
-////    return (set_right(value, offset, state) == expected) && (value == expected);
+////    return (set_right_into(value, offset, state) == expected) && (value == expected);
 ////}
 
 // set_right
@@ -402,7 +402,7 @@ static_assert(std::is_same<decltype(set_right<uint8_t>(0, 0, false)), uint8_t>::
 ////template <typename Type>
 ////constexpr bool unmask_left_test(Type target, size_t bits, Type expected)
 ////{
-////    return (unmask_left(target, bits) == expected) && (target == expected);
+////    return (unmask_left_into(target, bits) == expected) && (target == expected);
 ////}
 
 // unmask_left
@@ -427,7 +427,7 @@ static_assert(std::is_same<decltype(unmask_left<uint8_t>(0)), uint8_t>::value, "
 ////template <typename Type>
 ////constexpr bool mask_left_test(Type target, size_t bits, Type expected)
 ////{
-////    return (mask_left(target, bits) == expected) && (target == expected);
+////    return (mask_left_into(target, bits) == expected) && (target == expected);
 ////}
 
 // mask_left
@@ -452,7 +452,7 @@ static_assert(std::is_same<decltype(mask_left<uint8_t>(0)), uint8_t>::value, "")
 template <typename Type>
 constexpr bool unmask_right_test(Type target, size_t bits, Type expected)
 {
-    return (unmask_right(target, bits) == expected) && (target == expected);
+    return (unmask_right_into(target, bits) == expected) && (target == expected);
 }
 
 // unmask_right
@@ -477,7 +477,7 @@ static_assert(std::is_same<decltype(unmask_right<uint8_t>(0)), uint8_t>::value, 
 ////template <typename Type>
 ////constexpr bool mask_right_test(Type target, size_t bits, Type expected)
 ////{
-////    return (mask_right(target, bits) == expected) && (target == expected);
+////    return (mask_right_into(target, bits) == expected) && (target == expected);
 ////}
 
 // mask_right
@@ -502,7 +502,7 @@ static_assert(std::is_same<decltype(mask_right<uint8_t>(0)), uint8_t>::value, ""
 ////template <typename Type>
 ////constexpr bool rotate_right_test(Type value, size_t bits, Type expected)
 ////{
-////    return (rotate_right(value, bits) == expected) && (value == expected);
+////    return (rotate_right_into(value, bits) == expected) && (value == expected);
 ////}
 
 // rotate_right
@@ -541,7 +541,7 @@ static_assert(rotate_right<uint8_t>(0x1d, 9) == 0x8e, "");
 ////template <typename Type>
 ////constexpr bool rotate_left_test(Type value, size_t bits, Type expected)
 ////{
-////    return (rotate_left(value, bits) == expected) && (value == expected);
+////    return (rotate_left_into(value, bits) == expected) && (value == expected);
 ////}
 
 // rotate_left
@@ -577,6 +577,12 @@ static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d, "");
 static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a, "");
 static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a, "");
 
+////template <typename Type>
+////constexpr bool shift_left_test(Type value, size_t bits, bool overflow, Type expected)
+////{
+////    return (shift_left_into(value, bits) == expected) && (value == expected);
+////}
+
 // shift_left
 static_assert(shift_left<uint8_t>(0, 0, true) == 0, "");
 static_assert(shift_left<uint8_t>(0, 1, true) == 0, "");
@@ -606,6 +612,12 @@ static_assert(shift_left<uint8_t>(1, 8, false) == 1, "");
 static_assert(shift_left<uint8_t>(1, 9, false) == 2, "");
 
 static_assert(std::is_same<decltype(shift_left<uint8_t>(0, 0, true)), uint8_t>::value, "");
+
+////template <typename Type>
+////constexpr bool shift_right_test(Type value, size_t bits, bool overflow, Type expected)
+////{
+////    return (shift_right_into(value, bits) == expected) && (value == expected);
+////}
 
 // shift_left
 static_assert(shift_right<uint8_t>(0x00, 0, true) == 0, "");
