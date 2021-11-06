@@ -46,6 +46,7 @@ namespace chain {
 
 using namespace bc::system::machine;
 
+// TODO: guard against static initialization race (move to using method).
 const hash_digest script::one = hash_literal(
     "0000000000000000000000000000000000000000000000000000000000000001");
 
@@ -565,7 +566,7 @@ static hash_digest sign_single(const transaction& tx, uint32_t input_index,
 
     // Trim and clear outputs except that of specified input index.
     const auto& outputs = tx.outputs();
-    output::list outs(input_index + 1);
+    output::list outs(add1(input_index));
 
     BITCOIN_ASSERT(input_index < outputs.size());
     outs.back() = outputs[input_index];
