@@ -649,7 +649,6 @@ bool block::is_valid_coinbase_script(size_t height) const
     return script::is_coinbase_pattern(script.operations(), height);
 }
 
-// TODO: merkle root is generated twice in validation.
 bool block::is_valid_witness_commitment() const
 {
     if (transactions_.empty() || transactions_.front().inputs().empty())
@@ -748,12 +747,12 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         proof_of_work_limit, scrypt))))
         return ec;
 
+    else if (transactions_.empty())
+        return error::empty_block;
+
     // Relates to total of tx.size (pool cache tx.size(false)).
     else if (serialized_size(false) > max_block_size)
         return error::block_size_limit;
-
-    else if (transactions_.empty())
-        return error::empty_block;
 
     // Coinbase transactions are not pooled but (cache is_coinbase).
     else if (!transactions_.front().is_coinbase())
@@ -764,6 +763,8 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
         return error::extra_coinbases;
 
     // Determinable from tx pool graph (cannot cache, must navigate).
+    // Satoshi implementation side effect, as tx order is otherwise irrelevant.
+    // Txs cannot form cycles under the presumption of hash non-collision.
     else if (is_forward_reference())
         return error::forward_reference;
 
@@ -772,6 +773,8 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     ////    return error::internal_duplicate;
 
     // Determinable from tx pool graph (cannot cache, must navigate).
+    // This also preempts the block merkle calculation DoS exploit.
+    // bitcointalk.org/?topic=102395
     else if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
@@ -804,6 +807,7 @@ code block::accept(const chain_state& state,
 {
     code ec;
     const auto bip16 = state.is_enabled(bip16_rule);
+    ////const auto bip30 = state.is_enabled(bip30_rule);
     const auto bip34 = state.is_enabled(bip34_rule);
     const auto bip42 = state.is_enabled(bip42_rule);
     const auto bip113 = state.is_enabled(bip113_rule);
@@ -827,20 +831,27 @@ code block::accept(const chain_state& state,
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
+    // requires prevouts
+    // This is a spentness check, applied at confirmation not validation.
+    ////else if (bip30 && is_coinbase_unspent())
+    ////    return error::unspent_coinbase_collision;
+
+    // requires prevouts
     // Relates block height to total of tx.fee (pool cache tx.fee).
     else if (!is_valid_coinbase_claim(state.height(),
         settings.subsidy_interval_blocks, settings.initial_subsidy(), bip42))
         return error::coinbase_value_limit;
 
+    // This merely rolls up checks already performed by tx accept.
     // Relates block time to each tx.locktime (pool cache tx.locktime).
     else if (!is_final(state.height(), block_time))
         return error::block_non_final;
 
-    // Relates block header to coinbase.
     // This causes a second merkle root computation (uncached).
     else if (bip141 && !is_valid_witness_commitment())
         return error::invalid_witness_commitment;
 
+    // requires prevouts
     // Relates block limit to total of tx.sigops (pool cache tx.sigops).
     else if (transactions && signature_operations(bip16, bip141) > max_sigops)
         return error::block_embedded_sigop_limit;

@@ -112,6 +112,7 @@ enum error_code_t
 
     // accept block
     block_non_final = 34,
+    ////coinbase_collision = 87,
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,

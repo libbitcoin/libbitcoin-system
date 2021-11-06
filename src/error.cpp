@@ -118,6 +118,7 @@ std::string error_category_impl::message(int ev) const noexcept
         { error::block_embedded_sigop_limit, "too many block embedded signature operations" },
         { error::invalid_witness_commitment, "invalid witness commitment" },
         { error::block_weight_limit, "block weight limit exceeded" },
+        ////{ error::coinbase_collision, "unspent coinbase collision" },
 
         // check transaction
         { error::empty_transaction, "transaction inputs or outputs empty" },
