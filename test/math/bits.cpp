@@ -400,54 +400,29 @@ static_assert(set_right<uint8_t>(0xff, 7, false) == 0x7f, "");
 static_assert(std::is_same<decltype(set_right<uint8_t>(0, 0, false)), uint8_t>::value, "");
 
 ////template <typename Type>
-////constexpr bool flag_left_test(Type target, size_t bits, Type expected)
+////constexpr bool unmask_left_test(Type target, size_t bits, Type expected)
 ////{
-////    return (flag_left(target, bits) == expected) && (target == expected);
+////    return (unmask_left(target, bits) == expected) && (target == expected);
 ////}
 
-// flag_left
-static_assert(flag_left<uint8_t>(0) == 0x00, "");
-static_assert(flag_left<uint8_t>(1) == 0x80, "");
-static_assert(flag_left<uint8_t>(2) == 0xc0, "");
-static_assert(flag_left<uint8_t>(3) == 0xe0, "");
-static_assert(flag_left<uint8_t>(4) == 0xf0, "");
-static_assert(flag_left<uint8_t>(5) == 0xf8, "");
-static_assert(flag_left<uint8_t>(6) == 0xfc, "");
-static_assert(flag_left<uint8_t>(7) == 0xfe, "");
-static_assert(flag_left<uint8_t>(8) == 0xff, "");
-static_assert(flag_left<uint16_t>(8) == 0xff00, "");
-static_assert(flag_left<uint32_t>(8) == 0xff000000, "");
-static_assert(flag_left<uint64_t>(8) == 0xff00000000000000, "");
-static_assert(flag_left<uint8_t>(0x00, 8) == 0xff, "");
-static_assert(flag_left<uint16_t>(0x0000, 8) == 0xff00, "");
-static_assert(flag_left<uint32_t>(0x00000000, 8) == 0xff000000, "");
-static_assert(flag_left<uint64_t>(0x0000000000000000, 8) == 0xff00000000000000, "");
-static_assert(std::is_same<decltype(flag_left<uint8_t>(0)), uint8_t>::value, "");
-
-template <typename Type>
-constexpr bool flag_right_test(Type target, size_t bits, Type expected)
-{
-    return (flag_right(target, bits) == expected) && (target == expected);
-}
-
-// flag_right
-static_assert(flag_right<uint8_t>(0) == 0, "");
-static_assert(flag_right<uint8_t>(1) == 0x01, "");
-static_assert(flag_right<uint8_t>(2) == 0x03, "");
-static_assert(flag_right<uint8_t>(3) == 0x07, "");
-static_assert(flag_right<uint8_t>(4) == 0x0f, "");
-static_assert(flag_right<uint8_t>(5) == 0x1f, "");
-static_assert(flag_right<uint8_t>(6) == 0x3f, "");
-static_assert(flag_right<uint8_t>(7) == 0x7f, "");
-static_assert(flag_right<uint8_t>(8) == 0xff, "");
-static_assert(flag_right<uint16_t>(8) == 0x00ff, "");
-static_assert(flag_right<uint32_t>(8) == 0x000000ff, "");
-static_assert(flag_right<uint64_t>(8) == 0x00000000000000ff, "");
-static_assert(flag_right<uint8_t>(0x00, 8) == 0xff, "");
-static_assert(flag_right<uint16_t>(0x0000, 8) == 0x00ff, "");
-static_assert(flag_right<uint32_t>(0x00000000, 8) == 0x000000ff, "");
-static_assert(flag_right<uint64_t>(0x0000000000000000, 8) == 0x00000000000000ff, "");
-static_assert(std::is_same<decltype(flag_right<uint8_t>(0)), uint8_t>::value, "");
+// unmask_left
+static_assert(unmask_left<uint8_t>(0) == 0x00, "");
+static_assert(unmask_left<uint8_t>(1) == 0x80, "");
+static_assert(unmask_left<uint8_t>(2) == 0xc0, "");
+static_assert(unmask_left<uint8_t>(3) == 0xe0, "");
+static_assert(unmask_left<uint8_t>(4) == 0xf0, "");
+static_assert(unmask_left<uint8_t>(5) == 0xf8, "");
+static_assert(unmask_left<uint8_t>(6) == 0xfc, "");
+static_assert(unmask_left<uint8_t>(7) == 0xfe, "");
+static_assert(unmask_left<uint8_t>(8) == 0xff, "");
+static_assert(unmask_left<uint16_t>(8) == 0xff00, "");
+static_assert(unmask_left<uint32_t>(8) == 0xff000000, "");
+static_assert(unmask_left<uint64_t>(8) == 0xff00000000000000, "");
+static_assert(unmask_left<uint8_t>(0x00, 8) == 0xff, "");
+static_assert(unmask_left<uint16_t>(0x0000, 8) == 0xff00, "");
+static_assert(unmask_left<uint32_t>(0x00000000, 8) == 0xff000000, "");
+static_assert(unmask_left<uint64_t>(0x0000000000000000, 8) == 0xff00000000000000, "");
+static_assert(std::is_same<decltype(unmask_left<uint8_t>(0)), uint8_t>::value, "");
 
 ////template <typename Type>
 ////constexpr bool mask_left_test(Type target, size_t bits, Type expected)
@@ -473,6 +448,31 @@ static_assert(mask_left<uint16_t>(0xffff, 8) == 0x00ff, "");
 static_assert(mask_left<uint32_t>(0xffffffff, 8) == 0x00ffffff, "");
 static_assert(mask_left<uint64_t>(0xffffffffffffffff, 8) == 0x00ffffffffffffff, "");
 static_assert(std::is_same<decltype(mask_left<uint8_t>(0)), uint8_t>::value, "");
+
+template <typename Type>
+constexpr bool unmask_right_test(Type target, size_t bits, Type expected)
+{
+    return (unmask_right(target, bits) == expected) && (target == expected);
+}
+
+// unmask_right
+static_assert(unmask_right<uint8_t>(0) == 0, "");
+static_assert(unmask_right<uint8_t>(1) == 0x01, "");
+static_assert(unmask_right<uint8_t>(2) == 0x03, "");
+static_assert(unmask_right<uint8_t>(3) == 0x07, "");
+static_assert(unmask_right<uint8_t>(4) == 0x0f, "");
+static_assert(unmask_right<uint8_t>(5) == 0x1f, "");
+static_assert(unmask_right<uint8_t>(6) == 0x3f, "");
+static_assert(unmask_right<uint8_t>(7) == 0x7f, "");
+static_assert(unmask_right<uint8_t>(8) == 0xff, "");
+static_assert(unmask_right<uint16_t>(8) == 0x00ff, "");
+static_assert(unmask_right<uint32_t>(8) == 0x000000ff, "");
+static_assert(unmask_right<uint64_t>(8) == 0x00000000000000ff, "");
+static_assert(unmask_right<uint8_t>(0x00, 8) == 0xff, "");
+static_assert(unmask_right<uint16_t>(0x0000, 8) == 0x00ff, "");
+static_assert(unmask_right<uint32_t>(0x00000000, 8) == 0x000000ff, "");
+static_assert(unmask_right<uint64_t>(0x0000000000000000, 8) == 0x00000000000000ff, "");
+static_assert(std::is_same<decltype(unmask_right<uint8_t>(0)), uint8_t>::value, "");
 
 ////template <typename Type>
 ////constexpr bool mask_right_test(Type target, size_t bits, Type expected)

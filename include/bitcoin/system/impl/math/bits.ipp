@@ -124,13 +124,13 @@ constexpr bool get_left(Value value, size_t offset)
 // set
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_integer<Value>>
-inline Value set_left(Value& target, size_t offset, bool state)
-{
-    // C++14: local variables allowed in constexpr.
-    return state ? ((target |= bit_left<Value>(offset))) :
-        ((target &= ones_complement(bit_left<Value>(offset))));
-}
+////template <typename Value, if_integer<Value>>
+////inline void set_left(Value& target, size_t offset, bool state)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    state ? target |= bit_left<Value>(offset) :
+////        target &= ones_complement(bit_left<Value>(offset));
+////}
 
 template <typename Value, if_integer<Value>>
 constexpr Value set_left(const Value& target, size_t offset, bool state)
@@ -141,13 +141,13 @@ constexpr Value set_left(const Value& target, size_t offset, bool state)
 }
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_integer<Value>>
-inline Value set_right(Value& target, size_t offset, bool state)
-{
-    // C++14: local variables allowed in constexpr.
-    return state ? ((target |= bit_right<Value>(offset))) :
-        ((target &= ones_complement(bit_right<Value>(offset))));
-}
+////template <typename Value, if_integer<Value>>
+////inline void set_right(Value& target, size_t offset, bool state)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    state ? target |= bit_right<Value>(offset) :
+////        target &= ones_complement(bit_right<Value>(offset));
+////}
 
 template <typename Value, if_integer<Value>>
 constexpr Value set_right(const Value& target, size_t offset, bool state)
@@ -155,52 +155,6 @@ constexpr Value set_right(const Value& target, size_t offset, bool state)
     // C++14: local variables allowed in constexpr.
     return state ? target | bit_right<Value>(offset) :
         target & ones_complement(bit_right<Value>(offset));
-}
-
-// flag
-
-// Flags support only unsigned Value because:
-// C++ standard: "Right-shift on signed integral types is an arithmetic right
-// shift, which performs sign-extension". In other words, repeatedly shifting
-// -1 of any integer width will produce "1" bits, indefinitely.
-// This is an implementation limitation and could otherwise be supported.
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_left(size_t bits)
-{
-    return ones_complement(bit_all<Value>() >> bits);
-}
-
-// constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value flag_left(Value& value, size_t bits)
-{
-    return ((value |= flag_left<Value>(bits)));
-}
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_left(const Value& value, size_t bits)
-{
-    return value | flag_left<Value>(bits);
-}
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_right(size_t bits)
-{
-    return ones_complement(bit_all<Value>() << bits);
-}
-
-// constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value flag_right(Value& value, size_t bits)
-{
-    return ((value |= flag_right<Value>(bits)));
-}
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr Value flag_right(const Value& value, size_t bits)
-{
-    return value | flag_right<Value>(bits);
 }
 
 // All below support only unsigned Value because:
@@ -217,11 +171,11 @@ constexpr Value mask_left(size_t bits)
 }
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value mask_left(Value& value, size_t bits)
-{
-    return ((value &= mask_left<Value>(bits)));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void mask_left(Value& value, size_t bits)
+////{
+////    value &= mask_left<Value>(bits);
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_left(const Value& value, size_t bits)
@@ -236,16 +190,62 @@ constexpr Value mask_right(size_t bits)
 }
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value mask_right(Value& value, size_t bits)
-{
-    return ((value &= mask_right<Value>(bits)));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void mask_right(Value& value, size_t bits)
+////{
+////    value &= mask_right<Value>(bits);
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value mask_right(const Value& value, size_t bits)
 {
     return value & mask_right<Value>(bits);
+}
+
+// unmask
+
+// Unmask supports only unsigned Value because:
+// C++ standard: "Right-shift on signed integral types is an arithmetic right
+// shift, which performs sign-extension". In other words, repeatedly shifting
+// -1 of any integer width will produce "1" bits, indefinitely.
+// This is an implementation limitation and could otherwise be supported.
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value unmask_left(size_t bits)
+{
+    return ones_complement(bit_all<Value>() >> bits);
+}
+
+// constexpr reference assignment not allowed.
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void unmask_left(Value& value, size_t bits)
+////{
+////    value |= unmask_left<Value>(bits);
+////}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value unmask_left(const Value& value, size_t bits)
+{
+    return value | unmask_left<Value>(bits);
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value unmask_right(size_t bits)
+{
+    return ones_complement(bit_all<Value>() << bits);
+}
+
+// constexpr reference assignment not allowed.
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void unmask_right(Value& value, size_t bits)
+////{
+////    value |= unmask_right<Value>(bits);
+////}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value unmask_right(const Value& value, size_t bits)
+{
+    return value | unmask_right<Value>(bits);
 }
 
 // rotate
@@ -254,14 +254,14 @@ constexpr Value mask_right(const Value& value, size_t bits)
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value rotate_left(Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    ////constexpr auto bits = width<Value>();
-    return ((value = (value << (shift % width<Value>())) |
-        (value >> (width<Value>() - (shift % width<Value>())))));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void rotate_left(Value& value, size_t shift)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    ////constexpr auto bits = width<Value>();
+////    (value = (value << (shift % width<Value>())) |
+////        (value >> (width<Value>() - (shift % width<Value>()))));
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_left(const Value& value, size_t shift)
@@ -273,14 +273,14 @@ constexpr Value rotate_left(const Value& value, size_t shift)
 }
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value rotate_right(Value& value, size_t shift)
-{
-    // C++14: local variables allowed in constexpr.
-    ////constexpr auto bits = width<Value>();
-    return ((value = (value << (width<Value>() - (shift % width<Value>())) |
-        (value >> (shift % width<Value>())))));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void rotate_right(Value& value, size_t shift)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    ////constexpr auto bits = width<Value>();
+////    (value = (value << (width<Value>() - (shift % width<Value>())) |
+////        (value >> (shift % width<Value>()))));
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_right(const Value& value, size_t shift)
@@ -302,14 +302,14 @@ constexpr Value rotate_right(const Value& value, size_t shift)
 // These are both default behaviors of different compilers.
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value shift_left(Value& value, size_t shift, bool overflow)
-{
-    // C++14: local variables allowed in constexpr.
-    ////constexpr auto bits = width<Value>();
-    return (overflow && shift >= width<Value>()) ? ((value = 0)) :
-        ((value <<= (shift % width<Value>())));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void shift_left(Value& value, size_t shift, bool overflow)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    ////constexpr auto bits = width<Value>();
+////    overflow && shift >= width<Value>() ? value = 0 :
+////        value <<= (shift % width<Value>());
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
@@ -321,14 +321,14 @@ constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
 }
 
 // constexpr reference assignment not allowed.
-template <typename Value, if_unsigned_integer<Value>>
-inline Value shift_right(Value& value, size_t shift, bool overflow)
-{
-    // C++14: local variables allowed in constexpr.
-    ////constexpr auto bits = width<Value>();
-    return (overflow && shift >= width<Value>()) ? ((value = 0)) :
-        ((value >>= (shift % width<Value>())));
-}
+////template <typename Value, if_unsigned_integer<Value>>
+////inline void shift_right(Value& value, size_t shift, bool overflow)
+////{
+////    // C++14: local variables allowed in constexpr.
+////    ////constexpr auto bits = width<Value>();
+////    overflow && shift >= width<Value>() ? value = 0 :
+////        value >>= (shift % width<Value>());
+////}
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift, bool overflow)
