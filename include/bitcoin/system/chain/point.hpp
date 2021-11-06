@@ -114,6 +114,15 @@ protected:
     void reset();
 
 private:
+    // TODO:
+    // The index is consensus-serialized as a fixed 4 bytes, however it is
+    // conceptually bound by input count. Code would be normalized to type it
+    // as size_t, casting upon serialization and deserialization. Guarding
+    // either would be unnecessary, as deserialization is not consensus-
+    // critical and if overflowed would create an invalid hash serialization.
+    // Store serialization may limit this to 2^16, as this is the byte-wise
+    // upper bound on the number of inputs that one transaction may contain
+    // while still confirming to the block byte size limit.
     hash_digest hash_;
     uint32_t index_;
     bool valid_;
