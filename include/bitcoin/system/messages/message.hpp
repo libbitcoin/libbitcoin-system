@@ -186,13 +186,15 @@ constexpr size_t max_locator = 43;
 
 /// Serialize a message object to the Bitcoin wire protocol encoding.
 template <typename Message>
-data_chunk serialize(const Message& packet, uint32_t version,
-    uint32_t magic)
+data_chunk serialize(const Message& packet, uint32_t version, uint32_t magic)
 {
     const auto heading_size = heading::satoshi_fixed_size();
     const auto payload_size = packet.serialized_size(version);
     const auto message_size = heading_size + payload_size;
 
+    // TODO: use a stream of message size, offset to write payload to end.
+    // Checksum the payload, then reset stream to start and write message.
+    // This will avoid the payload move, which is still a copy operation.
     data_chunk message;
     message.reserve(message_size);
     auto payload = packet.to_data(version);
