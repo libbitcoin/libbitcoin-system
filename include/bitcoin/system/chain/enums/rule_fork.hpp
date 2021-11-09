@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_RULE_FORK_HPP
 
 #include <cstdint>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -29,65 +30,65 @@ enum rule_fork : uint32_t
 {
     no_rules = 0,
 
-    /// Allow minimum difficulty blocks (hard fork, testnet).
-    difficult = 1u << 0,
-
-    /// Perform difficulty retargeting (hard fork, regtest).
-    retarget = 1u << 1,
-
     /// Pay-to-script-hash enabled (soft fork, feature).
-    bip16_rule = 1u << 2,
+    bip16_rule = bit_right<uint32_t>(1),
 
     /// No duplicated unspent transaction ids (soft fork, security).
-    bip30_rule = 1u << 3,
+    bip30_rule = bit_right<uint32_t>(2),
 
     /// Coinbase must include height (soft fork, security).
-    bip34_rule = 1u << 4,
+    bip34_rule = bit_right<uint32_t>(3),
 
     /// Finite monetary supply (soft fork, feature).
-    bip42_rule = 1u << 5,
+    bip42_rule = bit_right<uint32_t>(4),
+
+    /// Hashes limited by bitcoind database locks (soft & hard fork, patch).
+    bip50_rule = bit_right<uint32_t>(5),
 
     /// Strict DER signatures required (soft fork, security).
-    bip66_rule = 1u << 6,
+    bip66_rule = bit_right<uint32_t>(6),
 
     /// Operation nop2 becomes check locktime verify (soft fork, feature).
-    bip65_rule = 1u << 7,
+    bip65_rule = bit_right<uint32_t>(7),
 
     /// Hard code bip34-based activation heights (hard fork, optimization).
-    bip90_rule = 1u << 8,
+    bip90_rule = bit_right<uint32_t>(8),
 
     /// Enforce relative locktime (soft fork, feature).
-    bip68_rule = 1u << 9,
+    bip68_rule = bit_right<uint32_t>(9),
 
     /// Operation nop3 becomes check sequence verify (soft fork, feature).
-    bip112_rule = 1u << 10,
+    bip112_rule = bit_right<uint32_t>(10),
 
     /// Use median time past for locktime (soft fork, feature).
-    bip113_rule = 1u << 11,
+    bip113_rule = bit_right<uint32_t>(11),
 
     /// Segregated witness consensus layer (soft fork, feature).
-    bip141_rule = 1u << 12,
+    bip141_rule = bit_right<uint32_t>(12),
 
     /// Segregated witness v0 verification (soft fork, feature).
-    bip143_rule = 1u << 13,
+    bip143_rule = bit_right<uint32_t>(13),
 
     /// Prevent dummy value malleability (soft fork, feature).
-    bip147_rule = 1u << 14,
+    bip147_rule = bit_right<uint32_t>(14),
 
     // Future bitcoin forks work forward from << 15.
-    // Splitcoin/altcoin forks work backwards from << 30.
+    // Splitcoin/altcoin forks work backwards from << 31.
 
     /// Fix Satoshi's time warp bug (hard fork, security).
-    time_warp_patch = 1u << 28,
+    time_warp_patch = bit_right<uint32_t>(27),
 
     /// Fix target overflow for very low difficulty (hard fork, security).
-    retarget_overflow_patch = 1u << 29,
+    retarget_overflow_patch = bit_right<uint32_t>(28),
 
     /// Use scrypt hashing for proof of work (hard fork, feature).
-    scrypt_proof_of_work = 1u << 30,
+    scrypt_proof_of_work = bit_right<uint32_t>(29),
 
-    /// Sentinel bit to indicate tx has not been validated.
-    unverified = 1u << 31,
+    /// Perform difficulty retargeting (hard fork, regtest).
+    retarget = bit_right<uint32_t>(30),
+
+    /// Allow minimum difficulty blocks (hard fork, testnet).
+    difficult = bit_right<uint32_t>(31),
 
     /// Rules that use bip34-based activation.
     bip34_activations =
@@ -110,7 +111,7 @@ enum rule_fork : uint32_t
     /// TODO: rules that use taproot-style activation.
 
     /// Mask to set all rule bits.
-    all_rules = 0xffffffff
+    all_rules = bit_all<uint32_t>()
 };
 
 } // namespace chain
