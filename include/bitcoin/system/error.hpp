@@ -112,12 +112,13 @@ enum error_code_t
 
     // accept block
     block_non_final = 34,
-    ////coinbase_collision = 87,
     coinbase_height_mismatch = 37,
     coinbase_value_limit = 41,
     block_embedded_sigop_limit = 52,
     invalid_witness_commitment = 25,
     block_weight_limit = 82,
+    temporary_hash_limit = 87,
+    unspent_coinbase_collision = 88,
 
     // check transaction
     empty_transaction = 20,

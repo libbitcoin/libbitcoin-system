@@ -24,6 +24,7 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
+#include <set>
 #include <type_traits>
 #include <utility>
 #include <unordered_map>
@@ -440,7 +441,7 @@ size_t block::total_non_coinbase_inputs() const
     };
 
     const auto& txs = transactions_;
-    value = std::accumulate(txs.begin() + 1, txs.end(), zero, inputs);
+    value = std::accumulate(std::next(txs.begin()), txs.end(), zero, inputs);
     non_coinbase_inputs_ = value;
 
     mutex_.unlock();
@@ -506,6 +507,47 @@ bool block::is_extra_coinbases() const
     return std::any_of(std::next(txs.begin()), txs.end(), value);
 }
 
+bool block::is_unspent_coinbase_collision() const
+{
+    // This is excluded under two bip30 exception blocks.
+    // This cannot occur in any branch above bip34, due to height in coinbase.
+    // BIP34 is checkpoint buried, so is always active, making this is moot.
+    return false;
+}
+
+// TODO: add bip50 to chain_state with timestamp range activation.
+// "Special short-term limits to avoid 10,000 BDB lock limit.
+// Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
+// header.timestamp > 1363039171 && header.timestamp < 1368576000."
+// BIP50 is checkpoint buried, making this always inactive.
+bool block::is_hash_limit_exceeded() const
+{
+    if (transactions_.empty())
+        return false;
+
+    // A set is used to collapse duplicates.
+    std::set<hash_digest> hashes;
+
+    // Just the coinbase tx hash, skip its null input hashes.
+    const auto& txs = transactions_;
+    hashes.insert(txs.front().hash());
+
+    const auto tx_inserter = [&hashes](const transaction& tx)
+    {
+        const auto input_inserter = [&hashes](const input& input)
+        {
+            hashes.insert(input.previous_output().hash());
+        };
+
+        hashes.insert(tx.hash());
+        const auto& inputs = tx.inputs();
+        std::for_each(inputs.begin(), inputs.end(), input_inserter);
+    };
+
+    std::for_each(std::next(txs.begin()), txs.end(), tx_inserter);
+    return hashes.size() <= hash_limit;
+}
+
 bool block::is_final(size_t height, uint32_t block_time) const
 {
     const auto value = [=](const transaction& tx)
@@ -520,11 +562,17 @@ bool block::is_final(size_t height, uint32_t block_time) const
 // Distinctness is defined by transaction hash.
 bool block::is_distinct_transaction_set() const
 {
-    const auto hasher = [](const transaction& tx) { return tx.hash(); };
+    // A set is used to collapse duplicates.
+    std::set<hash_digest> hashes;
+
+    const auto hasher = [&hashes](const transaction& tx)
+    {
+        hashes.insert(tx.hash());
+    };
+
     const auto& txs = transactions_;
-    hash_list hashes(txs.size());
-    std::transform(txs.begin(), txs.end(), hashes.begin(), hasher);
-    return is_distinct(std::move(hashes));
+    std::for_each(txs.begin(), txs.end(), hasher);
+    return hashes.size() == txs.size();
 }
 
 hash_digest block::generate_merkle_root(bool witness) const
@@ -588,18 +636,19 @@ bool block::is_internal_double_spend() const
     if (transactions_.empty())
         return false;
 
-    point::list outs;
-    outs.reserve(total_non_coinbase_inputs());
-    const auto& txs = transactions_;
+    // A set is used to collapse duplicates.
+    std::set<point> outs;
 
-    // Merge the prevouts of all non-coinbase transactions into one set.
-    for (auto tx = std::next(txs.begin()); tx != txs.end(); ++tx)
+    const auto inserter = [&outs](const transaction& tx)
     {
-        auto out = tx->previous_outputs();
+        auto out = tx.previous_outputs();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
-    }
+    };
 
-    return !is_distinct(std::move(outs));
+    // Move the copied prevouts of all non-coinbase transactions into one set.
+    const auto& txs = transactions_;
+    std::for_each(std::next(txs.begin()), txs.end(), inserter);
+    return outs.size() != total_non_coinbase_inputs();
 }
 
 bool block::is_valid_merkle_root() const
@@ -754,11 +803,11 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     else if (serialized_size(false) > max_block_size)
         return error::block_size_limit;
 
-    // Coinbase transactions are not pooled but (cache is_coinbase).
+    // Coinbase transactions are not pooled (cache is_coinbase).
     else if (!transactions_.front().is_coinbase())
         return error::first_not_coinbase;
 
-    // Coinbase transactions are not pooled but (cache is_coinbase).
+    // Coinbase transactions are not pooled (cache is_coinbase).
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
@@ -768,12 +817,12 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     else if (is_forward_reference())
         return error::forward_reference;
 
-    // This is subset of is_internal_double_spend if collisions cannot happen.
+    // Subset of is_internal_double_spend if sha256 collisions cannot happen.
     ////else if (!is_distinct_transaction_set())
     ////    return error::internal_duplicate;
 
     // Determinable from tx pool graph (cannot cache, must navigate).
-    // This also preempts the block merkle calculation DoS exploit.
+    // This also precludes the block merkle calculation DoS exploit.
     // bitcointalk.org/?topic=102395
     else if (is_internal_double_spend())
         return error::block_internal_double_spend;
@@ -807,9 +856,10 @@ code block::accept(const chain_state& state,
 {
     code ec;
     const auto bip16 = state.is_enabled(bip16_rule);
-    ////const auto bip30 = state.is_enabled(bip30_rule);
+    const auto bip30 = state.is_enabled(bip30_rule);
     const auto bip34 = state.is_enabled(bip34_rule);
     const auto bip42 = state.is_enabled(bip42_rule);
+    const auto bip50 = state.is_enabled(bip50_rule);
     const auto bip113 = state.is_enabled(bip113_rule);
     const auto bip141 = state.is_enabled(bip141_rule);
 
@@ -827,14 +877,18 @@ code block::accept(const chain_state& state,
     else if (bip141 && weight() > max_block_weight)
         return error::block_weight_limit;
 
-    // Relates block height to coinbase.
+    // Relates block height to coinbase, always under checkpoint.
     else if (bip34 && !is_valid_coinbase_script(state.height()))
         return error::coinbase_height_mismatch;
 
+    // Relates block time to tx and prevout hashes, always under checkpoint.
+    else if (bip50 && is_hash_limit_exceeded())
+        return error::temporary_hash_limit;
+
     // requires prevouts
-    // This is a spentness check, applied at confirmation not validation.
-    ////else if (bip30 && is_coinbase_unspent())
-    ////    return error::unspent_coinbase_collision;
+    // This is a spentness check, to be applied at confirmation not validation.
+    else if (bip30 && is_unspent_coinbase_collision())
+        return error::unspent_coinbase_collision;
 
     // requires prevouts
     // Relates block height to total of tx.fee (pool cache tx.fee).

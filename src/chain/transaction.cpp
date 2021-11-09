@@ -905,12 +905,12 @@ point::list transaction::previous_outputs() const
     point::list out(no_fill_allocator);
     out.resize(inputs_.size());
 
-    std::transform(inputs_.begin(), inputs_.end(), out.begin(),
-        [](const input& input)
-        {
-            return input.previous_output();
-        });
+    const auto prevout = [](const input& input)
+    {
+        return input.previous_output();
+    };
 
+    std::transform(inputs_.begin(), inputs_.end(), out.begin(), prevout);
     return out;
 }
 
@@ -939,12 +939,12 @@ hash_list transaction::missing_previous_transactions() const
     hash_list hashes(no_fill_allocator);
     hashes.resize(points.size());
 
-    std::transform(points.begin(), points.end(), hashes.begin(),
-        [](const output_point& point)
-        {
-            return point.hash();
-        });
+    const auto hasher = [](const output_point& point)
+    {
+        return point.hash();
+    };
 
+    std::transform(points.begin(), points.end(), hashes.begin(), hasher);
     return std::move(distinct(hashes));
 }
 
