@@ -315,15 +315,19 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval()))
-        return work_required_retarget(values, forks, settings.work_limit(),
-            settings.proof_of_work_limit, settings.minimum_timespan(),
+        return work_required_retarget(values, forks,
+            settings.work_limit(),
+            settings.proof_of_work_limit,
+            settings.minimum_timespan(),
             settings.maximum_timespan(),
             settings.retargeting_interval_seconds);
 
     // Testnet retargets easy on inter-interval.
     if (!script::is_enabled(forks, rule_fork::difficult))
-        return easy_work_required(values, settings.retargeting_interval(),
-            settings.proof_of_work_limit, settings.block_spacing_seconds);
+        return easy_work_required(values,
+            settings.retargeting_interval(),
+            settings.proof_of_work_limit,
+            settings.block_spacing_seconds);
 
     // Mainnet not retargeting.
     return bits_high(values);
@@ -550,7 +554,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // If version collection overflows, dequeue oldest member.
     if (data.version.ordered.size() > version_count(height, forks,
-            settings.activation_sample))
+        settings.activation_sample))
         data.version.ordered.pop_front();
 
     // If timestamp collection overflows, dequeue oldest member.
