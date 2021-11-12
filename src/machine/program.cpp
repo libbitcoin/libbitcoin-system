@@ -150,12 +150,13 @@ code program::evaluate(const operation& op)
 // Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_invalid() const
 {
-    // Stack elements must be within push size limit (bip141).
-    // Invalid operations indicates a failure deserializing individual ops.
-    return !script_.is_valid_operations()
-        || script_.is_unspendable()
-        || script_.is_oversized()
-        || !chain::witness::is_push_size(primary_);
+    const auto bip141 = script::is_enabled(forks_, rule_fork::bip141_rule);
+    const auto nops_rule = script::is_enabled(forks_, rule_fork::nops_rule);
+
+    // TODO: nops rule must be enabled.
+    return 
+        (/*nops_rule && */script_.is_oversized()) ||
+        (bip141 && !chain::witness::is_push_size(primary_));
 }
 
 uint32_t program::forks() const
@@ -211,6 +212,13 @@ size_t program::operation_count() const
 
 bool operation_overflow(size_t count)
 {
+    // ************************************************************************
+    // CONSENSUS:
+    // Satoshi compares the count to 200 with a composed postfix increment,
+    // which makes the actual maximum 201, not the presumably-intended 200.
+    // The code was later revised to make this explicit, by use of a prefix
+    // increment against a limit of 201.
+    // ************************************************************************
     return count > max_counted_ops;
 }
 
@@ -241,13 +249,15 @@ bool program::set_jump_register(const operation& op, int32_t offset)
     if (script_.empty())
         return false;
 
+    // This avoids std::find_if use of equality operator override.
     const auto finder = [&op](const operation& operation)
     {
         return &operation == &op;
     };
 
-    // This is not efficient but is simplifying and subscript is rarely used.
-    // Otherwise we must track the program counter through each evaluation.
+    // This is not efficient (linear) but simplifying and jump is rarely used.
+    // TODO: use an iterator against script_ for the opcode, then just copy it
+    // to jump_ and increment it below.
     jump_ = std::find_if(script_.begin(), script_.end(), finder);
 
     if (jump_ == script_.end())
@@ -257,7 +267,7 @@ bool program::set_jump_register(const operation& op, int32_t offset)
     // Even if the opcode is last in the sequence the increment is valid (end).
     BITCOIN_ASSERT_MSG(offset == 1, "unguarded jump offset");
 
-    jump_ += offset;
+    std::advance(jump_, offset);
     return true;
 }
 
@@ -444,7 +454,6 @@ bool program::is_stack_overflow() const
 
 bool program::if_(const operation& op) const
 {
-    // Skip operation if failed and the operator is unconditional.
     return op.is_conditional() || succeeded();
 }
 
@@ -470,11 +479,9 @@ program::stack_iterator program::position(size_t index) /*const*/
 // Pop jump-to-end, push all back, use to construct a script.
 program::operations program::subscript() const
 {
-    operations ops;
-
-    for (auto op = jump(); op != end(); ++op)
-        ops.push_back(*op);
-
+    static default_allocator<operation> no_fill_allocator{};
+    operations ops(std::distance(jump(), end()), no_fill_allocator);
+    std::copy(jump(), end(), ops.begin());
     return ops;
 }
 
