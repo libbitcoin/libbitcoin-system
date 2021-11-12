@@ -112,7 +112,7 @@ enum class opcode : uint8_t
     push_two_size = 77,
     push_four_size = 78,
     push_negative_1 = 79,   // is_numeric
-    reserved_80 = 80,       // [reserved]
+    reserved_80 = 80,       // is_reserved [op_reserved]
     push_positive_1 = 81,   // is_numeric, is_positive, is_version
     push_positive_2 = 82,   // is_numeric, is_positive, is_version
     push_positive_3 = 83,   // is_numeric, is_positive, is_version
@@ -131,18 +131,18 @@ enum class opcode : uint8_t
     push_positive_16 = 96,  // is_numeric, is_positive, is_version
 
     //-------------------------------------------------------------------------
-    // is_counted
+    // is_counted [notice that reserved_80 is not counted]
 
     nop = 97,
-    reserved_98 = 98,       // [ver]
+    op_ver = 98,            // is_reserved [disabled in 0.3.6]
     if_ = 99,               // is_conditional
     notif = 100,            // is_conditional
-    disabled_verif = 101,   // is_disabled
-    disabled_vernotif = 102,// is_disabled
+    op_verif = 101,         // is_invalid [disabled in 0.3.6]
+    op_vernotif = 102,      // is_invalid [disabled in 0.3.6]
     else_ = 103,            // is_conditional
     endif = 104,            // is_conditional
     verify = 105,
-    return_ = 106,
+    op_return = 106,        // is_reserved [disabled in 0.3.6]
     toaltstack = 107,
     fromaltstack = 108,
     drop2 = 109,
@@ -162,34 +162,34 @@ enum class opcode : uint8_t
     rot = 123,
     swap = 124,
     tuck = 125,
-    disabled_cat = 126,     // is_disabled
-    disabled_substr = 127,  // is_disabled
-    disabled_left = 128,    // is_disabled
-    disabled_right = 129,   // is_disabled
+    op_cat = 126,           // is_invalid [disabled in 0.3.10]
+    op_substr = 127,        // is_invalid [disabled in 0.3.10]
+    op_left = 128,          // is_invalid [disabled in 0.3.10]
+    op_right = 129,         // is_invalid [disabled in 0.3.10]
     size = 130,
-    disabled_invert = 131,  // is_disabled
-    disabled_and = 132,     // is_disabled
-    disabled_or = 133,      // is_disabled
-    disabled_xor = 134,     // is_disabled
+    op_invert = 131,        // is_invalid [disabled in 0.3.10]
+    op_and = 132,           // is_invalid [disabled in 0.3.10]
+    op_or = 133,            // is_invalid [disabled in 0.3.10]
+    op_xor = 134,           // is_invalid [disabled in 0.3.10]
     equal = 135,
     equalverify = 136,
-    reserved_137 = 137,     // [reserved1]
-    reserved_138 = 138,     // [reserved2]
+    reserved_137 = 137,     // is_reserved [op_reserved1]
+    reserved_138 = 138,     // is_reserved [op_reserved2]
     add1 = 139,
     sub1 = 140,
-    disabled_mul2 = 141,    // is_disabled
-    disabled_div2 = 142,    // is_disabled
+    op_mul2 = 141,          // is_invalid [disabled in 0.3.10]
+    op_div2 = 142,          // is_invalid [disabled in 0.3.10]
     negate = 143,
     abs = 144,
     not_ = 145,
     nonzero = 146,
     add = 147,
     sub = 148,
-    disabled_mul = 149,     // is_disabled
-    disabled_div = 150,     // is_disabled
-    disabled_mod = 151,     // is_disabled
-    disabled_lshift = 152,  // is_disabled
-    disabled_rshift = 153,  // is_disabled
+    op_mul = 149,           // is_invalid [disabled in 0.3.10]
+    op_div = 150,           // is_invalid [disabled in 0.3.10]
+    op_mod = 151,           // is_invalid [disabled in 0.3.10]
+    op_lshift = 152,        // is_invalid [disabled in 0.3.10]
+    op_rshift = 153,        // is_invalid [disabled in 0.3.10]
     booland = 154,
     boolor = 155,
     numequal = 156,
@@ -212,6 +212,10 @@ enum class opcode : uint8_t
     checksigverify = 173,
     checkmultisig = 174,
     checkmultisigverify = 175,
+
+    //-------------------------------------------------------------------------
+    // Promoted from reserved to nop by [0.3.6] hard fork.
+
     nop1 = 176,
     nop2 = 177,
     checklocktimeverify = nop2,
@@ -224,7 +228,12 @@ enum class opcode : uint8_t
     nop8 = 183,
     nop9 = 184,
     nop10 = 185,
-    reserved_186 = 186,
+
+    //-------------------------------------------------------------------------
+    // These are enumerated to provide explicit deserialization of byte opcode.
+    // is_reserved [unnamed]
+
+    reserved_186 = 186,     // To be subsumed by bip342 (tapscript).
     reserved_187 = 187,
     reserved_188 = 188,
     reserved_189 = 189,

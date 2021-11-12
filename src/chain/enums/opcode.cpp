@@ -129,7 +129,7 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
         case opcode::push_negative_1:
             return "-1";
         case opcode::reserved_80:
-            return "reserved";          // deprecated, use hex
+            return "reserved";
         case opcode::push_positive_1:
         case opcode::push_positive_2:
         case opcode::push_positive_3:
@@ -149,23 +149,23 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
             return std::to_string(static_cast<uint8_t>(value) - push_zero);
         case opcode::nop:
             return "nop";
-        case opcode::reserved_98:
-            return "ver";               // deprecated, use hex
+        case opcode::op_ver:
+            return "ver";
         case opcode::if_:
             return "if";
         case opcode::notif:
             return "notif";
-        case opcode::disabled_verif:
-            return "verif";             // deprecated, use hex
-        case opcode::disabled_vernotif:
-            return "vernotif";          // deprecated, use hex
+        case opcode::op_verif:
+            return "verif";
+        case opcode::op_vernotif:
+            return "vernotif";
         case opcode::else_:
             return "else";
         case opcode::endif:
             return "endif";
         case opcode::verify:
             return "verify";
-        case opcode::return_:
+        case opcode::op_return:
             return "return";
         case opcode::toaltstack:
             return "toaltstack";
@@ -205,39 +205,39 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
             return "swap";
         case opcode::tuck:
             return "tuck";
-        case opcode::disabled_cat:
+        case opcode::op_cat:
             return "cat";
-        case opcode::disabled_substr:
+        case opcode::op_substr:
             return "substr";
-        case opcode::disabled_left:
+        case opcode::op_left:
             return "left";
-        case opcode::disabled_right:
+        case opcode::op_right:
             return "right";
         case opcode::size:
             return "size";
-        case opcode::disabled_invert:
+        case opcode::op_invert:
             return "invert";
-        case opcode::disabled_and:
+        case opcode::op_and:
             return "and";
-        case opcode::disabled_or:
+        case opcode::op_or:
             return "or";
-        case opcode::disabled_xor:
+        case opcode::op_xor:
             return "xor";
         case opcode::equal:
             return "equal";
         case opcode::equalverify:
             return "equalverify";
         case opcode::reserved_137:
-            return "reserved_137";      // deprecated, use hex
+            return "reserved_137";
         case opcode::reserved_138:
-            return "reserved_138";      // deprecated, use hex
+            return "reserved_138";
         case opcode::add1:
             return "1add";
         case opcode::sub1:
             return "1sub";
-        case opcode::disabled_mul2:
+        case opcode::op_mul2:
             return "2mul";
-        case opcode::disabled_div2:
+        case opcode::op_div2:
             return "2div";
         case opcode::negate:
             return "negate";
@@ -251,15 +251,15 @@ std::string opcode_to_string(opcode value, uint32_t active_forks)
             return "add";
         case opcode::sub:
             return "sub";
-        case opcode::disabled_mul:
+        case opcode::op_mul:
             return "mul";
-        case opcode::disabled_div:
+        case opcode::op_div:
             return "div";
-        case opcode::disabled_mod:
+        case opcode::op_mod:
             return "mod";
-        case opcode::disabled_lshift:
+        case opcode::op_lshift:
             return "lshift";
-        case opcode::disabled_rshift:
+        case opcode::op_rshift:
             return "rshift";
         case opcode::booland:
             return "booland";
@@ -508,15 +508,15 @@ bool opcode_from_string(opcode& out_code, const std::string& value)
     RETURN_IF_OPCODE("15", push_positive_15);
     RETURN_IF_OPCODE("16", push_positive_16);
     RETURN_IF_OPCODE("nop", nop);
-    RETURN_IF_OPCODE_OR_ALIAS("reserved_98", "ver", reserved_98);
+    RETURN_IF_OPCODE_OR_ALIAS("op_ver", "ver", op_ver);
     RETURN_IF_OPCODE("if", if_);
     RETURN_IF_OPCODE("notif", notif);
-    RETURN_IF_OPCODE_OR_ALIAS("disabled_verif", "verif", disabled_verif);
-    RETURN_IF_OPCODE_OR_ALIAS("disabled_vernotif", "vernotif", disabled_vernotif);
+    RETURN_IF_OPCODE_OR_ALIAS("op_verif", "verif", op_verif);
+    RETURN_IF_OPCODE_OR_ALIAS("op_vernotif", "vernotif", op_vernotif);
     RETURN_IF_OPCODE("else", else_);
     RETURN_IF_OPCODE("endif", endif);
     RETURN_IF_OPCODE("verify", verify);
-    RETURN_IF_OPCODE("return", return_);
+    RETURN_IF_OPCODE("return", op_return);
     RETURN_IF_OPCODE("toaltstack", toaltstack);
     RETURN_IF_OPCODE("fromaltstack", fromaltstack);
     RETURN_IF_OPCODE_OR_ALIAS("drop2", "2drop", drop2);
@@ -536,34 +536,34 @@ bool opcode_from_string(opcode& out_code, const std::string& value)
     RETURN_IF_OPCODE("rot", rot);
     RETURN_IF_OPCODE("swap", swap);
     RETURN_IF_OPCODE("tuck", tuck);
-    RETURN_IF_OPCODE("cat", disabled_cat);
-    RETURN_IF_OPCODE("substr", disabled_substr);
-    RETURN_IF_OPCODE("left", disabled_left);
-    RETURN_IF_OPCODE("right", disabled_right);
+    RETURN_IF_OPCODE("cat", op_cat);
+    RETURN_IF_OPCODE("substr", op_substr);
+    RETURN_IF_OPCODE("left", op_left);
+    RETURN_IF_OPCODE("right", op_right);
     RETURN_IF_OPCODE("size", size);
-    RETURN_IF_OPCODE("invert", disabled_invert);
-    RETURN_IF_OPCODE("and", disabled_and);
-    RETURN_IF_OPCODE("or", disabled_or);
-    RETURN_IF_OPCODE("xor", disabled_xor);
+    RETURN_IF_OPCODE("invert", op_invert);
+    RETURN_IF_OPCODE("and", op_and);
+    RETURN_IF_OPCODE("or", op_or);
+    RETURN_IF_OPCODE("xor", op_xor);
     RETURN_IF_OPCODE("equal", equal);
     RETURN_IF_OPCODE("equalverify", equalverify);
     RETURN_IF_OPCODE_OR_ALIAS("reserved_137", "reserved1", reserved_137);
     RETURN_IF_OPCODE_OR_ALIAS("reserved_138", "reserved2", reserved_138);
     RETURN_IF_OPCODE_OR_ALIAS("add1", "1add", add1);
     RETURN_IF_OPCODE_OR_ALIAS("sub1", "1sub", sub1);
-    RETURN_IF_OPCODE_OR_ALIAS("mul2", "2mul", disabled_mul2);
-    RETURN_IF_OPCODE_OR_ALIAS("div2", "2div", disabled_div2);
+    RETURN_IF_OPCODE_OR_ALIAS("mul2", "2mul", op_mul2);
+    RETURN_IF_OPCODE_OR_ALIAS("div2", "2div", op_div2);
     RETURN_IF_OPCODE("negate", negate);
     RETURN_IF_OPCODE("abs", abs);
     RETURN_IF_OPCODE("not", not_);
     RETURN_IF_OPCODE_OR_ALIAS("nonzero", "0notequal", nonzero);
     RETURN_IF_OPCODE("add", add);
     RETURN_IF_OPCODE("sub", sub);
-    RETURN_IF_OPCODE("mul", disabled_mul);
-    RETURN_IF_OPCODE("div", disabled_div);
-    RETURN_IF_OPCODE("mod", disabled_mod);
-    RETURN_IF_OPCODE("lshift", disabled_lshift);
-    RETURN_IF_OPCODE("rshift", disabled_rshift);
+    RETURN_IF_OPCODE("mul", op_mul);
+    RETURN_IF_OPCODE("div", op_div);
+    RETURN_IF_OPCODE("mod", op_mod);
+    RETURN_IF_OPCODE("lshift", op_lshift);
+    RETURN_IF_OPCODE("rshift", op_rshift);
     RETURN_IF_OPCODE("booland", booland);
     RETURN_IF_OPCODE("boolor", boolor);
     RETURN_IF_OPCODE("numequal", numequal);
