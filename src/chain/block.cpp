@@ -519,7 +519,6 @@ bool block::is_unspent_coinbase_collision() const
 // "Special short-term limits to avoid 10,000 BDB lock limit.
 // Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
 // header.timestamp > 1363039171 && header.timestamp < 1368576000."
-// BIP50 is checkpoint buried, making this always inactive.
 bool block::is_hash_limit_exceeded() const
 {
     if (transactions_.empty())
