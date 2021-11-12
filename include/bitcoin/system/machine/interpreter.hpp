@@ -37,9 +37,8 @@ public:
     // Operations (shared).
     //-------------------------------------------------------------------------
 
-    static result op_nop(chain::opcode);
-    static result op_disabled(chain::opcode);
-    static result op_reserved(chain::opcode);
+    static result op_unevaluated(chain::opcode);
+    static result op_nop(program& program, chain::opcode);
     static result op_push_number(program& program, uint8_t value);
     static result op_push_size(program& program, const chain::operation& op);
     static result op_push_data(program& program, const data_chunk& data,
@@ -48,8 +47,12 @@ public:
     // Operations (not shared).
     //-------------------------------------------------------------------------
 
+    static result op_nop(chain::opcode);
+    static result op_ver(program& program);
     static result op_if(program& program);
     static result op_notif(program& program);
+    static result op_verif(program& program);
+    static result op_vernotif(program& program);
     static result op_else(program& program);
     static result op_endif(program& program);
     static result op_verify(program& program);
@@ -73,17 +76,32 @@ public:
     static result op_rot(program& program);
     static result op_swap(program& program);
     static result op_tuck(program& program);
+    static result op_cat(program& program);
+    static result op_substr(program& program);
+    static result op_left(program& program);
+    static result op_right(program& program);
     static result op_size(program& program);
+    static result op_invert(program& program);
+    static result op_and(program& program);
+    static result op_or(program& program);
+    static result op_xor(program& program);
     static result op_equal(program& program);
     static result op_equal_verify(program& program);
     static result op_add1(program& program);
     static result op_sub1(program& program);
+    static result op_mul2(program& program);
+    static result op_div2(program& program);
     static result op_negate(program& program);
     static result op_abs(program& program);
     static result op_not(program& program);
     static result op_nonzero(program& program);
     static result op_add(program& program);
     static result op_sub(program& program);
+    static result op_mul(program& program);
+    static result op_div(program& program);
+    static result op_mod(program& program);
+    static result op_lshift(program& program);
+    static result op_rshift(program& program);
     static result op_bool_and(program& program);
     static result op_bool_or(program& program);
     static result op_num_equal(program& program);

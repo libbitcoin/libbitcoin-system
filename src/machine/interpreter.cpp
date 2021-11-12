@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -35,24 +36,24 @@ namespace machine {
 
 using namespace bc::system::chain;
 
-static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-
 // Operations (shared).
 //-----------------------------------------------------------------------------
 
-interpreter::result interpreter::op_nop(opcode)
+interpreter::result interpreter::op_unevaluated(opcode code)
 {
+    return operation::is_invalid(code) ? error::op_invalid : error::op_reserved;
+}
+
+// Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
+interpreter::result interpreter::op_nop(program& program, opcode code)
+{
+    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+        return error::success;
+
+    // TODO: nops_rule *must* be enabled in test cases and default config.
+    // TODO: cats_rule should be enabled in test cases and default config.
     return error::success;
-}
-
-interpreter::result interpreter::op_disabled(opcode)
-{
-    return error::op_disabled;
-}
-
-interpreter::result interpreter::op_reserved(opcode)
-{
-    return error::op_reserved;
+    ////return op_unevaluated(code);
 }
 
 interpreter::result interpreter::op_push_number(program& program,
@@ -65,6 +66,8 @@ interpreter::result interpreter::op_push_number(program& program,
 interpreter::result interpreter::op_push_size(program& program,
     const operation& op)
 {
+    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+
     if (op.data().size() > op_75)
         return error::op_push_size;
 
@@ -85,6 +88,19 @@ interpreter::result interpreter::op_push_data(program& program,
 // Operations (not shared).
 //-----------------------------------------------------------------------------
 // All index parameters are zero-based and relative to stack top.
+
+interpreter::result interpreter::op_nop(opcode)
+{
+    return error::success;
+}
+
+interpreter::result interpreter::op_ver(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+        return op_unevaluated(opcode::op_ver);
+
+    return error::not_implemented;
+}
 
 interpreter::result interpreter::op_if(program& program)
 {
@@ -120,6 +136,22 @@ interpreter::result interpreter::op_notif(program& program)
     return error::success;
 }
 
+interpreter::result interpreter::op_verif(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+        return op_unevaluated(opcode::op_verif);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_vernotif(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+        return op_unevaluated(opcode::op_vernotif);
+
+    return error::not_implemented;
+}
+
 interpreter::result interpreter::op_else(program& program)
 {
     if (program.closed())
@@ -150,9 +182,12 @@ interpreter::result interpreter::op_verify(program& program)
     return error::success;
 }
 
-interpreter::result interpreter::op_return(program&)
+interpreter::result interpreter::op_return(program& program)
 {
-    return error::op_return;
+    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+        return op_unevaluated(opcode::op_return);
+        
+    return error::not_implemented;
 }
 
 interpreter::result interpreter::op_to_alt_stack(program& program)
@@ -358,6 +393,38 @@ interpreter::result interpreter::op_tuck(program& program)
     return error::success;
 }
 
+interpreter::result interpreter::op_cat(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_cat);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_substr(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_substr);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_left(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_left);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_right(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_right);
+
+    return error::not_implemented;
+}
+
 interpreter::result interpreter::op_size(program& program)
 {
     if (program.empty())
@@ -368,6 +435,38 @@ interpreter::result interpreter::op_size(program& program)
     program.push_move(std::move(top));
     program.push_move(number(size).data());
     return error::success;
+}
+
+interpreter::result interpreter::op_invert(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_invert);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_and(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_and);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_or(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_or);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_xor(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_xor);
+
+    return error::not_implemented;
 }
 
 interpreter::result interpreter::op_equal(program& program)
@@ -408,6 +507,22 @@ interpreter::result interpreter::op_sub1(program& program)
     number -= 1;
     program.push_move(number.data());
     return error::success;
+}
+
+interpreter::result interpreter::op_mul2(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_mul2);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_div2(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_div2);
+
+    return error::not_implemented;
 }
 
 interpreter::result interpreter::op_negate(program& program)
@@ -474,6 +589,46 @@ interpreter::result interpreter::op_sub(program& program)
     const auto result = second - first;
     program.push_move(result.data());
     return error::success;
+}
+
+interpreter::result interpreter::op_mul(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_mul);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_div(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_div);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_mod(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_mod);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_lshift(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_lshift);
+
+    return error::not_implemented;
+}
+
+interpreter::result interpreter::op_rshift(program& program)
+{
+    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+        return op_unevaluated(opcode::op_rshift);
+
+    return error::not_implemented;
 }
 
 interpreter::result interpreter::op_bool_and(program& program)
@@ -797,7 +952,7 @@ interpreter::result interpreter::op_check_locktime_verify(
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!script::is_enabled(program.forks(), rule_fork::bip65_rule))
-        return op_nop(opcode::nop2);
+        return op_nop(program, opcode::nop2);
 
     const auto& tx = program.transaction();
     const auto input_index = program.input_index();
@@ -837,7 +992,7 @@ interpreter::result interpreter::op_check_sequence_verify(
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
     if (!script::is_enabled(program.forks(), rule_fork::bip112_rule))
-        return op_nop(opcode::nop3);
+        return op_nop(program, opcode::nop3);
 
     const auto& tx = program.transaction();
     const auto input_index = program.input_index();
@@ -860,7 +1015,7 @@ interpreter::result interpreter::op_check_sequence_verify(
 
     // BIP112: the stack sequence is disabled, treat as nop3.
     if (get_right(sequence, relative_locktime_disabled_bit))
-        return op_nop(opcode::nop3);
+        return op_nop(program, opcode::nop3);
 
     // BIP112: the stack sequence is enabled and tx version less than 2.
     if (tx.version() < relative_locktime_min_version)
@@ -978,7 +1133,7 @@ interpreter::result interpreter::run_op(const operation& op,
         case opcode::push_negative_1:
             return op_push_number(program, numbers::negative_1);
         case opcode::reserved_80:
-            return op_reserved(code);
+            return op_unevaluated(code);
         case opcode::push_positive_1:
             return op_push_number(program, numbers::positive_1);
         case opcode::push_positive_2:
@@ -1013,23 +1168,23 @@ interpreter::result interpreter::run_op(const operation& op,
             return op_push_number(program, numbers::positive_16);
         case opcode::nop:
             return op_nop(code);
-        case opcode::reserved_98:
-            return op_reserved(code);
+        case opcode::op_ver:
+            return op_ver(program);
         case opcode::if_:
             return op_if(program);
         case opcode::notif:
             return op_notif(program);
-        case opcode::disabled_verif:
-            return op_disabled(code);
-        case opcode::disabled_vernotif:
-            return op_disabled(code);
+        case opcode::op_verif:
+            return op_verif(program);
+        case opcode::op_vernotif:
+            return op_vernotif(program);
         case opcode::else_:
             return op_else(program);
         case opcode::endif:
             return op_endif(program);
         case opcode::verify:
             return op_verify(program);
-        case opcode::return_:
+        case opcode::op_return:
             return op_return(program);
         case opcode::toaltstack:
             return op_to_alt_stack(program);
@@ -1069,40 +1224,40 @@ interpreter::result interpreter::run_op(const operation& op,
             return op_swap(program);
         case opcode::tuck:
             return op_tuck(program);
-        case opcode::disabled_cat:
-            return op_disabled(code);
-        case opcode::disabled_substr:
-            return op_disabled(code);
-        case opcode::disabled_left:
-            return op_disabled(code);
-        case opcode::disabled_right:
-            return op_disabled(code);
+        case opcode::op_cat:
+            return op_cat(program);
+        case opcode::op_substr:
+            return op_substr(program);
+        case opcode::op_left:
+            return op_left(program);
+        case opcode::op_right:
+            return op_right(program);
         case opcode::size:
             return op_size(program);
-        case opcode::disabled_invert:
-            return op_disabled(code);
-        case opcode::disabled_and:
-            return op_disabled(code);
-        case opcode::disabled_or:
-            return op_disabled(code);
-        case opcode::disabled_xor:
-            return op_disabled(code);
+        case opcode::op_invert:
+            return op_invert(program);
+        case opcode::op_and:
+            return op_and(program);
+        case opcode::op_or:
+            return op_or(program);
+        case opcode::op_xor:
+            return op_xor(program);
         case opcode::equal:
             return op_equal(program);
         case opcode::equalverify:
             return op_equal_verify(program);
         case opcode::reserved_137:
-            return op_reserved(code);
+            return op_unevaluated(code);
         case opcode::reserved_138:
-            return op_reserved(code);
+            return op_unevaluated(code);
         case opcode::add1:
             return op_add1(program);
         case opcode::sub1:
             return op_sub1(program);
-        case opcode::disabled_mul2:
-            return op_disabled(code);
-        case opcode::disabled_div2:
-            return op_disabled(code);
+        case opcode::op_mul2:
+            return op_mul2(program);
+        case opcode::op_div2:
+            return op_div2(program);
         case opcode::negate:
             return op_negate(program);
         case opcode::abs:
@@ -1115,16 +1270,16 @@ interpreter::result interpreter::run_op(const operation& op,
             return op_add(program);
         case opcode::sub:
             return op_sub(program);
-        case opcode::disabled_mul:
-            return op_disabled(code);
-        case opcode::disabled_div:
-            return op_disabled(code);
-        case opcode::disabled_mod:
-            return op_disabled(code);
-        case opcode::disabled_lshift:
-            return op_disabled(code);
-        case opcode::disabled_rshift:
-            return op_disabled(code);
+        case opcode::op_mul:
+            return op_mul(program);
+        case opcode::op_div:
+            return op_div(program);
+        case opcode::op_mod:
+            return op_mod(program);
+        case opcode::op_lshift:
+            return op_lshift(program);
+        case opcode::op_rshift:
+            return op_rshift(program);
         case opcode::booland:
             return op_bool_and(program);
         case opcode::boolor:
@@ -1170,7 +1325,7 @@ interpreter::result interpreter::run_op(const operation& op,
         case opcode::checkmultisigverify:
             return op_check_multisig_verify(program);
         case opcode::nop1:
-            return op_nop(code);
+            return op_nop(program, code);
         case opcode::checklocktimeverify:
             return op_check_locktime_verify(program);
         case opcode::checksequenceverify:
@@ -1182,79 +1337,9 @@ interpreter::result interpreter::run_op(const operation& op,
         case opcode::nop8:
         case opcode::nop9:
         case opcode::nop10:
-            return op_nop(code);
-        case opcode::reserved_186:
-        case opcode::reserved_187:
-        case opcode::reserved_188:
-        case opcode::reserved_189:
-        case opcode::reserved_190:
-        case opcode::reserved_191:
-        case opcode::reserved_192:
-        case opcode::reserved_193:
-        case opcode::reserved_194:
-        case opcode::reserved_195:
-        case opcode::reserved_196:
-        case opcode::reserved_197:
-        case opcode::reserved_198:
-        case opcode::reserved_199:
-        case opcode::reserved_200:
-        case opcode::reserved_201:
-        case opcode::reserved_202:
-        case opcode::reserved_203:
-        case opcode::reserved_204:
-        case opcode::reserved_205:
-        case opcode::reserved_206:
-        case opcode::reserved_207:
-        case opcode::reserved_208:
-        case opcode::reserved_209:
-        case opcode::reserved_210:
-        case opcode::reserved_211:
-        case opcode::reserved_212:
-        case opcode::reserved_213:
-        case opcode::reserved_214:
-        case opcode::reserved_215:
-        case opcode::reserved_216:
-        case opcode::reserved_217:
-        case opcode::reserved_218:
-        case opcode::reserved_219:
-        case opcode::reserved_220:
-        case opcode::reserved_221:
-        case opcode::reserved_222:
-        case opcode::reserved_223:
-        case opcode::reserved_224:
-        case opcode::reserved_225:
-        case opcode::reserved_226:
-        case opcode::reserved_227:
-        case opcode::reserved_228:
-        case opcode::reserved_229:
-        case opcode::reserved_230:
-        case opcode::reserved_231:
-        case opcode::reserved_232:
-        case opcode::reserved_233:
-        case opcode::reserved_234:
-        case opcode::reserved_235:
-        case opcode::reserved_236:
-        case opcode::reserved_237:
-        case opcode::reserved_238:
-        case opcode::reserved_239:
-        case opcode::reserved_240:
-        case opcode::reserved_241:
-        case opcode::reserved_242:
-        case opcode::reserved_243:
-        case opcode::reserved_244:
-        case opcode::reserved_245:
-        case opcode::reserved_246:
-        case opcode::reserved_247:
-        case opcode::reserved_248:
-        case opcode::reserved_249:
-        case opcode::reserved_250:
-        case opcode::reserved_251:
-        case opcode::reserved_252:
-        case opcode::reserved_253:
-        case opcode::reserved_254:
-        case opcode::reserved_255:
+            return op_nop(program, code);
         default:
-            return op_reserved(code);
+            return op_unevaluated(code);
     }
 }
 
@@ -1262,30 +1347,39 @@ code interpreter::run(program& program)
 {
     code ec;
 
+    // Enforce script size limit (10,000) [0.3.7+].
+    // Enforce initial primary stack size limit (520) [bip141].
     if (program.is_invalid())
         return error::invalid_script;
 
     for (const auto& op: program)
     {
+        // Enforce push data limit (520) [0.3.6+].
         if (op.is_oversized())
             return error::invalid_push_data_size;
 
-        if (op.is_disabled())
-            return error::op_disabled;
+        // Enforce unconditionally invalid opcodes ("disabled").
+        if (op.is_invalid())
+            return error::op_invalid;
 
+        // Enforce opcode count limit (201).
         if (!program.increment_operation_count(op))
             return error::invalid_operation_count;
 
+        // Conditional evaluation scope.
         if (program.if_(op))
         {
+            // Evaluate opcode (switch).
             if ((ec = run_op(op, program)))
                 return ec;
 
+            // Enforce combined stacks size limit (1,000).
             if (program.is_stack_overflow())
                 return error::invalid_stack_size;
         }
     }
 
+    // Guard against unclosed evaluation scope.
     return program.closed() ? error::success : error::invalid_stack_scope;
 }
 
