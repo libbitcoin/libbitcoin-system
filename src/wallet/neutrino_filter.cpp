@@ -65,8 +65,10 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
         {
             const auto& script = output.script();
 
+            // TODO: should this be output_pattern() == 
+            // script_pattern::pay_null_data?
             if (!script.empty() &&
-                (script.front().code() != chain::opcode::return_))
+                (script.front().code() != chain::opcode::op_return))
                 scripts.push_back(script.to_data(false));
         }
     }
