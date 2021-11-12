@@ -74,6 +74,7 @@ public:
 
     bool from_string(const std::string& mnemonic);
 
+    // Invalid only if minimal encoding required and not satisfied.
     bool is_valid() const;
 
     // Serialization.
@@ -126,8 +127,8 @@ public:
     static bool is_version(opcode code);
     static bool is_numeric(opcode code);
     static bool is_positive(opcode code);
+    static bool is_invalid(opcode code);
     static bool is_reserved(opcode code);
-    static bool is_disabled(opcode code);
     static bool is_conditional(opcode code);
     static bool is_relaxed_push(opcode code);
 
@@ -136,7 +137,7 @@ public:
     bool is_counted() const;
     bool is_version() const;
     bool is_positive() const;
-    bool is_disabled() const;
+    bool is_invalid() const;
     bool is_conditional() const;
     bool is_relaxed_push() const;
     bool is_oversized() const;

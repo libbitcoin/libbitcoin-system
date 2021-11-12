@@ -30,16 +30,16 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-static constexpr auto any_invalid_code = opcode::disabled_xor;
+// Gotta set something when invalid minimal result, test is_valid.
+static constexpr auto any_invalid = opcode::op_xor;
 
 // Constructors.
 //-----------------------------------------------------------------------------
 
+// Always invalid (no code has been specified).
 operation::operation()
-  : code_(any_invalid_code), valid_(false)
+  : code_(any_invalid), valid_(false)
 {
-    // The failed-state code must be disabled so it will never pass evaluation.
-    BITCOIN_ASSERT(is_disabled());
 }
 
 operation::operation(operation&& other)
@@ -52,14 +52,10 @@ operation::operation(const operation& other)
 {
 }
 
+// Invalid only if minimal encoding required and not satisfied.
 operation::operation(data_chunk&& uncoded, bool minimal)
-  : code_(opcode_from_data(uncoded, minimal)),
-    data_(std::move(uncoded)),
-    valid_(!is_oversized())
+  : code_(opcode_from_data(uncoded, minimal)), data_(std::move(uncoded)), valid_(true)
 {
-    if (!valid_)
-        reset();
-
     // Revert data if opcode_from_data produced a numeric encoding.
     if (minimal && !is_payload(code_))
     {
@@ -68,14 +64,10 @@ operation::operation(data_chunk&& uncoded, bool minimal)
     }
 }
 
+// Invalid only if minimal encoding required and not satisfied.
 operation::operation(const data_chunk& uncoded, bool minimal)
-  : code_(opcode_from_data(uncoded, minimal)),
-    data_(uncoded),
-    valid_(!is_oversized())
+  : code_(opcode_from_data(uncoded, minimal)), data_(uncoded), valid_(true)
 {
-    if (!valid_)
-        reset();
-
     // Revert data if opcode_from_data produced a numeric encoding.
     if (minimal && !is_payload(code_))
     {
@@ -84,6 +76,7 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     }
 }
 
+// Always valid (all codes are valid in this sense).
 operation::operation(opcode code)
   : code_(code), valid_(true)
 {
@@ -122,7 +115,10 @@ operation& operation::operator=(const operation& other)
 
 bool operation::operator==(const operation& other) const
 {
-    return (code_ == other.code_) && (data_ == other.data_);
+    return
+        (code_ == other.code_) &&
+        (data_ == other.data_) &&
+        (valid_ == other.valid_);
 }
 
 bool operation::operator!=(const operation& other) const
@@ -133,6 +129,10 @@ bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
+//*****************************************************************************
+// CONSENSUS: hashed serialization honors the opcode indication of data size,
+// even if it is not minimally-encoded.
+//*****************************************************************************
 size_t operation::serialized_size() const
 {
     static constexpr auto op_size = sizeof(uint8_t);
@@ -166,9 +166,8 @@ const data_chunk& operation::data() const
 
 // private
 //*****************************************************************************
-// CONSENSUS: op data size is limited to 520 bytes, which requires no more
-// than two bytes to encode. However the four byte encoding can represent
-// a value of any size, so remains valid despite the data size limit.
+// CONSENSUS: Given that hash serialization honors non-minimal encoding, we
+// accept it and do not normalize it upon deserialization or serialization.
 //*****************************************************************************
 uint32_t operation::read_data_size(opcode code, reader& source)
 {
@@ -189,8 +188,8 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 }
 
 //*****************************************************************************
-// CONSENSUS: this is non-minial but consensus critical due to find_and_delete.
-// Presumably this was just an oversight in the original script encoding.
+// CONSENSUS: non-minial encoding is consensus critical due to find_and_delete.
+// Presumably this was just an oversight in the original hash serialization.
 //*****************************************************************************
 opcode operation::opcode_from_size(size_t size)
 {
@@ -311,63 +310,65 @@ bool operation::is_positive(opcode code)
     return value >= op_81 && value <= op_96;
 }
 
-// opcode: [80, 98, 137, 138, 186-255]
-bool operation::is_reserved(opcode code)
-{
-    constexpr auto op_186 = static_cast<uint8_t>(opcode::reserved_186);
-
-    switch (code)
-    {
-        case opcode::reserved_80:
-        case opcode::reserved_98:
-        case opcode::reserved_137:
-        case opcode::reserved_138:
-            return true;
-        default:
-            return static_cast<uint8_t>(code) >= op_186;
-    }
-}
-
-//*****************************************************************************
-// CONSENSUS: the codes VERIF and VERNOTIF are in the conditional range yet are
-// not handled. As a result satoshi always processes them in the op switch.
-// This causes them to always fail as unhandled. It is misleading that the
-// satoshi test cases refer to these as reserved codes. These two codes behave
-// exactly as the explicitly disabled codes. On the other hand VER is not within
-// the satoshi conditional range test so it is in fact reserved. Presumably
-// this was an unintended consequence of range testing enums.
-//*****************************************************************************
-bool operation::is_disabled(opcode code)
+// opcode: [101-102, 126-129, 131-134, 141-142, 149-153]
+// ****************************************************************************
+// CONSENSUS: These are invalid even if evaluation is precluded by conditional.
+// ****************************************************************************
+bool operation::is_invalid(opcode code)
 {
     switch (code)
     {
-        case opcode::disabled_cat:
-        case opcode::disabled_substr:
-        case opcode::disabled_left:
-        case opcode::disabled_right:
-        case opcode::disabled_invert:
-        case opcode::disabled_and:
-        case opcode::disabled_or:
-        case opcode::disabled_xor:
-        case opcode::disabled_mul2:
-        case opcode::disabled_div2:
-        case opcode::disabled_mul:
-        case opcode::disabled_div:
-        case opcode::disabled_mod:
-        case opcode::disabled_lshift:
-        case opcode::disabled_rshift:
-        case opcode::disabled_verif:
-        case opcode::disabled_vernotif:
+        // Demoted to invalid by [0.3.6] soft fork.
+        case opcode::op_verif:
+        case opcode::op_vernotif:
+
+        // Demoted to invalid by [0.3.10] soft fork.
+        case opcode::op_cat:
+        case opcode::op_substr:
+        case opcode::op_left:
+        case opcode::op_right:
+        case opcode::op_invert:
+        case opcode::op_and:
+        case opcode::op_or:
+        case opcode::op_xor:
+        case opcode::op_mul2:
+        case opcode::op_div2:
+        case opcode::op_mul:
+        case opcode::op_div:
+        case opcode::op_mod:
+        case opcode::op_lshift:
+        case opcode::op_rshift:
             return true;
         default:
             return false;
     }
 }
 
-//*****************************************************************************
-// CONSENSUS: in order to properly treat VERIF and VERNOTIF as disabled (see
-// is_disabled comments) those codes must not be included here.
-//*****************************************************************************
+// opcode: [80, 98, 106, 137-138, 186-255]
+// ****************************************************************************
+// CONSENSUS: These are invalid unless evaluation is precluded by conditional.
+// ****************************************************************************
+bool operation::is_reserved(opcode code)
+{
+    constexpr auto op_185 = static_cast<uint8_t>(opcode::nop10);
+
+    switch (code)
+    {
+        // Demoted to reserved by [0.3.6] soft fork.
+        case opcode::op_ver:
+        case opcode::op_return:
+
+        // Unimplemented.
+        case opcode::reserved_80:
+        case opcode::reserved_137:
+        case opcode::reserved_138:
+            return true;
+        default:
+            return static_cast<uint8_t>(code) > op_185;
+    }
+}
+
+// opcode: [99-100, 103-104]
 bool operation::is_conditional(opcode code)
 {
     switch (code)
@@ -415,9 +416,9 @@ bool operation::is_positive() const
     return is_positive(code_);
 }
 
-bool operation::is_disabled() const
+bool operation::is_invalid() const
 {
-    return is_disabled(code_);
+    return is_invalid(code_);
 }
 
 bool operation::is_conditional() const
@@ -432,7 +433,7 @@ bool operation::is_relaxed_push() const
 
 bool operation::is_oversized() const
 {
-    // bit.ly/2eSDkOJ
+    // Rule imposed by [0.3.6] soft fork.
     return data_.size() > max_push_data_size;
 }
 
@@ -485,17 +486,15 @@ bool operation::from_data(std::istream& stream)
     return from_data(source);
 }
 
-// TODO: optimize for larger data by using a shared byte array.
 bool operation::from_data(reader& source)
 {
-    ////reset();
     valid_ = true;
     code_ = static_cast<opcode>(source.read_byte());
     const auto size = read_data_size(code_, source);
 
-    // The max_script_size and max_push_data_size constants limit
-    // evaluation, but not all scripts evaluate, so use max_block_size
-    // to guard memory allocation here.
+    // The max_script_size and max_push_data_size constants limit evaluation,
+    // but not all scripts evaluate, so use max_block_size to guard memory 
+    // allocation here. Interesting question before max_block_size soft fork.
     if (size > max_block_size)
         source.invalidate();
     else
@@ -637,7 +636,7 @@ bool operation::is_valid() const
 // protected
 void operation::reset()
 {
-    code_ = any_invalid_code;
+    code_ = any_invalid;
     data_.clear();
     valid_ = false;
 }
@@ -660,6 +659,9 @@ void operation::to_data(std::ostream& stream) const
     to_data(out);
 }
 
+//*****************************************************************************
+// CONSENSUS: Non-minimal encoding is allowed by consensus hashing.
+//*****************************************************************************
 void operation::to_data(writer& sink) const
 {
     const auto size = data_.size();
@@ -668,17 +670,17 @@ void operation::to_data(writer& sink) const
 
     switch (code_)
     {
-    case opcode::push_one_size:
-        sink.write_byte(static_cast<uint8_t>(size));
-        break;
-    case opcode::push_two_size:
-        sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
-        break;
-    case opcode::push_four_size:
-        sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
-        break;
-    default:
-        break;
+        case opcode::push_one_size:
+            sink.write_byte(static_cast<uint8_t>(size));
+            break;
+        case opcode::push_two_size:
+            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
+            break;
+        case opcode::push_four_size:
+            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
+            break;
+        default:
+            break;
     }
 
     sink.write_bytes(data_);
@@ -692,14 +694,14 @@ static std::string opcode_to_prefix(opcode code, const data_chunk& data)
 
     switch (code)
     {
-    case opcode::push_one_size:
-        return "1.";
-    case opcode::push_two_size:
-        return "2.";
-    case opcode::push_four_size:
-        return "4.";
-    default:
-        return "0.";
+        case opcode::push_one_size:
+            return "1.";
+        case opcode::push_two_size:
+            return "2.";
+        case opcode::push_four_size:
+            return "4.";
+        default:
+            return "0.";
     }
 }
 

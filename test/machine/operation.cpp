@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initializ
 
     BOOST_REQUIRE(!instance.is_valid());
     BOOST_REQUIRE(instance.data().empty());
-    BOOST_REQUIRE(instance.code() == opcode::disabled_xor);
+    BOOST_REQUIRE(instance.code() == opcode::op_xor);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initialized)
