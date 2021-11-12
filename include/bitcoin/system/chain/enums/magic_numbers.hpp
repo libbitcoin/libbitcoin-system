@@ -39,7 +39,8 @@ constexpr uint64_t sighash_null_value = max_uint64;
 
 constexpr size_t max_counted_ops = 201;
 constexpr size_t max_stack_size = 1000;
-constexpr size_t max_script_size = 10000;
+constexpr size_t max_unified_script_size = 20000;
+constexpr size_t max_script_size = to_half(max_unified_script_size);
 constexpr size_t max_push_data_size = 520;
 constexpr size_t max_script_public_keys = 20;
 constexpr size_t multisig_default_sigops = 20;
