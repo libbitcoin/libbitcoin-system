@@ -48,7 +48,7 @@ public:
     typedef std::vector<script> list;
 
     /// Consensus sentinel.
-    static const hash_digest one;
+    static hash_digest one_hash();
 
     // Constructors.
     //-------------------------------------------------------------------------

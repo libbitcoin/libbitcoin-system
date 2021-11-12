@@ -46,9 +46,13 @@ namespace chain {
 
 using namespace bc::system::machine;
 
-// TODO: guard against static initialization race (move to using method).
-const hash_digest script::one = hash_literal(
-    "0000000000000000000000000000000000000000000000000000000000000001");
+hash_digest script::one_hash()
+{
+    static const auto hash = base16_hash(
+        "0000000000000000000000000000000000000000000000000000000000000001");
+
+    return hash;
+}
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -457,7 +461,8 @@ const operation::list& script::operations() const
 
     // If an op fails it is pushed to operations and the loop terminates.
     // To validate the ops the caller must test the last op.is_valid(), or may
-    // text script.is_valid_operations(), which is done in script metadata.
+    // test script.is_valid_operations(), which is done in script metadata.
+    // Invalidity of a parsed script will be caught in validation regardless.
     while (!source.is_exhausted())
     {
         op.from_data(source);
@@ -637,10 +642,10 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     const auto sighash = to_sighash_enum(sighash_type);
 
     //*************************************************************************
-    // CONSENSUS: wacky satoshi behavior (continuing with one hash).
+    // CONSENSUS: wacky satoshi behavior (continuing with one).
     //*************************************************************************
     if (is_index_overflow(tx, input_index, sighash))
-        return script::one;
+        return script::one_hash();
 
     //*************************************************************************
     // CONSENSUS: more wacky satoshi behavior.
@@ -919,7 +924,7 @@ bool script::is_commitment_pattern(const operation::list& ops)
     // Bytes after commitment are optional with no consensus meaning (bip141).
     // Commitment is not executable so invalid trailing operations are allowed.
     return ops.size() > 1
-        && ops[0].code() == opcode::return_
+        && ops[0].code() == opcode::op_return
         && ops[1].code() == opcode::push_size_36
         && std::equal(header.begin(), header.end(), ops[1].data().begin());
 }
@@ -952,7 +957,7 @@ bool script::is_witness_program_pattern(const operation::list& ops)
 bool script::is_pay_null_data_pattern(const operation::list& ops)
 {
     return ops.size() == 2
-        && ops[0].code() == opcode::return_
+        && ops[0].code() == opcode::op_return
         && ops[1].is_minimal_push()
         && ops[1].data().size() <= max_null_data_size;
 }
@@ -1089,7 +1094,7 @@ operation::list script::to_pay_null_data_pattern(const data_slice& data)
 
     return operation::list
     {
-        { opcode::return_ },
+        { opcode::op_return },
         { to_chunk(data) }
     };
 }
@@ -1410,8 +1415,15 @@ bool script::is_oversized() const
 // The criteria below are not be comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
+    if (operations().empty())
+        return false;
+
     // The first operations access must be method-based to guarantee the cache.
-    return !operations().empty() && operations_[0].code() == opcode::return_;
+    const auto& code = operations_[0].code();
+
+    // There is no condition prior to the first opcode in a script.
+    return operation::is_reserved(code) ||
+        operation::is_invalid(code);
 }
 
 // Validation.
@@ -1426,6 +1438,9 @@ code script::verify(const transaction& tx, uint32_t input_index,
     code ec;
     bool witnessed;
     const auto& in = tx.inputs()[input_index];
+
+    // TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
+    // TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
 
     // Evaluate input script.
     program input(in.script(), tx, input_index, forks);
