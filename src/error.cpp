@@ -48,9 +48,8 @@ std::string error_category_impl::message(int ev) const noexcept
 {
     static const std::unordered_map<int, std::string> messages =
     {
-        // general codes
+        // general
         { error::success, "success" },
-        { error::deprecated1, "deprecated1" },
         { error::unknown, "unknown error" },
         { error::not_found, "object does not exist" },
         { error::file_system, "file system error" },
@@ -89,6 +88,17 @@ std::string error_category_impl::message(int ev) const noexcept
         { error::insufficient_fee, "insufficient transaction fee" },
         { error::stale_chain, "blockchain too far behind" },
         { error::dusty_transaction, "output value too low" },
+
+        // server
+        { error::unrecognized_filter_type, "Unrecognized filter type" },
+        { error::invalid_response_range, "The range of responses is invalid" },
+        { error::configuration_disabled, "Disabled by configuration" },
+        { error::metadata_prevout_missing, "Missing expected cached prevout" },
+
+        // http
+        { error::http_invalid_request, "invalid request" },
+        { error::http_method_not_found, "method not found" },
+        { error::http_internal_error, "internal error" },
 
         // check header
         { error::invalid_proof_of_work, "proof of work invalid" },
@@ -152,20 +162,14 @@ std::string error_category_impl::message(int ev) const noexcept
         { error::invalid_stack_scope, "invalid stack scope" },
         { error::invalid_script_embed, "invalid script embed" },
         { error::invalid_signature_encoding, "invalid signature encoding" },
-        { error::deprecated2, "deprecated2" },
         { error::incorrect_signature, "incorrect signature" },
         { error::unexpected_witness, "unexpected witness" },
         { error::invalid_witness, "invalid witness" },
         { error::dirty_witness, "dirty witness" },
         { error::stack_false, "stack false" },
 
-        // http
-        { error::http_invalid_request, "invalid request" },
-        { error::http_method_not_found, "method not found" },
-        { error::http_internal_error, "internal error" },
-
         // op eval
-        { error::op_disabled, "op_disabled" },
+        { error::op_invalid, "op_invalid" },
         { error::op_reserved, "op_reserved" },
         { error::op_push_size, "op_push_size" },
         { error::op_push_data, "op_push_data" },
@@ -248,15 +252,7 @@ std::string error_category_impl::message(int ev) const noexcept
         { error::op_check_sequence_verify5, "op_check_sequence_verify5" },
         { error::op_check_sequence_verify6, "op_check_sequence_verify6" },
         { error::op_check_sequence_verify7, "op_check_sequence_verify7" },
-
-        // Added out of order (bip147).
-        { error::op_check_multisig_verify8, "op_check_multisig_verify8" },
-
-        // Added bip157 blockchain related
-        { error::unrecognized_filter_type, "Unrecognized filter type" },
-        { error::invalid_response_range, "The range of responses is invalid" },
-        { error::configuration_disabled, "Disabled by configuration" },
-        { error::metadata_prevout_missing, "Missing expected cached prevout" }
+        { error::op_check_multisig_verify8, "op_check_multisig_verify8" }
     };
 
     const auto message = messages.find(ev);

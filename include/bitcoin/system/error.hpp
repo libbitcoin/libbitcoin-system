@@ -47,124 +47,128 @@ namespace error {
 // The numeric values of these codes may change without notice.
 enum error_code_t
 {
-    // general codes
+    // general
     success = 0,
-    deprecated1 = 6,
-    unknown = 43,
-    not_found = 3,
-    file_system = 42,
-    not_implemented = 4,
-    oversubscribed = 71,
+    unknown,
+    not_found,
+    file_system,
+    not_implemented,
+    oversubscribed,
 
     // network
-    service_stopped = 1,
-    operation_failed = 2,
-    resolve_failed = 7,
-    network_unreachable = 8,
-    address_in_use = 9,
-    listen_failed = 10,
-    accept_failed = 11,
-    bad_stream = 12,
-    channel_timeout = 13,
-    address_blocked = 44,
-    channel_stopped = 45,
-    peer_throttling = 73,
+    service_stopped,
+    operation_failed,
+    resolve_failed,
+    network_unreachable,
+    address_in_use,
+    listen_failed,
+    accept_failed,
+    bad_stream,
+    channel_timeout,
+    address_blocked,
+    channel_stopped,
+    peer_throttling,
 
     // database
-    store_block_duplicate = 66,
-    store_block_invalid_height = 67,
-    store_block_missing_parent = 68,
-    store_lock_failure = 85,
-    store_incorrect_state = 86,
+    store_block_duplicate,
+    store_block_invalid_height,
+    store_block_missing_parent,
+    store_lock_failure,
+    store_incorrect_state,
 
     // blockchain
-    duplicate_block = 51,
-    orphan_block = 5,
-    invalid_previous_block = 24,
-    insufficient_work = 48,
-    duplicate_transaction = 84,
-    orphan_transaction = 14,
-    transaction_version = 17,
-    insufficient_fee = 70,
-    stale_chain = 75,
-    dusty_transaction = 76,
+    duplicate_block,
+    orphan_block,
+    invalid_previous_block,
+    insufficient_work,
+    duplicate_transaction,
+    orphan_transaction,
+    transaction_version,
+    insufficient_fee,
+    stale_chain,
+    dusty_transaction,
 
-    // check header
-    invalid_proof_of_work = 26,
-    futuristic_timestamp = 27,
-
-    // accept header
-    checkpoints_failed = 35,
-    invalid_block_version = 36,
-    incorrect_proof_of_work = 32,
-    timestamp_too_early = 33,
-
-    // check block
-    block_size_limit = 50,
-    empty_block = 47,
-    first_not_coinbase = 28,
-    extra_coinbases = 29,
-    internal_duplicate = 49,
-    block_internal_double_spend = 15,
-    forward_reference = 79,
-    merkle_mismatch = 31,
-    block_legacy_sigop_limit = 30,
-
-    // accept block
-    block_non_final = 34,
-    coinbase_height_mismatch = 37,
-    coinbase_value_limit = 41,
-    block_embedded_sigop_limit = 52,
-    invalid_witness_commitment = 25,
-    block_weight_limit = 82,
-    temporary_hash_limit = 87,
-    unspent_coinbase_collision = 88,
-
-    // check transaction
-    empty_transaction = 20,
-    previous_output_null = 23,
-    spend_overflow = 21,
-    invalid_coinbase_script_size = 22,
-    coinbase_transaction = 16,
-    transaction_internal_double_spend = 72,
-    transaction_size_limit = 53,
-    transaction_legacy_sigop_limit = 54,
-
-    // accept transaction
-    transaction_non_final = 74,
-    premature_validation = 69,
-    unspent_duplicate = 38,
-    missing_previous_output = 19,
-    double_spend = 18,
-    coinbase_maturity = 46,
-    spend_exceeds_value = 40,
-    transaction_embedded_sigop_limit = 55,
-    sequence_locked = 78,
-    transaction_weight_limit = 83,
-
-    // connect input
-    invalid_script = 39,
-    invalid_script_size = 56,
-    invalid_push_data_size = 57,
-    invalid_operation_count = 58,
-    invalid_stack_size = 59,
-    invalid_stack_scope = 60,
-    invalid_script_embed = 61,
-    invalid_signature_encoding = 62,
-    deprecated2 = 63,
-    incorrect_signature = 64,
-    unexpected_witness = 77,
-    invalid_witness = 80,
-    dirty_witness = 81,
-    stack_false = 65,
+    // server
+    unrecognized_filter_type,
+    invalid_response_range,
+    configuration_disabled,
+    metadata_prevout_missing,
 
     // http
-    http_invalid_request = 90,
-    http_method_not_found = 91,
-    http_internal_error = 92,
+    http_invalid_request,
+    http_method_not_found,
+    http_internal_error,
+
+    // check header
+    invalid_proof_of_work,
+    futuristic_timestamp,
+
+    // accept header
+    checkpoints_failed,
+    invalid_block_version,
+    incorrect_proof_of_work,
+    timestamp_too_early,
+
+    // check block
+    block_size_limit,
+    empty_block,
+    first_not_coinbase,
+    extra_coinbases,
+    internal_duplicate,
+    block_internal_double_spend,
+    forward_reference,
+    merkle_mismatch,
+    block_legacy_sigop_limit,
+
+    // accept block
+    block_non_final,
+    coinbase_height_mismatch,
+    coinbase_value_limit,
+    block_embedded_sigop_limit,
+    invalid_witness_commitment,
+    block_weight_limit,
+    temporary_hash_limit,
+    unspent_coinbase_collision,
+
+    // check transaction
+    empty_transaction,
+    previous_output_null,
+    spend_overflow,
+    invalid_coinbase_script_size,
+    coinbase_transaction,
+    transaction_internal_double_spend,
+    transaction_size_limit,
+    transaction_legacy_sigop_limit,
+
+    // accept transaction
+    transaction_non_final,
+    premature_validation,
+    unspent_duplicate,
+    missing_previous_output,
+    double_spend,
+    coinbase_maturity,
+    spend_exceeds_value,
+    transaction_embedded_sigop_limit,
+    sequence_locked,
+    transaction_weight_limit,
+
+    // connect input
+    invalid_script,
+    invalid_script_size,
+    invalid_push_data_size,
+    invalid_operation_count,
+    invalid_stack_size,
+    invalid_stack_scope,
+    invalid_script_embed,
+    invalid_signature_encoding,
+    incorrect_signature,
+    unexpected_witness,
+    invalid_witness,
+    dirty_witness,
+    stack_false,
 
     // op eval
-    op_disabled = 100,
+    op_invalid,
     op_reserved,
     op_push_size,
     op_push_data,
@@ -247,16 +251,13 @@ enum error_code_t
     op_check_sequence_verify5,
     op_check_sequence_verify6,
     op_check_sequence_verify7,
-
-    // Added out of order (bip147).
     op_check_multisig_verify8,
 
-    // Added bip157 blockchain related
-    unrecognized_filter_type,
-    invalid_response_range,
-    configuration_disabled,
-    metadata_prevout_missing
+    maxumum_error_code
 };
+
+// The store retains codes in 1 byte fields.
+static_assert(maxumum_error_code < 256, "error code capacity");
 
 enum error_condition_t
 {
