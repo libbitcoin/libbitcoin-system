@@ -544,17 +544,35 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
     }
 }
 
-BOOST_AUTO_TEST_CASE(script___parse__invalid)
+BOOST_AUTO_TEST_CASE(script__parse__not_invalid)
 {
-    for (const auto& test: invalid_parse_scripts)
+    for (const auto& test: not_invalid_parse_scripts)
     {
-        const auto tx = new_tx(test);
-        const auto name = test_name(test);
-        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+        BOOST_CHECK_MESSAGE(new_tx(test).is_valid(), test_name(test));
+    }
+}
 
-        // These are always invalid.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules) != error::success, name);
+BOOST_AUTO_TEST_CASE(script__parse_syntax__invalid)
+{
+    for (const auto& test: invalid_syntax_scripts)
+    {
+        BOOST_CHECK_MESSAGE(!new_tx(test).is_valid(), test_name(test));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__parse_push_not_overflow__valid)
+{
+    for (const auto& test: valid_push_data_scripts)
+    {
+        BOOST_CHECK_MESSAGE(new_tx(test).is_valid(), test_name(test));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(script__parse_push_overflow__invalid)
+{
+    for (const auto& test: invalid_overflowed_push_data_scripts)
+    {
+        BOOST_CHECK_MESSAGE(!new_tx(test).is_valid(), test_name(test));
     }
 }
 

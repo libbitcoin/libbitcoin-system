@@ -829,12 +829,35 @@ const script_test_list invalid_context_free_scripts
     { "0x00", "'00' equal", "basic op_0 execution" }
 }};
 
-// These are always invalid due to parsing.
-const script_test_list invalid_parse_scripts
+// These parse errors cannot happen in the libbitcoin syntax.
+// Minimal encoding is not required for input (or consensus).
+const script_test_list not_invalid_parse_scripts
 {{
-    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
-    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
-    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" }
+    { "[1.01]", "0x01 nop", "PUSHDATA1 with not enough bytes" },
+    ////{ "0x4c01", "0x01 nop", "PUSHDATA1 with not enough bytes" },
+    { "[2.0200ff]", "0x01 nop", "PUSHDATA2 with not enough bytes" },
+    ////{ "0x4d0200ff", "0x01 nop", "PUSHDATA2 with not enough bytes" },
+    { "[4.03000000ffff]", "0x01 nop", "PUSHDATA4 with not enough bytes" }
+    ////{ "0x4e03000000ffff", "0x01 nop", "PUSHDATA4 with not enough bytes" }
+}};
+
+// On the other hand, syntactic errors can happen (odd hex digits).
+const script_test_list invalid_syntax_scripts
+{{
+    { "[1.1]", "0x01 nop", "PUSHDATA1 with odd hex digits" },
+    { "[2.200ff]", "0x01 nop", "PUSHDATA2 with odd hex digits" },
+    { "[4.3000000ffff]", "0x01 nop", "PUSHDATA4with odd hex digits" },
+}};
+
+const script_test_list valid_push_data_scripts
+{{
+    { "[1." + std::string(size_t(2 * 255), 'f') + "]", "0x01 nop", "PUSHDATA1 with max hex digits" },
+}};
+
+// And push_data overflow can happen.
+const script_test_list invalid_overflowed_push_data_scripts
+{{
+    { "[1." + std::string(size_t(2 * 256), 'f') + "]", "0x01 nop", "PUSHDATA1 with max + 1 hex digits" }
 }};
 
 #endif
