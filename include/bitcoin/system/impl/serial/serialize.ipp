@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>

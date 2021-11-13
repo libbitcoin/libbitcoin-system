@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <iterator>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
