@@ -760,8 +760,8 @@ const script_test_list invalid_context_free_scripts
 
     // Reserved.
     { "1", "ver", "op_ver is reserved" },
-    { "1", "verif", "op_verif is reserved" },
-    { "1", "vernotif", "op_vernotif is reserved" },
+    { "1", "verif", "op_verif is reserved (no, it's disabled)" },
+    { "1", "vernotif", "op_vernotif is reserved (no, it's disabled)" },
     { "1", "reserved", "op_reserved is reserved" },
     { "1", "reserved1", "op_reserved1 is reserved" },
     { "1", "reserved2", "op_reserved2 is reserved" },
