@@ -109,6 +109,8 @@ bool deserialize(std::vector<Value>& out, const std::string& text)
 template <typename Value>
 bool deserialize(Value& out, const std::string& text)
 {
+    // This can convert garbage to zero, use is_ascii_number for pre-assurance.
+
     // Trimming is useful for type conversion, which otherwise fails.
     // So trimming of string types (pass-thru) is avoided by template override.
     std::istringstream istream(trim_copy(text));
