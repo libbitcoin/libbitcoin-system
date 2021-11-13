@@ -679,11 +679,15 @@ std::string opcode_to_hexadecimal(opcode code)
 
 bool opcode_from_hexadecimal(opcode& out_code, const std::string& value)
 {
-    if (value.size() != 4 || value[0] != '0' || value[1] != 'x')
+    static const std::string ox = "0x";
+    static const auto prefix = ox.size();
+    static const auto byte = prefix + octet_width;
+
+    if (value.size() != byte || !starts_with(value, ox))
         return false;
 
     data_chunk out;
-    if (!decode_base16(out, { std::next(value.begin(), 2), value.end() }))
+    if (!decode_base16(out, { std::next(value.begin(), prefix), value.end() }))
         return false;
 
     out_code = static_cast<opcode>(out.front());
