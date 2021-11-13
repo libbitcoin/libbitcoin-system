@@ -534,16 +534,20 @@ BOOST_AUTO_TEST_CASE(operation__from_string__push_0__push_size_0)
     BOOST_REQUIRE(value.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_string__push_1__false)
+BOOST_AUTO_TEST_CASE(operation__from_string__push_1__empty)
 {
     operation value;
-    BOOST_REQUIRE(!value.from_string("push_1"));
+    BOOST_REQUIRE(value.from_string("push_1"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_1);
+    BOOST_REQUIRE(value.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_string__push_75__false)
+BOOST_AUTO_TEST_CASE(operation__from_string__push_75__empty)
 {
     operation value;
-    BOOST_REQUIRE(!value.from_string("push_75"));
+    BOOST_REQUIRE(value.from_string("push_75"));
+    BOOST_REQUIRE(value.code() == opcode::push_size_75);
+    BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__from_string__push_one__push_one_size_empty)

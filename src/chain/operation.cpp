@@ -516,13 +516,6 @@ inline bool is_text_token(const std::string& token)
     return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
 }
 
-inline bool is_valid_data_size(opcode code, size_t size)
-{
-    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-    const auto value = static_cast<uint8_t>(code);
-    return value > op_75 || value == size;
-}
-
 inline std::string trim_token(const std::string& token)
 {
     BITCOIN_ASSERT(token.size() > 1);
@@ -564,7 +557,7 @@ static bool opcode_from_data_prefix(opcode& out_code,
     return false;
 }
 
-static bool data_from_number_token(data_chunk& out_data,
+static bool data_from_decimal(data_chunk& out_data,
     const std::string& token)
 {
     int64_t value;
@@ -582,42 +575,38 @@ bool operation::from_string(const std::string& mnemonic)
 
     if (is_push_token(mnemonic))
     {
-        // Data encoding uses single token (with optional non-minimality).
+        // Data encoding uses single token with one or two parts.
         const auto parts = split_push_token(mnemonic);
 
         if (parts.size() == 1)
         {
             // Extract operation using nominal data size encoding.
-            if (decode_base16(data_, parts.front()))
-            {
+            if ((valid_ = decode_base16(data_, parts.front())))
                 code_ = nominal_opcode_from_data(data_);
-                valid_ = true;
-            }
         }
         else if (parts.size() == 2)
         {
-            // Extract operation using explicit data size encoding.
+            // Extract operation using minimal data size encoding.
             valid_ = decode_base16(data_, parts[1]) &&
                 opcode_from_data_prefix(code_, parts[0], data_);
         }
     }
     else if (is_text_token(mnemonic))
     {
-        const auto text = trim_token(mnemonic);
-        data_ = data_chunk{ text.begin(), text.end() };
+        // Extract operation using nominal data size encoding.
+        data_ = to_chunk(trim_token(mnemonic));
         code_ = nominal_opcode_from_data(data_);
         valid_ = true;
     }
-    else if (opcode_from_string(code_, mnemonic))
+    else if (opcode_from_mnemonic(code_, mnemonic))
     {
-        // push_one_size, push_two_size and push_four_size succeed with empty.
-        // push_size_1 through push_size_75 always fail because they are empty.
-        valid_ = is_valid_data_size(code_, data_.size());
+        // Any push code may have empty data, so this is presumed here.
+        // No data is obtained here from a push opcode (use push/text tokens).
+        valid_ = true;
     }
-    else if (data_from_number_token(data_, mnemonic))
+    else if (data_from_decimal(data_, mnemonic))
     {
-        // [-1, 0, 1..16] integers captured by opcode_from_string, others here.
-        // Otherwise minimal_opcode_from_data could convert integers here.
+        // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
         code_ = nominal_opcode_from_data(data_);
         valid_ = true;
     }
@@ -712,7 +701,7 @@ std::string operation::to_string(uint32_t active_forks) const
         return "<invalid>";
 
     if (data_.empty())
-        return opcode_to_string(code_, active_forks);
+        return opcode_to_mnemonic(code_, active_forks);
 
     // Data encoding uses single token with explicit size prefix as required.
     return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
