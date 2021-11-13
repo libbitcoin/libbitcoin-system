@@ -27,6 +27,7 @@ namespace system {
 
 /// Character tests.
 BC_API bool is_ascii_character(char32_t point);
+BC_API bool is_ascii_number(char32_t point);
 BC_API bool is_ascii_separator(char32_t point);
 BC_API bool is_ascii_whitespace(char32_t point);
 
@@ -44,6 +45,10 @@ BC_API bool has_mixed_ascii_case(const std::string& text);
 
 /// True if all characters are in the ASCII subset of UTF8 [<128].
 BC_API bool is_ascii(const std::string& text);
+
+/// True if all characters are in the ASCII subset '0'..'9' with a leading '-'
+/// character if specified. Leaving zeroes allowed, including after negative.
+BC_API bool is_ascii_numeric(const std::string& text);
 
 } // namespace system
 } // namespace libbitcoin

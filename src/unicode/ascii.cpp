@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <string>
+#include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 
@@ -32,6 +33,11 @@ namespace system {
 bool is_ascii_character(char32_t character)
 {
     return is_zero(character & 0xffffff80);
+}
+
+bool is_ascii_number(char32_t point)
+{
+    return '0' <= point && point <= '9';
 }
 
 bool is_ascii_separator(char32_t point)
@@ -50,7 +56,17 @@ bool is_ascii(const std::string& text)
 {
     return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
-    
+
+bool is_ascii_numeric(const std::string& text)
+{
+    if (text.empty())
+        return true;
+
+    const auto negative = (text.front() == '-');
+    const auto start = std::next(text.begin(), negative ? 1 : 0);
+    return std::all_of(start, text.end(), is_ascii_number);
+}
+
 std::string ascii_to_lower(const std::string& text)
 {
     auto copy = text;
