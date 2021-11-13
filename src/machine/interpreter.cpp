@@ -1045,7 +1045,7 @@ interpreter::result interpreter::run_op(const operation& op,
 {
     const auto code = op.code();
 
-    switch (op.code())
+    switch (code)
     {
         case opcode::push_size_0:
         case opcode::push_size_1:
