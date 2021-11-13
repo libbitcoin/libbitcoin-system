@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -829,13 +829,12 @@ const script_test_list invalid_context_free_scripts
     { "0x00", "'00' equal", "basic op_0 execution" }
 }};
 
-////// TODO: move these to operation tests.
-////// These are always invalid due to parsing.
-////const script_test_list invalid_parse_scripts
-////{{
-////    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
-////    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
-////    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" }
-////}};
+// These are always invalid due to parsing.
+const script_test_list invalid_parse_scripts
+{{
+    { "0x4c01", "0x01 NOP", "PUSHDATA1 with not enough bytes" },
+    { "0x4d0200ff", "0x01 NOP", "PUSHDATA2 with not enough bytes" },
+    { "0x4e03000000ffff", "0x01 NOP", "PUSHDATA4 with not enough bytes" }
+}};
 
 #endif
