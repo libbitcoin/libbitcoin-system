@@ -516,7 +516,7 @@ inline bool is_text_token(const std::string& token)
     return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
 }
 
-inline std::string trim_token(const std::string& token)
+inline std::string remove_token_delimiters(const std::string& token)
 {
     BITCOIN_ASSERT(token.size() > 1);
     return std::string(std::next(token.begin()), std::prev(token.end()));
@@ -524,7 +524,7 @@ inline std::string trim_token(const std::string& token)
 
 inline string_list split_push_token(const std::string& token)
 {
-    return split(trim_token(token), ".", false, false);
+    return split(remove_token_delimiters(token), ".", false, false);
 }
 
 static bool opcode_from_data_prefix(opcode& out_code,
@@ -594,7 +594,7 @@ bool operation::from_string(const std::string& mnemonic)
     else if (is_text_token(mnemonic))
     {
         // Extract operation using nominal data size encoding.
-        data_ = to_chunk(trim_token(mnemonic));
+        data_ = to_chunk(remove_token_delimiters(mnemonic));
         code_ = nominal_opcode_from_data(data_);
         valid_ = true;
     }
