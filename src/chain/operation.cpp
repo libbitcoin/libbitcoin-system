@@ -25,6 +25,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/machine.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -560,6 +561,10 @@ static bool opcode_from_data_prefix(opcode& out_code,
 static bool data_from_decimal(data_chunk& out_data,
     const std::string& token)
 {
+    // Deserialization to a number can convert random text to zero.
+    if (!is_ascii_numeric(token))
+        return false;
+
     int64_t value;
     if (!deserialize(value, token))
         return false;
