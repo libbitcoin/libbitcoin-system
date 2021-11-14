@@ -46,8 +46,13 @@ namespace chain {
 
 using namespace bc::system::machine;
 
-static const auto one_hash = base16_hash(
-    "0000000000000000000000000000000000000000000000000000000000000001");
+hash_digest script::one_hash()
+{
+    static const auto hash = base16_hash(
+        "0000000000000000000000000000000000000000000000000000000000000001");
+
+    return hash;
+}
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -640,7 +645,7 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     // CONSENSUS: wacky satoshi behavior (continuing with one).
     //*************************************************************************
     if (is_index_overflow(tx, input_index, sighash))
-        return one_hash;
+        return script::one_hash();
 
     //*************************************************************************
     // CONSENSUS: more wacky satoshi behavior.

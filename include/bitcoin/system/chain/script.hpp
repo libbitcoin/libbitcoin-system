@@ -47,6 +47,9 @@ class BC_API script
 public:
     typedef std::vector<script> list;
 
+    /// Consensus sentinel.
+    static hash_digest one_hash();
+
     // Constructors.
     //-------------------------------------------------------------------------
 
