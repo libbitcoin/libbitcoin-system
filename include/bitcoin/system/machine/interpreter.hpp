@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/machine/program.hpp>
 
@@ -32,7 +32,7 @@ namespace machine {
 class BC_API interpreter
 {
 public:
-    typedef error::error_code_t result;
+    typedef error::error_t result;
 
     // Operations (shared).
     //-------------------------------------------------------------------------

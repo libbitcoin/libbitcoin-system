@@ -35,7 +35,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/optional.hpp>

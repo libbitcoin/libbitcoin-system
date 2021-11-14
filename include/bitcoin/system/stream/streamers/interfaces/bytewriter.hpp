@@ -25,7 +25,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 
 namespace libbitcoin {
 namespace system {

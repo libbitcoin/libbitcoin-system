@@ -26,7 +26,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
@@ -149,7 +149,7 @@ template <typename IStream>
 code byte_reader<IStream>::read_error_code() noexcept
 {
     const auto value = read_little_endian<uint32_t>();
-    return code(static_cast<error::error_code_t>(value));
+    return code(static_cast<error::error_t>(value));
 }
 
 // bytes

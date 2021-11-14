@@ -25,7 +25,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/program.hpp>
 #include <bitcoin/system/math/math.hpp>

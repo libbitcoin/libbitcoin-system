@@ -15,10 +15,10 @@
  */
 
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/console_result.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/optional.hpp>
@@ -94,6 +94,10 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/error/error_category.hpp>
+#include <bitcoin/system/error/error_code.hpp>
+#include <bitcoin/system/error/error_condition.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>

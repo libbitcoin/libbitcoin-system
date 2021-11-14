@@ -36,7 +36,6 @@ src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPP
 src_libbitcoin_system_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_log_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_system_la_SOURCES = \
-    src/error.cpp \
     src/properties.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
@@ -119,6 +118,9 @@ src_libbitcoin_system_la_SOURCES = \
     src/data/data_slab.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
+    src/error/error_category.cpp \
+    src/error/error_code.cpp \
+    src/error/error_condition.cpp \
     src/machine/interpreter.cpp \
     src/machine/number.cpp \
     src/machine/program.cpp \
@@ -269,6 +271,7 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
+    test/error.cpp \
     test/main.cpp \
     test/properties.cpp \
     test/settings.cpp \
@@ -457,10 +460,10 @@ include_bitcoin_HEADERS = \
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
     include/bitcoin/system/assert.hpp \
+    include/bitcoin/system/console_result.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
-    include/bitcoin/system/error.hpp \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/mutex.hpp \
     include/bitcoin/system/optional.hpp \
@@ -551,6 +554,13 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/data_slice.hpp \
     include/bitcoin/system/data/string.hpp \
     include/bitcoin/system/data/uintx.hpp
+
+include_bitcoin_system_errordir = ${includedir}/bitcoin/system/error
+include_bitcoin_system_error_HEADERS = \
+    include/bitcoin/system/error/error.hpp \
+    include/bitcoin/system/error/error_category.hpp \
+    include/bitcoin/system/error/error_code.hpp \
+    include/bitcoin/system/error/error_condition.hpp
 
 include_bitcoin_system_impldir = ${includedir}/bitcoin/system/impl
 include_bitcoin_system_impl_HEADERS = \

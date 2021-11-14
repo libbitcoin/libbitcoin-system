@@ -277,7 +277,6 @@ add_definitions(
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
 add_library( ${CANONICAL_LIB_NAME}
-    "../../src/error.cpp"
     "../../src/properties.cpp"
     "../../src/settings.cpp"
     "../../src/chain/block.cpp"
@@ -360,6 +359,9 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/data/data_slab.cpp"
     "../../src/data/data_slice.cpp"
     "../../src/data/string.cpp"
+    "../../src/error/error_category.cpp"
+    "../../src/error/error_code.cpp"
+    "../../src/error/error_condition.cpp"
     "../../src/machine/interpreter.cpp"
     "../../src/machine/number.cpp"
     "../../src/machine/program.cpp"
@@ -571,6 +573,7 @@ if (with-tests)
     add_executable( libbitcoin-system-test
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
+        "../../test/error.cpp"
         "../../test/main.cpp"
         "../../test/properties.cpp"
         "../../test/settings.cpp"

@@ -26,7 +26,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 
 namespace libbitcoin {
