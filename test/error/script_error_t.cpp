@@ -16,19 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/error/error_condition.hpp>
-
+#include "../test.hpp"
 #include <system_error>
-#include <bitcoin/system/error/error.hpp>
-#include <bitcoin/system/error/error_category.hpp>
 
-namespace std {
+BOOST_AUTO_TEST_SUITE(script_error_t_tests)
 
-std::error_condition make_error_condition(
-    bc::system::error::error_t value) noexcept
+BOOST_AUTO_TEST_CASE(script_error_t__code__test__expected)
 {
-    return std::error_condition(value,
-        bc::system::error::error_category::singleton);
 }
 
-} // namespace std
+BOOST_AUTO_TEST_SUITE_END()

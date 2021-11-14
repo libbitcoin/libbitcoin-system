@@ -457,10 +457,10 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_error_code__empty__default_invalid)
 
 BOOST_AUTO_TEST_CASE(bit_reader__read_error_code__value__expected)
 {
-    const std::string value{ (char)error::insufficient_work, 0x00, 0x00, 0x00, '*' };
+    const std::string value{ (char)error::double_spend, 0x00, 0x00, 0x00, '*' };
     std::stringstream stream{ value };
     read::bits::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_error_code(), error::insufficient_work);
+    BOOST_REQUIRE_EQUAL(reader.read_error_code().value(), error::double_spend);
     BOOST_REQUIRE(reader);
 }
 

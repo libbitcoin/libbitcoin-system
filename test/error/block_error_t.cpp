@@ -16,35 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_CONDITION_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_CONDITION_HPP
-
+#include "../test.hpp"
 #include <system_error>
-#include <bitcoin/system/error/error.hpp>
 
-namespace libbitcoin {
-namespace system {
-namespace error {
+BOOST_AUTO_TEST_SUITE(block_error_t_tests)
 
-enum error_condition_t {};
-
-}
-}
-}
-
-namespace std {
-
-// Make eligible for std::error_condition automatic conversions.
-template <>
-struct is_error_condition_enum<bc::system::error::error_condition_t>
-  : public true_type
+BOOST_AUTO_TEST_CASE(block_error_t__code__test__expected)
 {
-};
+}
 
-// Required by is_error_condition_enum, see: std::error_condition source.
-std::error_condition make_error_condition(
-    bc::system::error::error_t value) noexcept;
-
-} // namespace std
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

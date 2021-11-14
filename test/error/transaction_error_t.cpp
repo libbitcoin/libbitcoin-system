@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "test.hpp"
+#include "../test.hpp"
+#include <system_error>
 
-BOOST_AUTO_TEST_SUITE(error_tests)
+BOOST_AUTO_TEST_SUITE(transaction_error_t_tests)
 
-BOOST_AUTO_TEST_CASE(error__code__default__expected)
+BOOST_AUTO_TEST_CASE(transaction_error_t__code__test__expected)
 {
-    BOOST_REQUIRE_EQUAL(code(error::maxumum_error_code).message(), "invalid code");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

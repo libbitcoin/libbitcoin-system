@@ -1020,10 +1020,10 @@ code transaction::connect_input(const chain_state& state,
     size_t input_index) const
 {
     if (input_index >= inputs_.size())
-        return error::operation_failed;
+        return error::inputs_overflow;
 
     if (is_coinbase())
-        return error::success;
+        return error::transaction_success;
 
     const auto& prevout = inputs_[input_index].previous_output().metadata;
 
@@ -1079,13 +1079,14 @@ code transaction::check(uint64_t max_money, bool transaction_pool) const
     ////    return error::transaction_legacy_sigop_limit;
 
     else
-        return error::success;
+        return error::transaction_success;
 }
 
 code transaction::accept(bool transaction_pool) const
 {
     const auto state = metadata.state;
-    return state ? accept(*state, transaction_pool) : error::operation_failed;
+    return state ? accept(*state, transaction_pool) :
+        error::transaction_missing_metadata;
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
@@ -1150,13 +1151,13 @@ code transaction::accept(const chain_state& state, bool transaction_pool) const
         return error::transaction_weight_limit;
 
     else
-        return error::success;
+        return error::transaction_success;
 }
 
 code transaction::connect() const
 {
     const auto state = metadata.state;
-    return state ? connect(*state) : error::operation_failed;
+    return state ? connect(*state) : error::transaction_missing_metadata;
 }
 
 code transaction::connect(const chain_state& state) const
@@ -1167,7 +1168,7 @@ code transaction::connect(const chain_state& state) const
         if ((ec = connect_input(state, input)))
             return ec;
 
-    return error::success;
+    return error::transaction_success;
 }
 
 #undef RETURN_CACHED

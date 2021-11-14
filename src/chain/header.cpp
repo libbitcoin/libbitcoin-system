@@ -518,7 +518,7 @@ code header::check(uint32_t timestamp_limit_seconds,
 code header::accept() const
 {
     const auto state = metadata.state;
-    return state ? accept(*state) : error::operation_failed;
+    return state ? accept(*state) : error::header_missing_metadata;
 }
 
 code header::accept(const chain_state& state) const

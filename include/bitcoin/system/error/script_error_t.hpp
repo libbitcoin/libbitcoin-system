@@ -16,22 +16,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_ERROR_SCRIPT_ERROR_T_HPP
+#define LIBBITCOIN_SYSTEM_ERROR_SCRIPT_ERROR_T_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
+#include <cstdint>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
+
+ // Transaction sequences are limited to 0xff for single byte store encoding.
+ // With the uint8_t domain specified the compiler enforces this guard.
 
 namespace libbitcoin {
 namespace system {
+namespace error {
 
-using code = std::error_code;
+enum script_error_t : uint8_t
+{
+    script_success = 0,
+    inputs_overflow = add1<int>(transaction_error_t::tx_error_last),
+    invalid_script,
+    invalid_script_size,
+    invalid_push_data_size,
+    invalid_operation_count,
+    invalid_stack_size,
+    invalid_stack_scope,
+    invalid_script_embed,
+    unversioned_script,
+    unexpected_witness,
+    invalid_witness,
+    dirty_witness,
+    stack_false,
 
+    // chained to op_error_t
+    script_error_last
+};
+
+DECLARE_ERROR_T_CATEGORY(script_error);
+
+} // namespace error
 } // namespace system
 } // namespace libbitcoin
+
+DECLARE_STD_ERROR_T_REGISTRATION(bc::system::error, script_error)
 
 #endif

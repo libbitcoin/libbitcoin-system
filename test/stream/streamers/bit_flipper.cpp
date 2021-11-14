@@ -468,10 +468,10 @@ BOOST_AUTO_TEST_CASE(bit_flipper__read_error_code__empty__default_invalid)
 
 BOOST_AUTO_TEST_CASE(bit_flipper__read_error_code__value__expected)
 {
-    const std::string value{ (char)error::insufficient_work, 0x00, 0x00, 0x00, '*' };
+    const std::string value{ (char)error::double_spend, 0x00, 0x00, 0x00, '*' };
     std::stringstream stream{ value };
     flip::bits::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_error_code(), error::insufficient_work);
+    BOOST_REQUIRE_EQUAL(reader.read_error_code().value(), error::double_spend);
     BOOST_REQUIRE(reader);
 }
 
@@ -1172,8 +1172,8 @@ BOOST_AUTO_TEST_CASE(bit_flipper__write_error_code__value__expected)
 {
     std::stringstream stream;
     flip::bits::iostream writer(stream);
-    writer.write_error_code(error::insufficient_work);
-    const std::string expected{ (char)error::insufficient_work, 0x00, 0x00, 0x00 };
+    writer.write_error_code(error::double_spend);
+    const std::string expected{ (char)error::double_spend, 0x00, 0x00, 0x00 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }

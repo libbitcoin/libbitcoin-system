@@ -279,8 +279,8 @@ BOOST_AUTO_TEST_CASE(bit_writer__write_error_code__value__expected)
 {
     std::ostringstream stream;
     write::bits::ostream writer(stream);
-    writer.write_error_code(error::insufficient_work);
-    const std::string expected{ (char)error::insufficient_work, 0x00, 0x00, 0x00 };
+    writer.write_error_code(error::double_spend);
+    const std::string expected{ (char)error::double_spend, 0x00, 0x00, 0x00 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }

@@ -16,18 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/error/error_code.hpp>
+#include <bitcoin/system/error/error_t.hpp>
 
-#include <system_error>
-#include <bitcoin/system/error/error.hpp>
-#include <bitcoin/system/error/error_category.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error/macros.hpp>
 
-namespace std {
-
-std::error_code make_error_code(bc::system::error::error_t value) noexcept
+namespace libbitcoin {
+namespace system {
+namespace error {
+    
+DEFINE_ERROR_T_MESSAGE_MAP(error)
 {
-    return std::error_code(value,
-        bc::system::error::error_category::singleton);
-}
+    { success, "success" },
+    { unknown, "unknown error" },
+    { not_found, "object does not exist" },
+    { not_implemented, "feature not implemented" }
+    ////{ error_last, "unmapped code" }
+};
 
-} // namespace std
+DEFINE_ERROR_T_CATEGORY(error, "bc", "system code")
+
+} // namespace error
+} // namespace system
+} // namespace libbitcoin
+
+DEFINE_STD_ERROR_T_REGISTRATION(bc::system::error, error)

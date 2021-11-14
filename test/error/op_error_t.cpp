@@ -16,33 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_CATEGORY_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_CATEGORY_HPP
-
-#include <string>
+#include "../test.hpp"
 #include <system_error>
 
-namespace libbitcoin {
-namespace system {
-namespace error {
+BOOST_AUTO_TEST_SUITE(op_error_t_tests)
 
-class error_category
-  : public std::error_category
+BOOST_AUTO_TEST_CASE(op_error_t__code__test__expected)
 {
-public:
-    static const error_category singleton;
+}
 
-    virtual const char* name() const noexcept;
-    virtual std::string message(int value) const noexcept;
-    virtual std::error_condition default_error_condition(
-        int value) const noexcept;
-
-private:
-    static const char* category_name;
-};
-
-} // namespace error
-} // namespace system
-} // namespace libbitcoin
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

@@ -757,7 +757,7 @@ code block::check_transactions(uint64_t max_money) const
         if ((ec = tx.check(max_money, false)))
             return ec;
 
-    return error::success;
+    return error::block_success;
 }
 
 code block::accept_transactions(const chain_state& state) const
@@ -768,7 +768,7 @@ code block::accept_transactions(const chain_state& state) const
         if ((ec = tx.accept(state, false)))
             return ec;
 
-    return error::success;
+    return error::block_success;
 }
 
 code block::connect_transactions(const chain_state& state) const
@@ -779,7 +779,7 @@ code block::connect_transactions(const chain_state& state) const
         if ((ec = tx.connect(state)))
             return ec;
 
-    return error::success;
+    return error::block_success;
 }
 
 // Validation.
@@ -846,7 +846,7 @@ code block::accept(const system::settings& settings, bool transactions,
 {
     const auto state = header_.metadata.state;
     return state ? accept(*state, settings, transactions, header) :
-        error::operation_failed;
+        error::header_missing_metadata;
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
@@ -919,13 +919,13 @@ code block::accept(const chain_state& state,
 code block::connect() const
 {
     const auto state = header_.metadata.state;
-    return state ? connect(*state) : error::operation_failed;
+    return state ? connect(*state) : error::header_missing_metadata;
 }
 
 code block::connect(const chain_state& state) const
 {
     if (state.is_under_checkpoint())
-        return error::success;
+        return error::block_success;
 
     return connect_transactions(state);
 }

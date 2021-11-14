@@ -1433,7 +1433,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks, const script& prevout_script, uint64_t value)
 {
     if (input_index >= tx.inputs().size())
-        return error::operation_failed;
+        return error::inputs_overflow;
 
     code ec;
     bool witnessed;
@@ -1511,7 +1511,7 @@ code script::verify(const transaction& tx, uint32_t input_index,
     uint32_t forks)
 {
     if (input_index >= tx.inputs().size())
-        return error::operation_failed;
+        return error::inputs_overflow;
 
     const auto& in = tx.inputs()[input_index];
     const auto& prevout = in.previous_output().metadata.cache;
