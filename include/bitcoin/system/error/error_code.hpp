@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,65 +16,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_CODE_HPP
+#define LIBBITCOIN_SYSTEM_ERROR_ERROR_CODE_HPP
 
 #include <string>
-#include <system_error>
-#include <unordered_map>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-/// Console result codes, positive values are domain-specific.
-enum console_result : int
-{
-    failure = -1,
-    okay = 0,
-    invalid = 1
-};
-
-/// Alias for error code declarations.
-typedef std::error_code code;
-
-/// Alias for boost error code declarations.
-typedef boost::system::error_code boost_code;
-
 namespace error {
 
-// The numeric values of these codes may change without notice.
-enum error_code_t
+enum error_t
 {
     // general
     success = 0,
     unknown,
     not_found,
-    file_system,
     not_implemented,
     oversubscribed,
+    file_system,
 
     // network
-    service_stopped,
-    operation_failed,
-    resolve_failed,
-    network_unreachable,
-    address_in_use,
     listen_failed,
     accept_failed,
-    bad_stream,
+    resolve_failed,
+    connect_failed,
     channel_timeout,
-    address_blocked,
     channel_stopped,
+    service_stopped,
+    operation_canceled,
+    operation_failed,
+    address_in_use,
+    bad_stream,
+    address_blocked,
     peer_throttling,
 
     // database
     store_block_duplicate,
     store_block_invalid_height,
     store_block_missing_parent,
-    store_lock_failure,
     store_incorrect_state,
+    store_lock_failure,
 
     // blockchain
     duplicate_block,
@@ -87,17 +69,6 @@ enum error_code_t
     insufficient_fee,
     stale_chain,
     dusty_transaction,
-
-    // server
-    unrecognized_filter_type,
-    invalid_response_range,
-    configuration_disabled,
-    metadata_prevout_missing,
-
-    // http
-    http_invalid_request,
-    http_method_not_found,
-    http_internal_error,
 
     // check header
     invalid_proof_of_work,
@@ -253,20 +224,22 @@ enum error_code_t
     op_check_sequence_verify7,
     op_check_multisig_verify8,
 
+    // http [TODO: isolate to http service]
+    http_invalid_request,
+    http_method_not_found,
+    http_internal_error,
+
+    ////// server [not implemented]
+    ////unrecognized_filter_type,
+    ////invalid_response_range,
+    ////configuration_disabled,
+    ////prevout_missing,
+
     maxumum_error_code
 };
 
 // The store retains codes in 1 byte fields.
 static_assert(maxumum_error_code < 256, "error code capacity");
-
-enum error_condition_t
-{
-};
-
-BC_API code make_error_code(error_code_t e);
-BC_API std::error_condition make_error_condition(error_condition_t e);
-BC_API error_code_t boost_to_error_code(const boost_code& ec);
-BC_API error_code_t posix_to_error_code(int ec);
 
 } // namespace error
 } // namespace system
@@ -274,17 +247,15 @@ BC_API error_code_t posix_to_error_code(int ec);
 
 namespace std {
 
+// Make eligible for std::error_code/std::error_condition automatic conversions.
 template <>
-struct is_error_code_enum<bc::system::error::error_code_t>
+struct is_error_code_enum<bc::system::error::error_t>
   : public true_type
 {
 };
 
-template <>
-struct is_error_condition_enum<bc::system::error::error_condition_t>
-  : public true_type
-{
-};
+// Required by is_error_code_enum, see: std::error_code source.
+std::error_code make_error_code(bc::system::error::error_t value) noexcept;
 
 } // namespace std
 
