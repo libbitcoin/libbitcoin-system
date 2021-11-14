@@ -18,11 +18,16 @@
  */
 #include <bitcoin/system/error/error_code.hpp>
 
+#include <system_error>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/error/error_category.hpp>
+
 namespace std {
 
 std::error_code make_error_code(bc::system::error::error_t value) noexcept
 {
-    return std::error_code(value);
+    return std::error_code(value,
+        bc::system::error::error_category::singleton);
 }
 
 } // namespace std
