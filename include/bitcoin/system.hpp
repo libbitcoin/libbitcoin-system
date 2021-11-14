@@ -94,10 +94,13 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/error/block_error_t.hpp>
 #include <bitcoin/system/error/error.hpp>
-#include <bitcoin/system/error/error_category.hpp>
-#include <bitcoin/system/error/error_code.hpp>
-#include <bitcoin/system/error/error_condition.hpp>
+#include <bitcoin/system/error/error_t.hpp>
+#include <bitcoin/system/error/macros.hpp>
+#include <bitcoin/system/error/op_error_t.hpp>
+#include <bitcoin/system/error/script_error_t.hpp>
+#include <bitcoin/system/error/transaction_error_t.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>

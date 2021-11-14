@@ -399,13 +399,19 @@
     <ClCompile Include="..\..\..\..\src\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\error\error_category.cpp">
+    <ClCompile Include="..\..\..\..\src\error\block_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\error\error_code.cpp">
+    <ClCompile Include="..\..\..\..\src\error\error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\error\error_condition.cpp">
+    <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp">
+      <Filter>src\error</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp">
+      <Filter>src\error</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp">
@@ -959,16 +965,25 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp">
+      <Filter>include\bitcoin\system\error</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error.hpp">
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_category.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_t.hpp">
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_code.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\macros.hpp">
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_condition.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\op_error_t.hpp">
+      <Filter>include\bitcoin\system\error</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp">
+      <Filter>include\bitcoin\system\error</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp">
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp">

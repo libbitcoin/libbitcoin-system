@@ -118,9 +118,11 @@ src_libbitcoin_system_la_SOURCES = \
     src/data/data_slab.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
-    src/error/error_category.cpp \
-    src/error/error_code.cpp \
-    src/error/error_condition.cpp \
+    src/error/block_error_t.cpp \
+    src/error/error_t.cpp \
+    src/error/op_error_t.cpp \
+    src/error/script_error_t.cpp \
+    src/error/transaction_error_t.cpp \
     src/machine/interpreter.cpp \
     src/machine/number.cpp \
     src/machine/program.cpp \
@@ -271,7 +273,6 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
-    test/error.cpp \
     test/main.cpp \
     test/properties.cpp \
     test/settings.cpp \
@@ -325,6 +326,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/data_slice.cpp \
     test/data/integer.cpp \
     test/data/string.cpp \
+    test/error/block_error_t.cpp \
+    test/error/error_t.cpp \
+    test/error/op_error_t.cpp \
+    test/error/script_error_t.cpp \
+    test/error/transaction_error_t.cpp \
     test/machine/number.cpp \
     test/machine/number.hpp \
     test/machine/operation.cpp \
@@ -557,10 +563,13 @@ include_bitcoin_system_data_HEADERS = \
 
 include_bitcoin_system_errordir = ${includedir}/bitcoin/system/error
 include_bitcoin_system_error_HEADERS = \
+    include/bitcoin/system/error/block_error_t.hpp \
     include/bitcoin/system/error/error.hpp \
-    include/bitcoin/system/error/error_category.hpp \
-    include/bitcoin/system/error/error_code.hpp \
-    include/bitcoin/system/error/error_condition.hpp
+    include/bitcoin/system/error/error_t.hpp \
+    include/bitcoin/system/error/macros.hpp \
+    include/bitcoin/system/error/op_error_t.hpp \
+    include/bitcoin/system/error/script_error_t.hpp \
+    include/bitcoin/system/error/transaction_error_t.hpp
 
 include_bitcoin_system_impldir = ${includedir}/bitcoin/system/impl
 include_bitcoin_system_impl_HEADERS = \
