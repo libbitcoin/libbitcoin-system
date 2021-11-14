@@ -32,7 +32,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -46,9 +46,6 @@ class BC_API script
 {
 public:
     typedef std::vector<script> list;
-
-    /// Consensus sentinel.
-    static hash_digest one_hash();
 
     // Constructors.
     //-------------------------------------------------------------------------

@@ -35,7 +35,7 @@
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/error.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -46,13 +46,8 @@ namespace chain {
 
 using namespace bc::system::machine;
 
-hash_digest script::one_hash()
-{
-    static const auto hash = base16_hash(
-        "0000000000000000000000000000000000000000000000000000000000000001");
-
-    return hash;
-}
+static const auto one_hash = base16_hash(
+    "0000000000000000000000000000000000000000000000000000000000000001");
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -645,7 +640,7 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     // CONSENSUS: wacky satoshi behavior (continuing with one).
     //*************************************************************************
     if (is_index_overflow(tx, input_index, sighash))
-        return script::one_hash();
+        return one_hash;
 
     //*************************************************************************
     // CONSENSUS: more wacky satoshi behavior.
