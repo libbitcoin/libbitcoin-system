@@ -222,15 +222,19 @@ bool operation_overflow(size_t count)
     return count > max_counted_ops;
 }
 
+// This is guarded by script size.
 bool program::increment_operation_count(const operation& op)
 {
-    // Addition is safe due to script size metadata.
+    // Addition is safe due to script size constraint.
+    BITCOIN_ASSERT(max_size_t - one >= operation_count_);
+
     if (operation::is_counted(op.code()))
         ++operation_count_;
 
     return !operation_overflow(operation_count_);
 }
 
+// This is guarded by script size.
 bool program::increment_operation_count(int32_t public_keys)
 {
     static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
@@ -239,7 +243,9 @@ bool program::increment_operation_count(int32_t public_keys)
     if (is_negative(public_keys)|| public_keys > max_keys)
         return false;
 
-    // Addition is safe due to script size metadata.
+    // Addition is safe due to script size constraint.
+    BITCOIN_ASSERT(max_size_t - public_keys >= operation_count_);
+
     operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
 }
