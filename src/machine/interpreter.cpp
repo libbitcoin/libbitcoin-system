@@ -1345,7 +1345,7 @@ interpreter::result interpreter::run_op(const operation& op,
 
 code interpreter::run(program& program)
 {
-    code ec;
+    result ec;
 
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
