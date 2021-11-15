@@ -127,7 +127,7 @@ enum op_error_t : uint8_t
     op_check_sequence_verify7
 };
 
-DECLARE_ERROR_T_CATEGORY(op_error);
+DECLARE_ERROR_T_CODE_CATEGORY(op_error);
 
 } // namespace error
 } // namespace system

@@ -26,6 +26,8 @@
 #include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
 
+#include <system_error>
+
 namespace libbitcoin {
 namespace system {
 

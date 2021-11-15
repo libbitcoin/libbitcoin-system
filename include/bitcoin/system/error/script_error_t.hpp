@@ -53,7 +53,7 @@ enum script_error_t : uint8_t
     script_error_last
 };
 
-DECLARE_ERROR_T_CATEGORY(script_error);
+DECLARE_ERROR_T_CODE_CATEGORY(script_error);
 
 } // namespace error
 } // namespace system
