@@ -126,7 +126,6 @@ const operation::list& script::operations_copy() const
 // Operators.
 //-----------------------------------------------------------------------------
 
-// Concurrent read/write is not supported, so no critical section.
 script& script::operator=(script&& other)
 {
     operations_ = other.operations_move();
@@ -136,7 +135,6 @@ script& script::operator=(script&& other)
     return *this;
 }
 
-// Concurrent read/write is not supported, so no critical section.
 script& script::operator=(const script& other)
 {
     operations_ = other.operations_copy();
@@ -195,7 +193,6 @@ bool script::from_data(std::istream& stream, bool prefix)
     return from_data(source, prefix);
 }
 
-// Concurrent read/write is not supported, so no critical section.
 bool script::from_data(reader& source, bool prefix)
 {
     reset();
@@ -223,7 +220,6 @@ bool script::from_data(reader& source, bool prefix)
     return source;
 }
 
-// Concurrent read/write is not supported, so no critical section.
 bool script::from_string(const std::string& mnemonic)
 {
     reset();
@@ -242,7 +238,6 @@ bool script::from_string(const std::string& mnemonic)
     return true;
 }
 
-// Concurrent read/write is not supported, so no critical section.
 void script::from_operations(operation::list&& ops)
 {
     ////reset();
@@ -252,7 +247,6 @@ void script::from_operations(operation::list&& ops)
     valid_ = true;
 }
 
-// Concurrent read/write is not supported, so no critical section.
 void script::from_operations(const operation::list& ops)
 {
     ////reset();
@@ -291,7 +285,6 @@ size_t script::serialized_size(const operation::list& ops)
 }
 
 // protected
-// Concurrent read/write is not supported, so no critical section.
 void script::reset()
 {
     bytes_.clear();
@@ -914,6 +907,20 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
         && ops[0].data() == number(height).data();
 }
 
+////// This is slightly more efficient because the script does not get parsed,
+////// but the static template implementation is more self-explanatory.
+////bool script::is_coinbase_pattern(size_t height) const
+////{
+////    const auto actual = to_data(false);
+////
+////    // Create the expected script as a non-minimal byte vector.
+////    script compare(operation::list{ { number(height).data(), false } });
+////    const auto expected = compare.to_data(false);
+////
+////    // Require the actual script start with the expected coinbase script.
+////    return std::equal(expected.begin(), expected.end(), actual.begin());
+////}
+
 //*****************************************************************************
 // CONSENSUS: this pattern is used to commit to bip141 witness data.
 //*****************************************************************************
@@ -1379,7 +1386,6 @@ void script::find_and_delete_(const data_chunk& endorsement)
         bytes_.erase(it, it + value.size());
 }
 
-// Concurrent read/write is not supported, so no critical section.
 void script::find_and_delete(const data_stack& endorsements)
 {
     for (const auto& endorsement: endorsements)
@@ -1390,20 +1396,6 @@ void script::find_and_delete(const data_stack& endorsements)
     cached_ = false;
     bytes_.shrink_to_fit();
 }
-
-////// This is slightly more efficient because the script does not get parsed,
-////// but the static template implementation is more self-explanatory.
-////bool script::is_coinbase_pattern(size_t height) const
-////{
-////    const auto actual = to_data(false);
-////
-////    // Create the expected script as a non-minimal byte vector.
-////    script compare(operation::list{ { number(height).data(), false } });
-////    const auto expected = compare.to_data(false);
-////
-////    // Require the actual script start with the expected coinbase script.
-////    return std::equal(expected.begin(), expected.end(), actual.begin());
-////}
 
 bool script::is_oversized() const
 {
