@@ -244,30 +244,25 @@ bool program::increment_operation_count(int32_t public_keys)
     return !operation_overflow(operation_count_);
 }
 
-bool program::set_jump_register(const operation& op, int32_t offset)
+bool program::register_jump(const operation& op)
 {
     if (script_.empty())
         return false;
 
-    // This avoids std::find_if use of equality operator override.
+    // This avoids std::find_if using equality operator override.
     const auto finder = [&op](const operation& operation)
     {
         return &operation == &op;
     };
 
-    // This is not efficient (linear) but simplifying and jump is rarely used.
-    // TODO: use an iterator against script_ for the opcode, then just copy it
-    // to jump_ and increment it below.
+    // This is not efficient (linear) but rarely used.
     jump_ = std::find_if(script_.begin(), script_.end(), finder);
 
+    // This is not reachable if op is an element of script_.
     if (jump_ == script_.end())
         return false;
 
-    // This does not require guard because op_codeseparator can only increment.
-    // Even if the opcode is last in the sequence the increment is valid (end).
-    BITCOIN_ASSERT_MSG(offset == 1, "unguarded jump offset");
-
-    std::advance(jump_, offset);
+    std::advance(jump_, one);
     return true;
 }
 

@@ -89,7 +89,7 @@ public:
     code evaluate(const chain::operation& op);
     bool increment_operation_count(const chain::operation& op);
     bool increment_operation_count(int32_t public_keys);
-    bool set_jump_register(const chain::operation& op, int32_t offset);
+    bool register_jump(const chain::operation& op);
 
     // Primary stack.
     //-------------------------------------------------------------------------

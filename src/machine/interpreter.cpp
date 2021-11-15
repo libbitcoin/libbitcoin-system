@@ -800,7 +800,7 @@ interpreter::result interpreter::op_hash256(program& program)
 interpreter::result interpreter::op_codeseparator(program& program,
     const operation& op)
 {
-    return program.set_jump_register(op, +1) ? error::op_success :
+    return program.register_jump(op) ? error::op_success :
         error::op_code_seperator;
 }
 
