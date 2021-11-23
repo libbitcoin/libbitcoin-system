@@ -67,6 +67,8 @@ enum transaction_error_t
 
 DECLARE_ERROR_T_CODE_CATEGORY(transaction_error);
 
+DECLARE_ERROR_CODE_CONSTRUCTION(bc::system::error, transaction_error)
+
 } // namespace error
 } // namespace system
 } // namespace libbitcoin

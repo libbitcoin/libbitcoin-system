@@ -71,6 +71,20 @@ std::error_condition cat##_category::default_error_condition(int code) const noe
 
 #endif // DECLARE_CATEGORY
 
+#define DECLARE_ERROR_CODE_CONSTRUCTION(space, cat) \
+std::error_code make_error_code(space::cat##_t value) noexcept; \
+std::error_condition make_error_condition(space::cat##_t value) noexcept;
+
+#define DEFINE_ERROR_CODE_CONSTRUCTION(space, cat) \
+std::error_code make_error_code(cat##_t value) noexcept \
+{ \
+    return std::error_code(value, space::cat##_category::singleton); \
+} \
+std::error_condition make_error_condition(cat##_t value) noexcept \
+{ \
+    return std::error_condition(value, space::cat##_category::singleton); \
+}
+
 #define DECLARE_STD_ERROR_T_REGISTRATION(space, cat) \
 namespace std { \
 template <> \
@@ -79,21 +93,6 @@ struct is_error_code_enum<space::cat##_t> \
 template <> \
 struct is_error_condition_enum<space::cat##_condition_t> \
   : public true_type {}; \
-std::error_code make_error_code(space::cat##_t value) noexcept; \
-std::error_condition make_error_condition(space::cat##_t value) noexcept; \
-}
-
-#define DEFINE_STD_ERROR_T_REGISTRATION(space, cat) \
-using namespace space; \
-namespace std { \
-std::error_code make_error_code(cat##_t value) noexcept \
-{ \
-    return std::error_code(value, space::cat##_category::singleton); \
-} \
-std::error_condition make_error_condition(cat##_t value) noexcept \
-{ \
-    return std::error_condition(value, space::cat##_category::singleton); \
-} \
 }
 
 // If an equivalence is not defined, codes are evaluated for equality.
