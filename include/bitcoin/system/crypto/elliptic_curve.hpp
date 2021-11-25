@@ -59,6 +59,7 @@ typedef data_chunk der_signature;
 static constexpr size_t min_endorsement_size = 9;
 static constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
+typedef std::vector<endorsement> endorsements;
 
 // secg.org/sec2-v2.pdf
 static const ec_compressed ec_compressed_generator = base16_array("02"
