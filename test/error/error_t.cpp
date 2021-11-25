@@ -33,25 +33,28 @@ BOOST_AUTO_TEST_CASE(error_t__code__success__false_exected_message)
 
 BOOST_AUTO_TEST_CASE(error_t__code__unknown__true_exected_message)
 {
-    const auto ec = code(error::unknown);
+    constexpr auto value = error::unknown;
+    const auto ec = code(value);
     BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == error::unknown);
+    BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "unknown error");
 }
 
 BOOST_AUTO_TEST_CASE(error_t__code__not_found__true_exected_message)
 {
-    const auto ec = code(error::not_found);
+    constexpr auto value = error::not_found;
+    const auto ec = code(value);
     BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == error::not_found);
+    BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "object does not exist");
 }
 
 BOOST_AUTO_TEST_CASE(error_t__code__not_implemented__true_exected_message)
 {
-    const auto ec = code(error::not_implemented);
+    constexpr auto value = error::not_implemented;
+    const auto ec = code(value);
     BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == error::not_implemented);
+    BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "feature not implemented");
 }
 
