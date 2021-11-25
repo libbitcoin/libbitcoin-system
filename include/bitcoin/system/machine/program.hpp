@@ -83,7 +83,6 @@ public:
     op_iterator begin() const;
     op_iterator jump() const;
     op_iterator end() const;
-    size_t operation_count() const;
 
     /// Instructions.
     code evaluate();

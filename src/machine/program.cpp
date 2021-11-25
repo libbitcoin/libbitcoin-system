@@ -208,15 +208,10 @@ program::op_iterator program::end() const
     return script_.end();
 }
 
-size_t program::operation_count() const
-{
-    return operation_count_;
-}
-
 // Instructions.
 //-----------------------------------------------------------------------------
 
-bool operation_overflow(size_t count)
+inline bool operation_overflow(size_t count)
 {
     // ************************************************************************
     // CONSENSUS:
