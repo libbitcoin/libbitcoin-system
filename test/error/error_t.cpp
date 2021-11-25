@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include <system_error>
 
 BOOST_AUTO_TEST_SUITE(error_t_tests)
 
