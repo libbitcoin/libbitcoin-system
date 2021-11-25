@@ -815,10 +815,11 @@ hash_digest script::generate_signature_hash(const transaction& tx,
 
 // static
 bool script::check_signature(const ec_signature& signature,
-    uint8_t sighash_type, const data_chunk& public_key,
+    uint8_t sighash_type, const data_slice& public_key,
     const script& script_code, const transaction& tx, uint32_t input_index,
     script_version version, uint64_t value)
 {
+    // This is already checked.
     if (signature.empty() || public_key.empty())
         return false;
 

@@ -822,10 +822,9 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
 
     uint8_t sighash;
     ec_signature signature;
-    der_signature distinguished;
+    data_slice distinguished;
     auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
 
-    // TODO: make distinguished a data_slice.
     // Parse endorsement into DER signature into an EC signature.
     if (!parse_endorsement(sighash, distinguished, endorsement) ||
         !parse_signature(signature, distinguished, bip66))
@@ -896,7 +895,7 @@ interpreter::result interpreter::op_check_multisig_verify(
 
     uint8_t sighash;
     ec_signature signature;
-    der_signature distinguished;
+    data_slice distinguished;
     auto endorsement = endorsements.begin();
     auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
     auto bip143 = script::is_enabled(program.forks(), rule_fork::bip143_rule);
@@ -922,7 +921,6 @@ interpreter::result interpreter::op_check_multisig_verify(
         if (public_key.empty())
             return error::op_check_multisig_verify9;
 
-        // TODO: make distinguished a data_slice.
         // Parse endorsement into DER signature into an EC signature.
         if (!parse_endorsement(sighash, distinguished, *endorsement) ||
             !parse_signature(signature, distinguished, bip66))

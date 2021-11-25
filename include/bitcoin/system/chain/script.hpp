@@ -134,7 +134,7 @@ public:
         uint64_t value=max_uint64);
 
     static bool check_signature(const ec_signature& signature,
-        uint8_t sighash_type, const data_chunk& public_key,
+        uint8_t sighash_type, const data_slice& public_key,
         const script& script_code, const transaction& tx, uint32_t input_index,
         script_version version=script_version::unversioned,
         uint64_t value=max_uint64);

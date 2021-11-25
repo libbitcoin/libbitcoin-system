@@ -151,10 +151,7 @@ BC_API bool secret_to_public(ec_uncompressed& out, const ec_secret& secret);
 BC_API bool verify(const ec_secret& secret);
 
 /// Verify point.
-BC_API bool verify(const ec_compressed& point);
-
-/// Verify point.
-BC_API bool verify(const ec_uncompressed& point);
+BC_API bool verify(const data_slice& point);
 
 // Detect public keys
 // ----------------------------------------------------------------------------
@@ -178,13 +175,13 @@ BC_API bool is_endorsement(const endorsement& endorsement);
 // ----------------------------------------------------------------------------
 
 /// Parse an endorsement into signature hash type and DER signature.
-BC_API bool parse_endorsement(uint8_t& sighash_type,
-    der_signature& der_signature, const endorsement& endorsement);
+BC_API bool parse_endorsement(uint8_t& sighash_type, data_slice& der_signature,
+    const endorsement& endorsement);
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
-BC_API bool parse_signature(ec_signature& out,
-    const der_signature& der_signature, bool strict);
+BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
+    bool strict);
 
 /// Encode an EC signature as DER (strict).
 BC_API bool encode_signature(der_signature& out, const ec_signature& signature);
@@ -195,14 +192,6 @@ BC_API bool encode_signature(der_signature& out, const ec_signature& signature);
 /// Create a deterministic ECDSA signature using a private key.
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash);
-
-/// Verify an EC signature using a compressed point.
-BC_API bool verify_signature(const ec_compressed& point,
-    const hash_digest& hash, const ec_signature& signature);
-
-/// Verify an EC signature using an uncompressed point.
-BC_API bool verify_signature(const ec_uncompressed& point,
-    const hash_digest& hash, const ec_signature& signature);
 
 /// Verify an EC signature using a potential point.
 BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
