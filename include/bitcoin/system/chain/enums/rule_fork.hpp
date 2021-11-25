@@ -32,60 +32,20 @@ enum rule_fork : uint32_t
     /// Only satoshi-released hard forks, and enforced soft forks are included.
     no_rules = 0,
 
-    // TODO:
-    /// Promote nop1..nop10 [0.3.6] (hard fork, expansion).
-    /// Combined script max 20,000 bytes, push_data 520 (soft fork, arbitrary).
-    /// Initial script and push_data size limits (soft fork, arbitrary).
-    /// Demote return, op_ver, verif, vernotif (soft fork, security).
-    nops_rule = bit_right<uint32_t>(16),
+    /// Disallow minimum difficulty blocks (hard fork, !testnet).
+    difficult = bit_right<uint32_t>(0),
 
-    // TODO:
-    /// Splits script evaluation, activated by [0.3.7] (hard fork, security).
-    /// Per script max 10,000 bytes, one more total byte than prior, as the
-    /// previous limit was imposed after concatenating with op_codeseparator.
-    split_rule = bit_right<uint32_t>(17),
-
-    // TODO:
-    /// Invalidate op_cat, etc. [0.3.9] (soft fork, security).
-    cats_rule = bit_right<uint32_t>(18),
-
-    // TODO:
-    /// The original rule leaked output value, was plugged here (soft fork).
-    /// This was activated at block 74,638 [0.3.10], later to all blocks.
-    plug_rule = bit_right<uint32_t>(19),
-
-    // TODO:
-    /// Limit block size to 1,000,000 bytes (soft fork, system DoS).
-    /// Limit signature operations per block (soft fork, system DoS).
-    /// This was activated at block 79,400 [0.3.12], and later to all blocks.
-    size_rule = bit_right<uint32_t>(29),
-
-    // TODO:
-    /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
-    /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
-    unlock_rule = bit_right<uint32_t>(21),
-
-    // TODO:
-    /// This allowed double spends, applied and removed (hard fork, inflation).
-    /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
-    inflation_rule = bit_right<uint32_t>(22),
+    /// Perform difficulty retargeting (hard fork, !regtest).
+    retarget = bit_right<uint32_t>(1),
 
     /// Pay-to-script-hash enabled (soft fork, feature).
-    bip16_rule = bit_right<uint32_t>(1),
+    bip16_rule = bit_right<uint32_t>(2),
 
     /// No duplicated unspent transaction ids (soft fork, deflation).
-    bip30_rule = bit_right<uint32_t>(2),
+    bip30_rule = bit_right<uint32_t>(3),
 
     /// Coinbase must include height, redundant w/bip30 (soft fork, arbitrary).
-    bip34_rule = bit_right<uint32_t>(3),
-
-    /// Finite monetary supply, effective at 13,440,000 (soft fork, inflation).
-    bip42_rule = bit_right<uint32_t>(4),
-
-    // TODO:
-    /// Tx and input hashes max 4,500 per block (hard fork, determinism).
-    /// This (initially) soft fork rule expires, which makes it a hard fork.
-    bip50_rule = bit_right<uint32_t>(15),
+    bip34_rule = bit_right<uint32_t>(4),
 
     /// Strict DER signatures defined and required (soft fork, determinism).
     bip66_rule = bit_right<uint32_t>(5),
@@ -105,40 +65,75 @@ enum rule_fork : uint32_t
     /// Use median time past for locktime (soft fork, security).
     bip113_rule = bit_right<uint32_t>(10),
 
-    // TODO:
-    /// Reduces threshold segregated witness signaling (soft fork, feature).
-    bip91_rule = bit_right<uint32_t>(11),
-
     /// Segregated witness consensus layer (soft fork, feature).
-    bip141_rule = bit_right<uint32_t>(12),
+    bip141_rule = bit_right<uint32_t>(11),
 
     /// Segregated witness v0 verification (soft fork, feature).
-    bip143_rule = bit_right<uint32_t>(13),
+    bip143_rule = bit_right<uint32_t>(12),
 
     /// Segregated witness, dummy value malleability (soft fork, security).
-    bip147_rule = bit_right<uint32_t>(14),
-
-    /// TODO: taproot rules.
-
-    // ************************************************************************
-    // Future bitcoin forks work forward from bit 1.
-    // Splitcoin/altcoin forks work backwards from bit 31.
-    // ************************************************************************
+    bip147_rule = bit_right<uint32_t>(13),
 
     /// Fix Satoshi's time warp bug (hard fork, security).
-    time_warp_patch = bit_right<uint32_t>(27),
+    time_warp_patch = bit_right<uint32_t>(14),
 
     /// Fix target overflow for very low difficulty (hard fork, security).
-    retarget_overflow_patch = bit_right<uint32_t>(28),
+    retarget_overflow_patch = bit_right<uint32_t>(15),
 
     /// Use scrypt hashing for proof of work (hard fork, feature).
-    scrypt_proof_of_work = bit_right<uint32_t>(29),
+    scrypt_proof_of_work = bit_right<uint32_t>(16),
 
-    /// Perform difficulty retargeting (hard fork, regtest).
-    retarget = bit_right<uint32_t>(30),
+    /// Finite monetary supply, effective at 13,440,000 (soft fork, inflation).
+    bip42_rule = bit_right<uint32_t>(17),
 
-    /// Allow minimum difficulty blocks (hard fork, testnet).
-    difficult = bit_right<uint32_t>(31),
+    // TODO:
+    /// Promote nop1..nop10 [0.3.6] (hard fork, expansion).
+    /// Combined script max 20,000 bytes, push_data 520 (soft fork, arbitrary).
+    /// Initial script and push_data size limits (soft fork, arbitrary).
+    /// Demote return, op_ver, verif, vernotif (soft fork, security).
+    nops_rule = bit_right<uint32_t>(18),
+
+    // TODO:
+    /// Splits script evaluation, activated by [0.3.7] (hard fork, security).
+    /// Per script max 10,000 bytes, one more total byte than prior, as the
+    /// previous limit was imposed after concatenating with op_codeseparator.
+    split_rule = bit_right<uint32_t>(19),
+
+    // TODO:
+    /// Invalidate op_cat, etc. [0.3.9] (soft fork, security).
+    cats_rule = bit_right<uint32_t>(20),
+
+    // TODO:
+    /// The original rule leaked output value, was plugged here (soft fork).
+    /// This was activated at block 74,638 [0.3.10], later to all blocks.
+    plug_rule = bit_right<uint32_t>(21),
+
+    // TODO:
+    /// Limit block size to 1,000,000 bytes (soft fork, system DoS).
+    /// Limit signature operations per block (soft fork, system DoS).
+    /// This was activated at block 79,400 [0.3.12], and later to all blocks.
+    size_rule = bit_right<uint32_t>(22),
+
+    // TODO:
+    /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
+    /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
+    unlock_rule = bit_right<uint32_t>(21),
+
+    // TODO:
+    /// This allowed double spends, applied and removed (hard fork, inflation).
+    /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
+    inflation_rule = bit_right<uint32_t>(23),
+
+    // TODO:
+    /// Tx and input hashes max 4,500 per block (hard fork, determinism).
+    /// This (initially) soft fork rule expires, which makes it a hard fork.
+    bip50_rule = bit_right<uint32_t>(24),
+
+    // TODO:
+    /// Reduces threshold segregated witness signaling (soft fork, feature).
+    bip91_rule = bit_right<uint32_t>(25),
+
+    /// TODO: taproot rules.
 
     /// Rules that use bip34-based activation.
     bip34_activations =
