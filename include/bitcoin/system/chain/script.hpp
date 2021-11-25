@@ -210,7 +210,6 @@ public:
 
     /// Consensus computations.
     size_t sigops(bool accurate) const;
-    ////void find_and_delete(const data_stack& endorsements);
     bool is_oversized() const;
     bool is_unspendable() const;
 
@@ -242,8 +241,6 @@ private:
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
         uint32_t input_index, const script& script_code, uint64_t value,
         uint8_t sighash_type);
-
-    ////void find_and_delete_(const data_chunk& endorsement);
 
     operation::list& operations_move();
     const operation::list& operations_copy() const;
