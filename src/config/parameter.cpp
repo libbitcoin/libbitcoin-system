@@ -52,7 +52,7 @@ void parameter::initialize(const po::option_description& option,
 int parameter::position(const po::option_description& option,
     const argument_list& arguments) const
 {
-    return static_cast<int>(find_pair_position<argument_list>(arguments, option.long_name()));
+    return static_cast<int>(find_pair_position(arguments, option.long_name()));
 }
 
 // 100% unit coverage, all three scenarios (long, short, both)
