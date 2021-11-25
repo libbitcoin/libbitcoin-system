@@ -327,6 +327,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/integer.cpp \
     test/data/string.cpp \
     test/error/block_error_t.cpp \
+    test/error/error.cpp \
     test/error/error_t.cpp \
     test/error/op_error_t.cpp \
     test/error/script_error_t.cpp \
