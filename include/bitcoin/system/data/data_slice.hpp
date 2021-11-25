@@ -137,11 +137,12 @@ public:
     size_type size() const noexcept;
     bool empty() const noexcept;
 
-    /// Unary operators.
+    /// Operators.
     template<size_type Size>
     operator std::array<value_type, Size>() const noexcept;
     operator std::vector<value_type>() const noexcept;
     value_type operator[](size_type index) const noexcept;
+    data_slice& operator=(const data_slice& other);
 
 private:
     data_slice(pointer begin, pointer end, size_type size) noexcept;
@@ -156,7 +157,8 @@ private:
     template <typename Pointer>
     static data_slice from_size(Pointer begin, size_type size) noexcept;
 
-    const pointer begin_;
+    // Non-const because of assignment operator.
+    /*const*/ pointer begin_;
     pointer end_;
     size_type size_;
 };

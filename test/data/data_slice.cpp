@@ -128,12 +128,26 @@ const std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const auto encoded = encode_base16(string);
 
 
-// copy construct
+// copy construct/assigment
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__copy__expected)
 {
     const data_slice slice(string);
     const data_slice copy(slice);
+    BOOST_REQUIRE_EQUAL(slice.size(), size);
+
+    // size/data
+    BOOST_REQUIRE(!slice.empty());
+    BOOST_REQUIRE_EQUAL(slice.size(), size);
+    BOOST_REQUIRE_EQUAL(*slice.data(), 'f');
+    BOOST_REQUIRE_EQUAL(slice.back(), 'r');
+    BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
+}
+
+BOOST_AUTO_TEST_CASE(data_slice__operator__assignment__expected)
+{
+    const data_slice slice(string);
+    const auto copy = slice;
     BOOST_REQUIRE_EQUAL(slice.size(), size);
 
     // size/data
