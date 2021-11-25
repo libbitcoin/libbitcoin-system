@@ -355,8 +355,13 @@ bool program::pop_position(stack_iterator& out_position)
 }
 
 // pop1/pop2/.../pop[count]
-bool program::pop(data_stack& section, size_t count)
+bool program::pop(data_stack& section, int32_t signed_count)
 {
+    if (is_negative(signed_count))
+        return false;
+
+    const auto count = static_cast<uint32_t>(signed_count);
+
     if (size() < count)
         return false;
 

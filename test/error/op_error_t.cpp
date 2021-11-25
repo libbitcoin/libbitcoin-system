@@ -713,15 +713,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify9__true_exected_m
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify9");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify10__true_exected_message)
-{
-    constexpr auto value = error::op_check_multisig_verify10;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify10");
-}
-
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify_parse__true_exected_message)
 {
     constexpr auto value = error::op_check_multisig_verify_parse;

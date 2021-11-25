@@ -104,7 +104,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_multisig_verify7, "op_check_multisig_verify7" },
     { op_check_multisig_verify8, "op_check_multisig_verify8" },
     { op_check_multisig_verify9, "op_check_multisig_verify9" },
-    { op_check_multisig_verify10, "op_check_multisig_verify10" },
     { op_check_multisig_verify_parse, "op_check_multisig_verify_parse" },
     { op_check_multisig, "op_check_multisig" },
     { op_check_locktime_verify1, "op_check_locktime_verify1" },

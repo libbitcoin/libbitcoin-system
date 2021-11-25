@@ -106,7 +106,7 @@ public:
     bool pop_binary(number& first, number& second);
     bool pop_ternary(number& first, number& second, number& third);
     bool pop_position(stack_iterator& out_position);
-    bool pop(data_stack& section, size_t count);
+    bool pop(data_stack& section, int32_t signed_count);
 
     /// Primary push/pop optimizations (active).
     void duplicate(size_t index);
