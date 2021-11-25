@@ -60,8 +60,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
 
 DEFINE_ERROR_T_CATEGORY(transaction_error, "transaction", "transaction code")
 
+DEFINE_ERROR_CODE_CONSTRUCTION(bc::system::error, transaction_error)
+
 } // namespace error
 } // namespace system
 } // namespace libbitcoin
-
-DEFINE_STD_ERROR_T_REGISTRATION(bc::system::error, transaction_error)

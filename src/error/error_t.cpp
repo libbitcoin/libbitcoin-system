@@ -36,8 +36,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(error)
 
 DEFINE_ERROR_T_CATEGORY(error, "bc", "system code")
 
+DEFINE_ERROR_CODE_CONSTRUCTION(bc::system::error, error)
+
 } // namespace error
 } // namespace system
 } // namespace libbitcoin
-
-DEFINE_STD_ERROR_T_REGISTRATION(bc::system::error, error)
