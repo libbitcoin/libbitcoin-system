@@ -87,6 +87,7 @@ std::vector<To> cast(const std::vector<From>& source) noexcept
     return { std::begin(source), std::end(source) };
 }
 
+// C++17: Parallel policy for std::transform.
 template <typename To, typename From, size_t Size>
 std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 {
@@ -100,6 +101,7 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
     return out;
 }
 
+// C++17: Parallel policy for std::any_of.
 template <typename Collection>
 bool contains(const Collection& list,
     const typename Collection::value_type& element) noexcept
@@ -121,6 +123,7 @@ bool starts_with(const typename Collection::const_iterator& begin,
 }
 
 // TODO: constrain to std::pair elements.
+// C++17: Parallel policy for std::find_if.
 // Collection requires std::pair elements.
 template <typename Collection>
 typename Collection::difference_type
@@ -137,6 +140,7 @@ find_pair_position(const Collection& list,
         std::distance(std::begin(list), position);
 }
 
+// C++17: Parallel policy for std::find.
 template <typename Collection>
 typename Collection::difference_type
 find_position(const Collection& list,
@@ -181,6 +185,7 @@ pop(Collection& stack) noexcept
     return element;
 }
 
+// C++17: Parallel policy for std::sort, std::unique.
 template <typename Collection>
 bool is_distinct(Collection&& list) noexcept
 {
@@ -209,6 +214,7 @@ bool is_distinct(const Collection& list) noexcept
 }
 
 // TODO: provide optional comparison function
+// C++17: Parallel policy for std::is_sorted.
 template <typename Collection>
 bool is_sorted(const Collection& list) noexcept
 {
@@ -216,6 +222,7 @@ bool is_sorted(const Collection& list) noexcept
 }
 
 // TODO: specialize vector and generalize on element type.
+// C++17: Parallel policy for std::sort, std::erase.
 // Collection requires erase and shrink_to_fit methods (vector).
 template <typename Collection>
 Collection& distinct(Collection& list) noexcept
@@ -233,6 +240,32 @@ Collection distinct(const Collection& list) noexcept
     return std::move(distinct(copy));
 }
 
+// C++17: Parallel policy for std::find_first_of.
+template <typename Collection>
+bool intersecting(const Collection& left, const Collection& right) noexcept
+{
+    return std::find_first_of(std::begin(left), std::end(left),
+        std::begin(right), std::end(right)) != std::end(left);
+}
+
+// Collection requires reserve and shrink_to_fit methods (vector).
+template <typename Collection>
+Collection difference(const Collection& minuend,
+    const Collection& subtrahend) noexcept
+{
+    Collection copy;
+    copy.reserve(std::size(minuend));
+
+    // Linear copy since creating a copy, more efficient than multiple erases.
+    for (const auto& min: minuend)
+        if (!contains(subtrahend, min))
+            copy.push_back(min);
+
+    copy.shrink_to_fit();
+    return copy;
+}
+
+// C++17: Parallel policy for std::reverse.
 template <typename Collection>
 Collection& reverse(Collection& list) noexcept
 {
@@ -248,6 +281,7 @@ Collection reverse(const Collection& list) noexcept
 }
 
 // TODO: provide optional comparison function parameter.
+// C++17: Parallel policy for std::sort.
 template <typename Collection>
 Collection& sort(Collection& list) noexcept
 {

@@ -354,6 +354,130 @@ BOOST_AUTO_TEST_CASE(collection__distinct__const_distinct_unsorted_duplicates__s
     BOOST_REQUIRE_EQUAL(distinct(set), expected);
 }
 
+// intersecting
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__empty_sets__false)
+{
+    const data_chunk left;
+    const data_chunk right;
+    BOOST_REQUIRE(!intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__left_set_empty__false)
+{
+    const data_chunk left;
+    const data_chunk right{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(!intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__right_set_empty__false)
+{
+    const data_chunk left{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk right;
+    BOOST_REQUIRE(!intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__distinct_sets__false)
+{
+    const data_chunk left{ 0, 2, 4, 6, 8 };
+    const data_chunk right{ 1, 3, 5, 7, 9 };
+    BOOST_REQUIRE(!intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__same_sets__true)
+{
+    const data_chunk left{ 0, 2, 4, 6, 8 };
+    const data_chunk right{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__consistent_sets__true)
+{
+    const data_chunk left{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk right{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__left_subset__true)
+{
+    const data_chunk left{ 8, 6 };
+    const data_chunk right{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE(intersecting(left, right));
+}
+
+BOOST_AUTO_TEST_CASE(collection__intersecting__right_subset__true)
+{
+    const data_chunk left{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk right{ 0, 8 };
+    BOOST_REQUIRE(intersecting(left, right));
+}
+
+// difference
+
+BOOST_AUTO_TEST_CASE(collection__difference__empty_sets__empty)
+{
+    const data_chunk minuend;
+    const data_chunk subtrahend;
+    const auto expected = minuend;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__idifference__minuend_empty__empty)
+{
+    const data_chunk minuend;
+    const data_chunk subtrahend{ 0, 2, 4, 6, 8 };
+    const auto expected = minuend;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_empty__minuend)
+{
+    const data_chunk minuend{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk subtrahend;
+    const auto expected = minuend;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__distinct_sets__minuend)
+{
+    const data_chunk minuend{ 0, 2, 4, 6, 8 };
+    const data_chunk subtrahend{ 1, 3, 5, 7, 9 };
+    const data_chunk expected = minuend;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__same_sets__empty)
+{
+    const data_chunk minuend{ 0, 2, 4, 6, 8 };
+    const data_chunk subtrahend{ 0, 2, 4, 6, 8 };
+    const data_chunk expected;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__consistent_sets__empty)
+{
+    const data_chunk minuend{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk subtrahend{ 0, 2, 4, 6, 8 };
+    const data_chunk expected;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__minuend_subset__empty)
+{
+    const data_chunk minuend{ 8, 6 };
+    const data_chunk subtrahend{ 0, 2, 4, 6, 8 };
+    const data_chunk expected;
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_subset__expected)
+{
+    const data_chunk minuend{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk subtrahend{ 0, 8 };
+    const data_chunk expected{ 2, 6, 4 };
+    BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
+}
+
 // reverse
 
 BOOST_AUTO_TEST_CASE(collection__reverse__empty__empty)

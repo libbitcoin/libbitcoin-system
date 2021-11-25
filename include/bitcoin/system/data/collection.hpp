@@ -97,6 +97,15 @@ Collection& distinct(Collection& list) noexcept;
 template <typename Collection>
 Collection distinct(const Collection& list) noexcept;
 
+/// Obtain the set difference of minuend less subtrahend.
+template <typename Collection>
+Collection difference(const Collection& minuend,
+    const Collection& subtrahend) noexcept;
+
+/// Determing if the sets have an intersection.
+template <typename Collection>
+bool intersecting(const Collection& left, const Collection& right) noexcept;
+
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
