@@ -23,9 +23,19 @@
 #include <system_error>
 #include <unordered_map>
 
-#define DECLARE_CATEGORY
-#ifdef DECLARE_CATEGORY
+// The category parameter must be namespaced. The category name must correspond
+// to the error type by the naming convention: category_t as the error type.
+#define DECLARE_STD_ERROR_REGISTRATION(cat) \
+namespace std { \
+template <> \
+struct is_error_code_enum<cat##_t> \
+  : public true_type {}; \
+template <> \
+struct is_error_condition_enum<cat##_condition_t> \
+  : public true_type {}; \
+}
 
+// For use of codes without conditions.
 #define DECLARE_ERROR_T_CODE_CATEGORY(cat) \
 enum cat##_condition_t {};\
 class cat##_category \
@@ -37,8 +47,12 @@ public: \
     virtual const char* name() const noexcept; \
     virtual std::string message(int condition) const noexcept; \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
-}
+}; \
+std::error_code make_error_code(cat##_t value) noexcept; \
+std::error_condition make_error_condition(cat##_t value) noexcept
 
+// This adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires the
+// corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
 #define DECLARE_ERROR_T_CONDITION_CATEGORY(cat) \
 enum cat##_condition_t {};\
 class cat##_category \
@@ -51,7 +65,9 @@ public: \
     virtual std::string message(int condition) const noexcept; \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
     virtual bool equivalent(const std::error_code& value, int condition) const noexcept; \
-}
+}; \
+std::error_code make_error_code(cat##_t value) noexcept; \
+std::error_condition make_error_condition(cat##_t value) noexcept
 
 #define DEFINE_ERROR_T_CATEGORY(cat, category_name, unmapped) \
 const cat##_category cat##_category::singleton; \
@@ -67,32 +83,14 @@ std::string cat##_category::message(int condition) const noexcept \
 std::error_condition cat##_category::default_error_condition(int code) const noexcept \
 { \
     return std::error_condition(code, *this); \
-}
-
-#endif // DECLARE_CATEGORY
-
-#define DECLARE_ERROR_CODE_CONSTRUCTION(space, cat) \
-std::error_code make_error_code(space::cat##_t value) noexcept; \
-std::error_condition make_error_condition(space::cat##_t value) noexcept;
-
-#define DEFINE_ERROR_CODE_CONSTRUCTION(space, cat) \
+} \
 std::error_code make_error_code(cat##_t value) noexcept \
 { \
-    return std::error_code(value, space::cat##_category::singleton); \
+    return std::error_code(value, cat##_category::singleton); \
 } \
 std::error_condition make_error_condition(cat##_t value) noexcept \
 { \
-    return std::error_condition(value, space::cat##_category::singleton); \
-}
-
-#define DECLARE_STD_ERROR_T_REGISTRATION(space, cat) \
-namespace std { \
-template <> \
-struct is_error_code_enum<space::cat##_t> \
-  : public true_type {}; \
-template <> \
-struct is_error_condition_enum<space::cat##_condition_t> \
-  : public true_type {}; \
+    return std::error_condition(value, cat##_category::singleton); \
 }
 
 // If an equivalence is not defined, codes are evaluated for equality.

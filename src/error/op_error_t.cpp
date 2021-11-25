@@ -122,8 +122,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
 
 DEFINE_ERROR_T_CATEGORY(op_error, "op", "op code")
 
-DEFINE_ERROR_CODE_CONSTRUCTION(bc::system::error, op_error)
-
 } // namespace error
 } // namespace system
 } // namespace libbitcoin

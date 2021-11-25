@@ -55,12 +55,10 @@ enum script_error_t : uint8_t
 
 DECLARE_ERROR_T_CODE_CATEGORY(script_error);
 
-DECLARE_ERROR_CODE_CONSTRUCTION(bc::system::error, script_error)
-
 } // namespace error
 } // namespace system
 } // namespace libbitcoin
 
-DECLARE_STD_ERROR_T_REGISTRATION(bc::system::error, script_error)
+DECLARE_STD_ERROR_REGISTRATION(bc::system::error::script_error)
 
 #endif

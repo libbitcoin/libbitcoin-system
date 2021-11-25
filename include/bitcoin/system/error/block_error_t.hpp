@@ -74,12 +74,10 @@ enum block_error_t : uint8_t
 
 DECLARE_ERROR_T_CODE_CATEGORY(block_error);
 
-DECLARE_ERROR_CODE_CONSTRUCTION(bc::system::error, block_error)
-
 } // namespace error
 } // namespace system
 } // namespace libbitcoin
 
-DECLARE_STD_ERROR_T_REGISTRATION(bc::system::error, block_error)
+DECLARE_STD_ERROR_REGISTRATION(bc::system::error::block_error)
 
 #endif
