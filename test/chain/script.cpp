@@ -700,7 +700,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
 
 BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__valid)
 {
-    //// DEBUG[blockchain] Verify failed[23428] : stack false (consensus patch bug)
+    //// DEBUG [blockchain] Verify failed[23428] : stack false (consensus patch bug).
     //// libconsensus : false
     //// forks : 1073742031
     //// outpoint : 18327d91dcf0ded31212b0da3efd472b98766d9f21f887a65d04ddfe35a01eca : 1
@@ -710,9 +710,21 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__valid)
     //// transaction : 0100000002c0cd5346700d18a937575424eb84888bdc277bdbfade39b3bb9a4ce31fd4455101000000fdf60100483045022100f681bb660ef85bb191e337450f2ba3493c37b90a8622864d932cec5b40a74428022007cab269d846b7e63899b8e7082bdea94375d4b1c197b7c50365823c9ffd935e01483045022100b4d3be95b088c8ef176b25c9cee0b16ac7f91c10ccf645ab7421ad3de1d8aba802205c6b3bd9df0b19271abefc47997ce7bd113a6f069674003c821c01440d49a48b0148304502207fad219634211fb614cef1654bdb956a9ed751a352e47c2b64d4ac8459e05ec2022100bd4ae53e76f266938f2ec09d1b2d515eaf5e21b990e5c7df0779ca61f24a10de014830450221009f2dd7fa5eafdf9f660e764750aabffd86628bb19501d49007551151f6409266022019fad776d46c6896a849bf7fcacefa73da6d5db22680c7bacdd055d8d8547858014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffffca1ea035fedd045da687f8219f6d76982b47fd3edab01212d3def0dc917d321801000000fdf40100473044022050cf9d0bf024af1780af7ce91a8cac62fd54a3df96cc1eb27889a58aaf82f09e02205f85c010faa5978963f569cfa6bd7202363841ad82bab0a6044c1092140ba49001483045022100f3f5076e1f233acf3fd2bb1188da82f3259224ee29a50af287b707c71503543f02202e82db849e59f8eb836ec6c55dab6a3d61b6511e9d25e550901d5534276432320148304502210094ff0cd6c74dd756a07334c2b76373dd4fb8f5ef7c1da7e09a168d54cf79a7770220114337de0ac0edd7871c079b796ad422d2d5e50d350d3b9f7371b0f1bd66fe7a01473044022022bc92872b6c680da40aa6388e28ef396c7ffa410317ae574c1f31836c85b28602203b43a7d2cdcc2ba1afaf53c1a0c0b474933581b0e359aed788ad7ad819260dfb014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffff02605af405000000001976a914bb6754a948265de730c60fbd745aeb5868ea921e88ac00e1f5050000000017a9144aba54e2541475f91659ccdbb13ce0b490778c7f8700000000
 
     static const auto index = 1u;
-    static const auto forks = static_cast<rule_fork>(1073742031);
     static const auto encoded_script = "a9144aba54e2541475f91659ccdbb13ce0b490778c7f87";
     static const auto encoded_tx = "0100000002c0cd5346700d18a937575424eb84888bdc277bdbfade39b3bb9a4ce31fd4455101000000fdf60100483045022100f681bb660ef85bb191e337450f2ba3493c37b90a8622864d932cec5b40a74428022007cab269d846b7e63899b8e7082bdea94375d4b1c197b7c50365823c9ffd935e01483045022100b4d3be95b088c8ef176b25c9cee0b16ac7f91c10ccf645ab7421ad3de1d8aba802205c6b3bd9df0b19271abefc47997ce7bd113a6f069674003c821c01440d49a48b0148304502207fad219634211fb614cef1654bdb956a9ed751a352e47c2b64d4ac8459e05ec2022100bd4ae53e76f266938f2ec09d1b2d515eaf5e21b990e5c7df0779ca61f24a10de014830450221009f2dd7fa5eafdf9f660e764750aabffd86628bb19501d49007551151f6409266022019fad776d46c6896a849bf7fcacefa73da6d5db22680c7bacdd055d8d8547858014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffffca1ea035fedd045da687f8219f6d76982b47fd3edab01212d3def0dc917d321801000000fdf40100473044022050cf9d0bf024af1780af7ce91a8cac62fd54a3df96cc1eb27889a58aaf82f09e02205f85c010faa5978963f569cfa6bd7202363841ad82bab0a6044c1092140ba49001483045022100f3f5076e1f233acf3fd2bb1188da82f3259224ee29a50af287b707c71503543f02202e82db849e59f8eb836ec6c55dab6a3d61b6511e9d25e550901d5534276432320148304502210094ff0cd6c74dd756a07334c2b76373dd4fb8f5ef7c1da7e09a168d54cf79a7770220114337de0ac0edd7871c079b796ad422d2d5e50d350d3b9f7371b0f1bd66fe7a01473044022022bc92872b6c680da40aa6388e28ef396c7ffa410317ae574c1f31836c85b28602203b43a7d2cdcc2ba1afaf53c1a0c0b474933581b0e359aed788ad7ad819260dfb014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffff02605af405000000001976a914bb6754a948265de730c60fbd745aeb5868ea921e88ac00e1f5050000000017a9144aba54e2541475f91659ccdbb13ce0b490778c7f8700000000";
+
+    // Isolate rules from integer values (1073742031u/1100 1110).
+    // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
+    // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
+    static const auto forks =
+        ////rule_fork::difficult |
+        rule_fork::retarget |
+        rule_fork::bip16_rule |
+        rule_fork::bip30_rule |
+        ////rule_fork::bip34_rule |
+        ////rule_fork::bip66_rule |
+        rule_fork::bip65_rule | // bip65 should be superseded by bip90.
+        rule_fork::bip90_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -749,9 +761,21 @@ BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__valid)
     //// transaction  : 0100000002f9cbafc519425637ba4227f8d0a0b7160b4e65168193d5af39747891de98b5b5000000006b4830450221008dd619c563e527c47d9bd53534a770b102e40faa87f61433580e04e271ef2f960220029886434e18122b53d5decd25f1f4acb2480659fea20aabd856987ba3c3907e0121022b78b756e2258af13779c1a1f37ea6800259716ca4b7f0b87610e0bf3ab52a01ffffffff42e7988254800876b69f24676b3e0205b77be476512ca4d970707dd5c60598ab00000000fd260100483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a53034930460221008431bdfa72bc67f9d41fe72e94c88fb8f359ffa30b33c72c121c5a877d922e1002210089ef5fc22dd8bfc6bf9ffdb01a9862d27687d424d1fefbab9e9c7176844a187a014c9052483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a5303210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c7153aeffffffff01a08601000000000017a914d8dacdadb7462ae15cd906f1878706d0da8660e68700000000
 
     static const auto index = 1u;
-    static const auto forks = static_cast<rule_fork>(1073742030);
     static const auto encoded_script = "a914d8dacdadb7462ae15cd906f1878706d0da8660e687";
     static const auto encoded_tx = "0100000002f9cbafc519425637ba4227f8d0a0b7160b4e65168193d5af39747891de98b5b5000000006b4830450221008dd619c563e527c47d9bd53534a770b102e40faa87f61433580e04e271ef2f960220029886434e18122b53d5decd25f1f4acb2480659fea20aabd856987ba3c3907e0121022b78b756e2258af13779c1a1f37ea6800259716ca4b7f0b87610e0bf3ab52a01ffffffff42e7988254800876b69f24676b3e0205b77be476512ca4d970707dd5c60598ab00000000fd260100483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a53034930460221008431bdfa72bc67f9d41fe72e94c88fb8f359ffa30b33c72c121c5a877d922e1002210089ef5fc22dd8bfc6bf9ffdb01a9862d27687d424d1fefbab9e9c7176844a187a014c9052483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a5303210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c7153aeffffffff01a08601000000000017a914d8dacdadb7462ae15cd906f1878706d0da8660e68700000000";
+
+    // Isolate rules from integer values (1073742031u/1100 1110).
+    // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
+    // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
+    static const auto forks =
+        ////rule_fork::difficult |
+        rule_fork::retarget |
+        rule_fork::bip16_rule |
+        rule_fork::bip30_rule |
+        ////rule_fork::bip34_rule |
+        ////rule_fork::bip66_rule |
+        rule_fork::bip65_rule | // bip65 should be superseded by bip90.
+        rule_fork::bip90_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -788,9 +812,18 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__valid)
     //// transaction  : 0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658
 
     static const auto index = 0u;
-    static const auto forks = static_cast<rule_fork>(62);
     static const auto encoded_script = "a914faa558780a5767f9e3be14992a578fc1cbcf483087";
     static const auto encoded_tx = "0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658";
+
+    // Isolate rules from integer values (62u/0011 0011).
+    // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
+    static const auto forks =
+        rule_fork::difficult |
+        rule_fork::retarget |
+        ////rule_fork::bip16_rule | // This looks wrong.
+        ////rule_fork::bip30_rule | // This is moot but looks wrong.
+        rule_fork::bip34_rule |
+        rule_fork::bip66_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -814,7 +847,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__valid)
 
 BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__valid)
 {
-    //// DEBUG [blockchain] Verify failed [481824] : stack false
+    //// DEBUG [blockchain] Verify failed [481824] : stack false.
     //// libconsensus : false
     //// forks        : 1073758206
     //// outpoint     : 42f7d0545ef45bd3b9cfee6b170cf6314a3bd8b3f09b610eeb436d92993ad440:1
@@ -825,9 +858,27 @@ BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__valid)
 
     static const auto index = 0u;
     static const auto value = 100200000u;
-    static const auto forks = 1073758206u;
     static const auto encoded_script = "a9142928f43af18d2d60e8a843540d8086b30534133987";
     static const auto encoded_tx = "0200000000010140d43a99926d43eb0e619bf0b3d83b4a31f60c176beecfb9d35bf45e54d0f7420100000017160014a4b4ca48de0b3fffc15404a1acdc8dbaae226955ffffffff0100e1f5050000000017a9144a1154d50b03292b3024370901711946cb7cccc387024830450221008604ef8f6d8afa892dee0f31259b6ce02dd70c545cfcfed8148179971876c54a022076d771d6e91bed212783c9b06e0de600fab2d518fad6f15a2b191d7fbd262a3e0121039d25ab79f41f75ceaf882411fd41fa670a4c672c23ffaf0e361a969cde0692e800000000";
+
+    // Isolate rules from integer values (1073758206u/0011 1111 1111 1111).
+    // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
+    // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
+    static const auto forks =
+        rule_fork::difficult |
+        rule_fork::retarget |
+        rule_fork::bip16_rule |
+        rule_fork::bip30_rule |
+        rule_fork::bip34_rule |
+        rule_fork::bip66_rule |
+        rule_fork::bip65_rule |
+        rule_fork::bip90_rule |
+        rule_fork::bip68_rule |
+        rule_fork::bip112_rule |
+        rule_fork::bip113_rule |
+        rule_fork::bip141_rule |
+        rule_fork::bip143_rule |
+        rule_fork::bip147_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -852,7 +903,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__valid)
 
 BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__invalid_witness)
 {
-    //// DEBUG [blockchain] Verify failed [892321] : invalid witness
+    //// DEBUG [blockchain] Verify failed [892321] : invalid witness.
     //// libconsensus : false
     //// forks        : 1073758207
     //// outpoint     : fca5e8f5d6ce5201f45230268dfe6cbf8472932e63a001216e9002993acd08f5:0
@@ -862,9 +913,27 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__in
     //// transaction  : 0200000001f508cd3a9902906e2101a0632e937284bf6cfe8d263052f40152ced6f5e8a5fc0000000000ffffffff0105e4020000000000160014b6aa463696df9140b1191fa2cc1891cf9b5da6d900000000
     static const auto index = 0u;
     static const auto value = 194445u;
-    static const auto forks = 1073758207u;
     static const auto encoded_script = "0020925fe0a6cde95bdc7a21b08925c246cae17005f8a013efffdb5e5cb7b7f8d0c2";
     static const auto encoded_tx = "0200000001f508cd3a9902906e2101a0632e937284bf6cfe8d263052f40152ced6f5e8a5fc0000000000ffffffff0105e4020000000000160014b6aa463696df9140b1191fa2cc1891cf9b5da6d900000000";
+
+    // Isolate rules from integer values (1073758207u/0011 1111 1111 1110).
+    // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
+    // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
+    static const auto forks =
+        ////rule_fork::difficult |
+        rule_fork::retarget |
+        rule_fork::bip16_rule |
+        rule_fork::bip30_rule |
+        rule_fork::bip34_rule |
+        rule_fork::bip66_rule |
+        rule_fork::bip65_rule |
+        rule_fork::bip90_rule |
+        rule_fork::bip68_rule |
+        rule_fork::bip112_rule |
+        rule_fork::bip113_rule |
+        rule_fork::bip141_rule |
+        rule_fork::bip143_rule |
+        rule_fork::bip147_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -1136,7 +1205,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__valid)
     BOOST_REQUIRE(prevout0.script().is_valid());
 
     // P2WSH witness program.
-    auto result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule);
+    auto result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule | rule_fork::bip147_rule);
     BOOST_REQUIRE_EQUAL(result0.value(), error::success);
 
     // missing bip141, extra bip16 (witness not allowed).
