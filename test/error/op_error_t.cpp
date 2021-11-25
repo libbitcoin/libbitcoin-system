@@ -614,6 +614,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify4__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify4");
 }
 
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify_parse__true_exected_message)
+{
+    constexpr auto value = error::op_check_sig_verify_parse;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify_parse");
+}
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig__true_exected_message)
 {
     constexpr auto value = error::op_check_sig;
@@ -711,6 +720,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify10__true_exected_
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify10");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify_parse__true_exected_message)
+{
+    constexpr auto value = error::op_check_multisig_verify_parse;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify_parse");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig__true_exected_message)
