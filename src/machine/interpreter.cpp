@@ -809,35 +809,37 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
     if (program.size() < 2)
         return error::op_check_sig_verify1;
 
+    const auto public_key = program.pop();
+
+    // BIP66: Continue to allow empty signature to push false vs. fail.
+    const auto endorsement = program.pop();
+    if (endorsement.empty())
+        return error::op_check_sig_verify3;
+
+    // Check endorsement for soft failure first, as this is a hard failure.
+    if (public_key.empty())
+        return error::op_check_sig_verify2;
+
     uint8_t sighash;
     ec_signature signature;
     der_signature distinguished;
     auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
+
+    // TODO: make distinguished a data_slice.
+    // Parse endorsement into DER signature into an EC signature.
+    if (!parse_endorsement(sighash, distinguished, endorsement) ||
+        !parse_signature(signature, distinguished, bip66))
+        return error::op_check_sig_verify_parse;
+
     auto bip143 = script::is_enabled(program.forks(), rule_fork::bip143_rule);
     auto version = bip143 ? program.version() : script_version::unversioned;
 
-    const auto public_key = program.pop();
-    auto endorsement = program.pop();
-
-    // Create a subscript with endorsements stripped (sort of).
-    script script_code(program.subscript());
-
-    // BIP143: find and delete of the signature is not applied for v0.
-    if (program.version() != script_version::zero)
-        script_code.find_and_delete({ endorsement });
-
-    // BIP66: Continue to allow empty signature to push false vs. fail.
-    if (endorsement.empty())
-        return error::op_check_sig_verify2;
-
-    // Parse endorsement into DER signature into an EC signature.
-    if (!parse_endorsement(sighash, distinguished, std::move(endorsement)) ||
-        !parse_signature(signature, distinguished, bip66))
-        return error::op_check_sig_verify3;
+    // BIP143: op stripping not applied for v0.
+    const auto subscript = program.subscript(version, { endorsement });
 
     // Version condition preserves independence of bip141 and bip143.
     return script::check_signature(signature, sighash, public_key,
-        script_code, program.transaction(), program.input_index(),
+        subscript, program.transaction(), program.input_index(),
             version, program.value()) ? error::op_success :
                 error::op_check_sig_verify4;
 }
@@ -849,7 +851,7 @@ interpreter::result interpreter::op_check_sig(program& program)
         rule_fork::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verified == error::op_check_sig_verify3)
+    if (bip66 && verified == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
     program.push(verified == error::success);
@@ -864,7 +866,7 @@ interpreter::result interpreter::op_check_multisig_verify(
         return error::op_check_multisig_verify1;
 
     // Multisig script public keys are counted as op codes.
-    if (!program.increment_operation_count(key_count))
+    if (!program.increment_op_count(key_count))
         return error::op_check_multisig_verify2;
 
     data_stack public_keys;
@@ -900,35 +902,40 @@ interpreter::result interpreter::op_check_multisig_verify(
     auto bip143 = script::is_enabled(program.forks(), rule_fork::bip143_rule);
     auto version = bip143 ? program.version() : script_version::unversioned;
 
-    // Before looping create subscript with endorsements stripped (sort of).
-    script script_code(program.subscript());
+    // BIP143: op stripping not applied for v0.
+    const auto subscript = program.subscript(version, endorsements);
 
-    // BIP143: find and delete of the signature is not applied for v0.
-    if (version != script_version::zero)
-        script_code.find_and_delete(endorsements);
+    // TODO: generate sighash outside of loop (satoshi does not!).
+    // TODO: handle empty endorsements and public keys outside of loop.
+    // TODO: use concurrent for_each for parsers and check_signature.
 
     for (const auto& public_key: public_keys)
     {
-        // The exact number of signatures are required and must be in order.
+        // The exact number of signatures is required and must be in order.
         if (endorsement == endorsements.end())
             break;
 
-        // BIP66: Continue to allow empty signature to push false vs. fail.
+        // Continue as this is a soft failure, but there may be hard ones.
         if (endorsement->empty())
             continue;
 
+        if (public_key.empty())
+            return error::op_check_multisig_verify9;
+
+        // TODO: make distinguished a data_slice.
         // Parse endorsement into DER signature into an EC signature.
         if (!parse_endorsement(sighash, distinguished, *endorsement) ||
             !parse_signature(signature, distinguished, bip66))
-            return error::op_check_multisig_verify9;
+            return error::op_check_multisig_verify_parse;
 
         // Version condition preserves independence of bip141 and bip143.
         if (script::check_signature(signature, sighash, public_key,
-            script_code, program.transaction(), program.input_index(),
+            subscript, program.transaction(), program.input_index(),
             version, program.value()))
             ++endorsement;
     }
 
+    // BIP66: Continue to allow empty signature to push false vs. fail.
     return endorsement == endorsements.end() ? error::op_success :
         error::op_check_multisig_verify10;
 }
@@ -940,7 +947,7 @@ interpreter::result interpreter::op_check_multisig(program& program)
         rule_fork::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verified == error::op_check_sig_verify3)
+    if (bip66 && verified == error::op_check_multisig_verify_parse)
         return error::op_check_multisig;
 
     program.push(verified == error::op_success);
@@ -1363,7 +1370,7 @@ code interpreter::run(program& program)
             return error::op_invalid;
 
         // Enforce opcode count limit (201).
-        if (!program.increment_operation_count(op))
+        if (!program.increment_op_count(op))
             return error::invalid_operation_count;
 
         // Conditional evaluation scope.

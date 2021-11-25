@@ -19,9 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number.hpp>
@@ -34,7 +36,6 @@ class BC_API program
 {
 public:
     typedef data_stack::value_type value_type;
-    typedef chain::operation::list operations;
     typedef chain::operation::iterator op_iterator;
 
     // Older libstdc++ does not allow erase with const iterator.
@@ -87,8 +88,8 @@ public:
     /// Instructions.
     code evaluate();
     code evaluate(const chain::operation& op);
-    bool increment_operation_count(const chain::operation& op);
-    bool increment_operation_count(int32_t public_keys);
+    bool increment_op_count(const chain::operation& op);
+    bool increment_op_count(int32_t public_keys);
     bool register_jump(const chain::operation& op);
 
     // Primary stack.
@@ -115,6 +116,7 @@ public:
     void erase(const stack_iterator& first, const stack_iterator& last);
 
     /// Primary push/pop optimizations (passive).
+    size_t size() const;
     bool empty() const;
     bool stack_true(bool clean) const;
     bool stack_result(bool clean) const;
@@ -123,8 +125,6 @@ public:
     const value_type& item(size_t index) /*const*/;
     bool top(number& out_number, size_t maxiumum_size=chain::max_number_size) /*const*/;
     stack_iterator position(size_t index) /*const*/;
-    operations subscript() const;
-    size_t size() const;
 
     // Alternate stack.
     //-------------------------------------------------------------------------
@@ -142,9 +142,21 @@ public:
     bool closed() const;
     bool succeeded() const;
 
+    // Subscript.
+    //-------------------------------------------------------------------------
+
+    /// Returns the subscript indicated by the last registered jump operation.
+    chain::script subscript() const;
+
+    /// Parameterized overload strips opcodes from returned subscript.
+    chain::script subscript(chain::script_version version,
+        const endorsements& endorsements) const;
+
 private:
     // A space-efficient dynamic bitset (specialized by c++ std libr).
     typedef std::vector<bool> bool_stack;
+
+    static chain::operation::list create_delete_ops(const endorsements& data);
 
     bool stack_to_bool(bool clean) const;
 

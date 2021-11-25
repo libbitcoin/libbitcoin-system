@@ -30,6 +30,7 @@
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -81,6 +82,8 @@ program::program(const script& script, const chain::transaction& transaction,
     operation_count_(0),
     jump_(script_.begin())
 {
+    // This is guarded by is_invalid, and in the interpreter.
+    BITCOIN_ASSERT(input_index < transaction.inputs().size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
@@ -98,6 +101,8 @@ program::program(const script& script, const chain::transaction& transaction,
     jump_(script_.begin()),
     primary_(std::move(stack))
 {
+    // This is guarded by is_invalid, and in the interpreter.
+    BITCOIN_ASSERT(input_index < transaction.inputs().size());
 }
 
 
@@ -154,8 +159,9 @@ bool program::is_invalid() const
     const auto nops_rule = script::is_enabled(forks_, rule_fork::nops_rule);
 
     // TODO: nops rule must be enabled.
-    return 
+    return
         (/*nops_rule && */script_.is_oversized()) ||
+        (input_index() > transaction_.inputs().size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
 
@@ -223,7 +229,7 @@ bool operation_overflow(size_t count)
 }
 
 // This is guarded by script size.
-bool program::increment_operation_count(const operation& op)
+bool program::increment_op_count(const operation& op)
 {
     // Addition is safe due to script size constraint.
     BITCOIN_ASSERT(max_size_t - one >= operation_count_);
@@ -235,12 +241,12 @@ bool program::increment_operation_count(const operation& op)
 }
 
 // This is guarded by script size.
-bool program::increment_operation_count(int32_t public_keys)
+bool program::increment_op_count(int32_t public_keys)
 {
     static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
 
     // bit.ly/2d1bsdB
-    if (is_negative(public_keys)|| public_keys > max_keys)
+    if (is_negative(public_keys) || public_keys > max_keys)
         return false;
 
     // Addition is safe due to script size constraint.
@@ -428,6 +434,11 @@ bool program::stack_to_bool(bool clean) const
         std::any_of(top.begin(), std::prev(top.end()), not_zero);
 }
 
+size_t program::size() const
+{
+    return primary_.size();
+}
+
 bool program::empty() const
 {
     return primary_.empty();
@@ -472,23 +483,9 @@ bool program::top(number& out_number, size_t maxiumum_size)
 // This must be guarded.
 program::stack_iterator program::position(size_t index) /*const*/
 {
-    // Decrementing 1 makes the stack index zero-based (unlike satoshi).
+    // Decrementing 1 (prev) makes the stack index zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < size());
     return std::prev(primary_.end(), ++index);
-}
-
-// Pop jump-to-end, push all back, use to construct a script.
-program::operations program::subscript() const
-{
-    static default_allocator<operation> no_fill_allocator{};
-    operations ops(std::distance(jump(), end()), no_fill_allocator);
-    std::copy(jump(), end(), ops.begin());
-    return ops;
-}
-
-size_t program::size() const
-{
-    return primary_.size();
 }
 
 // Alternate stack.
@@ -558,6 +555,82 @@ bool program::succeeded() const
     // Optimized above to avoid succeeded loop.
     ////const auto is_true = [](bool value) { return value; };
     ////return std::all_of(condition_.begin(), condition_.end(), true);
+}
+
+// Subscript.
+//-----------------------------------------------------------------------------
+
+static default_allocator<chain::operation> no_fill_op_allocator{};
+
+// private
+// Create set of endorsement push data ops and a codeseparator op.
+chain::operation::list program::create_delete_ops(const endorsements& data)
+{
+    operation::list strip(add1(data.size()), no_fill_op_allocator);
+
+    // C++17: Parallel policy for std::transform.
+    std::transform(data.begin(), data.end(), strip.begin(),
+        [](const endorsement& data)
+        {
+            // ****************************************************************
+            // CONSENSUS: non-minimal encoding required.
+            // ****************************************************************
+            return operation{ data, false };
+        });
+
+    strip.emplace_back(opcode::codeseparator);
+    return strip;
+}
+
+// ****************************************************************************
+// CONSENSUS: Witness v0 scripts are not stripped (bip143).
+// Subscripts are not evaluated, they are limited to signature hash creation.
+// ****************************************************************************
+chain::script program::subscript() const
+{
+    // TODO: Retain the script as a shared object. Currently both subscript
+    // TODO: methods return either a reference or a constructed copy. This
+    // TODO: necessitates returning a copy in either case. This copy can be
+    // TODO: eliminated by passing a shared_from_this() generated pointer in
+    // TODO: one case and a constructed shared pointer instance in the other.
+    if (jump() == begin())
+        return script_;
+
+    // TODO: Construct script on operations shared pointer and offset parameter.
+    // TODO: if offset provided, all iteration starts at offset point. This
+    // TODO: precludes copying operations in the case of a jump without mutate.
+    operation::list sub(std::distance(jump(), end()), no_fill_op_allocator);
+    std::copy(jump(), end(), sub.begin());
+    return { sub };
+}
+
+// ****************************************************************************
+// CONSENSUS: Endorsement and code separator stripping are always performed in
+// conjunction and are limited to non-witness signature hash subscripts.
+// The order of operations is inconsequential, as they are all removed.
+// Subscripts are not evaluated, they are limited to signature hash creation.
+// ****************************************************************************
+chain::script program::subscript(chain::script_version version,
+    const endorsements& endorsements) const
+{
+    const auto sub = subscript();
+    if (version == script_version::zero)
+        return sub;
+
+    // TODO: Construct opcode with shared pointer to data, and stack with
+    // TODO: shared pointers to opcode data values. This eliminates both the
+    // TODO: stack copy of script data elements and copy here into operations.
+    // TODO: the endorsement delete would then just reduce the reference count.
+
+    // Transform endorsements into the set of operators, and op_codeseparator.
+    const auto strip = create_delete_ops(endorsements);
+
+    // If no intersection, nothing to strip.
+    if (!intersecting(sub.operations(), strip))
+        return script_;
+
+    // Copy script operations for mutation.
+    return { difference(sub.operations(), strip) };
 }
 
 } // namespace machine

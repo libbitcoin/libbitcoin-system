@@ -616,17 +616,16 @@ static bool is_index_overflow(const transaction& tx, uint32_t input_index,
             sighash == sighash_algorithm::hash_single);
 }
 
-// TODO: optimize to prevent script reconstruction.
-static script strip_code_seperators(const script& script_code)
-{
-    operation::list ops;
-
-    for (auto op = script_code.begin(); op != script_code.end(); ++op)
-        if (op->code() != opcode::codeseparator)
-            ops.push_back(*op);
-
-    return { std::move(ops) };
-}
+////static script strip_code_seperators(const script& script_code)
+////{
+////    operation::list ops;
+////
+////    for (auto op = script_code.begin(); op != script_code.end(); ++op)
+////        if (op->code() != opcode::codeseparator)
+////            ops.push_back(*op);
+////
+////    return { std::move(ops) };
+////}
 
 // private/static
 hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
@@ -640,21 +639,18 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     if (is_index_overflow(tx, input_index, sighash))
         return script::one_hash();
 
-    //*************************************************************************
-    // CONSENSUS: more wacky satoshi behavior.
-    //*************************************************************************
-    const auto stripped = strip_code_seperators(script_code);
+    ////const auto stripped = strip_code_seperators(script_code);
 
     // The sighash serializations are isolated for clarity and optimization.
     switch (sighash)
     {
         case sighash_algorithm::hash_none:
-            return sign_none(tx, input_index, stripped, sighash_type);
+            return sign_none(tx, input_index, script_code, sighash_type);
         case sighash_algorithm::hash_single:
-            return sign_single(tx, input_index, stripped, sighash_type);
+            return sign_single(tx, input_index, script_code, sighash_type);
         default:
         case sighash_algorithm::hash_all:
-            return sign_all(tx, input_index, stripped, sighash_type);
+            return sign_all(tx, input_index, script_code, sighash_type);
     }
 }
 
@@ -1346,56 +1342,51 @@ size_t script::sigops(bool accurate) const
     return total;
 }
 
-//*****************************************************************************
-// CONSENSUS: this is a pointless, broken, premature optimization attempt.
-// The comparison and erase are not limited to a single operation and so can
-// erase arbitrary upstream data from the script.
-//*****************************************************************************
-void script::find_and_delete_(const data_chunk& endorsement)
-{
-    // If this is empty it would produce an empty script but not operation.
-    // So we test it for empty prior to operation reserialization.
-    if (endorsement.empty())
-        return;
-
-    // The value must be serialized to script using non-minimal encoding.
-    // Non-minimally-encoded target values will therefore not match.
-    const auto value = operation(endorsement, false).to_data();
-
-    operation op;
-    read::bytes::copy source(bytes_);
-    std::vector<data_chunk::iterator> found;
-
-    // The exhaustion test handles stream end and op deserialization failure.
-    for (auto it = bytes_.begin(); !source.is_exhausted();
-        it += (source ? op.serialized_size() : zero))
-    {
-        // Track all found values for later deletion.
-        for (; starts_with(it, bytes_.end(), value); it += value.size())
-        {
-            source.skip_bytes(value.size());
-            found.push_back(it);
-        }
-
-        // Read the next op code following last found value.
-        op.from_data(source);
-    }
-
-    // Delete any found values, reversed to prevent iterator invalidation.
-    for (const auto& it: boost::adaptors::reverse(found))
-        bytes_.erase(it, it + value.size());
-}
-
-void script::find_and_delete(const data_stack& endorsements)
-{
-    for (const auto& endorsement: endorsements)
-        find_and_delete_(endorsement);
-
-    // Invalidate the cache so that the operations may be regenerated.
-    operations_.clear();
-    cached_ = false;
-    bytes_.shrink_to_fit();
-}
+////void script::find_and_delete_(const data_chunk& endorsement)
+////{
+////    // If this is empty it would produce an empty script but not operation.
+////    // So we test it for empty prior to operation reserialization.
+////    if (endorsement.empty())
+////        return;
+////
+////    // The value must be serialized to script using non-minimal encoding.
+////    // Non-minimally-encoded target values will therefore not match.
+////    const auto value = operation(endorsement, false).to_data();
+////
+////    operation op;
+////    read::bytes::copy source(bytes_);
+////    std::vector<data_chunk::iterator> found;
+////
+////    // The exhaustion test handles stream end and op deserialization failure.
+////    for (auto it = bytes_.begin(); !source.is_exhausted();
+////        it += (source ? op.serialized_size() : zero))
+////    {
+////        // Track all found values for later deletion.
+////        for (; starts_with(it, bytes_.end(), value); it += value.size())
+////        {
+////            source.skip_bytes(value.size());
+////            found.push_back(it);
+////        }
+////
+////        // Read the next op code following last found value.
+////        op.from_data(source);
+////    }
+////
+////    // Delete any found values, reversed to prevent iterator invalidation.
+////    for (const auto& it: boost::adaptors::reverse(found))
+////        bytes_.erase(it, it + value.size());
+////}
+////
+////void script::find_and_delete(const data_stack& endorsements)
+////{
+////    for (const auto& endorsement: endorsements)
+////        find_and_delete_(endorsement);
+////
+////    // Invalidate the cache so that the operations may be regenerated.
+////    operations_.clear();
+////    cached_ = false;
+////    bytes_.shrink_to_fit();
+////}
 
 bool script::is_oversized() const
 {
