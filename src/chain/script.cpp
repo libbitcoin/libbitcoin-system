@@ -736,10 +736,14 @@ static size_t version_0_preimage_size(size_t script_size)
 
 // private/static
 hash_digest script::generate_version_0_signature_hash(const transaction& tx,
-    uint32_t index, const script& subscript, uint64_t value, uint8_t flags)
+    uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
+    bool bip143)
 {
-    const auto sighash = to_sighash_enum(flags);
+    // bip143/v0: the way of serialization is changed.
+    if (!bip143)
+        return generate_unversioned_signature_hash(tx, index, subscript, flags);
 
+    const auto sighash = to_sighash_enum(flags);
     const auto any = !is_zero(flags & sighash_algorithm::anyone_can_pay);
     const auto single = (sighash == sighash_algorithm::hash_single);
     //// const auto none = (sighash == sighash_algorithm::hash_none);
@@ -798,9 +802,8 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 // static
 hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
-    script_version version)
+    script_version version, bool bip143)
 {
-    // The way of serialization is changed (bip143).
     switch (version)
     {
         case script_version::unversioned:
@@ -808,7 +811,7 @@ hash_digest script::generate_signature_hash(const transaction& tx,
                 flags);
         case script_version::zero:
             return generate_version_0_signature_hash(tx, index, subscript,
-                value, flags);
+                value, flags, bip143);
         case script_version::reserved:
         default:
             BITCOIN_ASSERT_MSG(false, "invalid script version");
@@ -820,14 +823,14 @@ hash_digest script::generate_signature_hash(const transaction& tx,
 bool script::check_signature(const ec_signature& signature,
     const data_slice& public_key, const script& subscript,
     const transaction& tx, uint32_t index, uint64_t value, uint8_t flags,
-    script_version version)
+    script_version version, bool bip143)
 {
     if (signature.empty() || public_key.empty())
         return false;
 
     // This always produces a valid signature hash, including one_hash.
     const auto sighash = chain::script::generate_signature_hash(tx,
-        index, subscript, value, flags, version);
+        index, subscript, value, flags, version, bip143);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
@@ -836,13 +839,13 @@ bool script::check_signature(const ec_signature& signature,
 // static
 bool script::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& prevout_script, const transaction& tx, uint32_t index,
-    uint64_t value, uint8_t flags, script_version version)
+    uint64_t value, uint8_t flags, script_version version, bool bip143)
 {
     out.reserve(max_endorsement_size);
 
     // This always produces a valid signature hash, including one_hash.
     const auto sighash = chain::script::generate_signature_hash(tx,
-        index, prevout_script, value, flags, version);
+        index, prevout_script, value, flags, version, bip143);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;

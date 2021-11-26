@@ -565,7 +565,7 @@ bool program::succeeded() const
 //-----------------------------------------------------------------------------
 
 // ****************************************************************************
-// CONSENSUS: Witness v0 scripts are not stripped (bip143).
+// CONSENSUS: Witness v0 scripts are not stripped (bip143/v0).
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
 chain::script program::subscript() const
@@ -596,8 +596,9 @@ chain::script program::subscript(const endorsements& endorsements) const
 {
     const auto sub = subscript();
 
-    // BIP143: op stripping not applied for v0.
-    if (version() == script_version::zero)
+    // bip143: op stripping not applied to bip141 v0 scripts.
+    // The bip141 fork sets the version property, so this is a distinct check.
+    if (script::is_enabled(forks(), rule_fork::bip143_rule))
         return sub;
 
     // TODO: Construct opcode with shared pointer to data, and stack with
@@ -616,6 +617,7 @@ chain::script program::subscript(const endorsements& endorsements) const
     return { difference(sub.operations(), strip) };
 }
 
+// TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, data_chunk& key,
     hash_digest& hash, const system::endorsement& endorsement) const
 {
@@ -626,7 +628,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
     if (!parse_endorsement(flags, distinguished, endorsement))
         return false;
 
-    // Obtain the signature hash from subscript and endorsement flags.
+    // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(subscript({ endorsement }), flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
@@ -646,7 +648,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
     if (!parse_endorsement(flags, distinguished, endorsement))
         return false;
 
-    // Obtain the signature hash from subscript and endorsement sighash_flags.
+    // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(cache, subscript, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
@@ -676,11 +678,13 @@ chain::operation::list program::create_delete_ops(const endorsements& data)
     return strip;
 }
 
-hash_digest program::signature_hash(const script& subscript,
-    uint8_t flags) const
+hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
+    // The bip141 fork established witness version, hashing is a distinct fork.
+    const auto bip143 = script::is_enabled(forks(), rule_fork::bip143_rule);
+
     return script::generate_signature_hash(transaction(), input_index(),
-        subscript, value(), flags, version());
+        subscript, value(), flags, version(), bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.
@@ -692,9 +696,9 @@ hash_digest program::signature_hash(hash_cache& cache, const script& subscript,
     if (it != cache.end())
         return it->second;
 
-    return ((cache[flags] =
-        script::generate_signature_hash(transaction(), input_index(),
-            subscript, value(), flags, version())));
+    auto hash = signature_hash(subscript, flags);
+    cache[flags] = hash;
+    return hash;
 }
 
 } // namespace machine

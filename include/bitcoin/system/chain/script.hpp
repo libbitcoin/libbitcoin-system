@@ -130,21 +130,18 @@ public:
     //-------------------------------------------------------------------------
 
     static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t index, const script& subscript, uint64_t value=max_uint64,
-        uint8_t flags=sighash_algorithm::hash_all,
-        script_version version=script_version::unversioned);
+        uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
+        script_version version, bool bip143);
 
     static bool check_signature(const ec_signature& signature,
         const data_slice& public_key, const script& subscript,
-        const transaction& tx, uint32_t index, uint64_t value=max_uint64,
-        uint8_t flags=sighash_algorithm::hash_all,
-        script_version version=script_version::unversioned);
+        const transaction& tx, uint32_t index, uint64_t value, uint8_t flags,
+        script_version version, bool bip143);
 
     static bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, const transaction& tx,
-        uint32_t index, uint64_t value=max_uint64,
-        uint8_t flags=sighash_algorithm::hash_all,
-        script_version version=script_version::unversioned);
+        uint32_t index, uint64_t value, uint8_t flags, script_version version,
+        bool bip143);
 
     // Utilities (static).
     //-------------------------------------------------------------------------
@@ -237,7 +234,8 @@ private:
     static hash_digest generate_unversioned_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint8_t flags);
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
-        uint32_t index, const script& subscript, uint64_t value, uint8_t flags);
+        uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
+        bool bip143);
 
     operation::list& operations_move();
     const operation::list& operations_copy() const;
