@@ -595,7 +595,7 @@ chain::script program::subscript(const endorsements& endorsements) const
 {
     const auto sub = subscript();
 
-    // bip143: op stripping not applied to bip141 v0 scripts.
+    // bip143: op stripping is not applied to bip141 v0 scripts.
     // The bip141 fork sets the version property, so this is a distinct check.
     if (script::is_enabled(forks(), rule_fork::bip143_rule))
         return sub;
@@ -658,15 +658,15 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 // Private.
 //-----------------------------------------------------------------------------
 
-// C++17: Parallel policy for std::transform.
-// Create set of endorsement push data ops and a codeseparator op.
-// ************************************************************************
+// ****************************************************************************
 // CONSENSUS: non-minimal endorsement operation encoding required.
-// ************************************************************************
+// ****************************************************************************
 chain::operation::list program::create_delete_ops(const endorsements& data)
 {
+    // Create set of endorsement push data ops and a codeseparator op.
     operation::list strip(add1(data.size()), no_fill_op_allocator);
 
+    // C++17: Parallel policy.
     std::transform(data.begin(), data.end(), strip.begin(),
         [](const endorsement& data)
         {
@@ -679,9 +679,10 @@ chain::operation::list program::create_delete_ops(const endorsements& data)
 
 hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
-    // The bip141 fork established witness version, hashing is a distinct fork.
+    // The bip141 fork establishes witness version, hashing is a distinct fork.
     const auto bip143 = script::is_enabled(forks(), rule_fork::bip143_rule);
 
+    // bip143: the method of signature hashing is changed for v0 scripts.
     return script::generate_signature_hash(transaction(), input_index(),
         subscript, value(), flags, version(), bip143);
 }
@@ -695,6 +696,7 @@ hash_digest program::signature_hash(hash_cache& cache, const script& subscript,
     if (it != cache.end())
         return it->second;
 
+    // TODO: change to pointer cache with general conversion of push data.
     auto hash = signature_hash(subscript, flags);
     cache[flags] = hash;
     return hash;
