@@ -496,14 +496,15 @@ code witness::verify(const transaction& tx, uint32_t input_index,
     data_stack stack;
     const auto version = program_script.version();
 
+    // Versions (and version 0) are defined by bip141.
     switch (version)
     {
-        // Version 0 (bip141).
         case script_version::zero:
         {
             if (!extract_script(script, stack, program_script))
                 return error::invalid_witness;
 
+            // A defined version indicates bip141 is active (not bip143).
             program witness(script, tx, input_index, forks, std::move(stack),
                 value, version);
 

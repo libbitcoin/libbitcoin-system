@@ -851,9 +851,6 @@ interpreter::result interpreter::op_check_sig(program& program)
     return error::op_success;
 }
 
-//*****************************************************************************
-// CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
-//*****************************************************************************
 interpreter::result interpreter::op_check_multisig_verify(
     program& program)
 {
@@ -883,6 +880,9 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (program.empty())
         return error::op_check_multisig_verify7;
 
+    //*************************************************************************
+    // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
+    //*************************************************************************
     if (!program.pop().empty() && bip147)
         return error::op_check_multisig_verify8;
 
