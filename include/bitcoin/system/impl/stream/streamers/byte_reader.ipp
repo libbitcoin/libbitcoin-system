@@ -313,6 +313,18 @@ void byte_reader<IStream>::rewind_bytes(size_t size) noexcept
 }
 
 template <typename IStream>
+size_t byte_reader<IStream>::get_position() noexcept
+{
+    return getter();
+}
+
+template <typename IStream>
+void byte_reader<IStream>::set_position(size_t offset) noexcept
+{
+    setter(offset);
+}
+
+template <typename IStream>
 bool byte_reader<IStream>::is_exhausted() const noexcept
 {
     // True if invalid or if no bytes remain in the stream.
@@ -372,17 +384,15 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
-    // pos_type is not an integer so cannot use limit cast here,
-    // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(static_cast<typename IStream::pos_type>(size));
+    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
+    seeker(static_cast<typename IStream::pos_type>(size), IStream::cur);
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 {
-    // pos_type is not an integer so cannot use limit cast here,
-    // but sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(-static_cast<typename IStream::pos_type>(size));
+    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
+    seeker(-static_cast<typename IStream::pos_type>(size), IStream::cur);
 }
 
 template <typename IStream>
@@ -447,12 +457,48 @@ void byte_reader<IStream>::clear() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
+size_t byte_reader<IStream>::getter() noexcept
+{
+    static const auto failure = IStream::pos_type(-1);
+    IStream::pos_type offset;
+
+    // Force these to be consistent, and avoid propagating exceptions.
+    // Assuming behavior is consistent with seekg (as documented).
+    // Returns current position on success and pos_type(-1) on failure.
+    try
+    {
+        offset = stream_.tellg();
+        validate();
+    }
+    catch (const typename IStream::failure&)
+    {
+        offset = failure;
+        invalid();
+    }
+
+    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
+    return offset == failure ? zero : static_cast<size_t>(offset);
+}
+
+template <typename IStream>
+void byte_reader<IStream>::setter(size_t absolute) noexcept
+{
+    // Clear a presumed error state following a read overflow.
+    clear();
+
+    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
+    // seekg(n) is not necessarily equivalent to seekg(n, ios::beg).
+    seeker(static_cast<typename IStream::pos_type>(absolute), IStream::beg);
+}
+
+template <typename IStream>
+void byte_reader<IStream>::seeker(typename IStream::pos_type offset,
+    std::ios_base::seekdir direction) noexcept
 {
     // Force these to be consistent by treating zero seek as a no-op.
     // boost/istringstream both succeed on non-empty zero seek.
     // istringstream succeeds on empty zero seek, boost sets failbit.
-    if (is_zero(offset))
+    if (is_zero(offset) && (direction == IStream::cur))
         return;
 
     // Force these to be consistent, and avoid propagating exceptions.
@@ -460,7 +506,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
     // boost/istringstream both set failbit on empty over/underflow.
     try
     {
-        stream_.seekg(offset, IStream::cur);
+        stream_.seekg(offset, direction);
         validate();
     }
     catch (const typename IStream::failure&)

@@ -228,6 +228,66 @@ BOOST_AUTO_TEST_CASE(byte_reader__rewind__past_begin__invalid)
     BOOST_REQUIRE(!reader);
 }
 
+// get_position/set_position
+
+BOOST_AUTO_TEST_CASE(byte_reader__get_position__read_and_reset__expected)
+{
+    std::istringstream stream{ "*" };
+    read::bytes::istream reader(stream);
+    const auto position = reader.get_position();
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(reader.is_exhausted());
+    reader.set_position(position);
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__get_position__skip_to_end_set_to_middle__expected)
+{
+    const auto size = 42;
+    const std::string value(size, 0x00);
+    std::istringstream stream{ value + "*" + value };
+    read::bytes::istream reader(stream);
+    reader.skip_bytes(size);
+    const auto position = reader.get_position();
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    reader.skip_bytes(size);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+    reader.set_position(position);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__set_position__past_end__invalid)
+{
+    const auto size = 42;
+    std::istringstream stream{ std::string(size, 0x00) };
+    read::bytes::istream reader(stream);
+    reader.set_position(sub1(size));
+    BOOST_REQUIRE(!reader.is_exhausted());
+    reader.set_position(add1(size));
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__set_position__invalid__clears)
+{
+    const auto size = 42;
+    std::istringstream stream{ std::string(size, 0x42) };
+    read::bytes::istream reader(stream);
+    reader.set_position(add1(size));
+    BOOST_REQUIRE(!reader);
+    reader.set_position(sub1(size));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 0x42);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
 #endif // BYTE_READER_CONTEXT
 
 #ifdef BYTE_READER_BIG_ENDIAN

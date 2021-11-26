@@ -108,6 +108,12 @@ public:
     void rewind_byte() noexcept override;
     void rewind_bytes(size_t size) noexcept override;
 
+    /// Get the current absolute position (invalidates on failure).
+    size_t get_position() noexcept override;
+
+    /// Clear invalid and set absolute position (invalidates on failure).
+    void set_position(size_t absolute) noexcept override;
+
     /// The stream is empty (or invalid).
     bool is_exhausted() const noexcept override;
 
@@ -134,7 +140,10 @@ private:
     void invalid() noexcept;
     void validate() noexcept;
     void clear() noexcept;
-    void seeker(typename IStream::pos_type offset) noexcept;
+    virtual size_t getter() noexcept;
+    virtual void setter(size_t absolute) noexcept;
+    void seeker(typename IStream::pos_type offset, 
+        typename std::ios_base::seekdir direction) noexcept;
 
     IStream& stream_;
 };
