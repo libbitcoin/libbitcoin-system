@@ -39,7 +39,7 @@ static constexpr auto any_invalid = opcode::op_xor;
 
 // Always invalid (no code has been specified).
 operation::operation()
-  : code_(any_invalid), valid_(false)
+  : data_{}, code_(any_invalid), valid_(false)
 {
 }
 
@@ -55,10 +55,10 @@ operation::operation(const operation& other)
 
 // Invalid only if minimal encoding required and not satisfied.
 operation::operation(data_chunk&& uncoded, bool minimal)
-  : code_(opcode_from_data(uncoded, minimal)), data_(std::move(uncoded)), valid_(true)
+  : data_(std::move(uncoded)), code_(opcode_from_data(data_, minimal)), valid_(true)
 {
-    // Revert data if opcode_from_data produced a numeric encoding.
-    if (minimal && !is_payload(code_))
+    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
+    if (!is_payload(code_))
     {
         data_.clear();
         data_.shrink_to_fit();
@@ -67,10 +67,10 @@ operation::operation(data_chunk&& uncoded, bool minimal)
 
 // Invalid only if minimal encoding required and not satisfied.
 operation::operation(const data_chunk& uncoded, bool minimal)
-  : code_(opcode_from_data(uncoded, minimal)), data_(uncoded), valid_(true)
+  : data_(uncoded), code_(opcode_from_data(data_, minimal)), valid_(true)
 {
-    // Revert data if opcode_from_data produced a numeric encoding.
-    if (minimal && !is_payload(code_))
+    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
+    if (!is_payload(code_))
     {
         data_.clear();
         data_.shrink_to_fit();
@@ -79,19 +79,19 @@ operation::operation(const data_chunk& uncoded, bool minimal)
 
 // Always valid (all codes are valid in this sense).
 operation::operation(opcode code)
-  : code_(code), valid_(true)
+  : data_{}, code_(code), valid_(true)
 {
 }
 
 // protected
 operation::operation(opcode code, data_chunk&& data, bool valid)
-  : code_(code), data_(std::move(data)), valid_(valid)
+  : data_(std::move(data)), code_(code), valid_(valid)
 {
 }
 
 // protected
 operation::operation(opcode code, const data_chunk& data, bool valid)
-  : code_(code), data_(data), valid_(valid)
+  : data_(data), code_(code), valid_(valid)
 {
 }
 

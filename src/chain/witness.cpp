@@ -371,7 +371,7 @@ inline operation::list to_pay_key_hash(data_chunk&& program)
     {
         { opcode::dup },
         { opcode::hash160 },
-        { std::move(program) },
+        { std::move(program), true },
         { opcode::equalverify },
         { opcode::checksig }
     };

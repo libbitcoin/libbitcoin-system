@@ -669,9 +669,9 @@ chain::operation::list program::create_delete_ops(const endorsements& data)
 
     std::transform(data.begin(), data.end(), strip.begin(),
         [](const endorsement& data)
-    {
-        return operation{ data, false };
-    });
+        {
+            return operation{ data, false };
+        });
 
     strip.emplace_back(opcode::codeseparator);
     return strip;

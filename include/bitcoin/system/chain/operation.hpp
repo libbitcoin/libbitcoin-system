@@ -152,8 +152,8 @@ protected:
     void reset();
 
 private:
-    opcode code_;
     data_chunk data_;
+    opcode code_;
     bool valid_;
 };
 
