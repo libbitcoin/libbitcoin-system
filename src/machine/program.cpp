@@ -22,10 +22,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <map>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/number.hpp>
@@ -40,6 +42,8 @@ using namespace bc::system::chain;
 
 static const chain::transaction default_tx_;
 static const chain::script default_script_;
+
+static default_allocator<chain::operation> no_fill_op_allocator{};
 
 // Constructors.
 //-----------------------------------------------------------------------------
@@ -71,10 +75,10 @@ program::program(const script& script)
 }
 
 program::program(const script& script, const chain::transaction& transaction,
-    uint32_t input_index, uint32_t forks)
+    uint32_t index, uint32_t forks)
   : script_(script),
     transaction_(transaction),
-    input_index_(input_index),
+    input_index_(index),
     forks_(forks),
     value_(max_uint64),
     version_(script_version::unversioned),
@@ -83,16 +87,16 @@ program::program(const script& script, const chain::transaction& transaction,
     jump_(script_.begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(input_index < transaction.inputs().size());
+    BITCOIN_ASSERT(index < transaction.inputs().size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script& script, const chain::transaction& transaction,
-    uint32_t input_index, uint32_t forks, data_stack&& stack, uint64_t value,
+    uint32_t index, uint32_t forks, data_stack&& stack, uint64_t value,
     script_version version)
   : script_(script),
     transaction_(transaction),
-    input_index_(input_index),
+    input_index_(index),
     forks_(forks),
     value_(value),
     version_(version),
@@ -102,7 +106,7 @@ program::program(const script& script, const chain::transaction& transaction,
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(input_index < transaction.inputs().size());
+    BITCOIN_ASSERT(index < transaction.inputs().size());
 }
 
 
@@ -560,28 +564,6 @@ bool program::succeeded() const
 // Subscript.
 //-----------------------------------------------------------------------------
 
-static default_allocator<chain::operation> no_fill_op_allocator{};
-
-// private
-// Create set of endorsement push data ops and a codeseparator op.
-chain::operation::list program::create_delete_ops(const endorsements& data)
-{
-    operation::list strip(add1(data.size()), no_fill_op_allocator);
-
-    // C++17: Parallel policy for std::transform.
-    std::transform(data.begin(), data.end(), strip.begin(),
-        [](const endorsement& data)
-        {
-            // ****************************************************************
-            // CONSENSUS: non-minimal encoding required.
-            // ****************************************************************
-            return operation{ data, false };
-        });
-
-    strip.emplace_back(opcode::codeseparator);
-    return strip;
-}
-
 // ****************************************************************************
 // CONSENSUS: Witness v0 scripts are not stripped (bip143).
 // Subscripts are not evaluated, they are limited to signature hash creation.
@@ -610,11 +592,12 @@ chain::script program::subscript() const
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script program::subscript(chain::script_version version,
-    const endorsements& endorsements) const
+chain::script program::subscript(const endorsements& endorsements) const
 {
     const auto sub = subscript();
-    if (version == script_version::zero)
+
+    // BIP143: op stripping not applied for v0.
+    if (version() == script_version::zero)
         return sub;
 
     // TODO: Construct opcode with shared pointer to data, and stack with
@@ -631,6 +614,87 @@ chain::script program::subscript(chain::script_version version,
 
     // Copy script operations for mutation.
     return { difference(sub.operations(), strip) };
+}
+
+bool program::prepare(ec_signature& signature, data_chunk& key,
+    hash_digest& hash, const system::endorsement& endorsement) const
+{
+    uint8_t flags;
+    data_slice distinguished;
+
+    // Parse Bitcoin endorsement into DER signature and sighash flags.
+    if (!parse_endorsement(flags, distinguished, endorsement))
+        return false;
+
+    // Obtain the signature hash from subscript and endorsement flags.
+    hash = signature_hash(subscript({ endorsement }), flags);
+
+    // Parse DER signature into an EC signature (bip66 sets strict).
+    const auto bip66 = script::is_enabled(forks(), rule_fork::bip66_rule);
+    return parse_signature(signature, distinguished, bip66);
+}
+
+// TODO: use sighash and key to generate signature in sign mode.
+bool program::prepare(ec_signature& signature, data_chunk& key,
+    hash_digest& hash, hash_cache& cache, const system::endorsement& endorsement,
+    const script& subscript) const
+{
+    uint8_t flags;
+    data_slice distinguished;
+
+    // Parse Bitcoin endorsement into DER signature and sighash flags.
+    if (!parse_endorsement(flags, distinguished, endorsement))
+        return false;
+
+    // Obtain the signature hash from subscript and endorsement sighash_flags.
+    hash = signature_hash(cache, subscript, flags);
+
+    // Parse DER signature into an EC signature (bip66 sets strict).
+    const auto bip66 = script::is_enabled(forks(), rule_fork::bip66_rule);
+    return parse_signature(signature, distinguished, bip66);
+}
+
+// Private.
+//-----------------------------------------------------------------------------
+
+// C++17: Parallel policy for std::transform.
+// Create set of endorsement push data ops and a codeseparator op.
+// ************************************************************************
+// CONSENSUS: non-minimal endorsement operation encoding required.
+// ************************************************************************
+chain::operation::list program::create_delete_ops(const endorsements& data)
+{
+    operation::list strip(add1(data.size()), no_fill_op_allocator);
+
+    std::transform(data.begin(), data.end(), strip.begin(),
+        [](const endorsement& data)
+    {
+        return operation{ data, false };
+    });
+
+    strip.emplace_back(opcode::codeseparator);
+    return strip;
+}
+
+hash_digest program::signature_hash(const script& subscript,
+    uint8_t flags) const
+{
+    return script::generate_signature_hash(transaction(), input_index(),
+        subscript, value(), flags, version());
+}
+
+// Caches signature hashes in a map against sighash flags.
+// Prevents recomputation in the common case where flags are the same.
+hash_digest program::signature_hash(hash_cache& cache, const script& subscript,
+    uint8_t flags) const
+{
+    const auto it = cache.find(flags);
+    if (it != cache.end())
+        return it->second;
+
+    return ((cache[flags] =
+        script::generate_signature_hash(transaction(), input_index(),
+            subscript, value(), flags, version())));
 }
 
 } // namespace machine

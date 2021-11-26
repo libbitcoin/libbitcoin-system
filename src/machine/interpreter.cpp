@@ -23,7 +23,6 @@
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/number.hpp>
@@ -804,44 +803,39 @@ interpreter::result interpreter::op_codeseparator(program& program,
         error::op_code_seperator;
 }
 
+// In signing mode, prepare_signature converts key from a private key to
+// a public key and generates the signature from key and hash. The signature is
+// then verified against the key and hash as if obtained from the script.
 interpreter::result interpreter::op_check_sig_verify(program& program)
 {
     if (program.empty())
         return error::op_check_sig_verify1;
 
-    const auto key = program.pop();
+    auto key = program.pop();
+
+    if (key.empty())
+        return error::op_check_sig_verify2;
 
     if (program.empty())
-        return error::op_check_sig_verify2;
+        return error::op_check_sig_verify3;
 
     const auto endorsement = program.pop();
 
-    // error::op_check_sig_verify_parse fails op_check_sig.
-    if (!endorsement.empty())
-    {
-        uint8_t sighash;
-        ec_signature signature;
-        data_slice distinguished;
-        auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
-        auto bip143 = script::is_enabled(program.forks(), rule_fork::bip143_rule);
-        auto version = bip143 ? program.version() : script_version::unversioned;
+    // error::op_check_sig_verify_parse causes op_check_sig fail.
+    if (endorsement.empty())
+        return error::op_check_sig_verify4;
 
-        // BIP143: op stripping not applied for v0.
-        const auto subscript = program.subscript(version, { endorsement });
+    hash_digest hash;
+    ec_signature signature;
 
-        // Parse endorsement into DER signature into an EC signature.
-        if (!parse_endorsement(sighash, distinguished, endorsement) ||
-            !parse_signature(signature, distinguished, bip66))
-            return error::op_check_sig_verify_parse;
+    // Parse endorsement into DER signature into an EC signature.
+    // Also generates signature hash from endorsement sighash flags.
+    // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
+    if (!program.prepare(signature, key, hash, endorsement))
+        return error::op_check_sig_verify_parse;
 
-        // Version condition preserves independence of bip141 and bip143.
-        return script::check_signature(signature, sighash, key, subscript,
-            program.transaction(), program.input_index(), version,
-                program.value()) ? error::op_success :
-                    error::op_check_sig_verify3;
-    }
-
-    return error::op_check_sig_verify4;
+    return system::verify_signature(key, hash, signature) ?
+        error::op_success : error::op_check_sig_verify5;
 }
 
 interpreter::result interpreter::op_check_sig(program& program)
@@ -857,9 +851,14 @@ interpreter::result interpreter::op_check_sig(program& program)
     return error::op_success;
 }
 
+//*****************************************************************************
+// CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
+//*****************************************************************************
 interpreter::result interpreter::op_check_multisig_verify(
     program& program)
 {
+    auto bip147 = script::is_enabled(program.forks(), rule_fork::bip147_rule);
+
     int32_t count;
     if (!program.pop(count))
         return error::op_check_multisig_verify1;
@@ -884,46 +883,37 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (program.empty())
         return error::op_check_multisig_verify7;
 
-    //*************************************************************************
-    // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
-    //*************************************************************************
-    auto bip147 = script::is_enabled(program.forks(), rule_fork::bip147_rule);
-
     if (!program.pop().empty() && bip147)
         return error::op_check_multisig_verify8;
 
-    uint8_t sighash;
+    hash_digest hash;
     ec_signature signature;
     data_slice distinguished;
-    auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
-    auto bip143 = script::is_enabled(program.forks(), rule_fork::bip143_rule);
-    auto version = bip143 ? program.version() : script_version::unversioned;
+    program::hash_cache cache;
 
-    // BIP143: op stripping not applied for v0.
-    const auto subscript = program.subscript(version, endorsements);
+    // Subscript is the same for all signatures.
+    const auto subscript = program.subscript(endorsements);
     auto endorsement = endorsements.begin();
 
     // Keys may be empty, endorsements is an ordered subset of corresponding
-    // keys, all endorsements must be verified against a key, under bip66 check
-    // multisig fails (vs. push false) if any non-empty key is not strict DER.
-    for (const auto& key: keys)
+    // keys, all endorsements must be verified against a key. Under bip66,
+    // op_check_multisig fails if any parsed endorsement is not strict DER.
+    for (auto& key: keys)
     {
         // All signatures are valid (empty does not increment the iterator).
         if (endorsement == endorsements.end())
             break;
 
-        // error::op_check_multisig_verify_parse fails op_check_multisig.
+        // error::op_check_multisig_verify_parse causes op_check_multisig fail.
         if (!endorsement->empty())
         {
             // Parse endorsement into DER signature into an EC signature.
-            if (!parse_endorsement(sighash, distinguished, *endorsement) ||
-                !parse_signature(signature, distinguished, bip66))
+            // Also generates signature hash from endorsement sighash flags.
+            if (!program.prepare(signature, key, hash, cache, *endorsement,
+                subscript))
                 return error::op_check_multisig_verify_parse;
 
-            // Version condition preserves independence of bip141 and bip143.
-            if (script::check_signature(signature, sighash, key, subscript,
-                program.transaction(), program.input_index(), version,
-                program.value()))
+            if (system::verify_signature(key, hash, signature))
                 ++endorsement;
         }
     }
