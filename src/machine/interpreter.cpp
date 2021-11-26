@@ -800,7 +800,7 @@ interpreter::result interpreter::op_codeseparator(program& program,
     const operation& op)
 {
     return program.register_jump(op) ? error::op_success :
-        error::op_code_seperator;
+        error::op_code_separator;
 }
 
 // In signing mode, prepare_signature converts key from a private key to

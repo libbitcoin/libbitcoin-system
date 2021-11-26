@@ -1067,9 +1067,9 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__valid)
     result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule);
     BOOST_REQUIRE_EQUAL(result0.value(), error::success);
 
-    // missing bip143 (code-seperator treatment).
+    // missing bip143 (code-separator treatment).
     result1 = script::verify(tx, 1, rule_fork::bip141_rule);
-    BOOST_REQUIRE_EQUAL(result1.value(), error::op_check_sig_verify3);
+    BOOST_REQUIRE_EQUAL(result1.value(), error::op_check_sig_verify5);
 
     // missing bip141 (witness not allowed).
     result1 = script::verify(tx, 1, rule_fork::bip143_rule);
@@ -1112,11 +1112,11 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__valid)
     result1 = script::verify(tx, 1, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule);
     BOOST_REQUIRE_EQUAL(result1.value(), error::success);
 
-    // missing bip143 (code-seperator treatment).
+    // missing bip143 (code-separator treatment).
     result0 = script::verify(tx, 0, rule_fork::bip141_rule);
     BOOST_REQUIRE_EQUAL(result0.value(), error::stack_false);
 
-    // missing bip143 (code-seperator treatment).
+    // missing bip143 (code-separator treatment).
     result1 = script::verify(tx, 1, rule_fork::bip141_rule);
     BOOST_REQUIRE_EQUAL(result1.value(), error::stack_false);
 
@@ -1211,7 +1211,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__valid)
 
     // missing bip143, extra bip16 (find-and-delete treatment).
     result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule);
-    BOOST_REQUIRE_EQUAL(result0.value(), error::op_check_sig_verify3);
+    BOOST_REQUIRE_EQUAL(result0.value(), error::op_check_sig_verify5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

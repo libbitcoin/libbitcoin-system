@@ -95,7 +95,7 @@ enum op_error_t : uint8_t
     op_sha256,
     op_hash160,
     op_hash256,
-    op_code_seperator,
+    op_code_separator,
     op_check_sig_verify1,
     op_check_sig_verify2,
     op_check_sig_verify3,

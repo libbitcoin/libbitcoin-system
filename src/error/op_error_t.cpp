@@ -88,7 +88,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_sha256, "op_sha256" },
     { op_hash160, "op_hash160" },
     { op_hash256, "op_hash256" },
-    { op_code_seperator, "op_code_seperator" },
+    { op_code_separator, "op_code_separator" },
     { op_check_sig_verify1, "op_check_sig_verify1" },
     { op_check_sig_verify2, "op_check_sig_verify2" },
     { op_check_sig_verify3, "op_check_sig_verify3" },
