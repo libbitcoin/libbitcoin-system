@@ -785,15 +785,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_locktime_verify5__true_exected_m
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_locktime_verify5");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_locktime_verify6__true_exected_message)
-{
-    constexpr auto value = error::op_check_locktime_verify6;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_locktime_verify6");
-}
-
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sequence_verify1__true_exected_message)
 {
     constexpr auto value = error::op_check_sequence_verify1;
@@ -846,15 +837,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sequence_verify6__true_exected_m
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sequence_verify6");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sequence_verify7__true_exected_message)
-{
-    constexpr auto value = error::op_check_sequence_verify7;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sequence_verify7");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

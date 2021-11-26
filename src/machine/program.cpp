@@ -164,7 +164,7 @@ bool program::is_invalid() const
     // TODO: nops rule must be enabled.
     return
         (/*nops_rule && */script_.is_oversized()) ||
-        (input_index() > transaction_.inputs().size()) ||
+        (input_index_ > transaction_.inputs().size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
 
@@ -173,24 +173,27 @@ uint32_t program::forks() const
     return forks_;
 }
 
-uint32_t program::input_index() const
-{
-    return input_index_;
-}
-
 uint64_t program::value() const
 {
     return value_;
 }
 
-script_version program::version() const
+// This must be guarded (intended for interpreter internal use).
+const input& program::input() const
 {
-    return version_;
+    // This is guarded by is_invalid().
+    BITCOIN_ASSERT(index < tx.inputs().size());
+    return transaction_.inputs()[input_index_];
 }
 
 const chain::transaction& program::transaction() const
 {
     return transaction_;
+}
+
+script_version program::version() const
+{
+    return version_;
 }
 
 // Program registers.
@@ -683,7 +686,7 @@ hash_digest program::signature_hash(const script& subscript, uint8_t flags) cons
     const auto bip143 = script::is_enabled(forks(), rule_fork::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return script::generate_signature_hash(transaction(), input_index(),
+    return script::generate_signature_hash(transaction(), input_index_,
         subscript, value(), flags, version(), bip143);
 }
 

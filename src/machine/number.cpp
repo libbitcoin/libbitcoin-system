@@ -81,10 +81,9 @@ data_chunk number::data() const
 
     auto data = to_little_endian_chunk(absolute(value_));
     const auto negative_bit_set = get_left(data.back());
-    const auto negative = is_negative(value_);
 
     // Push a 0x80 byte that will be popped off when converting to an integral.
-    if (negative_bit_set && negative)
+    if (negative_bit_set && is_negative())
         data.push_back(numbers::negative_sign);
 
     // Push a 0x00 byte to make the most significant byte non-negative again.
@@ -93,7 +92,7 @@ data_chunk number::data() const
 
     // Set the negative bit, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
-    else if (negative)
+    else if (is_negative())
         set_left_into(data.back());
 
     return data;
@@ -120,6 +119,11 @@ bool number::is_true() const
 bool number::is_false() const
 {
     return is_zero(value_);
+}
+
+bool number::is_negative() const
+{
+    return system::is_negative(value_);
 }
 
 // Operators

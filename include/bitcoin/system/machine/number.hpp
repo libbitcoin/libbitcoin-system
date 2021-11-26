@@ -71,6 +71,9 @@ public:
     /// Return value as stack boolean (zero is false).
     bool is_false() const;
 
+    /// Return true if the value is negative.
+    bool is_negative() const;
+
     // Operators
     //-------------------------------------------------------------------------
 

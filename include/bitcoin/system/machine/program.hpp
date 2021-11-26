@@ -76,10 +76,10 @@ public:
 
     /// Constant registers.
     uint32_t forks() const;
-    uint32_t input_index() const;
     uint64_t value() const;
-    chain::script_version version() const;
+    const chain::input& input() const;
     const chain::transaction& transaction() const;
+    chain::script_version version() const;
 
     /// Program registers.
     op_iterator begin() const;

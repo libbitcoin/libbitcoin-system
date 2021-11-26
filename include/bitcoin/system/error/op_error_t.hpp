@@ -119,14 +119,12 @@ enum op_error_t : uint8_t
     op_check_locktime_verify3,
     op_check_locktime_verify4,
     op_check_locktime_verify5,
-    op_check_locktime_verify6,
     op_check_sequence_verify1,
     op_check_sequence_verify2,
     op_check_sequence_verify3,
     op_check_sequence_verify4,
     op_check_sequence_verify5,
-    op_check_sequence_verify6,
-    op_check_sequence_verify7
+    op_check_sequence_verify6
 };
 
 DECLARE_ERROR_T_CODE_CATEGORY(op_error);
