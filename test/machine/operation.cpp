@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_1__always__returns_default_initializ
 {
     operation instance;
 
-    BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE(instance.code() == opcode::op_xor);
 }
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_2__valid_input__returns_input_initia
     auto dup_data = data;
     operation instance(std::move(dup_data));
 
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
     BOOST_REQUIRE(instance.data() == data);
 }
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_3__valid_input__returns_input_initia
     const auto data = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     operation instance(data);
 
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
     BOOST_REQUIRE(instance.data() == data);
 }
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_4__valid_input__returns_input_initia
     const operation expected(base16_chunk("23156214"));
     operation instance(expected);
 
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -68,17 +68,17 @@ BOOST_AUTO_TEST_CASE(operation__constructor_5__valid_input__returns_input_initia
     operation expected(base16_chunk("23156214"));
     operation instance(std::move(expected));
 
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__insufficient_bytes__failure)
-{
-    const data_chunk data;
-    operation instance;
-
-    BOOST_REQUIRE(!instance.from_data(data));
-    BOOST_REQUIRE(!instance.is_valid());
-}
+////BOOST_AUTO_TEST_CASE(operation__from_data__insufficient_bytes__underflow)
+////{
+////    const data_chunk data;
+////    operation instance;
+////
+////    BOOST_REQUIRE(!instance.from_data(data));
+////    BOOST_REQUIRE(instance.is_underflow());
+////}
 
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
 {
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_75__success)
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_negative_1__success)
     // This is read as an encoded operation, not as data.
     // Constructors read (unencoded) data and can select minimal encoding.
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_1__success)
     // This is read as an encoded operation, not as data.
     // Constructors read (unencoded) data and can select minimal encoding.
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
     // This is read as an encoded operation, not as data.
     // Constructors read (unencoded) data and can select minimal encoding.
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(raw_operation));
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_underflow());
     BOOST_REQUIRE(raw_operation == instance.to_data());
 
     operation duplicate;
@@ -238,30 +238,30 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
 
 BOOST_AUTO_TEST_CASE(operation__factory_1__roundtrip__success)
 {
-    auto operation = operation::factory(valid_raw_operation);
+    auto instance = operation::factory(valid_raw_operation);
 
-    BOOST_REQUIRE(operation.is_valid());
-    data_chunk output = operation.to_data();
+    BOOST_REQUIRE(!instance.is_underflow());
+    data_chunk output = instance.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
 
 BOOST_AUTO_TEST_CASE(operation__factory_2__roundtrip__success)
 {
     stream::in::copy istream(valid_raw_operation);
-    auto operation = operation::factory(istream);
+    auto instance = operation::factory(istream);
 
-    BOOST_REQUIRE(operation.is_valid());
-    data_chunk output = operation.to_data();
+    BOOST_REQUIRE(!instance.is_underflow());
+    data_chunk output = instance.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
 
 BOOST_AUTO_TEST_CASE(operation__factory_3__roundtrip__success)
 {
     read::bytes::copy source(valid_raw_operation);
-    auto operation = operation::factory(source);
+    auto instance = operation::factory(source);
 
-    BOOST_REQUIRE(operation.is_valid());
-    data_chunk output = operation.to_data();
+    BOOST_REQUIRE(!instance.is_underflow());
+    data_chunk output = instance.to_data();
     BOOST_REQUIRE(output == valid_raw_operation);
 }
 

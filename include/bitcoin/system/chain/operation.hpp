@@ -43,13 +43,10 @@ public:
     //-------------------------------------------------------------------------
 
     operation();
-
     operation(operation&& other);
     operation(const operation& other);
-
     operation(data_chunk&& uncoded, bool minimal=true);
     operation(const data_chunk& uncoded, bool minimal=true);
-
     operation(opcode code);
 
     // Operators.
@@ -74,9 +71,6 @@ public:
 
     bool from_string(const std::string& mnemonic);
 
-    // Invalid only if minimal encoding required and not satisfied.
-    bool is_valid() const;
-
     // Serialization.
     //-------------------------------------------------------------------------
 
@@ -91,10 +85,10 @@ public:
 
     size_t serialized_size() const;
 
-    /// Get the op code [0..255], if is_valid is consistent with data.
+    /// Get the op code [0..255].
     opcode code() const;
 
-    /// Get the data, empty if not a push code or if invalid.
+    /// Get the data, empty if not a push code.
     const data_chunk& data() const;
 
     // Utilities.
@@ -143,6 +137,7 @@ public:
     bool is_oversized() const;
     bool is_minimal_push() const;
     bool is_nominal_push() const;
+    bool is_underflow() const;
 
 protected:
     operation(opcode code, data_chunk&& data, bool valid);
@@ -154,7 +149,7 @@ protected:
 private:
     data_chunk data_;
     opcode code_;
-    bool valid_;
+    bool underflow_;
 };
 
 } // namespace chain

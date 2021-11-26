@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -39,23 +40,24 @@ static constexpr auto any_invalid = opcode::op_xor;
 
 // Always invalid (no code has been specified).
 operation::operation()
-  : data_{}, code_(any_invalid), valid_(false)
+  : data_{}, code_(any_invalid), underflow_(false)
 {
 }
 
 operation::operation(operation&& other)
-  : operation(other.code_, std::move(other.data_), other.valid_)
+  : operation(other.code_, std::move(other.data_), other.underflow_)
 {
 }
 
 operation::operation(const operation& other)
-  : operation(other.code_, other.data_, other.valid_)
+  : operation(other.code_, other.data_, other.underflow_)
 {
 }
 
-// Invalid only if minimal encoding required and not satisfied.
 operation::operation(data_chunk&& uncoded, bool minimal)
-  : data_(std::move(uncoded)), code_(opcode_from_data(data_, minimal)), valid_(true)
+  : data_(std::move(uncoded)),
+    code_(opcode_from_data(data_, minimal)),
+    underflow_(false)
 {
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
     if (!is_payload(code_))
@@ -65,9 +67,10 @@ operation::operation(data_chunk&& uncoded, bool minimal)
     }
 }
 
-// Invalid only if minimal encoding required and not satisfied.
 operation::operation(const data_chunk& uncoded, bool minimal)
-  : data_(uncoded), code_(opcode_from_data(data_, minimal)), valid_(true)
+  : data_(uncoded),
+    code_(opcode_from_data(data_, minimal)),
+    underflow_(false)
 {
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
     if (!is_payload(code_))
@@ -77,21 +80,20 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     }
 }
 
-// Always valid (all codes are valid in this sense).
 operation::operation(opcode code)
-  : data_{}, code_(code), valid_(true)
+  : data_{}, code_(code), underflow_(false)
 {
 }
 
 // protected
 operation::operation(opcode code, data_chunk&& data, bool valid)
-  : data_(std::move(data)), code_(code), valid_(valid)
+  : data_(std::move(data)), code_(code), underflow_(valid)
 {
 }
 
 // protected
 operation::operation(opcode code, const data_chunk& data, bool valid)
-  : data_(data), code_(code), valid_(valid)
+  : data_(data), code_(code), underflow_(valid)
 {
 }
 
@@ -102,7 +104,7 @@ operation& operation::operator=(operation&& other)
 {
     code_ = other.code_;
     data_ = std::move(other.data_);
-    valid_ = other.valid_;
+    underflow_ = other.underflow_;
     return *this;
 }
 
@@ -110,7 +112,7 @@ operation& operation::operator=(const operation& other)
 {
     code_ = other.code_;
     data_ = other.data_;
-    valid_ = other.valid_;
+    underflow_ = other.underflow_;
     return *this;
 }
 
@@ -119,7 +121,7 @@ bool operation::operator==(const operation& other) const
     return
         (code_ == other.code_) &&
         (data_ == other.data_) &&
-        (valid_ == other.valid_);
+        (underflow_ == other.underflow_);
 }
 
 bool operation::operator!=(const operation& other) const
@@ -130,10 +132,6 @@ bool operation::operator!=(const operation& other) const
 // Properties (size, accessors, cache).
 //-----------------------------------------------------------------------------
 
-//*****************************************************************************
-// CONSENSUS: hashed serialization honors the opcode indication of data size,
-// even if it is not minimally-encoded.
-//*****************************************************************************
 size_t operation::serialized_size() const
 {
     static constexpr auto op_size = sizeof(uint8_t);
@@ -166,10 +164,6 @@ const data_chunk& operation::data() const
 //-----------------------------------------------------------------------------
 
 // private
-//*****************************************************************************
-// CONSENSUS: Given that hash serialization honors non-minimal encoding, we
-// accept it and do not normalize it upon deserialization or serialization.
-//*****************************************************************************
 uint32_t operation::read_data_size(opcode code, reader& source)
 {
     constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -190,7 +184,6 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 
 //*****************************************************************************
 // CONSENSUS: non-minial encoding is consensus critical due to find_and_delete.
-// Presumably this was just an oversight in the original hash serialization.
 //*****************************************************************************
 opcode operation::opcode_from_size(size_t size)
 {
@@ -211,7 +204,7 @@ opcode operation::minimal_opcode_from_data(const data_chunk& data)
 {
     const auto size = data.size();
 
-    if (size == 1)
+    if (size == one)
     {
         const auto value = data.front();
 
@@ -254,14 +247,14 @@ opcode operation::opcode_from_positive(uint8_t value)
     BITCOIN_ASSERT(value >= numbers::positive_1);
     BITCOIN_ASSERT(value <= numbers::positive_16);
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<opcode>(value + op_81 - 1);
+    return static_cast<opcode>(value + sub1(op_81));
 }
 
 uint8_t operation::opcode_to_positive(opcode code)
 {
     BITCOIN_ASSERT(is_positive(code));
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<uint8_t>(code) - op_81 + 1;
+    return static_cast<uint8_t>(code) - add1(op_81);
 }
 
 // opcode: [0-79, 81-96]
@@ -514,6 +507,15 @@ bool operation::is_nominal_push() const
     return code_ == nominal_opcode_from_data(data_);
 }
 
+// ****************************************************************************
+// CONSENSUS: An underflow is sized op-undersized data. This is valid as long
+// as the operation is not executed. For example, coinbase input scripts.
+// ****************************************************************************
+bool operation::is_underflow() const
+{
+    return underflow_;
+}
+
 // Deserialization.
 //-----------------------------------------------------------------------------
 
@@ -555,8 +557,11 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
-    valid_ = true;
+    underflow_ = false;
     code_ = static_cast<opcode>(source.read_byte());
+
+    // TODO: an buffer read here is not the same as constructing from data,
+    // TODO: as there is no presumed opcode for a push, just the data.
     const auto size = read_data_size(code_, source);
 
     // The max_script_size and max_push_data_size constants limit evaluation,
@@ -570,7 +575,7 @@ bool operation::from_data(reader& source)
     if (!source)
         reset();
 
-    return valid_;
+    return source;
 }
 
 inline bool is_push_token(const std::string& token)
@@ -581,6 +586,11 @@ inline bool is_push_token(const std::string& token)
 inline bool is_text_token(const std::string& token)
 {
     return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
+}
+
+inline bool is_underflow_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '<' && token.back() == '>';
 }
 
 inline std::string remove_token_delimiters(const std::string& token)
@@ -643,6 +653,7 @@ static bool data_from_decimal(data_chunk& out_data,
 bool operation::from_string(const std::string& mnemonic)
 {
     reset();
+    auto valid = false;
 
     if (is_push_token(mnemonic))
     {
@@ -652,13 +663,13 @@ bool operation::from_string(const std::string& mnemonic)
         if (parts.size() == 1)
         {
             // Extract operation using nominal data size encoding.
-            if ((valid_ = decode_base16(data_, parts.front())))
+            if ((valid = decode_base16(data_, parts.front())))
                 code_ = nominal_opcode_from_data(data_);
         }
         else if (parts.size() == 2)
         {
             // Extract operation using minimal data size encoding.
-            valid_ = decode_base16(data_, parts[1]) &&
+            valid = decode_base16(data_, parts[1]) &&
                 opcode_from_data_prefix(code_, parts[0], data_);
         }
     }
@@ -667,30 +678,33 @@ bool operation::from_string(const std::string& mnemonic)
         // Extract operation using nominal data size encoding.
         data_ = to_chunk(remove_token_delimiters(mnemonic));
         code_ = nominal_opcode_from_data(data_);
-        valid_ = true;
+        valid = true;
+    }
+    else if (is_underflow_token(mnemonic))
+    {
+        // code_ is ignored for underflow_ ops.
+        data_ = to_chunk(remove_token_delimiters(mnemonic));
+        code_ = any_invalid;
+        underflow_ = true;
+        valid = true;
     }
     else if (opcode_from_mnemonic(code_, mnemonic))
     {
         // Any push code may have empty data, so this is presumed here.
         // No data is obtained here from a push opcode (use push/text tokens).
-        valid_ = true;
+        valid = true;
     }
     else if (data_from_decimal(data_, mnemonic))
     {
         // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
         code_ = nominal_opcode_from_data(data_);
-        valid_ = true;
+        valid = true;
     }
 
-    if (!valid_)
+    if (!valid)
         reset();
 
-    return valid_;
-}
-
-bool operation::is_valid() const
-{
-    return valid_;
+    return valid;
 }
 
 // protected
@@ -698,7 +712,7 @@ void operation::reset()
 {
     code_ = any_invalid;
     data_.clear();
-    valid_ = false;
+    underflow_ = false;
 }
 
 // Serialization.
@@ -719,11 +733,16 @@ void operation::to_data(std::ostream& stream) const
     to_data(out);
 }
 
-//*****************************************************************************
-// CONSENSUS: Non-minimal encoding is allowed by consensus hashing.
-//*****************************************************************************
 void operation::to_data(writer& sink) const
 {
+    // Underflow is op-undersized data, it is held and serialized alone.
+    // An underflow could only be a final token in a script deserialization.
+    if (is_underflow())
+    {
+        sink.write_bytes(data_);
+        return;
+    }
+
     const auto size = data_.size();
 
     sink.write_byte(static_cast<uint8_t>(code_));
@@ -768,8 +787,8 @@ static std::string opcode_to_prefix(opcode code, const data_chunk& data)
 // The removal of spaces in v3 data is a compatibility break with our v2.
 std::string operation::to_string(uint32_t active_forks) const
 {
-    if (!valid_)
-        return "<invalid>";
+    if (underflow_)
+        return "<" + encode_base16(data_) + ">";
 
     if (data_.empty())
         return opcode_to_mnemonic(code_, active_forks);
