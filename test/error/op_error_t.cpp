@@ -614,6 +614,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify4__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify4");
 }
 
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify5__true_exected_message)
+{
+    constexpr auto value = error::op_check_sig_verify5;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify5");
+}
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify_parse__true_exected_message)
 {
     constexpr auto value = error::op_check_sig_verify_parse;
