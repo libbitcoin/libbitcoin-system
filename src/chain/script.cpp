@@ -1352,8 +1352,7 @@ bool script::is_unspendable() const
     const auto& code = operations_[0].code();
 
     // There is no condition prior to the first opcode in a script.
-    return operation::is_reserved(code) ||
-        operation::is_invalid(code);
+    return operation::is_reserved(code) || operation::is_invalid(code);
 }
 
 // Validation.
