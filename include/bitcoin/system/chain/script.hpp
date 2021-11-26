@@ -95,9 +95,6 @@ public:
     /// A script object is valid if the byte count matches the prefix.
     bool is_valid() const;
 
-    /// Script operations is valid if all push ops have the predicated size.
-    bool is_valid_operations() const;
-
     // Serialization.
     //-------------------------------------------------------------------------
 

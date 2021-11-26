@@ -306,13 +306,6 @@ bool script::is_valid() const
     return valid_;
 }
 
-bool script::is_valid_operations() const
-{
-    // Script validity is independent of individual operation validity.
-    // There is a trailing invalid/default op if a push op had a size mismatch.
-    return operations().empty() || operations_.back().is_valid();
-}
-
 // Serialization.
 //-----------------------------------------------------------------------------
 
@@ -456,10 +449,10 @@ const operation::list& script::operations() const
     // In this case an invalid script is parsed to the extent possible.
     // ************************************************************************
 
-    // If an op fails it is pushed to operations and the loop terminates.
-    // To validate the ops the caller must test the last op.is_valid(), or may
-    // test script.is_valid_operations(), which is done in script metadata.
-    // Invalidity of a parsed script will be caught in validation regardless.
+    // Op deserialization always succeeds to the extent the stream is not
+    // invalidated. A final (underflow) op may contain only data, with the code
+    // disabled. This is valid as long as it is not executed (such as a
+    // coinbase input script). Underflow ops deserialize to original data.
     while (!source.is_exhausted())
     {
         op.from_data(source);
