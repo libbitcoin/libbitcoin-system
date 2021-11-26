@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <map>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
