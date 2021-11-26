@@ -412,7 +412,7 @@ data_chunk transaction::to_data(bool wire, bool witness) const
     const auto size = serialized_size(wire, witness);
 
     // Reserve an extra byte to prevent full reallocation in the case of
-    // generate_signature_hash extension by addition of the sighash_type.
+    // generate_signature_hash extension by addition of the sighash_flags.
     data.reserve(size + sizeof(uint8_t));
 
     stream::out::data ostream(data);

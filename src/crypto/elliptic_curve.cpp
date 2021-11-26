@@ -332,13 +332,13 @@ bool is_endorsement(const endorsement& endorsement)
 // DER parse/encode
 // ----------------------------------------------------------------------------
 
-bool parse_endorsement(uint8_t& sighash_type, data_slice& der_signature,
+bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
     const endorsement& endorsement)
 {
     if (endorsement.empty())
         return false;
 
-    sighash_type = endorsement.back();
+    sighash_flags = endorsement.back();
     der_signature = { endorsement.begin(), std::prev(endorsement.end()) };
     return true;
 }

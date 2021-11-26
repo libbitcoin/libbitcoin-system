@@ -175,7 +175,7 @@ BC_API bool is_endorsement(const endorsement& endorsement);
 // ----------------------------------------------------------------------------
 
 /// Parse an endorsement into signature hash type and DER signature.
-BC_API bool parse_endorsement(uint8_t& sighash_type, data_slice& der_signature,
+BC_API bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
     const endorsement& endorsement);
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
