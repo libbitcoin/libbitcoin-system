@@ -27,6 +27,7 @@
 #include <bitcoin/system/chain/enums/rule_fork.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
+#include <bitcoin/system/chain/enums/sighash_algorithm.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -129,21 +130,21 @@ public:
     //-------------------------------------------------------------------------
 
     static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t input_index, const script& script_code, uint8_t sighash_type,
-        script_version version=script_version::unversioned,
-        uint64_t value=max_uint64);
+        uint32_t index, const script& subscript, uint64_t value=max_uint64,
+        uint8_t flags=sighash_algorithm::hash_all,
+        script_version version=script_version::unversioned);
 
     static bool check_signature(const ec_signature& signature,
-        uint8_t sighash_type, const data_slice& public_key,
-        const script& script_code, const transaction& tx, uint32_t input_index,
-        script_version version=script_version::unversioned,
-        uint64_t value=max_uint64);
+        const data_slice& public_key, const script& subscript,
+        const transaction& tx, uint32_t index, uint64_t value=max_uint64,
+        uint8_t flags=sighash_algorithm::hash_all,
+        script_version version=script_version::unversioned);
 
     static bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, const transaction& tx,
-        uint32_t input_index, uint8_t sighash_type,
-        script_version version=script_version::unversioned,
-        uint64_t value=max_uint64);
+        uint32_t index, uint64_t value=max_uint64,
+        uint8_t flags=sighash_algorithm::hash_all,
+        script_version version=script_version::unversioned);
 
     // Utilities (static).
     //-------------------------------------------------------------------------
@@ -216,12 +217,10 @@ public:
     // Validation.
     //-------------------------------------------------------------------------
 
-    // This obtains the previous output from metadata.
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t forks);
-
-    static code verify(const transaction& tx, uint32_t input_index,
-        uint32_t forks, const script& prevout_script, uint64_t value);
+    /// This overload obtains the previous output from metadata.
+    static code verify(const transaction& tx, uint32_t index, uint32_t forks);
+    static code verify(const transaction& tx, uint32_t index, uint32_t forks,
+        const script& prevout_script, uint64_t value);
 
 protected:
     // So that input and output may call reset from their own.
@@ -235,12 +234,10 @@ protected:
 private:
     static size_t serialized_size(const operation::list& ops);
     static data_chunk operations_to_data(const operation::list& ops);
-    static hash_digest generate_unversioned_signature_hash(
-        const transaction& tx, uint32_t input_index,
-        const script& script_code, uint8_t sighash_type);
+    static hash_digest generate_unversioned_signature_hash(const transaction& tx,
+        uint32_t index, const script& subscript, uint8_t flags);
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
-        uint32_t input_index, const script& script_code, uint64_t value,
-        uint8_t sighash_type);
+        uint32_t index, const script& subscript, uint64_t value, uint8_t flags);
 
     operation::list& operations_move();
     const operation::list& operations_copy() const;
