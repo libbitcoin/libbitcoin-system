@@ -159,9 +159,11 @@ BOOST_AUTO_TEST_CASE(witness_address__hash_digest_construct__null_hash__valid)
     BOOST_REQUIRE(witness_address(null_hash));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__script_construct__uninitialized__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__script_construct__invlid__invalid)
 {
-    BOOST_REQUIRE(!witness_address(script()));
+    chain::script script;
+    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, false));
+    BOOST_REQUIRE(!witness_address(script));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__script_construct__initialized__valid)
@@ -511,7 +513,9 @@ BOOST_AUTO_TEST_CASE(witness_address__encoded__script_hash_prefix__expected)
 
 BOOST_AUTO_TEST_CASE(witness_address__encoded__invalid_script__empty)
 {
-    const witness_address instance{ chain::script{} };
+    chain::script script;
+    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, false));
+    const witness_address instance{ script };
     BOOST_REQUIRE(instance.encoded().empty());
 }
 
@@ -662,12 +666,6 @@ BOOST_AUTO_TEST_CASE(witness_address__identifier__script__version_0_p2sh)
 }
 
 // script
-
-BOOST_AUTO_TEST_CASE(witness_address__script__invalid__invalid)
-{
-    const witness_address instance{};
-    BOOST_REQUIRE(!instance.script().is_valid());
-}
 
 BOOST_AUTO_TEST_CASE(witness_address__script__version_16_address__valid)
 {

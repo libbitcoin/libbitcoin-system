@@ -37,12 +37,10 @@
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/output_point.hpp>
-#include <bitcoin/system/chain/payment_record.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/point_value.hpp>
 #include <bitcoin/system/chain/points_value.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/stealth_record.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>

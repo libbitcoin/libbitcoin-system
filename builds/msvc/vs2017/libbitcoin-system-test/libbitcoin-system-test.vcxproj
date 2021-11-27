@@ -85,13 +85,11 @@
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\stealth_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>

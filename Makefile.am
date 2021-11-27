@@ -48,12 +48,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/operation.cpp \
     src/chain/output.cpp \
     src/chain/output_point.cpp \
-    src/chain/payment_record.cpp \
     src/chain/point.cpp \
     src/chain/point_value.cpp \
     src/chain/points_value.cpp \
     src/chain/script.cpp \
-    src/chain/stealth_record.cpp \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
     src/chain/enums/opcode.cpp \
@@ -288,14 +286,12 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/operation.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
-    test/chain/payment_record.cpp \
     test/chain/point.cpp \
     test/chain/point_value.cpp \
     test/chain/points_value.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
-    test/chain/stealth_record.cpp \
     test/chain/transaction.cpp \
     test/chain/enums/opcode.cpp \
     test/config/authority.cpp \
@@ -492,12 +488,10 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/operation.hpp \
     include/bitcoin/system/chain/output.hpp \
     include/bitcoin/system/chain/output_point.hpp \
-    include/bitcoin/system/chain/payment_record.hpp \
     include/bitcoin/system/chain/point.hpp \
     include/bitcoin/system/chain/point_value.hpp \
     include/bitcoin/system/chain/points_value.hpp \
     include/bitcoin/system/chain/script.hpp \
-    include/bitcoin/system/chain/stealth_record.hpp \
     include/bitcoin/system/chain/transaction.hpp \
     include/bitcoin/system/chain/witness.hpp
 

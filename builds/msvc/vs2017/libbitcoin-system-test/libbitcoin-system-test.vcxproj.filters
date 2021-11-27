@@ -111,9 +111,6 @@
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -127,9 +124,6 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\script.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\stealth_record.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
