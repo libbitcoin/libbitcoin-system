@@ -662,7 +662,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 //-----------------------------------------------------------------------------
 
 // ****************************************************************************
-// CONSENSUS: non-minimal endorsement operation encoding required.
+// CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
 chain::operation::list program::create_delete_ops(const endorsements& data)
 {

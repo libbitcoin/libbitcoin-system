@@ -45,9 +45,17 @@ public:
     operation();
     operation(operation&& other);
     operation(const operation& other);
-    operation(data_chunk&& uncoded, bool minimal=true);
-    operation(const data_chunk& uncoded, bool minimal=true);
     operation(opcode code);
+
+    // TODO: when we remove factories, the op_data constructor has no minimal
+    // TODO: parameter and the push_data constructor requires the parameter.
+    ////operation(const data_chunk& op_data);
+    ////operation(const data_chunk& push_data, bool minimal);
+
+    /// These construct from push-data, not serialized operations (no codes).
+    /// When minimal is true the data is interpreted as minimally-encoded push.
+    operation(data_chunk&& uncoded, bool minimal);
+    operation(const data_chunk& uncoded, bool minimal);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -61,10 +69,12 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
+    /// These deserialize operations (with codes), not from push-data.
     static operation factory(const data_chunk& encoded);
     static operation factory(std::istream& stream);
     static operation factory(reader& source);
 
+    /// These serialize operations (with codes), not to push-data.
     bool from_data(const data_chunk& encoded);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
@@ -128,10 +138,13 @@ public:
 
     /// Categories of operations.
     bool is_push() const;
+    bool is_payload() const;
     bool is_counted() const;
     bool is_version() const;
+    bool is_numeric() const;
     bool is_positive() const;
     bool is_invalid() const;
+    bool is_reserved() const;
     bool is_conditional() const;
     bool is_relaxed_push() const;
     bool is_oversized() const;
@@ -140,9 +153,10 @@ public:
     bool is_underflow() const;
 
 protected:
+    static uint32_t read_data_size(opcode code, reader& source);
+
     operation(opcode code, data_chunk&& data, bool valid);
     operation(opcode code, const data_chunk& data, bool valid);
-    static uint32_t read_data_size(opcode code, reader& source);
     opcode opcode_from_data(const data_chunk& data, bool minimal);
     void reset();
 

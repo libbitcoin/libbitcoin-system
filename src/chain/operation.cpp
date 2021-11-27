@@ -54,11 +54,18 @@ operation::operation(const operation& other)
 {
 }
 
+operation::operation(opcode code)
+  : data_{}, code_(code), underflow_(false)
+{
+    // If code is push data the data member will be inconsistent (empty).
+}
+
 operation::operation(data_chunk&& uncoded, bool minimal)
   : data_(std::move(uncoded)),
     code_(opcode_from_data(data_, minimal)),
     underflow_(false)
 {
+    // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
     if (!is_payload(code_))
     {
@@ -72,17 +79,13 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     code_(opcode_from_data(data_, minimal)),
     underflow_(false)
 {
+    // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
     if (!is_payload(code_))
     {
         data_.clear();
         data_.shrink_to_fit();
     }
-}
-
-operation::operation(opcode code)
-  : data_{}, code_(code), underflow_(false)
-{
 }
 
 // protected
@@ -138,21 +141,32 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
-    underflow_ = false;
+    // If stream is not empty then a non-data opcode will always deserialize.
+    // A push-data opcode may indicate more bytes than are available. In this
+    // case the presumption is that the script is invalid, but it may not be
+    // evaluated, such as with a coinbase input. So if an operation fails to
+    // deserialize it is re-read and retained as an "underflow" operation.
+    // An underflow op serializes as data only, and fails evaluation. Only the
+    // last operation in a script could become an underflow, which may possibly
+    // contain the entire script.
+    const auto start = source.get_position();
+
+    // The size of a push-data opcode is not retained, as this is inherent in
+    // the size of the data member, and is obtained from that upon serialize.
     code_ = static_cast<opcode>(source.read_byte());
+    data_ = source.read_bytes(read_data_size(code_, source));
+    underflow_ = !source;
 
-    // TODO: an buffer read here is not the same as constructing from data,
-    // TODO: as there is no presumed opcode for a push, just the data.
-    const auto size = read_data_size(code_, source);
+    // This requires that provided stream terminates at the end of the script.
+    if (underflow_)
+    {
+        code_ = any_invalid;
+        source.set_position(start);
+        data_ = source.read_bytes();
+    }
 
-    // The max_script_size and max_push_data_size constants limit evaluation,
-    // but not all scripts evaluate, so use max_block_size to guard memory 
-    // allocation here. Interesting question before max_block_size soft fork.
-    if (size > max_block_size)
-        source.invalidate();
-    else
-        data_ = source.read_bytes(size);
-
+    // This indicates a failure with the stream itself as it cannot be the
+    // result of invaliditty of its data. All byte vectors are deserializable.
     if (!source)
         reset();
 
@@ -187,7 +201,7 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    // Underflow is op-undersized data, it is held and serialized alone.
+    // Underflow is op-undersized data, it is serialized with no opcode.
     // An underflow could only be a final token in a script deserialization.
     if (is_underflow())
     {
@@ -196,7 +210,6 @@ void operation::to_data(writer& sink) const
     }
 
     const auto size = data_.size();
-
     sink.write_byte(static_cast<uint8_t>(code_));
 
     switch (code_)
@@ -304,20 +317,20 @@ bool operation::from_string(const std::string& mnemonic)
 
         if (parts.size() == 1)
         {
-            // Extract operation using nominal data size encoding.
+            // Extract operation using nominal data size decoding.
             if ((valid = decode_base16(data_, parts.front())))
                 code_ = nominal_opcode_from_data(data_);
         }
         else if (parts.size() == 2)
         {
-            // Extract operation using minimal data size encoding.
+            // Extract operation using explicit data size decoding.
             valid = decode_base16(data_, parts[1]) &&
                 opcode_from_data_prefix(code_, parts[0], data_);
         }
     }
     else if (is_text_token(mnemonic))
     {
-        // Extract operation using nominal data size encoding.
+        // Extract operation using nominal data size decoding.
         data_ = to_chunk(remove_token_delimiters(mnemonic));
         code_ = nominal_opcode_from_data(data_);
         valid = true;
@@ -325,10 +338,9 @@ bool operation::from_string(const std::string& mnemonic)
     else if (is_underflow_token(mnemonic))
     {
         // code_ is ignored for underflow_ ops.
-        data_ = to_chunk(remove_token_delimiters(mnemonic));
-        code_ = any_invalid;
         underflow_ = true;
-        valid = true;
+        code_ = any_invalid;
+        valid = decode_base16(data_, remove_token_delimiters(mnemonic));
     }
     else if (opcode_from_mnemonic(code_, mnemonic))
     {
@@ -425,6 +437,9 @@ size_t operation::serialized_size() const
     static constexpr auto op_size = sizeof(uint8_t);
     const auto size = data_.size();
 
+    if (underflow_)
+        return size;
+
     switch (code_)
     {
         case opcode::push_one_size:
@@ -516,18 +531,19 @@ opcode operation::nominal_opcode_from_data(const data_chunk& data)
     return opcode_from_size(data.size());
 }
 
-opcode operation::opcode_from_version(uint8_t value)
-{
-    BITCOIN_ASSERT(value <= numbers::positive_16);
-    return (value == numbers::positive_0) ? opcode::push_size_0 :
-        operation::opcode_from_positive(value);
-}
-
+// private
 opcode operation::opcode_from_data(const data_chunk& data,
     bool minimal)
 {
     return minimal ? minimal_opcode_from_data(data) :
         nominal_opcode_from_data(data);
+}
+
+opcode operation::opcode_from_version(uint8_t value)
+{
+    BITCOIN_ASSERT(value <= numbers::positive_16);
+    return (value == numbers::positive_0) ? opcode::push_size_0 :
+        operation::opcode_from_positive(value);
 }
 
 opcode operation::opcode_from_positive(uint8_t value)
@@ -544,6 +560,9 @@ uint8_t operation::opcode_to_positive(opcode code)
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     return static_cast<uint8_t>(code) - add1(op_81);
 }
+
+// Categories of opcodes.
+// ----------------------------------------------------------------------------
 
 // opcode: [0-79, 81-96]
 bool operation::is_push(opcode code)
@@ -744,9 +763,17 @@ bool operation::is_relaxed_push(opcode code)
     return value <= op_96;
 }
 
+// Categories of operations.
+// ----------------------------------------------------------------------------
+
 bool operation::is_push() const
 {
     return is_push(code_);
+}
+
+bool operation::is_payload() const
+{
+    return is_payload(code_);
 }
 
 bool operation::is_counted() const
@@ -759,6 +786,11 @@ bool operation::is_version() const
     return is_version(code_);
 }
 
+bool operation::is_numeric() const
+{
+    return is_numeric(code_);
+}
+
 bool operation::is_positive() const
 {
     return is_positive(code_);
@@ -767,6 +799,11 @@ bool operation::is_positive() const
 bool operation::is_invalid() const
 {
     return is_invalid(code_);
+}
+
+bool operation::is_reserved() const
+{
+    return is_reserved(code_);
 }
 
 bool operation::is_conditional() const
