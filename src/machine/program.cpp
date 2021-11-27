@@ -182,7 +182,7 @@ uint64_t program::value() const
 const input& program::input() const
 {
     // This is guarded by is_invalid().
-    BITCOIN_ASSERT(index < tx.inputs().size());
+    BITCOIN_ASSERT(input_index_ < transaction().inputs().size());
     return transaction_.inputs()[input_index_];
 }
 
