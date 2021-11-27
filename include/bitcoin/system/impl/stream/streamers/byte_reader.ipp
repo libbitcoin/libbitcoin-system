@@ -489,6 +489,10 @@ void byte_reader<IStream>::setter(size_t absolute) noexcept
     // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
     // seekg(n) is not necessarily equivalent to seekg(n, ios::beg).
     seeker(static_cast<typename IStream::pos_type>(absolute), IStream::beg);
+
+    // Empty stream reset to beginning creates an error state, so reset it.
+    if (!valid() && is_zero(absolute))
+        clear();
 }
 
 template <typename IStream>

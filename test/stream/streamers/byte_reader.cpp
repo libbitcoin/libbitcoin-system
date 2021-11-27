@@ -263,6 +263,20 @@ BOOST_AUTO_TEST_CASE(byte_reader__get_position__skip_to_end_set_to_middle__expec
     BOOST_REQUIRE(reader);
 }
 
+BOOST_AUTO_TEST_CASE(byte_reader__set_position__empty__valid)
+{
+    std::istringstream stream{};
+    read::bytes::istream reader(stream);
+    reader.set_position(0);
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+    reader.read_byte();
+    BOOST_REQUIRE(!reader);
+    reader.set_position(0);
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+}
+
 BOOST_AUTO_TEST_CASE(byte_reader__set_position__past_end__invalid)
 {
     const auto size = 42;
