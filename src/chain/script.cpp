@@ -50,14 +50,6 @@ namespace chain {
 
 using namespace bc::system::machine;
 
-hash_digest script::one_hash()
-{
-    static const auto hash = base16_hash(
-        "0000000000000000000000000000000000000000000000000000000000000001");
-
-    return hash;
-}
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
@@ -617,13 +609,16 @@ static bool is_index_overflow(const transaction& tx, uint32_t index,
 hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint8_t flags)
 {
+    static const auto one_hash = base16_hash(
+        "0000000000000000000000000000000000000000000000000000000000000001");
+
     const auto sighash = to_sighash_enum(flags);
 
     //*************************************************************************
     // CONSENSUS: wacky satoshi behavior (continuing with one).
     //*************************************************************************
     if (is_index_overflow(tx, index, sighash))
-        return script::one_hash();
+        return one_hash;
 
     // The sighash serializations are isolated for clarity and optimization.
     switch (sighash)

@@ -130,12 +130,6 @@ std::string test_name(const script_test& test)
     return out.str();
 }
 
-BOOST_AUTO_TEST_CASE(script__one__literal__expected)
-{
-    static const ec_secret big_endian_one{ { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
-    BOOST_REQUIRE_EQUAL(script::one_hash(), big_endian_one);
-}
-
 // Serialization tests.
 //------------------------------------------------------------------------------
 
