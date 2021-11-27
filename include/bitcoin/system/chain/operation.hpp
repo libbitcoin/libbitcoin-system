@@ -90,7 +90,7 @@ public:
 
     std::string to_string(uint32_t active_forks) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
     size_t serialized_size() const;
