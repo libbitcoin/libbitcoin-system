@@ -285,6 +285,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/compact.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
+    test/chain/operation.cpp \
     test/chain/output.cpp \
     test/chain/output_point.cpp \
     test/chain/payment_record.cpp \
@@ -334,7 +335,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/error/transaction_error_t.cpp \
     test/machine/number.cpp \
     test/machine/number.hpp \
-    test/machine/operation.cpp \
     test/math/addition.cpp \
     test/math/bits.cpp \
     test/math/division.cpp \

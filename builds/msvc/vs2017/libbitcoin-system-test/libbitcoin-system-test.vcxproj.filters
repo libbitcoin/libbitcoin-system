@@ -102,6 +102,9 @@
     <ClCompile Include="..\..\..\..\test\chain\input.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\operation.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\output.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -238,9 +241,6 @@
       <Filter>src\error</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
-      <Filter>src\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\machine\operation.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\main.cpp">

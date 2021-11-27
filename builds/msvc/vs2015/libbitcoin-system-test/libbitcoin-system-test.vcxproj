@@ -82,6 +82,7 @@
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
@@ -134,7 +135,6 @@
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
-    <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
