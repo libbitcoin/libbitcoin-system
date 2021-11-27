@@ -212,6 +212,12 @@ void byte_writer<OStream>::write_string(const std::string& value,
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
+size_t byte_writer<OStream>::get_position() noexcept
+{
+    return getter();
+}
+
+template <typename OStream>
 void byte_writer<OStream>::flush() noexcept
 {
     do_flush();
@@ -277,6 +283,30 @@ void byte_writer<OStream>::validate() noexcept
     // for validity could miss an error on intervening operations.
     if (!valid())
         invalid();
+}
+
+template <typename OStream>
+size_t byte_writer<OStream>::getter() noexcept
+{
+    static const auto failure = OStream::pos_type(-1);
+    OStream::pos_type offset;
+
+    // Force these to be consistent, and avoid propagating exceptions.
+    // Assuming behavior is consistent with seekg (as documented).
+    // Returns current position on success and pos_type(-1) on failure.
+    try
+    {
+        offset = stream_.tellp();
+        validate();
+    }
+    catch (const typename OStream::failure&)
+    {
+        offset = failure;
+        invalid();
+    }
+
+    // sizeof(std::ostream/ostringstream::pos_type) is 24 bytes.
+    return offset == failure ? zero : static_cast<size_t>(offset);
 }
 
 template <typename OStream>

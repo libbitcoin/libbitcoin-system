@@ -68,6 +68,9 @@ public:
     /// Write string to specified length, padded with nulls as required.
     virtual void write_string(const std::string& value) noexcept = 0;
 
+    /// Get the current absolute position (invalidates on failure).
+    virtual size_t get_position() noexcept = 0;
+
     /// Flush the buffer.
     virtual void flush() noexcept = 0;
 
