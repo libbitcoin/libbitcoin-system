@@ -1084,7 +1084,7 @@ operation::list script::to_pay_null_data_pattern(const data_slice& data)
     return operation::list
     {
         { opcode::op_return },
-        { to_chunk(data) }
+        { to_chunk(data), false }
     };
 }
 
@@ -1095,7 +1095,7 @@ operation::list script::to_pay_public_key_pattern(const data_slice& point)
 
     return operation::list
     {
-        { to_chunk(point) },
+        { to_chunk(point), false },
         { opcode::checksig }
     };
 }
@@ -1106,7 +1106,7 @@ operation::list script::to_pay_key_hash_pattern(const short_hash& hash)
     {
         { opcode::dup },
         { opcode::hash160 },
-        { to_chunk(hash) },
+        { to_chunk(hash), false },
         { opcode::equalverify },
         { opcode::checksig }
     };
@@ -1117,7 +1117,7 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
     return operation::list
     {
         { opcode::hash160 },
-        { to_chunk(hash) },
+        { to_chunk(hash), false },
         { opcode::equal }
     };
 }
@@ -1160,7 +1160,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
         if (!is_public_key(point))
             return {};
 
-        ops.emplace_back(point);
+        ops.emplace_back(point, false);
     }
 
     ops.emplace_back(op_n);
@@ -1173,7 +1173,7 @@ operation::list script::to_pay_witness_pattern(uint8_t version, const data_slice
     return
     {
         { operation::opcode_from_version(version) },
-        { to_chunk(data) },
+        { to_chunk(data), false },
     };
 }
 
@@ -1182,7 +1182,7 @@ operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
     return
     {
         { opcode::push_size_0 },
-        { to_chunk(hash) },
+        { to_chunk(hash), false },
     };
 }
 
@@ -1191,7 +1191,7 @@ operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& ha
     return
     {
         { opcode::push_size_0 },
-        { to_chunk(hash) }
+        { to_chunk(hash), false }
     };
 }
 
