@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -47,7 +47,7 @@ public:
     /// Construct with specified value.
     explicit number(int64_t value);
 
-    /// Replace the value derived from a byte vector with LSB first ordering.
+    /// Replace the value derived from a little-endian byte vector.
     bool set_data(const data_chunk& data, size_t max_size);
 
     // Properties

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,13 +20,9 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
-#include <sstream>
-#include <string>
-#include <boost/format.hpp>
+////#include <sstream>
+////#include <boost/format.hpp>
 #include "number.hpp"
-////#ifdef ENABLE_DATAGEN
-////#include "big_number.hpp"
-////#endif
 
 BOOST_AUTO_TEST_SUITE(number_tests)
 
@@ -170,11 +166,6 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
     BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > num2));
 }
 
-#ifndef ENABLE_DATAGEN
-
-// Test
-// ----------------------------------------------------------------------------
-
 static void RunOperators(const int64_t num1, int64_t num2, size_t value,
     size_t offset, size_t test)
 {
@@ -191,7 +182,12 @@ static void RunOperators(const int64_t num1, int64_t num2, size_t value,
     CheckCompare(num1, num2, value, offset, test);
 }
 
-BOOST_AUTO_TEST_CASE(check_operators)
+// Tests
+// ----------------------------------------------------------------------------
+
+// operators
+
+BOOST_AUTO_TEST_CASE(number__operators__data_driven__expected)
 {
     for (size_t i = 0; i < number_values_count; ++i)
     {
@@ -216,230 +212,154 @@ BOOST_AUTO_TEST_CASE(check_operators)
     }
 }
 
-#else
+// construct (data/int32/int64)
 
-// big_number value generators
-// ----------------------------------------------------------------------------
-
-static number_buffer MakeAdd(const int64_t num1, const int64_t num2)
+BOOST_AUTO_TEST_CASE(number__construct__default__zero)
 {
-    if (add_overflow64(num1, num2))
-        return number_buffer();
-
-    big_number bignum1;
-    bignum1.set_int64(num1);
-    big_number bignum2;
-    bignum2.set_int64(num2);
-
-    auto sum = bignum1 + bignum2;
-    const number_buffer add
-    {
-        sum.int32(),
-        sum.data()
-    };
-
-    return add;
+    number instance{};
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.int32(), 0);
+    BOOST_REQUIRE_EQUAL(instance.int64(), 0);
 }
 
-static number_buffer MakeNegate(const int64_t num)
+BOOST_AUTO_TEST_CASE(number__construct__zero__zero)
 {
-    if (negate_overflow64(num))
-        return number_buffer();
-
-    big_number bignum;
-    bignum.set_int64(num);
-
-    auto negative = -bignum;
-    const number_buffer negated
-    {
-        negative.int32(),
-        negative.data()
-    };
-
-    return negated;
+    number instance{ 0 };
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.int32(), 0);
+    BOOST_REQUIRE_EQUAL(instance.int64(), 0);
 }
 
-static number_subtract MakeSubtract(const int64_t num1, const int64_t num2)
+constexpr auto min64 = std::numeric_limits<int64_t>::min();
+constexpr auto max64 = std::numeric_limits<int64_t>::max();
+constexpr auto min32 = std::numeric_limits<int32_t>::min();
+constexpr auto max32 = std::numeric_limits<int32_t>::max();
+
+// little-endian (with 0x80 negative sentinel)
+static const data_chunk min64_data{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80 };
+static const data_chunk max64_data{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f };
+
+BOOST_AUTO_TEST_CASE(number__construct__minimum__minimums)
 {
-    big_number bignum1;
-    bignum1.set_int64(num1);
-    big_number bignum2;
-    bignum2.set_int64(num2);
-
-    big_number forward;
-    if (!subtract_overflow64(num1, num2))
-        forward = bignum1 - bignum2;
-
-    big_number reverse;
-    if (!subtract_overflow64(num2, num1))
-        reverse = bignum2 - bignum1;
-
-    const number_subtract subtract
-    {
-        { forward.int32(), forward.data() },
-        { reverse.int32(), reverse.data() }
-    };
-
-    return subtract;
+    number instance{ min64 };
+    BOOST_REQUIRE_EQUAL(instance.data(), min64_data );
+    BOOST_REQUIRE_EQUAL(instance.int32(), min32);
+    BOOST_REQUIRE_EQUAL(instance.int64(), min64);
 }
 
-static number_compare MakeCompare(const int64_t num1, const int64_t num2)
+BOOST_AUTO_TEST_CASE(number__construct__maximum__maximums)
 {
-    big_number bignum1;
-    bignum1.set_int64(num1);
-    big_number bignum2;
-    bignum2.set_int64(num2);
-
-    number_compare compare
-    {
-        bignum1 == bignum2,
-        bignum1 != bignum2,
-        bignum1 < bignum2,
-        bignum1 > bignum2,
-        bignum1 <= bignum2,
-        bignum1 >= bignum2
-    };
-
-    return compare;
+    number instance{ max64 };
+    BOOST_REQUIRE_EQUAL(instance.data(), max64_data);
+    BOOST_REQUIRE_EQUAL(instance.int32(), max32);
+    BOOST_REQUIRE_EQUAL(instance.int64(), max64);
 }
 
-// Formatter Helpers
-// ----------------------------------------------------------------------------
+// set_data (data/int32/int64)
 
-static void write_bytes(data_chunk chunk, std::ostream& out)
+BOOST_AUTO_TEST_CASE(number__set_data__empty_four__zero)
 {
-    for (const auto& byte : chunk)
-        out << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));
+    number instance{};
+    BOOST_REQUIRE(instance.set_data({}, 4));
+    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.int32(), 0);
+    BOOST_REQUIRE_EQUAL(instance.int64(), 0);
 }
 
-static void write_buffer(number_buffer buffer, std::ostream& out)
+BOOST_AUTO_TEST_CASE(number__set_data__one_four__expected)
 {
-    out << boost::format("{ %1%, {") % buffer.number;
-    write_bytes(buffer.bytes, out);
-    out << "} }, ";
+    constexpr uint8_t value = 0x42;
+    const data_chunk data{ value };
+    number instance{};
+    BOOST_REQUIRE(instance.set_data(data, 4));
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+    BOOST_REQUIRE_EQUAL(instance.int32(), value);
+    BOOST_REQUIRE_EQUAL(instance.int64(), value);
 }
 
-static void write_compare(number_compare compare, std::ostream& out)
+BOOST_AUTO_TEST_CASE(number__set_data__one_five__expected)
 {
-    out << boost::format("{ %1%, %2%, %3%, %4%, %5%, %6% }, ") % compare.eq %
-        compare.ne % compare.lt % compare.gt % compare.le % compare.ge;
+    constexpr uint8_t value = 0x42;
+    const data_chunk data{ value };
+    number instance{};
+    BOOST_REQUIRE(instance.set_data(data, 5));
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+    BOOST_REQUIRE_EQUAL(instance.int32(), value);
+    BOOST_REQUIRE_EQUAL(instance.int64(), value);
 }
 
-static void write_subtract(number_subtract subtract, std::ostream& out)
+BOOST_AUTO_TEST_CASE(number__set_data__four_four__expected)
 {
-    out << "{ ";
-    write_buffer(subtract.forward, out);
-    write_buffer(subtract.reverse, out);
-    out << "}, ";
+    const data_chunk data{ 0x42, 0x43, 0x44, 0x45 };
+    number instance{};
+    BOOST_REQUIRE(instance.set_data(data, 4));
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+    BOOST_REQUIRE_EQUAL(instance.int32(), from_little_endian<int32_t>(data));
+    BOOST_REQUIRE_EQUAL(instance.int64(), from_little_endian<int64_t>(data));
 }
 
-static void write_names(const std::string& name, size_t count,
-    std::ostream& out)
+BOOST_AUTO_TEST_CASE(number__set_data__five_five__expected)
 {
-    out << boost::format("const %1%[%2%][%3%][%4%]=\n{\n") % name %
-        number_values_count % number_offsets_count % count;
+    const data_chunk data{ 0x42, 0x43, 0x44, 0x45, 0x46 };
+    number instance{};
+    BOOST_REQUIRE(instance.set_data(data, 5));
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+
+    // int32 applies limit, not truncation.
+    BOOST_REQUIRE_EQUAL(instance.int32(), max32);
+    BOOST_REQUIRE_EQUAL(instance.int64(), from_little_endian<int64_t>(data));
 }
 
-static void write(const std::string& text, std::ostream& add_out,
-    std::ostream& neg_out, std::ostream& sub_out, std::ostream& cmp_out)
+BOOST_AUTO_TEST_CASE(number__set_data__five_four__expected)
 {
-    add_out << text;
-    neg_out << text;
-    sub_out << text;
-    cmp_out << text;
+    const data_chunk data{ 0x42, 0x43, 0x44, 0x45, 0x46 };
+    number instance{};
+    BOOST_REQUIRE(!instance.set_data(data, 4));
 }
 
-static void replace(std::string& buffer, const std::string& find,
-    const std::string& replacement)
+BOOST_AUTO_TEST_CASE(number__set_data__six_five__expected)
 {
-    size_t pos = 0;
-    while ((pos = buffer.find(find, pos)) != std::string::npos)
-    {
-        buffer.replace(pos, find.length(), replacement);
-        pos += replacement.length();
-    }
+    const data_chunk data{ 0x42, 0x43, 0x44, 0x45, 0x46, 0x47 };
+    number instance{};
+    BOOST_REQUIRE(!instance.set_data(data, 5));
 }
 
-// Maker
-// ----------------------------------------------------------------------------
+// booleans
 
-static void MakeOperators(const int64_t num1, const int64_t num2,
-    std::ostream& add_out, std::ostream& neg_out, std::ostream& sub_out,
-    std::ostream& cmp_out)
+BOOST_AUTO_TEST_CASE(number__is_true__one__true)
 {
-    write("\n              ", add_out, neg_out, sub_out, cmp_out);
-
-    auto add = MakeAdd(num1, num2);
-    CheckAdd(num1, num2, add);
-    write_buffer(add, add_out);
-
-    auto negate = MakeNegate(num1);
-    CheckNegate(num1, negate);
-    write_buffer(negate, neg_out);
-
-    auto subtract = MakeSubtract(num1, num2);
-    CheckSubtract(num1, num2, subtract);
-    write_subtract(subtract, sub_out);
-
-    auto compare = MakeCompare(num1, num2);
-    CheckCompare(num1, num2, compare);
-    write_compare(compare, cmp_out);
+    number instance{ 1 };
+    BOOST_REQUIRE(instance.is_true());
 }
 
-BOOST_AUTO_TEST_CASE(make_operator_expectations)
+BOOST_AUTO_TEST_CASE(number__is_true__zero__false)
 {
-    std::stringstream add_out;
-    std::stringstream neg_out;
-    std::stringstream sub_out;
-    std::stringstream cmp_out;
-
-    write_names("number_buffer number_adds", 12, add_out);
-    write_names("number_buffer number_negates", 12, neg_out);
-    write_names("number_subtract number_subtracts", 12, sub_out);
-    write_names("number_compare number_compares", 12, cmp_out);
-
-    for (size_t i = 0; i < number_values_count; ++i)
-    {
-        write("    {\n", add_out, neg_out, sub_out, cmp_out);
-
-        for (size_t j = 0; j < number_offsets_count; ++j)
-        {
-            write("        {", add_out, neg_out, sub_out, cmp_out);
-
-            auto a = number_values[i];
-            auto b = number_offsets[j];
-
-            MakeOperators(a, +a, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a, -a, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a, +b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a, -b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a + b, +b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a + b, -b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a - b, +b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a - b, -b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a + b, +a + b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a + b, +a - b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a - b, +a + b, add_out, neg_out, sub_out, cmp_out);
-            MakeOperators(a - b, +a - b, add_out, neg_out, sub_out, cmp_out);
-
-            write("\n        },\n", add_out, neg_out, sub_out, cmp_out);
-        }
-
-        write("    },\n", add_out, neg_out, sub_out, cmp_out);
-    }
-
-    write("};\n\n", add_out, neg_out, sub_out, cmp_out);
-
-    std::stringstream dump;
-    dump << add_out.str();
-    dump << neg_out.str();
-    dump << sub_out.str();
-    dump << cmp_out.str();
-
-    auto source = dump.str();
-    replace(source, "-2147483648", "(-2147483647 - 1)");
-    replace(source, "-9223372036854775808", "(-9223372036854775807 - 1)");
+    number instance{ 0 };
+    BOOST_REQUIRE(!instance.is_true());
 }
-#endif
+
+BOOST_AUTO_TEST_CASE(number__is_false__one__false)
+{
+    number instance{ 1 };
+    BOOST_REQUIRE(!instance.is_false());
+}
+
+BOOST_AUTO_TEST_CASE(number__is_false__zero__true)
+{
+    number instance{ 0 };
+    BOOST_REQUIRE(instance.is_false());
+}
+
+BOOST_AUTO_TEST_CASE(number__is_negative__negative__true)
+{
+    number instance{ -1 };
+    BOOST_REQUIRE(instance.is_negative());
+}
+
+BOOST_AUTO_TEST_CASE(number__is_negative__positive__false)
+{
+    number instance{ 1 };
+    BOOST_REQUIRE(!instance.is_negative());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

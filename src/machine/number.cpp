@@ -73,7 +73,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
     return true;
 }
 
-// The result is little-endian.
+// The result is little-endian, with negative sign bit.
 data_chunk number::data() const
 {
     if (is_zero(value_))
