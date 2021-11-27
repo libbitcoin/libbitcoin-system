@@ -97,6 +97,294 @@ operation::operation(opcode code, const data_chunk& data, bool valid)
 {
 }
 
+// Deserialization.
+//-----------------------------------------------------------------------------
+
+// static
+operation operation::factory(const data_chunk& encoded)
+{
+    operation instance;
+    instance.from_data(encoded);
+    return instance;
+}
+
+// static
+operation operation::factory(std::istream& stream)
+{
+    operation instance;
+    instance.from_data(stream);
+    return instance;
+}
+
+// static
+operation operation::factory(reader& source)
+{
+    operation instance;
+    instance.from_data(source);
+    return instance;
+}
+
+bool operation::from_data(const data_chunk& encoded)
+{
+    stream::in::copy istream(encoded);
+    return from_data(istream);
+}
+
+bool operation::from_data(std::istream& stream)
+{
+    read::bytes::istream source(stream);
+    return from_data(source);
+}
+
+bool operation::from_data(reader& source)
+{
+    underflow_ = false;
+    code_ = static_cast<opcode>(source.read_byte());
+
+    // TODO: an buffer read here is not the same as constructing from data,
+    // TODO: as there is no presumed opcode for a push, just the data.
+    const auto size = read_data_size(code_, source);
+
+    // The max_script_size and max_push_data_size constants limit evaluation,
+    // but not all scripts evaluate, so use max_block_size to guard memory 
+    // allocation here. Interesting question before max_block_size soft fork.
+    if (size > max_block_size)
+        source.invalidate();
+    else
+        data_ = source.read_bytes(size);
+
+    if (!source)
+        reset();
+
+    return source;
+}
+
+// protected
+void operation::reset()
+{
+    code_ = any_invalid;
+    data_.clear();
+    underflow_ = false;
+}
+
+// Serialization.
+//-----------------------------------------------------------------------------
+
+data_chunk operation::to_data() const
+{
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size());
+    stream::out::copy ostream(data);
+    to_data(ostream);
+    return data;
+}
+
+void operation::to_data(std::ostream& stream) const
+{
+    write::bytes::ostream out(stream);
+    to_data(out);
+}
+
+void operation::to_data(writer& sink) const
+{
+    // Underflow is op-undersized data, it is held and serialized alone.
+    // An underflow could only be a final token in a script deserialization.
+    if (is_underflow())
+    {
+        sink.write_bytes(data_);
+        return;
+    }
+
+    const auto size = data_.size();
+
+    sink.write_byte(static_cast<uint8_t>(code_));
+
+    switch (code_)
+    {
+        case opcode::push_one_size:
+            sink.write_byte(static_cast<uint8_t>(size));
+            break;
+        case opcode::push_two_size:
+            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
+            break;
+        case opcode::push_four_size:
+            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
+            break;
+        default:
+            break;
+    }
+
+    sink.write_bytes(data_);
+}
+
+// From String.
+//-----------------------------------------------------------------------------
+
+inline bool is_push_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '[' && token.back() == ']';
+}
+
+inline bool is_text_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
+}
+
+inline bool is_underflow_token(const std::string& token)
+{
+    return token.size() > 1 && token.front() == '<' && token.back() == '>';
+}
+
+inline std::string remove_token_delimiters(const std::string& token)
+{
+    BITCOIN_ASSERT(token.size() > 1);
+    return std::string(std::next(token.begin()), std::prev(token.end()));
+}
+
+inline string_list split_push_token(const std::string& token)
+{
+    return split(remove_token_delimiters(token), ".", false, false);
+}
+
+static bool opcode_from_data_prefix(opcode& out_code,
+    const std::string& prefix, const data_chunk& data)
+{
+    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto size = data.size();
+    out_code = operation::opcode_from_size(size);
+
+    if (prefix == "0")
+    {
+        return size <= op_75;
+    }
+    else if (prefix == "1")
+    {
+        out_code = opcode::push_one_size;
+        return size <= max_uint8;
+    }
+    else if (prefix == "2")
+    {
+        out_code = opcode::push_two_size;
+        return size <= max_uint16;
+    }
+    else if (prefix == "4")
+    {
+        out_code = opcode::push_four_size;
+        return size <= max_uint32;
+    }
+
+    return false;
+}
+
+static bool data_from_decimal(data_chunk& out_data,
+    const std::string& token)
+{
+    // Deserialization to a number can convert random text to zero.
+    if (!is_ascii_numeric(token))
+        return false;
+
+    int64_t value;
+    if (!deserialize(value, token))
+        return false;
+
+    out_data = machine::number(value).data();
+    return true;
+}
+
+// The removal of spaces in v3 data is a compatibility break with our v2.
+bool operation::from_string(const std::string& mnemonic)
+{
+    reset();
+    auto valid = false;
+
+    if (is_push_token(mnemonic))
+    {
+        // Data encoding uses single token with one or two parts.
+        const auto parts = split_push_token(mnemonic);
+
+        if (parts.size() == 1)
+        {
+            // Extract operation using nominal data size encoding.
+            if ((valid = decode_base16(data_, parts.front())))
+                code_ = nominal_opcode_from_data(data_);
+        }
+        else if (parts.size() == 2)
+        {
+            // Extract operation using minimal data size encoding.
+            valid = decode_base16(data_, parts[1]) &&
+                opcode_from_data_prefix(code_, parts[0], data_);
+        }
+    }
+    else if (is_text_token(mnemonic))
+    {
+        // Extract operation using nominal data size encoding.
+        data_ = to_chunk(remove_token_delimiters(mnemonic));
+        code_ = nominal_opcode_from_data(data_);
+        valid = true;
+    }
+    else if (is_underflow_token(mnemonic))
+    {
+        // code_ is ignored for underflow_ ops.
+        data_ = to_chunk(remove_token_delimiters(mnemonic));
+        code_ = any_invalid;
+        underflow_ = true;
+        valid = true;
+    }
+    else if (opcode_from_mnemonic(code_, mnemonic))
+    {
+        // Any push code may have empty data, so this is presumed here.
+        // No data is obtained here from a push opcode (use push/text tokens).
+        valid = true;
+    }
+    else if (data_from_decimal(data_, mnemonic))
+    {
+        // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
+        code_ = nominal_opcode_from_data(data_);
+        valid = true;
+    }
+
+    if (!valid)
+        reset();
+
+    return valid;
+}
+
+// To String.
+//-----------------------------------------------------------------------------
+
+static std::string opcode_to_prefix(opcode code, const data_chunk& data)
+{
+    // If opcode is minimal for a size-based encoding, do not set a prefix.
+    if (code == operation::opcode_from_size(data.size()))
+        return "";
+
+    switch (code)
+    {
+        case opcode::push_one_size:
+            return "1.";
+        case opcode::push_two_size:
+            return "2.";
+        case opcode::push_four_size:
+            return "4.";
+        default:
+            return "0.";
+    }
+}
+
+// The removal of spaces in v3 data is a compatibility break with our v2.
+std::string operation::to_string(uint32_t active_forks) const
+{
+    if (underflow_)
+        return "<" + encode_base16(data_) + ">";
+
+    if (data_.empty())
+        return opcode_to_mnemonic(code_, active_forks);
+
+    // Data encoding uses single token with explicit size prefix as required.
+    return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
+}
+
+
 // Operators.
 //-----------------------------------------------------------------------------
 
@@ -514,287 +802,6 @@ bool operation::is_nominal_push() const
 bool operation::is_underflow() const
 {
     return underflow_;
-}
-
-// Deserialization.
-//-----------------------------------------------------------------------------
-
-// static
-operation operation::factory(const data_chunk& encoded)
-{
-    operation instance;
-    instance.from_data(encoded);
-    return instance;
-}
-
-// static
-operation operation::factory(std::istream& stream)
-{
-    operation instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-// static
-operation operation::factory(reader& source)
-{
-    operation instance;
-    instance.from_data(source);
-    return instance;
-}
-
-bool operation::from_data(const data_chunk& encoded)
-{
-    stream::in::copy istream(encoded);
-    return from_data(istream);
-}
-
-bool operation::from_data(std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(source);
-}
-
-bool operation::from_data(reader& source)
-{
-    underflow_ = false;
-    code_ = static_cast<opcode>(source.read_byte());
-
-    // TODO: an buffer read here is not the same as constructing from data,
-    // TODO: as there is no presumed opcode for a push, just the data.
-    const auto size = read_data_size(code_, source);
-
-    // The max_script_size and max_push_data_size constants limit evaluation,
-    // but not all scripts evaluate, so use max_block_size to guard memory 
-    // allocation here. Interesting question before max_block_size soft fork.
-    if (size > max_block_size)
-        source.invalidate();
-    else
-        data_ = source.read_bytes(size);
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-inline bool is_push_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '[' && token.back() == ']';
-}
-
-inline bool is_text_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
-}
-
-inline bool is_underflow_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '<' && token.back() == '>';
-}
-
-inline std::string remove_token_delimiters(const std::string& token)
-{
-    BITCOIN_ASSERT(token.size() > 1);
-    return std::string(std::next(token.begin()), std::prev(token.end()));
-}
-
-inline string_list split_push_token(const std::string& token)
-{
-    return split(remove_token_delimiters(token), ".", false, false);
-}
-
-static bool opcode_from_data_prefix(opcode& out_code,
-    const std::string& prefix, const data_chunk& data)
-{
-    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-    const auto size = data.size();
-    out_code = operation::opcode_from_size(size);
-
-    if (prefix == "0")
-    {
-        return size <= op_75;
-    }
-    else if (prefix == "1")
-    {
-        out_code = opcode::push_one_size;
-        return size <= max_uint8;
-    }
-    else if (prefix == "2")
-    {
-        out_code = opcode::push_two_size;
-        return size <= max_uint16;
-    }
-    else if (prefix == "4")
-    {
-        out_code = opcode::push_four_size;
-        return size <= max_uint32;
-    }
-
-    return false;
-}
-
-static bool data_from_decimal(data_chunk& out_data,
-    const std::string& token)
-{
-    // Deserialization to a number can convert random text to zero.
-    if (!is_ascii_numeric(token))
-        return false;
-
-    int64_t value;
-    if (!deserialize(value, token))
-        return false;
-
-    out_data = machine::number(value).data();
-    return true;
-}
-
-// The removal of spaces in v3 data is a compatibility break with our v2.
-bool operation::from_string(const std::string& mnemonic)
-{
-    reset();
-    auto valid = false;
-
-    if (is_push_token(mnemonic))
-    {
-        // Data encoding uses single token with one or two parts.
-        const auto parts = split_push_token(mnemonic);
-
-        if (parts.size() == 1)
-        {
-            // Extract operation using nominal data size encoding.
-            if ((valid = decode_base16(data_, parts.front())))
-                code_ = nominal_opcode_from_data(data_);
-        }
-        else if (parts.size() == 2)
-        {
-            // Extract operation using minimal data size encoding.
-            valid = decode_base16(data_, parts[1]) &&
-                opcode_from_data_prefix(code_, parts[0], data_);
-        }
-    }
-    else if (is_text_token(mnemonic))
-    {
-        // Extract operation using nominal data size encoding.
-        data_ = to_chunk(remove_token_delimiters(mnemonic));
-        code_ = nominal_opcode_from_data(data_);
-        valid = true;
-    }
-    else if (is_underflow_token(mnemonic))
-    {
-        // code_ is ignored for underflow_ ops.
-        data_ = to_chunk(remove_token_delimiters(mnemonic));
-        code_ = any_invalid;
-        underflow_ = true;
-        valid = true;
-    }
-    else if (opcode_from_mnemonic(code_, mnemonic))
-    {
-        // Any push code may have empty data, so this is presumed here.
-        // No data is obtained here from a push opcode (use push/text tokens).
-        valid = true;
-    }
-    else if (data_from_decimal(data_, mnemonic))
-    {
-        // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
-        code_ = nominal_opcode_from_data(data_);
-        valid = true;
-    }
-
-    if (!valid)
-        reset();
-
-    return valid;
-}
-
-// protected
-void operation::reset()
-{
-    code_ = any_invalid;
-    data_.clear();
-    underflow_ = false;
-}
-
-// Serialization.
-//-----------------------------------------------------------------------------
-
-data_chunk operation::to_data() const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size());
-    stream::out::copy ostream(data);
-    to_data(ostream);
-    return data;
-}
-
-void operation::to_data(std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(out);
-}
-
-void operation::to_data(writer& sink) const
-{
-    // Underflow is op-undersized data, it is held and serialized alone.
-    // An underflow could only be a final token in a script deserialization.
-    if (is_underflow())
-    {
-        sink.write_bytes(data_);
-        return;
-    }
-
-    const auto size = data_.size();
-
-    sink.write_byte(static_cast<uint8_t>(code_));
-
-    switch (code_)
-    {
-        case opcode::push_one_size:
-            sink.write_byte(static_cast<uint8_t>(size));
-            break;
-        case opcode::push_two_size:
-            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
-            break;
-        case opcode::push_four_size:
-            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
-            break;
-        default:
-            break;
-    }
-
-    sink.write_bytes(data_);
-}
-
-static std::string opcode_to_prefix(opcode code, const data_chunk& data)
-{
-    // If opcode is minimal for a size-based encoding, do not set a prefix.
-    if (code == operation::opcode_from_size(data.size()))
-        return "";
-
-    switch (code)
-    {
-        case opcode::push_one_size:
-            return "1.";
-        case opcode::push_two_size:
-            return "2.";
-        case opcode::push_four_size:
-            return "4.";
-        default:
-            return "0.";
-    }
-}
-
-// The removal of spaces in v3 data is a compatibility break with our v2.
-std::string operation::to_string(uint32_t active_forks) const
-{
-    if (underflow_)
-        return "<" + encode_base16(data_) + ">";
-
-    if (data_.empty())
-        return opcode_to_mnemonic(code_, active_forks);
-
-    // Data encoding uses single token with explicit size prefix as required.
-    return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
 }
 
 } // namespace chain
