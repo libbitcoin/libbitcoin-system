@@ -171,12 +171,15 @@ bool read(Source& source, std::vector<Put>& puts)
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
+    {
         source.invalidate();
+    }
     else
-        puts.resize(count);
-
-    for (auto& put: puts)
-        put.from_data(source);
+    {
+        puts.reserve(count);
+        for (size_t put = 0; put < count; ++put)
+            puts.emplace_back(source);
+    }
 
     return source;
 }

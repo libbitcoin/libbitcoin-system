@@ -127,6 +127,23 @@ bool witness::operator!=(const witness& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
+static data_chunk read_element(reader& source)
+{
+    // Each witness encoded as variable integer prefixed byte array (bip144).
+    const auto size = source.read_size();
+
+    // The max_script_size and max_push_data_size constants limit evaluation,
+    // but not all stacks evaluate, so use max_block_weight to guard memory
+    // allocation here.
+    if (size > max_block_weight)
+    {
+        source.invalidate();
+        return {};
+    }
+
+    return source.read_bytes(size);
+};
+
 bool witness::from_data(const data_chunk& encoded, bool prefix)
 {
     stream::in::copy istream(encoded);
@@ -144,30 +161,22 @@ bool witness::from_data(reader& source, bool prefix)
 {
     reset();
 
-    const auto read_element = [](reader& source)
-    {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = source.read_size();
-
-        // The max_script_size and max_push_data_size constants limit
-        // evaluation, but not all stacks evaluate, so use max_block_weight
-        // to guard memory allocation here.
-        if (size > max_block_weight)
-        {
-            source.invalidate();
-            return data_chunk{};
-        }
-
-        return source.read_bytes(size);
-    };
-
     if (prefix)
     {
-        // Witness prefix is an element count, not byte length (unlike script).
-        // On wire each witness is prefixed with number of elements (bip144).
-        // And each witness is also prefixed with its byte length.
-        for (auto count = source.read_size(); count > 0; --count)
-             stack_.push_back(read_element(source));
+        // Each witness is prefixed with number of elements (bip144).
+        // Witness prefix is an element count, not byte length.
+        auto count = source.read_size();
+
+        if (count > max_block_weight)
+        {
+            source.invalidate();
+        }
+        else
+        {
+            stack_.reserve(count);
+            for (size_t element = 0; element < count; ++element)
+                stack_.push_back(read_element(source));
+        }
     }
     else
     {

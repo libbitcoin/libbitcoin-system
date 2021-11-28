@@ -165,17 +165,19 @@ bool block::from_data(reader& source, bool witness)
     reset();
 
     header_.from_data(source);
-
     const auto count = source.read_size();
 
     // Guard against potential for arbitrary memory allocation.
     if (count > max_block_size)
+    {
         source.invalidate();
+    }
     else
-        transactions_.resize(count);
-
-    for (auto& tx: transactions_)
-        tx.from_data(source, witness);
+    {
+        transactions_.reserve(count);
+        for (size_t tx = 0; tx < count; ++tx)
+            transactions_.emplace_back(source, witness);
+    }
 
     if (!witness)
         strip_witness();

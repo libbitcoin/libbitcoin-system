@@ -168,12 +168,8 @@ bool script::from_data(reader& source, bool prefix)
         source.set_limit(size);
     }
 
-    operation op;
     while (!source.is_exhausted())
-    {
-        op.from_data(source);
-        ops_.push_back(op);
-    }
+        ops_.emplace_back(source);
 
     if (prefix)
     {
@@ -1148,7 +1144,7 @@ bool script::is_oversized() const
 
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
-// The criteria below are not be comprehensive but are fast to evaluate.
+// The criteria below are not comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
     if (ops_.empty())
