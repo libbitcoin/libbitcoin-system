@@ -56,31 +56,46 @@ static default_allocator<hash_digest> no_fill_hash_allocator{};
 //-----------------------------------------------------------------------------
 
 block::block()
+  : block({}, {}, false)
 {
 }
 
 block::block(const block& other)
-  : header_(other.header_),
-    transactions_(other.transactions_)
+  : block(other.header_, other.transactions_, other.valid_)
 {
 }
 
 block::block(block&& other)
-  : header_(std::move(other.header_)),
-    transactions_(std::move(other.transactions_))
+  : block(std::move(other.header_), std::move(other.transactions_),
+      other.valid_)
 {
 }
 
-block::block(const chain::header& header,
-    const transaction::list& transactions)
-  : header_(header),
-    transactions_(transactions)
+block::block(const chain::header& header, const transaction::list& transactions)
+  : block(header, transactions, true)
 {
 }
 
 block::block(chain::header&& header, transaction::list&& transactions)
+  : block(std::move(header), std::move(transactions), true)
+{
+}
+
+// protected
+block::block(const chain::header& header, const transaction::list& transactions,
+    bool valid)
+  : header_(header),
+    transactions_(transactions),
+    valid_(valid)
+{
+}
+
+// protected
+block::block(chain::header&& header, transaction::list&& transactions,
+    bool valid)
   : header_(std::move(header)),
-    transactions_(std::move(transactions))
+    transactions_(std::move(transactions)),
+    valid_(valid)
 {
 }
 
@@ -91,12 +106,14 @@ block& block::operator=(block&& other)
 {
     header_ = std::move(other.header_);
     transactions_ = std::move(other.transactions_);
+    valid_ = other.valid_;
     return *this;
 }
 
 bool block::operator==(const block& other) const
 {
-    return (header_ == other.header_) && (transactions_ == other.transactions_);
+    return (header_ == other.header_)
+        && (transactions_ == other.transactions_);
 }
 
 bool block::operator!=(const block& other) const
@@ -148,8 +165,7 @@ bool block::from_data(reader& source, bool witness)
 {
     reset();
 
-    if (!header_.from_data(source))
-        return false;
+    header_.from_data(source);
 
     const auto count = source.read_size();
 
@@ -160,8 +176,7 @@ bool block::from_data(reader& source, bool witness)
         transactions_.resize(count);
 
     for (auto& tx: transactions_)
-        if (!tx.from_data(source, witness))
-            break;
+        tx.from_data(source, witness);
 
     if (!witness)
         strip_witness();
@@ -169,7 +184,8 @@ bool block::from_data(reader& source, bool witness)
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // private
@@ -178,11 +194,12 @@ void block::reset()
     header_.reset();
     transactions_.clear();
     transactions_.shrink_to_fit();
+    valid_ = false;
 }
 
 bool block::is_valid() const
 {
-    return !transactions_.empty() || header_.is_valid();
+    return valid_;
 }
 
 // Serialization.
@@ -199,7 +216,6 @@ data_chunk block::to_data(bool witness) const
 
 void block::to_data(std::ostream& stream, bool witness) const
 {
-
     write::bytes::ostream out(stream);
     to_data(out, witness);
 }
@@ -233,7 +249,7 @@ hash_list block::to_hashes(bool witness) const
     return out;
 }
 
-// Properties (size, accessors, cache).
+// Properties.
 //-----------------------------------------------------------------------------
 
 // Full block serialization is always canonical encoding.
@@ -261,13 +277,11 @@ const transaction::list& block::transactions() const
     return transactions_;
 }
 
-// Convenience property.
 hash_digest block::hash() const
 {
     return header_.hash();
 }
 
-// Clear witness from all inputs (does not change default transaction hash).
 void block::strip_witness()
 {
     const auto strip = [](transaction& transaction)
@@ -457,7 +471,6 @@ bool block::is_forward_reference() const
     return false;
 }
 
-// This is an early check that is redundant with block pool accept checks.
 bool block::is_internal_double_spend() const
 {
     if (transactions_.empty())

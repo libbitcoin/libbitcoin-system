@@ -73,7 +73,7 @@ public:
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
-    bool from_data(reader& source, bool unused=false);
+    bool from_data(reader& source);
 
     bool is_valid() const;
 
@@ -82,7 +82,7 @@ public:
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
-    void to_data(writer& sink, bool unused=false) const;
+    void to_data(writer& sink) const;
 
     // Properties.
     //-------------------------------------------------------------------------
@@ -100,11 +100,15 @@ public:
     bool extract_committed_hash(hash_digest& out) const;
 
 protected:
+    output(uint64_t value, chain::script&& script, bool valid);
+    output(uint64_t value, const chain::script& script, bool valid);
+
     void reset();
 
 private:
     uint64_t value_;
     chain::script script_;
+    bool valid_;
 };
 
 } // namespace chain

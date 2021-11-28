@@ -59,33 +59,45 @@ bool script::is_enabled(uint32_t active_forks, rule_fork fork)
 //-----------------------------------------------------------------------------
 
 script::script()
-  : ops_{}, valid_(true)
+  : script(operation::list{}, true)
 {
 }
 
 script::script(script&& other)
-  : ops_(std::move(other.ops_)), valid_(other.valid_)
+  : script(std::move(other.ops_), other.valid_)
 {
 }
 
 script::script(const script& other)
-  : ops_(other.ops_), valid_(other.valid_)
-{
-}
-
-script::script(const operation::list& ops)
-  : ops_(ops), valid_(true)
+  : script(other.ops_, other.valid_)
 {
 }
 
 script::script(operation::list&& ops)
-  : ops_(std::move(ops)), valid_(true)
+  : script(std::move(ops), true)
+{
+}
+
+script::script(const operation::list& ops)
+  : script(ops, true)
 {
 }
 
 script::script(const data_chunk& encoded, bool prefix)
 {
-    valid_ = from_data(encoded, prefix);
+    from_data(encoded, prefix);
+}
+
+// protected
+script::script(operation::list&& ops, bool valid)
+  : ops_(std::move(ops)), valid_(true)
+{
+}
+
+// protected
+script::script(const operation::list& ops, bool valid)
+  : ops_(ops), valid_(valid)
+{
 }
 
 // Operators.
@@ -107,7 +119,7 @@ script& script::operator=(const script& other)
 
 bool script::operator==(const script& other) const
 {
-    return ops_ == other.ops_ && valid_ == other.valid_;
+    return ops_ == other.ops_;
 }
 
 bool script::operator!=(const script& other) const
@@ -156,8 +168,8 @@ bool script::from_data(std::istream& stream, bool prefix)
 
 bool script::from_data(reader& source, bool prefix)
 {
-    ////reset();
-    valid_ = true;
+    reset();
+
     auto size = zero;
     auto start = zero;
 
@@ -190,7 +202,8 @@ bool script::from_data(reader& source, bool prefix)
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 bool script::from_string(const std::string& mnemonic)
@@ -222,9 +235,9 @@ bool script::from_string(const std::string& mnemonic)
 // protected
 void script::reset()
 {
-    valid_ = false;
     ops_.clear();
     ops_.shrink_to_fit();
+    valid_ = false;
 }
 
 bool script::is_valid() const

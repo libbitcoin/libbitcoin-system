@@ -33,8 +33,11 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Constructors.
+//-----------------------------------------------------------------------------
+
 check_point::check_point() noexcept
-  : check_point(null_hash, zero, false)
+  : check_point({}, zero, false)
 {
 }
 
@@ -63,19 +66,22 @@ check_point::check_point(const std::string& hash, size_t height) noexcept
 {
 }
 
-// private
+// protected
 check_point::check_point(hash_digest&& hash, size_t height,
     bool valid) noexcept
-  : valid_(valid), hash_(std::move(hash)), height_(height)
+  : hash_(std::move(hash)), height_(height), valid_(valid)
 {
 }
 
-// private
+// protected
 check_point::check_point(const hash_digest& hash, size_t height,
     bool valid) noexcept
-  : valid_(valid), hash_(hash), height_(height)
+  : hash_(hash), height_(height), valid_(valid)
 {
 }
+
+// Methods.
+//-----------------------------------------------------------------------------
 
 // private
 check_point check_point::from_string(const std::string& hash,
@@ -88,6 +94,11 @@ check_point check_point::from_string(const std::string& hash,
     return { std::move(digest), height, true };
 }
 
+bool check_point::is_valid() const noexcept
+{
+    return valid_;
+}
+
 size_t check_point::height() const noexcept
 {
     return height_;
@@ -98,20 +109,19 @@ const hash_digest& check_point::hash() const noexcept
     return hash_;
 }
 
-bool check_point::is_valid() const noexcept
-{
-    return valid_;
-}
-
 std::string check_point::to_string() const noexcept
 {
     return encode_hash(hash_) + ":" + serialize(height_);
 }
 
+// Operators.
+//-----------------------------------------------------------------------------
+
 check_point& check_point::operator=(check_point&& other) noexcept
 {
     hash_ = std::move(other.hash_);
     height_ = other.height_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -119,18 +129,17 @@ check_point& check_point::operator=(const check_point& other) noexcept
 {
     hash_ = other.hash_;
     height_ = other.height_;
+    valid_ = other.valid_;
     return *this;
 }
 
 bool operator<(const check_point& left, const check_point& right) noexcept
 {
-    // Only heights compared, for sorting.
     return left.height() < right.height();
 }
 
 bool operator==(const check_point& left, const check_point& right) noexcept
 {
-    // Validity not compared.
     return left.hash() == right.hash() && left.height() == right.height();
 }
 

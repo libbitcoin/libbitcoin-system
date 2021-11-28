@@ -132,8 +132,11 @@ protected:
 private:
     static size_t serialized_size(const data_stack& stack);
 
-    bool valid_;
+    witness(data_stack&& stack, bool valid);
+    witness(const data_stack& stack, bool valid);
+
     data_stack stack_;
+    bool valid_;
 };
 
 } // namespace chain

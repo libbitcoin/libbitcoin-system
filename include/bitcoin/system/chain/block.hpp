@@ -137,9 +137,14 @@ public:
 protected:
     void reset();
 
+    block(chain::header&& header, transaction::list&& transactions, bool valid);
+    block(const chain::header& header, const transaction::list& transactions,
+        bool valid);
+
 private:
     chain::header header_;
     transaction::list transactions_;
+    bool valid_;
 };
 
 } // namespace chain

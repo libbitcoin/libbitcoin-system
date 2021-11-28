@@ -119,6 +119,14 @@ protected:
     // So block may reset its member.
     friend class block;
 
+    header(uint32_t version, hash_digest&& previous_block_hash,
+        hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, bool valid);
+
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, bool valid);
+
     void reset();
 
 private:
@@ -130,6 +138,7 @@ private:
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;
+    bool valid_;
 };
 
 } // namespace chain

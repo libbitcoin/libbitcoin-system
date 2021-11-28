@@ -25,7 +25,7 @@ const auto valid_raw_point = base16_chunk("000000000019d6689c085ae165831e934ff76
 BOOST_AUTO_TEST_CASE(point__constructor_1__always__returns_default_initialized)
 {
     chain::point instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(point__constructor_2__valid_input__returns_input_initialized)

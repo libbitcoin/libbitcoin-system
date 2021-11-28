@@ -59,6 +59,7 @@ public:
     script(operation::list&& ops);
     script(const operation::list& ops);
 
+    // Script is currently the only chain class with a raw data constructor.
     script(const data_chunk& encoded, bool prefix);
 
     // Operators.
@@ -206,6 +207,9 @@ protected:
     // So inputs and output may reset the member.
     friend class input;
     friend class output;
+
+    script(operation::list&& ops, bool valid);
+    script(const operation::list& ops, bool valid);
 
     void reset();
     bool is_pay_to_witness(uint32_t forks) const;

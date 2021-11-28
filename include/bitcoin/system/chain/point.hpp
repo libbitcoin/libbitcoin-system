@@ -84,7 +84,7 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
     static size_t satoshi_fixed_size();
@@ -104,6 +104,7 @@ protected:
 
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
+
     void reset();
 
 private:

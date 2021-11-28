@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include  <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -35,33 +36,41 @@ const uint64_t output::not_found = sighash_null_value;
 // Constructors.
 //-----------------------------------------------------------------------------
 
+// Valid default used in signature hashing.
 output::output()
-  : value_(not_found),
-    script_{}
+  : output(output::not_found, {}, true)
 {
 }
 
 output::output(output&& other)
-  : value_(other.value_),
-    script_(std::move(other.script_))
+  : output(other.value_, std::move(other.script_), other.valid_)
 {
 }
 
 output::output(const output& other)
-  : value_(other.value_),
-    script_(other.script_)
+  : output(other.value_, other.script_, other.valid_)
 {
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : value_(value),
-    script_(std::move(script))
+  : output(value, std::move(script), true)
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : value_(value),
-    script_(script)
+  : output(value, script, true)
+{
+}
+
+// protected
+output::output(uint64_t value, chain::script&& script, bool valid)
+  : value_(value), script_(std::move(script)), valid_(valid)
+{
+}
+
+// protected
+output::output(uint64_t value, const chain::script& script, bool valid)
+  : value_(value), script_(script), valid_(valid)
 {
 }
 
@@ -72,6 +81,7 @@ output& output::operator=(output&& other)
 {
     value_ = other.value_;
     script_ = std::move(other.script_);
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -79,12 +89,14 @@ output& output::operator=(const output& other)
 {
     value_ = other.value_;
     script_ = other.script_;
+    valid_ = other.valid_;
     return *this;
 }
 
 bool output::operator==(const output& other) const
 {
-    return (value_ == other.value_) && (script_ == other.script_);
+    return (value_ == other.value_)
+        && (script_ == other.script_);
 }
 
 bool output::operator!=(const output& other) const
@@ -128,7 +140,7 @@ bool output::from_data(std::istream& stream)
     return from_data(source);
 }
 
-bool output::from_data(reader& source, bool)
+bool output::from_data(reader& source)
 {
     reset();
 
@@ -138,20 +150,22 @@ bool output::from_data(reader& source, bool)
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // protected
 void output::reset()
 {
+    // This value is required by signature hashing for output clearance.
     value_ = output::not_found;
     script_.reset();
+    valid_ = false;
 }
 
-// Empty scripts are valid, validation relies on not_found only.
 bool output::is_valid() const
 {
-    return value_ != output::not_found;
+    return valid_;
 }
 
 // Serialization.
@@ -172,7 +186,7 @@ void output::to_data(std::ostream& stream) const
     to_data(out);
 }
 
-void output::to_data(writer& sink, bool) const
+void output::to_data(writer& sink) const
 {
     DEBUG_ONLY(const auto size = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
@@ -210,7 +224,7 @@ const chain::script& output::script() const
 size_t output::signature_operations(bool bip141) const
 {
     // Penalize quadratic signature operations (bip141).
-    const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
+    const auto sigops_factor = bip141 ? fast_sigops_factor : one;
 
     // Count heavy sigops in the output script.
     return script_.sigops(false) * sigops_factor;
@@ -230,7 +244,7 @@ bool output::extract_committed_hash(hash_digest& out) const
         return false;
 
     // The four byte offset for the witness commitment hash (bip141).
-    const auto start = ops[1].data().begin() + sizeof(witness_head);
+    const auto start = std::next(ops[1].data().begin(), sizeof(witness_head));
     std::copy_n(start, hash_size, out.begin());
     return true;
 }

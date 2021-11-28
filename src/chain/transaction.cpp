@@ -45,106 +45,66 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Read a length-prefixed collection of inputs or outputs from the source.
-template<class Source, class Put>
-bool read(Source& source, std::vector<Put>& puts, bool witness)
-{
-    auto result = true;
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
-        source.invalidate();
-    else
-        puts.resize(count);
-
-    const auto deserialize = [&](Put& put)
-    {
-        result = result && put.from_data(source, witness);
-    };
-
-    std::for_each(puts.begin(), puts.end(), deserialize);
-    return result;
-}
-
-// Write a length-prefixed collection of inputs or outputs to the sink.
-template<class Sink, class Put>
-void write(Sink& sink, const std::vector<Put>& puts, bool witness)
-{
-    sink.write_variable(puts.size());
-
-    const auto serialize = [&](const Put& put)
-    {
-        put.to_data(sink, witness);
-    };
-
-    std::for_each(puts.begin(), puts.end(), serialize);
-}
-
-// Input list must be pre-populated as it determines witness count.
-void transaction::read_witnesses(reader& source, input::list& inputs) const
-{
-    const auto deserialize = [&](input& input)
-    {
-        input.witness_ = witness::factory(source, true);
-    };
-
-    std::for_each(inputs.begin(), inputs.end(), deserialize);
-}
-
-// Witness count is not written as it is inferred from input count.
-void transaction::write_witnesses(writer& sink, const input::list& inputs) const
-{
-    const auto serialize = [&sink](const input& input)
-    {
-        input.witness().to_data(sink, true);
-    };
-
-    std::for_each(inputs.begin(), inputs.end(), serialize);
-}
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
 transaction::transaction()
-  : version_(0),
-    locktime_(0),
-    inputs_{},
-    outputs_{}
+  : transaction(0, 0, {}, {}, false)
 {
 }
 
 transaction::transaction(transaction&& other)
-  : version_(other.version_),
-    locktime_(other.locktime_),
-    inputs_(std::move(other.inputs_)),
-    outputs_(std::move(other.outputs_))
+  : transaction(
+      other.version_,
+      other.locktime_,
+      std::move(other.inputs_),
+      std::move(other.outputs_),
+      other.valid_)
 {
 }
 
 transaction::transaction(const transaction& other)
-  : version_(other.version_),
-    locktime_(other.locktime_),
-    inputs_(other.inputs_),
-    outputs_(other.outputs_)
+  : transaction(
+      other.version_,
+      other.locktime_,
+      other.inputs_,
+      other.outputs_,
+      other.valid_)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
-  : version_(version),
-    locktime_(locktime),
-    inputs_(std::move(inputs)),
-    outputs_(std::move(outputs))
+  : transaction(version, locktime, std::move(inputs), std::move(outputs),
+      true)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs)
+  : transaction(version, locktime, inputs, outputs, true)
+{
+}
+
+// protected
+transaction::transaction(uint32_t version, uint32_t locktime,
+    input::list&& inputs, output::list&& outputs, bool valid)
+  : version_(version),
+    locktime_(locktime),
+    inputs_(std::move(inputs)),
+    outputs_(std::move(outputs)),
+    valid_(valid)
+{
+}
+
+// protected
+transaction::transaction(uint32_t version, uint32_t locktime,
+    const input::list& inputs, const output::list& outputs, bool valid)
   : version_(version),
     locktime_(locktime),
     inputs_(inputs),
-    outputs_(outputs)
+    outputs_(outputs),
+    valid_(valid)
 {
 }
 
@@ -157,6 +117,7 @@ transaction& transaction::operator=(transaction&& other)
     locktime_ = other.locktime_;
     inputs_ = std::move(other.inputs_);
     outputs_ = std::move(other.outputs_);
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -167,6 +128,7 @@ transaction& transaction::operator=(const transaction& other)
     locktime_ = other.locktime_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -186,6 +148,24 @@ bool transaction::operator!=(const transaction& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
+// Read a length-prefixed collection of inputs or outputs from the source.
+template<class Source, class Put>
+bool read(Source& source, std::vector<Put>& puts)
+{
+    const auto count = source.read_size();
+
+    // Guard against potential for arbitrary memory allocation.
+    if (count > max_block_size)
+        source.invalidate();
+    else
+        puts.resize(count);
+
+    for (auto& put: puts)
+        put.from_data(source);
+
+    return source;
+}
+
 // static
 transaction transaction::factory(const data_chunk& data, bool witness)
 {
@@ -197,7 +177,6 @@ transaction transaction::factory(const data_chunk& data, bool witness)
 // static
 transaction transaction::factory(std::istream& stream, bool witness)
 {
-
     transaction instance;
     instance.from_data(stream, witness);
     return instance;
@@ -223,45 +202,39 @@ bool transaction::from_data(std::istream& stream, bool witness)
     return from_data(source, witness);
 }
 
-// Witness is not used by outputs, just for template normalization.
 bool transaction::from_data(reader& source, bool witness)
 {
     reset();
 
-    // Wire (satoshi protocol) deserialization.
     version_ = source.read_4_bytes_little_endian();
-    read(source, inputs_, witness);
+    read(source, inputs_);
 
     // Detect witness as no inputs (marker) and expected flag (bip144).
-    const auto witness_transaction =
-        inputs_.size() == witness_marker &&
-        source.peek_byte() == witness_enabled;
-
-    // This is always enabled so caller should validate with is_segregated.
-    // No premature check for empty witnesses, is caught in validation.
-    if (witness_transaction)
+    if (inputs_.size() == witness_marker &&
+        source.peek_byte() == witness_enabled)
     {
         // Skip over the peeked witness flag.
         source.skip_byte();
-        read(source, inputs_, witness);
-        read(source, outputs_, witness);
-        read_witnesses(source, inputs_);
+        read(source, inputs_);
+        read(source, outputs_);
+        for (auto& input: inputs_)
+            input.witness_ = witness::factory(source, true);
     }
     else
     {
-        read(source, outputs_, witness);
+        read(source, outputs_);
     }
 
     locktime_ = source.read_4_bytes_little_endian();
 
-    // TODO: optimize by having reader skip witness data.
     if (!witness)
         strip_witness();
 
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // protected
@@ -273,73 +246,69 @@ void transaction::reset()
     inputs_.shrink_to_fit();
     outputs_.clear();
     outputs_.shrink_to_fit();
+    valid_ = false;
 }
 
 bool transaction::is_valid() const
 {
-    return (version_ != 0) || (locktime_ != 0) || !inputs_.empty() ||
-        !outputs_.empty();
+    return valid_;
 }
 
 // Serialization.
 //-----------------------------------------------------------------------------
 
+// Write a length-prefixed collection of inputs or outputs to the sink.
+template<class Sink, class Put>
+void write(Sink& sink, const std::vector<Put>& puts)
+{
+    sink.write_variable(puts.size());
+
+    for (const auto& put: puts)
+        put.to_data(sink);
+}
+
 // Transactions with empty witnesses always use old serialization (bip144).
 // If no inputs are witness programs then witness hash is tx hash (bip141).
 data_chunk transaction::to_data(bool witness) const
 {
-    // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    data_chunk data;
-    const auto size = serialized_size(witness);
-
-    // Reserve an extra byte to prevent full reallocation in the case of
-    // generate_signature_hash extension by addition of the sighash_flags.
-    data.reserve(size + sizeof(uint8_t));
-
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size(witness));
+    stream::out::copy ostream(data);
     to_data(ostream, witness);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
 void transaction::to_data(std::ostream& stream, bool witness) const
 {
-    // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
     write::bytes::ostream out(stream);
     to_data(out, witness);
 }
 
-// Witness is not used by outputs, just for template normalization.
 void transaction::to_data(writer& sink, bool witness) const
 {
     DEBUG_ONLY(const auto size = serialized_size(witness);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    // Witness handling must be disabled for non-segregated txs.
     witness &= is_segregated();
 
-    // Wire (satoshi protocol) serialization.
-    // If witness then this requires the witness-allowed bit to be valid.
     sink.write_4_bytes_little_endian(version_);
 
     if (witness)
     {
         sink.write_byte(witness_marker);
         sink.write_byte(witness_enabled);
-        write(sink, inputs_, witness);
-        write(sink, outputs_, witness);
-        write_witnesses(sink, inputs_);
     }
-    else
-    {
-        write(sink, inputs_, witness);
-        write(sink, outputs_, witness);
-    }
+
+    write(sink, inputs_);
+    write(sink, outputs_);
+
+    if (witness)
+        for (auto& input: inputs_)
+            input.witness().to_data(sink, true);
 
     sink.write_4_bytes_little_endian(locktime_);
 
@@ -365,12 +334,9 @@ size_t transaction::maximum_size(bool is_coinbase)
 
 size_t transaction::serialized_size(bool witness) const
 {
-    // The witness parameter must be set to false for non-segregated txs.
     witness &= is_segregated();
 
-    // Returns space for the witness although not serialized by input.
-    // Returns witness space if specified even if input not segregated.
-    const auto ins = [witness](size_t size, const input& input)
+    const auto ins = [=](size_t size, const input& input)
     {
         return size + input.serialized_size(witness);
     };
@@ -380,15 +346,14 @@ size_t transaction::serialized_size(bool witness) const
         return size + output.serialized_size();
     };
 
-    // Must be both witness and wire encoding for bip144 serialization.
-    return (witness ? sizeof(witness_marker) : zero)
+    return sizeof(version_)
+        + (witness ? sizeof(witness_marker) : zero)
         + (witness ? sizeof(witness_enabled) : zero)
-        + sizeof(version_)
-        + sizeof(locktime_)
         + variable_size(inputs_.size())
-        + variable_size(outputs_.size())
         + std::accumulate(inputs_.begin(), inputs_.end(), zero, ins)
-        + std::accumulate(outputs_.begin(), outputs_.end(), zero, outs);
+        + variable_size(outputs_.size())
+        + std::accumulate(outputs_.begin(), outputs_.end(), zero, outs)
+        + sizeof(locktime_);
 }
 
 // Accessors.
@@ -529,15 +494,15 @@ bool transaction::is_null_non_coinbase() const
     return std::any_of(inputs_.begin(), inputs_.end(), invalid);
 }
 
-// private
-bool transaction::all_inputs_final() const
+
+static bool all_final(const input::list& inputs)
 {
     const auto finalized = [](const input& input)
     {
         return input.is_final();
     };
 
-    return std::all_of(inputs_.begin(), inputs_.end(), finalized);
+    return std::all_of(inputs.begin(), inputs.end(), finalized);
 }
 
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
@@ -549,13 +514,13 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
     };
 
     return is_zero(locktime_) || locktime_ < max_locktime() ||
-        all_inputs_final();
+        all_final(inputs_);
 }
 
 // This is not a consensus rule, just detection of an irrational use.
 bool transaction::is_locktime_conflict() const
 {
-    return !is_zero(locktime_) && all_inputs_final();
+    return !is_zero(locktime_) && all_final(inputs_);
 }
 
 // Overflow returns max_uint64.

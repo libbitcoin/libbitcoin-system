@@ -49,15 +49,12 @@ public:
     input(input&& other);
     input(const input& other);
 
-    input(point&& previous_output, chain::script&& script,
-        uint32_t sequence);
+    input(point&& prevout, chain::script&& script, uint32_t sequence);
+    input(const point& prevout, const chain::script& script, uint32_t sequence);
 
-    input(const point& previous_output, const chain::script& script,
+    input(point&& prevout, chain::script&& script, chain::witness&& witness,
         uint32_t sequence);
-
-    input(point&& previous_output, chain::script&& script,
-        chain::witness&& witness, uint32_t sequence);
-    input(const point& previous_output, const chain::script& script,
+    input(const point& prevout, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
 
     // Operators.
@@ -72,22 +69,22 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static input factory(const data_chunk& data, bool witness=false);
-    static input factory(std::istream& stream, bool witness=false);
-    static input factory(reader& source, bool witness=false);
+    static input factory(const data_chunk& data);
+    static input factory(std::istream& stream);
+    static input factory(reader& source);
 
-    bool from_data(const data_chunk& data, bool witness=false);
-    bool from_data(std::istream& stream, bool witness=false);
-    bool from_data(reader& source, bool witness=false);
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness=false) const;
-    void to_data(std::ostream& stream, bool witness=false) const;
-    void to_data(writer& sink, bool witness=false) const;
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
 
     // Properties.
     //-------------------------------------------------------------------------
@@ -115,13 +112,19 @@ protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
+    input(point&& prevout, chain::script&& script, chain::witness&& witness,
+        uint32_t sequence, bool valid);
+    input(const point& prevout, const chain::script& script,
+        const chain::witness& witness, uint32_t sequence, bool valid);
+
     void reset();
 
 private:
-    point previous_output_;
+    point prevout_;
     chain::script script_;
     chain::witness witness_;
     uint32_t sequence_;
+    bool valid_;
 };
 
 } // namespace chain

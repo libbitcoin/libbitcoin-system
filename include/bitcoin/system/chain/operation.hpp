@@ -43,8 +43,10 @@ public:
     //-------------------------------------------------------------------------
 
     operation();
+
     operation(operation&& other);
     operation(const operation& other);
+
     operation(opcode code);
 
     // TODO: when we remove factories, the op_data constructor has no minimal
@@ -155,8 +157,9 @@ public:
 protected:
     static uint32_t read_data_size(opcode code, reader& source);
 
-    operation(opcode code, data_chunk&& data, bool valid);
-    operation(opcode code, const data_chunk& data, bool valid);
+    operation(opcode code, data_chunk&& data, bool underflow);
+    operation(opcode code, const data_chunk& data, bool underflow);
+
     opcode opcode_from_data(const data_chunk& data, bool minimal);
     void reset();
 

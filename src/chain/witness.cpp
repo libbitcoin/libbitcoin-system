@@ -45,32 +45,30 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // Constructors.
 //-----------------------------------------------------------------------------
 
-// A default instance is invalid (until modified).
 witness::witness()
-  : valid_(false)
+  : witness(data_stack{}, false)
 {
 }
 
 witness::witness(witness&& other)
-  : stack_(std::move(other.stack_)), valid_(other.valid_)
+  : witness(std::move(other.stack_), other.valid_)
 {
 }
 
 witness::witness(const witness& other)
-  : stack_(other.stack_), valid_(other.valid_)
+  : witness(other.stack_, other.valid_)
+{
+}
+
+witness::witness(data_stack&& stack)
+  : witness(std::move(stack), true)
 {
 }
 
 witness::witness(const data_stack& stack)
+  : witness(stack, true)
 {
-    stack_ = stack;
 }
-
-witness::witness(data_stack&& stack)
-{
-    stack_ = std::move(stack);
-}
-
 witness::witness(data_chunk&& encoded, bool prefix)
 {
     from_data(encoded, prefix);
@@ -81,12 +79,24 @@ witness::witness(const data_chunk& encoded, bool prefix)
     from_data(encoded, prefix);
 }
 
+// protected
+witness::witness(data_stack&& stack, bool valid)
+  : stack_(std::move(stack)), valid_(valid)
+{
+}
+
+// protected
+witness::witness(const data_stack& stack, bool valid)
+  : stack_(stack), valid_(valid)
+{
+}
+
 // Operators.
 //-----------------------------------------------------------------------------
 
 witness& witness::operator=(witness&& other)
 {
-    reset();
+    ////reset();
     stack_ = std::move(other.stack_);
     valid_ = other.valid_;
     return *this;
@@ -94,7 +104,7 @@ witness& witness::operator=(witness&& other)
 
 witness& witness::operator=(const witness& other)
 {
-    reset();
+    ////reset();
     stack_ = other.stack_;
     valid_ = other.valid_;
     return *this;
@@ -153,7 +163,6 @@ bool witness::from_data(std::istream& stream, bool prefix)
 bool witness::from_data(reader& source, bool prefix)
 {
     reset();
-    valid_ = true;
 
     const auto read_element = [](reader& source)
     {
@@ -189,7 +198,8 @@ bool witness::from_data(reader& source, bool prefix)
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // private/static
@@ -208,14 +218,13 @@ size_t witness::serialized_size(const data_stack& stack)
 // protected
 void witness::reset()
 {
-    valid_ = false;
     stack_.clear();
     stack_.shrink_to_fit();
+    valid_ = false;
 }
 
 bool witness::is_valid() const
 {
-    // Witness validity is consistent with stack validity (unlike script).
     return valid_;
 }
 
@@ -324,8 +333,8 @@ witness::iterator witness::end() const
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(stack_.size()) : 0u) +
-        serialized_size(stack_);
+    return (prefix ? variable_size(stack_.size()) : zero)
+        + serialized_size(stack_);
 }
 
 const data_stack& witness::stack() const

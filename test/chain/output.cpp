@@ -25,7 +25,7 @@ const auto valid_raw_output = base16_chunk("20300500000000001976a914905f933de850
 BOOST_AUTO_TEST_CASE(output__constructor_1__always__returns_default_initialized)
 {
     chain::output instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(output__constructor_2__valid_input__returns_input_initialized)

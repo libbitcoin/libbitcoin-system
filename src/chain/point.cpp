@@ -35,41 +35,14 @@ const uint32_t point::null_index = no_previous_output;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-// A default instance is invalid (until modified).
+// Valid default used in signature hashing.
 point::point()
-  : hash_(null_hash),
-    index_(0),
-    valid_(false)
+  : point(null_hash, 0, true)
 {
 }
 
-point::point(const hash_digest& hash, uint32_t index)
-  : hash_(hash),
-    index_(index),
-    valid_(true)
-{
-}
-
-point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::move(hash)),
-    index_(index),
-    valid_(true)
-{
-}
-
-// protected
-point::point(const hash_digest& hash, uint32_t index, bool valid)
-  : hash_(hash),
-    index_(index),
-    valid_(valid)
-{
-}
-
-// protected
-point::point(hash_digest&& hash, uint32_t index, bool valid)
-  : hash_(std::move(hash)),
-    index_(index),
-    valid_(valid)
+point::point(point&& other)
+  : point(std::move(other.hash_), other.index_, other.valid_)
 {
 }
 
@@ -78,8 +51,25 @@ point::point(const point& other)
 {
 }
 
-point::point(point&& other)
-  : point(std::move(other.hash_), other.index_, other.valid_)
+point::point(hash_digest&& hash, uint32_t index)
+  : point(std::move(hash), index, true)
+{
+}
+
+point::point(const hash_digest& hash, uint32_t index)
+  : point(hash, index, true)
+{
+}
+
+// protected
+point::point(const hash_digest& hash, uint32_t index, bool valid)
+  : hash_(hash), index_(index), valid_(valid)
+{
+}
+
+// protected
+point::point(hash_digest&& hash, uint32_t index, bool valid)
+  : hash_(std::move(hash)), index_(index), valid_(valid)
 {
 }
 
@@ -90,6 +80,7 @@ point& point::operator=(point&& other)
 {
     hash_ = std::move(other.hash_);
     index_ = other.index_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -97,20 +88,20 @@ point& point::operator=(const point& other)
 {
     hash_ = other.hash_;
     index_ = other.index_;
+    valid_ = other.valid_;
     return *this;
 }
 
-// This arbitrary order is produced to support set uniqueness determinations.
 bool point::operator<(const point& other) const
 {
-    // The index is primary only because its comparisons are simpler.
-    return index_ == other.index_ ? hash_ < other.hash_ :
-        index_ < other.index_;
+    // This arbitrary order is produced to support set uniqueness determinations.
+    return index_ == other.index_ ? hash_ < other.hash_ : index_ < other.index_;
 }
 
 bool point::operator==(const point& other) const
 {
-    return (hash_ == other.hash_) && (index_ == other.index_);
+    return (hash_ == other.hash_)
+        && (index_ == other.index_);
 }
 
 bool point::operator!=(const point& other) const
@@ -161,22 +152,22 @@ bool point::from_data(reader& source)
 {
     reset();
 
-    valid_ = true;
     hash_ = source.read_hash();
     index_ = source.read_4_bytes_little_endian();
 
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // protected
 void point::reset()
 {
-    valid_ = false;
-    hash_ = null_hash;
+    hash_.fill(0);
     index_ = 0;
+    valid_ = false;
 }
 
 bool point::is_valid() const

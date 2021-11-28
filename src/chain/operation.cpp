@@ -38,9 +38,8 @@ static constexpr auto any_invalid = opcode::op_xor;
 // Constructors.
 //-----------------------------------------------------------------------------
 
-// Always invalid (no code has been specified).
 operation::operation()
-  : data_{}, code_(any_invalid), underflow_(false)
+  : operation(any_invalid, {}, false)
 {
 }
 
@@ -54,10 +53,10 @@ operation::operation(const operation& other)
 {
 }
 
+// If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code)
-  : data_{}, code_(code), underflow_(false)
+  : operation(code, {}, false)
 {
-    // If code is push data the data member will be inconsistent (empty).
 }
 
 operation::operation(data_chunk&& uncoded, bool minimal)
@@ -75,9 +74,7 @@ operation::operation(data_chunk&& uncoded, bool minimal)
 }
 
 operation::operation(const data_chunk& uncoded, bool minimal)
-  : data_(uncoded),
-    code_(opcode_from_data(data_, minimal)),
-    underflow_(false)
+  : operation(opcode_from_data(uncoded, minimal), uncoded, false)
 {
     // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
@@ -89,14 +86,18 @@ operation::operation(const data_chunk& uncoded, bool minimal)
 }
 
 // protected
-operation::operation(opcode code, data_chunk&& data, bool valid)
-  : data_(std::move(data)), code_(code), underflow_(valid)
+operation::operation(opcode code, data_chunk&& data, bool underflow)
+  : data_(std::move(data)),
+    code_(code),
+    underflow_(underflow)
 {
 }
 
 // protected
-operation::operation(opcode code, const data_chunk& data, bool valid)
-  : data_(data), code_(code), underflow_(valid)
+operation::operation(opcode code, const data_chunk& data, bool underflow)
+  : data_(data),
+    code_(code),
+    underflow_(underflow)
 {
 }
 
@@ -141,6 +142,8 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
+    reset();
+
     // If stream is not empty then a non-data opcode will always deserialize.
     // A push-data opcode may indicate more bytes than are available. In this
     // case the the script is invalid, but it may not be evaluated, such as
@@ -182,6 +185,7 @@ void operation::reset()
 {
     code_ = any_invalid;
     data_.clear();
+    data_.shrink_to_fit();
     underflow_ = false;
 }
 
@@ -428,10 +432,9 @@ operation& operation::operator=(const operation& other)
 
 bool operation::operator==(const operation& other) const
 {
-    return
-        (code_ == other.code_) &&
-        (data_ == other.data_) &&
-        (underflow_ == other.underflow_);
+    return (code_ == other.code_)
+        && (data_ == other.data_)
+        && (underflow_ == other.underflow_);
 }
 
 bool operation::operator!=(const operation& other) const
@@ -439,7 +442,7 @@ bool operation::operator!=(const operation& other) const
     return !(*this == other);
 }
 
-// Properties (size, accessors, cache).
+// Properties.
 //-----------------------------------------------------------------------------
 
 size_t operation::serialized_size() const

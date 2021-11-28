@@ -132,17 +132,19 @@ public:
     ////code connect_input(const chain_state& state, size_t input_index) const;
 
 protected:
-    void reset();
-    bool all_inputs_final() const;
+    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
+        output::list&& outputs, bool valid);
+    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
+        const output::list& outputs, bool valid);
 
-    void read_witnesses(reader& source, input::list& inputs) const;
-    void write_witnesses(writer& sink, const input::list& inputs) const;
+    void reset();
 
 private:
     uint32_t version_;
     uint32_t locktime_;
     input::list inputs_;
     output::list outputs_;
+    bool valid_;
 };
 
 } // namespace chain

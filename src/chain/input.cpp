@@ -32,60 +32,75 @@ namespace chain {
 // Constructors.
 //-----------------------------------------------------------------------------
 
+// Valid default used in signature hashing.
 input::input()
-  : previous_output_{},
-    script_{},
-    sequence_(0)
+  : input({}, {}, {}, 0, true)
 {
 }
 
 input::input(input&& other)
-  : previous_output_(std::move(other.previous_output_)),
-    script_(std::move(other.script_)),
-    witness_(std::move(other.witness_)),
-    sequence_(other.sequence_)
+  : input(
+      std::move(other.prevout_),
+      std::move(other.script_),
+      std::move(other.witness_),
+      other.sequence_,
+      other.valid_)
 {
 }
 
 input::input(const input& other)
-  : previous_output_(other.previous_output_),
-    script_(std::move(other.script_)),
-    witness_(other.witness_),
-    sequence_(other.sequence_)
+  : input(
+      other.prevout_,
+      other.script_,
+      other.witness_,
+      other.sequence_,
+      other.valid_)
 {
 }
 
-input::input(point&& previous_output, chain::script&& script,
+input::input(point&& prevout, chain::script&& script, uint32_t sequence)
+  : input(std::move(prevout), std::move(script), {}, sequence, true)
+{
+}
+
+input::input(const point& prevout, const chain::script& script,
     uint32_t sequence)
-  : previous_output_(std::move(previous_output)),
-    script_(std::move(script)),
-    sequence_(sequence)
+  : input(prevout, script, {}, sequence, true)
 {
 }
 
-input::input(const point& previous_output, const chain::script& script,
+input::input(point&& prevout, chain::script&& script, chain::witness&& witness,
     uint32_t sequence)
-  : previous_output_(previous_output),
-    script_(script),
-    sequence_(sequence)
+  : input(std::move(prevout), std::move(script), std::move(witness), sequence,
+      true)
 {
 }
 
-input::input(point&& previous_output, chain::script&& script,
-    chain::witness&& witness, uint32_t sequence)
-  : previous_output_(std::move(previous_output)),
+input::input(const point& prevout, const chain::script& script,
+    const chain::witness& witness, uint32_t sequence)
+  : input(prevout, script, witness, sequence, true)
+{
+}
+
+// protected
+input::input(point&& prevout, chain::script&& script, chain::witness&& witness,
+    uint32_t sequence, bool valid)
+  : prevout_(std::move(prevout)),
     script_(std::move(script)),
     witness_(std::move(witness)),
-    sequence_(sequence)
+    sequence_(sequence),
+    valid_(valid)
 {
 }
 
-input::input(const point& previous_output, const chain::script& script,
-    const chain::witness& witness, uint32_t sequence)
-  : previous_output_(previous_output),
+// protected
+input::input(const point& prevout, const chain::script& script,
+    const chain::witness& witness, uint32_t sequence, bool valid)
+  : prevout_(prevout),
     script_(script),
     witness_(witness),
-    sequence_(sequence)
+    sequence_(sequence),
+    valid_(valid)
 {
 }
 
@@ -94,26 +109,28 @@ input::input(const point& previous_output, const chain::script& script,
 
 input& input::operator=(input&& other)
 {
-    previous_output_ = std::move(other.previous_output_);
+    prevout_ = std::move(other.prevout_);
     script_ = std::move(other.script_);
     witness_ = std::move(other.witness_);
     sequence_ = other.sequence_;
+    valid_ = other.valid_;
     return *this;
 }
 
 input& input::operator=(const input& other)
 {
-    previous_output_ = other.previous_output_;
+    prevout_ = other.prevout_;
     script_ = other.script_;
     witness_ = other.witness_;
     sequence_ = other.sequence_;
+    valid_ = other.valid_;
     return *this;
 }
 
 bool input::operator==(const input& other) const
 {
     return (sequence_ == other.sequence_)
-        && (previous_output_ == other.previous_output_)
+        && (prevout_ == other.prevout_)
         && (script_ == other.script_)
         && (witness_ == other.witness_);
 }
@@ -126,94 +143,95 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-input input::factory(const data_chunk& data, bool witness)
+input input::factory(const data_chunk& data)
 {
     input instance;
-    instance.from_data(data, witness);
+    instance.from_data(data);
     return instance;
 }
 
-input input::factory(std::istream& stream, bool witness)
+input input::factory(std::istream& stream)
 {
     input instance;
-    instance.from_data(stream, witness);
+    instance.from_data(stream);
     return instance;
 }
 
-input input::factory(reader& source, bool witness)
+input input::factory(reader& source)
 {
     input instance;
-    instance.from_data(source, witness);
+    instance.from_data(source);
     return instance;
 }
 
-bool input::from_data(const data_chunk& data, bool witness)
+bool input::from_data(const data_chunk& data)
 {
     read::bytes::copy reader(data);
-    return from_data(reader, witness);
+    return from_data(reader);
 }
 
-bool input::from_data(std::istream& stream, bool witness)
+bool input::from_data(std::istream& stream)
 {
     read::bytes::istream reader(stream);
-    return from_data(reader, witness);
+    return from_data(reader);
 }
 
-bool input::from_data(reader& source, bool witness)
+// Witness is deserialized by transaction.
+bool input::from_data(reader& source)
 {
     reset();
 
-    previous_output_.from_data(source);
+    prevout_.from_data(source);
     script_.from_data(source, true);
     sequence_ = source.read_4_bytes_little_endian();
+    witness_.reset();
 
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 void input::reset()
 {
-    previous_output_.reset();
+    prevout_.reset();
     script_.reset();
     witness_.reset();
     sequence_ = 0;
+    valid_ = false;
 }
 
-// Since empty scripts and zero sequence are valid this relies on the prevout.
 bool input::is_valid() const
 {
-    return sequence_ != 0 ||
-        previous_output_.is_valid() ||
-        script_.is_valid() ||
-        witness_.is_valid();
+    return valid_;
 }
 
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk input::to_data(bool witness) const
+data_chunk input::to_data() const
 {
     data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(witness));
+    data.resize(serialized_size());
     stream::out::copy ostream(data);
-    to_data(ostream, witness);
+    to_data(ostream);
     return data;
 }
 
-void input::to_data(std::ostream& stream, bool witness) const
+void input::to_data(std::ostream& stream) const
 {
     write::bytes::ostream out(stream);
-    to_data(out, witness);
+    to_data(out);
 }
 
-void input::to_data(writer& sink, bool witness) const
+// Witness is serialized by transaction.
+void input::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto size = serialized_size(witness);)
+    DEBUG_ONLY(const auto size = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    previous_output_.to_data(sink);
+    prevout_.to_data(sink);
     script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 
@@ -225,8 +243,11 @@ void input::to_data(writer& sink, bool witness) const
 
 size_t input::serialized_size(bool witness) const
 {
-
-    return previous_output_.serialized_size()
+    // input.serialized_size(witness) provides sizing for witness, however
+    // witnesses are serialized by the transaction. This is an ugly hack as a
+    // consequence of bip144 not serializing witnesses as part of inputs, which
+    // is logically the proper association.
+    return prevout_.serialized_size()
         + script_.serialized_size(true)
         + (witness ? witness_.serialized_size(true) : zero)
         + sizeof(sequence_);
@@ -237,7 +258,7 @@ size_t input::serialized_size(bool witness) const
 
 const point& input::previous_output() const
 {
-    return previous_output_;
+    return prevout_;
 }
 
 const chain::script& input::script() const

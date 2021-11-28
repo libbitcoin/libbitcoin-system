@@ -52,24 +52,27 @@ public:
     {
     }
 
+    bool is_valid() const noexcept;
+
     size_t height() const noexcept;
     const hash_digest& hash() const noexcept;
 
-    bool is_valid() const noexcept;
     std::string to_string() const noexcept;
 
     check_point& operator=(check_point&& other) noexcept;
     check_point& operator=(const check_point& other) noexcept;
 
-private:
+protected:
     check_point(hash_digest&& hash, size_t height, bool valid) noexcept;
     check_point(const hash_digest& hash, size_t height, bool valid) noexcept;
+
+private:
     static check_point from_string(const std::string& hash,
         size_t height) noexcept;
 
-    bool valid_;
     hash_digest hash_;
     size_t height_;
+    bool valid_;
 };
 
 bool operator<(const check_point& left, const check_point& right) noexcept;

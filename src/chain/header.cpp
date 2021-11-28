@@ -42,50 +42,75 @@ using wall_clock = std::chrono::system_clock;
 //-----------------------------------------------------------------------------
 
 header::header()
-  : header(0, null_hash, null_hash, 0, 0, 0)
+  : header(0, {}, {}, 0, 0, 0, false)
 {
 }
 
 header::header(header&& other)
-  : version_(other.version_),
-    previous_block_hash_(std::move(other.previous_block_hash_)),
-    merkle_root_(std::move(other.merkle_root_)),
-    timestamp_(other.timestamp_),
-    bits_(other.bits_),
-    nonce_(other.nonce_)
+  : header(
+      other.version_,
+      std::move(other.previous_block_hash_),
+      std::move(other.merkle_root_),
+      other.timestamp_,
+      other.bits_,
+      other.nonce_,
+      other.valid_)
 {
 }
 
 header::header(const header& other)
-  : version_(other.version_),
-    previous_block_hash_(other.previous_block_hash_),
-    merkle_root_(other.merkle_root_),
-    timestamp_(other.timestamp_),
-    bits_(other.bits_),
-    nonce_(other.nonce_)
+: header(
+    other.version_,
+    other.previous_block_hash_,
+    other.merkle_root_,
+    other.timestamp_,
+    other.bits_,
+    other.nonce_,
+    other.valid_)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits, uint32_t nonce)
-  : version_(version),
-    previous_block_hash_(std::move(previous_block_hash)),
-    merkle_root_(std::move(merkle_root)),
-    timestamp_(timestamp),
-    bits_(bits),
-    nonce_(nonce)
+    hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce)
+  : header(version, std::move(previous_block_hash), std::move(merkle_root),
+      timestamp, bits, nonce, true)
 {
 }
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
+  : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
+      true)
+{
+}
+
+// protected
+header::header(uint32_t version, hash_digest&& previous_block_hash,
+    hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce, bool valid)
+  : version_(version),
+    previous_block_hash_(std::move(previous_block_hash)),
+    merkle_root_(std::move(merkle_root)),
+    timestamp_(timestamp),
+    bits_(bits),
+    nonce_(nonce),
+    valid_(valid)
+{
+}
+
+// protected
+header::header(uint32_t version, const hash_digest& previous_block_hash,
+    const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce, bool valid)
   : version_(version),
     previous_block_hash_(previous_block_hash),
     merkle_root_(merkle_root),
     timestamp_(timestamp),
     bits_(bits),
-    nonce_(nonce)
+    nonce_(nonce),
+    valid_(valid)
 {
 }
 
@@ -100,6 +125,7 @@ header& header::operator=(header&& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -111,6 +137,7 @@ header& header::operator=(const header& other)
     timestamp_ = other.timestamp_;
     bits_ = other.bits_;
     nonce_ = other.nonce_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -170,7 +197,7 @@ bool header::from_data(std::istream& stream)
 
 bool header::from_data(reader& source)
 {
-    ////reset();
+    reset();
 
     version_ = source.read_4_bytes_little_endian();
     previous_block_hash_ = source.read_hash();
@@ -182,7 +209,8 @@ bool header::from_data(reader& source)
     if (!source)
         reset();
 
-    return source;
+    valid_ = source;
+    return valid_;
 }
 
 // protected
@@ -194,16 +222,12 @@ void header::reset()
     timestamp_ = 0;
     bits_ = 0;
     nonce_ = 0;
+    valid_ = false;
 }
 
 bool header::is_valid() const
 {
-    return (version_ != 0) ||
-        (previous_block_hash_ != null_hash) ||
-        (merkle_root_ != null_hash) ||
-        (timestamp_ != 0) ||
-        (bits_ != 0) ||
-        (nonce_ != 0);
+    return valid_;
 }
 
 // Serialization.
@@ -280,7 +304,6 @@ uint32_t header::timestamp() const
 {
     return timestamp_;
 }
-
 
 uint32_t header::bits() const
 {
