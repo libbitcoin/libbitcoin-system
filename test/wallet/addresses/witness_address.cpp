@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(witness_address__hash_digest_construct__null_hash__valid)
     BOOST_REQUIRE(witness_address(null_hash));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__script_construct__invlid__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__script_construct__invalid__invalid)
 {
     chain::script script;
     BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, true));
