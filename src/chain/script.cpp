@@ -158,22 +158,34 @@ bool script::from_data(reader& source, bool prefix)
 {
     ////reset();
     valid_ = true;
+    auto size = zero;
+    auto start = zero;
+
+    if (prefix)
+    {
+        size = source.read_size();
+        start = source.get_position();
+
+        // Limit the number of bytes that ops may consume.
+        source.set_limit(size);
+    }
+
     operation op;
-
-    // TODO: add to reader: source.set_limit(source.read_size());
-    const auto limit = prefix ? source.read_size() : max_size_t;
-    auto read = zero;
-
-    while (!source.is_exhausted() && read < limit)
+    while (!source.is_exhausted())
     {
         op.from_data(source);
         ops_.push_back(op);
-        read += op.serialized_size();
     }
 
-    // Prefix overstated buffer size.
-    if (prefix && read < limit)
-        source.invalidate();
+    if (prefix)
+    {
+        // Remove the stream limit.
+        source.set_limit();
+
+        // Stream was exhausted prior to reaching prefix size.
+        if (source.get_position() - start != size)
+            source.invalidate();
+    }
 
     if (!source)
         reset();
