@@ -86,6 +86,21 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
+header::header(const data_chunk& data)
+{
+    from_data(data);
+}
+
+header::header(std::istream& stream)
+{
+    from_data(stream);
+}
+
+header::header(reader& source)
+{
+    from_data(source);
+}
+
 // protected
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
@@ -158,30 +173,6 @@ bool header::operator!=(const header& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-// static
-header header::factory(const data_chunk& data)
-{
-    header instance;
-    instance.from_data(data);
-    return instance;
-}
-
-// static
-header header::factory(std::istream& stream)
-{
-    header instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-// static
-header header::factory(reader& source)
-{
-    header instance;
-    instance.from_data(source);
-    return instance;
-}
 
 bool header::from_data(const data_chunk& data)
 {

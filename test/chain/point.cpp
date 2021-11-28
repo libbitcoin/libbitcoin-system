@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(point__factory_1__roundtrip__success)
 
     BOOST_REQUIRE(raw == data);
 
-    auto point = chain::point::factory(raw);
+    const chain::point point(raw);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(point__factory_2__roundtrip__success)
     BOOST_REQUIRE(raw == data);
 
     stream::in::copy istream(raw);
-    auto point = chain::point::factory(istream);
+    const chain::point point(istream);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(point__factory_3__roundtrip__success)
     BOOST_REQUIRE(raw == data);
 
     read::bytes::copy source(raw);
-    auto point = chain::point::factory(source);
+    const chain::point point(source);
 
     BOOST_REQUIRE(point.is_valid());
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");

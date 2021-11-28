@@ -62,6 +62,21 @@ output::output(uint64_t value, const chain::script& script)
 {
 }
 
+output::output(const data_chunk& data)
+{
+    from_data(data);
+}
+
+output::output(std::istream& stream)
+{
+    from_data(stream);
+}
+
+output::output(reader& source)
+{
+    from_data(source);
+}
+
 // protected
 output::output(uint64_t value, chain::script&& script, bool valid)
   : value_(value), script_(std::move(script)), valid_(valid)
@@ -106,27 +121,6 @@ bool output::operator!=(const output& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-output output::factory(const data_chunk& data)
-{
-    output instance;
-    instance.from_data(data);
-    return instance;
-}
-
-output output::factory(std::istream& stream)
-{
-    output instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-output output::factory(reader& source)
-{
-    output instance;
-    instance.from_data(source);
-    return instance;
-}
 
 bool output::from_data(const data_chunk& data)
 {

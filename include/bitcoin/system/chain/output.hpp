@@ -55,6 +55,10 @@ public:
     output(uint64_t value, chain::script&& script);
     output(uint64_t value, const chain::script& script);
 
+    output(const data_chunk& data);
+    output(std::istream& stream);
+    output(reader& source);
+
     // Operators.
     //-------------------------------------------------------------------------
 
@@ -66,10 +70,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static output factory(const data_chunk& data);
-    static output factory(std::istream& stream);
-    static output factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

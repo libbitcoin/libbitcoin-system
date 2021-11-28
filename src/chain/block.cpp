@@ -81,6 +81,21 @@ block::block(chain::header&& header, transaction::list&& transactions)
 {
 }
 
+block::block(const data_chunk& data, bool witness)
+{
+    from_data(data, witness);
+}
+
+block::block(std::istream& stream, bool witness)
+{
+    from_data(stream, witness);
+}
+
+block::block(reader& source, bool witness)
+{
+    from_data(source, witness);
+}
+
 // protected
 block::block(const chain::header& header, const transaction::list& transactions,
     bool valid)
@@ -110,6 +125,14 @@ block& block::operator=(block&& other)
     return *this;
 }
 
+block& block::operator=(const block& other)
+{
+    header_ = other.header_;
+    transactions_ = other.transactions_;
+    valid_ = other.valid_;
+    return *this;
+}
+
 bool block::operator==(const block& other) const
 {
     return (header_ == other.header_)
@@ -123,30 +146,6 @@ bool block::operator!=(const block& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-// static
-block block::factory(const data_chunk& data, bool witness)
-{
-    block instance;
-    instance.from_data(data, witness);
-    return instance;
-}
-
-// static
-block block::factory(std::istream& stream, bool witness)
-{
-    block instance;
-    instance.from_data(stream, witness);
-    return instance;
-}
-
-// static
-block block::factory(reader& source, bool witness)
-{
-    block instance;
-    instance.from_data(source, witness);
-    return instance;
-}
 
 bool block::from_data(const data_chunk& data, bool witness)
 {

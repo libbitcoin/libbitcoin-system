@@ -47,6 +47,7 @@ class BC_API script
 {
 public:
     typedef std::vector<script> list;
+    typedef std::shared_ptr<script> ptr;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -59,13 +60,13 @@ public:
     script(operation::list&& ops);
     script(const operation::list& ops);
 
-    // Script is currently the only chain class with a raw data constructor.
     script(const data_chunk& encoded, bool prefix);
+    script(std::istream& stream, bool prefix);
+    script(reader& source, bool prefix);
 
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     script& operator=(script&& other);
     script& operator=(const script& other);
 
@@ -74,10 +75,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static script factory(const data_chunk& encoded, bool prefix);
-    static script factory(std::istream& stream, bool prefix);
-    static script factory(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
     bool from_data(const data_chunk& encoded, bool prefix);

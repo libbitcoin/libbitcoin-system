@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
 
     const auto data = expected.to_data();
 
-    const auto result = chain::header::factory(data);
+    const chain::header result(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
     const auto data = expected.to_data();
     stream::in::copy istream(data);
 
-    const auto result = chain::header::factory(istream);
+    const chain::header result(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
     const auto data = expected.to_data();
     read::bytes::copy source(data);
 
-    const auto result = chain::header::factory(source);
+    const chain::header result(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

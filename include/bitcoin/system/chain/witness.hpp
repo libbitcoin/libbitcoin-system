@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <istream>
+#include <memory>
 #include <string>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -37,6 +38,9 @@ class transaction;
 class BC_API witness
 {
 public:
+    typedef std::vector<witness> list;
+    typedef std::shared_ptr<witness> ptr;
+
     typedef data_stack::const_iterator iterator;
 
     // Constructors.
@@ -50,13 +54,13 @@ public:
     witness(data_stack&& stack);
     witness(const data_stack& stack);
 
-    witness(data_chunk&& encoded, bool prefix);
     witness(const data_chunk& encoded, bool prefix);
+    witness(std::istream& stream, bool prefix);
+    witness(reader& source, bool prefix);
 
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     witness& operator=(witness&& other);
     witness& operator=(const witness& other);
 
@@ -66,10 +70,6 @@ public:
     // Deserialization (from witness stack).
     //-------------------------------------------------------------------------
     // Prefixed data assumed valid here though caller may confirm with is_valid.
-
-    static witness factory(const data_chunk& encoded, bool prefix);
-    static witness factory(std::istream& stream, bool prefix);
-    static witness factory(reader& source, bool prefix);
 
     /// Deserialization invalidates the iterator.
     bool from_data(const data_chunk& encoded, bool prefix);

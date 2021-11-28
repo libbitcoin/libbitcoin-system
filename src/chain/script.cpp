@@ -88,6 +88,16 @@ script::script(const data_chunk& encoded, bool prefix)
     from_data(encoded, prefix);
 }
 
+script::script(std::istream& stream, bool prefix)
+{
+    from_data(stream, prefix);
+}
+
+script::script(reader& source, bool prefix)
+{
+    from_data(source, prefix);
+}
+
 // protected
 script::script(operation::list&& ops, bool valid)
   : ops_(std::move(ops)), valid_(true)
@@ -129,30 +139,6 @@ bool script::operator!=(const script& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-// static
-script script::factory(const data_chunk& encoded, bool prefix)
-{
-    script instance;
-    instance.from_data(encoded, prefix);
-    return instance;
-}
-
-// static
-script script::factory(std::istream& stream, bool prefix)
-{
-    script instance;
-    instance.from_data(stream, prefix);
-    return instance;
-}
-
-// static
-script script::factory(reader& source, bool prefix)
-{
-    script instance;
-    instance.from_data(source, prefix);
-    return instance;
-}
 
 bool script::from_data(const data_chunk& encoded, bool prefix)
 {

@@ -104,7 +104,7 @@
 //////
 //////    for (auto data : block_data)
 //////    {
-//////        const auto block = chain::block::factory(data);
+//////        const chain::block block(data);
 //////        data_chunk filter;
 //////        BOOST_REQUIRE(neutrino::compute_filter(block, filter))
 //////        const auto header = neutrino::compute_filter_header(
@@ -1414,7 +1414,7 @@
 ////        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000"
 ////        "00"));
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata = {
@@ -2806,7 +2806,7 @@
 ////        "3d93cc58aa88ac3003ef05000000001976a91439072da37d9b9ca5f614691cb18830"
 ////        "f88ca1d8c588ac00000000"));
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata = {
@@ -2871,7 +2871,7 @@
 ////        "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
 ////        "8a4c702b6bf11d5fac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    // Block zero has no prevouts.
@@ -2897,7 +2897,7 @@
 ////        "2fffffffff0100f2052a010000002321038a7f6ef1c8ca0c588aa53fa860128077c9"
 ////        "e6c11e6830f4d7ee4e763a56b7718fac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    // Block 2 has no prevouts.
@@ -2923,7 +2923,7 @@
 ////        "2fffffffff0100f2052a01000000232103f6d9ff4c12959445ca5549c811683bf9c8"
 ////        "8e637b222dd2e0311154c4c85cf423ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    // Block 3 has no prevouts.
@@ -2949,7 +2949,7 @@
 ////        "2fffffffff0100f2052a01000000232103f268e9ae07e0f8cb2f6e901d87c510d650"
 ////        "b97230c0365b021df8f467363cafb1ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    // Block 15007 has no prevouts.
@@ -3011,7 +3011,7 @@
 ////        "e5ad8b1f731c50ca7e1d4b2a06dc1fffffffff02d0223a00000000001976a91445db"
 ////        "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    data_chunk result;
@@ -3074,7 +3074,7 @@
 ////        "e5ad8b1f731c50ca7e1d4b2a06dc1fffffffff02d0223a00000000001976a91445db"
 ////        "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata
@@ -3200,7 +3200,7 @@
 ////        "284d88bfd421ce520f0f843188ac00ca9a3b000000001976a9146d10f3f592699265"
 ////        "d10b106eda37c3ce793f7a8588ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata
@@ -3345,7 +3345,7 @@
 ////        "1a4f64faa6878f447f0b000000001976a914913bcc2be49cb534c20474c4dee1e9c4"
 ////        "c317e7eb88ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata
@@ -3437,7 +3437,7 @@
 ////        "424d4920546573742fffffff0001205fa012000000001e76a914c486de584a735ec2"
 ////        "f22da7cd9681614681f92173d83d0aa68688ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata;
@@ -3472,7 +3472,7 @@
 ////        "b2752103a40b74d43df244799d041f32ce1ad515a6cd99501701540e38750d883ae2"
 ////        "1d3a68ac00000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata
@@ -3507,7 +3507,7 @@
 ////        "00000000000000000000000000000000ffffffff18034d94154d696e657247617465"
 ////        "3030310d000000f238f401ffffffff01c817a804000000000000000000");
 ////
-////    auto validated_block = chain::block::factory(raw_block);
+////    const chain::block validated_block(raw_block);
 ////    BOOST_REQUIRE(validated_block.is_valid());
 ////
 ////    prevout_data::list metadata;

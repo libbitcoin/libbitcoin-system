@@ -86,6 +86,21 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 {
 }
 
+transaction::transaction(const data_chunk& data, bool witness)
+{
+    from_data(data, witness);
+}
+
+transaction::transaction(std::istream& stream, bool witness)
+{
+    from_data(stream, witness);
+}
+
+transaction::transaction(reader& source, bool witness)
+{
+    from_data(source, witness);
+}
+
 // protected
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs, bool valid)
@@ -166,30 +181,6 @@ bool read(Source& source, std::vector<Put>& puts)
     return source;
 }
 
-// static
-transaction transaction::factory(const data_chunk& data, bool witness)
-{
-    transaction instance;
-    instance.from_data(data, witness);
-    return instance;
-}
-
-// static
-transaction transaction::factory(std::istream& stream, bool witness)
-{
-    transaction instance;
-    instance.from_data(stream, witness);
-    return instance;
-}
-
-// static
-transaction transaction::factory(reader& source, bool witness)
-{
-    transaction instance;
-    instance.from_data(source, witness);
-    return instance;
-}
-
 bool transaction::from_data(const data_chunk& data, bool witness)
 {
     stream::in::copy istream(data);
@@ -218,7 +209,7 @@ bool transaction::from_data(reader& source, bool witness)
         read(source, inputs_);
         read(source, outputs_);
         for (auto& input: inputs_)
-            input.witness_ = witness::factory(source, true);
+            input.witness_ = witness::witness(source, true);
     }
     else
     {

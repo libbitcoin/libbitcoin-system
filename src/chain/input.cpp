@@ -82,6 +82,21 @@ input::input(const point& prevout, const chain::script& script,
 {
 }
 
+input::input(const data_chunk& data)
+{
+    from_data(data);
+}
+
+input::input(std::istream& stream)
+{
+    from_data(stream);
+}
+
+input::input(reader& source)
+{
+    from_data(source);
+}
+
 // protected
 input::input(point&& prevout, chain::script&& script, chain::witness&& witness,
     uint32_t sequence, bool valid)
@@ -142,27 +157,6 @@ bool input::operator!=(const input& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-input input::factory(const data_chunk& data)
-{
-    input instance;
-    instance.from_data(data);
-    return instance;
-}
-
-input input::factory(std::istream& stream)
-{
-    input instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-input input::factory(reader& source)
-{
-    input instance;
-    instance.from_data(source);
-    return instance;
-}
 
 bool input::from_data(const data_chunk& data)
 {

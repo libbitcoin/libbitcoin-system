@@ -326,7 +326,7 @@ const auto underflow_serialized_op = base16_chunk("0900ff11ee22bb33");
 
 BOOST_AUTO_TEST_CASE(operation__factory_1__empty__underflow)
 {
-    auto instance = operation::factory({});
+    const operation instance(data_chunk{});
     BOOST_REQUIRE(instance.is_invalid());
     BOOST_REQUIRE(instance.is_underflow());
     BOOST_REQUIRE(instance.data().empty());
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(operation__factory_1__empty__underflow)
 
 BOOST_AUTO_TEST_CASE(operation__factory_1__underflow__underflow)
 {
-    auto instance = operation::factory(underflow_serialized_op);
+    const operation instance(underflow_serialized_op);
     BOOST_REQUIRE(instance.is_invalid());
     BOOST_REQUIRE(instance.is_underflow());
     BOOST_REQUIRE_EQUAL(instance.data(), underflow_serialized_op);
@@ -344,21 +344,21 @@ BOOST_AUTO_TEST_CASE(operation__factory_1__underflow__underflow)
 
 BOOST_AUTO_TEST_CASE(operation__factory_1__roundtrip__success)
 {
-    auto instance = operation::factory(valid_serialized_op);
+    const operation instance(valid_serialized_op);
     BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
 }
 
 BOOST_AUTO_TEST_CASE(operation__factory_2__roundtrip__success)
 {
     stream::in::copy istream(valid_serialized_op);
-    auto instance = operation::factory(istream);
+    const operation instance(istream);
     BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
 }
 
 BOOST_AUTO_TEST_CASE(operation__factory_3__roundtrip__success)
 {
     read::bytes::copy source(valid_serialized_op);
-    auto instance = operation::factory(source);
+    const operation instance(source);
     BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
 }
 

@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -35,12 +36,12 @@ namespace chain {
 class BC_API point
 {
 public:
+    typedef std::vector<point> list;
+    typedef std::shared_ptr<point> ptr;
+
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
-
-    typedef std::vector<point> list;
-    typedef std::vector<uint32_t> indexes;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -53,23 +54,24 @@ public:
     point(hash_digest&& hash, uint32_t index);
     point(const hash_digest& hash, uint32_t index);
 
+    point(const data_chunk& data);
+    point(std::istream& stream);
+    point(reader& source);
+
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
     point& operator=(point&& other);
     point& operator=(const point& other);
 
-    bool operator<(const point& other) const;
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 
+    /// Arbitrary compare, for uniqueness sorting.
+    bool operator<(const point& other) const;
+
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static point factory(const data_chunk& data);
-    static point factory(std::istream& stream);
-    static point factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

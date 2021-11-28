@@ -61,6 +61,21 @@ point::point(const hash_digest& hash, uint32_t index)
 {
 }
 
+point::point(const data_chunk& data)
+{
+    from_data(data);
+}
+
+point::point(std::istream& stream)
+{
+    from_data(stream);
+}
+
+point::point(reader& source)
+{
+    from_data(source);
+}
+
 // protected
 point::point(const hash_digest& hash, uint32_t index, bool valid)
   : hash_(hash), index_(index), valid_(valid)
@@ -92,12 +107,6 @@ point& point::operator=(const point& other)
     return *this;
 }
 
-bool point::operator<(const point& other) const
-{
-    // This arbitrary order is produced to support set uniqueness determinations.
-    return index_ == other.index_ ? hash_ < other.hash_ : index_ < other.index_;
-}
-
 bool point::operator==(const point& other) const
 {
     return (hash_ == other.hash_)
@@ -109,32 +118,14 @@ bool point::operator!=(const point& other) const
     return !(*this == other);
 }
 
+bool point::operator<(const point& other) const
+{
+    // Arbitrary compare, for uniqueness sorting.
+    return index_ == other.index_ ? hash_ < other.hash_ : index_ < other.index_;
+}
+
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-// static
-point point::factory(const data_chunk& data)
-{
-    point instance;
-    instance.from_data(data);
-    return instance;
-}
-
-// static
-point point::factory(std::istream& stream)
-{
-    point instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-// static
-point point::factory(reader& source)
-{
-    point instance;
-    instance.from_data(source);
-    return instance;
-}
 
 bool point::from_data(const data_chunk& data)
 {

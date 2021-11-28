@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
-    transaction instance(chain::transaction::factory(raw_tx));
+    transaction instance(raw_tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == tx);
 }
@@ -122,8 +122,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_6__always__equals_equivalent_tx)
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
 
-    transaction value = transaction::factory(
-        transaction::version_minimum, raw_tx);
+    transaction value = transaction::factory(transaction::version_minimum, raw_tx);
 
     chain::transaction tx;
     BOOST_REQUIRE(tx.from_data(raw_tx));
@@ -380,8 +379,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equi
 
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
-    transaction instance;
-    instance = chain::transaction::factory(raw_tx);
+    chain::transaction instance(raw_tx);
     BOOST_REQUIRE(instance == expected);
 }
 

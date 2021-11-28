@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
@@ -37,6 +38,8 @@ class BC_API operation
 {
 public:
     typedef std::vector<operation> list;
+    typedef std::shared_ptr<operation> ptr;
+
     typedef list::const_iterator iterator;
 
     // Constructors.
@@ -49,15 +52,15 @@ public:
 
     operation(opcode code);
 
-    // TODO: when we remove factories, the op_data constructor has no minimal
-    // TODO: parameter and the push_data constructor requires the parameter.
-    ////operation(const data_chunk& op_data);
-    ////operation(const data_chunk& push_data, bool minimal);
-
     /// These construct from push-data, not serialized operations (no codes).
     /// When minimal is true the data is interpreted as minimally-encoded push.
-    operation(data_chunk&& uncoded, bool minimal);
-    operation(const data_chunk& uncoded, bool minimal);
+    operation(data_chunk&& push_data, bool minimal);
+    operation(const data_chunk& push_data, bool minimal);
+
+    /// These deserialize operations (with codes), not from push-data.
+    operation(const data_chunk& op_data);
+    operation(std::istream& stream);
+    operation(reader& source);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -70,11 +73,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    /// These deserialize operations (with codes), not from push-data.
-    static operation factory(const data_chunk& encoded);
-    static operation factory(std::istream& stream);
-    static operation factory(reader& source);
 
     /// These serialize operations (with codes), not to push-data.
     bool from_data(const data_chunk& encoded);
@@ -164,8 +162,8 @@ protected:
     void reset();
 
 private:
-    data_chunk data_;
     opcode code_;
+    data_chunk data_;
     bool underflow_;
 };
 

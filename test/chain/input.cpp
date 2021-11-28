@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
 
 BOOST_AUTO_TEST_CASE(input__factory_1__valid_input__success)
 {
-    const auto instance = input::factory(valid_raw_input);
+    const input instance(valid_raw_input);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(input__factory_1__valid_input__success)
 BOOST_AUTO_TEST_CASE(input__factory_2__valid_input__success)
 {
     stream::in::copy stream(valid_raw_input);
-    auto instance = input::factory(stream);
+    const input instance(stream);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(input__factory_2__valid_input__success)
 BOOST_AUTO_TEST_CASE(input__factory_3__valid_input__success)
 {
     read::bytes::copy source(valid_raw_input);
-    auto instance = input::factory(source);
+    const input instance(valid_raw_input);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
@@ -259,8 +259,7 @@ BOOST_AUTO_TEST_CASE(input__operator_assign_equals_1__always__matches_equivalent
 {
     input expected;
     BOOST_REQUIRE(expected.from_data(valid_raw_input));
-    input instance;
-    instance = input::factory(valid_raw_input);
+    const input instance(valid_raw_input);
     BOOST_REQUIRE(instance == expected);
 }
 

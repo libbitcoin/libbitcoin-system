@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(output__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(output__factory_1__valid_input_success)
 {
-    auto instance = chain::output::factory(valid_raw_output);
+    const chain::output instance(valid_raw_output);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_output.size());
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(output__factory_1__valid_input_success)
 BOOST_AUTO_TEST_CASE(output__factory_2__valid_input_success)
 {
     stream::in::copy stream(valid_raw_output);
-    auto instance = chain::output::factory(stream);
+    const chain::output instance(stream);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_output.size());
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(output__factory_2__valid_input_success)
 BOOST_AUTO_TEST_CASE(output__factory_3__valid_input_success)
 {
     read::bytes::copy source(valid_raw_output);
-    auto instance = chain::output::factory(source);
+    const chain::output instance(source);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_output.size());
 
@@ -136,8 +136,7 @@ BOOST_AUTO_TEST_CASE(output__operator_assign_equals_1__always__matches_equivalen
 {
     chain::output expected;
     BOOST_REQUIRE(expected.from_data(valid_raw_output));
-    chain::output instance;
-    instance = chain::output::factory(valid_raw_output);
+    const chain::output instance(valid_raw_output);
     BOOST_REQUIRE(instance == expected);
 }
 

@@ -44,6 +44,7 @@ class BC_API transaction
 {
 public:
     typedef std::vector<transaction> list;
+    typedef std::shared_ptr<transaction> ptr;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -57,6 +58,10 @@ public:
         output::list&& outputs);
     transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
         const output::list& outputs);
+    
+    transaction(const data_chunk& data, bool witness=false);
+    transaction(std::istream& stream, bool witness=false);
+    transaction(reader& source, bool witness=false);
 
     // Operators.
     //-------------------------------------------------------------------------
@@ -69,10 +74,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static transaction factory(const data_chunk& data, bool witness=false);
-    static transaction factory(std::istream& stream, bool witness=false);
-    static transaction factory(reader& source, bool witness=false);
 
     bool from_data(const data_chunk& data, bool witness=false);
     bool from_data(std::istream& stream, bool witness=false);

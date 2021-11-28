@@ -40,6 +40,7 @@ class BC_API input
 {
 public:
     typedef std::vector<input> list;
+    typedef std::shared_ptr<input> ptr;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -57,6 +58,10 @@ public:
     input(const point& prevout, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
 
+    input(const data_chunk& data);
+    input(std::istream& stream);
+    input(reader& source);
+
     // Operators.
     //-------------------------------------------------------------------------
 
@@ -68,10 +73,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static input factory(const data_chunk& data);
-    static input factory(std::istream& stream);
-    static input factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

@@ -22,6 +22,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -45,6 +46,7 @@ class BC_API block
 {
 public:
     typedef std::vector<block> list;
+    typedef std::shared_ptr<block> ptr;
 
     // Constructors.
     //-------------------------------------------------------------------------
@@ -57,22 +59,21 @@ public:
     block(chain::header&& header, transaction::list&& transactions);
     block(const chain::header& header, const transaction::list& transactions);
 
+    block(const data_chunk& data, bool witness=false);
+    block(std::istream& stream, bool witness=false);
+    block(reader& source, bool witness=false);
+
     // Operators.
     //-------------------------------------------------------------------------
 
-    /// This class is move assignable but NOT copy assignable (performance).
     block& operator=(block&& other);
-    block& operator=(const block& other) = delete;
+    block& operator=(const block& other);
 
     bool operator==(const block& other) const;
     bool operator!=(const block& other) const;
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static block factory(const data_chunk& data, bool witness=false);
-    static block factory(std::istream& stream, bool witness=false);
-    static block factory(reader& source, bool witness=false);
 
     bool from_data(const data_chunk& data, bool witness=false);
     bool from_data(std::istream& stream, bool witness=false);

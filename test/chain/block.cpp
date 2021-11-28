@@ -252,18 +252,18 @@ BOOST_AUTO_TEST_CASE(block__genesis__regtest__valid_structure)
 }
 
 
-BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__construct_data__genesis_mainnet__success)
 {
     const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
-    auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+    auto data = genesis.to_data();
+    BOOST_REQUIRE_EQUAL(data.size(), 285u);
 
     // Reload genesis block.
-    const auto block = chain::block::factory(raw_block);
+    const chain::block block(data);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());
@@ -272,19 +272,19 @@ BOOST_AUTO_TEST_CASE(block__factory_1__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header().merkle_root() == block.generate_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__construct_stream__genesis_mainnet__success)
 {
     const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
-    auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+    auto data = genesis.to_data();
+    BOOST_REQUIRE_EQUAL(data.size(), 285u);
 
     // Reload genesis block.
-    stream::in::copy stream(raw_block);
-    const auto block = chain::block::factory(stream);
+    stream::in::copy stream(data);
+    const chain::block block(stream);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());
@@ -293,19 +293,19 @@ BOOST_AUTO_TEST_CASE(block__factory_2__genesis_mainnet__success)
     BOOST_REQUIRE(genesis.header().merkle_root() == block.generate_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_3__genesis_mainnet__success)
+BOOST_AUTO_TEST_CASE(block__construct_reader__genesis_mainnet__success)
 {
     const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
     BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
 
     // Save genesis block.
-    data_chunk raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+    data_chunk data = genesis.to_data();
+    BOOST_REQUIRE_EQUAL(data.size(), 285u);
 
     // Reload genesis block.
-    read::bytes::copy source(raw_block);
-    const auto block = chain::block::factory(source);
+    read::bytes::copy source(data);
+    const chain::block block(source);
 
     BOOST_REQUIRE(block.is_valid());
     BOOST_REQUIRE(genesis.header() == block.header());

@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
 BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
 {
     const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
-    const auto instance = script::factory(raw, false);
+    const script instance(raw, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 {
     const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     stream::in::copy istream(raw);
-    auto instance = script::factory(istream, false);
+    const script instance(istream, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 {
     const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
     read::bytes::copy source(raw);
-    const auto instance = script::factory(source, false);
+    const script instance(source, false);
     BOOST_REQUIRE(instance.is_valid());
 }
 

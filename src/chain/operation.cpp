@@ -60,9 +60,7 @@ operation::operation(opcode code)
 }
 
 operation::operation(data_chunk&& uncoded, bool minimal)
-  : data_(std::move(uncoded)),
-    code_(opcode_from_data(data_, minimal)),
-    underflow_(false)
+  : operation(opcode_from_data(uncoded, minimal), std::move(uncoded), false)
 {
     // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
@@ -85,48 +83,70 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     }
 }
 
+operation::operation(const data_chunk& encoded)
+{
+    from_data(encoded);
+}
+
+operation::operation(std::istream& stream)
+{
+    from_data(stream);
+}
+
+operation::operation(reader& source)
+{
+    from_data(source);
+}
+
 // protected
 operation::operation(opcode code, data_chunk&& data, bool underflow)
-  : data_(std::move(data)),
-    code_(code),
+  : code_(code),
+    data_(std::move(data)),
     underflow_(underflow)
 {
 }
 
 // protected
 operation::operation(opcode code, const data_chunk& data, bool underflow)
-  : data_(data),
-    code_(code),
+  : code_(code),
+    data_(data),
     underflow_(underflow)
 {
 }
 
-// Deserialization.
+// Operators.
 //-----------------------------------------------------------------------------
 
-// static
-operation operation::factory(const data_chunk& encoded)
+operation& operation::operator=(operation&& other)
 {
-    operation instance;
-    instance.from_data(encoded);
-    return instance;
+    code_ = other.code_;
+    data_ = std::move(other.data_);
+    underflow_ = other.underflow_;
+    return *this;
 }
 
-// static
-operation operation::factory(std::istream& stream)
+operation& operation::operator=(const operation& other)
 {
-    operation instance;
-    instance.from_data(stream);
-    return instance;
+    code_ = other.code_;
+    data_ = other.data_;
+    underflow_ = other.underflow_;
+    return *this;
 }
 
-// static
-operation operation::factory(reader& source)
+bool operation::operator==(const operation& other) const
 {
-    operation instance;
-    instance.from_data(source);
-    return instance;
+    return (code_ == other.code_)
+        && (data_ == other.data_)
+        && (underflow_ == other.underflow_);
 }
+
+bool operation::operator!=(const operation& other) const
+{
+    return !(*this == other);
+}
+
+// Deserialization.
+//-----------------------------------------------------------------------------
 
 bool operation::from_data(const data_chunk& encoded)
 {
@@ -408,38 +428,6 @@ std::string operation::to_string(uint32_t active_forks) const
 
     // Data encoding uses single token with explicit size prefix as required.
     return "[" + opcode_to_prefix(code_, data_) + encode_base16(data_) + "]";
-}
-
-
-// Operators.
-//-----------------------------------------------------------------------------
-
-operation& operation::operator=(operation&& other)
-{
-    code_ = other.code_;
-    data_ = std::move(other.data_);
-    underflow_ = other.underflow_;
-    return *this;
-}
-
-operation& operation::operator=(const operation& other)
-{
-    code_ = other.code_;
-    data_ = other.data_;
-    underflow_ = other.underflow_;
-    return *this;
-}
-
-bool operation::operator==(const operation& other) const
-{
-    return (code_ == other.code_)
-        && (data_ == other.data_)
-        && (underflow_ == other.underflow_);
-}
-
-bool operation::operator!=(const operation& other) const
-{
-    return !(*this == other);
 }
 
 // Properties.

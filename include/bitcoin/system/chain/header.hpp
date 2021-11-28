@@ -42,6 +42,9 @@ namespace chain {
 class BC_API header
 {
 public:
+    typedef std::vector<header> list;
+    typedef std::shared_ptr<header> ptr;
+
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -57,6 +60,10 @@ public:
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
 
+    header(const data_chunk& data);
+    header(std::istream& stream);
+    header(reader& source);
+
     // Operators.
     //-------------------------------------------------------------------------
 
@@ -68,10 +75,6 @@ public:
 
     // Deserialization.
     //-------------------------------------------------------------------------
-
-    static header factory(const data_chunk& data);
-    static header factory(std::istream& stream);
-    static header factory(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);

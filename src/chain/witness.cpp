@@ -69,14 +69,20 @@ witness::witness(const data_stack& stack)
   : witness(stack, true)
 {
 }
-witness::witness(data_chunk&& encoded, bool prefix)
-{
-    from_data(encoded, prefix);
-}
 
 witness::witness(const data_chunk& encoded, bool prefix)
 {
     from_data(encoded, prefix);
+}
+
+witness::witness(std::istream& stream, bool prefix)
+{
+    from_data(stream, prefix);
+}
+
+witness::witness(reader& source, bool prefix)
+{
+    from_data(source, prefix);
 }
 
 // protected
@@ -96,7 +102,6 @@ witness::witness(const data_stack& stack, bool valid)
 
 witness& witness::operator=(witness&& other)
 {
-    ////reset();
     stack_ = std::move(other.stack_);
     valid_ = other.valid_;
     return *this;
@@ -104,7 +109,6 @@ witness& witness::operator=(witness&& other)
 
 witness& witness::operator=(const witness& other)
 {
-    ////reset();
     stack_ = other.stack_;
     valid_ = other.valid_;
     return *this;
@@ -122,30 +126,6 @@ bool witness::operator!=(const witness& other) const
 
 // Deserialization.
 //-----------------------------------------------------------------------------
-
-// static
-witness witness::factory(const data_chunk& encoded, bool prefix)
-{
-    witness instance;
-    instance.from_data(encoded, prefix);
-    return instance;
-}
-
-// static
-witness witness::factory(std::istream& stream, bool prefix)
-{
-    witness instance;
-    instance.from_data(stream, prefix);
-    return instance;
-}
-
-// static
-witness witness::factory(reader& source, bool prefix)
-{
-    witness instance;
-    instance.from_data(source, prefix);
-    return instance;
-}
 
 bool witness::from_data(const data_chunk& encoded, bool prefix)
 {
