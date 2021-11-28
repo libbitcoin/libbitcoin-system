@@ -51,13 +51,17 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
         {
             for (const auto& input: tx.inputs())
             {
-                const auto& prevout = input.previous_output();
-                if (!prevout.metadata.cache.is_valid())
-                    return false;
+                return false;
 
-                const auto& script = prevout.metadata.cache.script();
-                if (!script.empty())
-                    scripts.push_back(script.to_data(false));
+                // TODO:
+
+                ////const auto& prevout = input.previous_output();
+                ////if (!prevout.metadata.cache.is_valid())
+                ////    return false;
+
+                ////const auto& script = prevout.metadata.cache.script();
+                ////if (!script.empty())
+                ////    scripts.push_back(script.to_data(false));
             }
         }
 

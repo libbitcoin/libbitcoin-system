@@ -21,7 +21,6 @@
 #include <sstream>
 #include <string>
 #include <bitcoin/system/chain/input.hpp>
-#include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
@@ -37,21 +36,15 @@ using namespace boost::program_options;
 static bool decode_input(chain::input& input, const std::string& tuple)
 {
     const auto tokens = split(tuple, point::delimiter);
-    if (tokens.size() != 2 && tokens.size() != 3)
+    if (tokens.size() != 2)
         return false;
 
-    input.set_sequence(chain::max_input_sequence);
-    input.set_previous_output(point(tokens[0] + ":" + tokens[1]));
-
-    // TODO: remove stealth inputs.
-    if (tokens.size() == 3)
+    input = chain::input
     {
-        uint32_t value;
-        if (!deserialize(value, tokens[2]))
-            return false;
-
-        input.set_sequence(value);
-    }
+        point{ tokens[0] + ":" + tokens[1] },
+        input.script(),
+        chain::max_input_sequence
+    };
 
     return true;
 }
@@ -76,17 +69,12 @@ input::input(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-input::input(const chain::input& value)
-  : value_(value)
-{
-}
-
 input::input(const input& other)
   : input(other.value_)
 {
 }
 
-input::input(const chain::input_point& value)
+input::input(const chain::point& value)
   : value_({value, {}, chain::max_input_sequence})
 {
 }

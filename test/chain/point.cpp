@@ -183,38 +183,6 @@ BOOST_AUTO_TEST_CASE(point__factory_3__roundtrip__success)
     BOOST_REQUIRE(output == raw);
 }
 
-BOOST_AUTO_TEST_CASE(point__hash_setter_1__roundtrip__success)
-{
-    const auto value = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-
-    chain::point instance;
-    BOOST_REQUIRE(value != instance.hash());
-    instance.set_hash(value);
-    BOOST_REQUIRE(value == instance.hash());
-}
-
-BOOST_AUTO_TEST_CASE(point__hash_setter_2__roundtrip__success)
-{
-    const auto value = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-
-    // This must be non-const.
-    auto dup_value = value;
-
-    chain::point instance;
-    BOOST_REQUIRE(value != instance.hash());
-    instance.set_hash(std::move(dup_value));
-    BOOST_REQUIRE(value == instance.hash());
-}
-
-BOOST_AUTO_TEST_CASE(point__index__roundtrip__success)
-{
-    uint32_t value = 1254u;
-    chain::point instance;
-    BOOST_REQUIRE(value != instance.index());
-    instance.set_index(value);
-    BOOST_REQUIRE_EQUAL(value, instance.index());
-}
-
 BOOST_AUTO_TEST_CASE(point__operator_assign_equals_1__always__matches_equivalent)
 {
     chain::point expected;
@@ -272,32 +240,54 @@ BOOST_AUTO_TEST_CASE(point__operator_boolean_not_equals__differs__returns_true)
     BOOST_REQUIRE(alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(point__checksum__all_ones__returns_all_ones)
-{
-    static const auto tx_hash = hash_literal("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    chain::point instance(tx_hash, 0xffffffff);
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xffffffffffffffff);
-}
-
-BOOST_AUTO_TEST_CASE(point__checksum__all_zeroes__returns_all_zeros)
-{
-    static const auto tx_hash = hash_literal("0000000000000000000000000000000000000000000000000000000000000000");
-    chain::point instance(tx_hash, 0x00000000);
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 0x0000000000000000);
-}
-
-BOOST_AUTO_TEST_CASE(point__checksum__pattern_one__returns_expected)
-{
-    static const auto tx_hash = hash_literal("000000000000000000000000aaaaaaaaaaaaaaaa000000000000000000000000");
-    chain::point instance(tx_hash, 0x00000001);
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 0xaaaaaaaaaaaa8001);
-}
-
-BOOST_AUTO_TEST_CASE(point__checksum__pattern_high__returns_expected)
-{
-    static const auto tx_hash = hash_literal("ffffffffffffffffffffffff01234567aaaaaaaaffffffffffffffffffffffff");
-    chain::point instance(tx_hash, 0x89abcdef);
-    BOOST_REQUIRE_EQUAL(instance.checksum(), 0x1234567aaaacdef);
-}
+////BOOST_AUTO_TEST_CASE(point__is_mature__mature_coinbase_prevout__returns_true)
+////{
+////    size_t target_height = 162u;
+////    chain::point instance(hash1, 42);
+////    instance.metadata.height = 50u;
+////    instance.metadata.coinbase = true;
+////    BOOST_REQUIRE(!instance.is_null());
+////    BOOST_REQUIRE(instance.is_mature(target_height));
+////}
+////
+////BOOST_AUTO_TEST_CASE(point__is_mature__immature_coinbase_prevout__returns_false)
+////{
+////    size_t target_height = 162u;
+////    chain::point instance(hash1, 42);
+////    instance.metadata.height = 100u;
+////    instance.metadata.coinbase = true;
+////    BOOST_REQUIRE(!instance.is_null());
+////    BOOST_REQUIRE(!instance.is_mature(target_height));
+////}
+////
+////BOOST_AUTO_TEST_CASE(point__is_mature__immature_coinbase_prevout_null_input__returns_true)
+////{
+////    size_t target_height = 162u;
+////    chain::point instance(null_hash, chain::point::null_index);
+////    instance.metadata.height = 100u;
+////    instance.metadata.coinbase = true;
+////    BOOST_REQUIRE(instance.is_null());
+////    BOOST_REQUIRE(instance.is_mature(target_height));
+////}
+////
+////BOOST_AUTO_TEST_CASE(point__is_mature__mature_non_coinbase_prevout__returns_true)
+////{
+////    size_t target_height = 162u;
+////    chain::point instance(hash1, 42);
+////    instance.metadata.height = 50u;
+////    instance.metadata.coinbase = false;
+////    BOOST_REQUIRE(!instance.is_null());
+////    BOOST_REQUIRE(instance.is_mature(target_height));
+////}
+////
+////BOOST_AUTO_TEST_CASE(point__is_mature__immature_non_coinbase_prevout__returns_true)
+////{
+////    size_t target_height = 162u;
+////    chain::point instance(hash1, 42);
+////    instance.metadata.height = 100u;
+////    instance.metadata.coinbase = false;
+////    BOOST_REQUIRE(!instance.is_null());
+////    BOOST_REQUIRE(instance.is_mature(target_height));
+////}
 
 BOOST_AUTO_TEST_SUITE_END()

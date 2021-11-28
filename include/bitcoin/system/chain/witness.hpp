@@ -100,7 +100,7 @@ public:
     iterator end() const;
     const data_chunk& operator[](size_t index) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
     size_t serialized_size(bool prefix) const;
@@ -124,7 +124,7 @@ public:
         const script& program_script, uint64_t value) const;
 
 protected:
-    // So that input may call reset from its own.
+    // So input may reset its member.
     friend class input;
 
     void reset();

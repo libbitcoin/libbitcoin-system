@@ -172,7 +172,6 @@ bool witness::from_data(reader& source, bool prefix)
         return source.read_bytes(size);
     };
 
-    // TODO: optimize store serialization to avoid loop, reading data directly.
     if (prefix)
     {
         // Witness prefix is an element count, not byte length (unlike script).
@@ -225,13 +224,10 @@ bool witness::is_valid() const
 
 data_chunk witness::to_data(bool prefix) const
 {
-    data_chunk data;
-    const auto size = serialized_size(prefix);
-    data.reserve(size);
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size(prefix));
+    stream::out::copy ostream(data);
     to_data(ostream, prefix);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
@@ -243,19 +239,21 @@ void witness::to_data(std::ostream& stream, bool prefix) const
 
 void witness::to_data(writer& sink, bool prefix) const
 {
+    DEBUG_ONLY(const auto size = serialized_size(prefix);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
         sink.write_variable(stack_.size());
 
-    const auto serialize = [&sink](const data_chunk& element)
+    // Tokens encoded as variable integer prefixed byte array (bip144).
+    for (const auto& element: stack_)
     {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
         sink.write_variable(element.size());
         sink.write_bytes(element);
-    };
+    }
 
-    // TODO: optimize store serialization to avoid loop, writing data directly.
-    std::for_each(stack_.begin(), stack_.end(), serialize);
+    BITCOIN_ASSERT(sink.get_position() - start == size);
 }
 
 std::string witness::to_string() const
@@ -442,8 +440,7 @@ bool witness::extract_script(script& out_script,
 
                     // Create a pay-to-key-hash input script from the program.
                     // The hash160 of public key must match program (bip141).
-                    out_script.from_operations(to_pay_key_hash(
-                        std::move(program)));
+                    out_script = script{ to_pay_key_hash(std::move(program)) };
                     return true;
                 }
 

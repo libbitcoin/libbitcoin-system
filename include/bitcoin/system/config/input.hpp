@@ -36,7 +36,7 @@ public:
     input(const input& other);
     input(const std::string& tuple);
     input(const chain::input& value);
-    input(const chain::input_point& value);
+    input(const chain::point& value);
 
     operator const chain::input&() const;
 

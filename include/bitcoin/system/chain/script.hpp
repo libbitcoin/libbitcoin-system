@@ -59,7 +59,6 @@ public:
     script(operation::list&& ops);
     script(const operation::list& ops);
 
-    script(data_chunk&& encoded, bool prefix);
     script(const data_chunk& encoded, bool prefix);
 
     // Operators.
@@ -86,8 +85,6 @@ public:
 
     /// Deserialization invalidates the iterator.
     bool from_string(const std::string& mnemonic);
-    void from_operations(operation::list&& ops);
-    void from_operations(const operation::list& ops);
 
     /// A script object is valid if the byte count matches the prefix.
     bool is_valid() const;
@@ -100,7 +97,6 @@ public:
     void to_data(writer& sink, bool prefix) const;
 
     std::string to_string(uint32_t active_forks) const;
-    hash_digest to_payments_key() const;
 
     // Iteration.
     //-------------------------------------------------------------------------
@@ -114,11 +110,12 @@ public:
     operation::iterator end() const;
     const operation& operator[](size_t index) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
     size_t serialized_size(bool prefix) const;
     const operation::list& operations() const;
+    hash_digest to_payments_key() const;
 
     // Signing.
     //-------------------------------------------------------------------------
@@ -140,16 +137,8 @@ public:
     // Utilities (static).
     //-------------------------------------------------------------------------
 
-    /// Transaction helpers.
-    static data_chunk to_outputs(const transaction& tx);
-    static data_chunk to_inpoints(const transaction& tx);
-    static data_chunk to_sequences(const transaction& tx);
-
     /// Determine if the fork is enabled in the active forks set.
-    static inline bool is_enabled(uint32_t active_forks, rule_fork fork)
-    {
-        return !is_zero(fork & active_forks);
-    }
+    static bool is_enabled(uint32_t active_forks, rule_fork fork);
 
     /// Consensus patterns.
     static bool is_push_only(const operation::list& ops);
@@ -209,12 +198,12 @@ public:
     //-------------------------------------------------------------------------
 
     /// This overload obtains the previous output from metadata.
-    static code verify(const transaction& tx, uint32_t index, uint32_t forks);
+    ////static code verify(const transaction& tx, uint32_t index, uint32_t forks);
     static code verify(const transaction& tx, uint32_t index, uint32_t forks,
         const script& prevout_script, uint64_t value);
 
 protected:
-    // So that input and output may call reset from their own.
+    // So inputs and output may reset the member.
     friend class input;
     friend class output;
 
@@ -223,23 +212,13 @@ protected:
     bool is_pay_to_script_hash(uint32_t forks) const;
 
 private:
-    static size_t serialized_size(const operation::list& ops);
-    static data_chunk operations_to_data(const operation::list& ops);
     static hash_digest generate_unversioned_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint8_t flags);
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
         bool bip143);
 
-    operation::list& operations_move();
-    const operation::list& operations_copy() const;
-
-    // These are protected by mutex.
-    mutable operation::list operations_;
-    mutable bool cached_;
-    mutable upgrade_mutex mutex_;
-
-    data_chunk bytes_;
+    mutable operation::list ops_;
     bool valid_;
 };
 

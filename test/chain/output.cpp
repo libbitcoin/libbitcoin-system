@@ -132,48 +132,6 @@ BOOST_AUTO_TEST_CASE(output__signature_operations__always__returns_script_sigops
     BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations(false));
 }
 
-BOOST_AUTO_TEST_CASE(output__value__roundtrip__success)
-{
-    uint64_t expected = 523542u;
-    chain::output instance;
-    BOOST_REQUIRE(expected != instance.value());
-    instance.set_value(expected);
-    BOOST_REQUIRE_EQUAL(expected, instance.value());
-}
-
-BOOST_AUTO_TEST_CASE(output__script_setter_1__roundtrip__success)
-{
-    chain::script value;
-    const auto data = base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1");
-     BOOST_REQUIRE(value.from_data(data, false));
-
-    chain::output instance;
-    BOOST_REQUIRE(value != instance.script());
-    instance.set_script(value);
-    BOOST_REQUIRE(value == instance.script());
-    const auto& restricted = instance;
-    BOOST_REQUIRE(value == instance.script());
-    BOOST_REQUIRE(value == restricted.script());
-}
-
-BOOST_AUTO_TEST_CASE(output__script_setter_2__roundtrip__success)
-{
-    chain::script value;
-    const auto data = base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1");
-    BOOST_REQUIRE(value.from_data(data, false));
-
-    // This must be non-const.
-    auto dup_value = value;
-
-    chain::output instance;
-    BOOST_REQUIRE(value != instance.script());
-    instance.set_script(std::move(dup_value));
-    BOOST_REQUIRE(value == instance.script());
-    const auto& restricted = instance;
-    BOOST_REQUIRE(value == instance.script());
-    BOOST_REQUIRE(value == restricted.script());
-}
-
 BOOST_AUTO_TEST_CASE(output__operator_assign_equals_1__always__matches_equivalent)
 {
     chain::output expected;

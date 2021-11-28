@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(witness_address__hash_digest_construct__null_hash__valid)
 BOOST_AUTO_TEST_CASE(witness_address__script_construct__invlid__invalid)
 {
     chain::script script;
-    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, false));
+    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, true));
     BOOST_REQUIRE(!witness_address(script));
 }
 
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(witness_address__encoded__script_hash_prefix__expected)
 BOOST_AUTO_TEST_CASE(witness_address__encoded__invalid_script__empty)
 {
     chain::script script;
-    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, false));
+    BOOST_REQUIRE(!script.from_data(data_chunk{ 0x01 }, true));
     const witness_address instance{ script };
     BOOST_REQUIRE(instance.encoded().empty());
 }

@@ -24,7 +24,7 @@
 #include <istream>
 #include <memory>
 #include <vector>
-#include <bitcoin/system/chain/output_point.hpp>
+#include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -49,15 +49,15 @@ public:
     input(input&& other);
     input(const input& other);
 
-    input(output_point&& previous_output, chain::script&& script,
+    input(point&& previous_output, chain::script&& script,
         uint32_t sequence);
 
-    input(const output_point& previous_output, const chain::script& script,
+    input(const point& previous_output, const chain::script& script,
         uint32_t sequence);
 
-    input(output_point&& previous_output, chain::script&& script,
+    input(point&& previous_output, chain::script&& script,
         chain::witness&& witness, uint32_t sequence);
-    input(const output_point& previous_output, const chain::script& script,
+    input(const point& previous_output, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
 
     // Operators.
@@ -72,44 +72,31 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static input factory(const data_chunk& data, bool wire=true, bool witness=false);
-    static input factory(std::istream& stream, bool wire=true, bool witness=false);
-    static input factory(reader& source, bool wire=true, bool witness=false);
+    static input factory(const data_chunk& data, bool witness=false);
+    static input factory(std::istream& stream, bool witness=false);
+    static input factory(reader& source, bool witness=false);
 
-    bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
-    bool from_data(std::istream& stream, bool wire=true, bool witness=false);
-    bool from_data(reader& source, bool wire=true, bool witness=false);
+    bool from_data(const data_chunk& data, bool witness=false);
+    bool from_data(std::istream& stream, bool witness=false);
+    bool from_data(reader& source, bool witness=false);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true, bool witness=false) const;
-    void to_data(std::ostream& stream, bool wire=true, bool witness=false) const;
-    void to_data(writer& sink, bool wire=true, bool witness=false) const;
+    data_chunk to_data(bool witness=false) const;
+    void to_data(std::ostream& stream, bool witness=false) const;
+    void to_data(writer& sink, bool witness=false) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
-    /// This accounts for wire witness, but does not read or write it.
-    size_t serialized_size(bool wire=true, bool witness=false) const;
-
-    output_point& previous_output();
-    const output_point& previous_output() const;
-    void set_previous_output(const output_point& value);
-    void set_previous_output(output_point&& value);
-
+    size_t serialized_size(bool witness=false) const;
+    const point& previous_output() const;
     const chain::script& script() const;
-    void set_script(const chain::script& value);
-    void set_script(chain::script&& value);
-
     const chain::witness& witness() const;
-    void set_witness(const chain::witness& value);
-    void set_witness(chain::witness&& value);
-
     uint32_t sequence() const;
-    void set_sequence(uint32_t value);
 
     // Utilities.
     //-------------------------------------------------------------------------
@@ -122,16 +109,16 @@ public:
 
     bool is_final() const;
     bool is_segregated() const;
-    bool is_locked(size_t block_height, uint32_t median_time_past) const;
-    size_t signature_operations(bool bip16, bool bip141) const;
     bool extract_reserved_hash(hash_digest& out) const;
-    bool extract_embedded_script(chain::script& out) const;
 
 protected:
+    // So that witness may be set late in deserialization.
+    friend class transaction;
+
     void reset();
 
 private:
-    output_point previous_output_;
+    point previous_output_;
     chain::script script_;
     chain::witness witness_;
     uint32_t sequence_;

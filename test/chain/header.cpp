@@ -185,14 +185,6 @@ BOOST_AUTO_TEST_CASE(header__version_accessor__always__returns_initialized_value
     BOOST_REQUIRE_EQUAL(value, instance.version());
 }
 
-BOOST_AUTO_TEST_CASE(header__version_setter__roundtrip__success)
-{
-    uint32_t expected = 4521u;
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.version());
-    instance.set_version(expected);
-    BOOST_REQUIRE(expected == instance.version());
-}
 
 BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__returns_initialized_value)
 {
@@ -220,28 +212,6 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__returns_ini
         34564u);
 
     BOOST_REQUIRE(value == instance.previous_block_hash());
-}
-
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_1__roundtrip__success)
-{
-    const auto expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.previous_block_hash());
-    instance.set_previous_block_hash(expected);
-    BOOST_REQUIRE(expected == instance.previous_block_hash());
-}
-
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_setter_2__roundtrip__success)
-{
-    const auto expected = hash_literal("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
-
-    // This must be non-const.
-    auto duplicate = expected;
-
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.previous_block_hash());
-    instance.set_previous_block_hash(std::move(duplicate));
-    BOOST_REQUIRE(expected == instance.previous_block_hash());
 }
 
 BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_value)
@@ -272,28 +242,6 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_valu
     BOOST_REQUIRE(value == instance.merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(header__merkle_setter_1__roundtrip__success)
-{
-    const auto expected = hash_literal("abababababababababababababababababababababababababababababababab");
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.merkle_root());
-    instance.set_merkle_root(expected);
-    BOOST_REQUIRE(expected == instance.merkle_root());
-}
-
-BOOST_AUTO_TEST_CASE(header__merkle_setter_2__roundtrip__success)
-{
-    const auto expected = hash_literal("abababababababababababababababababababababababababababababababab");
-
-    // This must be non-const.
-    hash_digest duplicate = expected;
-
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.merkle_root());
-    instance.set_merkle_root(std::move(duplicate));
-    BOOST_REQUIRE(expected == instance.merkle_root());
-}
-
 BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__returns_initialized_value)
 {
     uint32_t value = 753234u;
@@ -306,15 +254,6 @@ BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__returns_initialized_val
         34564u);
 
     BOOST_REQUIRE_EQUAL(value, instance.timestamp());
-}
-
-BOOST_AUTO_TEST_CASE(header__timestamp_setter__roundtrip__success)
-{
-    uint32_t expected = 4521u;
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.timestamp());
-    instance.set_timestamp(expected);
-    BOOST_REQUIRE(expected == instance.timestamp());
 }
 
 BOOST_AUTO_TEST_CASE(header__bits_accessor__always__returns_initialized_value)
@@ -331,15 +270,6 @@ BOOST_AUTO_TEST_CASE(header__bits_accessor__always__returns_initialized_value)
     BOOST_REQUIRE_EQUAL(value, instance.bits());
 }
 
-BOOST_AUTO_TEST_CASE(header__bits_setter__roundtrip__success)
-{
-    uint32_t expected = 4521u;
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.bits());
-    instance.set_bits(expected);
-    BOOST_REQUIRE(expected == instance.bits());
-}
-
 BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 {
     uint32_t value = 34564u;
@@ -354,39 +284,27 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
     BOOST_REQUIRE_EQUAL(value, instance.nonce());
 }
 
-BOOST_AUTO_TEST_CASE(header__nonce_setter__roundtrip__success)
-{
-    uint32_t expected = 4521u;
-    chain::header instance;
-    BOOST_REQUIRE(expected != instance.nonce());
-    instance.set_nonce(expected);
-    BOOST_REQUIRE(expected == instance.nonce());
-}
-
 BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__returns_true)
 {
-    chain::header instance;
     const auto now = std::chrono::system_clock::now();
     const auto now_time = std::chrono::system_clock::to_time_t(now);
-    instance.set_timestamp(static_cast<uint32_t>(now_time));
+    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
     BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
 {
-    chain::header instance;
     const auto now = std::chrono::system_clock::now();
     const auto duration = std::chrono::hours(3);
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
-    instance.set_timestamp(static_cast<uint32_t>(future));
+    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
     BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
 {
     const settings settings(chain::selection::mainnet);
-    chain::header instance;
-    instance.set_bits(settings.proof_of_work_limit + 1);
+    chain::header instance{ {}, {}, {}, {}, settings.proof_of_work_limit + 1, {} };
     BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 }
 

@@ -25,9 +25,6 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
-// If required change to bc::checked.
-////#include <bitcoin/system/wallet/addresses/payment_address.hpp>
-
 namespace libbitcoin {
 namespace system {
 namespace chain {
@@ -35,76 +32,53 @@ namespace chain {
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
-// These are non-consensus sentinel values used by the store.
-const uint32_t output::validation::not_spent = max_uint32;
-const uint8_t output::validation::candidate_spent_true = 1;
-const uint8_t output::validation::candidate_spent_false = 0;
-
 // Constructors.
 //-----------------------------------------------------------------------------
 
 output::output()
-  : metadata{},
-    value_(not_found),
+  : value_(not_found),
     script_{}
 {
 }
 
 output::output(output&& other)
-  : metadata(other.metadata),
-    ////addresses_(other.addresses_cache()),
-    value_(other.value_),
+  : value_(other.value_),
     script_(std::move(other.script_))
 {
 }
 
 output::output(const output& other)
-  : metadata(other.metadata),
-    ////addresses_(other.addresses_cache()),
-    value_(other.value_),
+  : value_(other.value_),
     script_(other.script_)
 {
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : metadata{},
-    value_(value),
+  : value_(value),
     script_(std::move(script))
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : metadata{},
-    value_(value),
+  : value_(value),
     script_(script)
 {
 }
-
-////// Private cache access for copy/move construction.
-////output::addresses_ptr output::addresses_cache() const
-////{
-////    shared_lock lock(mutex_);
-////    return addresses_;
-////}
 
 // Operators.
 //-----------------------------------------------------------------------------
 
 output& output::operator=(output&& other)
 {
-    ////addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = std::move(other.script_);
-    metadata = std::move(other.metadata);
     return *this;
 }
 
 output& output::operator=(const output& other)
 {
-    ////addresses_ = other.addresses_cache();
     value_ = other.value_;
     script_ = other.script_;
-    metadata = other.metadata;
     return *this;
 }
 
@@ -121,53 +95,42 @@ bool output::operator!=(const output& other) const
 // Deserialization.
 //-----------------------------------------------------------------------------
 
-output output::factory(const data_chunk& data, bool wire)
+output output::factory(const data_chunk& data)
 {
     output instance;
-    instance.from_data(data, wire);
+    instance.from_data(data);
     return instance;
 }
 
-output output::factory(std::istream& stream, bool wire)
+output output::factory(std::istream& stream)
 {
     output instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream);
     return instance;
 }
 
-output output::factory(reader& source, bool wire)
+output output::factory(reader& source)
 {
     output instance;
-    instance.from_data(source, wire);
+    instance.from_data(source);
     return instance;
 }
 
-bool output::from_data(const data_chunk& data, bool wire)
+bool output::from_data(const data_chunk& data)
 {
     stream::in::copy istream(data);
-    return from_data(istream, wire);
+    return from_data(istream);
 }
 
-bool output::from_data(std::istream& stream, bool wire)
+bool output::from_data(std::istream& stream)
 {
     read::bytes::istream source(stream);
-    return from_data(source, wire);
+    return from_data(source);
 }
 
-bool output::from_data(reader& source, bool wire, bool)
+bool output::from_data(reader& source, bool)
 {
     reset();
-
-    if (!wire)
-    {
-        const auto spent = source.read_byte() == 
-            output::validation::candidate_spent_true;
-
-        // These read updateable data in a non-atomic manner.
-        // The results are unusable unless externally protected.
-        metadata.candidate_spent = spent;
-        metadata.confirmed_spent_height = source.read_4_bytes_little_endian();
-    }
 
     value_ = source.read_8_bytes_little_endian();
     script_.from_data(source, true);
@@ -194,49 +157,38 @@ bool output::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk output::to_data(bool wire) const
+data_chunk output::to_data() const
 {
-    data_chunk data;
-    const auto size = serialized_size(wire);
-    data.reserve(size);
-    stream::out::data ostream(data);
-    to_data(ostream, wire);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size());
+    stream::out::copy ostream(data);
+    to_data(ostream);
     return data;
 }
 
-void output::to_data(std::ostream& stream, bool wire) const
+void output::to_data(std::ostream& stream) const
 {
     write::bytes::ostream out(stream);
-    to_data(out, wire);
+    to_data(out);
 }
 
-void output::to_data(writer& sink, bool wire, bool) const
+void output::to_data(writer& sink, bool) const
 {
-    if (!wire)
-    {
-        const auto spent = metadata.candidate_spent ?
-            output::validation::candidate_spent_true :
-            output::validation::candidate_spent_false;
-
-        // These writes are only utilized for unreachable tx serialization.
-        // Later updates and usable reads must be externally protected.
-        sink.write_byte(spent);
-        sink.write_4_bytes_little_endian(metadata.confirmed_spent_height);
-    }
+    DEBUG_ONLY(const auto size = serialized_size();)
+    DEBUG_ONLY(const auto start = sink.get_position();)
 
     sink.write_8_bytes_little_endian(value_);
     script_.to_data(sink, true);
+
+    BITCOIN_ASSERT(sink.get_position() - start == size);
 }
 
 // Size.
 //-----------------------------------------------------------------------------
 
-size_t output::serialized_size(bool wire) const
+size_t output::serialized_size() const
 {
-    const auto metadata = wire ? 0 : sizeof(uint32_t) + sizeof(uint8_t);
-    return metadata + sizeof(value_) + script_.serialized_size(true);
+    return sizeof(value_) + script_.serialized_size(true);
 }
 
 // Accessors.
@@ -247,79 +199,10 @@ uint64_t output::value() const
     return value_;
 }
 
-void output::set_value(uint64_t value)
-{
-    value_ = value;
-}
-
 const chain::script& output::script() const
 {
     return script_;
 }
-
-void output::set_script(const chain::script& value)
-{
-    script_ = value;
-    ////invalidate_cache();
-}
-
-void output::set_script(chain::script&& value)
-{
-    script_ = std::move(value);
-    ////invalidate_cache();
-}
-
-////// protected
-////void output::invalidate_cache() const
-////{
-////    ///////////////////////////////////////////////////////////////////////////
-////    // Critical Section
-////    mutex_.lock_upgrade();
-////
-////    if (addresses_)
-////    {
-////        mutex_.unlock_upgrade_and_lock();
-////        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-////        addresses_.reset();
-////        //---------------------------------------------------------------------
-////        mutex_.unlock_and_lock_upgrade();
-////    }
-////
-////    mutex_.unlock_upgrade();
-////    ///////////////////////////////////////////////////////////////////////////
-////}
-
-////payment_address output::address(uint8_t p2kh_version,
-////    uint8_t p2sh_version) const
-////{
-////    const auto value = addresses(p2kh_version, p2sh_version);
-////    return value.empty() ? payment_address{} : value.front();
-////}
-
-////payment_address::list output::addresses(uint8_t p2kh_version,
-////    uint8_t p2sh_version) const
-////{
-////    ///////////////////////////////////////////////////////////////////////////
-////    // Critical Section
-////    mutex_.lock_upgrade();
-////
-////    if (!addresses_)
-////    {
-////        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-////        mutex_.unlock_upgrade_and_lock();
-////        addresses_ = std::make_shared<payment_address::list>(
-////            payment_address::extract_output(script_, p2kh_version,
-////                p2sh_version));
-////        mutex_.unlock_and_lock_upgrade();
-////        //---------------------------------------------------------------------
-////    }
-////
-////    const auto addresses = *addresses_;
-////    mutex_.unlock_upgrade();
-////    ///////////////////////////////////////////////////////////////////////////
-////
-////    return addresses;
-////}
 
 // Validation helpers.
 //-----------------------------------------------------------------------------

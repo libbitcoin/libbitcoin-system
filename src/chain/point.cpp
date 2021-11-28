@@ -122,60 +122,48 @@ bool point::operator!=(const point& other) const
 //-----------------------------------------------------------------------------
 
 // static
-point point::factory(const data_chunk& data, bool wire)
+point point::factory(const data_chunk& data)
 {
     point instance;
-    instance.from_data(data, wire);
+    instance.from_data(data);
     return instance;
 }
 
 // static
-point point::factory(std::istream& stream, bool wire)
+point point::factory(std::istream& stream)
 {
     point instance;
-    instance.from_data(stream, wire);
+    instance.from_data(stream);
     return instance;
 }
 
 // static
-point point::factory(reader& source, bool wire)
+point point::factory(reader& source)
 {
     point instance;
-    instance.from_data(source, wire);
+    instance.from_data(source);
     return instance;
 }
 
-bool point::from_data(const data_chunk& data, bool wire)
+bool point::from_data(const data_chunk& data)
 {
     stream::in::copy istream(data);
-    return from_data(istream, wire);
+    return from_data(istream);
 }
 
-bool point::from_data(std::istream& stream, bool wire)
+bool point::from_data(std::istream& stream)
 {
     read::bytes::istream source(stream);
-    return from_data(source, wire);
+    return from_data(source);
 }
 
-bool point::from_data(reader& source, bool wire)
+bool point::from_data(reader& source)
 {
     reset();
 
     valid_ = true;
     hash_ = source.read_hash();
-
-    if (wire)
-    {
-        index_ = source.read_4_bytes_little_endian();
-    }
-    else
-    {
-        index_ = source.read_2_bytes_little_endian();
-
-        // Convert 16 bit sentinel to 32 bit sentinel.
-        if (index_ == max_uint16)
-            index_ = null_index;
-    }
+    index_ = source.read_4_bytes_little_endian();
 
     if (!source)
         reset();
@@ -199,55 +187,43 @@ bool point::is_valid() const
 // Serialization.
 //-----------------------------------------------------------------------------
 
-data_chunk point::to_data(bool wire) const
+data_chunk point::to_data() const
 {
-    data_chunk data;
-    const auto size = serialized_size(wire);
-    data.reserve(size);
-    stream::out::data ostream(data);
-    to_data(ostream, wire);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size());
+    stream::out::copy ostream(data);
+    to_data(ostream);
     return data;
 }
 
-void point::to_data(std::ostream& stream, bool wire) const
+void point::to_data(std::ostream& stream) const
 {
     write::bytes::ostream out(stream);
-    to_data(out, wire);
+    to_data(out);
 }
 
-void point::to_data(writer& sink, bool wire) const
+void point::to_data(writer& sink) const
 {
+    DEBUG_ONLY(const auto size = serialized_size();)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
     sink.write_bytes(hash_);
+    sink.write_4_bytes_little_endian(index_);
 
-    if (wire)
-    {
-        sink.write_4_bytes_little_endian(index_);
-    }
-    else
-    {
-        BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
-
-        // Convert 32 bit sentinel to 16 bit sentinel.
-        const auto index = (index_ == null_index) ? max_uint16 :
-            static_cast<uint16_t>(index_);
-
-        sink.write_2_bytes_little_endian(index);
-    }
+    BITCOIN_ASSERT(sink.get_position() - start == size);
 }
 
 // Properties.
 //-----------------------------------------------------------------------------
 
-size_t point::satoshi_fixed_size(bool wire)
+size_t point::satoshi_fixed_size()
 {
-    return hash_size + (wire ? sizeof(uint32_t) : sizeof(uint16_t));
+    return hash_size + sizeof(uint32_t);
 }
 
-size_t point::serialized_size(bool wire) const
+size_t point::serialized_size() const
 {
-    return satoshi_fixed_size(wire);
+    return satoshi_fixed_size();
 }
 
 const hash_digest& point::hash() const
@@ -255,55 +231,9 @@ const hash_digest& point::hash() const
     return hash_;
 }
 
-void point::set_hash(const hash_digest& value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    hash_ = value;
-}
-
-void point::set_hash(hash_digest&& value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    hash_ = std::move(value);
-}
-
 uint32_t point::index() const
 {
     return index_;
-}
-
-void point::set_index(uint32_t value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    index_ = value;
-}
-
-// Utilities.
-//-----------------------------------------------------------------------------
-
-// Changed in v3.0 and again in v3.1 (3.0 was unmasked, lots of collisions).
-// This is used with output_point identification within a set of history rows
-// of the same address. Collision will result in miscorrelation of points by
-// client callers. This is stored in database. This is NOT a bitcoin checksum.
-uint64_t point::checksum() const
-{
-    // Reserve 49 bits for the tx hash and 15 bits (32768) for the input index.
-    static constexpr uint64_t mask = 0xffffffffffff8000;
-
-    // Use an offset to the middle of the hash to avoid coincidental mining
-    // of values into the front or back of tx hash (not a security feature).
-    // Use most possible bits of tx hash to make intentional collision hard.
-    const data_slice slice(std::next(hash_.begin(), 12), hash_.end());
-
-    const auto bits = from_little_endian<uint64_t>(slice);
-    const auto index = static_cast<uint64_t>(index_);
-
-    const auto hash_upper_49_bits = bits & mask;
-    const auto index_lower_15_bits = index & ~mask;
-    return hash_upper_49_bits | index_lower_15_bits;
 }
 
 // Validation.

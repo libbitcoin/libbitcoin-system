@@ -37,7 +37,7 @@ using namespace boost::program_options;
 const std::string point::delimiter = ":";
 
 // Point format is currently private to bx.
-static bool decode_point(chain::output_point& point, const std::string& tuple)
+static bool decode_point(chain::point& point, const std::string& tuple)
 {
     uint32_t index;
     const auto tokens = split(tuple, point::delimiter);
@@ -45,19 +45,12 @@ static bool decode_point(chain::output_point& point, const std::string& tuple)
         return false;
 
     // Validate and deserialize the transaction hash.
-    const hash256 digest(tokens[0]);
-    const hash_digest& hash = digest;
-    hash_digest copy;
-
-    // Copy the input point values.
-    std::copy(hash.begin(), hash.end(), copy.begin());
-    point.set_hash(std::move(copy));
-    point.set_index(index);
+    point = chain::point{ hash256{ tokens[0] }, index };
     return true;
 }
 
 // Point format is currently private to bx.
-static std::string encode_point(const chain::output_point& point)
+static std::string encode_point(const chain::point& point)
 {
     std::stringstream result;
     result << hash256(point.hash()) << point::delimiter << point.index();
@@ -74,7 +67,7 @@ point::point(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-point::point(const chain::output_point& value)
+point::point(const chain::point& value)
   : value_(value)
 {
 }
@@ -84,7 +77,7 @@ point::point(const point& other)
 {
 }
 
-point::operator const chain::output_point&() const
+point::operator const chain::point&() const
 {
     return value_;
 }

@@ -27,7 +27,7 @@ namespace chain {
 
 /// Signature hash types.
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
-enum sighash_algorithm : uint32_t
+enum sighash_algorithm : uint8_t
 {
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.

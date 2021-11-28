@@ -201,33 +201,39 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
+    DEBUG_ONLY(const auto size = serialized_size();)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
     // Underflow is op-undersized data, it is serialized with no opcode.
     // An underflow could only be a final token in a script deserialization.
     if (is_underflow())
     {
         sink.write_bytes(data_);
-        return;
     }
-
-    const auto size = data_.size();
-    sink.write_byte(static_cast<uint8_t>(code_));
-
-    switch (code_)
+    else
     {
-        case opcode::push_one_size:
-            sink.write_byte(static_cast<uint8_t>(size));
+        const auto size = data_.size();
+        sink.write_byte(static_cast<uint8_t>(code_));
+
+        switch (code_)
+        {
+            case opcode::push_one_size:
+                sink.write_byte(static_cast<uint8_t>(size));
+                break;
+            case opcode::push_two_size:
+                sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
+                break;
+            case opcode::push_four_size:
+                sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
+                break;
+            default:
             break;
-        case opcode::push_two_size:
-            sink.write_2_bytes_little_endian(static_cast<uint16_t>(size));
-            break;
-        case opcode::push_four_size:
-            sink.write_4_bytes_little_endian(static_cast<uint32_t>(size));
-            break;
-        default:
-            break;
+        }
+
+        sink.write_bytes(data_);
     }
 
-    sink.write_bytes(data_);
+    BITCOIN_ASSERT(sink.get_position() - start == size);
 }
 
 // From String.

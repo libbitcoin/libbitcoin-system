@@ -46,27 +46,6 @@ class BC_API block
 public:
     typedef std::vector<block> list;
 
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    struct validation
-    {
-        // Organize
-        std::chrono::nanoseconds deserialize;
-        std::chrono::nanoseconds check;
-        std::chrono::nanoseconds associate;
-
-        // Validate
-        ////std::chrono::nanoseconds deserialize;
-        std::chrono::nanoseconds populate;
-        std::chrono::nanoseconds accept;
-        std::chrono::nanoseconds connect;
-        std::chrono::nanoseconds candidate;
-        std::chrono::nanoseconds confirm;
-        std::chrono::nanoseconds catalog;
-        std::chrono::nanoseconds filter;
-
-        float cache_efficiency;
-    };
-
     // Constructors.
     //-------------------------------------------------------------------------
 
@@ -107,20 +86,16 @@ public:
     data_chunk to_data(bool witness=false) const;
     void to_data(std::ostream& stream, bool witness=false) const;
     void to_data(writer& sink, bool witness=false) const;
+
     hash_list to_hashes(bool witness=false) const;
 
-    // Properties (size, accessors, cache).
+    // Properties.
     //-------------------------------------------------------------------------
 
     size_t serialized_size(bool witness=false) const;
 
     const chain::header& header() const;
-    void set_header(const chain::header& value);
-    void set_header(chain::header&& value);
-
     const transaction::list& transactions() const;
-    void set_transactions(const transaction::list& value);
-    void set_transactions(transaction::list&& value);
 
     hash_digest hash() const;
 
@@ -133,24 +108,15 @@ public:
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42);
 
-    uint64_t fees() const;
-    uint64_t claim() const;
-    uint64_t reward(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
     hash_digest generate_merkle_root(bool witness=false) const;
-    size_t signature_operations() const;
-    size_t signature_operations(bool bip16, bool bip141) const;
     size_t total_non_coinbase_inputs() const;
     size_t total_inputs() const;
     size_t weight() const;
 
     bool is_extra_coinbases() const;
     bool is_hash_limit_exceeded() const;
-    bool is_unspent_coinbase_collision() const;
     bool is_final(size_t height, uint32_t block_time) const;
     bool is_distinct_transaction_set() const;
-    bool is_valid_coinbase_claim(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
     bool is_valid_coinbase_script(size_t height) const;
     bool is_valid_witness_commitment() const;
     bool is_forward_reference() const;
@@ -162,35 +128,18 @@ public:
         uint32_t proof_of_work_limit, bool scrypt=false,
         bool header=true) const;
     code check_transactions(uint64_t max_money) const;
-    code accept(const system::settings& settings, bool transactions=true,
-        bool header=true) const;
-    code accept(const chain_state& state, const system::settings& settings,
+    code accept(const chain_state& state, const settings& settings,
         bool transactions=true, bool header=true) const;
     code accept_transactions(const chain_state& state) const;
-    code connect() const;
-    code connect(const chain_state& state) const;
-    code connect_transactions(const chain_state& state) const;
-
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+    ////code connect(const chain_state& state) const;
+    ////code connect_transactions(const chain_state& state) const;
 
 protected:
     void reset();
 
 private:
-    optional_size total_inputs_cache() const;
-    optional_size non_coinbase_inputs_cache() const;
-
     chain::header header_;
     transaction::list transactions_;
-
-    // These share a mutex as they are not expected to contend.
-    mutable optional_flag segregated_;
-    mutable optional_size total_inputs_;
-    mutable optional_size non_coinbase_inputs_;
-    mutable optional_size base_size_;
-    mutable optional_size total_size_;
-    mutable upgrade_mutex mutex_;
 };
 
 } // namespace chain

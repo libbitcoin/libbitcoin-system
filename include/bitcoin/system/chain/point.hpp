@@ -67,41 +67,31 @@ public:
     // Deserialization.
     //-------------------------------------------------------------------------
 
-    static point factory(const data_chunk& data, bool wire=true);
-    static point factory(std::istream& stream, bool wire=true);
-    static point factory(reader& source, bool wire=true);
+    static point factory(const data_chunk& data);
+    static point factory(std::istream& stream);
+    static point factory(reader& source);
 
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
 
     bool is_valid() const;
 
     // Serialization.
     //-------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
 
     // Properties (size, accessors, cache).
     //-------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size(bool wire=true);
-    size_t serialized_size(bool wire=true) const;
+    static size_t satoshi_fixed_size();
+    size_t serialized_size() const;
 
     const hash_digest& hash() const;
-    void set_hash(hash_digest&& value);
-    void set_hash(const hash_digest& value);
-
     uint32_t index() const;
-    void set_index(uint32_t value);
-
-    // Utilities.
-    //-------------------------------------------------------------------------
-
-    /// This is for client-server, not related to consensus or p2p networking.
-    uint64_t checksum() const;
 
     // Validation.
     //-------------------------------------------------------------------------
@@ -109,20 +99,16 @@ public:
     bool is_null() const;
 
 protected:
+    // So input may reset its member.
+    friend class input;
+
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
     void reset();
 
 private:
-    // TODO:
     // The index is consensus-serialized as a fixed 4 bytes, however it is
-    // conceptually bound by input count. Code would be normalized to type it
-    // as size_t, casting upon serialization and deserialization. Guarding
-    // either would be unnecessary, as deserialization is not consensus-
-    // critical and if overflowed would create an invalid hash serialization.
-    // Store serialization may limit this to 2^16, as this is the byte-wise
-    // upper bound on the number of inputs that one transaction may contain
-    // while still confirming to the block byte size limit.
+    // effectively bound to 2^17 by the block byte size limit.
     hash_digest hash_;
     uint32_t index_;
     bool valid_;
