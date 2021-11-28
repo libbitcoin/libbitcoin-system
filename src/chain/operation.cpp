@@ -143,21 +143,25 @@ bool operation::from_data(reader& source)
 {
     // If stream is not empty then a non-data opcode will always deserialize.
     // A push-data opcode may indicate more bytes than are available. In this
-    // case the presumption is that the script is invalid, but it may not be
-    // evaluated, such as with a coinbase input. So if an operation fails to
-    // deserialize it is re-read and retained as an "underflow" operation.
-    // An underflow op serializes as data only, and fails evaluation. Only the
-    // last operation in a script could become an underflow, which may possibly
-    // contain the entire script.
+    // case the the script is invalid, but it may not be evaluated, such as
+    // with a coinbase input. So if an operation fails to deserialize it is
+    // re-read and retained as an "underflow" operation. An underflow op
+    // serializes as data only, and fails evaluation. Only the last operation
+    // in a script could become an underflow, which may possibly contain the
+    // entire script. This retains the read position in case of underflow.
     const auto start = source.get_position();
 
-    // The size of a push-data opcode is not retained, as this is inherent in
-    // the size of the data member, and is obtained from that upon serialize.
+    // Size of a push-data opcode is not retained, as this is inherent in data.
     code_ = static_cast<opcode>(source.read_byte());
     data_ = source.read_bytes(read_data_size(code_, source));
     underflow_ = !source;
 
     // This requires that provided stream terminates at the end of the script.
+    // when passing ops as part of a stream longer than the script, such as for
+    // a transaction, caller should apply source.set_limit(prefix size), and
+    // clear the stream limit upon return. Stream invalidation and set_position
+    // do not alter a stream limit, it just behaves as a smaller stream buffer.
+    // Without a limit, source.read_bytes() below consumes the remaining stream.
     if (underflow_)
     {
         code_ = any_invalid;
@@ -166,7 +170,7 @@ bool operation::from_data(reader& source)
     }
 
     // This indicates a failure with the stream itself as it cannot be the
-    // result of invaliditty of its data. All byte vectors are deserializable.
+    // result of invalidity of its data. All byte vectors are deserializable.
     if (!source)
         reset();
 
