@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_75__success)
 {
     const auto data75 = data_chunk(75, '.');
-    const auto data = splice(base16_literal("4b"), data75);
+    const auto data = splice(base16_array("4b"), data75);
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(data));
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
 {
     const auto data255 = data_chunk(255, '.');
-    const auto data = splice(base16_literal("4c" "ff"), data255);
+    const auto data = splice(base16_array("4c" "ff"), data255);
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(data));
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
 {
     const auto data520 = data_chunk(520, '.');
-    const auto data = splice(base16_literal("4d" "0802"), data520);
+    const auto data = splice(base16_array("4d" "0802"), data520);
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(data));
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
 BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
 {
     const auto data520 = data_chunk(520, '.');
-    const auto data = splice(base16_literal("4e" "08020000"), data520);
+    const auto data = splice(base16_array("4e" "08020000"), data520);
     operation instance;
 
     BOOST_REQUIRE(instance.from_data(data));

@@ -31,7 +31,7 @@ using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
 {
-    const auto encoded_password = base16_literal("cf92cc8100f0909080f09f92a9");
+    const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
     std::string passphrase(encoded_password.begin(), encoded_password.end());
 
     // This confirms that the passphrase decodes as expected in BIP38.
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__lot_overlow__false)
     const size_t lot = 1048575 + 1;
     const size_t sequence = 0;
     const auto passphrase = "";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     encrypted_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
     const size_t lot = 0;
     const size_t sequence = 4095 + 1;
     const auto passphrase = "";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     encrypted_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__defaults__expected)
     const size_t lot = 0;
     const size_t sequence = 0;
     const auto passphrase = "";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7yQVcg1eQKPuX7rzGwBtEH1YSZnKbyk75x3rugZu1ci4RyF4rEn");
 }
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase__expected)
     const size_t lot = 0;
     const size_t sequence = 0;
     const auto passphrase = "passphrase";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7x4pQXMhsJs2j7L8LTV8ujk9jGqgzUrafBeto9VrabP5SmvANvz");
 }
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_max__expected)
     const size_t lot = 1048575;
     const size_t sequence = 0;
     const auto passphrase = "passphrase";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 }
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_sequence_max__expec
     const size_t lot = 0;
     const size_t sequence = 4095;
     const auto passphrase = "passphrase";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 }
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_sequence__expec
     const size_t lot = 42;
     const size_t sequence = 42;
     const auto passphrase = "passphrase";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 }
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_SUITE(encrypted__create_token_entropy)
 BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__defaults__expected)
 {
     const auto passphrase = "";
-    const auto entropy = base16_literal("baadf00dbaadf00d");
+    const auto entropy = base16_array("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6yLmJ7TQ49fKnQtsgjybNgNHAKBCQKoFZcTNjNJtg4oCUgtPt3");
 }
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__defaults__expected)
 BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__passphrase__expected)
 {
     const auto passphrase = "passphrase";
-    const auto entropy = base16_literal("baadf00dbaadf00d");
+    const auto entropy = base16_array("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 }
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_0__expected)
     auto compression = false;
     const uint8_t version = 0x00;
     const auto expected = "6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg";
-    const auto secret = base16_literal("cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
+    const auto secret = base16_array("cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
     BC_REQUIRE_ENCRYPT(secret, "TestingOneTwoThree", version, compression, expected);
 }
 
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_1__expected)
     auto compression = false;
     const uint8_t version = 0x00;
     const auto expected = "6PRNFFkZc2NZ6dJqFfhRoFNMR9Lnyj7dYGrzdgXXVMXcxoKTePPX1dWByq";
-    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    const auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     BC_REQUIRE_ENCRYPT(secret, "Satoshi", version, compression, expected);
 }
 
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_2_compressed__expected)
     auto compression = true;
     const uint8_t version = 0x00;
     const auto expected = "6PYNKZ1EAgYgmQfmNVamxyXVWHzK5s6DGhwP4J5o44cvXdoY7sRzhtpUeo";
-    const auto secret = base16_literal("cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
+    const auto secret = base16_array("cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
     BC_REQUIRE_ENCRYPT(secret, "TestingOneTwoThree", version, compression, expected);
 }
 
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_3_compressed__expected)
     auto compression = true;
     const uint8_t version = 0x00;
     const auto expected = "6PYLtMnXvfG3oJde97zRyLYFZCYizPU5T3LwgdYJz1fRhh16bU7u6PPmY7";
-    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    const auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     BC_REQUIRE_ENCRYPT(secret, "Satoshi", version, compression, expected);
 }
 
@@ -202,10 +202,10 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto encoded_password = base16_literal("cf92cc8100f0909080f09f92a9");
+    const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
     std::string passphrase(encoded_password.begin(), encoded_password.end());
     const auto expected = "6PRW5o9FLp4gJDDVqJQKJFTpMvdsSGJxMYHtHaQBF3ooa8mwD69bapcDQn";
-    const auto secret = base16_literal("64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e");
+    const auto secret = base16_array("64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e");
     BC_REQUIRE_ENCRYPT(secret, passphrase, version, compression, expected);
 }
 
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point;
     encrypted_private out_private;
@@ -421,7 +421,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_8__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
@@ -436,7 +436,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed__expected)
 {
     auto compression = true;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed_testnet__ex
 {
     auto compression = true;
     const uint8_t version = 111;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
 
 BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
 {
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point;
     encrypted_public out_public;
@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_8__exp
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9__exp
 {
     auto compression = false;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
@@ -531,7 +531,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_comp
 {
     auto compression = true;
     const uint8_t version = 0x00;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_comp
 {
     auto compression = true;
     const uint8_t version = 111;
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
@@ -562,7 +562,7 @@ BOOST_AUTO_TEST_SUITE(encrypted__round_trips)
 
 BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_version_and_compression)
 {
-    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    const auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     const auto passphrase = "passphrase";
 
     // Encrypt the secret as a private key.
@@ -587,7 +587,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
     // Create the token.
     encrypted_token out_token;
     const auto passphrase = "passphrase";
-    const auto entropy = base16_literal("baadf00dbaadf00d");
+    const auto entropy = base16_array("baadf00dbaadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, entropy));
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 
@@ -597,7 +597,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
     encrypted_private out_private_key;
     const uint8_t version = 111;
     const auto is_compressed = false;
-    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+    const auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
     BOOST_REQUIRE(create_key_pair(out_private_key, out_point, token, seed, version, is_compressed));
 
     // Extract the secret from the private key.
@@ -621,7 +621,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
     // Create the token.
     encrypted_token out_token;
     const auto passphrase = "passphrase";
-    const auto salt = base16_literal("baadf00d");
+    const auto salt = base16_array("baadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 
@@ -632,7 +632,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
     encrypted_public out_public_key;
     const uint8_t version = 111;
     const auto is_compressed = true;
-    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+    const auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
     BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, out_point, token, seed, version, is_compressed));
 
     // Extract the secret from the private key.
@@ -678,7 +678,7 @@ BOOST_AUTO_TEST_SUITE_END()
 //BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
 //{
 //    encrypted_private out_private_key;
-//    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+//    const auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
 //
 //    const auto compressed = true;
 //    for (size_t version = 0x00; version <= 0xFF; ++version)
@@ -695,13 +695,13 @@ BOOST_AUTO_TEST_SUITE_END()
 //BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
 //{
 //    encrypted_token out_token;
-//    create_token(out_token, "passphrase", base16_literal("baadf00dbaadf00d"));
+//    create_token(out_token, "passphrase", base16_array("baadf00dbaadf00d"));
 //
 //    const auto& token = out_token;
 //    ec_compressed unused;
 //    encrypted_private out_private_key;
 //    encrypted_public out_public_key;
-//    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+//    const auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
 //
 //    const auto compressed = true;
 //    for (size_t version = 0x00; version <= 0xFF; ++version)

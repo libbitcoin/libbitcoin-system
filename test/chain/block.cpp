@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -78,8 +78,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__uninitialized__returns_true)
 
 BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__returns_true)
 {
-    const auto raw_block = to_chunk(base16_literal(
+    const auto raw_block = to_chunk(base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a0000000"
         "0005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4dc118244d6"
         "7fb74c9d8e2f1bea5ee82a03010000000100000000000000000000000000000000000"
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__failure)
 {
-    const auto data = to_chunk(base16_literal(
+    const auto data = to_chunk(base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_zero_transactions__
 BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_multiple_transactions__matches_historic_data)
 {
     // encodes the 100,000 block data.
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
@@ -368,8 +368,8 @@ BOOST_AUTO_TEST_CASE(block__generate_merkle_root__block_with_multiple_transactio
 BOOST_AUTO_TEST_CASE(block__header_accessor__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -388,8 +388,8 @@ BOOST_AUTO_TEST_CASE(block__header_accessor__always__returns_initialized_value)
 BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -408,8 +408,8 @@ BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__returns_initialized_v
 BOOST_AUTO_TEST_CASE(block__operator_assign_equals__always__matches_equivalent)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -437,8 +437,8 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__duplicates__returns_true)
 {
     const chain::block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
@@ -456,8 +456,8 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__differs__returns_false)
 {
     const chain::block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
@@ -476,8 +476,8 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__duplicates__returns_fal
 {
     const chain::block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
@@ -495,8 +495,8 @@ BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__differs__returns_true)
 {
     const chain::block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
@@ -612,17 +612,17 @@ BOOST_AUTO_TEST_SUITE(is_internal_double_spend_block_tests)
 #define HASH_TX1 \
 "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270"
 
-const auto hash_tx1 = hash_literal(HASH_TX1);
+const auto hash_tx1 = base16_hash(HASH_TX1);
 
 #define HASH_TX2 \
 "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f"
 
-const auto hash_tx2 = hash_literal(HASH_TX2);
+const auto hash_tx2 = base16_hash(HASH_TX2);
 
 #define HASH_TX3 \
 "cb1e303db604f066225eb14d59d3f8d2231200817bc9d4610d2802586bd93f8a"
 
-const auto hash_tx3 = hash_literal(HASH_TX3);
+const auto hash_tx3 = base16_hash(HASH_TX3);
 
 BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__empty_transactions__false)
 {

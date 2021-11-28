@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_1__always__initialized_invalid)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_3__always__equals_param)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__always__equals_param)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_6__always__equals_equivalent_tx)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_data__failure)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
 {
-    auto junk = base16_literal(
+    auto junk = base16_array(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
 
@@ -163,9 +163,9 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -189,9 +189,9 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_1__case_2_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -223,9 +223,9 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_2_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -253,9 +253,9 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -291,9 +291,9 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -321,9 +321,9 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
 {
-    hash_digest tx_hash = hash_literal(
+    hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equi
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equivalent)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equi
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns_true)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__returns_false)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__returns_fa
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__returns_false)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -498,7 +498,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__ret
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__returns_true)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__return
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__returns_true)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__returns
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__returns_false)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -580,7 +580,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__returns_fa
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__returns_false)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -608,7 +608,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__ret
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__differs__returns_true)
 {
-    data_chunk raw_tx = to_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"

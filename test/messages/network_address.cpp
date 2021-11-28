@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_2__always__equals_params)
     uint32_t timestamp = 734678u;
     uint64_t services = 5357534u;
     uint16_t port = 123u;
-    const messages::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+    const messages::ip_address ip = base16_array("127544abcdefa7b6d3e91486c57000aa");
 
     messages::network_address instance(timestamp, services, ip, port);
     BOOST_REQUIRE(instance.is_valid());
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_3__always__equals_params)
     uint16_t port = 123u;
 
     messages::network_address instance(timestamp, services,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"), port);
+        base16_array("127544abcdefa7b6d3e91486c57000aa"), port);
 
     BOOST_REQUIRE(instance.is_valid());
 }
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_4__always__equals_params)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(network_address__constructor_5__always__equals_params)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_1__without_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_2__without_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_3__without_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_1__with_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_2__with_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_3__with_timestamp__success)
     {
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     };
 
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(network_address__timestamp_accessor__always__returns_initia
     messages::network_address instance(
         timestamp,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     );
 
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(network_address__services_accessor__always__returns_initial
     messages::network_address instance(
         734678u,
         services,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         123u
     );
 
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(network_address__services_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(network_address__ip_accessor__always__returns_initialized_value)
 {
-    const messages::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+    const messages::ip_address ip = base16_array("127544abcdefa7b6d3e91486c57000aa");
 
     messages::network_address instance(
         734678u,
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(network_address__ip_accessor__always__returns_initialized_v
 
 BOOST_AUTO_TEST_CASE(network_address__ip_setter_1__roundtrip__success)
 {
-    const messages::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+    const messages::ip_address ip = base16_array("127544abcdefa7b6d3e91486c57000aa");
 
     messages::network_address instance;
     BOOST_REQUIRE(ip != instance.ip());
@@ -310,11 +310,11 @@ BOOST_AUTO_TEST_CASE(network_address__ip_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(network_address__ip_setter_2__roundtrip__success)
 {
-    const messages::ip_address ip = base16_literal("127544abcdefa7b6d3e91486c57000aa");
+    const messages::ip_address ip = base16_array("127544abcdefa7b6d3e91486c57000aa");
 
     messages::network_address instance;
     BOOST_REQUIRE(ip != instance.ip());
-    instance.set_ip(base16_literal("127544abcdefa7b6d3e91486c57000aa"));
+    instance.set_ip(base16_array("127544abcdefa7b6d3e91486c57000aa"));
     BOOST_REQUIRE(ip == instance.ip());
 }
 
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(network_address__port_accessor__always__returns_initialized
     messages::network_address instance(
         734678u,
         5357534u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         port
     );
 
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_assign_equals_1__always__matches_
     messages::network_address value(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_assign_equals_2__always__matches_
     const messages::network_address value(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__retur
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__returns_
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__duplicates__r
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs_times
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 
@@ -449,7 +449,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs__retu
     const messages::network_address expected(
         14356u,
         54676843u,
-        base16_literal("127544abcdefa7b6d3e91486c57000aa"),
+        base16_array("127544abcdefa7b6d3e91486c57000aa"),
         1500u
     );
 

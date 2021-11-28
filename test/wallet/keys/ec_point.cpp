@@ -21,9 +21,9 @@
 
 BOOST_AUTO_TEST_SUITE(ec_point_tests)
 
-const ec_compressed pointx = base16_literal("0245dbb7e2cd3a5de19fde8d556fd567a036f9c377ecf69a9202aa4affce41c623");
-const ec_compressed pointy = base16_literal("02cfc43e064c50cfd1896766ef70e7da82b16e8cfebd8d5dec618212d0db1e6d12");
-const ec_compressed sum_xy = base16_literal("03332bf6821c7c0e1080efc131d2b745760a8245c0b91a05f13308ff8600d30525");
+const ec_compressed pointx = base16_array("0245dbb7e2cd3a5de19fde8d556fd567a036f9c377ecf69a9202aa4affce41c623");
+const ec_compressed pointy = base16_array("02cfc43e064c50cfd1896766ef70e7da82b16e8cfebd8d5dec618212d0db1e6d12");
+const ec_compressed sum_xy = base16_array("03332bf6821c7c0e1080efc131d2b745760a8245c0b91a05f13308ff8600d30525");
 
 BOOST_AUTO_TEST_CASE(ec_point__sum__cool__expected)
 {

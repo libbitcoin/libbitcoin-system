@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_2__always__equals_params)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(code == instance.code());
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_3__always__equals_params)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "sadfasdgd";
     std::string reason = "jgfghkggfsr";
-    hash_digest data = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    hash_digest data = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
     messages::reject instance(code, std::move(message), std::move(reason), std::move(data));
     BOOST_REQUIRE(instance.is_valid());
 }
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_4__always__equals_params)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject expected(code, message, reason, data);
     messages::reject instance(expected);
     BOOST_REQUIRE(instance.is_valid());
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(reject__constructor_5__always__equals_params)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject expected(code, message, reason, data);
     messages::reject instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(reject__code_accessor__always__returns_initialized_value)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE(code == instance.code());
 }
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(reject__message_accessor_1__always__returns_initialized_val
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE_EQUAL(message, instance.message());
 }
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(reject__message_accessor_2__always__returns_initialized_val
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE_EQUAL(message, instance.message());
 }
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(reject__reason_accessor_1__always__returns_initialized_valu
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
 }
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(reject__reason_accessor_2__always__returns_initialized_valu
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
 }
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(reject__data_accessor_1__always__returns_initialized_value)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE(data == instance.data());
 }
@@ -436,14 +436,14 @@ BOOST_AUTO_TEST_CASE(reject__data_accessor_2__always__returns_initialized_value)
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
     std::string reason = "Gamma Delta";
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const messages::reject instance(code, message, reason, data);
     BOOST_REQUIRE(data == instance.data());
 }
 
 BOOST_AUTO_TEST_CASE(reject__data_setter_1__roundtrip__success)
 {
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance;
     BOOST_REQUIRE(data != instance.data());
     instance.set_data(data);
@@ -452,8 +452,8 @@ BOOST_AUTO_TEST_CASE(reject__data_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(reject__data_setter_2__roundtrip__success)
 {
-    hash_digest duplicate = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    hash_digest data = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest duplicate = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest data = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::reject instance;
     BOOST_REQUIRE(duplicate != instance.data());
     instance.set_data(std::move(data));
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_assign_equals__always__matches_equivalent)
         messages::reject::reason_code::dust,
         "My Message",
         "My Reason",
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     );
 
     BOOST_REQUIRE(value.is_valid());
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__duplicates__returns_true)
         messages::reject::reason_code::dust,
         "My Message",
         "My Reason",
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     );
 
     messages::reject instance(expected);
@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__differs__returns_false)
         messages::reject::reason_code::dust,
         "My Message",
         "My Reason",
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     );
 
     messages::reject instance;
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__returns_fa
         messages::reject::reason_code::dust,
         "My Message",
         "My Reason",
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     );
 
     messages::reject instance(expected);
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__returns_true)
         messages::reject::reason_code::dust,
         "My Message",
         "My Reason",
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     );
 
     messages::reject instance;

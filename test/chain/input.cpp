@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(input_tests)
 
 using namespace bc::system::chain;
 
-const auto valid_raw_input = to_chunk(base16_literal(
+const auto valid_raw_input = to_chunk(base16_array(
     "54b755c39207d443fd96a8d12c94446a1c6f66e39c95e894c23418d7501f681b01000"
     "0006b48304502203267910f55f2297360198fff57a3631be850965344370f732950b4"
     "7795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915"
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__insufficient_data__failure)
 
 BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
 {
-    const auto junk = base16_literal("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
+    const auto junk = base16_array("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     input instance;
     read::bytes::copy reader(junk);
     BOOST_REQUIRE(instance.from_data(reader));

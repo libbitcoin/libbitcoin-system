@@ -29,12 +29,12 @@ BOOST_AUTO_TEST_CASE(get_headers__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(get_headers__constructor_2__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_headers instance(starts, stop);
     BOOST_REQUIRE(instance.is_valid());
@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE(get_headers__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_headers__constructor_3__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
     hash_list starts_duplicate = starts;
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_headers instance(std::move(starts_duplicate), std::move(stop));
     BOOST_REQUIRE(instance.is_valid());
@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE(get_headers__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_headers__constructor_4__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::get_headers expected(starts, stop);
     messages::get_headers instance(expected);
@@ -80,12 +80,12 @@ BOOST_AUTO_TEST_CASE(get_headers__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_headers__constructor_5__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_headers expected(starts, stop);
     messages::get_headers instance(std::move(expected));
@@ -108,13 +108,13 @@ BOOST_AUTO_TEST_CASE(get_headers__from_data__insufficient_version__failure)
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::get_headers::version_minimum);
@@ -129,13 +129,13 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_1__valid_input__success)
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::get_headers::version_minimum);
@@ -156,13 +156,13 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_2__valid_input__success)
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::get_headers::version_minimum);
@@ -184,13 +184,13 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_3__valid_input__success)
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::get_headers::version_minimum);
@@ -210,14 +210,14 @@ BOOST_AUTO_TEST_CASE(get_headers__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(get_headers__operator_assign_equals__always__matches_equivalent)
 {
     hash_list start = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("7777777777777777777777777777777777777777777777777777777777777777");
+    hash_digest stop = base16_hash("7777777777777777777777777777777777777777777777777777777777777777");
 
     messages::get_headers value{ start, stop };
 
@@ -237,13 +237,13 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__duplicates__returns_t
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_headers instance(expected);
@@ -255,13 +255,13 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__differs__returns_fals
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_headers instance;
@@ -273,13 +273,13 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__duplicates__retur
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_headers instance(expected);
@@ -291,13 +291,13 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__differs__returns_
     const messages::get_headers expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_headers instance;

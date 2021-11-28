@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_1__always__returns_default_initialized)
 
 BOOST_AUTO_TEST_CASE(point__constructor_2__valid_input__returns_input_initialized)
 {
-    const auto hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     uint32_t index = 1234u;
 
     chain::point instance(hash, index);
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_2__valid_input__returns_input_initialize
 
 BOOST_AUTO_TEST_CASE(point__constructor_3__valid_input__returns_input_initialized)
 {
-    const auto hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     uint32_t index = 1234u;
 
     // This must be non-const.
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_4__valid_input__returns_input_initialize
 {
     const chain::point expected
     {
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         524342u
     };
 
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(point__constructor_5__valid_input__returns_input_initialize
     // This must be non-const.
     chain::point expected
     {
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         524342u
     };
 

@@ -32,14 +32,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -53,16 +53,16 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_2__always__equals_pa
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_3__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     hash_digest dup_stop = stop_hash;
 
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     hash_list dup_filter_headers = filter_headers;
@@ -78,14 +78,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_3__always__equals_pa
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_4__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint value(filter_type, stop_hash, filter_headers);
@@ -100,13 +100,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_4__always__equals_pa
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_5__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     const hash_list filter_headers = {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint value(filter_type, stop_hash, filter_headers);
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__constructor_5__always__equals_pa
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_bytes__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "01cf1a02915dc0137cae81ea04161dbebc0d7ec4"));
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_bytes__f
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_bytes_mid_list__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"
         "05"
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_bytes_mi
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_version__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"
         "05"
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__from_data__insufficient_version_
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_1__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"
         "05"
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_1__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_2__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"
         "05"
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_3__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"
         "05"
@@ -247,14 +247,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_type_accessor__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -276,14 +276,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_type_setter__roundtrip__s
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -294,14 +294,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_1__always__re
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     const messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_2__always__re
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_setter_1__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::compact_filter_checkpoint instance;
     BOOST_REQUIRE(stop_hash != instance.stop_hash());
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_setter_1__roundtrip__s
 
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_setter_2__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest copy = stop_hash;
 
     messages::compact_filter_checkpoint instance;
@@ -335,14 +335,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_setter_2__roundtrip__s
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -353,14 +353,14 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_1__alway
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     const messages::compact_filter_checkpoint instance(filter_type, stop_hash, filter_headers);
@@ -372,11 +372,11 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_setter_1__roundtr
 {
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint instance;
@@ -390,11 +390,11 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_setter_2__roundtr
 {
     const hash_list filter_headers
     {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
     hash_list copy = filter_headers;
 
@@ -408,13 +408,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_setter_2__roundtr
 BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_assign_equals__always__matches_equivalent)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list filter_headers = {
-        hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-        hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-        hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-        hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-        hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+        base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+        base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+        base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+        base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+        base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
     };
 
     messages::compact_filter_checkpoint value(filter_type, stop_hash, filter_headers);
@@ -435,13 +435,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__duplica
 {
     const messages::compact_filter_checkpoint expected(
         19u,
-        hash_literal("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"),
+        base16_hash("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"),
         {
-            hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-            hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-            hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-            hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-            hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+            base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+            base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+            base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+            base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+            base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
         });
 
     messages::compact_filter_checkpoint instance(expected);
@@ -452,13 +452,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__differs
 {
     const messages::compact_filter_checkpoint expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         {
-            hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-            hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-            hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-            hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-            hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+            base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+            base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+            base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+            base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+            base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
         });
 
     messages::compact_filter_checkpoint instance;
@@ -469,13 +469,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__dup
 {
     const messages::compact_filter_checkpoint expected(
         19u,
-        hash_literal("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"),
+        base16_hash("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"),
         {
-            hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-            hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-            hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-            hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-            hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+            base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+            base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+            base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+            base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+            base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
         });
 
     messages::compact_filter_checkpoint instance(expected);
@@ -486,13 +486,13 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__dif
 {
     const messages::compact_filter_checkpoint expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         {
-            hash_literal("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
-            hash_literal("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
-            hash_literal("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
-            hash_literal("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
-            hash_literal("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
+            base16_hash("00000000000000000018a65ff0bbbc2a93493c693d05dd65c6a8dcbb881f55fb"),
+            base16_hash("00000000000000000026fe62acfabe9fae5f986e0eaeda21d5830c15ac4bdf89"),
+            base16_hash("00000000000000000000eecdc8cec3ed73c2298ced2e0fbca3e7c46b033b58d0"),
+            base16_hash("0000000000000000001f5f2b512fbf0b4538398852857455eb8d02dfdc042eeb"),
+            base16_hash("00000000000000000020f5d0a7cb16e4946c9dbb7c62416ea292d6a10229c83c")
         });
 
     messages::compact_filter_checkpoint instance;

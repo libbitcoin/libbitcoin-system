@@ -21,19 +21,19 @@
 
 BOOST_AUTO_TEST_SUITE(ec_scalar_tests)
 
-const ec_secret secret1a = base16_literal("b9d22ea0ed7e3d53cc9e1b3d436bb9260fc3211634c821f6bb3cb3a73ee7a0b5");
-const ec_secret secret1b = base16_literal("f9416cd856d81a00366ad7234a7b5e5dbda61812e56effcb4cde0695bc092380");
-const ec_secret sum1 = base16_literal("b3139b79445657540308f2608de7178512ba5c426aee818648485bb02aba82f4");
-const ec_secret product1 = base16_literal("aba800424dd618d36a42bf6d6d3156a38a74298b9e4519bbba34cf0d7dce4d4f");
+const ec_secret secret1a = base16_array("b9d22ea0ed7e3d53cc9e1b3d436bb9260fc3211634c821f6bb3cb3a73ee7a0b5");
+const ec_secret secret1b = base16_array("f9416cd856d81a00366ad7234a7b5e5dbda61812e56effcb4cde0695bc092380");
+const ec_secret sum1 = base16_array("b3139b79445657540308f2608de7178512ba5c426aee818648485bb02aba82f4");
+const ec_secret product1 = base16_array("aba800424dd618d36a42bf6d6d3156a38a74298b9e4519bbba34cf0d7dce4d4f");
 
-const ec_secret negative1 = base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
-const ec_secret positive1 = base16_literal("0000000000000000000000000000000000000000000000000000000000000001");
-const ec_secret positive2 = base16_literal("0000000000000000000000000000000000000000000000000000000000000002");
-const ec_secret positive3 = base16_literal("0000000000000000000000000000000000000000000000000000000000000003");
-const ec_secret positive42 = base16_literal("000000000000000000000000000000000000000000000000000000000000002a");
+const ec_secret negative1 = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
+const ec_secret positive1 = base16_array("0000000000000000000000000000000000000000000000000000000000000001");
+const ec_secret positive2 = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
+const ec_secret positive3 = base16_array("0000000000000000000000000000000000000000000000000000000000000003");
+const ec_secret positive42 = base16_array("000000000000000000000000000000000000000000000000000000000000002a");
 
-const ec_secret secret2 = base16_literal("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
-const ec_compressed compressed2 = base16_literal("0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731");
+const ec_secret secret2 = base16_array("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
+const ec_compressed compressed2 = base16_array("0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731");
 
 // construct
 

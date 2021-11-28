@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_SUITE(messages__sign_message)
 BOOST_AUTO_TEST_CASE(message__sign_message__compressed__expected)
 {
     const auto compressed = true;
-    const auto secret = base16_literal(SECRET);
+    const auto secret = base16_array(SECRET);
     const payment_address address({ secret, 0x00, compressed });
     const auto message = to_chunk(std::string("Compressed"));
     message_signature out_signature;
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(message__sign_message__compressed__expected)
 BOOST_AUTO_TEST_CASE(message__sign_message__uncompressed__expected)
 {
     const auto compressed = false;
-    const auto secret = base16_literal(SECRET);
+    const auto secret = base16_array(SECRET);
     const payment_address address({ secret, 0x00, compressed });
     const auto message = to_chunk(std::string("Uncompressed"));
     message_signature out_signature;
@@ -184,17 +184,17 @@ BOOST_AUTO_TEST_SUITE(messages__verify_message)
 
 BOOST_AUTO_TEST_CASE(message__verify_message__compressed__expected)
 {
-    const payment_address address(base16_literal(SECRET));
+    const payment_address address(base16_array(SECRET));
     const auto message = to_chunk(std::string("Compressed"));
-    const auto signature = base16_literal(SIGNATURE_COMPRESSED);
+    const auto signature = base16_array(SIGNATURE_COMPRESSED);
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
 BOOST_AUTO_TEST_CASE(message__verify_message__uncompressed__expected)
 {
-    const payment_address address({ base16_literal(SECRET), 0x00, false });
+    const payment_address address({ base16_array(SECRET), 0x00, false });
     const auto message = to_chunk(std::string("Uncompressed"));
-    const auto signature = base16_literal(SIGNATURE_UNCOMPRESSED);
+    const auto signature = base16_array(SIGNATURE_UNCOMPRESSED);
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(message__verify_message_wif__compressed__round_trip)
     ec_private secret(WIF_COMPRESSED);
     const payment_address address(secret);
     const auto message = to_chunk(std::string("Compressed"));
-    const auto signature = base16_literal(SIGNATURE_WIF_COMPRESSED);
+    const auto signature = base16_array(SIGNATURE_WIF_COMPRESSED);
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(message__verify_message_wif__uncompressed__round_trip)
     ec_private secret(WIF_UNCOMPRESSED);
     const payment_address address(secret);
     const auto message = to_chunk(std::string("Uncompressed"));
-    const auto signature = base16_literal(SIGNATURE_WIF_UNCOMPRESSED);
+    const auto signature = base16_array(SIGNATURE_WIF_UNCOMPRESSED);
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 

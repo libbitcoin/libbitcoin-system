@@ -29,12 +29,12 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(get_blocks__constructor_2__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_blocks instance(starts, stop);
     BOOST_REQUIRE(instance.is_valid());
@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_blocks__constructor_3__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
     hash_list starts_duplicate = starts;
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_blocks instance(std::move(starts_duplicate), std::move(stop));
     BOOST_REQUIRE(instance.is_valid());
@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_blocks__constructor_4__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::get_blocks expected(starts, stop);
     messages::get_blocks instance(expected);
@@ -80,12 +80,12 @@ BOOST_AUTO_TEST_CASE(get_blocks__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_blocks__constructor_5__always__equals_params)
 {
     hash_list starts = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest stop = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_blocks expected(starts, stop);
     messages::get_blocks instance(std::move(expected));
@@ -107,13 +107,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_1__valid_input__success)
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::version::level::minimum);
@@ -133,13 +133,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_2__valid_input__success)
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::version::level::minimum);
@@ -160,13 +160,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__factory_3__valid_input__success)
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     const auto data = expected.to_data(messages::version::level::minimum);
@@ -232,17 +232,17 @@ BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_138__returns_138_through_1
 BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_1__always__returns_initialized_value)
 {
     hash_list expected = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
     messages::get_blocks instance
     {
         expected,
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     BOOST_REQUIRE(expected == instance.start_hashes());
@@ -251,17 +251,17 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_1__always__returns_initia
 BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_2__always__returns_initialized_value)
 {
     hash_list expected = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
     const messages::get_blocks instance
     {
         expected,
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     BOOST_REQUIRE(expected == instance.start_hashes());
@@ -270,11 +270,11 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_2__always__returns_initia
 BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_setter_1__roundtrip__success)
 {
     const hash_list values = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
     messages::get_blocks instance;
@@ -286,11 +286,11 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_setter_2__roundtrip__success)
 {
     hash_list values = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
     hash_list values_duplicate = values;
@@ -303,17 +303,17 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_1__always__returns_initialized_value)
 {
-    hash_digest expected = hash_literal(
+    hash_digest expected = base16_hash(
         "7777777777777777777777777777777777777777777777777777777777777777");
 
     messages::get_blocks instance
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
         expected
     };
@@ -323,17 +323,17 @@ BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_1__always__returns_initializ
 
 BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_2__always__returns_initialized_value)
 {
-    hash_digest expected = hash_literal(
+    hash_digest expected = base16_hash(
         "7777777777777777777777777777777777777777777777777777777777777777");
 
     const messages::get_blocks instance
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
         expected
     };
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_2__always__returns_initializ
 
 BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_setter_1__roundtrip__success)
 {
-    hash_digest value = hash_literal("7777777777777777777777777777777777777777777777777777777777777777");
+    hash_digest value = base16_hash("7777777777777777777777777777777777777777777777777777777777777777");
     messages::get_blocks instance;
     BOOST_REQUIRE(value != instance.stop_hash());
     instance.set_stop_hash(value);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_setter_2__roundtrip__success)
 {
-    hash_digest value = hash_literal("7777777777777777777777777777777777777777777777777777777777777777");
+    hash_digest value = base16_hash("7777777777777777777777777777777777777777777777777777777777777777");
     messages::get_blocks instance;
     BOOST_REQUIRE(value != instance.stop_hash());
     instance.set_stop_hash(std::move(value));
@@ -362,14 +362,14 @@ BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(get_blocks__operator_assign_equals__always__matches_equivalent)
 {
     hash_list start = {
-        hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-        hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-        hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-        hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+        base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+        base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     };
 
-    hash_digest stop = hash_literal("7777777777777777777777777777777777777777777777777777777777777777");
+    hash_digest stop = base16_hash("7777777777777777777777777777777777777777777777777777777777777777");
 
     messages::get_blocks value{ start, stop };
 
@@ -389,13 +389,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__duplicates__returns_tr
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_blocks instance(expected);
@@ -407,13 +407,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__differs__returns_false
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_blocks instance;
@@ -425,13 +425,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__duplicates__return
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_blocks instance(expected);
@@ -443,13 +443,13 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__differs__returns_t
     const messages::get_blocks expected
     {
         {
-            hash_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            hash_literal("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            hash_literal("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
-            hash_literal("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
-            hash_literal("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_hash("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+            base16_hash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+            base16_hash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+            base16_hash("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         },
-        hash_literal("7777777777777777777777777777777777777777777777777777777777777777")
+        base16_hash("7777777777777777777777777777777777777777777777777777777777777777")
     };
 
     messages::get_blocks instance;

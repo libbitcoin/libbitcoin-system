@@ -172,10 +172,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_2__valid_input__returns_input_init
     uint32_t locktime = 4568656u;
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_array(TX0_INPUTS))));
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_array(TX0_INPUTS_LAST_OUTPUT))));
 
     chain::transaction instance(version, locktime, inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
@@ -191,10 +191,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__valid_input__returns_input_init
     uint32_t locktime = 4568656u;
     chain::input::list inputs;
     inputs.emplace_back();
-    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS))));
+    BOOST_REQUIRE(inputs.back().from_data(to_chunk(base16_array(TX0_INPUTS))));
     chain::output::list outputs;
     outputs.emplace_back();
-    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_literal(TX0_INPUTS_LAST_OUTPUT))));
+    BOOST_REQUIRE(outputs.back().from_data(to_chunk(base16_array(TX0_INPUTS_LAST_OUTPUT))));
 
     // These must be non-const.
     auto dup_inputs = inputs;
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__valid_input__returns_input_init
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_4__valid_input__returns_input_initialized)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
 
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_4__valid_input__returns_input_init
 
 BOOST_AUTO_TEST_CASE(transaction__constructor_5__valid_input__returns_input_initialized)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
 
     // This must be non-const.
     chain::transaction expected;
@@ -587,8 +587,8 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_1__case_1__success)
 {
-    const auto tx_hash = hash_literal(TX1_HASH);
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto tx_hash = base16_hash(TX1_HASH);
+    const auto raw_tx = to_chunk(base16_array(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     chain::transaction tx = chain::transaction::factory(raw_tx);
@@ -604,8 +604,8 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_1__case_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_1__case_2__success)
 {
-    const auto tx_hash = hash_literal(TX4_HASH);
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto tx_hash = base16_hash(TX4_HASH);
+    const auto raw_tx = to_chunk(base16_array(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     chain::transaction tx = chain::transaction::factory(raw_tx);
@@ -620,8 +620,8 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_1__case_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_1__success)
 {
-    const auto tx_hash = hash_literal(TX1_HASH);
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto tx_hash = base16_hash(TX1_HASH);
+    const auto raw_tx = to_chunk(base16_array(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     stream::in::copy stream(raw_tx);
@@ -638,8 +638,8 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_2__success)
 {
-    const auto tx_hash = hash_literal(TX4_HASH);
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto tx_hash = base16_hash(TX4_HASH);
+    const auto raw_tx = to_chunk(base16_array(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     stream::in::copy stream(raw_tx);
@@ -655,8 +655,8 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_2__case_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_1__success)
 {
-    const auto tx_hash = hash_literal(TX1_HASH);
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto tx_hash = base16_hash(TX1_HASH);
+    const auto raw_tx = to_chunk(base16_array(TX1));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 225u);
 
     read::bytes::copy source(raw_tx);
@@ -673,8 +673,8 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_2__success)
 {
-    const hash_digest tx_hash = hash_literal(TX4_HASH);
-    const data_chunk raw_tx = to_chunk(base16_literal(TX4));
+    const hash_digest tx_hash = base16_hash(TX4_HASH);
+    const data_chunk raw_tx = to_chunk(base16_array(TX4));
     BOOST_REQUIRE_EQUAL(raw_tx.size(), 523u);
 
     read::bytes::copy source(raw_tx);
@@ -690,7 +690,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_data_3__case_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__non_coinbase_tx__returns_false)
 {
-    const auto data = to_chunk(base16_literal(TX5));
+    const auto data = to_chunk(base16_array(TX5));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(data));
     BOOST_REQUIRE(!instance.is_coinbase());
@@ -754,7 +754,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_oversized_coinbase__script_size_within_boun
 
 BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__coinbase_tx__returns_false)
 {
-    const auto data = to_chunk(base16_literal(TX6));
+    const auto data = to_chunk(base16_array(TX6));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(data));
     BOOST_REQUIRE(!instance.is_null_non_coinbase());
@@ -946,7 +946,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__returns_false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__returns_true)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(raw_tx));
     BOOST_REQUIRE(instance.is_dusty(1740950001));
@@ -954,7 +954,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__return
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__returns_false)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(raw_tx));
     BOOST_REQUIRE(!instance.is_dusty(257999999));
@@ -962,7 +962,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__return
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__returns_true)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(raw_tx));
     BOOST_REQUIRE(instance.is_dusty(1740950000));
@@ -970,7 +970,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__returns_
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__returns_false)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(raw_tx));
     BOOST_REQUIRE(!instance.is_dusty(258000000));
@@ -978,13 +978,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__returns_
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__returns_true)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX1));
+    const auto raw_tx = to_chunk(base16_array(TX1));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(raw_tx));
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
 
-////const auto hash1 = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+////const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 ////
 ////BOOST_AUTO_TEST_CASE(transaction__is_mature__no_inputs__returns_true)
 ////{
@@ -1042,7 +1042,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
     chain::transaction instance;
@@ -1052,7 +1052,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equi
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equivalent)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction expected;
     BOOST_REQUIRE(expected.from_data(raw_tx));
     chain::transaction instance;
@@ -1062,7 +1062,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equi
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals__duplicates__returns_true)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(raw_tx));
@@ -1072,7 +1072,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals__duplicates__returns_t
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals__differs__returns_false)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(raw_tx));
@@ -1081,7 +1081,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals__differs__returns_fals
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals__duplicates__returns_false)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(raw_tx));
@@ -1091,7 +1091,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals__duplicates__retur
 
 BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals__differs__returns_true)
 {
-    const auto raw_tx = to_chunk(base16_literal(TX4));
+    const auto raw_tx = to_chunk(base16_array(TX4));
     chain::transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(raw_tx));
@@ -1101,8 +1101,8 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals__differs__returns_
 BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
 {
     // This is a garbage script that collides with the former opcode::raw_data sentinel.
-    const auto expected = hash_literal(TX7_HASH);
-    const auto data = to_chunk(base16_literal(TX7));
+    const auto expected = base16_hash(TX7_HASH);
+    const auto data = to_chunk(base16_array(TX7));
     chain::transaction instance;
     BOOST_REQUIRE(instance.from_data(data));
     BOOST_REQUIRE(expected == instance.hash());
@@ -1118,11 +1118,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__empty_prevouts__fals
 ////BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__false)
 ////{
 ////    chain::transaction instance;
-////    const auto hash1 = hash_literal(TX1_HASH);
+////    const auto hash1 = base16_hash(TX1_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    const auto hash2 = hash_literal(TX4_HASH);
+////    const auto hash2 = base16_hash(TX4_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash2, 27 }, chain::script{}, 0);
-////    const auto hash3 = hash_literal(TX7_HASH);
+////    const auto hash3 = base16_hash(TX7_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash3, 36 }, chain::script{}, 0);
 ////    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), false);
 ////}
@@ -1130,11 +1130,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__empty_prevouts__fals
 ////BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__true)
 ////{
 ////    chain::transaction instance;
-////    const auto hash1 = hash_literal(TX1_HASH);
+////    const auto hash1 = base16_hash(TX1_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    const auto hash2 = hash_literal(TX4_HASH);
+////    const auto hash2 = base16_hash(TX4_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash2, 27 }, chain::script{}, 0);
-////    const auto hash3 = hash_literal(TX7_HASH);
+////    const auto hash3 = base16_hash(TX7_HASH);
 ////    instance.inputs().emplace_back(chain::point{ hash3, 36 }, chain::script{}, 0);
 ////    instance.inputs().emplace_back(chain::point{ hash3, 36 }, chain::script{}, 0);
 ////    BOOST_REQUIRE_EQUAL(instance.is_internal_double_spend(), true);

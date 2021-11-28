@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(point_value_tests)
 
 using namespace bc::system::wallet;
 
-static const auto hash1 = hash_literal(
+static const auto hash1 = base16_hash(
     "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 
 BOOST_AUTO_TEST_CASE(point_value__default_constructor__always__zero_value)

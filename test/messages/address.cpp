@@ -50,17 +50,17 @@ BOOST_AUTO_TEST_CASE(address__constructor_2__always__equals_params)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -77,17 +77,17 @@ BOOST_AUTO_TEST_CASE(address__constructor_3__always__equals_params)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -106,17 +106,17 @@ BOOST_AUTO_TEST_CASE(address__constructor_4__always__equals_params)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -135,17 +135,17 @@ BOOST_AUTO_TEST_CASE(address__constructor_5__always__equals_params)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(address__factory_1__roundtrip__success)
         {
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u
         }
     });
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(address__factory_2__roundtrip__success)
         {
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u
         }
     });
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(address__factory_3__roundtrip__success)
         {
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u
         }
     });
@@ -239,17 +239,17 @@ BOOST_AUTO_TEST_CASE(address__addresses_setter_1__roundtrip__success)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -266,17 +266,17 @@ BOOST_AUTO_TEST_CASE(address__addresses_setter_2__roundtrip__success)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -294,17 +294,17 @@ BOOST_AUTO_TEST_CASE(address__operator_assign_equals__always__matches_equivalent
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     };
 
@@ -327,17 +327,17 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__duplicates__returns_true)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     });
 
@@ -352,17 +352,17 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__differs__returns_false)
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     });
 
@@ -377,17 +377,17 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__duplicates__returns_f
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     });
 
@@ -402,17 +402,17 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__differs__returns_true
         network_address(
             734678u,
             5357534u,
-            base16_literal("47816a40bb92bdb4e0b8256861f96a55"),
+            base16_array("47816a40bb92bdb4e0b8256861f96a55"),
             123u),
         network_address(
             34654u,
             47653u,
-            base16_literal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            base16_array("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             222u),
         network_address(
             265453u,
             2115325u,
-            base16_literal("19573257168426842319857321595126"),
+            base16_array("19573257168426842319857321595126"),
             159u)
     });
 

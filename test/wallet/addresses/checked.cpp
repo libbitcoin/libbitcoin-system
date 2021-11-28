@@ -34,10 +34,10 @@ const data_array<1> mini_prefix{ 1 };
 const data_array<3> short_prefix{ 1, 2, 3 };
 const data_array<5> long_prefix{ 1, 2, 3, 4, 5 };
 
-const data_array<0> test_zero_hash = hash_literal("");
-const mini_hash test_mini_hash = hash_literal("000102030405");
-const short_hash test_short_hash = hash_literal("0908070605040302010009080706050403020100");
-const long_hash test_long_hash = hash_literal("09080706050403020100090807060504030201000908070605040302010009080706050403020100090807060504030201000908070605040302010003020100");
+const data_array<0> test_zero_hash = base16_hash("");
+const mini_hash test_mini_hash = base16_hash("000102030405");
+const short_hash test_short_hash = base16_hash("0908070605040302010009080706050403020100");
+const long_hash test_long_hash = base16_hash("09080706050403020100090807060504030201000908070605040302010009080706050403020100090807060504030201000908070605040302010003020100");
 
 const auto zero_valid_value = insert_checksum<zero_checked::value_size, 0>({ zero_prefix,  test_zero_hash });
 const auto mini_valid_value = insert_checksum<mini_checked::value_size, 2>({ mini_prefix,  test_mini_hash });

@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 {
     static const auto type = inventory_vector::type_id::error;
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const inventory_vector::list values
     {
         inventory_vector(type, hash)
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 {
     static const auto type = inventory_vector::type_id::error;
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     static const hash_list hashes{ hash };
 
     const get_data instance(hashes, type);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 {
     static const auto type = inventory_vector::type_id::error;
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const get_data instance{ { type, hash } };
     BOOST_REQUIRE(instance.is_valid());
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_5__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 {
     static const auto type = inventory_vector::type_id::error;
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const get_data value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(get_data__constructor_6__always__equals_params)
 BOOST_AUTO_TEST_CASE(get_data__constructor_7__always__equals_params)
 {
     static const auto type = inventory_vector::type_id::error;
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const get_data value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(get_data__from_data__insufficient_version__failure)
     {
         {
             inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         }
     };
 
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(get_data__factory_1__valid_input__success)
     {
         {
             inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         }
     };
 
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(get_data__factory_2__valid_input__success)
         {
             {
                 inventory_vector::type_id::transaction,
-                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+                base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
         }
     };
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(get_data__factory_3__valid_input__success)
         {
             {
                 inventory_vector::type_id::block,
-                hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+                base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
             }
         }
     };
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(get_data__to_witness__block_error_transaction__expected)
 
 BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalent)
 {
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     static const inventory_vector::list elements
     {
         inventory_vector(inventory_vector::type_id::error, hash)
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalen
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true)
 {
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
     {
         inventory_vector(inventory_vector::type_id::error, hash)
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
 {
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
     {
         inventory_vector(inventory_vector::type_id::error, hash)
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_false)
 {
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
     {
         inventory_vector(inventory_vector::type_id::error, hash)
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_
 
 BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_true)
 {
-    static const auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
     {
         inventory_vector(inventory_vector::type_id::error, hash)

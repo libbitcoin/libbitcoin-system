@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(compact_block__constructor_2__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_2__always__equals_params)
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list& short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
     messages::compact_block::short_id_list dup_short_ids = short_ids;
 
@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_block__constructor_4__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -107,10 +107,10 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_4__always__equals_params)
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_block__constructor_5__always__equals_params)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -143,10 +143,10 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_5__always__equals_params)
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes_mid_transaction__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes_mid_transactio
 
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_version__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_version__failure)
 
 BOOST_AUTO_TEST_CASE(compact_block__factory_1__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(compact_block__factory_1__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_block__factory_2__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(compact_block__factory_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_block__factory_3__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000000"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
         "221b08003e8a6300240c0100d2040000000000000400000012121212121234343434"
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE(compact_block__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -279,10 +279,10 @@ BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__returns_initializ
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -299,8 +299,8 @@ BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__returns_initializ
 BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -308,10 +308,10 @@ BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__returns_initializ
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -328,8 +328,8 @@ BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__returns_initializ
 BOOST_AUTO_TEST_CASE(compact_block__header_setter_1__roundtrip__success)
 {
     const chain::header value(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -343,8 +343,8 @@ BOOST_AUTO_TEST_CASE(compact_block__header_setter_1__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_block__header_setter_2__roundtrip__success)
 {
     const chain::header value(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -359,8 +359,8 @@ BOOST_AUTO_TEST_CASE(compact_block__header_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_block__nonce_accessor__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -368,10 +368,10 @@ BOOST_AUTO_TEST_CASE(compact_block__nonce_accessor__always__returns_initialized_
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -398,8 +398,8 @@ BOOST_AUTO_TEST_CASE(compact_block__nonce_setter__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -407,10 +407,10 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__returns_initia
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -427,8 +427,8 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__returns_initia
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_2__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -436,10 +436,10 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_2__always__returns_initia
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -457,10 +457,10 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_1__roundtrip__success)
 {
     const messages::compact_block::short_id_list value
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     messages::compact_block instance;
@@ -473,10 +473,10 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_2__roundtrip__success)
 {
     const messages::compact_block::short_id_list value
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
     messages::compact_block::short_id_list dup(value);
 
@@ -489,8 +489,8 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -498,10 +498,10 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__returns_ini
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -518,8 +518,8 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__returns_ini
 BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_2__always__returns_initialized_value)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -527,10 +527,10 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_2__always__returns_ini
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -578,8 +578,8 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_block__operator_assign_equals__always__matches_equivalent)
 {
     const chain::header header(10u,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         531234u,
         6523454u,
         68644u);
@@ -587,10 +587,10 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_assign_equals__always__matches_equi
     uint64_t nonce = 453245u;
     const messages::compact_block::short_id_list short_ids
     {
-        base16_literal("aaaaaaaaaaaa"),
-        base16_literal("bbbbbbbbbbbb"),
-        base16_literal("0f0f0f0f0f0f"),
-        base16_literal("f0f0f0f0f0f0")
+        base16_array("aaaaaaaaaaaa"),
+        base16_array("bbbbbbbbbbbb"),
+        base16_array("0f0f0f0f0f0f"),
+        base16_array("f0f0f0f0f0f0")
     };
 
     const messages::prefilled_transaction::list transactions
@@ -616,17 +616,17 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__returns
 {
     const messages::compact_block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
         12334u,
         {
-            base16_literal("aaaaaaaaaaaa"),
-            base16_literal("bbbbbbbbbbbb"),
-            base16_literal("0f0f0f0f0f0f"),
-            base16_literal("f0f0f0f0f0f0")
+            base16_array("aaaaaaaaaaaa"),
+            base16_array("bbbbbbbbbbbb"),
+            base16_array("0f0f0f0f0f0f"),
+            base16_array("f0f0f0f0f0f0")
         },
         {
             messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
@@ -642,17 +642,17 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__returns_fa
 {
     const messages::compact_block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
         12334u,
         {
-            base16_literal("aaaaaaaaaaaa"),
-            base16_literal("bbbbbbbbbbbb"),
-            base16_literal("0f0f0f0f0f0f"),
-            base16_literal("f0f0f0f0f0f0")
+            base16_array("aaaaaaaaaaaa"),
+            base16_array("bbbbbbbbbbbb"),
+            base16_array("0f0f0f0f0f0f"),
+            base16_array("f0f0f0f0f0f0")
         },
         {
             messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
@@ -668,17 +668,17 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__duplicates__ret
 {
     const messages::compact_block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
         12334u,
         {
-            base16_literal("aaaaaaaaaaaa"),
-            base16_literal("bbbbbbbbbbbb"),
-            base16_literal("0f0f0f0f0f0f"),
-            base16_literal("f0f0f0f0f0f0")
+            base16_array("aaaaaaaaaaaa"),
+            base16_array("bbbbbbbbbbbb"),
+            base16_array("0f0f0f0f0f0f"),
+            base16_array("f0f0f0f0f0f0")
         },
         {
             messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
@@ -694,17 +694,17 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__differs__return
 {
     const messages::compact_block expected(
         chain::header(10u,
-            hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
             531234u,
             6523454u,
             68644u),
         12334u,
         {
-            base16_literal("aaaaaaaaaaaa"),
-            base16_literal("bbbbbbbbbbbb"),
-            base16_literal("0f0f0f0f0f0f"),
-            base16_literal("f0f0f0f0f0f0")
+            base16_array("aaaaaaaaaaaa"),
+            base16_array("bbbbbbbbbbbb"),
+            base16_array("0f0f0f0f0f0f"),
+            base16_array("f0f0f0f0f0f0")
         },
         {
             messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),

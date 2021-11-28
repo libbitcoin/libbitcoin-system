@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_2__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
     messages::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
 
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_3__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
     hash_digest copy_stop = stop_hash;
 
     messages::get_compact_filter_headers instance(filter_type, start_height, std::move(copy_stop));
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_4__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
     messages::get_compact_filter_headers value(filter_type, start_height, stop_hash);
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_5__always__equals_p
 {
     const uint8_t filter_type = 16u;
     const uint32_t start_height = 62334u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
     messages::get_compact_filter_headers value(filter_type, start_height, stop_hash);
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__constructor_5__always__equals_p
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_bytes__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "000032"));
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_bytes__
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_version__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "00000FFF"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__from_data__insufficient_version
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_1__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "00000FFF"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_1__valid_input__success
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_2__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "00000FFF"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_2__valid_input__success
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__factory_3__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0b"
         "00000FFF"
         "bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040"));
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__filter_type_accessor__always__r
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
     messages::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
 
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__start_height_accessor__always__
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
+    const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
 
     messages::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(start_height == instance.start_height());
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_accessor_1__always__r
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_accessor_2__always__r
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::get_compact_filter_headers instance(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_accessor_2__always__r
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_setter_1__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_compact_filter_headers instance;
     BOOST_REQUIRE(stop_hash != instance.stop_hash());
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_setter_1__roundtrip__
 
 BOOST_AUTO_TEST_CASE(get_compact_filter_headers__stop_hash_setter_2__roundtrip__success)
 {
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest copy = stop_hash;
 
     messages::get_compact_filter_headers instance;
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_assign_equals__always_
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
-    const hash_digest stop_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::get_compact_filter_headers value(filter_type, start_height, stop_hash);
     BOOST_REQUIRE(value.is_valid());
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_boolean_equals__duplic
     const messages::get_compact_filter_headers expected(
         19u,
         2135u,
-        hash_literal("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"));
+        base16_hash("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"));
 
     messages::get_compact_filter_headers instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_boolean_equals__differ
     const messages::get_compact_filter_headers expected(
         19u,
         2341u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
 
     messages::get_compact_filter_headers instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_boolean_not_equals__du
     const messages::get_compact_filter_headers expected(
         19u,
         3546u,
-        hash_literal("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"));
+        base16_hash("01cf1a02915dc0137cae81ea04161dbebc0d7ec445c2704840b05ca52fce8484"));
 
     messages::get_compact_filter_headers instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filter_headers__operator_boolean_not_equals__di
     const messages::get_compact_filter_headers expected(
         19u,
         549u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
 
     messages::get_compact_filter_headers instance;
     BOOST_REQUIRE(instance != expected);

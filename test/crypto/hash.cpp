@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
     const auto ripemd_hash1 = bitcoin_short_hash(to_array(110));
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash1), "17d040b739d639c729daaf627eaff88cfe4207f4");
 
-    const auto ripemd_hash2 = bitcoin_short_hash(base16_literal("020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986"));
+    const auto ripemd_hash2 = bitcoin_short_hash(base16_array("020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986"));
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash2), "c23e37c6fad06deab545f952992c8f28cb02bbe5");
 }
 

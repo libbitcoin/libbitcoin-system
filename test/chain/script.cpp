@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__to_data__roundtrips)
 
 BOOST_AUTO_TEST_CASE(script__from_data__to_data_weird__roundtrips)
 {
-    const auto weird_raw_script = to_chunk(base16_literal(
+    const auto weird_raw_script = to_chunk(base16_array(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
         "cf654cae3b28a15f7572106d6c1319ddcdc878e636ccb83845"
         "e30220050ebf440160a4c0db5623e0cb1562f46401a7ff5b87"
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(script__factory_reader_test)
 
 BOOST_AUTO_TEST_CASE(script__from_data__first_byte_invalid_wire_code__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "bb566a54e38193e381aee4b896e7958ce381afe496e4babae381abe38288e381"
         "a3e381a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e3"
         "8292e8a8ade38191e381a6e381afe38184e381aae38184"));
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(script__from_data__first_byte_invalid_wire_code__success)
 
 BOOST_AUTO_TEST_CASE(script__from_data__internal_invalid_wire_code__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "566a54e38193e381aee4b896e7958ce381afe4bb96e4babae381abe38288e381"
         "a3e381a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e3"
         "8292e8a8ade38191e381a6e381afe38184e381aae38184"));
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
     script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"));
 
-    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
 
     endorsement out;
     const auto index = 0u;
@@ -721,7 +721,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"));
 
-    const ec_secret secret = hash_literal("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
 
     endorsement out;
     const auto index = 0u;

@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_2__always__equals_params)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
 
     messages::get_block_transactions instance(hash, indexes);
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_2__always__equals_param
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_3__always__equals_params)
 {
-    hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     auto hash_dup = hash;
     std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     auto indexes_dup = indexes;
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_3__always__equals_param
 BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_4__always__equals_params)
 {
     messages::get_block_transactions value(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     messages::get_block_transactions instance(value);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_4__always__equals_param
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__constructor_5__always__equals_params)
 {
-    hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
 
     messages::get_block_transactions value(hash, indexes);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_1__valid_input__success)
 {
     const messages::get_block_transactions expected
     {
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         {
             16,
             32,
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_2__valid_input__success)
 {
     const messages::get_block_transactions expected
     {
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         {
             16,
             32,
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_3__valid_input__success)
 {
     const messages::get_block_transactions expected
     {
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         {
             16,
             32,
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_1__always__returns_initialized_value)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     messages::get_block_transactions instance(hash, indexes);
     BOOST_REQUIRE(hash == instance.block_hash());
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_1__always__retu
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_2__always__returns_initialized_value)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     const messages::get_block_transactions instance(hash, indexes);
     BOOST_REQUIRE(hash == instance.block_hash());
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_2__always__retu
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_setter_1__roundtrip__success)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::get_block_transactions instance;
     BOOST_REQUIRE(hash != instance.block_hash());
     instance.set_block_hash(hash);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_setter_1__roundtrip__suc
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_setter_2__roundtrip__success)
 {
-    hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     auto dup = hash;
     messages::get_block_transactions instance;
     BOOST_REQUIRE(hash != instance.block_hash());
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_setter_2__roundtrip__suc
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_1__always__returns_initialized_value)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     messages::get_block_transactions instance(hash, indexes);
     BOOST_REQUIRE(indexes == instance.indexes());
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_1__always__returns
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_2__always__returns_initialized_value)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     const messages::get_block_transactions instance(hash, indexes);
     BOOST_REQUIRE(indexes == instance.indexes());
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_setter_2__roundtrip__succes
 
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_assign_equals__always__matches_equivalent)
 {
-    const hash_digest hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
     messages::get_block_transactions value(hash, indexes);
 
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_assign_equals__always__mat
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates__returns_true)
 {
     const messages::get_block_transactions expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     messages::get_block_transactions instance(expected);
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__returns_false)
 {
     const messages::get_block_transactions expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     messages::get_block_transactions instance;
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__r
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__duplicates__returns_false)
 {
     const messages::get_block_transactions expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     messages::get_block_transactions instance(expected);
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__duplic
 BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__differs__returns_true)
 {
     const messages::get_block_transactions expected(
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         { 1u, 3454u, 4234u, 75123u, 455323u });
 
     messages::get_block_transactions instance;

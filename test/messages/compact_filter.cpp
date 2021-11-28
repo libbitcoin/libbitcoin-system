@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_2__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     messages::compact_filter instance(filter_type, block_hash, filter);
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_3__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest dup_hash = block_hash;
     const auto filter = base16_chunk("0123456789abcdef");
     data_chunk dup_filter = filter;
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_4__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const auto filter = base16_chunk("fedcba9876543210");
 
     messages::compact_filter value(filter_type, block_hash, filter);
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(compact_filter__constructor_5__always__equals_params)
 {
     const uint8_t filter_type = 16u;
-    const hash_digest block_hash = hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    const hash_digest block_hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const auto filter = base16_chunk("fedcba9876543210");
 
     messages::compact_filter value(filter_type, block_hash, filter);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_bytes__failure)
 
 BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_version__failure)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__from_data__insufficient_version__failure)
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_1__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_1__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_2__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
 {
-    const auto raw = to_chunk(base16_literal(
+    const auto raw = to_chunk(base16_array(
         "0a0000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d619000022"
         "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"));
 
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(compact_filter__filter_type_accessor__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     messages::compact_filter instance(filter_type, block_hash, filter);
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_type_setter__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     messages::compact_filter instance(filter_type, block_hash, filter);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_init
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     const messages::compact_filter instance(filter_type, block_hash, filter);
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_init
 
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_1__roundtrip__success)
 {
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::compact_filter instance;
     BOOST_REQUIRE(block_hash != instance.block_hash());
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_2__roundtrip__success)
 {
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     hash_digest dup = block_hash;
 
     messages::compact_filter instance;
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     messages::compact_filter instance(filter_type, block_hash, filter);
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initiali
 BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__returns_initialized_value)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     const messages::compact_filter instance(filter_type, block_hash, filter);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_setter_2__roundtrip__success)
 BOOST_AUTO_TEST_CASE(compact_filter__operator_assign_equals__always__matches_equivalent)
 {
     const uint8_t filter_type = 55u;
-    const hash_digest block_hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const auto filter = base16_chunk("0123456789abcdef");
 
     messages::compact_filter value(filter_type, block_hash, filter);
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__duplicates__return
 {
     const messages::compact_filter expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         base16_chunk("0123456789abcdef"));
 
     messages::compact_filter instance(expected);
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__differs__returns_f
 {
     const messages::compact_filter expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         base16_chunk("0123456789abcdef"));
 
     messages::compact_filter instance;
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__duplicates__re
 {
     const messages::compact_filter expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         base16_chunk("0123456789abcdef"));
 
     messages::compact_filter instance(expected);
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__differs__retur
 {
     const messages::compact_filter expected(
         19u,
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
         base16_chunk("0123456789abcdef"));
 
     messages::compact_filter instance;

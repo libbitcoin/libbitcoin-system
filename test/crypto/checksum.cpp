@@ -31,7 +31,7 @@ const auto bip173_testnet_p2wkh = "qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx";
 const auto bip173_testnet_p2wsh = "qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7";
 
 // BIP173: All examples use public key:
-const auto bip173_ec_compressed = base16_literal("0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
+const auto bip173_ec_compressed = base16_array("0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
 
 // BIP141: The HASH160 of the pubkey in witness must match the 20 byte witness program.
 const auto bip173_p2wkh_program = ripemd160_hash_chunk(sha256_hash(bip173_ec_compressed));

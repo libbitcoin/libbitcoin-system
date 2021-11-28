@@ -50,12 +50,12 @@ BOOST_AUTO_TEST_CASE(ec_private__uncompressed_wif__not_compressed__true)
 
 BOOST_AUTO_TEST_CASE(ec_private__encode_wif__compressed__expected)
 {
-    BOOST_REQUIRE_EQUAL(ec_private(base16_literal(SECRET)).encoded(), WIF_COMPRESSED);
+    BOOST_REQUIRE_EQUAL(ec_private(base16_array(SECRET)).encoded(), WIF_COMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(ec_private__encode_wif__uncompressed__expected)
 {
-    BOOST_REQUIRE_EQUAL(ec_private(base16_literal(SECRET), 0x8000, false).encoded(), WIF_UNCOMPRESSED);
+    BOOST_REQUIRE_EQUAL(ec_private(base16_array(SECRET), 0x8000, false).encoded(), WIF_UNCOMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(ec_private__decode_wif__compressed__true)

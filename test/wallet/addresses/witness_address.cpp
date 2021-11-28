@@ -954,7 +954,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address3__expected)
 {
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx");
-    const auto program = base16_literal("751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6");
+    const auto program = base16_array("751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6");
     const witness_address address(program, "bc", 1);
     BOOST_REQUIRE_EQUAL(address.encoded(), "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y");
     BOOST_REQUIRE_EQUAL(address.version(), 1u);
@@ -967,7 +967,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address4__expected)
 {
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("BC1SW50QA3JX3S");
-    const auto program = base16_literal("751e");
+    const auto program = base16_array("751e");
     const witness_address address(program, "bc", 16);
     BOOST_REQUIRE_EQUAL(ascii_to_upper(address.encoded()), "BC1SW50QGDZ25J");
     BOOST_REQUIRE_EQUAL(address.version(), 16u);
@@ -980,7 +980,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address5__expected)
 {
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj");
-    const auto program = base16_literal("751e76e8199196d454941c45d1b3a323");
+    const auto program = base16_array("751e76e8199196d454941c45d1b3a323");
     const witness_address address(program, "bc", 2);
     BOOST_REQUIRE_EQUAL(address.encoded(), "bc1zw508d6qejxtdg4y5r3zarvaryvaxxpcs");
     BOOST_REQUIRE_EQUAL(address.version(), 2u);

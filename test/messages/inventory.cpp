@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(inventory__constructor_3__always__equals_params)
 {
     messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     messages::inventory_vector::list values =
     {
         messages::inventory_vector(type, hash)
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(inventory__constructor_4__always__equals_params)
 {
     messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list hashes = { hash };
 
     messages::inventory instance(hashes, type);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(inventory__constructor_5__always__equals_params)
 {
     messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::inventory instance{ { type, hash } };
     BOOST_REQUIRE(instance.is_valid());
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_5__always__equals_params)
 BOOST_AUTO_TEST_CASE(inventory__constructor_6__always__equals_params)
 {
     messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::inventory value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_6__always__equals_params)
 BOOST_AUTO_TEST_CASE(inventory__constructor_7__always__equals_params)
 {
     messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
-    auto hash = hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+    auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::inventory value{ { type, hash } };
     BOOST_REQUIRE(value.is_valid());
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__returns_initiali
     const messages::inventory_vector::list values =
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
     messages::inventory instance(values);
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_2__always__returns_initiali
     const messages::inventory_vector::list values =
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
     const messages::inventory instance(values);
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_setter_1__roundtrip__success)
     const messages::inventory_vector::list values =
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
     messages::inventory instance;
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_setter_2__roundtrip__success)
     messages::inventory_vector::list values =
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
     messages::inventory instance;
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_assign_equals__always__matches_equivale
     const messages::inventory_vector::list elements =
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
     messages::inventory instance;
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__duplicates__returns_tru
     const messages::inventory expected(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     messages::inventory instance(expected);
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__differs__returns_false)
     const messages::inventory expected(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     messages::inventory instance;
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__duplicates__returns
     const messages::inventory expected(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     messages::inventory instance(expected);
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__differs__returns_tr
     const messages::inventory expected(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     messages::inventory instance;
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(inventory__count__no_matching_type__returns_zero)
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     BOOST_REQUIRE_EQUAL(0u,
@@ -350,13 +350,13 @@ BOOST_AUTO_TEST_CASE(inventory__count__matching_type__returns_count)
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
         messages::inventory_vector(messages::inventory_vector::type_id::block,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
+            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     BOOST_REQUIRE_EQUAL(3u,
@@ -370,13 +370,13 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_empty_list)
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("1111111111111111111111111111111111111111111111111111111111111111")),
+            base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("2222222222222222222222222222222222222222222222222222222222222222")),
+            base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
         messages::inventory_vector(messages::inventory_vector::type_id::block,
-            hash_literal("3333333333333333333333333333333333333333333333333333333333333333")),
+            base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4444444444444444444444444444444444444444444444444444444444444444"))
+            base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     hash_list result;
@@ -387,21 +387,21 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_empty_list)
 BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_hashes)
 {
     const hash_list hashes = {
-        hash_literal("1111111111111111111111111111111111111111111111111111111111111111"),
-        hash_literal("2222222222222222222222222222222222222222222222222222222222222222"),
-        hash_literal("4444444444444444444444444444444444444444444444444444444444444444")
+        base16_hash("1111111111111111111111111111111111111111111111111111111111111111"),
+        base16_hash("2222222222222222222222222222222222222222222222222222222222222222"),
+        base16_hash("4444444444444444444444444444444444444444444444444444444444444444")
     };
 
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("1111111111111111111111111111111111111111111111111111111111111111")),
+            base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("2222222222222222222222222222222222222222222222222222222222222222")),
+            base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
         messages::inventory_vector(messages::inventory_vector::type_id::block,
-            hash_literal("3333333333333333333333333333333333333333333333333333333333333333")),
+            base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4444444444444444444444444444444444444444444444444444444444444444"))
+            base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     hash_list result;
@@ -416,13 +416,13 @@ BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__returns_empty_list)
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("1111111111111111111111111111111111111111111111111111111111111111")),
+            base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("2222222222222222222222222222222222222222222222222222222222222222")),
+            base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
         messages::inventory_vector(messages::inventory_vector::type_id::block,
-            hash_literal("3333333333333333333333333333333333333333333333333333333333333333")),
+            base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4444444444444444444444444444444444444444444444444444444444444444"))
+            base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     messages::inventory_vector::list result;
@@ -434,23 +434,23 @@ BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__returns_matches)
 {
     const messages::inventory_vector::list expected = {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("1111111111111111111111111111111111111111111111111111111111111111")),
+            base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("2222222222222222222222222222222222222222222222222222222222222222")),
+            base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4444444444444444444444444444444444444444444444444444444444444444"))
+            base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     };
 
     messages::inventory instance(
     {
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("1111111111111111111111111111111111111111111111111111111111111111")),
+            base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("2222222222222222222222222222222222222222222222222222222222222222")),
+            base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
         messages::inventory_vector(messages::inventory_vector::type_id::block,
-            hash_literal("3333333333333333333333333333333333333333333333333333333333333333")),
+            base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
         messages::inventory_vector(messages::inventory_vector::type_id::error,
-            hash_literal("4444444444444444444444444444444444444444444444444444444444444444"))
+            base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     messages::inventory_vector::list result;
