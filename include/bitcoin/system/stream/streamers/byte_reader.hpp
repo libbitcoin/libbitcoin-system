@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -38,6 +39,9 @@ class byte_reader
   : public virtual bytereader
 {
 public:
+    /// The maximum addressable stream position.
+    static const size_t maximum;
+
     /// Constructors.
     byte_reader(IStream& source) noexcept;
     virtual ~byte_reader() noexcept;
@@ -108,14 +112,17 @@ public:
     void rewind_byte() noexcept override;
     void rewind_bytes(size_t size) noexcept override;
 
-    /// Get the current absolute position (invalidates on failure).
-    size_t get_position() noexcept override;
-
-    /// Clear invalid and set absolute position (invalidates on failure).
-    void set_position(size_t absolute) noexcept override;
-
     /// The stream is empty (or invalid).
     bool is_exhausted() const noexcept override;
+
+    /// Get the current absolute position.
+    size_t get_position() noexcept override;
+
+    /// Clear invalid state and set absolute position.
+    void set_position(size_t absolute) noexcept override;
+
+    /// Limit stream upper bound to current position plus size (default resets).
+    void set_limit(size_t size=max_size_t) noexcept override;
 
     /// Invalidate the stream.
     void invalidate() noexcept override;
@@ -140,12 +147,13 @@ private:
     void invalid() noexcept;
     void validate() noexcept;
     void clear() noexcept;
-    virtual size_t getter() noexcept;
-    virtual void setter(size_t absolute) noexcept;
-    void seeker(typename IStream::pos_type offset, 
-        typename std::ios_base::seekdir direction) noexcept;
+    size_t getter() noexcept;
+    void limit(size_t size) noexcept;
+    bool limiter(size_t size) noexcept;
+    void seeker(typename IStream::pos_type offset) noexcept;
 
     IStream& stream_;
+    size_t remaining_;
 };
 
 } // namespace system

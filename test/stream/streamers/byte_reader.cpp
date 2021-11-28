@@ -302,6 +302,95 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_position__invalid__clears)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
+BOOST_AUTO_TEST_CASE(byte_reader__set_limit__default__unlimited)
+{
+    const auto size = 42;
+    std::istringstream stream{ std::string(size, 0x42) };
+    read::bytes::istream reader(stream);
+    reader.set_limit();
+    reader.set_position(sub1(size));
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 0x42);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+// set_position back tests both set_position and rewind.
+BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_back__limited)
+{
+    const auto size = 5;
+    std::istringstream stream{ "abcde" };
+    read::bytes::istream reader(stream);
+
+    // Read to position 1.
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 0u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+
+    // Position is 1, set limit +2 (to absolute 3).
+    reader.set_limit(2);
+
+    // Read to limit and verify.
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'b');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 2u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'c');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+
+    // Peek past limit invalidates.
+    BOOST_REQUIRE_EQUAL(reader.peek_byte(), 0x00);
+    BOOST_REQUIRE(!reader);
+
+    // Reset absolute position to 1 and clear invalid state.
+    reader.set_position(1);
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+
+    // Read to limit and verify.
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'b');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 2u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'c');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+
+    // Read past limit invalidates.
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 0x00);
+    BOOST_REQUIRE(!reader);
+}
+
+// set_position forward tests both set_position and skip.
+BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_forward_peek__limited)
+{
+    const auto size = 5;
+    std::istringstream stream{ "abcde" };
+    read::bytes::istream reader(stream);
+
+    // Read to position 1.
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 0u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+
+    // Position is 1, set limit +3 (to absolute 4).
+    reader.set_limit(3);
+
+    // Reset absolute position to 3.
+    reader.set_position(3);
+    BOOST_REQUIRE(!reader.is_exhausted());
+
+    // Read to limit and verify.
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), 'd');
+    BOOST_REQUIRE_EQUAL(reader.get_position(), 4u);
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+
+    // Peek past limit invalidates.
+    BOOST_REQUIRE_EQUAL(reader.peek_byte(), 0x00);
+    BOOST_REQUIRE(!reader);
+}
+
 #endif // BYTE_READER_CONTEXT
 
 #ifdef BYTE_READER_BIG_ENDIAN

@@ -23,8 +23,9 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
 
@@ -89,14 +90,17 @@ public:
     virtual void rewind_byte() noexcept = 0;
     virtual void rewind_bytes(size_t size) noexcept = 0;
 
-    /// Get the current absolute position (invalidates on failure).
-    virtual size_t get_position() noexcept = 0;
-
-    /// Clear invalid and set absolute position (invalidates on failure).
-    virtual void set_position(size_t absolute) noexcept = 0;
-
     /// The stream is empty (or invalid).
     virtual bool is_exhausted() const noexcept = 0;
+
+    /// Get the current absolute position.
+    virtual size_t get_position() noexcept = 0;
+
+    /// Clear invalid state and set absolute position.
+    virtual void set_position(size_t absolute) noexcept = 0;
+
+    /// Limit stream upper bound to current position plus size (default resets).
+    virtual void set_limit(size_t size=max_size_t) noexcept = 0;
 
     /// Invalidate the stream.
     virtual void invalidate() noexcept = 0;

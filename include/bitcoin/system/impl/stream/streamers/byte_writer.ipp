@@ -22,12 +22,16 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstddef>
+#include <ios>
+#include <limits>
 #include <ostream>
 #include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 
@@ -35,6 +39,12 @@ namespace libbitcoin {
 namespace system {
     
 // All public methods must rely on protected for stream state except validity.
+
+// This should be defined on OStream::pos_type, however this is implementation
+// defined and does not expose an integer domain, so rely on std::streamsize.
+template <typename OStream>
+const size_t byte_writer<OStream>::maximum = to_unsigned(
+    std::numeric_limits<std::streamsize>::max());
 
 template <typename OStream>
 const uint8_t byte_writer<OStream>::pad = 0x00;
@@ -212,15 +222,19 @@ void byte_writer<OStream>::write_string(const std::string& value,
 //-----------------------------------------------------------------------------
 
 template <typename OStream>
-size_t byte_writer<OStream>::get_position() noexcept
-{
-    return getter();
-}
-
-template <typename OStream>
 void byte_writer<OStream>::flush() noexcept
 {
     do_flush();
+}
+
+// control
+//-----------------------------------------------------------------------------
+// These only call non-virtual (private) methods.
+
+template <typename OStream>
+size_t byte_writer<OStream>::get_position() noexcept
+{
+    return getter();
 }
 
 template <typename OStream>
@@ -245,7 +259,12 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) noexcept
 {
     // It is not generally more efficient to call stream_.put() for one byte.
-    stream_.write(reinterpret_cast<const char*>(data), size);
+
+    // Write past stream start invalidates stream unless size exceeds maximum.
+    BITCOIN_ASSERT(size <= maximum);
+    stream_.write(reinterpret_cast<const char*>(data),
+        static_cast<typename OStream::pos_type>(size));
+
     validate();
 }
 
@@ -286,33 +305,33 @@ void byte_writer<OStream>::validate() noexcept
 }
 
 template <typename OStream>
+void byte_writer<OStream>::flusher() noexcept
+{
+    stream_.flush();
+}
+
+template <typename OStream>
 size_t byte_writer<OStream>::getter() noexcept
 {
     static const auto failure = OStream::pos_type(-1);
-    OStream::pos_type offset;
+    OStream::pos_type position;
 
     // Force these to be consistent, and avoid propagating exceptions.
     // Assuming behavior is consistent with seekg (as documented).
     // Returns current position on success and pos_type(-1) on failure.
     try
     {
-        offset = stream_.tellp();
+        position = stream_.tellp();
         validate();
     }
     catch (const typename OStream::failure&)
     {
-        offset = failure;
+        position = failure;
         invalid();
     }
 
-    // sizeof(std::ostream/ostringstream::pos_type) is 24 bytes.
-    return offset == failure ? zero : static_cast<size_t>(offset);
-}
-
-template <typename OStream>
-void byte_writer<OStream>::flusher() noexcept
-{
-    stream_.flush();
+    // Max size_t is presumed to exceed max OStream::pos_type.
+    return position == failure ? zero : static_cast<size_t>(position);
 }
 
 } // namespace system

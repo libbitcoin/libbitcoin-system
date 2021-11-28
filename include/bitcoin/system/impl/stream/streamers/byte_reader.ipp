@@ -21,8 +21,11 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <ios>
 #include <istream>
+#include <limits>
 #include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -36,6 +39,12 @@ namespace system {
 
 // All public methods must rely on protected for stream state except validity.
 
+// This should be defined on IStream::pos_type, however this is implementation
+// defined and does not expose an integer domain, so rely on std::streamsize.
+template <typename IStream>
+const size_t byte_reader<IStream>::maximum = to_unsigned(
+    std::numeric_limits<std::streamsize>::max());
+
 template <typename IStream>
 const uint8_t byte_reader<IStream>::pad = 0x00;
 
@@ -44,7 +53,7 @@ const uint8_t byte_reader<IStream>::pad = 0x00;
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) noexcept
-  : stream_(source)
+  : stream_(source), remaining_(std::numeric_limits<size_t>::max())
 {
 }
 
@@ -293,7 +302,6 @@ void byte_reader<IStream>::skip_byte() noexcept
     do_skip_bytes(one);
 }
 
-
 template <typename IStream>
 void byte_reader<IStream>::skip_bytes(size_t size) noexcept
 {
@@ -313,15 +321,21 @@ void byte_reader<IStream>::rewind_bytes(size_t size) noexcept
 }
 
 template <typename IStream>
-size_t byte_reader<IStream>::get_position() noexcept
+void byte_reader<IStream>::set_position(size_t absolute) noexcept
 {
-    return getter();
-}
+    // Clear a presumed error state following a read overflow.
+    clear();
 
-template <typename IStream>
-void byte_reader<IStream>::set_position(size_t offset) noexcept
-{
-    setter(offset);
+    // This allows conversion of and absolute to relative position.
+    const auto position = get_position();
+
+    if (absolute == position)
+        return;
+
+    if (absolute > position)
+        do_skip_bytes(absolute - position);
+    else
+        do_rewind_bytes(position - absolute);
 }
 
 template <typename IStream>
@@ -329,6 +343,22 @@ bool byte_reader<IStream>::is_exhausted() const noexcept
 {
     // True if invalid or if no bytes remain in the stream.
     return get_exhausted();
+}
+
+// control
+//-----------------------------------------------------------------------------
+// These only call non-virtual (private) methods.
+
+template <typename IStream>
+size_t byte_reader<IStream>::get_position() noexcept
+{
+    return getter();
+}
+
+template <typename IStream>
+void byte_reader<IStream>::set_limit(size_t size) noexcept
+{
+    limit(size);
 }
 
 template <typename IStream>
@@ -360,6 +390,9 @@ bool byte_reader<IStream>::operator!() const noexcept
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 {
+    if (limiter(one))
+        return pad;
+
     // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
     // the call the achieve consistent behavior. The reader will be invalid if
@@ -372,32 +405,55 @@ uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 template <typename IStream>
 void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 {
+    // Limited reads are not partially filled or padded.
+    if (limiter(size))
+        return;
+
     // It is not generally more efficient to call stream_.get() for one byte.
-    // partially-failed reads here will be populated by the stream, not padded.
+    // Partially-failed reads here will be populated by the stream, not padded.
     // However, both copy_source and stringstream will zero-fill partial reads.
     // Read on empty is inconsistent, so validate the result. The reader will be
     // invalid if the stream is get past end, including when empty.
-    stream_.read(reinterpret_cast<char*>(buffer), size);
+
+    // Read past stream end invalidates stream unless size exceeds maximum.
+    BITCOIN_ASSERT(size <= maximum);
+    stream_.read(reinterpret_cast<char*>(buffer),
+        static_cast<typename IStream::pos_type>(size));
+
     validate();
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 {
-    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(static_cast<typename IStream::pos_type>(size), IStream::cur);
+    if (limiter(size))
+        return;
+
+    // Skip past stream end invalidates stream unless size exceeds maximum.
+    BITCOIN_ASSERT(size <= maximum);
+    seeker(static_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
 void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 {
-    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    seeker(-static_cast<typename IStream::pos_type>(size), IStream::cur);
+    // Given that the stream size is unknown to the reader, the limit may be
+    // arbitrarily high. This prevents an overflow if sum exceeds max_size_t.
+    // max_size_t is presumed to exceed the range of IStream::pos_type, in 
+    // which case this constraint does not affect the limiting behavior.
+    remaining_ = ceilinged_add(remaining_, size);
+
+    // Rewind past stream start invalidates stream unless size exceeds maximum.
+    BITCOIN_ASSERT(size <= maximum);
+    seeker(-static_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
 bool byte_reader<IStream>::get_exhausted() const noexcept
 {
+    if (is_zero(remaining_))
+        return true;
+
     // Empty behavior is broadly inconsistent across implementations.
     // It is also necessary to start many reads, including initial reads, with
     // an exhaustion check, which must be consistent and not state-changing.
@@ -453,6 +509,7 @@ void byte_reader<IStream>::validate() noexcept
 template <typename IStream>
 void byte_reader<IStream>::clear() noexcept
 {
+    // Does not reset the current position.
     stream_.clear();
 }
 
@@ -460,49 +517,53 @@ template <typename IStream>
 size_t byte_reader<IStream>::getter() noexcept
 {
     static const auto failure = IStream::pos_type(-1);
-    IStream::pos_type offset;
+    IStream::pos_type position;
 
     // Force these to be consistent, and avoid propagating exceptions.
     // Assuming behavior is consistent with seekg (as documented).
     // Returns current position on success and pos_type(-1) on failure.
     try
     {
-        offset = stream_.tellg();
+        position = stream_.tellg();
         validate();
     }
     catch (const typename IStream::failure&)
     {
-        offset = failure;
+        position = failure;
         invalid();
     }
 
-    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    return offset == failure ? zero : static_cast<size_t>(offset);
+    // Max size_t is presumed to exceed max IStream::pos_type.
+    return position == failure ? zero : static_cast<size_t>(position);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::setter(size_t absolute) noexcept
+void byte_reader<IStream>::limit(size_t size) noexcept
 {
-    // Clear a presumed error state following a read overflow.
-    clear();
-
-    // sizeof(std::istream/istringstream::pos_type) is 24 bytes.
-    // seekg(n) is not necessarily equivalent to seekg(n, ios::beg).
-    seeker(static_cast<typename IStream::pos_type>(absolute), IStream::beg);
-
-    // Empty stream reset to beginning creates an error state, so reset it.
-    if (!valid() && is_zero(absolute))
-        clear();
+    remaining_ = size;
 }
 
 template <typename IStream>
-void byte_reader<IStream>::seeker(typename IStream::pos_type offset,
-    std::ios_base::seekdir direction) noexcept
+bool byte_reader<IStream>::limiter(size_t size) noexcept
+{
+    if (size > remaining_)
+    {
+        // Does not reset the current position or the remaining limit.
+        invalidate();
+        return true;
+    }
+
+    remaining_ -= size;
+    return false;
+}
+
+template <typename IStream>
+void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
 {
     // Force these to be consistent by treating zero seek as a no-op.
     // boost/istringstream both succeed on non-empty zero seek.
     // istringstream succeeds on empty zero seek, boost sets failbit.
-    if (is_zero(offset) && (direction == IStream::cur))
+    if (is_zero(offset))
         return;
 
     // Force these to be consistent, and avoid propagating exceptions.
@@ -510,7 +571,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset,
     // boost/istringstream both set failbit on empty over/underflow.
     try
     {
-        stream_.seekg(offset, direction);
+        stream_.seekg(offset, IStream::cur);
         validate();
     }
     catch (const typename IStream::failure&)

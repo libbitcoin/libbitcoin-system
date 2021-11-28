@@ -38,6 +38,9 @@ class byte_writer
   : public virtual bytewriter
 {
 public:
+    /// The maximum addressable stream position.
+    static const size_t maximum;
+
     /// Constructors.
     byte_writer(OStream& sink) noexcept;
     virtual ~byte_writer() noexcept;
@@ -82,11 +85,11 @@ public:
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     void write_string(const std::string& value, size_t size) noexcept override;
 
-    /// Get the current absolute position (invalidates on failure).
-    size_t get_position() noexcept override;
-
     /// Flush the buffer.
     void flush() noexcept override;
+
+    /// Get the current absolute position (invalidates on failure).
+    size_t get_position() noexcept override;
 
     /// The stream is valid.
     operator bool() const noexcept override;
@@ -104,8 +107,8 @@ private:
     bool valid() const noexcept;
     void invalid() noexcept;
     void validate() noexcept;
-    size_t getter() noexcept;
     void flusher() noexcept;
+    size_t getter() noexcept;
 
     OStream& stream_;
 };
