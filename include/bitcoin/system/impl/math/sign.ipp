@@ -41,7 +41,7 @@ template <typename Integer, typename Absolute, if_signed_integer<Integer>>
 constexpr Absolute absolute(Integer value) noexcept
 {
     // std::abs is limited to signed types.
-    return is_negative(value) ? -value : value;
+    return to_unsigned(is_negative(value) ? -value : value);
 }
 
 template <typename Integer, typename Absolute, if_unsigned_integer<Integer>>
