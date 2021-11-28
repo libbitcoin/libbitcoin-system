@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(points_value_tests)
 
-using namespace bc::system::chain;
+using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(points_value__value__default__zero)
 {

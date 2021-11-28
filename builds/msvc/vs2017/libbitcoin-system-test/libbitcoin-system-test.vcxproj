@@ -73,7 +73,6 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\block_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\check_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
@@ -84,10 +83,7 @@
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
@@ -256,6 +252,8 @@
       <ObjectFileName>$(IntDir)test_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\point_value.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">
       <ObjectFileName>$(IntDir)test_words_catalogs_electrum.obj</ObjectFileName>
     </ClCompile>

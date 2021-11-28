@@ -39,7 +39,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/properties.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
-    src/chain/block_filter.cpp \
     src/chain/chain_state.cpp \
     src/chain/check_point.cpp \
     src/chain/compact.cpp \
@@ -47,10 +46,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/input.cpp \
     src/chain/operation.cpp \
     src/chain/output.cpp \
-    src/chain/output_point.cpp \
     src/chain/point.cpp \
-    src/chain/point_value.cpp \
-    src/chain/points_value.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
@@ -187,6 +183,8 @@ src_libbitcoin_system_la_SOURCES = \
     src/wallet/context.cpp \
     src/wallet/message.cpp \
     src/wallet/neutrino_filter.cpp \
+    src/wallet/point_value.cpp \
+    src/wallet/points_value.cpp \
     src/wallet/addresses/bitcoin_uri.cpp \
     src/wallet/addresses/payment_address.cpp \
     src/wallet/addresses/qr_code.cpp \
@@ -277,7 +275,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/test.cpp \
     test/test.hpp \
     test/chain/block.cpp \
-    test/chain/block_filter.cpp \
     test/chain/chain_state.cpp \
     test/chain/check_point.cpp \
     test/chain/compact.cpp \
@@ -285,10 +282,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/input.cpp \
     test/chain/operation.cpp \
     test/chain/output.cpp \
-    test/chain/output_point.cpp \
     test/chain/point.cpp \
-    test/chain/point_value.cpp \
-    test/chain/points_value.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
@@ -414,6 +408,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/context.cpp \
     test/wallet/message.cpp \
     test/wallet/neutrino_filter.cpp \
+    test/wallet/point_value.cpp \
+    test/wallet/points_value.cpp \
     test/wallet/addresses/bitcoin_uri.cpp \
     test/wallet/addresses/checked.cpp \
     test/wallet/addresses/payment_address.cpp \
@@ -477,20 +473,15 @@ include_bitcoin_system_HEADERS = \
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain
 include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/block.hpp \
-    include/bitcoin/system/chain/block_filter.hpp \
     include/bitcoin/system/chain/chain.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/check_point.hpp \
     include/bitcoin/system/chain/compact.hpp \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
-    include/bitcoin/system/chain/input_point.hpp \
     include/bitcoin/system/chain/operation.hpp \
     include/bitcoin/system/chain/output.hpp \
-    include/bitcoin/system/chain/output_point.hpp \
     include/bitcoin/system/chain/point.hpp \
-    include/bitcoin/system/chain/point_value.hpp \
-    include/bitcoin/system/chain/points_value.hpp \
     include/bitcoin/system/chain/script.hpp \
     include/bitcoin/system/chain/transaction.hpp \
     include/bitcoin/system/chain/witness.hpp
@@ -767,6 +758,8 @@ include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/context.hpp \
     include/bitcoin/system/wallet/message.hpp \
     include/bitcoin/system/wallet/neutrino_filter.hpp \
+    include/bitcoin/system/wallet/point_value.hpp \
+    include/bitcoin/system/wallet/points_value.hpp \
     include/bitcoin/system/wallet/wallet.hpp
 
 include_bitcoin_system_wallet_addressesdir = ${includedir}/bitcoin/system/wallet/addresses

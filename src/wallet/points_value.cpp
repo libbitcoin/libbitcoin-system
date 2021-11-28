@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/system/wallet/points_value.hpp>
+
 #include <numeric>
 #include <cstdint>
-#include <bitcoin/system/chain/point_value.hpp>
-#include <bitcoin/system/chain/points_value.hpp>
 #include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/wallet/point_value.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace wallet {
 
 // static
 // ----------------------------------------------------------------------------
@@ -138,6 +139,6 @@ uint64_t points_value::value() const
     return std::accumulate(points.begin(), points.end(), uint64_t(0), sum);
 }
 
-} // namespace chain
+} // namespace wallet
 } // namespace system
 } // namespace libbitcoin

@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(point_value_tests)
 
-using namespace bc::system::chain;
+using namespace bc::system::wallet;
 
 static const auto hash1 = hash_literal(
     "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(point_value__copy_constructor__always__expected)
 
 BOOST_AUTO_TEST_CASE(point_value__constructor4__always__expected)
 {
-    point foo{ hash1, 42 };
+    chain::point foo{ hash1, 42 };
     static const point_value instance(std::move(foo), 34);
     BOOST_REQUIRE(instance.hash() == hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(point_value__constructor4__always__expected)
 
 BOOST_AUTO_TEST_CASE(point_value__constructor5__always__expected)
 {
-    static const point foo{ hash1, 42 };
+    static const chain::point foo{ hash1, 42 };
     static const point_value instance(foo, 34);
     BOOST_REQUIRE(instance.hash() == hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);

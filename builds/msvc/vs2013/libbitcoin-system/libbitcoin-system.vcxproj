@@ -79,7 +79,6 @@
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\block_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\check_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
@@ -94,12 +93,9 @@
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
       <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\output_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
       <ObjectFileName>$(IntDir)src_chain_point.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\point_value.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <ObjectFileName>$(IntDir)src_chain_script.obj</ObjectFileName>
     </ClCompile>
@@ -298,6 +294,8 @@
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\point_value.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\points_value.cpp" />
     <ClCompile Include="..\..\..\..\src\words\catalogs\electrum.cpp">
       <ObjectFileName>$(IntDir)src_words_catalogs_electrum.obj</ObjectFileName>
     </ClCompile>
@@ -313,7 +311,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\check_point.hpp" />
@@ -328,13 +325,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point_value.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp" />
@@ -530,6 +523,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\neutrino_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\point_value.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\wallet.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum_v1.hpp" />

@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_POINTS_VALUE_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_POINTS_VALUE_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_POINTS_VALUE_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_POINTS_VALUE_HPP
 
 #include <numeric>
 #include <cstdint>
-#include <bitcoin/system/chain/point_value.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/wallet/point_value.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace wallet {
 
 class BC_API points_value
 {
@@ -44,9 +44,8 @@ public:
     };
 
     /// Select outpoints for a spend from a list of unspent outputs.
-    static void select(chain::points_value& out,
-        const chain::points_value& unspent, uint64_t minimum_value,
-        selection option=selection::greedy);
+    static void select(points_value& out, const points_value& unspent,
+        uint64_t minimum_value, selection option=selection::greedy);
 
     /// Total value of the current set of points.
     uint64_t value() const;
@@ -55,11 +54,11 @@ public:
     point_value::list points;
 
 private:
-    static void greedy(chain::points_value& out,
-        const chain::points_value& unspent, uint64_t minimum_value);
+    static void greedy(points_value& out, const points_value& unspent,
+        uint64_t minimum_value);
 
-    static void individual(chain::points_value& out,
-        const chain::points_value& unspent, uint64_t minimum_value);
+    static void individual(points_value& out, const points_value& unspent,
+        uint64_t minimum_value);
 };
 
 } // namespace chain

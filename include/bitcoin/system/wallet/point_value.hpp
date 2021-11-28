@@ -16,21 +16,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_POINT_VALUE_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_POINT_VALUE_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_POINT_VALUE_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_POINT_VALUE_HPP
 
 #include <cstdint>
 #include <vector>
-#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace wallet {
 
 /// A valued point, does not implement specialized serialization methods.
 class BC_API point_value
-  : public point
+  : public chain::point
 {
 public:
     typedef std::vector<point_value> list;
@@ -66,7 +66,7 @@ private:
     uint64_t value_;
 };
 
-} // namespace chain
+} // namespace wallet
 } // namespace system
 } // namespace libbitcoin
 

@@ -48,5 +48,7 @@
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
+#include <bitcoin/system/wallet/point_value.hpp>
+#include <bitcoin/system/wallet/points_value.hpp>
 
 #endif

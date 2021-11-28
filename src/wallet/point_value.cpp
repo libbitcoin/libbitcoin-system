@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/system/wallet/point_value.hpp>
+
 #include <cstdint>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/chain/point.hpp>
-#include <bitcoin/system/chain/point_value.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace chain {
+namespace wallet {
 
 // Constructors.
 //-------------------------------------------------------------------------
@@ -79,6 +80,7 @@ bool point_value::operator!=(const point_value& other) const
 void swap(point_value& left, point_value& right)
 {
     using std::swap;
+    using namespace chain;
 
     // Must be unqualified (no std namespace).
     swap(static_cast<point&>(left), static_cast<point&>(right));
@@ -98,6 +100,6 @@ void point_value::set_value(uint64_t value)
     value_ = value;
 }
 
-} // namespace chain
+} // namespace wallet
 } // namespace system
 } // namespace libbitcoin

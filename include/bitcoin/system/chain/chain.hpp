@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_HPP
 
 #include <bitcoin/system/chain/block.hpp>
-#include <bitcoin/system/chain/block_filter.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
@@ -35,13 +34,9 @@
 #include <bitcoin/system/chain/check_point.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
-#include <bitcoin/system/chain/input_point.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/output.hpp>
-#include <bitcoin/system/chain/output_point.hpp>
 #include <bitcoin/system/chain/point.hpp>
-#include <bitcoin/system/chain/points_value.hpp>
-#include <bitcoin/system/chain/point_value.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
