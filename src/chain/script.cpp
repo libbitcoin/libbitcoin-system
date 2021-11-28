@@ -1223,7 +1223,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
         if ((witnessed = embedded_script.is_pay_to_witness(forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
-            if (in.script().size() != 1)
+            if (in.script().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
