@@ -736,15 +736,12 @@ size_t chain_state::height() const
 
 chain::context chain_state::context() const
 {
-    return
-    {
-        forks(),
-        policy(),
-        {
-            height(),
-            median_time_past()
-        }
-    };
+    chain::context context;
+    context.forks = forks();
+    context.policy = policy();
+    context.median_time_past = median_time_past();
+    context.height = height();
+    return context;
 }
 
 /// Current zulu (utc) time in seconds since epoch, using the wall clock.

@@ -39,7 +39,6 @@ public:
     typedef std::vector<output> list;
     typedef std::shared_ptr<output> ptr;
 
-    /// This is a sentinel used in .value to indicate not found/populated.
     /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
 

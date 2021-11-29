@@ -22,18 +22,10 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
-#include <bitcoin/system/chain/position.hpp>
-#include <bitcoin/system/chain/script.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-
-context::context(uint32_t forks, uint32_t policy,
-    const chain::position& position)
-  : chain::position(position), forks(forks), policy(policy)
-{
-}
 
 bool context::is_enabled(chain::forks fork) const
 {

@@ -22,23 +22,18 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/output.hpp>
-#include <bitcoin/system/chain/position.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// TODO: may require copy/move construct/assign.
-
 class BC_API prevout
-  : public output, position
+  : public output
 {
 public:
-    /// Default prevout ensures consensus invalidity.
-    prevout();
-
-    prevout(output&& output, position&& position);
-    prevout(const output& output, const position& position);
+    /// Default output ensures consensus invalidity.
+    size_t height;
+    uint32_t median_time_past;
 };
 
 } // namespace chain

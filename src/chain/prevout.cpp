@@ -18,31 +18,9 @@
  */
 #include <bitcoin/system/chain/prevout.hpp>
 
-#include <utility>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/chain/output.hpp>
-#include <bitcoin/system/chain/position.hpp>
-
 namespace libbitcoin {
 namespace system {
 namespace chain {
-
-// Default prevout ensures consensus invalidity as output is invalid, value
-// exceeds maximum money, and position is genesis height and maximum time.
-prevout::prevout()
-  : output{ max_uint64, {}, false }, position{ zero, max_uint32 }
-{
-}
-
-prevout::prevout(output&& output, position&& position)
-  : output(std::move(output)), position(std::move(position))
-{
-}
-
-prevout::prevout(const output& output, const position& position)
-  : output(output), position(position)
-{
-}
 
 } // namespace chain
 } // namespace system
