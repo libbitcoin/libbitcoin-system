@@ -31,7 +31,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
@@ -230,7 +230,7 @@ void block::to_data(writer& sink, bool witness) const
     for (const auto& transaction: transactions_)
         transaction.to_data(sink, witness);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 hash_list block::to_hashes(bool witness) const
@@ -480,11 +480,11 @@ bool block::is_internal_double_spend() const
 
     const auto inserter = [&outs](const transaction& tx)
     {
-        auto out = tx.previous_outputs();
+        auto out = tx.points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     };
 
-    // Move the copied prevouts of all non-coinbase transactions into one set.
+    // Move the prevouts of all non-coinbase transactions into one set.
     const auto& txs = transactions_;
     std::for_each(std::next(txs.begin()), txs.end(), inserter);
     return outs.size() != total_non_coinbase_inputs();
@@ -545,7 +545,7 @@ code block::check_transactions(uint64_t max_money) const
     return error::block_success;
 }
 
-code block::accept_transactions(const chain_state& state) const
+code block::accept_transactions(const context& state) const
 {
     code ec;
 
@@ -556,48 +556,45 @@ code block::accept_transactions(const chain_state& state) const
     return error::block_success;
 }
 
-////code block::connect_transactions(const chain_state& state) const
-////{
-////    code ec;
-////
-////    for (const auto& tx: transactions_)
-////        if ((ec = tx.connect(state)))
-////            return ec;
-////
-////    return error::block_success;
-////}
+code block::connect_transactions(const context& state) const
+{
+    code ec;
+
+    for (const auto& tx: transactions_)
+        if ((ec = tx.connect(state)))
+            return ec;
+
+    return error::block_success;
+}
 
 // Validation.
 //-----------------------------------------------------------------------------
 
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit, bool scrypt, bool header) const
+    uint32_t proof_of_work_limit) const
 {
     code ec;
 
-    if (header && ((ec = header_.check(timestamp_limit_seconds,
-        proof_of_work_limit, scrypt))))
-        return ec;
+    // The block header is checked independently.
 
-    else if (transactions_.empty())
+    if (transactions_.empty())
         return error::empty_block;
 
     // Relates to total of tx.size (pool cache tx.size(false)).
     else if (serialized_size(false) > max_block_size)
         return error::block_size_limit;
 
-    // Coinbase transactions are not pooled (cache is_coinbase).
+    // Coinbase transactions are not pooled.
     else if (!transactions_.front().is_coinbase())
         return error::first_not_coinbase;
 
-    // Coinbase transactions are not pooled (cache is_coinbase).
+    // Coinbase transactions are not pooled.
     else if (is_extra_coinbases())
         return error::extra_coinbases;
 
-    // Determinable from tx pool graph (cannot cache, must navigate).
+    // Determinable from tx pool graph.
     // Satoshi implementation side effect, as tx order is otherwise irrelevant.
-    // Txs cannot form cycles under the presumption of hash non-collision.
     else if (is_forward_reference())
         return error::forward_reference;
 
@@ -605,7 +602,7 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     else if (!is_distinct_transaction_set())
         return error::internal_duplicate;
 
-    // Determinable from tx pool graph (cannot cache, must navigate).
+    // Determinable from tx pool graph.
     // This also precludes the block merkle calculation DoS exploit.
     // bitcointalk.org/?topic=102395
     else if (is_internal_double_spend())
@@ -615,20 +612,11 @@ code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
     else if (!is_valid_merkle_root())
         return error::merkle_mismatch;
 
-    // We cannot know if bip16 is enabled at this point so we disable it.
-    // This will not make a difference unless prevouts are populated, in which
-    // case they are ignored. This means that p2sh sigops are not counted here.
-    // This is a preliminary check, the final count must come from connect().
-    ////else if (signature_operations(false, false) > max_block_sigops)
-    ////    return error::block_legacy_sigop_limit;
-
-    else
-        return check_transactions(max_money);
+    return check_transactions(max_money);
 }
 
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const chain_state& state,
-    const system::settings& settings, bool transactions, bool header) const
+code block::accept(const context& state, const system::settings& settings) const
 {
     code ec;
     const auto bip16 = state.is_enabled(bip16_rule);
@@ -638,23 +626,18 @@ code block::accept(const chain_state& state,
     const auto bip50 = state.is_enabled(bip50_rule);
     const auto bip113 = state.is_enabled(bip113_rule);
     const auto bip141 = state.is_enabled(bip141_rule);
-
-    const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;
-    const auto block_time = bip113 ? state.median_time_past() :
+    const auto sigops_limit = bip141 ? max_fast_sigops : max_block_sigops;
+    const auto block_time = bip113 ? state.median_time_past :
         header_.timestamp();
 
-    if (header && ((ec = header_.accept(state))))
-        return ec;
-
-    else if (state.is_under_checkpoint())
-        return error::success;
+    // The block header is accepted independently using chain_state.
 
     // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
-    else if (bip141 && weight() > max_block_weight)
+    if (bip141 && weight() > max_block_weight)
         return error::block_weight_limit;
 
     // Relates block height to coinbase, always under checkpoint.
-    else if (bip34 && !is_valid_coinbase_script(state.height()))
+    else if (bip34 && !is_valid_coinbase_script(state.height))
         return error::coinbase_height_mismatch;
 
     // Relates block time to tx and prevout hashes, always under checkpoint.
@@ -663,43 +646,35 @@ code block::accept(const chain_state& state,
 
     // This merely rolls up checks already performed by tx accept.
     // Relates block time to each tx.locktime (pool cache tx.locktime).
-    else if (!is_final(state.height(), block_time))
+    else if (!is_final(state.height, block_time))
         return error::block_non_final;
 
-    // This causes a second merkle root computation (uncached).
+    // Static check but requires context.
     else if (bip141 && !is_valid_witness_commitment())
         return error::invalid_witness_commitment;
 
-    // requires prevouts
-    // This is a spentness check, to be applied at confirmation not validation.
+    // These require prevouts.
+
+    ////// This is a spentness check, to be applied at confirmation not validation.
     ////else if (bip30 && is_unspent_coinbase_collision())
     ////    return error::unspent_coinbase_collision;
 
-    // requires prevouts
-    // Relates block height to total of tx.fee (pool cache tx.fee).
-    ////else if (!is_valid_coinbase_claim(state.height(),
+    ////// Relates block height to total of tx.fee (pool cache tx.fee).
+    ////else if (!is_valid_coinbase_claim(state.height,
     ////    settings.subsidy_interval_blocks, settings.initial_subsidy(), bip42))
     ////    return error::coinbase_value_limit;
 
-    // requires prevouts
-    // Relates block limit to total of tx.sigops (pool cache tx.sigops).
-    ////else if (transactions && signature_operations(bip16, bip141) > max_sigops)
+    ////// Relates block limit to total of tx.sigops (pool cache tx.sigops).
+    ////else if (signature_operations(bip16, bip141) > sigops_limit)
     ////    return error::block_embedded_sigop_limit;
 
-    else if (transactions)
-        return accept_transactions(state);
-
-    else
-        return ec;
+    return accept_transactions(state);
 }
 
-////code block::connect(const chain_state& state) const
-////{
-////    if (state.is_under_checkpoint())
-////        return error::block_success;
-////
-////    return connect_transactions(state);
-////}
+code block::connect(const context& state) const
+{
+    return connect_transactions(state);
+}
 
 } // namespace chain
 } // namespace system

@@ -25,7 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
@@ -112,8 +112,8 @@ public:
     hash_digest sequences_hash() const;
     hash_digest hash(bool witness = false) const;
 
-    point::list previous_outputs() const;
     uint64_t total_output_value() const;
+    point::list points() const;
     size_t weight() const;
 
     bool is_coinbase() const;
@@ -125,20 +125,23 @@ public:
     bool is_locktime_conflict() const;
     bool is_segregated() const;
 
-    code check(uint64_t max_money, bool transaction_pool=true) const;
-    code accept(const chain_state& state, bool transaction_pool=true) const;
-    ////code connect(const chain_state& state) const;
-    ////code connect_input(const chain_state& state, size_t input_index) const;
+    code check(uint64_t max_money, bool pool=true) const;
+    code accept(const context& state, bool pool=true) const;
+    code connect(const context& state) const;
+    code connect_input(const context& state, size_t input_index) const;
 
 protected:
-    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
-        output::list&& outputs, bool valid);
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs, bool valid);
+    static bool is_segregated(const input::list& inputs);
+
+    transaction(bool segregated, uint32_t version, uint32_t locktime,
+        input::list&& inputs, output::list&& outputs, bool valid);
+    transaction(bool segregated, uint32_t version, uint32_t locktime,
+        const input::list& inputs, const output::list& outputs, bool valid);
 
     void reset();
 
 private:
+    bool segregated_;
     uint32_t version_;
     uint32_t locktime_;
     input::list inputs_;

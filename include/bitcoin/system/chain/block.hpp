@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -124,14 +124,12 @@ public:
     bool is_segregated() const;
 
     code check(uint64_t max_money, uint32_t timestamp_limit_seconds,
-        uint32_t proof_of_work_limit, bool scrypt=false,
-        bool header=true) const;
+        uint32_t proof_of_work_limit) const;
     code check_transactions(uint64_t max_money) const;
-    code accept(const chain_state& state, const settings& settings,
-        bool transactions=true, bool header=true) const;
-    code accept_transactions(const chain_state& state) const;
-    ////code connect(const chain_state& state) const;
-    ////code connect_transactions(const chain_state& state) const;
+    code accept(const context& state, const settings& settings) const;
+    code accept_transactions(const context& state) const;
+    code connect(const context& state) const;
+    code connect_transactions(const context& state) const;
 
 protected:
     void reset();
