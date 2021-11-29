@@ -79,6 +79,9 @@
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\check_point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\context.cpp">
+      <ObjectFileName>$(IntDir)src_chain_context.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\enums\opcode.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <ObjectFileName>$(IntDir)src_chain_header.obj</ObjectFileName>
@@ -93,6 +96,8 @@
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
       <ObjectFileName>$(IntDir)src_chain_point.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\position.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\prevout.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <ObjectFileName>$(IntDir)src_chain_script.obj</ObjectFileName>
     </ClCompile>
@@ -262,7 +267,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\tiff.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\witness_address.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\context.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\context.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_context.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_public.cpp" />
@@ -312,19 +319,23 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\check_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\forks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\opcode.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\rule_fork.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\policy.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\script_pattern.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\script_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\selection.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\sighash_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\position.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp" />
@@ -435,7 +446,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\version.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\mutex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\properties.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />

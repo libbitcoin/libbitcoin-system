@@ -42,11 +42,14 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/chain_state.cpp \
     src/chain/check_point.cpp \
     src/chain/compact.cpp \
+    src/chain/context.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/operation.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
+    src/chain/position.cpp \
+    src/chain/prevout.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
@@ -278,11 +281,14 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/chain_state.cpp \
     test/chain/check_point.cpp \
     test/chain/compact.cpp \
+    test/chain/context.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/operation.cpp \
     test/chain/output.cpp \
     test/chain/point.cpp \
+    test/chain/position.cpp \
+    test/chain/prevout.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
@@ -464,7 +470,6 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
-    include/bitcoin/system/mutex.hpp \
     include/bitcoin/system/optional.hpp \
     include/bitcoin/system/properties.hpp \
     include/bitcoin/system/settings.hpp \
@@ -477,25 +482,29 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/check_point.hpp \
     include/bitcoin/system/chain/compact.hpp \
+    include/bitcoin/system/chain/context.hpp \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
     include/bitcoin/system/chain/operation.hpp \
     include/bitcoin/system/chain/output.hpp \
     include/bitcoin/system/chain/point.hpp \
+    include/bitcoin/system/chain/position.hpp \
+    include/bitcoin/system/chain/prevout.hpp \
     include/bitcoin/system/chain/script.hpp \
     include/bitcoin/system/chain/transaction.hpp \
     include/bitcoin/system/chain/witness.hpp
 
 include_bitcoin_system_chain_enumsdir = ${includedir}/bitcoin/system/chain/enums
 include_bitcoin_system_chain_enums_HEADERS = \
+    include/bitcoin/system/chain/enums/coverage.hpp \
+    include/bitcoin/system/chain/enums/forks.hpp \
     include/bitcoin/system/chain/enums/magic_numbers.hpp \
     include/bitcoin/system/chain/enums/numbers.hpp \
     include/bitcoin/system/chain/enums/opcode.hpp \
-    include/bitcoin/system/chain/enums/rule_fork.hpp \
+    include/bitcoin/system/chain/enums/policy.hpp \
     include/bitcoin/system/chain/enums/script_pattern.hpp \
     include/bitcoin/system/chain/enums/script_version.hpp \
-    include/bitcoin/system/chain/enums/selection.hpp \
-    include/bitcoin/system/chain/enums/sighash_algorithm.hpp
+    include/bitcoin/system/chain/enums/selection.hpp
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \

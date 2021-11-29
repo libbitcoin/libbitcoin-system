@@ -76,6 +76,9 @@
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\check_point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\context.cpp">
+      <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
@@ -84,6 +87,8 @@
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\position.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\prevout.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
@@ -232,7 +237,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\witness_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\context.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_context.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />

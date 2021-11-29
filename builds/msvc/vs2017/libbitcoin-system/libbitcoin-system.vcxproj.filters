@@ -204,6 +204,9 @@
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\context.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\enums\opcode.cpp">
       <Filter>src\chain\enums</Filter>
     </ClCompile>
@@ -220,6 +223,12 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\position.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\prevout.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
@@ -743,6 +752,15 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp">
+      <Filter>include\bitcoin\system\chain\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\forks.hpp">
+      <Filter>include\bitcoin\system\chain\enums</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
@@ -752,7 +770,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\opcode.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\rule_fork.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\policy.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\script_pattern.hpp">
@@ -762,9 +780,6 @@
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\selection.hpp">
-      <Filter>include\bitcoin\system\chain\enums</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\sighash_algorithm.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp">
@@ -780,6 +795,12 @@
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\position.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp">
@@ -1111,9 +1132,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\version.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\mutex.hpp">
-      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp">
       <Filter>include\bitcoin\system</Filter>
