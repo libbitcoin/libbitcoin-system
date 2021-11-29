@@ -141,13 +141,10 @@ bool compact_filter::from_data(reader& source)
 
 data_chunk compact_filter::to_data() const
 {
-    data_chunk data;
-    const auto size = serialized_size();
-    data.reserve(size);
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size());
+    stream::out::copy ostream(data);
     to_data(ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

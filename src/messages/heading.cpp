@@ -192,13 +192,10 @@ bool heading::from_data(reader& source)
 
 data_chunk heading::to_data() const
 {
-    data_chunk data;
-    const auto size = satoshi_fixed_size();
-    data.reserve(size);
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(satoshi_fixed_size());
+    stream::out::copy ostream(data);
     to_data(ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

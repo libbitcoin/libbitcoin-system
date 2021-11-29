@@ -132,13 +132,10 @@ bool network_address::from_data(uint32_t, reader& source,
 data_chunk network_address::to_data(uint32_t version,
     bool with_timestamp) const
 {
-    data_chunk data;
-    const auto size = serialized_size(version, with_timestamp);
-    data.reserve(size);
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size(version, with_timestamp));
+    stream::out::copy ostream(data);
     to_data(version, ostream, with_timestamp);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 

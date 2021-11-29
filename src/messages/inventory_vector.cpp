@@ -159,13 +159,10 @@ bool inventory_vector::from_data(uint32_t ,
 
 data_chunk inventory_vector::to_data(uint32_t version) const
 {
-    data_chunk data;
-    const auto size = serialized_size(version);
-    data.reserve(size);
-    stream::out::data ostream(data);
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(serialized_size(version));
+    stream::out::copy ostream(data);
     to_data(version, ostream);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
