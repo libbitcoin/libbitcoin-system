@@ -76,7 +76,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
 // The result is little-endian, with negative sign bit.
 data_chunk number::data() const
 {
-    if (is_zero(value_))
+    if (is_false())
         return {};
 
     auto data = to_little_endian_chunk(absolute(value_));
@@ -191,19 +191,13 @@ bool number::operator!=(const number& other) const
 
 number number::operator+(int64_t value) const
 {
-    BITCOIN_ASSERT_MSG(is_zero(value) ||
-        (value > 0 && value_ <= max_int64 - value) ||
-        (value < 0 && value_ >= min_int64 - value), "overflow");
-
+    BITCOIN_ASSERT(value_ + value == ceilinged_add(value_, value));
     return number(value_ + value);
 }
 
 number number::operator-(int64_t value) const
 {
-    BITCOIN_ASSERT_MSG(is_zero(value) ||
-        (value > 0 && value_ >= min_int64 + value) ||
-        (value < 0 && value_ <= max_int64 + value), "underflow");
-
+    BITCOIN_ASSERT(value_ - value == floored_subtract(value_, value));
     return number(value_ - value);
 }
 
@@ -225,7 +219,6 @@ number number::operator+() const
 number number::operator-() const
 {
     BITCOIN_ASSERT_MSG(value_ != min_int64, "out of range");
-
     return number(-value_);
 }
 
@@ -241,20 +234,14 @@ number& number::operator-=(const number& other)
 
 number& number::operator+=(int64_t value)
 {
-    BITCOIN_ASSERT_MSG(is_zero(value) ||
-        (value > 0 && value_ <= max_int64 - value) ||
-        (value < 0 && value_ >= min_int64 - value), "overflow");
-
+    BITCOIN_ASSERT(value_ + value == ceilinged_add(value_, value));
     value_ += value;
     return *this;
 }
 
 number& number::operator-=(int64_t value)
 {
-    BITCOIN_ASSERT_MSG(is_zero(value) ||
-        (value > 0 && value_ >= min_int64 + value) ||
-        (value < 0 && value_ <= max_int64 + value), "underflow");
-
+    BITCOIN_ASSERT(value_ - value == floored_subtract(value_, value));
     value_ -= value;
     return *this;
 }
