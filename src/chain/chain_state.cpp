@@ -26,7 +26,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
-#include <bitcoin/system/chain/check_point.hpp>
+#include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -43,11 +43,11 @@ namespace system {
 namespace chain {
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-static const check_point mainnet_bip30_exception_checkpoint1
+static const checkpoint mainnet_bip30_exception_checkpoint1
 {
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
 };
-static const check_point mainnet_bip30_exception_checkpoint2
+static const checkpoint mainnet_bip30_exception_checkpoint2
 {
     "00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721", 91880
 };
@@ -65,7 +65,7 @@ inline bool is_enforced(size_t count, size_t enforcement_threshold)
     return count >= enforcement_threshold;
 }
 
-inline bool is_bip30_exception(const check_point& check, bool mainnet)
+inline bool is_bip30_exception(const checkpoint& check, bool mainnet)
 {
     return mainnet &&
         ((check == mainnet_bip30_exception_checkpoint1) ||
@@ -267,7 +267,7 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
 }
 
 size_t chain_state::bip9_bit0_height(size_t height,
-    const check_point& bip9_bit0_active_checkpoint)
+    const checkpoint& bip9_bit0_active_checkpoint)
 {
     const auto activation_height = bip9_bit0_active_checkpoint.height();
     // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
@@ -275,7 +275,7 @@ size_t chain_state::bip9_bit0_height(size_t height,
 }
 
 size_t chain_state::bip9_bit1_height(size_t height,
-    const check_point& bip9_bit1_active_checkpoint)
+    const checkpoint& bip9_bit1_active_checkpoint)
 {
     const auto activation_height = bip9_bit1_active_checkpoint.height();
 
@@ -425,10 +425,10 @@ size_t chain_state::retarget_distance(size_t height,
 //-----------------------------------------------------------------------------
 
 chain_state::map chain_state::get_map(size_t height,
-    const check_points& /* checkpoints */, uint32_t forks,
+    const checkpoints& /* checkpoints */, uint32_t forks,
     size_t retargeting_interval, size_t activation_sample,
-    const check_point& bip9_bit0_active_checkpoint,
-    const check_point& bip9_bit1_active_checkpoint)
+    const checkpoint& bip9_bit0_active_checkpoint,
+    const checkpoint& bip9_bit1_active_checkpoint)
 {
     if (is_zero(height))
         return {};
@@ -596,8 +596,8 @@ chain_state::chain_state(const chain_state& top,
 }
 
 chain_state::data chain_state::to_block(const chain_state& pool,
-    const block& block, const check_point& bip9_bit0_active_checkpoint,
-    const check_point& bip9_bit1_active_checkpoint)
+    const block& block, const checkpoint& bip9_bit0_active_checkpoint,
+    const checkpoint& bip9_bit1_active_checkpoint)
 {
     // Copy data from presumed same-height pool state.
     auto data = pool.data_;
@@ -677,7 +677,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 }
 
 // From raw data.
-chain_state::chain_state(data&& values, const check_points& checkpoints,
+chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks, uint32_t stale_seconds, const system::settings& settings)
   : data_(std::move(values)),
     forks_(forks),
@@ -779,7 +779,7 @@ bool chain_state::is_valid() const
 bool chain_state::is_checkpoint_conflict(const hash_digest& hash) const
 {
     const auto it = std::find_if(checkpoints_.begin(), checkpoints_.end(),
-        [&](const check_point& item)
+        [&](const checkpoint& item)
         {
             return data_.height == item.height();
         });
@@ -792,7 +792,7 @@ bool chain_state::is_under_checkpoint() const
     // False if empty.
     // This is optimial if checkpoints are sorted by increasing height.
     return std::any_of(checkpoints_.rbegin(), checkpoints_.rend(),
-        [&](const check_point& item)
+        [&](const checkpoint& item)
         {
             return data_.height <= item.height();
         });

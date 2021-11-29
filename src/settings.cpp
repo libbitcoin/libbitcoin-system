@@ -101,13 +101,13 @@ settings::settings(chain::selection context)
             bip66_freeze = 363725;
             bip34_freeze = 227931;
             bip16_activation_time = 0x4f779a80;
-            bip34_active_checkpoint = chain::check_point(
+            bip34_active_checkpoint = chain::checkpoint(
                 "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8",
                 bip34_freeze);
-            bip9_bit0_active_checkpoint = chain::check_point(
+            bip9_bit0_active_checkpoint = chain::checkpoint(
                 "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5",
                 419328);
-            bip9_bit1_active_checkpoint = chain::check_point(
+            bip9_bit1_active_checkpoint = chain::checkpoint(
                 "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893",
                 481824);
 
@@ -163,13 +163,13 @@ settings::settings(chain::selection context)
             bip66_freeze = 330776;
             bip34_freeze = 21111;
             bip16_activation_time = 0x4f3af580;
-            bip34_active_checkpoint = chain::check_point(
+            bip34_active_checkpoint = chain::checkpoint(
                 "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",
                 bip34_freeze);
-            bip9_bit0_active_checkpoint = chain::check_point(
+            bip9_bit0_active_checkpoint = chain::checkpoint(
                 "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb",
                 770112);
-            bip9_bit1_active_checkpoint = chain::check_point(
+            bip9_bit1_active_checkpoint = chain::checkpoint(
                 "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca",
                 834624);
 
@@ -225,7 +225,7 @@ settings::settings(chain::selection context)
             bip34_freeze = 0;
             bip16_activation_time = 0x4f3af580;
 
-            chain::check_point genesis_checkpoint(genesis_block.hash(), zero);
+            chain::checkpoint genesis_checkpoint(genesis_block.hash(), zero);
 
             // bip90 assumes a historical bip34 activation block, use genesis.
             bip34_active_checkpoint = genesis_checkpoint;

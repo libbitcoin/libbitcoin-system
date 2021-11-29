@@ -84,7 +84,7 @@
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\check_point.cpp">
+    <ClCompile Include="..\..\..\..\test\chain\checkpoint.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp">

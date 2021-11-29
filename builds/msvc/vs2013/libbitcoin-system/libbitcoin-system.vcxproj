@@ -80,7 +80,7 @@
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\check_point.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\context.cpp">
       <ObjectFileName>$(IntDir)src_chain_context.obj</ObjectFileName>
@@ -320,7 +320,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\check_point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />

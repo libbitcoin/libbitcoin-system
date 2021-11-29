@@ -40,7 +40,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/settings.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
-    src/chain/check_point.cpp \
+    src/chain/checkpoint.cpp \
     src/chain/compact.cpp \
     src/chain/context.cpp \
     src/chain/header.cpp \
@@ -279,7 +279,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/test.hpp \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
-    test/chain/check_point.cpp \
+    test/chain/checkpoint.cpp \
     test/chain/compact.cpp \
     test/chain/context.cpp \
     test/chain/header.cpp \
@@ -480,7 +480,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/block.hpp \
     include/bitcoin/system/chain/chain.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
-    include/bitcoin/system/chain/check_point.hpp \
+    include/bitcoin/system/chain/checkpoint.hpp \
     include/bitcoin/system/chain/compact.hpp \
     include/bitcoin/system/chain/context.hpp \
     include/bitcoin/system/chain/header.hpp \

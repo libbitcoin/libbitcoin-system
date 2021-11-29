@@ -27,7 +27,7 @@
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
-#include <bitcoin/system/chain/check_point.hpp>
+#include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>

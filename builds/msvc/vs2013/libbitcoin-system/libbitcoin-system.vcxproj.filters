@@ -204,7 +204,7 @@
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\check_point.cpp">
+    <ClCompile Include="..\..\..\..\src\chain\checkpoint.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\compact.cpp">
@@ -752,7 +752,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\check_point.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\checkpoint.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp">

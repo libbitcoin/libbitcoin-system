@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/check_point.hpp>
+#include <bitcoin/system/chain/checkpoint.hpp>
 
 #include <cstddef>
 #include <iostream>
@@ -36,45 +36,45 @@ namespace chain {
 // Constructors.
 //-----------------------------------------------------------------------------
 
-check_point::check_point() noexcept
-  : check_point({}, zero, false)
+checkpoint::checkpoint() noexcept
+  : checkpoint({}, zero, false)
 {
 }
 
-check_point::check_point(check_point&& other) noexcept
-  : check_point(std::move(other.hash_), other.height_, other.valid_)
+checkpoint::checkpoint(checkpoint&& other) noexcept
+  : checkpoint(std::move(other.hash_), other.height_, other.valid_)
 {
 }
 
-check_point::check_point(const check_point& other) noexcept
-  : check_point(other.hash_, other.height_, other.valid_)
+checkpoint::checkpoint(const checkpoint& other) noexcept
+  : checkpoint(other.hash_, other.height_, other.valid_)
 {
 }
 
-check_point::check_point(hash_digest&& hash, size_t height) noexcept
-  : check_point(std::move(hash), height, true)
+checkpoint::checkpoint(hash_digest&& hash, size_t height) noexcept
+  : checkpoint(std::move(hash), height, true)
 {
 }
 
-check_point::check_point(const hash_digest& hash, size_t height) noexcept
-  : check_point(hash, height, true)
+checkpoint::checkpoint(const hash_digest& hash, size_t height) noexcept
+  : checkpoint(hash, height, true)
 {
 }
 
-check_point::check_point(const std::string& hash, size_t height) noexcept
-  : check_point(from_string(hash, height))
+checkpoint::checkpoint(const std::string& hash, size_t height) noexcept
+  : checkpoint(from_string(hash, height))
 {
 }
 
 // protected
-check_point::check_point(hash_digest&& hash, size_t height,
+checkpoint::checkpoint(hash_digest&& hash, size_t height,
     bool valid) noexcept
   : hash_(std::move(hash)), height_(height), valid_(valid)
 {
 }
 
 // protected
-check_point::check_point(const hash_digest& hash, size_t height,
+checkpoint::checkpoint(const hash_digest& hash, size_t height,
     bool valid) noexcept
   : hash_(hash), height_(height), valid_(valid)
 {
@@ -84,7 +84,7 @@ check_point::check_point(const hash_digest& hash, size_t height,
 //-----------------------------------------------------------------------------
 
 // private
-check_point check_point::from_string(const std::string& hash,
+checkpoint checkpoint::from_string(const std::string& hash,
     size_t height) noexcept
 {
     hash_digest digest;
@@ -94,22 +94,22 @@ check_point check_point::from_string(const std::string& hash,
     return { std::move(digest), height, true };
 }
 
-bool check_point::is_valid() const noexcept
+bool checkpoint::is_valid() const noexcept
 {
     return valid_;
 }
 
-size_t check_point::height() const noexcept
+size_t checkpoint::height() const noexcept
 {
     return height_;
 }
 
-const hash_digest& check_point::hash() const noexcept
+const hash_digest& checkpoint::hash() const noexcept
 {
     return hash_;
 }
 
-std::string check_point::to_string() const noexcept
+std::string checkpoint::to_string() const noexcept
 {
     return encode_hash(hash_) + ":" + serialize(height_);
 }
@@ -117,7 +117,7 @@ std::string check_point::to_string() const noexcept
 // Operators.
 //-----------------------------------------------------------------------------
 
-check_point& check_point::operator=(check_point&& other) noexcept
+checkpoint& checkpoint::operator=(checkpoint&& other) noexcept
 {
     hash_ = std::move(other.hash_);
     height_ = other.height_;
@@ -125,7 +125,7 @@ check_point& check_point::operator=(check_point&& other) noexcept
     return *this;
 }
 
-check_point& check_point::operator=(const check_point& other) noexcept
+checkpoint& checkpoint::operator=(const checkpoint& other) noexcept
 {
     hash_ = other.hash_;
     height_ = other.height_;
@@ -133,28 +133,28 @@ check_point& check_point::operator=(const check_point& other) noexcept
     return *this;
 }
 
-bool operator<(const check_point& left, const check_point& right) noexcept
+bool operator<(const checkpoint& left, const checkpoint& right) noexcept
 {
     return left.height() < right.height();
 }
 
-bool operator==(const check_point& left, const check_point& right) noexcept
+bool operator==(const checkpoint& left, const checkpoint& right) noexcept
 {
     return left.hash() == right.hash() && left.height() == right.height();
 }
 
-bool operator!=(const check_point& left, const check_point& right) noexcept
+bool operator!=(const checkpoint& left, const checkpoint& right) noexcept
 {
     return !(left == right);
 }
 
-std::ostream& operator<<(std::ostream& output, const check_point& in) noexcept
+std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept
 {
     output << in.to_string();
     return output;
 }
 
-std::istream& operator>>(std::istream& input, check_point& out) noexcept
+std::istream& operator>>(std::istream& input, checkpoint& out) noexcept
 {
     std::string value;
     input >> value;

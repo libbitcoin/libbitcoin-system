@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <memory>
 #include <deque>
-#include <bitcoin/system/chain/check_point.hpp>
+#include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -49,7 +49,7 @@ public:
     typedef struct { size_t count; size_t high; } range;
 
     typedef std::shared_ptr<chain_state> ptr;
-    typedef check_point::list check_points;
+    typedef checkpoint::list checkpoints;
 
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.
@@ -128,10 +128,10 @@ public:
     };
 
     /// Checkpoints must be ordered by height with greatest at back.
-    static map get_map(size_t height, const check_points& checkpoints,
+    static map get_map(size_t height, const checkpoints& checkpoints,
         uint32_t forks, size_t retargeting_interval, size_t activation_sample,
-        const check_point& bip9_bit0_active_checkpoint,
-        const check_point& bip9_bit1_active_checkpoint);
+        const checkpoint& bip9_bit0_active_checkpoint,
+        const checkpoint& bip9_bit1_active_checkpoint);
 
     static uint32_t signal_version(uint32_t forks,
         const system::settings& settings);
@@ -156,7 +156,7 @@ public:
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
-    chain_state(data&& values, const check_points& checkpoints, uint32_t forks,
+    chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks,
         uint32_t stale_seconds, const system::settings& settings);
 
     /// Properties.
@@ -212,15 +212,15 @@ private:
     static size_t retarget_height(size_t height, uint32_t forks,
         size_t retargeting_interval);
     static size_t bip9_bit0_height(size_t height,
-        const check_point& bip9_bit0_active_checkpoint);
+        const checkpoint& bip9_bit0_active_checkpoint);
     static size_t bip9_bit1_height(size_t height,
-        const check_point& bip9_bit1_active_checkpoint);
+        const checkpoint& bip9_bit1_active_checkpoint);
 
     static data to_pool(const chain_state& top,
         const system::settings& settings);
     static data to_block(const chain_state& pool, const block& block,
-        const check_point& bip9_bit0_active_checkpoint,
-        const check_point& bip9_bit1_active_checkpoint);
+        const checkpoint& bip9_bit0_active_checkpoint,
+        const checkpoint& bip9_bit1_active_checkpoint);
     data to_header(const chain_state& parent, const header& header,
         const system::settings& settings);
 
@@ -253,7 +253,7 @@ private:
     const uint32_t stale_seconds_;
 
     // Checkpoints do not affect the data that is collected or promoted.
-    const check_points& checkpoints_;
+    const checkpoints& checkpoints_;
 
     // These are computed on construct from sample and checkpoints.
     const activations active_;
