@@ -164,6 +164,10 @@ bool operation::from_data(reader& source)
 {
     reset();
 
+    // Guard against resetting a previously-invalid stream.
+    if (!source)
+        return false;
+
     // If stream is not empty then a non-data opcode will always deserialize.
     // A push-data opcode may indicate more bytes than are available. In this
     // case the the script is invalid, but it may not be evaluated, such as
