@@ -71,7 +71,7 @@ public:
     /// Flush the buffer.
     virtual void flush() noexcept = 0;
 
-    /// Get the current absolute position (invalidates on failure).
+    /// Get the current absolute position (fails with push_sink).
     virtual size_t get_position() noexcept = 0;
 
     /// The stream is valid.

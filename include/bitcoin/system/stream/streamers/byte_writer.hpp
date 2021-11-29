@@ -88,7 +88,7 @@ public:
     /// Flush the buffer.
     void flush() noexcept override;
 
-    /// Get the current absolute position (invalidates on failure).
+    /// Get the current absolute position (fails with push_sink).
     size_t get_position() noexcept override;
 
     /// The stream is valid.
