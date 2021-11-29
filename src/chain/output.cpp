@@ -188,7 +188,7 @@ void output::to_data(writer& sink) const
     sink.write_8_bytes_little_endian(value_);
     script_.to_data(sink, true);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 // Size.

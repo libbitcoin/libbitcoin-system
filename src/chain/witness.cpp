@@ -251,7 +251,7 @@ void witness::to_data(writer& sink, bool prefix) const
         sink.write_bytes(element);
     }
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 std::string witness::to_string() const

@@ -258,7 +258,7 @@ void script::to_data(writer& sink, bool prefix) const
     for (const auto& op: ops_)
         op.to_data(sink);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 std::string script::to_string(uint32_t active_forks) const

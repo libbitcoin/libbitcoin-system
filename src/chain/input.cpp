@@ -233,7 +233,7 @@ void input::to_data(writer& sink) const
     script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 // Size.

@@ -192,7 +192,7 @@ void point::to_data(writer& sink) const
     sink.write_bytes(hash_);
     sink.write_4_bytes_little_endian(index_);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 // Properties.

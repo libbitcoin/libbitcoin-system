@@ -250,7 +250,7 @@ void header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 // Size.
@@ -385,15 +385,13 @@ uint256_t header::proof() const
 code header::check(uint32_t timestamp_limit_seconds,
     uint32_t proof_of_work_limit, bool scrypt) const
 {
-
     if (!is_valid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
 
     else if (!is_valid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
-    else
-        return error::success;
+    return error::success;
 }
 
 code header::accept(const chain_state& state) const
@@ -413,8 +411,7 @@ code header::accept(const chain_state& state) const
     else if (timestamp_ <= state.median_time_past())
         return error::timestamp_too_early;
 
-    else
-        return error::success;
+    return error::success;
 }
 
 } // namespace chain

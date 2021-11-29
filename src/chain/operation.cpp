@@ -261,7 +261,7 @@ void operation::to_data(writer& sink) const
         sink.write_bytes(data_);
     }
 
-    BITCOIN_ASSERT(sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
 // From String.
