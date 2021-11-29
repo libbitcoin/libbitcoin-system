@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(encrypted_tests)
 
 using namespace bc::system::wallet;
 
-#if defined(SLOW_TESTS) || !defined(NDEBUG)
+#if defined(SLOW_TESTS)
 
 #ifdef WITH_ICU
 
