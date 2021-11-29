@@ -427,12 +427,17 @@ static hash_digest sign_none(const transaction& tx, uint32_t index,
 static hash_digest sign_single(const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
+    //*************************************************************************
+    // CONSENSUS: wacky satoshi behavior.
+    //*************************************************************************
+    if (index >= tx.outputs().size())
+        return one_hash;
+
     input::list ins;
     const auto& inputs = tx.inputs();
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
     ins.reserve(any ? one : inputs.size());
 
-    BITCOIN_ASSERT(index < inputs.size());
     const auto& self = inputs[index];
 
     if (any)
@@ -450,11 +455,9 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
         ins[index] = { self.point(), subscript, self.sequence() };
     }
 
-    // Trim and clear outputs except that of specified input index.
+    // Trim and clear outputs except that of the input index (guarded above).
     const auto& outputs = tx.outputs();
     output::list outs(add1(index));
-
-    BITCOIN_ASSERT(index < outputs.size());
     outs.back() = outputs[index];
 
     // Move new inputs and new outputs to new transaction.
@@ -493,31 +496,12 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
     return signature_hash(out, flags);
 }
 
-static bool is_index_overflow(const transaction& tx, uint32_t index,
-    coverage flag)
-{
-    return index >= tx.inputs().size() ||
-        (index >= tx.outputs().size() &&
-            flag == coverage::hash_single);
-}
-
 // private/static
 hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint8_t flags)
 {
-    static const auto one_hash = base16_hash(
-        "0000000000000000000000000000000000000000000000000000000000000001");
-
-    const auto flag = mask_sighash(flags);
-
-    //*************************************************************************
-    // CONSENSUS: wacky satoshi behavior (continuing with one_hash).
-    //*************************************************************************
-    if (is_index_overflow(tx, index, flag))
-        return one_hash;
-
     // The sighash serializations are isolated for clarity and optimization.
-    switch (flag)
+    switch (mask_sighash(flags))
     {
         case coverage::hash_none:
             return sign_none(tx, index, subscript, flags);
@@ -561,7 +545,6 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     //// const auto none = (flag == coverage::hash_none);
     const auto all = (flag == coverage::hash_all);
 
-    // Unlike unversioned algorithm this does not allow an invalid input index.
     BITCOIN_ASSERT(index < tx.inputs().size());
     const auto& input = tx.inputs()[index];
     const auto script_size = subscript.serialized_size(true);
@@ -616,6 +599,10 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
     script_version version, bool bip143)
 {
+    // This is merely invalid parameterization, not a consensus value.
+    if (index > tx.inputs().size())
+        return {};
+
     switch (version)
     {
         case script_version::unversioned:

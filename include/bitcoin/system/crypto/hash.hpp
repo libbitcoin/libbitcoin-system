@@ -90,6 +90,15 @@ constexpr hash_digest null_hash
     }
 };
 
+// Consensus sentinel.
+constexpr hash_digest one_hash
+{
+    {
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
+
 constexpr long_hash null_long_hash
 {
     {
