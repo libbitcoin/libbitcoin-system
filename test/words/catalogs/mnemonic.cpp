@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
 
 // These dictionaries are in normal form.
 // So there is no need to nfkd normalize these for wordlist-based seedings.
-// This also removes the ICU dependency for these language.
+// This also removes the ICU dependency for these languages.
 BOOST_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 {
     // The result is definitive only when WITH_ICU is defined.
@@ -147,6 +147,8 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 }
 
 // deviation
+
+// INTERSECTION/DEVIATION IS ALWAYS ZERO IN MSVC DEBUG BUILD TEST RUNS. ???
 
 // All zh_Hans/zh_Hant collisions are interchangeable.
 // None of the en/fr collisions are interchangeable.
