@@ -21,6 +21,8 @@
 
 #include <cstdint>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/position.hpp>
 
 namespace libbitcoin {
@@ -32,6 +34,12 @@ class BC_API context
 {
 public:
     context(uint32_t forks, uint32_t policy, const chain::position& position);
+
+    /// Determine if the fork is ative for this block.
+    bool is_enabled(chain::forks fork) const;
+
+    /// Determine if the policy is configured active.
+    bool is_policy(chain::policy police) const;
 
     /// Public mutable metadata access.
     uint32_t forks;

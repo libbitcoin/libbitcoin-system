@@ -773,14 +773,6 @@ bool chain_state::is_valid() const
     return !is_zero(data_.height);
 }
 
-// Forks.
-//-----------------------------------------------------------------------------
-
-bool chain_state::is_enabled(chain::forks fork) const
-{
-    return script::is_enabled(active_.forks, fork);
-}
-
 // Checkpoints.
 //-----------------------------------------------------------------------------
 

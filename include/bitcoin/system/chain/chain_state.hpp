@@ -178,9 +178,6 @@ public:
     /// Determine if the represented block is stale (top block for pool state).
     bool is_stale() const;
 
-    /// Determine if the fork is set for this block.
-    bool is_enabled(chain::forks fork) const;
-
     /// Determine if this block hash fails a checkpoint at this height.
     bool is_checkpoint_conflict(const hash_digest& hash) const;
 
