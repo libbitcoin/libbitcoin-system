@@ -132,8 +132,6 @@ protected:
     void reset();
 
 private:
-    typedef std::shared_ptr<hash_digest> hash_ptr;
-
     uint32_t version_;
     hash_digest previous_block_hash_;
     hash_digest merkle_root_;
