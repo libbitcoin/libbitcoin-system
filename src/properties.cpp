@@ -113,9 +113,9 @@
 ////    if (address)
 ////        tree.put("address_hash", hash160(address.hash()));
 ////
-////    tree.put("previous_output.hash", hash256(tx_input.previous_output().hash()));
-////    tree.put("previous_output.index", tx_input.previous_output().index());
-////    tree.put("script", tx_input.script().to_string(rule_fork::all_rules));
+////    tree.put("previous_output.hash", hash256(tx_input.point().hash()));
+////    tree.put("previous_output.index", tx_input.point().index());
+////    tree.put("script", tx_input.script().to_string(forks::all_rules));
 ////    tree.put("sequence", tx_input.sequence());
 ////
 ////    if (tx_input.is_segregated())
@@ -173,7 +173,7 @@
 ////    if (address)
 ////        tree.put("address_hash", hash160(address.hash()));
 ////
-////    tree.put("script", tx_output.script().to_string(rule_fork::all_rules));
+////    tree.put("script", tx_output.script().to_string(forks::all_rules));
 ////
 ////    // TODO: this will eventually change due to privacy problems, see:
 ////    // lists.dyne.org/lurker/message/20140812.214120.317490ae.en.html

@@ -37,8 +37,6 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/mutex.hpp>
-#include <bitcoin/system/optional.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -409,7 +407,7 @@ hash_digest transaction::points_hash() const
     const auto size = std::accumulate(inputs().begin(), inputs().end(), zero,
         [&](size_t total, const input& input)
         {
-            return total + input.previous_output().serialized_size();
+            return total + input.point().serialized_size();
         });
 
     data_chunk data(no_fill_byte_allocator);
@@ -417,7 +415,7 @@ hash_digest transaction::points_hash() const
     write::bytes::copy writer(data);
 
     for (const auto& input : inputs())
-        input.previous_output().to_data(writer);
+        input.point().to_data(writer);
 
     ////BITCOIN_ASSERT(riter && writer.get_position() == size);
     return bitcoin_hash(data);
@@ -461,7 +459,7 @@ void transaction::strip_witness()
 
 bool transaction::is_coinbase() const
 {
-    return inputs_.size() == 1 && inputs_.front().previous_output().is_null();
+    return inputs_.size() == 1 && inputs_.front().point().is_null();
 }
 
 // True if coinbase and has invalid input[0] script size.
@@ -482,7 +480,7 @@ bool transaction::is_null_non_coinbase() const
 
     const auto invalid = [](const input& input)
     {
-        return input.previous_output().is_null();
+        return input.point().is_null();
     };
 
     return std::any_of(inputs_.begin(), inputs_.end(), invalid);
@@ -543,7 +541,7 @@ point::list transaction::previous_outputs() const
 
     const auto prevout = [](const input& input)
     {
-        return input.previous_output();
+        return input.point();
     };
 
     std::transform(inputs_.begin(), inputs_.end(), out.begin(), prevout);
@@ -586,13 +584,13 @@ bool transaction::is_segregated() const
 ////    if (is_coinbase())
 ////        return error::transaction_success;
 ////
-////    const auto& prevout = inputs_[input_index].previous_output().prevout;
+////    const auto& prevout = inputs_[input_index].point().prevout;
 ////
 ////    // Verify that the previous output cache has been populated.
 ////    if (!prevout)
 ////        return error::missing_previous_output;
 ////
-////    const auto forks = state.enabled_forks();
+////    const auto forks = state.forks();
 ////    const auto index32 = static_cast<uint32_t>(input_index);
 ////
 ////    // Verify the transaction input script against the previous output.
@@ -646,9 +644,9 @@ code transaction::check(uint64_t max_money, bool transaction_pool) const
 // These checks assume that prevout caching is completed on all tx.inputs.
 code transaction::accept(const chain_state& state, bool transaction_pool) const
 {
-    const auto bip16 = state.is_enabled(rule_fork::bip16_rule);
-    const auto bip68 = state.is_enabled(rule_fork::bip68_rule);
-    const auto bip141 = state.is_enabled(rule_fork::bip141_rule);
+    const auto bip16 = state.is_enabled(forks::bip16_rule);
+    const auto bip68 = state.is_enabled(forks::bip68_rule);
+    const auto bip141 = state.is_enabled(forks::bip141_rule);
 
     // Segwit sigops are discounted by increasing limit and legacy weight.
     const auto max_sigops = bip141 ? max_fast_sigops : max_block_sigops;

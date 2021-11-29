@@ -43,7 +43,7 @@
 //////        std::cout << "tx: " << tx.hash() << "\t\t\tis_coinbase: " << tx.is_coinbase() << std::endl;
 //////        for (size_t index = 0; index < tx.inputs().size(); index++)
 //////        {
-//////            auto& output = tx.inputs()[index].previous_output().metadata.cache;
+//////            auto& output = tx.inputs()[index].point().metadata.cache;
 //////            data_chunk script = output.script().to_data(false);
 //////            std::cout << "  input: " << index << std::endl;
 //////            std::cout << "    populated : " << (output.value() != chain::output::not_found) << std::endl;
@@ -68,7 +68,7 @@
 ////
 ////                return false;
 ////                ////auto& output = tx.inputs()[prevout.input_index]
-////                ////   .previous_output().metadata.cache;
+////                ////   .point().metadata.cache;
 ////
 ////                ////output.set_value(prevout.output_value);
 ////                ////output.set_script(chain::script(prevout.script, false));

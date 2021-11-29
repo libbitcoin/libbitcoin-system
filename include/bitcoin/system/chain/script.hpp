@@ -24,17 +24,16 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <bitcoin/system/chain/enums/rule_fork.hpp>
+#include <bitcoin/system/chain/enums/coverage.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
-#include <bitcoin/system/chain/enums/sighash_algorithm.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
-#include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -136,7 +135,7 @@ public:
     //-------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, rule_fork fork);
+    static bool is_enabled(uint32_t active_forks, forks fork);
 
     /// Consensus patterns.
     static bool is_push_only(const operation::list& ops);

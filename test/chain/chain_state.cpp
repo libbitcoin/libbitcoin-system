@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_disable
     settings settings(chain::selection::mainnet);
     settings.proof_of_work_limit = 0x1e0fffff;
     const auto values = get_values(settings.retargeting_interval());
-    const auto forks = chain::rule_fork::retarget;
+    const auto forks = chain::forks::retarget;
     const auto work = test_chain_state::work_required(values, forks, settings);
     BOOST_REQUIRE_EQUAL(work, 0x1e0884d1);
 }
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     settings settings(chain::selection::mainnet);
     settings.proof_of_work_limit = 0x1e0fffff;
     const auto values = get_values(settings.retargeting_interval());
-    const auto forks = chain::rule_fork::retarget | chain::rule_fork::retarget_overflow_patch;
+    const auto forks = chain::forks::retarget | chain::forks::retarget_overflow_patch;
     const auto work = test_chain_state::work_required(values, forks, settings);
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }

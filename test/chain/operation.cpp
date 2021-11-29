@@ -526,25 +526,25 @@ BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
 {
     operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::no_rules), "nop2");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop2");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_bip65_rule__checklocktimeverify)
 {
     operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::bip65_rule), "checklocktimeverify");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip65_rule), "checklocktimeverify");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_no_rules__nop3)
 {
     operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::no_rules), "nop3");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop3");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify)
 {
     operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::rule_fork::bip112_rule), "checksequenceverify");
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip112_rule), "checksequenceverify");
 }
 
 // from_string

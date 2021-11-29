@@ -46,7 +46,7 @@ interpreter::result interpreter::op_unevaluated(opcode code)
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
 interpreter::result interpreter::op_nop(program& program, opcode code)
 {
-    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+    if (script::is_enabled(program.forks(), forks::nops_rule))
         return error::op_success;
 
     // TODO: nops_rule *must* be enabled in test cases and default config.
@@ -95,7 +95,7 @@ interpreter::result interpreter::op_nop(opcode)
 
 interpreter::result interpreter::op_ver(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+    if (script::is_enabled(program.forks(), forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
 
     return error::op_not_implemented;
@@ -137,7 +137,7 @@ interpreter::result interpreter::op_notif(program& program)
 
 interpreter::result interpreter::op_verif(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+    if (script::is_enabled(program.forks(), forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
 
     return error::op_not_implemented;
@@ -145,7 +145,7 @@ interpreter::result interpreter::op_verif(program& program)
 
 interpreter::result interpreter::op_vernotif(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+    if (script::is_enabled(program.forks(), forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
 
     return error::op_not_implemented;
@@ -183,7 +183,7 @@ interpreter::result interpreter::op_verify(program& program)
 
 interpreter::result interpreter::op_return(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::nops_rule))
+    if (script::is_enabled(program.forks(), forks::nops_rule))
         return op_unevaluated(opcode::op_return);
         
     return error::op_not_implemented;
@@ -394,7 +394,7 @@ interpreter::result interpreter::op_tuck(program& program)
 
 interpreter::result interpreter::op_cat(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
 
     return error::op_not_implemented;
@@ -402,7 +402,7 @@ interpreter::result interpreter::op_cat(program& program)
 
 interpreter::result interpreter::op_substr(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
 
     return error::op_not_implemented;
@@ -410,7 +410,7 @@ interpreter::result interpreter::op_substr(program& program)
 
 interpreter::result interpreter::op_left(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_left);
 
     return error::op_not_implemented;
@@ -418,7 +418,7 @@ interpreter::result interpreter::op_left(program& program)
 
 interpreter::result interpreter::op_right(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_right);
 
     return error::op_not_implemented;
@@ -438,7 +438,7 @@ interpreter::result interpreter::op_size(program& program)
 
 interpreter::result interpreter::op_invert(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
 
     return error::op_not_implemented;
@@ -446,7 +446,7 @@ interpreter::result interpreter::op_invert(program& program)
 
 interpreter::result interpreter::op_and(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_and);
 
     return error::op_not_implemented;
@@ -454,7 +454,7 @@ interpreter::result interpreter::op_and(program& program)
 
 interpreter::result interpreter::op_or(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_or);
 
     return error::op_not_implemented;
@@ -462,7 +462,7 @@ interpreter::result interpreter::op_or(program& program)
 
 interpreter::result interpreter::op_xor(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
 
     return error::op_not_implemented;
@@ -510,7 +510,7 @@ interpreter::result interpreter::op_sub1(program& program)
 
 interpreter::result interpreter::op_mul2(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
 
     return error::op_not_implemented;
@@ -518,7 +518,7 @@ interpreter::result interpreter::op_mul2(program& program)
 
 interpreter::result interpreter::op_div2(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
 
     return error::op_not_implemented;
@@ -592,7 +592,7 @@ interpreter::result interpreter::op_sub(program& program)
 
 interpreter::result interpreter::op_mul(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
 
     return error::op_not_implemented;
@@ -600,7 +600,7 @@ interpreter::result interpreter::op_mul(program& program)
 
 interpreter::result interpreter::op_div(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_div);
 
     return error::op_not_implemented;
@@ -608,7 +608,7 @@ interpreter::result interpreter::op_div(program& program)
 
 interpreter::result interpreter::op_mod(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
 
     return error::op_not_implemented;
@@ -616,7 +616,7 @@ interpreter::result interpreter::op_mod(program& program)
 
 interpreter::result interpreter::op_lshift(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
 
     return error::op_not_implemented;
@@ -624,7 +624,7 @@ interpreter::result interpreter::op_lshift(program& program)
 
 interpreter::result interpreter::op_rshift(program& program)
 {
-    if (script::is_enabled(program.forks(), rule_fork::cats_rule))
+    if (script::is_enabled(program.forks(), forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
 
     return error::op_not_implemented;
@@ -841,7 +841,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
 interpreter::result interpreter::op_check_sig(program& program)
 {
     auto verify = op_check_sig_verify(program);
-    auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
+    auto bip66 = script::is_enabled(program.forks(), forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_sig_verify_parse)
@@ -854,7 +854,7 @@ interpreter::result interpreter::op_check_sig(program& program)
 interpreter::result interpreter::op_check_multisig_verify(
     program& program)
 {
-    auto bip147 = script::is_enabled(program.forks(), rule_fork::bip147_rule);
+    auto bip147 = script::is_enabled(program.forks(), forks::bip147_rule);
 
     int32_t count;
     if (!program.pop(count))
@@ -925,7 +925,7 @@ interpreter::result interpreter::op_check_multisig_verify(
 interpreter::result interpreter::op_check_multisig(program& program)
 {
     auto verify = op_check_multisig_verify(program);
-    auto bip66 = script::is_enabled(program.forks(), rule_fork::bip66_rule);
+    auto bip66 = script::is_enabled(program.forks(), forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_multisig_verify_parse)
@@ -939,7 +939,7 @@ interpreter::result interpreter::op_check_locktime_verify(
     program& program)
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
-    if (!script::is_enabled(program.forks(), rule_fork::bip65_rule))
+    if (!script::is_enabled(program.forks(), forks::bip65_rule))
         return op_nop(program, opcode::nop2);
 
     // BIP65: the tx sequence is 0xffffffff.
@@ -974,7 +974,7 @@ interpreter::result interpreter::op_check_sequence_verify(
     program& program)
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
-    if (!script::is_enabled(program.forks(), rule_fork::bip112_rule))
+    if (!script::is_enabled(program.forks(), forks::bip112_rule))
         return op_nop(program, opcode::nop3);
 
     // BIP112: the stack is empty.

@@ -26,10 +26,13 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
-#include <bitcoin/system/chain/compact.hpp>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/chain/check_point.hpp>
+#include <bitcoin/system/chain/compact.hpp>
+#include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/policy.hpp>
+#include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -88,9 +91,9 @@ chain_state::activations chain_state::activation(const data& values,
     const auto height = values.height;
     const auto version = values.version.self;
     const auto& history = values.version.ordered;
-    const auto frozen = script::is_enabled(forks, rule_fork::bip90_rule);
-    const auto difficult = script::is_enabled(forks, rule_fork::difficult);
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    const auto frozen = script::is_enabled(forks, forks::bip90_rule);
+    const auto difficult = script::is_enabled(forks, forks::difficult);
+    const auto retarget = script::is_enabled(forks, forks::retarget);
     const auto mainnet = retarget && difficult;
 
     //*************************************************************************
@@ -121,33 +124,33 @@ chain_state::activations chain_state::activation(const data& values,
     const auto bip65_ice = frozen && height >= settings.bip65_freeze;
 
     // Initialize activation results with genesis values.
-    activations result{ rule_fork::no_rules, settings.first_version };
+    activations result{ forks::no_rules, settings.first_version };
 
     // retarget is only activated via configuration (hard fork).
-    result.forks |= (rule_fork::retarget & forks);
+    result.forks |= (forks::retarget & forks);
 
     // testnet is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::difficult & forks);
+    result.forks |= (forks::difficult & forks);
 
     // bip42 is activated based on configuration alone (soft fork).
-    result.forks |= (rule_fork::bip42_rule & forks);
+    result.forks |= (forks::bip42_rule & forks);
 
     // bip90 is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::bip90_rule & forks);
+    result.forks |= (forks::bip90_rule & forks);
 
     // time_warp_patch is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::time_warp_patch & forks);
+    result.forks |= (forks::time_warp_patch & forks);
 
     // retarget_overflow_patch is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::retarget_overflow_patch & forks);
+    result.forks |= (forks::retarget_overflow_patch & forks);
 
     // scrypt_proof_of_work is activated based on configuration alone (hard fork).
-    result.forks |= (rule_fork::scrypt_proof_of_work & forks);
+    result.forks |= (forks::scrypt_proof_of_work & forks);
 
     // bip16 was activated based on manual inspection of history (~55% rule).
     if (values.timestamp.self >= settings.bip16_activation_time)
     {
-        result.forks |= (rule_fork::bip16_rule & forks);
+        result.forks |= (forks::bip16_rule & forks);
     }
 
     // bip30 is active for all but two mainnet blocks that violate the rule.
@@ -156,40 +159,40 @@ chain_state::activations chain_state::activation(const data& values,
     // This was later applied to the full history in implementation (a no-op).
     if (!is_bip30_exception({ values.hash, height }, mainnet))
     {
-        result.forks |= (rule_fork::bip30_rule & forks);
+        result.forks |= (forks::bip30_rule & forks);
     }
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
     if (bip34_ice || (is_active(count_2, settings.activation_threshold) && version >=
         settings.bip34_version))
     {
-        result.forks |= (rule_fork::bip34_rule & forks);
+        result.forks |= (forks::bip34_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
     if (bip66_ice || (is_active(count_3, settings.activation_threshold) && version >=
         settings.bip66_version))
     {
-        result.forks |= (rule_fork::bip66_rule & forks);
+        result.forks |= (forks::bip66_rule & forks);
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
     if (bip65_ice || (is_active(count_4, settings.activation_threshold) && version >=
         settings.bip65_version))
     {
-        result.forks |= (rule_fork::bip65_rule & forks);
+        result.forks |= (forks::bip65_rule & forks);
     }
 
     // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
     if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
     {
-        result.forks |= (rule_fork::bip9_bit0_group & forks);
+        result.forks |= (forks::bip9_bit0_group & forks);
     }
 
     // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
     if (values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
     {
-        result.forks |= (rule_fork::bip9_bit1_group & forks);
+        result.forks |= (forks::bip9_bit1_group & forks);
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
@@ -219,11 +222,11 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
     size_t retargeting_interval)
 {
     // Mainnet doesn't use bits in retargeting.
-    if (script::is_enabled(forks, rule_fork::difficult))
+    if (script::is_enabled(forks, forks::difficult))
         return one;
 
     // Regtest bypasses all retargeting.
-    if (!script::is_enabled(forks, rule_fork::retarget))
+    if (!script::is_enabled(forks, forks::retarget))
         return one;
 
     // Testnet uses mainnet retargeting on interval.
@@ -237,8 +240,8 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
 size_t chain_state::version_count(size_t height, uint32_t forks,
     size_t activation_sample)
 {
-    if (script::is_enabled(forks, rule_fork::bip90_rule) ||
-        !script::is_enabled(forks, rule_fork::bip34_activations))
+    if (script::is_enabled(forks, forks::bip90_rule) ||
+        !script::is_enabled(forks, forks::bip34_activations))
     {
         return zero;
     }
@@ -254,7 +257,7 @@ size_t chain_state::timestamp_count(size_t height, uint32_t)
 size_t chain_state::retarget_height(size_t height, uint32_t forks,
     size_t retargeting_interval)
 {
-    if (!script::is_enabled(forks, rule_fork::retarget))
+    if (!script::is_enabled(forks, forks::retarget))
         return map::unrequested;
 
     // Height must be a positive multiple of interval, so underflow safe.
@@ -280,22 +283,6 @@ size_t chain_state::bip9_bit1_height(size_t height,
     return height > activation_height ? activation_height : map::unrequested;
 }
 
-// median_time_past
-//-----------------------------------------------------------------------------
-
-uint32_t chain_state::median_time_past(const data& values, uint32_t)
-{
-    // Create a copy for the in-place sort.
-    auto times = values.timestamp.ordered;
-
-    // Sort the times by value to obtain the median.
-    sort(times);
-
-    // Consensus defines median time using modulo 2 element selection.
-    // This differs from arithmetic median which averages two middle values.
-    return times.empty() ? 0 : times[to_half(times.size())];
-}
-
 // work_required
 //-----------------------------------------------------------------------------
 
@@ -310,7 +297,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
         return 0;
 
     // Regtest bypasses all retargeting.
-    if (!script::is_enabled(forks, rule_fork::retarget))
+    if (!script::is_enabled(forks, forks::retarget))
         return bits_high(values);
 
     // Mainnet and testnet retarget on interval.
@@ -323,7 +310,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
             settings.retargeting_interval_seconds);
 
     // Testnet retargets easy on inter-interval.
-    if (!script::is_enabled(forks, rule_fork::difficult))
+    if (!script::is_enabled(forks, forks::difficult))
         return easy_work_required(values,
             settings.retargeting_interval(),
             settings.proof_of_work_limit,
@@ -341,7 +328,7 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
     // limit precomputed from config as uint256_t(compact(proof_of_work_limit))
-    auto patch = script::is_enabled(forks, rule_fork::retarget_overflow_patch);
+    auto patch = script::is_enabled(forks, forks::retarget_overflow_patch);
     auto shift = to_int(patch && (floored_log2(target) >= floored_log2(limit)));
 
     target >>= shift;
@@ -434,10 +421,9 @@ size_t chain_state::retarget_distance(size_t height,
     return height % retargeting_interval;
 }
 
-// Publics.
+// Static
 //-----------------------------------------------------------------------------
 
-// static
 chain_state::map chain_state::get_map(size_t height,
     const check_points& /* checkpoints */, uint32_t forks,
     size_t retargeting_interval, size_t activation_sample,
@@ -479,51 +465,63 @@ chain_state::map chain_state::get_map(size_t height,
     return map;
 }
 
-// static
 uint32_t chain_state::signal_version(uint32_t forks,
     const system::settings& settings)
 {
-    if (script::is_enabled(forks, rule_fork::bip65_rule))
+    if (script::is_enabled(forks, forks::bip65_rule))
         return settings.bip65_version;
 
-    if (script::is_enabled(forks, rule_fork::bip66_rule))
+    if (script::is_enabled(forks, forks::bip66_rule))
         return settings.bip66_version;
 
-    if (script::is_enabled(forks, rule_fork::bip34_rule))
+    if (script::is_enabled(forks, forks::bip34_rule))
         return settings.bip34_version;
 
     // TODO: these can be retired.
     // Signal bip9 bit0 if any of the group is configured.
-    if (script::is_enabled(forks, rule_fork::bip9_bit0_group))
+    if (script::is_enabled(forks, forks::bip9_bit0_group))
         return settings.bip9_version_base | settings.bip9_version_bit0;
 
     // TODO: these can be retired.
     // Signal bip9 bit1 if any of the group is configured.
-    if (script::is_enabled(forks, rule_fork::bip9_bit1_group))
+    if (script::is_enabled(forks, forks::bip9_bit1_group))
         return settings.bip9_version_base | settings.bip9_version_bit1;
 
     return settings.first_version;
 }
 
-// static
 uint32_t chain_state::minimum_timespan(uint32_t retargeting_interval_seconds,
     uint32_t retargeting_factor)
 {
     return retargeting_interval_seconds / retargeting_factor;
 }
 
-// static
 uint32_t chain_state::maximum_timespan(uint32_t retargeting_interval_seconds,
     uint32_t retargeting_factor)
 {
     return retargeting_interval_seconds * retargeting_factor;
 }
 
-// static
 uint32_t chain_state::retargeting_interval(
     uint32_t retargeting_interval_seconds, uint32_t block_spacing_seconds)
 {
     return retargeting_interval_seconds / block_spacing_seconds;
+}
+
+// Constructors.
+//-----------------------------------------------------------------------------
+
+uint32_t chain_state::median_time_past(const data& values, uint32_t)
+{
+    // Create a copy for the in-place sort.
+    auto times = values.timestamp.ordered;
+
+    // Sort the times by value to obtain the median.
+    sort(times);
+
+    // Consensus defines median time using modulo 2 element selection.
+    // This differs from arithmetic median which averages two middle values.
+    return times.empty() ? 0 : times[to_half(times.size())];
 }
 
 // This is promotion from a preceding height to the next.
@@ -534,7 +532,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     const auto forks = top.forks_;
 
     // Retargeting is only activated via configuration.
-    const auto retarget = script::is_enabled(forks, rule_fork::retarget);
+    const auto retarget = script::is_enabled(forks, forks::retarget);
 
     // Copy data from presumed previous-height block state.
     auto data = top.data_;
@@ -562,7 +560,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         data.timestamp.ordered.pop_front();
 
     // Conditionally patch time warp bug (e.g. Litecoin).
-    const auto patch = script::is_enabled(forks, rule_fork::time_warp_patch);
+    const auto patch = script::is_enabled(forks, forks::time_warp_patch);
 
     // Regtest does not perform retargeting.
     // If promoting from retarget height, move that timestamp into retarget.
@@ -583,7 +581,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     return data;
 }
 
-// Constructor (top to pool).
+// Top to pool.
 // This generates a state for the pool above the presumed top block state.
 chain_state::chain_state(const chain_state& top,
     const system::settings& settings)
@@ -623,7 +621,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     return data;
 }
 
-// Constructor (tx pool to block).
+// Pool to block.
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
     const system::settings& settings)
@@ -664,7 +662,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     return data;
 }
 
-// Constructor (parent to header).
+// Parent to header.
 // This assumes that parent is the state of the header's previous block.
 chain_state::chain_state(const chain_state& parent, const header& header,
     const system::settings& settings)
@@ -678,7 +676,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 {
 }
 
-// Constructor (from raw data).
+// From raw data.
 chain_state::chain_state(data&& values, const check_points& checkpoints,
     uint32_t forks, uint32_t stale_seconds, const system::settings& settings)
   : data_(std::move(values)),
@@ -691,12 +689,62 @@ chain_state::chain_state(data&& values, const check_points& checkpoints,
 {
 }
 
-// Semantic invalidity can also arise from too many/few values in the arrays.
-// The same computations used to specify the ranges could detect such errors.
-// These are the conditions that would cause exception during execution.
-bool chain_state::is_valid() const
+// Properties.
+//-----------------------------------------------------------------------------
+
+const hash_digest& chain_state::hash() const
 {
-    return !is_zero(data_.height);
+    return data_.hash;
+}
+
+uint32_t chain_state::minimum_block_version() const
+{
+    return active_.minimum_block_version;
+}
+
+uint32_t chain_state::maximum_transaction_version() const
+{
+    return active_.maximum_transaction_version;
+}
+
+uint32_t chain_state::work_required() const
+{
+    return work_required_;
+}
+
+// context
+
+uint32_t chain_state::median_time_past() const
+{
+    return median_time_past_;
+}
+
+uint32_t chain_state::forks() const
+{
+    return active_.forks;
+}
+
+uint32_t chain_state::policy() const
+{
+    return policy::no_policy;
+}
+
+size_t chain_state::height() const
+{
+    return data_.height;
+}
+
+chain::context chain_state::context() const
+{
+    return
+    {
+        forks(),
+        policy(),
+        {
+            height(),
+            median_time_past()
+        }
+    };
 }
 
 /// Current zulu (utc) time in seconds since epoch, using the wall clock.
@@ -717,48 +765,18 @@ bool chain_state::is_stale() const
             static_cast<uint64_t>(stale_seconds_));
 }
 
-// Properties.
-//-----------------------------------------------------------------------------
-
-const hash_digest& chain_state::hash() const
+// Semantic invalidity can also arise from too many/few values in the arrays.
+// The same computations used to specify the ranges could detect such errors.
+// These are the conditions that would cause exception during execution.
+bool chain_state::is_valid() const
 {
-    return data_.hash;
-}
-
-size_t chain_state::height() const
-{
-    return data_.height;
-}
-
-uint32_t chain_state::enabled_forks() const
-{
-    return active_.forks;
-}
-
-uint32_t chain_state::minimum_block_version() const
-{
-    return active_.minimum_block_version;
-}
-
-uint32_t chain_state::maximum_transaction_version() const
-{
-    return active_.maximum_transaction_version;
-}
-
-uint32_t chain_state::median_time_past() const
-{
-    return median_time_past_;
-}
-
-uint32_t chain_state::work_required() const
-{
-    return work_required_;
+    return !is_zero(data_.height);
 }
 
 // Forks.
 //-----------------------------------------------------------------------------
 
-bool chain_state::is_enabled(rule_fork fork) const
+bool chain_state::is_enabled(chain::forks fork) const
 {
     return script::is_enabled(active_.forks, fork);
 }

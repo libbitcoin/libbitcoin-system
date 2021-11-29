@@ -32,17 +32,15 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
-#include <bitcoin/system/chain/enums/rule_fork.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/mutex.hpp>
-#include <bitcoin/system/optional.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -378,7 +376,7 @@ bool block::is_hash_limit_exceeded() const
     {
         const auto input_inserter = [&hashes](const input& input)
         {
-            hashes.insert(input.previous_output().hash());
+            hashes.insert(input.point().hash());
         };
 
         hashes.insert(tx.hash());
@@ -458,7 +456,7 @@ bool block::is_forward_reference() const
     std::unordered_map<hash_digest, bool> hashes(transactions_.size());
     const auto is_forward = [&hashes](const input& input)
     {
-        return !is_zero(hashes.count(input.previous_output().hash()));
+        return !is_zero(hashes.count(input.point().hash()));
     };
 
     for (const auto& tx: boost::adaptors::reverse(transactions_))

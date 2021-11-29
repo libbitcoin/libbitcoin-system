@@ -25,11 +25,11 @@
 #include <memory>
 #include <vector>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/mutex.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -50,12 +50,12 @@ public:
     input(input&& other);
     input(const input& other);
 
-    input(point&& prevout, chain::script&& script, uint32_t sequence);
-    input(const point& prevout, const chain::script& script, uint32_t sequence);
+    input(chain::point&& point, chain::script&& script, uint32_t sequence);
+    input(const point& point, const chain::script& script, uint32_t sequence);
 
-    input(point&& prevout, chain::script&& script, chain::witness&& witness,
-        uint32_t sequence);
-    input(const point& prevout, const chain::script& script,
+    input(chain::point&& point, chain::script&& script,
+        chain::witness&& witness, uint32_t sequence);
+    input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
 
     input(const data_chunk& data);
@@ -91,7 +91,7 @@ public:
     //-------------------------------------------------------------------------
 
     size_t serialized_size(bool witness=false) const;
-    const point& previous_output() const;
+    const chain::point& point() const;
     const chain::script& script() const;
     const chain::witness& witness() const;
     uint32_t sequence() const;
@@ -109,19 +109,22 @@ public:
     bool is_segregated() const;
     bool extract_reserved_hash(hash_digest& out) const;
 
+    /// Public mutable metadata access, not copied or compared.
+    chain::prevout prevout;
+
 protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
-    input(point&& prevout, chain::script&& script, chain::witness&& witness,
-        uint32_t sequence, bool valid);
-    input(const point& prevout, const chain::script& script,
+    input(chain::point&& point, chain::script&& script,
+        chain::witness&& witness, uint32_t sequence, bool valid);
+    input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence, bool valid);
 
     void reset();
 
 private:
-    point prevout_;
+    chain::point point_;
     chain::script script_;
     chain::witness witness_;
     uint32_t sequence_;

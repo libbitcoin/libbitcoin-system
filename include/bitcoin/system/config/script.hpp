@@ -45,7 +45,7 @@ public:
     data_chunk to_data() const;
 
     /// Return a pretty-printed copy of the script.
-    std::string to_string(uint32_t flags=chain::rule_fork::all_rules) const;
+    std::string to_string(uint32_t flags=chain::forks::all_rules) const;
 
     operator const chain::script&() const;
 

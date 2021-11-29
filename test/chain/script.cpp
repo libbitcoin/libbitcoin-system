@@ -295,9 +295,9 @@ BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
     const auto& ops = instance.operations();
     BOOST_REQUIRE_EQUAL(ops.size(), 6u);
     BOOST_REQUIRE(ops[0] == opcode::push_positive_2);
-    BOOST_REQUIRE_EQUAL(ops[1].to_string(rule_fork::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
-    BOOST_REQUIRE_EQUAL(ops[2].to_string(rule_fork::no_rules), "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
-    BOOST_REQUIRE_EQUAL(ops[3].to_string(rule_fork::no_rules), "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
+    BOOST_REQUIRE_EQUAL(ops[1].to_string(forks::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
+    BOOST_REQUIRE_EQUAL(ops[2].to_string(forks::no_rules), "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
+    BOOST_REQUIRE_EQUAL(ops[3].to_string(forks::no_rules), "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
     BOOST_REQUIRE(ops[4] == opcode::push_positive_3);
     BOOST_REQUIRE(ops[5] == opcode::checkmultisig);
 }
@@ -459,9 +459,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP16 activation.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip16_rule, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip16_rule, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) == error::success, name);
     }
 }
 
@@ -475,9 +475,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to BIP16 activation and invalid after.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip16_rule, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip16_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) != error::success, name);
     }
 }
 
@@ -491,9 +491,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip65_rule, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules & ~forks::bip112_rule, prevout, 0) == error::success, name);
     }
 }
 
@@ -507,9 +507,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are invalid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip65_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules & ~forks::bip112_rule, prevout, 0) != error::success, name);
     }
 }
 
@@ -523,9 +523,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to BIP65 activation and invalid after.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip65_rule, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules & ~rule_fork::bip112_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip65_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules & ~forks::bip112_rule, prevout, 0) != error::success, name);
     }
 }
 
@@ -542,9 +542,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
 
         // These are always valid.
         // These are scripts potentially affected by bip66 (but should not be).
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip66_rule, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) == error::success, name);
     }
 }
 
@@ -559,9 +559,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
 
         // These are always invalid.
         // These are scripts potentially affected by bip66 (but should not be).
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::bip66_rule, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::bip66_rule, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) != error::success, name);
     }
 }
 
@@ -575,8 +575,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are always valid.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) == error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) == error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) == error::success, name);
     }
 }
 
@@ -590,8 +590,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::no_rules, prevout, 0) != error::success, name);
-        BOOST_CHECK_MESSAGE(script::verify(tx, 0, rule_fork::all_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::no_rules, prevout, 0) != error::success, name);
+        BOOST_CHECK_MESSAGE(script::verify(tx, 0, forks::all_rules, prevout, 0) != error::success, name);
     }
 }
 
@@ -656,7 +656,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__single__uses_one_hash)
     const auto bip66 = true;
     const auto bip143 = false;
     BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
-    BOOST_REQUIRE(script::check_signature(signature, pubkey, subscript, parent_tx, index, value, sighash_algorithm::hash_single, script_version::unversioned, bip143));
+    BOOST_REQUIRE(script::check_signature(signature, pubkey, subscript, parent_tx, index, value, coverage::hash_single, script_version::unversioned, bip143));
 }
 
 BOOST_AUTO_TEST_CASE(script__checksig__normal__success)
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__normal__success)
     const auto bip66 = true;
     const auto bip143 = false;
     BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
-    BOOST_REQUIRE(script::check_signature(signature, pubkey, subscript, parent_tx, index, value, sighash_algorithm::hash_single, script_version::unversioned, bip143));
+    BOOST_REQUIRE(script::check_signature(signature, pubkey, subscript, parent_tx, index, value, coverage::hash_single, script_version::unversioned, bip143));
 }
 
 BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__expected)
@@ -704,7 +704,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
     const auto index = 0u;
     const auto value = 0u;
     const auto bip143 = false;
-    BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, test_tx, index, value, sighash_algorithm::hash_all, script_version::unversioned, bip143));
+    BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, test_tx, index, value, coverage::hash_all, script_version::unversioned, bip143));
 
     const auto result = encode_base16(out);
     const auto expected = "3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801";
@@ -727,7 +727,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     const auto index = 0u;
     const auto value = 0u;
     const auto bip143 = false;
-    BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, test_tx, index, value, sighash_algorithm::hash_all, script_version::unversioned, bip143));
+    BOOST_REQUIRE(script::create_endorsement(out, secret, prevout_script, test_tx, index, value, coverage::hash_all, script_version::unversioned, bip143));
 
     const auto result = encode_base16(out);
     const auto expected = "3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01";
@@ -748,7 +748,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
     const auto index = 0u;
     const auto value = 0u;
     const auto bip143 = false;
-    const auto sighash = script::generate_signature_hash(test_tx, index, prevout_script, value, sighash_algorithm::hash_all, script_version::unversioned, bip143);
+    const auto sighash = script::generate_signature_hash(test_tx, index, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
     const auto result = encode_base16(sighash);
     const auto expected = "f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0";
     BOOST_REQUIRE_EQUAL(result, expected);
@@ -776,14 +776,14 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     static const auto forks =
-        ////rule_fork::difficult |
-        rule_fork::retarget |
-        rule_fork::bip16_rule |
-        rule_fork::bip30_rule |
-        ////rule_fork::bip34_rule |
-        ////rule_fork::bip66_rule |
-        rule_fork::bip65_rule | // bip65 should be superseded by bip90.
-        rule_fork::bip90_rule;
+        ////forks::difficult |
+        forks::retarget |
+        forks::bip16_rule |
+        forks::bip30_rule |
+        ////forks::bip34_rule |
+        ////forks::bip66_rule |
+        forks::bip65_rule | // bip65 should be superseded by bip90.
+        forks::bip90_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -824,14 +824,14 @@ BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     static const auto forks =
-        ////rule_fork::difficult |
-        rule_fork::retarget |
-        rule_fork::bip16_rule |
-        rule_fork::bip30_rule |
-        ////rule_fork::bip34_rule |
-        ////rule_fork::bip66_rule |
-        rule_fork::bip65_rule | // bip65 should be superseded by bip90.
-        rule_fork::bip90_rule;
+        ////forks::difficult |
+        forks::retarget |
+        forks::bip16_rule |
+        forks::bip30_rule |
+        ////forks::bip34_rule |
+        ////forks::bip66_rule |
+        forks::bip65_rule | // bip65 should be superseded by bip90.
+        forks::bip90_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -868,12 +868,12 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__success)
     // Isolate rules from integer values (62u/0011 0011).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     static const auto forks =
-        rule_fork::difficult |
-        rule_fork::retarget |
-        ////rule_fork::bip16_rule | // This looks wrong.
-        ////rule_fork::bip30_rule | // This is moot but looks wrong.
-        rule_fork::bip34_rule |
-        rule_fork::bip66_rule;
+        forks::difficult |
+        forks::retarget |
+        ////forks::bip16_rule | // This looks wrong.
+        ////forks::bip30_rule | // This is moot but looks wrong.
+        forks::bip34_rule |
+        forks::bip66_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -912,20 +912,20 @@ BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     static const auto forks =
-        rule_fork::difficult |
-        rule_fork::retarget |
-        rule_fork::bip16_rule |
-        rule_fork::bip30_rule |
-        rule_fork::bip34_rule |
-        rule_fork::bip66_rule |
-        rule_fork::bip65_rule |
-        rule_fork::bip90_rule |
-        rule_fork::bip68_rule |
-        rule_fork::bip112_rule |
-        rule_fork::bip113_rule |
-        rule_fork::bip141_rule |
-        rule_fork::bip143_rule |
-        rule_fork::bip147_rule;
+        forks::difficult |
+        forks::retarget |
+        forks::bip16_rule |
+        forks::bip30_rule |
+        forks::bip34_rule |
+        forks::bip66_rule |
+        forks::bip65_rule |
+        forks::bip90_rule |
+        forks::bip68_rule |
+        forks::bip112_rule |
+        forks::bip113_rule |
+        forks::bip141_rule |
+        forks::bip143_rule |
+        forks::bip147_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -963,20 +963,20 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__in
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     static const auto forks =
-        ////rule_fork::difficult |
-        rule_fork::retarget |
-        rule_fork::bip16_rule |
-        rule_fork::bip30_rule |
-        rule_fork::bip34_rule |
-        rule_fork::bip66_rule |
-        rule_fork::bip65_rule |
-        rule_fork::bip90_rule |
-        rule_fork::bip68_rule |
-        rule_fork::bip112_rule |
-        rule_fork::bip113_rule |
-        rule_fork::bip141_rule |
-        rule_fork::bip143_rule |
-        rule_fork::bip147_rule;
+        ////forks::difficult |
+        forks::retarget |
+        forks::bip16_rule |
+        forks::bip30_rule |
+        forks::bip34_rule |
+        forks::bip66_rule |
+        forks::bip65_rule |
+        forks::bip90_rule |
+        forks::bip68_rule |
+        forks::bip112_rule |
+        forks::bip113_rule |
+        forks::bip141_rule |
+        forks::bip143_rule |
+        forks::bip147_rule;
 
     data_chunk decoded_tx;
     BOOST_REQUIRE(decode_base16(decoded_tx, encoded_tx));
@@ -1024,29 +1024,29 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wpkh_tx__success)
     BOOST_REQUIRE(prevout1.is_valid());
 
     // ordinary P2PK (no rules required).
-    auto result0 = script::verify(tx, 0, rule_fork::no_rules, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::no_rules, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // P2WPKH witness program.
-    auto result1 = script::verify(tx, 1, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout1, value1);
+    auto result1 = script::verify(tx, 1, forks::bip141_rule | forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // missing bip143 (invalid sighash).
-    result1 = script::verify(tx, 1, rule_fork::bip141_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip141_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::stack_false);
 
     // missing bip141 (witness not allowed).
-    result1 = script::verify(tx, 1, rule_fork::bip143_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    result1 = script::verify(tx, 1, rule_fork::no_rules, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::no_rules, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::unexpected_witness);
 }
 
@@ -1067,21 +1067,21 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wpkh_tx__success)
     BOOST_REQUIRE(prevout0.is_valid());
 
     // P2SH-P2WPKH witness program.
-    auto result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // Other scenarios:
 
     // missing bip16 (required for p2sh, embedded witness not consumed).
-    result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip143 (invalid sighash).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::stack_false);
 }
 
@@ -1109,25 +1109,25 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
     BOOST_REQUIRE(prevout1.is_valid());
 
     // ordinary P2PK (no rules required).
-    auto result0 = script::verify(tx, 0, rule_fork::no_rules, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::no_rules, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // native P2WSH witness program.
-    auto result1 = script::verify(tx, 1, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout1, value1);
+    auto result1 = script::verify(tx, 1, forks::bip141_rule | forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // missing bip143 (code-separator treatment).
-    result1 = script::verify(tx, 1, rule_fork::bip141_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip141_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::op_check_sig_verify5);
 
     // missing bip141 (witness not allowed).
-    result1 = script::verify(tx, 1, rule_fork::bip143_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::unexpected_witness);
 }
 
@@ -1154,37 +1154,37 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__success)
     BOOST_REQUIRE(prevout1.is_valid());
 
     // native P2WSH witness program.
-    auto result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // native P2WSH witness program.
-    auto result1 = script::verify(tx, 1, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout1, value1);
+    auto result1 = script::verify(tx, 1, forks::bip141_rule | forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // extra rules (okay).
-    result1 = script::verify(tx, 1, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip16_rule | forks::bip141_rule | forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::success);
 
     // missing bip143 (code-separator treatment).
-    result0 = script::verify(tx, 0, rule_fork::bip141_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip141_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::stack_false);
 
     // missing bip143 (code-separator treatment).
-    result1 = script::verify(tx, 1, rule_fork::bip141_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip141_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::stack_false);
 
     // missing bip141 (witness not allowed).
-    result0 = script::verify(tx, 0, rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    result1 = script::verify(tx, 1, rule_fork::bip143_rule, prevout1, value1);
+    result1 = script::verify(tx, 1, forks::bip143_rule, prevout1, value1);
     BOOST_REQUIRE_EQUAL(result1, error::unexpected_witness);
 
     // This example shows how SINGLE|ANYONECANPAY does not commit to the input index (swap input indexes).
@@ -1207,11 +1207,11 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__success)
     BOOST_REQUIRE(prevout3.is_valid());
 
     // native P2WSH witness program.
-    result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout2, value2);
+    result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule, prevout2, value2);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // native P2WSH witness program.
-    result1 = script::verify(tx, 1, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout3, value3);
+    result1 = script::verify(tx, 1, forks::bip141_rule | forks::bip143_rule, prevout3, value3);
     BOOST_REQUIRE_EQUAL(result1, error::success);
 }
 
@@ -1232,21 +1232,21 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wsh_tx__success)
     BOOST_REQUIRE(prevout0.is_valid());
 
     // P2SH-P2WSH 6-of-6 multisig witness program.
-    auto result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // Other scenarios:
 
     // missing bip16 (required for p2sh, embedded witness not consumed).
-    result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip143 (invalid sighash).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::stack_false);
 }
 
@@ -1267,17 +1267,17 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE(prevout0.is_valid());
 
     // P2WSH witness program.
-    auto result0 = script::verify(tx, 0, rule_fork::bip141_rule | rule_fork::bip143_rule | rule_fork::bip147_rule, prevout0, value0);
+    auto result0 = script::verify(tx, 0, forks::bip141_rule | forks::bip143_rule | forks::bip147_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::success);
 
     // Other scenarios:
 
     // missing bip141 (witness not allowed).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip143_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip143_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::unexpected_witness);
 
     // missing bip143 (find-and-delete treatment).
-    result0 = script::verify(tx, 0, rule_fork::bip16_rule | rule_fork::bip141_rule, prevout0, value0);
+    result0 = script::verify(tx, 0, forks::bip16_rule | forks::bip141_rule, prevout0, value0);
     BOOST_REQUIRE_EQUAL(result0, error::op_check_sig_verify5);
 }
 

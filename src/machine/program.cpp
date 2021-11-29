@@ -158,8 +158,8 @@ code program::evaluate(const operation& op)
 // Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_invalid() const
 {
-    const auto bip141 = script::is_enabled(forks_, rule_fork::bip141_rule);
-    const auto nops_rule = script::is_enabled(forks_, rule_fork::nops_rule);
+    const auto bip141 = script::is_enabled(forks_, forks::bip141_rule);
+    const auto nops_rule = script::is_enabled(forks_, forks::nops_rule);
 
     // TODO: nops rule must be enabled.
     return
@@ -600,7 +600,7 @@ chain::script program::subscript(const endorsements& endorsements) const
 
     // bip143: op stripping is not applied to bip141 v0 scripts.
     // The bip141 fork sets the version property, so this is a distinct check.
-    if (script::is_enabled(forks(), rule_fork::bip143_rule))
+    if (script::is_enabled(forks(), forks::bip143_rule))
         return sub;
 
     // TODO: Construct opcode with shared pointer to data, and stack with
@@ -634,7 +634,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
     hash = signature_hash(subscript({ endorsement }), flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = script::is_enabled(forks(), rule_fork::bip66_rule);
+    const auto bip66 = script::is_enabled(forks(), forks::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
@@ -654,7 +654,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
     hash = signature_hash(cache, subscript, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = script::is_enabled(forks(), rule_fork::bip66_rule);
+    const auto bip66 = script::is_enabled(forks(), forks::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
@@ -683,7 +683,7 @@ chain::operation::list program::create_delete_ops(const endorsements& data)
 hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
-    const auto bip143 = script::is_enabled(forks(), rule_fork::bip143_rule);
+    const auto bip143 = script::is_enabled(forks(), forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
     return script::generate_signature_hash(transaction(), input_index_,

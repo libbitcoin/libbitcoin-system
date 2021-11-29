@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2032 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_RULE_FORK_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_RULE_FORK_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_FORKS_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_FORKS_HPP
 
 #include <cstdint>
 #include <bitcoin/system/math/math.hpp>
@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-enum rule_fork : uint32_t
+enum forks : uint32_t
 {
     /// Rules start at satoshi v0.3.0.
     /// Only satoshi-released hard forks, and enforced soft forks are included.
@@ -137,28 +137,28 @@ enum rule_fork : uint32_t
 
     /// Rules that use bip34-based activation.
     bip34_activations =
-        rule_fork::bip34_rule |
-        rule_fork::bip65_rule |
-        rule_fork::bip66_rule,
+        forks::bip34_rule |
+        forks::bip65_rule |
+        forks::bip66_rule,
 
     /// TODO:
     /// Rules that use BIP9 bit 0 first time activation.
     bip9_bit0_group =
-        rule_fork::bip68_rule |
-        rule_fork::bip112_rule |
-        rule_fork::bip113_rule,
+        forks::bip68_rule |
+        forks::bip112_rule |
+        forks::bip113_rule,
 
     /// TODO:
     /// Rules that use BIP9 bit 1 first time activation.
     bip9_bit1_group =
-        rule_fork::bip141_rule |
-        rule_fork::bip143_rule |
-        rule_fork::bip147_rule,
+        forks::bip141_rule |
+        forks::bip143_rule |
+        forks::bip147_rule,
 
     /// TODO:
     /// Rules that use BIP9 bit 4 first time activation.
     bip9_bit4_group =
-        rule_fork::bip91_rule,
+        forks::bip91_rule,
 
     /// TODO: rules that use taproot-style activation.
 

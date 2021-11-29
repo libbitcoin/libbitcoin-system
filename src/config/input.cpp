@@ -53,7 +53,7 @@ static bool decode_input(chain::input& input, const std::string& tuple)
 static std::string encode_input(const chain::input& input)
 {
     std::stringstream result;
-    result << point(input.previous_output()) << point::delimiter
+    result << point(input.point()) << point::delimiter
         << input.sequence();
 
     return result.str();

@@ -20,6 +20,8 @@
 
 #include <algorithm>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -40,7 +42,7 @@ input::input()
 
 input::input(input&& other)
   : input(
-      std::move(other.prevout_),
+      std::move(other.point_),
       std::move(other.script_),
       std::move(other.witness_),
       other.sequence_,
@@ -50,7 +52,7 @@ input::input(input&& other)
 
 input::input(const input& other)
   : input(
-      other.prevout_,
+      other.point_,
       other.script_,
       other.witness_,
       other.sequence_,
@@ -58,27 +60,27 @@ input::input(const input& other)
 {
 }
 
-input::input(point&& prevout, chain::script&& script, uint32_t sequence)
-  : input(std::move(prevout), std::move(script), {}, sequence, true)
+input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
+  : input(std::move(point), std::move(script), {}, sequence, true)
 {
 }
 
-input::input(const point& prevout, const chain::script& script,
+input::input(const chain::point& point, const chain::script& script,
     uint32_t sequence)
-  : input(prevout, script, {}, sequence, true)
+  : input(point, script, {}, sequence, true)
 {
 }
 
-input::input(point&& prevout, chain::script&& script, chain::witness&& witness,
-    uint32_t sequence)
-  : input(std::move(prevout), std::move(script), std::move(witness), sequence,
+input::input(chain::point&& point, chain::script&& script,
+    chain::witness&& witness, uint32_t sequence)
+  : input(std::move(point), std::move(script), std::move(witness), sequence,
       true)
 {
 }
 
-input::input(const point& prevout, const chain::script& script,
+input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence)
-  : input(prevout, script, witness, sequence, true)
+  : input(point, script, witness, sequence, true)
 {
 }
 
@@ -98,24 +100,26 @@ input::input(reader& source)
 }
 
 // protected
-input::input(point&& prevout, chain::script&& script, chain::witness&& witness,
-    uint32_t sequence, bool valid)
-  : prevout_(std::move(prevout)),
+input::input(chain::point&& point, chain::script&& script,
+    chain::witness&& witness, uint32_t sequence, bool valid)
+  : point_(std::move(point)),
     script_(std::move(script)),
     witness_(std::move(witness)),
     sequence_(sequence),
-    valid_(valid)
+    valid_(valid),
+    prevout{}
 {
 }
 
 // protected
-input::input(const point& prevout, const chain::script& script,
+input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence, bool valid)
-  : prevout_(prevout),
+  : point_(point),
     script_(script),
     witness_(witness),
     sequence_(sequence),
-    valid_(valid)
+    valid_(valid),
+    prevout{}
 {
 }
 
@@ -124,7 +128,7 @@ input::input(const point& prevout, const chain::script& script,
 
 input& input::operator=(input&& other)
 {
-    prevout_ = std::move(other.prevout_);
+    point_ = std::move(other.point_);
     script_ = std::move(other.script_);
     witness_ = std::move(other.witness_);
     sequence_ = other.sequence_;
@@ -134,7 +138,7 @@ input& input::operator=(input&& other)
 
 input& input::operator=(const input& other)
 {
-    prevout_ = other.prevout_;
+    point_ = other.point_;
     script_ = other.script_;
     witness_ = other.witness_;
     sequence_ = other.sequence_;
@@ -145,7 +149,7 @@ input& input::operator=(const input& other)
 bool input::operator==(const input& other) const
 {
     return (sequence_ == other.sequence_)
-        && (prevout_ == other.prevout_)
+        && (point_ == other.point_)
         && (script_ == other.script_)
         && (witness_ == other.witness_);
 }
@@ -175,7 +179,7 @@ bool input::from_data(reader& source)
 {
     reset();
 
-    prevout_.from_data(source);
+    point_.from_data(source);
     script_.from_data(source, true);
     sequence_ = source.read_4_bytes_little_endian();
     witness_.reset();
@@ -189,7 +193,7 @@ bool input::from_data(reader& source)
 
 void input::reset()
 {
-    prevout_.reset();
+    point_.reset();
     script_.reset();
     witness_.reset();
     sequence_ = 0;
@@ -225,7 +229,7 @@ void input::to_data(writer& sink) const
     DEBUG_ONLY(const auto size = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    prevout_.to_data(sink);
+    point_.to_data(sink);
     script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 
@@ -241,7 +245,7 @@ size_t input::serialized_size(bool witness) const
     // witnesses are serialized by the transaction. This is an ugly hack as a
     // consequence of bip144 not serializing witnesses as part of inputs, which
     // is logically the proper association.
-    return prevout_.serialized_size()
+    return point_.serialized_size()
         + script_.serialized_size(true)
         + (witness ? witness_.serialized_size(true) : zero)
         + sizeof(sequence_);
@@ -250,9 +254,9 @@ size_t input::serialized_size(bool witness) const
 // Accessors.
 //-----------------------------------------------------------------------------
 
-const point& input::previous_output() const
+const point& input::point() const
 {
-    return prevout_;
+    return point_;
 }
 
 const chain::script& input::script() const

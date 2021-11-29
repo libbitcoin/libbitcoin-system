@@ -781,7 +781,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__null_input_prevout__retu
     };
 
     BOOST_REQUIRE(!instance.is_coinbase());
-    BOOST_REQUIRE(instance.inputs().back().previous_output().is_null());
+    BOOST_REQUIRE(instance.inputs().back().point().is_null());
     BOOST_REQUIRE(instance.is_null_non_coinbase());
 }
 
@@ -798,9 +798,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__null_input_prevout__retu
 ////    chain::transaction instance;
 ////    auto& inputs = instance.inputs();
 ////    inputs.emplace_back();
-////    inputs.back().previous_output().metadata.cache.set_value(123u);
+////    inputs.back().point().metadata.cache.set_value(123u);
 ////    inputs.emplace_back();
-////    inputs.back().previous_output().metadata.cache.set_value(321u);
+////    inputs.back().point().metadata.cache.set_value(321u);
 ////    BOOST_REQUIRE_EQUAL(instance.total_input_value(), 444u);
 ////}
 
@@ -831,9 +831,9 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 ////    chain::transaction instance;
 ////    auto& inputs = instance.inputs();
 ////    inputs.emplace_back();
-////    inputs.back().previous_output().metadata.cache.set_value(123u);
+////    inputs.back().point().metadata.cache.set_value(123u);
 ////    inputs.emplace_back();
-////    inputs.back().previous_output().metadata.cache.set_value(321u);
+////    inputs.back().point().metadata.cache.set_value(321u);
 ////    instance.outputs().emplace_back();
 ////    instance.outputs().back().set_value(44u);
 ////    BOOST_REQUIRE_EQUAL(instance.fees(), 400u);
@@ -882,7 +882,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().metadata.cache.set_value(123u);
+////    instance.inputs().back().point().metadata.cache.set_value(123u);
 ////    BOOST_REQUIRE(!instance.is_missing_previous_outputs());
 ////}
 
@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().metadata.cache.set_value(123u);
+////    instance.inputs().back().point().metadata.cache.set_value(123u);
 ////    BOOST_REQUIRE_EQUAL(instance.missing_previous_outputs().size(), 0u);
 ////}
 ////
@@ -926,7 +926,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().metadata.confirmed_spent = false;
+////    instance.inputs().back().point().metadata.confirmed_spent = false;
 ////    BOOST_REQUIRE(!instance.is_confirmed_double_spend());
 ////}
 ////
@@ -934,7 +934,7 @@ BOOST_AUTO_TEST_CASE(transaction__total_output_value__non_empty_outputs__returns
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back();
-////    instance.inputs().back().previous_output().metadata.confirmed_spent = true;
+////    instance.inputs().back().point().metadata.confirmed_spent = true;
 ////    BOOST_REQUIRE(instance.is_confirmed_double_spend());
 ////}
 
@@ -996,8 +996,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    instance.inputs().back().previous_output().metadata.coinbase = true;
-////    BOOST_REQUIRE(!instance.inputs().back().previous_output().is_null());
+////    instance.inputs().back().point().metadata.coinbase = true;
+////    BOOST_REQUIRE(!instance.inputs().back().point().is_null());
 ////    BOOST_REQUIRE(instance.is_mature(453));
 ////}
 ////
@@ -1005,9 +1005,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    instance.inputs().back().previous_output().metadata.height = 20;
-////    instance.inputs().back().previous_output().metadata.coinbase = true;
-////    BOOST_REQUIRE(!instance.inputs().back().previous_output().is_null());
+////    instance.inputs().back().point().metadata.height = 20;
+////    instance.inputs().back().point().metadata.coinbase = true;
+////    BOOST_REQUIRE(!instance.inputs().back().point().is_null());
 ////    BOOST_REQUIRE(!instance.is_mature(50));
 ////}
 ////
@@ -1015,9 +1015,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back(chain::point{ null_hash, chain::point::null_index }, chain::script{}, 0);
-////    instance.inputs().back().previous_output().metadata.height = 20;
-////    instance.inputs().back().previous_output().metadata.coinbase = true;
-////    BOOST_REQUIRE(instance.inputs().back().previous_output().is_null());
+////    instance.inputs().back().point().metadata.height = 20;
+////    instance.inputs().back().point().metadata.coinbase = true;
+////    BOOST_REQUIRE(instance.inputs().back().point().is_null());
 ////    BOOST_REQUIRE(instance.is_mature(50));
 ////}
 ////
@@ -1025,8 +1025,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    instance.inputs().back().previous_output().metadata.coinbase = false;
-////    BOOST_REQUIRE(!instance.inputs().back().previous_output().is_null());
+////    instance.inputs().back().point().metadata.coinbase = false;
+////    BOOST_REQUIRE(!instance.inputs().back().point().is_null());
 ////    BOOST_REQUIRE(instance.is_mature(453));
 ////}
 ////
@@ -1034,9 +1034,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__retu
 ////{
 ////    chain::transaction instance;
 ////    instance.inputs().emplace_back(chain::point{ hash1, 42 }, chain::script{}, 0);
-////    instance.inputs().back().previous_output().metadata.height = 20;
-////    instance.inputs().back().previous_output().metadata.coinbase = false;
-////    BOOST_REQUIRE(!instance.inputs().back().previous_output().is_null());
+////    instance.inputs().back().point().metadata.height = 20;
+////    instance.inputs().back().point().metadata.coinbase = false;
+////    BOOST_REQUIRE(!instance.inputs().back().point().is_null());
 ////    BOOST_REQUIRE(instance.is_mature(50));
 ////}
 

@@ -32,8 +32,6 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
-#include <bitcoin/system/mutex.hpp>
-#include <bitcoin/system/optional.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

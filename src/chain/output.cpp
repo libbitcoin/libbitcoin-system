@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include  <iterator>
+#include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>

@@ -24,7 +24,8 @@
 #include <memory>
 #include <deque>
 #include <bitcoin/system/chain/check_point.hpp>
-#include <bitcoin/system/chain/enums/rule_fork.hpp>
+#include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -160,12 +161,16 @@ public:
 
     /// Properties.
     const hash_digest& hash() const;
-    size_t height() const;
-    uint32_t enabled_forks() const;
     uint32_t minimum_block_version() const;
     uint32_t maximum_transaction_version() const;
-    uint32_t median_time_past() const;
     uint32_t work_required() const;
+
+    /// Context retains forks, policy, height, and median_time_past.
+    chain::context context() const;
+    uint32_t median_time_past() const;
+    uint32_t policy() const;
+    uint32_t forks() const;
+    size_t height() const;
 
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const;
@@ -174,7 +179,7 @@ public:
     bool is_stale() const;
 
     /// Determine if the fork is set for this block.
-    bool is_enabled(chain::rule_fork fork) const;
+    bool is_enabled(chain::forks fork) const;
 
     /// Determine if this block hash fails a checkpoint at this height.
     bool is_checkpoint_conflict(const hash_digest& hash) const;

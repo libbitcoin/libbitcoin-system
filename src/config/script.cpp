@@ -90,7 +90,7 @@ std::istream& operator>>(std::istream& input, script& argument)
 
 std::ostream& operator<<(std::ostream& output, const script& argument)
 {
-    static constexpr auto flags = chain::rule_fork::all_rules;
+    static constexpr auto flags = chain::forks::all_rules;
     output << argument.value_.to_string(flags);
     return output;
 }

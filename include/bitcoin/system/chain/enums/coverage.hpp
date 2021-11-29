@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SIGHASH_ALGORITHM_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SIGHASH_ALGORITHM_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_COVERAGE_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_COVERAGE_HPP
 
 #include <cstdint>
 
@@ -27,7 +27,7 @@ namespace chain {
 
 /// Signature hash types.
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
-enum sighash_algorithm : uint8_t
+enum coverage : uint8_t
 {
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.
