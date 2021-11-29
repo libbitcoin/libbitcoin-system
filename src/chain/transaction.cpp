@@ -106,7 +106,7 @@ transaction::transaction(reader& source, bool witness)
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs, bool valid)
-  : segregated_(valid),
+  : segregated_(segregated),
     version_(version),
     locktime_(locktime),
     inputs_(std::move(inputs)),
@@ -118,7 +118,7 @@ transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
     const input::list& inputs, const output::list& outputs, bool valid)
-  : segregated_(valid),
+  : segregated_(segregated),
     version_(version),
     locktime_(locktime),
     inputs_(inputs),
@@ -243,6 +243,7 @@ bool transaction::from_data(reader& source, bool witness)
 // protected
 void transaction::reset()
 {
+    segregated_ = false;
     version_ = 0;
     locktime_ = 0;
     inputs_.clear();
