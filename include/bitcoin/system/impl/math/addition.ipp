@@ -41,11 +41,42 @@ constexpr Result subtract(Left left, Right right) noexcept
     return static_cast<Result>(left) - static_cast<Result>(right);
 }
 
+template <typename Integer, if_signed_integer<Integer>>
+constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+{
+    // C++14: local variables allowed in constexpr.
+    return
+        (is_zero(right) ||
+            (is_negative(right) &&
+                (left >= std::numeric_limits<Integer>::min() - right)) ||
+            (!is_negative(right) &&
+                (left <= std::numeric_limits<Integer>::max() - right))) ?
+            (right + left) :
+        ((is_negative(right)) ?
+            std::numeric_limits<Integer>::min() :
+            std::numeric_limits<Integer>::max());
+}
+
+template <typename Integer, if_signed_integer<Integer>>
+constexpr Integer floored_subtract(Integer left, Integer right) noexcept
+{
+    // C++14: local variables allowed in constexpr.
+    return
+        (is_zero(right) ||
+            (is_negative(right) &&
+                (left <= std::numeric_limits<Integer>::max() + right)) ||
+            (!is_negative(right) &&
+                (left >= std::numeric_limits<Integer>::min() + right))) ?
+        (left - right) :
+        ((is_negative(right)) ?
+            std::numeric_limits<Integer>::max() :
+            std::numeric_limits<Integer>::min());
+}
+
 template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
 {
     // C++14: local variables allowed in constexpr.
-    ////constexpr auto maximum = std::numeric_limits<Integer>::max();
     return (left > (std::numeric_limits<Integer>::max() - right)) ?
         std::numeric_limits<Integer>::max() : (left + right);
 }

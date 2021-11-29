@@ -34,7 +34,15 @@ template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr Result subtract(Left left, Right right) noexcept;
 
-/// Integer maximum if would overflow return, otherwise the sum.
+/// Integer maximum if would overflow, otherwise the sum.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
+
+/// Integer minimum if would underflow, otherwise the difference.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr Integer floored_subtract(Integer left, Integer right) noexcept;
+
+/// Integer maximum if would overflow, otherwise the sum.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
 
