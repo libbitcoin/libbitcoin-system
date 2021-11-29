@@ -162,9 +162,9 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__valid_junk__success)
 
 BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -177,20 +177,20 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
 
     const auto tx = transaction::factory(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave = tx.to_data(version::level::minimum);
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_1__case_2_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -212,19 +212,19 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_2_valid_data__success)
 
     const auto tx = transaction::factory(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave = tx.to_data(version::level::minimum);
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -238,23 +238,23 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
     stream::in::copy stream(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    stream::out::data ostream(resave);
+    resave.resize(raw_tx.size());
+    stream::out::copy ostream(resave);
     tx.to_data(version::level::minimum, ostream);
-    ostream.flush();
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -277,22 +277,22 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
     stream::in::copy stream(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    stream::out::data ostream(resave);
+    resave.resize(raw_tx.size());
+    stream::out::copy ostream(resave);
     tx.to_data(version::level::minimum, ostream);
-    ostream.flush();
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -306,23 +306,23 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
     read::bytes::copy source(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), 225u);
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    write::bytes::data out(resave);
+    resave.resize(raw_tx.size());
+    write::bytes::copy out(resave);
     tx.to_data(version::level::minimum, out);
-    out.flush();
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
 {
-    hash_digest tx_hash = base16_hash(
+    const hash_digest tx_hash = base16_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_chunk(base16_array(
+    const data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -345,15 +345,15 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
     read::bytes::copy in(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, in);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE(tx.hash() == tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.serialized_size(version::level::minimum) == raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
     data_chunk resave;
-    write::bytes::data out(resave);
+    resave.resize(raw_tx.size());
+    write::bytes::copy out(resave);
     tx.to_data(version::level::minimum, out);
-    out.flush();
-    BOOST_REQUIRE(resave == raw_tx);
+    BOOST_REQUIRE_EQUAL(resave, raw_tx);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equivalent)

@@ -214,9 +214,9 @@ BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
     BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
 
     data_chunk raw_reserialization;
-    stream::out::data sink(raw_reserialization);
+    raw_reserialization.resize(block.serialized_size(version::level::minimum));
+    stream::out::copy sink(raw_reserialization);
     block.to_data(version::level::minimum, sink);
-    sink.flush();
     BOOST_REQUIRE(raw_reserialization == raw_block);
     BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
 }
@@ -243,7 +243,8 @@ BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
     BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
 
     data_chunk raw_reserialization;
-    write::bytes::data out(raw_reserialization);
+    raw_reserialization.resize(block.serialized_size(version::level::minimum));
+    write::bytes::copy out(raw_reserialization);
     block.to_data(version::level::minimum, out);
     out.flush();
     BOOST_REQUIRE(raw_reserialization == raw_block);
