@@ -33,7 +33,7 @@ namespace chain {
 const uint32_t point::null_index = no_previous_output;
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Valid default used in signature hashing.
 point::point()
@@ -89,7 +89,7 @@ point::point(hash_digest&& hash, uint32_t index, bool valid)
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 point& point::operator=(point&& other)
 {
@@ -125,7 +125,7 @@ bool point::operator<(const point& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool point::from_data(const data_chunk& data)
 {
@@ -167,7 +167,7 @@ bool point::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk point::to_data() const
 {
@@ -196,16 +196,11 @@ void point::to_data(writer& sink) const
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-size_t point::satoshi_fixed_size()
+size_t point::serialized_size()
 {
     return hash_size + sizeof(uint32_t);
-}
-
-size_t point::serialized_size() const
-{
-    return satoshi_fixed_size();
 }
 
 const hash_digest& point::hash() const
@@ -219,7 +214,7 @@ uint32_t point::index() const
 }
 
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool point::is_null() const
 {

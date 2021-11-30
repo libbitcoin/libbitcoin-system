@@ -38,6 +38,9 @@ class BC_API checkpoint
 public:
     typedef std::vector<checkpoint> list;
 
+    // Constructors.
+    // ------------------------------------------------------------------------
+
     checkpoint() noexcept;
     checkpoint(checkpoint&& other) noexcept;
     checkpoint(const checkpoint& other) noexcept;
@@ -52,15 +55,33 @@ public:
     {
     }
 
-    bool is_valid() const noexcept;
-
-    size_t height() const noexcept;
-    const hash_digest& hash() const noexcept;
-
-    std::string to_string() const noexcept;
+    // Operators.
+    // ------------------------------------------------------------------------
 
     checkpoint& operator=(checkpoint&& other) noexcept;
     checkpoint& operator=(const checkpoint& other) noexcept;
+
+    // Deserialization.
+    // ------------------------------------------------------------------------
+
+    ////bool from_string(const std::string& text);
+    ////bool from_string(std::istream& stream);
+    ////bool from_string(reader& source);
+
+    bool is_valid() const noexcept;
+
+    // Serialization.
+    // ------------------------------------------------------------------------
+
+    std::string to_string() const noexcept;
+    ////bool to_string(std::ostream& stream) const noexcept;
+    ////bool to_string(writer& sink) const noexcept;
+
+    // Properties.
+    // ------------------------------------------------------------------------
+
+    size_t height() const noexcept;
+    const hash_digest& hash() const noexcept;
 
 protected:
     checkpoint(hash_digest&& hash, size_t height, bool valid) noexcept;

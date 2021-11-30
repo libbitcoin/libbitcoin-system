@@ -43,7 +43,7 @@ public:
     typedef list::const_iterator iterator;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     operation();
 
@@ -63,7 +63,7 @@ public:
     operation(reader& source);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     operation& operator=(operation&& other);
     operation& operator=(const operation& other);
@@ -72,7 +72,7 @@ public:
     bool operator!=(const operation& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// These serialize operations (with codes), not to push-data.
     bool from_data(const data_chunk& encoded);
@@ -82,7 +82,7 @@ public:
     bool from_string(const std::string& mnemonic);
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
@@ -91,7 +91,7 @@ public:
     std::string to_string(uint32_t active_forks) const;
 
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     size_t serialized_size() const;
 
@@ -102,7 +102,7 @@ public:
     const data_chunk& data() const;
 
     // Utilities.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Compute nominal data opcode based on size alone.
     static opcode opcode_from_size(size_t size);

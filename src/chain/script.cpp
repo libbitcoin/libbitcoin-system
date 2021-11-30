@@ -56,7 +56,7 @@ bool script::is_enabled(uint32_t active_forks, forks fork)
 }
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 script::script()
   : script(operation::list{}, true)
@@ -111,7 +111,7 @@ script::script(const operation::list& ops, bool valid)
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 script& script::operator=(script&& other)
 {
@@ -138,7 +138,7 @@ bool script::operator!=(const script& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool script::from_data(const data_chunk& encoded, bool prefix)
 {
@@ -230,7 +230,7 @@ bool script::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk script::to_data(bool prefix) const
 {
@@ -277,7 +277,7 @@ std::string script::to_string(uint32_t active_forks) const
 }
 
 // Iteration.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 void script::clear()
 {
@@ -323,7 +323,7 @@ const operation& script::operator[](size_t index) const
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 size_t script::serialized_size(bool prefix) const
 {
@@ -351,7 +351,7 @@ hash_digest script::to_payments_key() const
 }
 
 // Signing (unversioned).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // ****************************************************************************
 // CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
@@ -362,7 +362,7 @@ inline hash_digest signature_hash(const transaction& tx, uint8_t flags)
     // There is no rational interpretation of a signature hash for a coinbase.
     BITCOIN_ASSERT(!tx.is_coinbase());
 
-    const auto size = tx.serialized_size() + sizeof(uint32_t);
+    const auto size = tx.serialized_size(false) + sizeof(uint32_t);
     data_chunk data(no_fill_byte_allocator);
     data.resize(size);
     write::bytes::copy out(data);
@@ -514,14 +514,14 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
 }
 
 // Signing (version 0).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 static size_t version_0_preimage_size(size_t script_size)
 {
     return sizeof(uint32_t)
         + hash_size
         + hash_size
-        + point::satoshi_fixed_size()
+        + point::serialized_size()
         + script_size
         + sizeof(uint64_t)
         + sizeof(uint32_t)
@@ -592,7 +592,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
 }
 
 // Signing (unversioned and version 0).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // static
 hash_digest script::generate_signature_hash(const transaction& tx,
@@ -658,7 +658,7 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 }
 
 // Utilities (static).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool script::is_push_only(const operation::list& ops)
 {
@@ -1003,7 +1003,7 @@ operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& ha
 }
 
 // Utilities (non-static).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 const data_chunk& script::witness_program() const
 {
@@ -1097,26 +1097,29 @@ inline size_t multisig_sigops(bool accurate, opcode code)
         operation::opcode_to_positive(code) : multisig_default_sigops;
 }
 
+inline bool is_single_sigop(opcode code)
+{
+    return code == opcode::checksig || code == opcode::checksigverify;
+}
+
+inline bool is_multiple_sigop(opcode code)
+{
+    return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
+}
+
 size_t script::sigops(bool accurate) const
 {
-    size_t total = 0;
+    auto total = zero;
     auto preceding = opcode::push_negative_1;
 
     for (const auto& op: ops_)
     {
         const auto code = op.code();
 
-        if (code == opcode::checksig ||
-            code == opcode::checksigverify)
-        {
-            ++total;
-        }
-        else if (
-            code == opcode::checkmultisig ||
-            code == opcode::checkmultisigverify)
-        {
-            total += multisig_sigops(accurate, preceding);
-        }
+        if (is_single_sigop(code))
+            total = ceilinged_add(total, one);
+        else if (is_multiple_sigop(code))
+            total = ceilinged_add(total, multisig_sigops(accurate, preceding));
 
         preceding = code;
     }
@@ -1144,7 +1147,7 @@ bool script::is_unspendable() const
 }
 
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     const script& prevout_script, uint64_t value)

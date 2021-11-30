@@ -284,96 +284,98 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
     BOOST_REQUIRE_EQUAL(value, instance.nonce());
 }
 
-BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__returns_true)
-{
-    const auto now = std::chrono::system_clock::now();
-    const auto now_time = std::chrono::system_clock::to_time_t(now);
-    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
-    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
-}
+// TODO: create test accessor.
+////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__returns_true)
+////{
+////    const auto now = std::chrono::system_clock::now();
+////    const auto now_time = std::chrono::system_clock::to_time_t(now);
+////    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
+////    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
+////{
+////    const auto now = std::chrono::system_clock::now();
+////    const auto duration = std::chrono::hours(3);
+////    const auto future = std::chrono::system_clock::to_time_t(now + duration);
+////    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
+////    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
+////}
 
-BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
-{
-    const auto now = std::chrono::system_clock::now();
-    const auto duration = std::chrono::hours(3);
-    const auto future = std::chrono::system_clock::to_time_t(now + duration);
-    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
-    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
-{
-    const settings settings(chain::selection::mainnet);
-    chain::header instance{ {}, {}, {}, {}, settings.proof_of_work_limit + 1, {} };
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
-{
-    const settings settings(chain::selection::mainnet);
-    const chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        0u,
-        34564u);
-
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
-{
-    const settings settings(chain::selection::mainnet);
-    const chain::header instance(
-        4u,
-        base16_hash("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
-        base16_hash("a6cb0b0d6531a71abe2daaa4a991e5498e1b6b0b51549568d0f9d55329b905df"),
-        1474388414u,
-        402972254u,
-        2842832236u);
-
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__returns_false)
-{
-    const settings settings(chain::selection::mainnet);
-    const chain::header instance(
-        536870912u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
-        1535119178u,
-        436332170u,
-        2135224651u);
-
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
-}
-
-BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__returns_true)
-{
-    const settings settings(chain::selection::mainnet);
-    const chain::header instance(
-        536870912u,
-        base16_hash("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
-        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
-        1535119178u,
-        436332170u,
-        2135224651u);
-
-    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
-    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-}
-
-BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
-{
-    BOOST_REQUIRE_EQUAL(chain::header::proof(0x1d00ffff), 0x0000000100010001);
-}
+// TODO: create test accessor.
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
+////{
+////    const settings settings(chain::selection::mainnet);
+////    chain::header instance{ {}, {}, {}, {}, settings.proof_of_work_limit + 1, {} };
+////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
+////{
+////    const settings settings(chain::selection::mainnet);
+////    const chain::header instance(
+////        11234u,
+////        base16_hash("abababababababababababababababababababababababababababababababab"),
+////        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
+////        753234u,
+////        0u,
+////        34564u);
+////
+////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
+////{
+////    const settings settings(chain::selection::mainnet);
+////    const chain::header instance(
+////        4u,
+////        base16_hash("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
+////        base16_hash("a6cb0b0d6531a71abe2daaa4a991e5498e1b6b0b51549568d0f9d55329b905df"),
+////        1474388414u,
+////        402972254u,
+////        2842832236u);
+////
+////    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__returns_false)
+////{
+////    const settings settings(chain::selection::mainnet);
+////    const chain::header instance(
+////        536870912u,
+////        base16_hash("abababababababababababababababababababababababababababababababab"),
+////        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+////        1535119178u,
+////        436332170u,
+////        2135224651u);
+////
+////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__returns_true)
+////{
+////    const settings settings(chain::selection::mainnet);
+////    const chain::header instance(
+////        536870912u,
+////        base16_hash("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
+////        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+////        1535119178u,
+////        436332170u,
+////        2135224651u);
+////
+////    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
+////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
+////}
+////
+////BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
+////{
+////    BOOST_REQUIRE_EQUAL(chain::header::difficulty(0x1d00ffff), 0x0000000100010001);
+////}
 
 BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
 {
     const chain::block block = settings(chain::selection::mainnet).genesis_block;
-    BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
+    BOOST_REQUIRE_EQUAL(block.header().difficulty(), 0x0000000100010001);
 }
 
 BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)

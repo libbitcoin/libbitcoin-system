@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_2__always__equals_transaction)
         "00"));
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(raw_tx));
+    BOOST_REQUIRE(tx.from_data(raw_tx, true));
     transaction instance(tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == tx);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_3__always__equals_param)
         "00"));
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(raw_tx));
+    BOOST_REQUIRE(tx.from_data(raw_tx, true));
     transaction alpha(tx);
     BOOST_REQUIRE(alpha.is_valid());
     BOOST_REQUIRE(alpha == tx);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_4__always__equals_equivalent_tx)
         "00"));
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(raw_tx));
+    BOOST_REQUIRE(tx.from_data(raw_tx, true));
     const auto inputs = tx.inputs();
     const auto outputs = tx.outputs();
     transaction instance(tx.version(), tx.locktime(), inputs, outputs);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_5__always__equals_equivalent_tx)
         "00"));
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(raw_tx));
+    BOOST_REQUIRE(tx.from_data(raw_tx, true));
     transaction instance(raw_tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == tx);
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor_6__always__equals_equivalent_tx)
     transaction value = transaction::factory(transaction::version_minimum, raw_tx);
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(raw_tx));
+    BOOST_REQUIRE(tx.from_data(raw_tx, true));
     transaction instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == tx);
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_1_valid_data__success)
     const auto tx = transaction::factory(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_1__case_2_valid_data__success)
 
     const auto tx = transaction::factory(version::level::minimum, raw_tx);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_1_valid_data__success)
     const auto tx = transaction::factory(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_2__case_2_valid_data__success)
     stream::in::copy stream(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, stream);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_1_valid_data__success)
     const auto tx = transaction::factory(version::level::minimum, source);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(transaction__factory_3__case_2_valid_data__success)
     read::bytes::copy in(raw_tx);
     const auto tx = transaction::factory(version::level::minimum, in);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(), tx_hash);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx_hash);
 
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx.serialized_size(version::level::minimum), raw_tx.size());
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_1__always__matches_equi
         "e61e66fe5d88ac00000000"));
 
     chain::transaction expected;
-    BOOST_REQUIRE(expected.from_data(raw_tx));
+    BOOST_REQUIRE(expected.from_data(raw_tx, true));
     chain::transaction instance(raw_tx);
     BOOST_REQUIRE(instance == expected);
 }
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns
     transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
-    BOOST_REQUIRE(beta.from_data(raw_tx));
+    BOOST_REQUIRE(beta.from_data(raw_tx, false));
     BOOST_REQUIRE(alpha == beta);
 }
 
@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__ret
     transaction alpha;
     chain::transaction beta;
     BOOST_REQUIRE(alpha.from_data(transaction::version_minimum, raw_tx));
-    BOOST_REQUIRE(beta.from_data(raw_tx));
+    BOOST_REQUIRE(beta.from_data(raw_tx, false));
     BOOST_REQUIRE_EQUAL(false, alpha != beta);
 }
 

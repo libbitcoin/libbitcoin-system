@@ -43,7 +43,7 @@ public:
     static const uint64_t not_found;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     output();
 
@@ -58,7 +58,7 @@ public:
     output(reader& source);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     output& operator=(output&& other);
     output& operator=(const output& other);
@@ -67,7 +67,7 @@ public:
     bool operator!=(const output& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -76,26 +76,27 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    // Properties.
-    //-------------------------------------------------------------------------
-
     size_t serialized_size() const;
 
+    // Properties.
+    // ------------------------------------------------------------------------
+
+    /// Native properties.
     uint64_t value() const;
     const chain::script& script() const;
 
-    // Validation.
-    //-------------------------------------------------------------------------
+    // Methods.
+    // ------------------------------------------------------------------------
 
+    bool committed_hash(hash_digest& out) const;
     size_t signature_operations(bool bip141) const;
     bool is_dust(uint64_t minimum_output_value) const;
-    bool extract_committed_hash(hash_digest& out) const;
 
 protected:
     output(uint64_t value, chain::script&& script, bool valid);

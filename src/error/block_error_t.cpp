@@ -36,8 +36,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     // accept header
     { checkpoints_failed, "block hash rejected by checkpoint" },
     { invalid_block_version, "block version rejected at current height" },
-    { incorrect_proof_of_work, "proof of work does not match bits field" },
     { timestamp_too_early, "block timestamp is too early" },
+    { incorrect_proof_of_work, "proof of work does not match bits field" },
 
     // check block
     { block_size_limit, "block size limit exceeded" },
@@ -54,14 +54,11 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { block_non_final, "block contains a non-final transaction" },
     { coinbase_height_mismatch, "block height mismatch in coinbase" },
     { coinbase_value_limit, "coinbase value too high" },
-    { block_embedded_sigop_limit, "too many block embedded signature operations" },
+    { block_sigop_limit, "too many block embedded signature operations" },
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
     { temporary_hash_limit, "block contains too many hashes" },
-    { unspent_coinbase_collision, "unspent coinbase collision" },
-
-    // deprecated
-    { header_missing_metadata, "header missing metadata" }
+    { unspent_coinbase_collision, "unspent coinbase collision" }
 };
 
 DEFINE_ERROR_T_CATEGORY(block_error, "block", "block code")

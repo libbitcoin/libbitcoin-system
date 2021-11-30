@@ -31,9 +31,32 @@ class BC_API prevout
   : public output
 {
 public:
-    /// Default output ensures consensus invalidity.
-    size_t height;
-    uint32_t median_time_past;
+    //*************************************************************************
+    // CONSENSUS: 
+    // A height of zero is immature (unspendable) despite unspent state.
+    //*************************************************************************
+    /// The confirmed chain height of the prevout (zero if not found).
+    size_t height = zero;
+
+    //*************************************************************************
+    // CONSENSUS: 
+    // A mtp of max_uint32 fails locktime maturity (until time overflow).
+    //*************************************************************************
+    /// The median time past at height (max_uint32 if not found/confirmed).
+    uint32_t median_time_past = max_uint32;
+
+    //*************************************************************************
+    // CONSENSUS: 
+    // For the first coinbase input, this indicates that a transaction of the
+    // same hash is either spent by height or does not exist by height (bip30).
+    // If the coinbase height is below height then a collision must be assumed.
+    // An unspent collision is immature (unspendable) and spent is mature.
+    //*************************************************************************
+    // For non-coinbase inputs this indicates spent at height.
+    bool spent = true;
+
+    // The output is of a coinbase transaction.
+    bool coinbase = false;
 };
 
 } // namespace chain

@@ -36,7 +36,7 @@ namespace machine {
 using namespace bc::system::chain;
 
 // Operations (shared).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 interpreter::result interpreter::op_unevaluated(opcode code)
 {
@@ -85,7 +85,7 @@ interpreter::result interpreter::op_push_data(program& program,
 }
 
 // Operations (not shared).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // All index parameters are zero-based and relative to stack top.
 
 interpreter::result interpreter::op_nop(opcode)

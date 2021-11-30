@@ -38,11 +38,13 @@ enum block_error_t : uint8_t
     invalid_proof_of_work,
     futuristic_timestamp,
 
+    // TODO: order these.
+
     // accept header
     checkpoints_failed,
     invalid_block_version,
-    incorrect_proof_of_work,
     timestamp_too_early,
+    incorrect_proof_of_work,
 
     // check block
     block_size_limit,
@@ -59,14 +61,13 @@ enum block_error_t : uint8_t
     block_non_final,
     coinbase_height_mismatch,
     coinbase_value_limit,
-    block_embedded_sigop_limit,
+    block_sigop_limit,
     invalid_witness_commitment,
     block_weight_limit,
     temporary_hash_limit,
-    unspent_coinbase_collision,
 
-    // deprecated
-    header_missing_metadata,
+    // confirm block
+    unspent_coinbase_collision,
 
     // not currently used
     block_error_last

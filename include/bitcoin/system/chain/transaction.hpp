@@ -45,7 +45,7 @@ public:
     typedef std::shared_ptr<transaction> ptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     transaction();
 
@@ -62,7 +62,7 @@ public:
     transaction(reader& source, bool witness=false);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     transaction& operator=(transaction&& other);
     transaction& operator=(const transaction& other);
@@ -71,67 +71,67 @@ public:
     bool operator!=(const transaction& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data, bool witness=false);
-    bool from_data(std::istream& stream, bool witness=false);
-    bool from_data(reader& source, bool witness=false);
+    bool from_data(const data_chunk& data, bool witness);
+    bool from_data(std::istream& stream, bool witness);
+    bool from_data(reader& source, bool witness);
 
+    // Deserialization result.
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness=false) const;
-    void to_data(std::ostream& stream, bool witness=false) const;
-    void to_data(writer& sink, bool witness=false) const;
+    data_chunk to_data(bool witness) const;
+    void to_data(std::ostream& stream, bool witness) const;
+    void to_data(writer& sink, bool witness) const;
+
+    size_t serialized_size(bool witness) const;
 
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    static size_t maximum_size(bool is_coinbase);
-    size_t serialized_size(bool witness=false) const;
-
+    /// Native properties.
     uint32_t version() const;
     uint32_t locktime() const;
-
     const input::list& inputs() const;
     const output::list& outputs() const;
 
-    // Utilities.
-    //-------------------------------------------------------------------------
+    /// Computed properties.
+    size_t weight() const;
+    uint64_t fee() const;
+    uint64_t claim() const;
+    uint64_t value() const;
+    hash_digest hash(bool witness) const;
+    bool is_coinbase() const;
+    bool is_segregated() const;
 
-    /// Clear witness from all inputs (does not change default hash).
-    void strip_witness();
+    // Methods.
+    // ------------------------------------------------------------------------
 
-    // Validation.
-    //-------------------------------------------------------------------------
-
+    bool is_dusty(uint64_t minimum_output_value) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
+    point::list points() const;
     hash_digest outputs_hash() const;
     hash_digest points_hash() const;
     hash_digest sequences_hash() const;
-    hash_digest hash(bool witness = false) const;
 
-    uint64_t total_output_value() const;
-    point::list points() const;
-    size_t weight() const;
+    // Guards (for tx pool without compact blocks).
+    // ------------------------------------------------------------------------
 
-    bool is_coinbase() const;
-    bool is_null_non_coinbase() const;
-    bool is_oversized_coinbase() const;
-    bool is_internal_double_spend() const;
-    bool is_dusty(uint64_t minimum_output_value) const;
-    bool is_final(size_t block_height, uint32_t block_time) const;
-    bool is_locktime_conflict() const;
-    bool is_segregated() const;
+    code guard() const;
+    code guard(const context& state) const;
 
-    code check(uint64_t max_money, bool pool=true) const;
-    code accept(const context& state, bool pool=true) const;
+    // Validation (consensus checks).
+    // ------------------------------------------------------------------------
+
+    code check() const;
+    code accept(const context& state) const;
     code connect(const context& state) const;
-    code connect_input(const context& state, size_t input_index) const;
 
 protected:
-    static bool is_segregated(const input::list& inputs);
+    ////friend class block;
 
     transaction(bool segregated, uint32_t version, uint32_t locktime,
         input::list&& inputs, output::list&& outputs, bool valid);
@@ -140,7 +140,53 @@ protected:
 
     void reset();
 
+    // Guard (context free).
+    // ------------------------------------------------------------------------
+
+    ////bool is_coinbase() const;
+    bool is_internal_double_spend() const;
+    bool is_oversized() const;
+
+    // Guard (contextual).
+    // ------------------------------------------------------------------------
+
+    ////bool is_segregated() const;
+    bool is_overweight() const;
+
+    // prevouts required
+    ////bool is_missing_prevouts() const;
+    bool is_signature_operations_limit(bool bip16, bool bip141) const;
+
+    // Check (context free).
+    // ------------------------------------------------------------------------
+
+    bool is_empty() const;
+    bool is_null_non_coinbase() const;
+    bool is_invalid_coinbase_size() const;
+
+    // Accept (contextual).
+    // ------------------------------------------------------------------------
+
+    bool is_non_final(size_t height, uint32_t timestamp,
+        uint32_t median_time_past, bool bip113) const;
+
+    // prevouts required
+    bool is_missing_prevouts() const;
+    bool is_overspent() const;
+    bool is_immature(size_t height) const;
+    bool is_locked(size_t height, uint32_t median_time_past) const;
+
+    // prevout confirmation state required
+    bool is_unconfirmed_spend(size_t height) const;
+    bool is_confirmed_double_spend(size_t height) const;
+
 private:
+    ////static size_t maximum_size(bool coinbase);
+    static bool segregated(const input::list& inputs);
+
+    // delegated
+    code connect_input(const context& state, size_t index) const;
+
     bool segregated_;
     uint32_t version_;
     uint32_t locktime_;

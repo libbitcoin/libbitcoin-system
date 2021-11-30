@@ -297,7 +297,7 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
 }
 
 // API
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 hash_digest digest(const data_slice& message, const key_rings& rings)
 {

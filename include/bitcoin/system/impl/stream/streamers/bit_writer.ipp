@@ -38,7 +38,7 @@ template <typename OStream>
 const uint8_t bit_writer<OStream>::pad = 0x00;
 
 // constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) noexcept
@@ -54,7 +54,7 @@ bit_writer<OStream>::~bit_writer() noexcept
 }
 
 // bits
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 void bit_writer<OStream>::write_bit(bool value) noexcept
@@ -80,7 +80,7 @@ void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 }
 
 // protected overrides
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
@@ -99,7 +99,7 @@ void bit_writer<OStream>::do_flush() noexcept
 }
 
 // private
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // This is the only byte write and offset change.
 template <typename OStream>

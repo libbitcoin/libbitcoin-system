@@ -19,7 +19,6 @@
 #include <bitcoin/system/messages/merkle_block.hpp>
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
@@ -75,12 +74,12 @@ merkle_block::merkle_block(chain::header&& header, size_t total_transactions,
 {
 }
 
-// Hack: use of safe_unsigned here isn't great. We should consider using size_t
-// for the transaction count and invalidating on deserialization and construct.
+// TODO: verify witness false parameter.
+// Transaction count is limited by max_block_size.
 merkle_block::merkle_block(const chain::block& block)
   : merkle_block(block.header(),
-        safe_cast<uint32_t>(block.transactions().size()),
-        block.to_hashes(), {})
+        static_cast<uint32_t>(block.transactions().size()),
+        block.transaction_hashes(false), {})
 {
 }
 

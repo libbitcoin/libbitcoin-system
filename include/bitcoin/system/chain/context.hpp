@@ -40,6 +40,7 @@ public:
     /// Public mutable metadata access.
     uint32_t forks;
     uint32_t policy;
+    uint32_t timestamp;
     uint32_t median_time_past;
     size_t height;
 };

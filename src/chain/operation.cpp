@@ -36,7 +36,7 @@ namespace chain {
 static constexpr auto any_invalid = opcode::op_xor;
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 operation::operation()
   : operation(any_invalid, {}, false)
@@ -115,7 +115,7 @@ operation::operation(opcode code, const data_chunk& data, bool underflow)
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 operation& operation::operator=(operation&& other)
 {
@@ -146,7 +146,7 @@ bool operation::operator!=(const operation& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool operation::from_data(const data_chunk& encoded)
 {
@@ -214,7 +214,7 @@ void operation::reset()
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk operation::to_data() const
 {
@@ -269,7 +269,7 @@ void operation::to_data(writer& sink) const
 }
 
 // From String.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 inline bool is_push_token(const std::string& token)
 {
@@ -400,7 +400,7 @@ bool operation::from_string(const std::string& mnemonic)
 }
 
 // To String.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 static std::string opcode_to_prefix(opcode code, const data_chunk& data)
 {
@@ -435,7 +435,7 @@ std::string operation::to_string(uint32_t active_forks) const
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 size_t operation::serialized_size() const
 {
@@ -469,7 +469,7 @@ const data_chunk& operation::data() const
 }
 
 // Utilities.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // private
 uint32_t operation::read_data_size(opcode code, reader& source)

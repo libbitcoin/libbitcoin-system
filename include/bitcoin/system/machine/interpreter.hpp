@@ -35,7 +35,7 @@ public:
     typedef error::op_error_t result;
 
     // Operations (shared).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     static result op_unevaluated(chain::opcode);
     static result op_nop(program& program, chain::opcode);
@@ -45,7 +45,7 @@ public:
         uint32_t size_limit);
 
     // Operations (not shared).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     static result op_nop(chain::opcode);
     static result op_ver(program& program);

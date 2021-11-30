@@ -65,7 +65,7 @@ std::istream& operator>>(std::istream& input, transaction& argument)
     std::string hexcode;
     input >> hexcode;
 
-    if (!argument.value_.from_data(base16(hexcode)))
+    if (!argument.value_.from_data(base16(hexcode), true))
         throw istream_exception(hexcode);
 
     return input;
@@ -73,7 +73,7 @@ std::istream& operator>>(std::istream& input, transaction& argument)
 
 std::ostream& operator<<(std::ostream& output, const transaction& argument)
 {
-    output << base16(argument.value_.to_data());
+    output << base16(argument.value_.to_data(true));
     return output;
 }
 

@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(opcode_tests)
 using namespace bc::system::chain;
 
 // opcode_to_mnemonic
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Partial coverage includes those with aliases and samples of each "range" of codes.
 
 // Use the traditional serializations for all codes (in this case 'zero' vs. 'push_0').
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__reserved_255_any_forks__0xff)
 }
 
 // opcode_from_mnemonic
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Partial coverage includes all aliases and boundaries of each "range" of codes.
 
 // zero
@@ -586,7 +586,7 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__checksequenceverify__nop3_or_
 }
 
 // opcode_to_hexadecimal
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(opcode__opcode_to_hexadecimal__zero__0x00)
 {
@@ -604,7 +604,7 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_hexadecimal__reserved_255__0xff)
 }
 
 // opcode_from_hexadecimal
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(opcode__opcode_from_hexadecimal__empty__false)
 {

@@ -94,7 +94,7 @@ public:
     bool register_jump(const chain::operation& op);
 
     // Primary stack.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Primary push.
     void push(bool value);
@@ -128,14 +128,14 @@ public:
     stack_iterator position(size_t index) /*const*/;
 
     // Alternate stack.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     bool empty_alternate() const;
     void push_alternate(value_type&& value);
     value_type pop_alternate();
 
     // Conditional stack.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     void open(bool value);
     void negate();
@@ -144,7 +144,7 @@ public:
     bool succeeded() const;
 
     // Signature validation.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Returns the subscript indicated by the last registered jump operation.
     chain::script subscript() const;

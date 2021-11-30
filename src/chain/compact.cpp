@@ -41,7 +41,7 @@ DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
 DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 
 // Inlines
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 inline bool is_negated(uint32_t compact)
 {
@@ -92,7 +92,7 @@ inline size_t logical_size(uint256_t value)
 }
 
 // Constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 compact::compact(uint32_t compact)
 {

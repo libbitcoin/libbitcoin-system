@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(header__factory_1__valid_input_canonical_version__no_transa
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(version));
-    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), chain::header::satoshi_fixed_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(version), chain::header::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)

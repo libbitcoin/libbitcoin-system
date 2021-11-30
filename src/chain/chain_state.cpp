@@ -53,7 +53,7 @@ static const checkpoint mainnet_bip30_exception_checkpoint2
 };
 
 // Inlines.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 inline bool is_active(size_t count, size_t activation_threshold)
 {
@@ -83,7 +83,7 @@ inline uint32_t bits_high(const chain_state::data& values)
 }
 
 // activation
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 chain_state::activations chain_state::activation(const data& values,
     uint32_t forks, const system::settings& settings)
@@ -284,7 +284,7 @@ size_t chain_state::bip9_bit1_height(size_t height,
 }
 
 // work_required
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings)
@@ -422,7 +422,7 @@ size_t chain_state::retarget_distance(size_t height,
 }
 
 // Static
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 chain_state::map chain_state::get_map(size_t height,
     const checkpoints& /* checkpoints */, uint32_t forks,
@@ -509,15 +509,19 @@ uint32_t chain_state::retargeting_interval(
 }
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
+//*****************************************************************************
+// CONSENSUS: satoshi associates the median time past for block N with block
+// N-1, as opposed to block N. Given that the value is actually obtained from
+// yet another preceding block in all cases except block 1 and 2, this is a
+// curious and confusing convention. We associate the median time past for
+// block N with block N. This is simple but requires care when comparing code.
+//*****************************************************************************
 uint32_t chain_state::median_time_past(const data& values, uint32_t)
 {
-    // Create a copy for the in-place sort.
-    auto times = values.timestamp.ordered;
-
     // Sort the times by value to obtain the median.
-    sort(times);
+    auto times = sort_copy(values.timestamp.ordered);
 
     // Consensus defines median time using modulo 2 element selection.
     // This differs from arithmetic median which averages two middle values.
@@ -690,7 +694,7 @@ chain_state::chain_state(data&& values, const checkpoints& checkpoints,
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 const hash_digest& chain_state::hash() const
 {
@@ -713,6 +717,11 @@ uint32_t chain_state::work_required() const
 }
 
 // context
+
+uint32_t chain_state::timestamp() const
+{
+    return data_.timestamp.self;
+}
 
 uint32_t chain_state::median_time_past() const
 {
@@ -739,6 +748,7 @@ chain::context chain_state::context() const
     chain::context context;
     context.forks = forks();
     context.policy = policy();
+    context.timestamp = timestamp();
     context.median_time_past = median_time_past();
     context.height = height();
     return context;
@@ -771,7 +781,7 @@ bool chain_state::is_valid() const
 }
 
 // Checkpoints.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool chain_state::is_checkpoint_conflict(const hash_digest& hash) const
 {

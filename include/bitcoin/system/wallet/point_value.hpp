@@ -36,7 +36,7 @@ public:
     typedef std::vector<point_value> list;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     point_value();
     point_value(point_value&& other);
@@ -45,7 +45,7 @@ public:
     point_value(const point& instance, uint64_t value);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
     point_value& operator=(point_value other);
@@ -57,7 +57,7 @@ public:
     friend void swap(point_value& left, point_value& right);
 
     // Properties (accessors).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     uint64_t value() const;
     void set_value(uint64_t value);

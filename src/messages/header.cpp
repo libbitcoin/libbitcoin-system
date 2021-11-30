@@ -58,7 +58,7 @@ header header::factory(uint32_t version, reader& source)
 size_t header::satoshi_fixed_size(uint32_t version)
 {
     const auto canonical = (version == version::level::canonical);
-    return chain::header::satoshi_fixed_size() +
+    return chain::header::serialized_size() +
         (canonical ? 0 : variable_size(0));
 }
 

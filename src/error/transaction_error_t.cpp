@@ -29,9 +29,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
 {
     { transaction_success, "transaction success" },
 
-    // dos transaction
-    { transaction_version, "transaction version not standard" },
-
     // check transaction
     { empty_transaction, "transaction inputs or outputs empty" },
     { previous_output_null, "non-coinbase transaction has input with null previous output" },
@@ -43,6 +40,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
     { transaction_legacy_sigop_limit, "too many transaction legacy signature operations" },
 
     // accept transaction
+    { unexpected_witness_transaction, "unexpected witness transaction" },
     { transaction_non_final, "transaction currently non-final for next block" },
     { premature_validation, "transaction validation under checkpoint" },
     { unspent_duplicate, "matching transaction with unspent outputs" },
@@ -50,12 +48,13 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
     { double_spend, "double spend of input" },
     { coinbase_maturity, "immature coinbase spent" },
     { spend_exceeds_value, "spend exceeds value of inputs" },
-    { transaction_embedded_sigop_limit, "too many transaction embedded signature operations" },
-    { sequence_locked, "transaction currently locked" },
+    { transaction_sigop_limit, "too many transaction embedded signature operations" },
+    { relative_time_locked, "transaction currently locked" },
     { transaction_weight_limit, "transaction weight limit exceeded" },
 
-    // deprecated
-    { transaction_missing_metadata, "transaction missing metadata" }
+    // dconfirm transaction
+    { unconfirmed_spend, "spend of unconfirmed previous output" },
+    { confirmed_double_spend, "spend of confirmed spent previous output" }
 };
 
 DEFINE_ERROR_T_CATEGORY(transaction_error, "transaction", "transaction code")

@@ -44,7 +44,7 @@ public:
     static const uint32_t null_index;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     point();
 
@@ -59,7 +59,7 @@ public:
     point(reader& source);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     point& operator=(point&& other);
     point& operator=(const point& other);
@@ -71,7 +71,7 @@ public:
     bool operator<(const point& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -80,24 +80,22 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
+    static size_t serialized_size();
+
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size();
-    size_t serialized_size() const;
-
+    /// Native properties.
     const hash_digest& hash() const;
     uint32_t index() const;
 
-    // Validation.
-    //-------------------------------------------------------------------------
-
+    /// Computed properties.
     bool is_null() const;
 
 protected:

@@ -24,6 +24,7 @@
 #include <istream>
 #include <memory>
 #include <vector>
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -43,7 +44,7 @@ public:
     typedef std::shared_ptr<input> ptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     input();
 
@@ -63,7 +64,7 @@ public:
     input(reader& source);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     input& operator=(input&& other);
     input& operator=(const input& other);
@@ -72,42 +73,41 @@ public:
     bool operator!=(const input& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
+    // Deserialization result.
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    // Properties.
-    //-------------------------------------------------------------------------
+    // Witness accounts for witness bytes, but are serialized independently.
+    size_t serialized_size(bool witness) const;
 
-    size_t serialized_size(bool witness=false) const;
+    // Properties.
+    // ------------------------------------------------------------------------
+
+    /// Native properties.
     const chain::point& point() const;
     const chain::script& script() const;
     const chain::witness& witness() const;
     uint32_t sequence() const;
 
-    // Utilities.
-    //-------------------------------------------------------------------------
-
-    /// Clear witness.
-    void strip_witness();
-
-    // Validation.
-    //-------------------------------------------------------------------------
+    // Methods.
+    // ------------------------------------------------------------------------
 
     bool is_final() const;
-    bool is_segregated() const;
-    bool extract_reserved_hash(hash_digest& out) const;
+    bool is_locked(size_t height, uint32_t median_time_past) const;
+    bool reserved_hash(hash_digest& out) const;
+    size_t signature_operations(bool bip16, bool bip141) const;
 
     /// Public mutable metadata access, not copied or compared.
     chain::prevout prevout;
@@ -124,6 +124,8 @@ protected:
     void reset();
 
 private:
+    bool embedded_script(chain::script& out) const;
+
     chain::point point_;
     chain::script script_;
     chain::witness witness_;

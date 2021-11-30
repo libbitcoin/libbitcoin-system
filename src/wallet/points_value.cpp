@@ -20,7 +20,7 @@
 
 #include <numeric>
 #include <cstdint>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 
 namespace libbitcoin {
@@ -129,11 +129,12 @@ void points_value::select(points_value& out, const points_value& unspent,
 // public
 // ----------------------------------------------------------------------------
 
+// Overflow returns max_uint64.
 uint64_t points_value::value() const
 {
     const auto sum = [](uint64_t total, const point_value& point)
     {
-        return safe_add(total, point.value());
+        return ceilinged_add(total, point.value());
     };
 
     return std::accumulate(points.begin(), points.end(), uint64_t(0), sum);

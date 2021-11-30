@@ -34,7 +34,7 @@ namespace system {
 namespace chain {
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 checkpoint::checkpoint() noexcept
   : checkpoint({}, zero, false)
@@ -67,8 +67,7 @@ checkpoint::checkpoint(const std::string& hash, size_t height) noexcept
 }
 
 // protected
-checkpoint::checkpoint(hash_digest&& hash, size_t height,
-    bool valid) noexcept
+checkpoint::checkpoint(hash_digest&& hash, size_t height, bool valid) noexcept
   : hash_(std::move(hash)), height_(height), valid_(valid)
 {
 }
@@ -80,9 +79,6 @@ checkpoint::checkpoint(const hash_digest& hash, size_t height,
 {
 }
 
-// Methods.
-//-----------------------------------------------------------------------------
-
 // private
 checkpoint checkpoint::from_string(const std::string& hash,
     size_t height) noexcept
@@ -90,32 +86,12 @@ checkpoint checkpoint::from_string(const std::string& hash,
     hash_digest digest;
     if (!decode_hash(digest, hash))
         return {};
-    
+
     return { std::move(digest), height, true };
 }
 
-bool checkpoint::is_valid() const noexcept
-{
-    return valid_;
-}
-
-size_t checkpoint::height() const noexcept
-{
-    return height_;
-}
-
-const hash_digest& checkpoint::hash() const noexcept
-{
-    return hash_;
-}
-
-std::string checkpoint::to_string() const noexcept
-{
-    return encode_hash(hash_) + ":" + serialize(height_);
-}
-
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 checkpoint& checkpoint::operator=(checkpoint&& other) noexcept
 {
@@ -148,18 +124,17 @@ bool operator!=(const checkpoint& left, const checkpoint& right) noexcept
     return !(left == right);
 }
 
-std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept
-{
-    output << in.to_string();
-    return output;
-}
+// Deserialization.
+// ----------------------------------------------------------------------------
 
+// TODO: add from_string.
+// TODO: add get_line/put_line to reader and eliminate stream_result.
 std::istream& operator>>(std::istream& input, checkpoint& out) noexcept
 {
     std::string value;
     input >> value;
 
-    hash_digest hash{};
+    hash_digest hash;
     size_t height(zero);
     const auto tokens = split(value, ":");
 
@@ -173,6 +148,38 @@ std::istream& operator>>(std::istream& input, checkpoint& out) noexcept
 
     out = {};
     return stream_result(input, false);
+}
+
+bool checkpoint::is_valid() const noexcept
+{
+    return valid_;
+}
+
+// Serialization.
+// ----------------------------------------------------------------------------
+
+std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept
+{
+    output << in.to_string();
+    return output;
+}
+
+std::string checkpoint::to_string() const noexcept
+{
+    return encode_hash(hash_) + ":" + serialize(height_);
+}
+
+// Properties.
+// ----------------------------------------------------------------------------
+
+size_t checkpoint::height() const noexcept
+{
+    return height_;
+}
+
+const hash_digest& checkpoint::hash() const noexcept
+{
+    return hash_;
 }
 
 } // namespace chain

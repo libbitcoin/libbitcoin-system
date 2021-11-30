@@ -169,87 +169,87 @@ BOOST_AUTO_TEST_CASE(block__constructor_7__always__equals_params)
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
-BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
-{
-    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
-    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
+////BOOST_AUTO_TEST_CASE(block__factory_data_1__genesis_mainnet__success)
+////{
+////    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
+////    BOOST_REQUIRE_EQUAL(genesis.serialized_size(true), 285u);
+////    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
+////
+////    // Save genesis block.
+////    auto raw_block = genesis.to_data(true);
+////    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+////
+////    // Reload genesis block.
+////    const auto block = block::factory(version::level::minimum, raw_block);
+////
+////    BOOST_REQUIRE(block.is_valid());
+////    BOOST_REQUIRE(genesis.header() == block.header());
+////
+////    // Verify merkle root from transactions.
+////    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
+////
+////    auto raw_reserialization = block.to_data(version::level::minimum);
+////    BOOST_REQUIRE(raw_reserialization == raw_block);
+////    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
+////}
 
-    // Save genesis block.
-    auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+////BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
+////{
+////    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
+////    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
+////    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
+////
+////    // Save genesis block.
+////    auto raw_block = genesis.to_data(true);
+////    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+////
+////    // Reload genesis block.
+////    stream::in::copy stream(raw_block);
+////    const auto block = block::factory(version::level::minimum, stream);
+////
+////    BOOST_REQUIRE(block.is_valid());
+////    BOOST_REQUIRE(genesis.header() == block.header());
+////
+////    // Verify merkle root from transactions.
+////    BOOST_REQUIRE(block.generate_merkle_root(true) == genesis.header().merkle_root());
+////
+////    data_chunk raw_reserialization;
+////    raw_reserialization.resize(block.serialized_size(version::level::minimum));
+////    stream::out::copy sink(raw_reserialization);
+////    block.to_data(version::level::minimum, sink);
+////    BOOST_REQUIRE(raw_reserialization == raw_block);
+////    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
+////}
 
-    // Reload genesis block.
-    const auto block = block::factory(version::level::minimum, raw_block);
-
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(genesis.header() == block.header());
-
-    // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
-
-    auto raw_reserialization = block.to_data(version::level::minimum);
-    BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
-}
-
-BOOST_AUTO_TEST_CASE(block__factory_data_2__genesis_mainnet__success)
-{
-    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
-    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
-
-    // Save genesis block.
-    auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
-
-    // Reload genesis block.
-    stream::in::copy stream(raw_block);
-    const auto block = block::factory(version::level::minimum, stream);
-
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(genesis.header() == block.header());
-
-    // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
-
-    data_chunk raw_reserialization;
-    raw_reserialization.resize(block.serialized_size(version::level::minimum));
-    stream::out::copy sink(raw_reserialization);
-    block.to_data(version::level::minimum, sink);
-    BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
-}
-
-BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
-{
-    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
-    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
-
-    // Save genesis block.
-    auto raw_block = genesis.to_data();
-    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
-
-    // Reload genesis block.
-    stream::in::copy stream(raw_block);
-    read::bytes::istream reader(stream);
-    const auto block = block::factory(version::level::minimum + 1, reader);
-
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(genesis.header() == block.header());
-
-    // Verify merkle root from transactions.
-    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
-
-    data_chunk raw_reserialization;
-    raw_reserialization.resize(block.serialized_size(version::level::minimum));
-    write::bytes::copy out(raw_reserialization);
-    block.to_data(version::level::minimum, out);
-    out.flush();
-    BOOST_REQUIRE(raw_reserialization == raw_block);
-    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
-}
+////BOOST_AUTO_TEST_CASE(block__factory_data_3__genesis_mainnet__success)
+////{
+////    const chain::block genesis = settings(chain::selection::mainnet).genesis_block;
+////    BOOST_REQUIRE_EQUAL(genesis.serialized_size(), 285u);
+////    BOOST_REQUIRE_EQUAL(genesis.header().serialized_size(), 80u);
+////
+////    // Save genesis block.
+////    auto raw_block = genesis.to_data(true);
+////    BOOST_REQUIRE_EQUAL(raw_block.size(), 285u);
+////
+////    // Reload genesis block.
+////    stream::in::copy stream(raw_block);
+////    read::bytes::istream reader(stream);
+////    const auto block = block::factory(version::level::minimum + 1, reader);
+////
+////    BOOST_REQUIRE(block.is_valid());
+////    BOOST_REQUIRE(genesis.header() == block.header());
+////
+////    // Verify merkle root from transactions.
+////    BOOST_REQUIRE(block.generate_merkle_root() == genesis.header().merkle_root());
+////
+////    data_chunk raw_reserialization;
+////    raw_reserialization.resize(block.serialized_size(version::level::minimum));
+////    write::bytes::copy out(raw_reserialization);
+////    block.to_data(version::level::minimum, out);
+////    out.flush();
+////    BOOST_REQUIRE(raw_reserialization == raw_block);
+////    BOOST_REQUIRE_EQUAL(raw_reserialization.size(), block.serialized_size(version::level::minimum));
+////}
 
 BOOST_AUTO_TEST_CASE(block__operator_assign_equals_1__always__matches_equivalent)
 {

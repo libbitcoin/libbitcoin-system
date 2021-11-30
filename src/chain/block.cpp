@@ -51,7 +51,7 @@ namespace chain {
 static default_allocator<hash_digest> no_fill_hash_allocator{};
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 block::block()
   : block({}, {}, false)
@@ -59,23 +59,23 @@ block::block()
 }
 
 block::block(const block& other)
-  : block(other.header_, other.transactions_, other.valid_)
+  : block(other.header_, other.txs_, other.valid_)
 {
 }
 
 block::block(block&& other)
-  : block(std::move(other.header_), std::move(other.transactions_),
+  : block(std::move(other.header_), std::move(other.txs_),
       other.valid_)
 {
 }
 
-block::block(const chain::header& header, const transaction::list& transactions)
-  : block(header, transactions, true)
+block::block(const chain::header& header, const transaction::list& txs)
+  : block(header, txs, true)
 {
 }
 
-block::block(chain::header&& header, transaction::list&& transactions)
-  : block(std::move(header), std::move(transactions), true)
+block::block(chain::header&& header, transaction::list&& txs)
+  : block(std::move(header), std::move(txs), true)
 {
 }
 
@@ -95,30 +95,29 @@ block::block(reader& source, bool witness)
 }
 
 // protected
-block::block(const chain::header& header, const transaction::list& transactions,
-    bool valid)
-  : header_(header),
-    transactions_(transactions),
+block::block(chain::header&& header, transaction::list&& txs, bool valid)
+  : header_(std::move(header)),
+    txs_(std::move(txs)),
     valid_(valid)
 {
 }
 
 // protected
-block::block(chain::header&& header, transaction::list&& transactions,
+block::block(const chain::header& header, const transaction::list& txs,
     bool valid)
-  : header_(std::move(header)),
-    transactions_(std::move(transactions)),
+  : header_(header),
+    txs_(txs),
     valid_(valid)
 {
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 block& block::operator=(block&& other)
 {
     header_ = std::move(other.header_);
-    transactions_ = std::move(other.transactions_);
+    txs_ = std::move(other.txs_);
     valid_ = other.valid_;
     return *this;
 }
@@ -126,7 +125,7 @@ block& block::operator=(block&& other)
 block& block::operator=(const block& other)
 {
     header_ = other.header_;
-    transactions_ = other.transactions_;
+    txs_ = other.txs_;
     valid_ = other.valid_;
     return *this;
 }
@@ -134,7 +133,7 @@ block& block::operator=(const block& other)
 bool block::operator==(const block& other) const
 {
     return (header_ == other.header_)
-        && (transactions_ == other.transactions_);
+        && (txs_ == other.txs_);
 }
 
 bool block::operator!=(const block& other) const
@@ -143,7 +142,7 @@ bool block::operator!=(const block& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool block::from_data(const data_chunk& data, bool witness)
 {
@@ -157,7 +156,6 @@ bool block::from_data(std::istream& stream, bool witness)
     return from_data(source, witness);
 }
 
-// Full block deserialization is always canonical encoding.
 bool block::from_data(reader& source, bool witness)
 {
     reset();
@@ -172,13 +170,10 @@ bool block::from_data(reader& source, bool witness)
     }
     else
     {
-        transactions_.reserve(count);
+        txs_.reserve(count);
         for (size_t tx = 0; tx < count; ++tx)
-            transactions_.emplace_back(source, witness);
+            txs_.emplace_back(source, witness);
     }
-
-    if (!witness)
-        strip_witness();
 
     if (!source)
         reset();
@@ -191,8 +186,8 @@ bool block::from_data(reader& source, bool witness)
 void block::reset()
 {
     header_.reset();
-    transactions_.clear();
-    transactions_.shrink_to_fit();
+    txs_.clear();
+    txs_.shrink_to_fit();
     valid_ = false;
 }
 
@@ -202,7 +197,7 @@ bool block::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk block::to_data(bool witness) const
 {
@@ -225,44 +220,28 @@ void block::to_data(writer& sink, bool witness) const
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     header_.to_data(sink);
-    sink.write_variable(transactions_.size());
+    sink.write_variable(txs_.size());
 
-    for (const auto& transaction: transactions_)
+    for (const auto& transaction: txs_)
         transaction.to_data(sink, witness);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
-hash_list block::to_hashes(bool witness) const
-{
-    hash_list out(no_fill_hash_allocator);
-    out.resize(transactions_.size());
-
-    const auto hash = [witness](const transaction& tx)
-    {
-        return tx.hash(witness);
-    };
-
-    const auto& txs = transactions_;
-    std::transform(txs.begin(), txs.end(), out.begin(), hash);
-    return out;
-}
-
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// Full block serialization is always canonical encoding.
 size_t block::serialized_size(bool witness) const
 {
+    // Overflow returns max_size_t.
     const auto sum = [witness](size_t total, const transaction& tx)
     {
-        return safe_add(total, tx.serialized_size(witness));
+        return ceilinged_add(total, tx.serialized_size(witness));
     };
 
-    const auto& txs = transactions_;
     return header_.serialized_size()
-        + variable_size(transactions_.size())
-        + std::accumulate(txs.begin(), txs.end(), zero, sum);
+        + variable_size(txs_.size())
+        + std::accumulate(txs_.begin(), txs_.end(), zero, sum);
 
 }
 
@@ -273,78 +252,67 @@ const chain::header& block::header() const
 
 const transaction::list& block::transactions() const
 {
-    return transactions_;
+    return txs_;
 }
 
+hash_list block::transaction_hashes(bool witness) const
+{
+    hash_list out(no_fill_hash_allocator);
+    out.resize(txs_.size());
+
+    const auto hash = [witness](const transaction& tx)
+    {
+        return tx.hash(witness);
+    };
+
+    std::transform(txs_.begin(), txs_.end(), out.begin(), hash);
+    return out;
+}
+
+// computed
 hash_digest block::hash() const
 {
     return header_.hash();
 }
 
-void block::strip_witness()
-{
-    const auto strip = [](transaction& transaction)
-    {
-        transaction.strip_witness();
-    };
+// Connect.
+// ----------------------------------------------------------------------------
 
-    std::for_each(transactions_.begin(), transactions_.end(), strip);
+////// Subset of is_internal_double_spend if sha256 collisions cannot happen.
+////bool block::is_distinct_transaction_set() const
+////{
+////    // A set is used to collapse duplicates.
+////    std::set<hash_digest> hashes;
+////
+////    const auto hasher = [&hashes](const transaction& tx)
+////    {
+////        hashes.insert(tx.hash());
+////    };
+////
+////    std::for_each(txs_.begin(), txs_.end(), hasher);
+////    return hashes.size() == txs.size();
+////}
+
+bool block::is_empty() const
+{
+    return txs_.empty();
 }
 
-// Validation helpers.
-//-----------------------------------------------------------------------------
-
-// static
-uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
-    uint64_t initial_block_subsidy_satoshi, bool bip42)
+bool block::is_oversized() const
 {
-    const auto halvings = height / subsidy_interval;
-
-    //*************************************************************************
-    // CONSENSUS: bip42 compensates for c++ undefined behavior of a right
-    // shift of a number of bits greater or equal to the shifted integer width.
-    // However, being undefined, the result of this operation may vary by
-    // compiler. The call below explicitly implements the presumed pre-bip42
-    // behavior (shift overflow modulo) by default, and the specified bip42
-    // behavior (shift overflow to zero) when bip42 is enabled.
-    //*************************************************************************
-    return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
+    return serialized_size(false) > max_block_size;
 }
 
-size_t block::total_non_coinbase_inputs() const
+bool block::is_first_non_coinbase() const
 {
-    const auto inputs = [](size_t total, const transaction& tx)
-    {
-        return safe_add(total, tx.inputs().size());
-    };
-
-    const auto& txs = transactions_;
-    return std::accumulate(std::next(txs.begin()), txs.end(), zero, inputs);
-}
-
-size_t block::total_inputs() const
-{
-    const auto inputs = [](size_t total, const transaction& tx)
-    {
-        return safe_add(total, tx.inputs().size());
-    };
-
-    const auto& txs = transactions_;
-    return std::accumulate(txs.begin(), txs.end(), zero, inputs);
-}
-
-size_t block::weight() const
-{
-    // Block weight is 3 * Base size * + 1 * Total size (bip141).
-    return base_size_contribution * serialized_size(false) +
-        total_size_contribution * serialized_size(true);
+    return !txs_.front().is_coinbase();
 }
 
 // True if there is another coinbase other than the first tx.
 // No txs or coinbases returns false.
 bool block::is_extra_coinbases() const
 {
-    if (transactions_.empty())
+    if (txs_.empty())
         return false;
 
     const auto value = [](const transaction& tx)
@@ -352,75 +320,70 @@ bool block::is_extra_coinbases() const
         return tx.is_coinbase();
     };
 
-    const auto& txs = transactions_;
-    return std::any_of(std::next(txs.begin()), txs.end(), value);
+    return std::any_of(std::next(txs_.begin()), txs_.end(), value);
 }
 
-// TODO: add bip50 to chain_state with timestamp range activation.
-// "Special short-term limits to avoid 10,000 BDB lock limit.
-// Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
-// header.timestamp > 1363039171 && header.timestamp < 1368576000."
-bool block::is_hash_limit_exceeded() const
+//*****************************************************************************
+// CONSENSUS: This is only necessary because satoshi stores and queries as it
+// validates, imposing an otherwise unnecessary partial transaction ordering.
+//*****************************************************************************
+bool block::is_forward_reference() const
 {
-    if (transactions_.empty())
+    std::unordered_map<hash_digest, bool> hashes(txs_.size());
+
+    const auto is_forward = [&hashes](const input& input)
+    {
+        return !is_zero(hashes.count(input.point().hash()));
+    };
+
+    for (const auto& tx: boost::adaptors::reverse(txs_))
+    {
+        hashes.emplace(tx.hash(false), true);
+        if (std::any_of(tx.inputs().begin(), tx.inputs().end(), is_forward))
+            return true;
+    }
+
+    return false;
+}
+
+// private
+size_t block::non_coinbase_inputs() const
+{
+    // Overflow returns max_size_t.
+    const auto inputs = [](size_t total, const transaction& tx)
+    {
+        return ceilinged_add(total, tx.inputs().size());
+    };
+
+    return std::accumulate(std::next(txs_.begin()), txs_.end(), zero, inputs);
+}
+
+bool block::is_internal_double_spend() const
+{
+    if (txs_.empty())
         return false;
 
-    // A set is used to collapse duplicates.
-    std::set<hash_digest> hashes;
+    // A set is used to collapse duplicate points.
+    std::set<point> outs;
 
-    // Just the coinbase tx hash, skip its null input hashes.
-    const auto& txs = transactions_;
-    hashes.insert(txs.front().hash());
-
-    const auto tx_inserter = [&hashes](const transaction& tx)
+    const auto inserter = [&outs](const transaction& tx)
     {
-        const auto input_inserter = [&hashes](const input& input)
-        {
-            hashes.insert(input.point().hash());
-        };
-
-        hashes.insert(tx.hash());
-        const auto& inputs = tx.inputs();
-        std::for_each(inputs.begin(), inputs.end(), input_inserter);
+        auto out = tx.points();
+        std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     };
 
-    std::for_each(std::next(txs.begin()), txs.end(), tx_inserter);
-    return hashes.size() <= hash_limit;
+    // Move the points of all non-coinbase transactions into one set.
+    std::for_each(std::next(txs_.begin()), txs_.end(), inserter);
+    return outs.size() != non_coinbase_inputs();
 }
 
-bool block::is_final(size_t height, uint32_t block_time) const
-{
-    const auto value = [=](const transaction& tx)
-    {
-        return tx.is_final(height, block_time);
-    };
-
-    const auto& txs = transactions_;
-    return std::all_of(txs.begin(), txs.end(), value);
-}
-
-// Distinctness is defined by transaction hash.
-bool block::is_distinct_transaction_set() const
-{
-    // A set is used to collapse duplicates.
-    std::set<hash_digest> hashes;
-
-    const auto hasher = [&hashes](const transaction& tx)
-    {
-        hashes.insert(tx.hash());
-    };
-
-    const auto& txs = transactions_;
-    std::for_each(txs.begin(), txs.end(), hasher);
-    return hashes.size() == txs.size();
-}
-
+// private
 hash_digest block::generate_merkle_root(bool witness) const
 {
-    if (transactions_.empty())
+    if (txs_.empty())
         return null_hash;
 
-    auto merkle = to_hashes(witness);
+    auto merkle = transaction_hashes(witness);
     if (is_one(merkle.size()))
         return merkle.front();
 
@@ -447,80 +410,64 @@ hash_digest block::generate_merkle_root(bool witness) const
     return merkle.front();
 }
 
-//****************************************************************************
-// CONSENSUS: This is only necessary because satoshi stores and queries as it
-// validates, imposing an otherwise unnecessary partial transaction ordering.
-//*****************************************************************************
-bool block::is_forward_reference() const
+bool block::is_invalid_merkle_root() const
 {
-    std::unordered_map<hash_digest, bool> hashes(transactions_.size());
-    const auto is_forward = [&hashes](const input& input)
-    {
-        return !is_zero(hashes.count(input.point().hash()));
-    };
-
-    for (const auto& tx: boost::adaptors::reverse(transactions_))
-    {
-        hashes.emplace(tx.hash(), true);
-
-        if (std::any_of(tx.inputs().begin(), tx.inputs().end(), is_forward))
-            return true;
-    }
-
-    return false;
+    return generate_merkle_root(false) != header_.merkle_root();
 }
 
-bool block::is_internal_double_spend() const
+// Accept (contextual).
+// ----------------------------------------------------------------------------
+
+size_t block::weight() const
 {
-    if (transactions_.empty())
+    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    return base_size_contribution * serialized_size(false) +
+        total_size_contribution * serialized_size(true);
+}
+
+bool block::is_overweight() const
+{
+    return weight() > max_block_weight;
+}
+
+bool block::is_invalid_coinbase_script(size_t height) const
+{
+    if (txs_.empty() || txs_.front().inputs().empty())
+        return false;
+
+    const auto& script = txs_.front().inputs().front().script();
+    return !script::is_coinbase_pattern(script.operations(), height);
+}
+
+// TODO: add bip50 to chain_state with timestamp range activation.
+// "Special short-term limits to avoid 10,000 BDB lock limit.
+// Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
+// header.timestamp > 1363039171 && header.timestamp < 1368576000."
+bool block::is_hash_limit_exceeded() const
+{
+    if (txs_.empty())
         return false;
 
     // A set is used to collapse duplicates.
-    std::set<point> outs;
+    std::set<hash_digest> hashes;
 
-    const auto inserter = [&outs](const transaction& tx)
+    // Just the coinbase tx hash, skip its null input hashes.
+    hashes.insert(txs_.front().hash(false));
+
+    const auto tx_inserter = [=, &hashes](const transaction& tx)
     {
-        auto out = tx.points();
-        std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
+        const auto input_inserter = [&hashes](const input& input)
+        {
+            hashes.insert(input.point().hash());
+        };
+
+        hashes.insert(tx.hash(false));
+        const auto& inputs = tx.inputs();
+        std::for_each(inputs.begin(), inputs.end(), input_inserter);
     };
 
-    // Move the prevouts of all non-coinbase transactions into one set.
-    const auto& txs = transactions_;
-    std::for_each(std::next(txs.begin()), txs.end(), inserter);
-    return outs.size() != total_non_coinbase_inputs();
-}
-
-bool block::is_valid_merkle_root() const
-{
-    return generate_merkle_root() == header_.merkle_root();
-}
-
-bool block::is_valid_coinbase_script(size_t height) const
-{
-    if (transactions_.empty() || transactions_.front().inputs().empty())
-        return false;
-
-    const auto& script = transactions_.front().inputs().front().script();
-    return script::is_coinbase_pattern(script.operations(), height);
-}
-
-bool block::is_valid_witness_commitment() const
-{
-    if (transactions_.empty() || transactions_.front().inputs().empty())
-        return false;
-
-    hash_digest reserved, committed;
-    const auto& coinbase = transactions_.front();
-
-    // Last output of commitment pattern holds committed value (bip141).
-    if (coinbase.inputs().front().extract_reserved_hash(reserved))
-        for (const auto& output: boost::adaptors::reverse(coinbase.outputs()))
-            if (output.extract_committed_hash(committed))
-                return committed == bitcoin_hash(
-                    splice(generate_merkle_root(true), reserved));
-
-    // If no txs in block are segregated the commitment is optional (bip141).
-    return !is_segregated();
+    std::for_each(std::next(txs_.begin()), txs_.end(), tx_inserter);
+    return hashes.size() > hash_limit;
 }
 
 bool block::is_segregated() const
@@ -530,16 +477,118 @@ bool block::is_segregated() const
         return tx.is_segregated();
     };
 
-    // If no block tx has witness data the commitment is optional (bip141).
-    return std::any_of(transactions_.begin(), transactions_.end(), segregated);
+    return std::any_of(txs_.begin(), txs_.end(), segregated);
 }
 
-code block::check_transactions(uint64_t max_money) const
+bool block::is_invalid_witness_commitment() const
+{
+    if (txs_.empty() || txs_.front().inputs().empty())
+        return false;
+
+    hash_digest reserved, committed;
+    const auto& coinbase = txs_.front();
+
+    // Last output of commitment pattern holds committed value (bip141).
+    if (coinbase.inputs().front().reserved_hash(reserved))
+        for (const auto& output: boost::adaptors::reverse(coinbase.outputs()))
+            if (output.committed_hash(committed))
+                return committed == bitcoin_hash(
+                    splice(generate_merkle_root(true), reserved));
+    
+    // If no block tx has witness data the commitment is optional (bip141).
+    return !is_segregated();
+}
+
+
+//*****************************************************************************
+// CONSENSUS:
+// bip42 compensates for c++ undefined behavior of a right shift of a number of
+// bits greater or equal to the shifted integer width. Yet being undefined, the
+// result of this operation may vary by compiler. The shift_right call below
+// explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
+// default, and specified bip42 behavior (shift overflow to zero) with bip42.
+//*****************************************************************************
+constexpr uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi, bool bip42)
+{
+    const auto halvings = height / subsidy_interval;
+    return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
+}
+
+// Prevouts required.
+
+uint64_t block::fees() const
+{
+    // Overflow returns max_uint64.
+    const auto value = [](uint64_t total, const transaction& tx)
+    {
+        return ceilinged_add(total, tx.fee());
+    };
+
+    return std::accumulate(txs_.begin(), txs_.end(), uint64_t(0), value);
+}
+
+uint64_t block::claim() const
+{
+    return txs_.empty() ? zero : txs_.front().value();
+}
+
+uint64_t block::reward(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi, bool bip42) const
+{
+    // Overflow returns max_uint64.
+    return ceilinged_add(fees(), block_subsidy(height, subsidy_interval,
+        initial_block_subsidy_satoshi, bip42));
+}
+
+bool block::is_overspent(size_t height, uint64_t subsidy_interval,
+    uint64_t initial_block_subsidy_satoshi, bool bip42) const
+{
+    return claim() > reward(height, subsidy_interval,
+        initial_block_subsidy_satoshi, bip42);
+}
+
+size_t block::is_signature_operations_limited(bool bip16, bool bip141) const
+{
+    const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
+
+    // Overflow returns max_size_t.
+    const auto value = [bip16, bip141](size_t total, const transaction& tx)
+    {
+        return ceilinged_add(total, tx.signature_operations(bip16, bip141));
+    };
+
+    return std::accumulate(txs_.begin(), txs_.end(), zero, value) > limit;
+}
+
+//*****************************************************************************
+// CONSENSUS:
+// This check is excluded under two bip30 exception blocks. This also cannot
+// occur in any branch above bip34, due to height in coinbase and the
+// presumption of sha256 non-collision. So this check is bypassed for both
+// exception blocks and if bip34 is active (including under bip90 activation).
+//*****************************************************************************
+bool block::is_unspent_coinbase_collision(size_t height) const
+{
+    if (txs_.empty() || txs_.front().inputs().empty())
+        return false;
+
+    const auto& prevout = txs_.front().inputs().front().prevout;
+
+    // This requires that prevout.spent was populated for the height of the
+    // validating block, otherwise a collision (unspent) must be assumed.
+    return !(height > prevout.height && prevout.spent);
+}
+
+// Delegated.
+// ----------------------------------------------------------------------------
+
+code block::check_transactions() const
 {
     code ec;
 
-    for (const auto& tx: transactions_)
-        if ((ec = tx.check(max_money, false)))
+    for (const auto& tx: txs_)
+        if ((ec = tx.check()))
             return ec;
 
     return error::block_success;
@@ -549,8 +598,8 @@ code block::accept_transactions(const context& state) const
 {
     code ec;
 
-    for (const auto& tx: transactions_)
-        if ((ec = tx.accept(state, false)))
+    for (const auto& tx: txs_)
+        if ((ec = tx.accept(state)))
             return ec;
 
     return error::block_success;
@@ -560,7 +609,7 @@ code block::connect_transactions(const context& state) const
 {
     code ec;
 
-    for (const auto& tx: transactions_)
+    for (const auto& tx: txs_)
         if ((ec = tx.connect(state)))
             return ec;
 
@@ -568,55 +617,55 @@ code block::connect_transactions(const context& state) const
 }
 
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
+// The block header is checked independently.
 // These checks are self-contained; blockchain (and so version) independent.
-code block::check(uint64_t max_money, uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit) const
+code block::check() const
 {
     code ec;
 
-    // The block header is checked independently.
-
-    if (transactions_.empty())
+    // Inputs and outputs are required.
+    if (is_empty())
         return error::empty_block;
 
     // Relates to total of tx.size (pool cache tx.size(false)).
-    else if (serialized_size(false) > max_block_size)
+    if (is_oversized())
         return error::block_size_limit;
 
-    // Coinbase transactions are not pooled.
-    else if (!transactions_.front().is_coinbase())
+    // The first transaction must be coinbase.
+    if (is_first_non_coinbase())
         return error::first_not_coinbase;
 
-    // Coinbase transactions are not pooled.
-    else if (is_extra_coinbases())
+    // Only the first transaction may be coinbase.
+    if (is_extra_coinbases())
         return error::extra_coinbases;
 
     // Determinable from tx pool graph.
     // Satoshi implementation side effect, as tx order is otherwise irrelevant.
-    else if (is_forward_reference())
+    if (is_forward_reference())
         return error::forward_reference;
-
-    // Subset of is_internal_double_spend if sha256 collisions cannot happen.
-    else if (!is_distinct_transaction_set())
-        return error::internal_duplicate;
 
     // Determinable from tx pool graph.
     // This also precludes the block merkle calculation DoS exploit.
     // bitcointalk.org/?topic=102395
-    else if (is_internal_double_spend())
+    if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
     // Relates height to tx.hash (pool cache tx.hash(false)).
-    else if (!is_valid_merkle_root())
+    if (is_invalid_merkle_root())
         return error::merkle_mismatch;
 
-    return check_transactions(max_money);
+    // error::empty_transaction
+    // error::previous_output_null
+    // error::invalid_coinbase_script_size
+    return check_transactions();
 }
 
+// The block header is accepted independently using chain_state.
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const context& state, const system::settings& settings) const
+code block::accept(const context& state, size_t subsidy_interval,
+    uint64_t initial_subsidy) const
 {
     code ec;
     const auto bip16 = state.is_enabled(bip16_rule);
@@ -626,48 +675,43 @@ code block::accept(const context& state, const system::settings& settings) const
     const auto bip50 = state.is_enabled(bip50_rule);
     const auto bip113 = state.is_enabled(bip113_rule);
     const auto bip141 = state.is_enabled(bip141_rule);
-    const auto sigops_limit = bip141 ? max_fast_sigops : max_block_sigops;
-    const auto block_time = bip113 ? state.median_time_past :
-        header_.timestamp();
-
-    // The block header is accepted independently using chain_state.
 
     // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
-    if (bip141 && weight() > max_block_weight)
+    if (bip141 && is_overweight())
         return error::block_weight_limit;
 
     // Relates block height to coinbase, always under checkpoint.
-    else if (bip34 && !is_valid_coinbase_script(state.height))
+    if (bip34 && is_invalid_coinbase_script(state.height))
         return error::coinbase_height_mismatch;
 
     // Relates block time to tx and prevout hashes, always under checkpoint.
-    else if (bip50 && is_hash_limit_exceeded())
+    if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
 
-    // This merely rolls up checks already performed by tx accept.
-    // Relates block time to each tx.locktime (pool cache tx.locktime).
-    else if (!is_final(state.height, block_time))
-        return error::block_non_final;
-
     // Static check but requires context.
-    else if (bip141 && !is_valid_witness_commitment())
+    if (bip141 && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
 
-    // These require prevouts.
+    // prevouts required
 
-    ////// This is a spentness check, to be applied at confirmation not validation.
-    ////else if (bip30 && is_unspent_coinbase_collision())
-    ////    return error::unspent_coinbase_collision;
+    // Relates block height to total of tx.fee (pool cache tx.fee).
+    if (is_overspent(state.height, subsidy_interval, initial_subsidy, bip42))
+        return error::coinbase_value_limit;
 
-    ////// Relates block height to total of tx.fee (pool cache tx.fee).
-    ////else if (!is_valid_coinbase_claim(state.height,
-    ////    settings.subsidy_interval_blocks, settings.initial_subsidy(), bip42))
-    ////    return error::coinbase_value_limit;
+    // Relates block limit to total of tx.sigops (pool cache tx.sigops).
+    if (is_signature_operations_limited(bip16, bip141))
+        return error::block_sigop_limit;
 
-    ////// Relates block limit to total of tx.sigops (pool cache tx.sigops).
-    ////else if (signature_operations(bip16, bip141) > sigops_limit)
-    ////    return error::block_embedded_sigop_limit;
+    // prevout confirmation state required
 
+    if (bip30 && !bip34 && is_unspent_coinbase_collision(state.height))
+        return error::unspent_coinbase_collision;
+
+    // error::unexpected_witness_transaction
+    // error::missing_previous_output
+    // error::spend_exceeds_value
+    // error::coinbase_maturity
+    // error::relative_time_locked
     return accept_transactions(state);
 }
 

@@ -29,7 +29,7 @@ namespace chain {
 
 enum class opcode : uint8_t
 {
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // is_relaxed_push, is_push (excluding reserved_80)
 
     push_size_0 = 0,        // is_version (pushes [] to the stack, not 0)
@@ -130,7 +130,7 @@ enum class opcode : uint8_t
     push_positive_15 = 95,  // is_numeric, is_positive, is_version
     push_positive_16 = 96,  // is_numeric, is_positive, is_version
 
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // is_counted [notice that reserved_80 is not counted]
 
     nop = 97,
@@ -213,7 +213,7 @@ enum class opcode : uint8_t
     checkmultisig = 174,
     checkmultisigverify = 175,
 
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Promoted from reserved to nop by [0.3.6] hard fork.
 
     nop1 = 176,
@@ -229,7 +229,7 @@ enum class opcode : uint8_t
     nop9 = 184,
     nop10 = 185,
 
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // These are enumerated to provide explicit deserialization of byte opcode.
     // is_reserved [unnamed]
 

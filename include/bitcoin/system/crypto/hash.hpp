@@ -187,7 +187,7 @@ BC_API size_t djb2_hash(const data_slice& data);
 } // namespace libbitcoin
 
 // Extend std and boost namespaces with djb2_hash.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // This allows our data_array to be incorporated into std/boost hash tables.
 
 namespace std

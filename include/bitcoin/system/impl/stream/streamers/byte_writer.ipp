@@ -50,7 +50,7 @@ template <typename OStream>
 const uint8_t byte_writer<OStream>::pad = 0x00;
 
 // constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
     
 template <typename OStream>
 byte_writer<OStream>::byte_writer(OStream& sink) noexcept
@@ -65,7 +65,7 @@ byte_writer<OStream>::~byte_writer() noexcept
 }
 
 // big endian
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 template <typename Integer, if_integer<Integer>>
@@ -98,7 +98,7 @@ void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) noexcept
 }
 
 // little endian
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 template <typename Integer, if_integer<Integer>>
@@ -164,7 +164,7 @@ void byte_writer<OStream>::write_error_code(const code& ec) noexcept
 }
 
 // bytes
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 std::istream& byte_writer<OStream>::write(std::istream& in) noexcept
@@ -195,7 +195,7 @@ void byte_writer<OStream>::write_bytes(const uint8_t* data,
 }
 
 // strings
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Normal p2p form (consensus hash no strings).
 
 template <typename OStream>
@@ -219,7 +219,7 @@ void byte_writer<OStream>::write_string(const std::string& value,
 }
 
 // context
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename OStream>
 void byte_writer<OStream>::flush() noexcept
@@ -228,7 +228,7 @@ void byte_writer<OStream>::flush() noexcept
 }
 
 // control
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These only call non-virtual (private) methods.
 
 template <typename OStream>
@@ -251,7 +251,7 @@ bool byte_writer<OStream>::operator!() const noexcept
 }
 
 // protected virtual
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
 template <typename OStream>
@@ -276,7 +276,7 @@ void byte_writer<OStream>::do_flush() noexcept
 }
 
 // private
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These may only call other private methods (due to overriding).
 
 template <typename OStream>

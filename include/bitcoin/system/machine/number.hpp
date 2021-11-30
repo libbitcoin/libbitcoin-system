@@ -51,7 +51,7 @@ public:
     bool set_data(const data_chunk& data, size_t max_size);
 
     // Properties
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const;
@@ -63,7 +63,7 @@ public:
     int64_t int64() const;
 
     // Stack Helpers
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Return value as stack boolean (nonzero is true).
     bool is_true() const;
@@ -75,7 +75,7 @@ public:
     bool is_negative() const;
 
     // Operators
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     //*************************************************************************
     // CONSENSUS: number implements consensus critical overflow behavior for

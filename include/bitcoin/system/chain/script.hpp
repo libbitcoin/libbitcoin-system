@@ -49,7 +49,7 @@ public:
     typedef std::shared_ptr<script> ptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     script();
 
@@ -64,7 +64,7 @@ public:
     script(reader& source, bool prefix);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     script& operator=(script&& other);
     script& operator=(const script& other);
@@ -73,7 +73,7 @@ public:
     bool operator!=(const script& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Deserialization invalidates the iterator.
     bool from_data(const data_chunk& encoded, bool prefix);
@@ -87,7 +87,7 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data(bool prefix) const;
     void to_data(std::ostream& stream, bool prefix) const;
@@ -96,7 +96,7 @@ public:
     std::string to_string(uint32_t active_forks) const;
 
     // Iteration.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     void clear();
     bool empty() const;
@@ -108,14 +108,14 @@ public:
     const operation& operator[](size_t index) const;
 
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     size_t serialized_size(bool prefix) const;
     const operation::list& operations() const;
     hash_digest to_payments_key() const;
 
     // Signing.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     static hash_digest generate_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
@@ -132,7 +132,7 @@ public:
         bool bip143);
 
     // Utilities (static).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
     static bool is_enabled(uint32_t active_forks, forks fork);
@@ -177,7 +177,7 @@ public:
         const hash_digest& hash);
 
     // Utilities (non-static).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// Common pattern detection.
     const data_chunk& witness_program() const;
@@ -192,7 +192,7 @@ public:
     bool is_unspendable() const;
 
     // Validation.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /// This overload obtains the previous output from metadata.
     ////static code verify(const transaction& tx, uint32_t index, uint32_t forks);

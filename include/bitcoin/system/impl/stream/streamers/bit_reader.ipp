@@ -38,7 +38,7 @@ template <typename IStream>
 const uint8_t bit_reader<IStream>::pad = 0x00;
 
 // constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) noexcept
@@ -52,7 +52,7 @@ bit_reader<IStream>::~bit_reader() noexcept
 }
 
 // bits
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 bool bit_reader<IStream>::read_bit() noexcept
@@ -115,7 +115,7 @@ void bit_reader<IStream>::rewind_bits(size_t bits) noexcept
 }
 
 // protected overrides
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 uint8_t bit_reader<IStream>::do_peek_byte() noexcept
@@ -160,7 +160,7 @@ bool bit_reader<IStream>::get_exhausted() const noexcept
 }
 
 // private
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 void bit_reader<IStream>::load() noexcept

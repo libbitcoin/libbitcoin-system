@@ -45,7 +45,7 @@ static const chain::script default_script_;
 static default_allocator<chain::operation> no_fill_op_allocator{};
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 program::program()
   : script_(default_script_),
@@ -140,7 +140,7 @@ program::program(const script& script, program&& other, bool)
 }
 
 // Instructions.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 code program::evaluate()
 {
@@ -153,7 +153,7 @@ code program::evaluate(const operation& op)
 }
 
 // Constant registers.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_invalid() const
@@ -197,7 +197,7 @@ script_version program::version() const
 }
 
 // Program registers.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 program::op_iterator program::begin() const
 {
@@ -215,7 +215,7 @@ program::op_iterator program::end() const
 }
 
 // Instructions.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 inline bool operation_overflow(size_t count)
 {
@@ -280,7 +280,7 @@ bool program::register_jump(const operation& op)
 }
 
 // Primary stack (push).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // push
 void program::push(bool value)
@@ -301,7 +301,7 @@ void program::push_copy(const value_type& item)
 }
 
 // Primary stack (pop).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // This must be guarded.
 data_chunk program::pop()
@@ -378,7 +378,7 @@ bool program::pop(data_stack& section, int32_t signed_count)
 }
 
 // Primary push/pop optimizations (active).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
 void program::duplicate(size_t index)
@@ -409,7 +409,7 @@ void program::erase(const stack_iterator& first,
 }
 
 // Primary push/pop optimizations (passive).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Reversed byte order in this example (big-endian).
 // []               : false (empty)
@@ -495,7 +495,7 @@ program::stack_iterator program::position(size_t index) /*const*/
 }
 
 // Alternate stack.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool program::empty_alternate() const
 {
@@ -517,7 +517,7 @@ program::value_type program::pop_alternate()
 }
 
 // Conditional stack.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 void program::open(bool value)
 {
@@ -564,7 +564,7 @@ bool program::succeeded() const
 }
 
 // Subscript.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // ****************************************************************************
 // CONSENSUS: Witness v0 scripts are not stripped (bip143/v0).
@@ -659,7 +659,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 }
 
 // Private.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.

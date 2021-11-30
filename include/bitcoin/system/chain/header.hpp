@@ -45,7 +45,7 @@ public:
     typedef std::shared_ptr<header> ptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     header();
 
@@ -64,7 +64,7 @@ public:
     header(reader& source);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     header& operator=(header&& other);
     header& operator=(const header& other);
@@ -73,27 +73,28 @@ public:
     bool operator!=(const header& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
+    // Deserialization result.
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
+    static size_t serialized_size();
+
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size();
-    size_t serialized_size() const;
-
+    /// Native properties.
     uint32_t version() const;
     const hash_digest& previous_block_hash() const;
     const hash_digest& merkle_root() const;
@@ -101,20 +102,16 @@ public:
     uint32_t bits() const;
     uint32_t nonce() const;
 
+    /// Computed properties.
     hash_digest hash() const;
+    uint256_t difficulty() const;
 
     // Validation.
-    //-------------------------------------------------------------------------
-
-    uint256_t proof() const;
-    static uint256_t proof(uint32_t bits);
-
-    bool is_valid_timestamp(uint32_t timestamp_limit_seconds) const;
-    bool is_valid_proof_of_work(uint32_t proof_of_work_limit,
-        bool scrypt=false) const;
+    // ------------------------------------------------------------------------
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
         bool scrypt=false) const;
+
     code accept(const chain_state& state) const;
 
 protected:
@@ -131,7 +128,24 @@ protected:
 
     void reset();
 
+    // Check (context free).
+    // ------------------------------------------------------------------------
+
+    bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
+        bool scrypt=false) const;
+    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const;
+
+    // Accept (relative to chain_state).
+    // ------------------------------------------------------------------------
+
+    // error::checkpoints_failed
+    // error::invalid_block_version
+    // error::timestamp_too_early
+    // error::incorrect_proof_of_work
+
 private:
+    static uint256_t difficulty(uint32_t bits);
+
     uint32_t version_;
     hash_digest previous_block_hash_;
     hash_digest merkle_root_;

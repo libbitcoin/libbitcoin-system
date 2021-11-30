@@ -49,7 +49,7 @@ template <typename IStream>
 const uint8_t byte_reader<IStream>::pad = 0x00;
 
 // constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) noexcept
@@ -63,7 +63,7 @@ byte_reader<IStream>::~byte_reader() noexcept
 }
 
 // big endian
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 template <typename Integer, if_integer<Integer>>
@@ -92,7 +92,7 @@ uint64_t byte_reader<IStream>::read_8_bytes_big_endian() noexcept
 }
 
 // little endian
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 template <typename Integer, if_integer<Integer>>
@@ -162,7 +162,7 @@ code byte_reader<IStream>::read_error_code() noexcept
 }
 
 // bytes
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 template <size_t Size>
@@ -263,7 +263,7 @@ void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
 }
 
 // strings
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 std::string byte_reader<IStream>::read_string() noexcept
@@ -294,7 +294,7 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
 }
 
 // context
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 void byte_reader<IStream>::skip_byte() noexcept
@@ -346,7 +346,7 @@ bool byte_reader<IStream>::is_exhausted() const noexcept
 }
 
 // control
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These only call non-virtual (private) methods.
 
 template <typename IStream>
@@ -384,7 +384,7 @@ bool byte_reader<IStream>::operator!() const noexcept
 }
 
 // protected virtual
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
 template <typename IStream>

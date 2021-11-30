@@ -33,8 +33,7 @@ enum transaction_error_t
 {
     transaction_success = 0,
 
-    // dos transaction
-    transaction_version,
+    // TODO: order these.
 
     // check transaction
     empty_transaction,
@@ -47,6 +46,7 @@ enum transaction_error_t
     transaction_legacy_sigop_limit,
 
     // accept transaction
+    unexpected_witness_transaction,
     transaction_non_final,
     premature_validation,
     unspent_duplicate,
@@ -54,12 +54,13 @@ enum transaction_error_t
     double_spend,
     coinbase_maturity,
     spend_exceeds_value,
-    transaction_embedded_sigop_limit,
-    sequence_locked,
+    transaction_sigop_limit,
+    relative_time_locked,
     transaction_weight_limit,
 
-    // deprecated
-    transaction_missing_metadata,
+    // confirm transaction
+    unconfirmed_spend,
+    confirmed_double_spend,
 
     // chained to script_error_t
     tx_error_last

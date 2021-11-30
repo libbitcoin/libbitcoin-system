@@ -83,14 +83,14 @@ std::istream& operator>>(std::istream& input, block& argument)
     std::string hexcode;
     input >> hexcode;
 
-    if (!argument.value_.from_data(base16(hexcode)))
+    if (!argument.value_.from_data(base16(hexcode), true))
         throw istream_exception(hexcode);
     return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const block& argument)
 {
-    const auto bytes = argument.value_.to_data();
+    const auto bytes = argument.value_.to_data(true);
 
     output << base16(bytes);
     return output;

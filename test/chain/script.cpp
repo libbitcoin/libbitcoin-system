@@ -125,7 +125,7 @@ using namespace bc::system::machine;
 "16 checkmultisig"
 
 // Test helpers.
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 script test_prevout(const script_test& test)
 {
@@ -179,7 +179,7 @@ std::string test_name(const script_test& test)
 }
 
 // Serialization tests.
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__from_data__testnet_119058_invalid_op_codes__success)
 {
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(script__clear__non_empty__empty)
 }
 
 // Pattern matching tests.
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // pay_null_data
 
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(script__pattern__17_of_17_multisig__non_standard)
 }
 
 // Data-driven tests.
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__bip16__valid)
 {
@@ -628,7 +628,7 @@ BOOST_AUTO_TEST_CASE(script__parse_push_overflow__invalid)
 }
 
 // Checksig tests.
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__checksig__single__uses_one_hash)
 {
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__single__uses_one_hash)
     data_chunk tx_data;
     decode_base16(tx_data, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
     transaction parent_tx;
-    BOOST_REQUIRE(parent_tx.from_data(tx_data));
+    BOOST_REQUIRE(parent_tx.from_data(tx_data, true));
 
     data_chunk distinguished;
     decode_base16(distinguished, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df");
@@ -665,7 +665,7 @@ BOOST_AUTO_TEST_CASE(script__checksig__normal__success)
     data_chunk tx_data;
     decode_base16(tx_data, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
     transaction parent_tx;
-    BOOST_REQUIRE(parent_tx.from_data(tx_data));
+    BOOST_REQUIRE(parent_tx.from_data(tx_data, true));
 
     data_chunk distinguished;
     decode_base16(distinguished, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27");
@@ -693,7 +693,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_single_output__exp
     data_chunk tx_data;
     decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970100000000ffffffff01905f0100000000001976a91418c0bd8d1818f1bf99cb1df2269c645318ef7b7388ac00000000");
     transaction test_tx;
-    BOOST_REQUIRE(test_tx.from_data(tx_data));
+    BOOST_REQUIRE(test_tx.from_data(tx_data, true));
 
     script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"));
@@ -716,7 +716,7 @@ BOOST_AUTO_TEST_CASE(script__create_endorsement__single_input_no_output__expecte
     data_chunk tx_data;
     decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
     transaction test_tx;
-    BOOST_REQUIRE(test_tx.from_data(tx_data));
+    BOOST_REQUIRE(test_tx.from_data(tx_data, true));
 
     script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"));
@@ -739,7 +739,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
     data_chunk tx_data;
     decode_base16(tx_data, "0100000001b3807042c92f449bbf79b33ca59d7dfec7f4cc71096704a9c526dddf496ee0970000000000ffffffff0000000000");
     transaction test_tx;
-    BOOST_REQUIRE(test_tx.from_data(tx_data));
+    BOOST_REQUIRE(test_tx.from_data(tx_data, true));
 
     script prevout_script;
     BOOST_REQUIRE(prevout_script.from_string("dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"));
@@ -755,7 +755,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
 }
 
 // Ad-hoc test cases.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
 {
@@ -792,7 +792,7 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
     BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
 
     transaction tx;
-    BOOST_REQUIRE(tx.from_data(decoded_tx));
+    BOOST_REQUIRE(tx.from_data(decoded_tx, true));
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     script prevout;
@@ -840,7 +840,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__success)
     BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
 
     transaction tx;
-    BOOST_REQUIRE(tx.from_data(decoded_tx));
+    BOOST_REQUIRE(tx.from_data(decoded_tx, true));
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     script prevout;
@@ -882,7 +882,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__success)
     BOOST_REQUIRE(decode_base16(decoded_script, encoded_script));
 
     transaction tx;
-    BOOST_REQUIRE(tx.from_data(decoded_tx));
+    BOOST_REQUIRE(tx.from_data(decoded_tx, true));
     BOOST_REQUIRE_GT(tx.inputs().size(), index);
 
     script prevout;
@@ -998,7 +998,7 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__in
 }
 
 // bip143 test cases.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wpkh_tx__success)
 {

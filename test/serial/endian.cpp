@@ -388,53 +388,53 @@ BOOST_AUTO_TEST_CASE(endian__round_trip__uint1024_little_endian__expected)
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint48__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<6>(from_little_endian<6>(bytes6)), reverse(bytes6));
-    BOOST_REQUIRE_EQUAL(to_little_endian<6>(from_big_endian<6>(bytes6)), reverse(bytes6));
+    BOOST_REQUIRE_EQUAL(to_big_endian<6>(from_little_endian<6>(bytes6)), reverse_copy(bytes6));
+    BOOST_REQUIRE_EQUAL(to_little_endian<6>(from_big_endian<6>(bytes6)), reverse_copy(bytes6));
 }
 
 // This is uintx64 not uint64_t!
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint64__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<8>(from_little_endian<8>(bytes8)), reverse(bytes8));
-    BOOST_REQUIRE_EQUAL(to_little_endian<8>(from_big_endian<8>(bytes8)), reverse(bytes8));
+    BOOST_REQUIRE_EQUAL(to_big_endian<8>(from_little_endian<8>(bytes8)), reverse_copy(bytes8));
+    BOOST_REQUIRE_EQUAL(to_little_endian<8>(from_big_endian<8>(bytes8)), reverse_copy(bytes8));
 }
 
 // This is uint64_t not uintx64!
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint64_t__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian(from_little_endian<uint64_t>(bytes8)), reverse(bytes8));
-    BOOST_REQUIRE_EQUAL(to_little_endian(from_big_endian<uint64_t>(bytes8)), reverse(bytes8));
+    BOOST_REQUIRE_EQUAL(to_big_endian(from_little_endian<uint64_t>(bytes8)), reverse_copy(bytes8));
+    BOOST_REQUIRE_EQUAL(to_little_endian(from_big_endian<uint64_t>(bytes8)), reverse_copy(bytes8));
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint128__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<16>(from_little_endian<16>(bytes16)), reverse(bytes16));
-    BOOST_REQUIRE_EQUAL(to_little_endian<16>(from_big_endian<16>(bytes16)), reverse(bytes16));
+    BOOST_REQUIRE_EQUAL(to_big_endian<16>(from_little_endian<16>(bytes16)), reverse_copy(bytes16));
+    BOOST_REQUIRE_EQUAL(to_little_endian<16>(from_big_endian<16>(bytes16)), reverse_copy(bytes16));
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint160__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<20>(from_little_endian<20>(bytes20)), reverse(bytes20));
-    BOOST_REQUIRE_EQUAL(to_little_endian<20>(from_big_endian<20>(bytes20)), reverse(bytes20));
+    BOOST_REQUIRE_EQUAL(to_big_endian<20>(from_little_endian<20>(bytes20)), reverse_copy(bytes20));
+    BOOST_REQUIRE_EQUAL(to_little_endian<20>(from_big_endian<20>(bytes20)), reverse_copy(bytes20));
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint256__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<32>(from_little_endian<32>(bytes32)), reverse(bytes32));
-    BOOST_REQUIRE_EQUAL(to_little_endian<32>(from_big_endian<32>(bytes32)), reverse(bytes32));
+    BOOST_REQUIRE_EQUAL(to_big_endian<32>(from_little_endian<32>(bytes32)), reverse_copy(bytes32));
+    BOOST_REQUIRE_EQUAL(to_little_endian<32>(from_big_endian<32>(bytes32)), reverse_copy(bytes32));
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint512__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian<64>(from_little_endian<64>(bytes64)), reverse(bytes64));
-    BOOST_REQUIRE_EQUAL(to_little_endian<64>(from_big_endian<64>(bytes64)), reverse(bytes64));
+    BOOST_REQUIRE_EQUAL(to_big_endian<64>(from_little_endian<64>(bytes64)), reverse_copy(bytes64));
+    BOOST_REQUIRE_EQUAL(to_little_endian<64>(from_big_endian<64>(bytes64)), reverse_copy(bytes64));
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint1024__expected)
 {
     // Reading more bytes than provided.
-    BOOST_REQUIRE_EQUAL(to_big_endian<128>(from_little_endian<128>(bytes128)), reverse(bytes128));
-    BOOST_REQUIRE_EQUAL(to_little_endian<128>(from_big_endian<128>(bytes128)), reverse(bytes128));
+    BOOST_REQUIRE_EQUAL(to_big_endian<128>(from_little_endian<128>(bytes128)), reverse_copy(bytes128));
+    BOOST_REQUIRE_EQUAL(to_little_endian<128>(from_big_endian<128>(bytes128)), reverse_copy(bytes128));
 }
 
 #endif // ENDIAN_ASYMMETRIC_ROUND_TRIPS

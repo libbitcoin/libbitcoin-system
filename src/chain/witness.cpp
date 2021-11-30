@@ -43,7 +43,7 @@ using namespace bc::system::machine;
 static const auto checksig_script = script{ { opcode::checksig } };
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 witness::witness()
   : witness(data_stack{}, false)
@@ -98,7 +98,7 @@ witness::witness(const data_stack& stack, bool valid)
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 witness& witness::operator=(witness&& other)
 {
@@ -125,7 +125,7 @@ bool witness::operator!=(const witness& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 static data_chunk read_element(reader& source)
 {
@@ -218,7 +218,7 @@ bool witness::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk witness::to_data(bool prefix) const
 {
@@ -270,7 +270,7 @@ std::string witness::to_string() const
 }
 
 // Iteration.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // These are syntactic sugar that allow the caller to iterate stack directly.
 
 void witness::clear()
@@ -317,7 +317,7 @@ witness::iterator witness::end() const
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 size_t witness::serialized_size(bool prefix) const
 {
@@ -332,7 +332,7 @@ const data_stack& witness::stack() const
 }
 
 // Utilities.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 inline data_chunk top_element(const data_stack stack)
 {
@@ -478,7 +478,7 @@ bool witness::extract_script(script& out_script,
 }
 
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // static
 // The program script is either a prevout script or an embedded script.

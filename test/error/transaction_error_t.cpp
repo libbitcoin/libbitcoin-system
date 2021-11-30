@@ -29,17 +29,6 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_success__false_exect
     BOOST_REQUIRE_EQUAL(ec.message(), "transaction success");
 }
 
-// dos transaction
-
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_version__true_exected_message)
-{
-    constexpr auto value = error::transaction_version;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "transaction version not standard");
-}
-
 // check transaction
 
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__empty_transaction__true_exected_message)
@@ -116,6 +105,15 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_legacy_sigop_limit__
 
 // accept transaction
 
+BOOST_AUTO_TEST_CASE(transaction_error_t__code__unexpected_witness_transaction__true_exected_message)
+{
+    constexpr auto value = error::unexpected_witness_transaction;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "unexpected witness transaction");
+}
+
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_non_final__true_exected_message)
 {
     constexpr auto value = error::transaction_non_final;
@@ -179,18 +177,18 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__spend_exceeds_value__true_execte
     BOOST_REQUIRE_EQUAL(ec.message(), "spend exceeds value of inputs");
 }
 
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_embedded_sigop_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_sigop_limit__true_exected_message)
 {
-    constexpr auto value = error::transaction_embedded_sigop_limit;
+    constexpr auto value = error::transaction_sigop_limit;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "too many transaction embedded signature operations");
 }
 
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__sequence_locked__true_exected_message)
+BOOST_AUTO_TEST_CASE(transaction_error_t__code__relative_time_locked__true_exected_message)
 {
-    constexpr auto value = error::sequence_locked;
+    constexpr auto value = error::relative_time_locked;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
@@ -204,16 +202,6 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_weight_limit__true_e
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "transaction weight limit exceeded");
-}
-
-// deprecated
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_missing_metadata__true_exected_message)
-{
-    constexpr auto value = error::transaction_missing_metadata;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "transaction missing metadata");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

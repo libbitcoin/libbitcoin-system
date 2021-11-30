@@ -28,14 +28,14 @@ namespace system {
 namespace chain {
 
 // Consensus sentinels.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 constexpr uint32_t no_previous_output = max_uint32;
 constexpr uint32_t max_input_sequence = max_uint32;
 constexpr uint64_t sighash_null_value = max_uint64;
 
 // Script/interpreter consensus constants.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 constexpr size_t max_counted_ops = 201;
 constexpr size_t max_stack_size = 1000;
@@ -49,7 +49,7 @@ constexpr size_t max_check_locktime_verify_number_size = 5;
 constexpr size_t max_check_sequence_verify_number_size = 5;
 
 // Validation consensus constants.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 constexpr size_t hash_limit = 4500;
 constexpr size_t min_coinbase_size = 2;
@@ -63,7 +63,7 @@ constexpr size_t max_block_sigops = max_block_size / max_sigops_factor;
 constexpr uint64_t satoshi_per_bitcoin = 100000000;
 
 // Relative locktime consensus constants.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 constexpr size_t relative_locktime_min_version = 2;
 constexpr size_t relative_locktime_disabled_bit = 31;
@@ -72,10 +72,10 @@ constexpr size_t relative_locktime_seconds_shift_left = 9;
 constexpr size_t relative_locktime_mask_left = 16;
 
 // Witness serialization consensus constants (bip141).
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-constexpr size_t fast_sigops_factor = 4;
-constexpr size_t max_fast_sigops = fast_sigops_factor * max_block_sigops;
+constexpr size_t heavy_sigops_factor = 4;
+constexpr size_t max_fast_sigops = heavy_sigops_factor * max_block_sigops;
 constexpr size_t light_weight_factor = 4;
 constexpr size_t max_block_weight = light_weight_factor * max_block_size;
 constexpr size_t base_size_contribution = 3;
@@ -87,7 +87,7 @@ constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
 
 // Policy constants.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 constexpr size_t max_null_data_size = 80;
 

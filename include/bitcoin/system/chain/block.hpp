@@ -47,22 +47,22 @@ public:
     typedef std::shared_ptr<block> ptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     block();
 
     block(block&& other);
     block(const block& other);
 
-    block(chain::header&& header, transaction::list&& transactions);
-    block(const chain::header& header, const transaction::list& transactions);
+    block(chain::header&& header, transaction::list&& txs);
+    block(const chain::header& header, const transaction::list& txs);
 
-    block(const data_chunk& data, bool witness=false);
-    block(std::istream& stream, bool witness=false);
-    block(reader& source, bool witness=false);
+    block(const data_chunk& data, bool witness);
+    block(std::istream& stream, bool witness);
+    block(reader& source, bool witness);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     block& operator=(block&& other);
     block& operator=(const block& other);
@@ -71,76 +71,109 @@ public:
     bool operator!=(const block& other) const;
 
     // Deserialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data, bool witness=false);
-    bool from_data(std::istream& stream, bool witness=false);
-    bool from_data(reader& source, bool witness=false);
+    bool from_data(const data_chunk& data, bool witness);
+    bool from_data(std::istream& stream, bool witness);
+    bool from_data(reader& source, bool witness);
 
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness=false) const;
-    void to_data(std::ostream& stream, bool witness=false) const;
-    void to_data(writer& sink, bool witness=false) const;
+    data_chunk to_data(bool witness) const;
+    void to_data(std::ostream& stream, bool witness) const;
+    void to_data(writer& sink, bool witness) const;
 
-    hash_list to_hashes(bool witness=false) const;
+    size_t serialized_size(bool witness) const;
 
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    size_t serialized_size(bool witness=false) const;
-
+    /// Native properties.
     const chain::header& header() const;
     const transaction::list& transactions() const;
+    hash_list transaction_hashes(bool witness) const;
 
-    hash_digest hash() const;
-
-    /// Clear witness from all inputs (does not change default hash).
-    void strip_witness();
-
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42);
-
-    hash_digest generate_merkle_root(bool witness=false) const;
-    size_t total_non_coinbase_inputs() const;
-    size_t total_inputs() const;
+    /// Computed properties.
     size_t weight() const;
-
-    bool is_extra_coinbases() const;
-    bool is_hash_limit_exceeded() const;
-    bool is_final(size_t height, uint32_t block_time) const;
-    bool is_distinct_transaction_set() const;
-    bool is_valid_coinbase_script(size_t height) const;
-    bool is_valid_witness_commitment() const;
-    bool is_forward_reference() const;
-    bool is_internal_double_spend() const;
-    bool is_valid_merkle_root() const;
+    uint64_t fees() const;
+    uint64_t claim() const;
+    hash_digest hash() const;
     bool is_segregated() const;
 
-    code check(uint64_t max_money, uint32_t timestamp_limit_seconds,
-        uint32_t proof_of_work_limit) const;
-    code check_transactions(uint64_t max_money) const;
-    code accept(const context& state, const settings& settings) const;
-    code accept_transactions(const context& state) const;
+    // Validation.
+    // ------------------------------------------------------------------------
+
+    /// Consensus checks (no DoS guards for block sync without headers first).
+    code check() const;
+    code accept(const context& state, size_t subsidy_interval,
+        uint64_t initial_subsidy) const;
     code connect(const context& state) const;
-    code connect_transactions(const context& state) const;
 
 protected:
-    void reset();
-
-    block(chain::header&& header, transaction::list&& transactions, bool valid);
-    block(const chain::header& header, const transaction::list& transactions,
+    block(chain::header&& header, transaction::list&& txs, bool valid);
+    block(const chain::header& header, const transaction::list& txs,
         bool valid);
 
+    void reset();
+
+    // Check (context free).
+    // ------------------------------------------------------------------------
+
+    bool is_empty() const;
+    bool is_oversized() const;
+    bool is_first_non_coinbase() const;
+    bool is_extra_coinbases() const;
+    bool is_forward_reference() const;
+    bool is_internal_double_spend() const;
+    bool is_invalid_merkle_root() const;
+
+    // TX: error::empty_transaction
+    // TX: error::previous_output_null
+    // TX: error::invalid_coinbase_script_size
+
+    // Accept (contextual).
+    // ------------------------------------------------------------------------
+
+    bool is_overweight() const;
+    bool is_invalid_coinbase_script(size_t height) const;
+    bool is_hash_limit_exceeded() const;
+    bool is_invalid_witness_commitment() const;
+
+    // prevouts required
+    bool is_overspent(size_t height, uint64_t subsidy_interval,
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
+    size_t is_signature_operations_limited(bool bip16, bool bip141) const;
+
+    // prevout confirmation state required
+    bool is_unspent_coinbase_collision(size_t height) const;
+
+    // TX: error::transaction_non_final (context)
+    // TX: error::missing_previous_output (prevouts)
+    // TX: error::spend_exceeds_value (prevouts)
+    // TX: error::coinbase_maturity (prevouts)
+    // TX: error::relative_time_locked (prevouts)
+    // TX: error::unconfirmed_spend (prevout confirmation state)
+    // TX: error::confirmed_double_spend (prevout confirmation state)
+
 private:
+    // context free
+    hash_digest generate_merkle_root(bool witness) const;
+
+    // contextual
+    size_t non_coinbase_inputs() const;
+    uint64_t reward(size_t height, uint64_t subsidy_interval,
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const;
+
+    // delegated
+    code check_transactions() const;
+    code connect_transactions(const context& state) const;
+    code accept_transactions(const context& state) const;
+
     chain::header header_;
-    transaction::list transactions_;
+    transaction::list txs_;
     bool valid_;
 };
 

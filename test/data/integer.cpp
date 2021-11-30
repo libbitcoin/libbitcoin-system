@@ -59,7 +59,7 @@ static const auto ones_hash = uint256_t(ONES_HASH);
 static const auto fives_hash = uint256_t(FIVES_HASH);
 
 // constructors
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_constructor_default__always__equates_to_0)
 {
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_constructor_uint32__maximum__equals_maximu
 }
 
 // hash
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_hash__default__returns_null_hash)
 {
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_hash__negative_1__returns_negative_zero_ha
 }
 
 // array operator
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_array__default__expected)
 {
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_array__odd_hash__expected)
 }
 
 // comparison operators
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_comparison_operators__null_hash__expected)
 {
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_comparison_operators__negative_zero_hash__
 }
 
 // not
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_not__minimum__maximum)
 {
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_not__odd_hash__expected)
 }
 
 // two's compliment (negate)
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_twos_compliment__null_hash__null_hash)
 {
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_twos_compliment__odd_hash__expected)
 }
 
 // shift right
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__null_hash__null_hash)
 {
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__odd_hash_32__expected)
 }
 
 // add256
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_add256__0_to_null_hash__null_hash)
 {
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_add256__1_to_negative_zero_hash__expected)
 }
 
 // divide256
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_divide256__unit_hash_by_null_hash__throws_overflow_error)
 {
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_divide256__max_hash_by_256__shifts_right_8
 }
 
 // increment
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_increment__0__1)
 {
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_increment__negative_zero_hash__expected)
 }
 
 // assign32
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign__null_hash_0__null_hash)
 {
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign__odd_hash_to_42__42)
 }
 
 // assign shift right
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_right__null_hash__null_hash)
 {
@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_right__odd_hash_32__expected)
 }
 
 // assign shift left
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_left__null_hash__null_hash)
 {
@@ -541,7 +541,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_left__odd_hash_32__expected)
 }
 
 // assign multiply32
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_multiply32__0_by_0__0)
 {
@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_multiply32__max_hash_by_256__shifts
 }
 
 // assign divide32
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide32__unit_hash_by_null_hash__throws_overflow_error)
 {
@@ -637,7 +637,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide32__max_hash_by_256__shifts_r
 }
 
 // assign add256
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_add256__0_to_null_hash__null_hash)
 {
@@ -682,7 +682,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_add256__1_to_negative_zero_hash__ex
 }
 
 // assign subtract256
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_subtract256__0_from_null_hash__null_hash)
 {
@@ -734,7 +734,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_subtract256__1_from_negative_zero_h
 }
 
 // assign divide256
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide__unit_hash_by_null_hash__throws_overflow_error)
 {

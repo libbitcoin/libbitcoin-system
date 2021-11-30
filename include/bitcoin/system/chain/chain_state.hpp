@@ -167,6 +167,7 @@ public:
 
     /// Context retains forks, policy, height, and median_time_past.
     chain::context context() const;
+    uint32_t timestamp() const;
     uint32_t median_time_past() const;
     uint32_t policy() const;
     uint32_t forks() const;

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <utility>
 #include <boost/thread.hpp>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -38,7 +39,7 @@ namespace chain {
 using wall_clock = std::chrono::system_clock;
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 header::header()
   : header(0, {}, {}, 0, 0, 0, false)
@@ -129,7 +130,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 header& header::operator=(header&& other)
 {
@@ -171,7 +172,7 @@ bool header::operator!=(const header& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool header::from_data(const data_chunk& data)
 {
@@ -221,7 +222,7 @@ bool header::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk header::to_data() const
 {
@@ -253,11 +254,8 @@ void header::to_data(writer& sink) const
     BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
-// Size.
-//-----------------------------------------------------------------------------
-
 // static
-size_t header::satoshi_fixed_size()
+size_t header::serialized_size()
 {
     return sizeof(version_)
         + hash_size
@@ -267,13 +265,8 @@ size_t header::satoshi_fixed_size()
         + sizeof(nonce_);
 }
 
-size_t header::serialized_size() const
-{
-    return satoshi_fixed_size();
-}
-
-// Accessors.
-//-----------------------------------------------------------------------------
+// Properties.
+// ----------------------------------------------------------------------------
 
 uint32_t header::version() const
 {
@@ -305,56 +298,19 @@ uint32_t header::nonce() const
     return nonce_;
 }
 
-// Cache.
-//-----------------------------------------------------------------------------
-
+// computed
 hash_digest header::hash() const
 {
     return bitcoin_hash(to_data());
 }
 
-// Validation helpers.
-//-----------------------------------------------------------------------------
-
-// ****************************************************************************
-/// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
-// ****************************************************************************
-bool header::is_valid_timestamp(uint32_t timestamp_limit_seconds) const
-{
-    using namespace std::chrono;
-    static const auto two_hours = seconds(timestamp_limit_seconds);
-    const auto time = wall_clock::from_time_t(timestamp_);
-    const auto future = wall_clock::now() + two_hours;
-    return time <= future;
-}
-
-bool header::is_valid_proof_of_work(uint32_t proof_of_work_limit,
-    bool scrypt) const
-{
-    const auto bits = compact(bits_);
-    static const uint256_t pow_limit(compact{ proof_of_work_limit });
-
-    if (bits.is_overflowed())
-        return false;
-
-    uint256_t target(bits);
-
-    // Ensure claimed work is within limits.
-    if (target < 1 || target > pow_limit)
-        return false;
-
-    // Conditionally use scrypt proof of work (e.g. Litecoin).
-    // Ensure actual work is at least claimed amount (smaller is more work).
-    return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) <= target;
-}
-
-// static
-uint256_t header::proof(uint32_t bits)
+// static/private
+uint256_t header::difficulty(uint32_t bits)
 {
     const auto header_bits = compact(bits);
 
     if (header_bits.is_overflowed())
-        return 0;
+        return zero;
 
     uint256_t target(header_bits);
 
@@ -364,31 +320,66 @@ uint256_t header::proof(uint32_t bits)
     // While actually achieving this work is improbable, this method operates
     // on a public method and therefore must be guarded.
     //*************************************************************************
-    const auto divisor = target + 1;
+    const auto divisor = add1(target);
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
-    return (divisor == 0) ? 0 : (~target / divisor) + 1;
+    return is_zero(divisor) ? zero : add1(~target / divisor);
 }
 
-uint256_t header::proof() const
+// computed
+uint256_t header::difficulty() const
 {
-    return proof(bits_);
+    return difficulty(bits_);
 }
 
+// Check.
+// ----------------------------------------------------------------------------
+
+bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
+    bool scrypt) const
+{
+    const auto bits = compact(bits_);
+    static const uint256_t pow_limit(compact{ proof_of_work_limit });
+
+    if (bits.is_overflowed())
+        return true;
+
+    uint256_t target(bits);
+
+    // Ensure claimed work is within limits.
+    if (target < one || target > pow_limit)
+        return true;
+
+    // Conditionally use scrypt proof of work (e.g. Litecoin).
+    // Ensure actual work is at least claimed amount (smaller is more work).
+    return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) > target;
+}
+
+// ****************************************************************************
+/// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
+// ****************************************************************************
+bool header::is_invalid_timestamp(uint32_t timestamp_limit_seconds) const
+{
+    using namespace std::chrono;
+    static const auto two_hours = seconds(timestamp_limit_seconds);
+    const auto time = wall_clock::from_time_t(timestamp_);
+    const auto future = wall_clock::now() + two_hours;
+    return time > future;
+}
 
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_limit_seconds,
     uint32_t proof_of_work_limit, bool scrypt) const
 {
-    if (!is_valid_proof_of_work(proof_of_work_limit, scrypt))
+    if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
 
-    else if (!is_valid_timestamp(timestamp_limit_seconds))
+    if (is_invalid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
     return error::success;
@@ -396,20 +387,17 @@ code header::check(uint32_t timestamp_limit_seconds,
 
 code header::accept(const chain_state& state) const
 {
-    if (bits_ != state.work_required())
-        return error::incorrect_proof_of_work;
-
-    else if (state.is_checkpoint_conflict(hash()))
+    if (state.is_checkpoint_conflict(hash()))
         return error::checkpoints_failed;
 
-    else if (state.is_under_checkpoint())
-        return error::success;
-
-    else if (version_ < state.minimum_block_version())
+    if (version_ < state.minimum_block_version())
         return error::invalid_block_version;
 
-    else if (timestamp_ <= state.median_time_past())
+    if (timestamp_ <= state.median_time_past())
         return error::timestamp_too_early;
+
+    if (bits_ != state.work_required())
+        return error::incorrect_proof_of_work;
 
     return error::success;
 }

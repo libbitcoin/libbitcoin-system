@@ -44,7 +44,7 @@ public:
     typedef data_stack::const_iterator iterator;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     witness();
 
@@ -59,7 +59,7 @@ public:
     witness(reader& source, bool prefix);
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     witness& operator=(witness&& other);
     witness& operator=(const witness& other);
@@ -68,7 +68,7 @@ public:
     bool operator!=(const witness& other) const;
 
     // Deserialization (from witness stack).
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Prefixed data assumed valid here though caller may confirm with is_valid.
 
     /// Deserialization invalidates the iterator.
@@ -80,7 +80,7 @@ public:
     bool is_valid() const;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     data_chunk to_data(bool prefix) const;
     void to_data(std::ostream& stream, bool prefix) const;
@@ -89,7 +89,7 @@ public:
     std::string to_string() const;
 
     // Iteration.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     void clear();
     bool empty() const;
@@ -101,13 +101,13 @@ public:
     const data_chunk& operator[](size_t index) const;
 
     // Properties.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     size_t serialized_size(bool prefix) const;
     const data_stack& stack() const;
 
     // Utilities.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     static bool is_push_size(const data_stack& stack);
     static bool is_reserved_pattern(const data_stack& stack);
@@ -118,7 +118,7 @@ public:
         const script& program_script) const;
 
     // Validation.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     code verify(const transaction& tx, uint32_t input_index, uint32_t forks,
         const script& program_script, uint64_t value) const;

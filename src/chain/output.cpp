@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -34,11 +35,12 @@ namespace chain {
 const uint64_t output::not_found = sighash_null_value;
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// Valid default used in signature hashing.
+// Invalid default used in signature hashing (validity ignored).
+// Invalidity is also used to determine that a prevout is not found.
 output::output()
-  : output(output::not_found, {}, true)
+  : output(output::not_found, {}, false)
 {
 }
 
@@ -90,7 +92,7 @@ output::output(uint64_t value, const chain::script& script, bool valid)
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 output& output::operator=(output&& other)
 {
@@ -120,7 +122,7 @@ bool output::operator!=(const output& other) const
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 bool output::from_data(const data_chunk& data)
 {
@@ -163,7 +165,7 @@ bool output::is_valid() const
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 data_chunk output::to_data() const
 {
@@ -191,16 +193,13 @@ void output::to_data(writer& sink) const
     BITCOIN_ASSERT(sink && sink.get_position() - start == size);
 }
 
-// Size.
-//-----------------------------------------------------------------------------
-
 size_t output::serialized_size() const
 {
     return sizeof(value_) + script_.serialized_size(true);
 }
 
-// Accessors.
-//-----------------------------------------------------------------------------
+// Properties.
+// ----------------------------------------------------------------------------
 
 uint64_t output::value() const
 {
@@ -212,28 +211,12 @@ const chain::script& output::script() const
     return script_;
 }
 
-// Validation helpers.
-//-----------------------------------------------------------------------------
+// Methods.
+// ----------------------------------------------------------------------------
 
-size_t output::signature_operations(bool bip141) const
-{
-    // Penalize quadratic signature operations (bip141).
-    const auto sigops_factor = bip141 ? fast_sigops_factor : one;
-
-    // Count heavy sigops in the output script.
-    return script_.sigops(false) * sigops_factor;
-}
-
-bool output::is_dust(uint64_t minimum_value) const
-{
-    // If provably unspendable it does not expand the unspent output set.
-    return value_ < minimum_value && !script_.is_unspendable();
-}
-
-bool output::extract_committed_hash(hash_digest& out) const
+bool output::committed_hash(hash_digest& out) const
 {
     const auto& ops = script_.operations();
-
     if (!script::is_commitment_pattern(ops))
         return false;
 
@@ -241,6 +224,29 @@ bool output::extract_committed_hash(hash_digest& out) const
     const auto start = std::next(ops[1].data().begin(), sizeof(witness_head));
     std::copy_n(start, hash_size, out.begin());
     return true;
+}
+
+// Product overflows guarded by script size limit.
+static_assert(max_script_size <
+    max_size_t / multisig_default_sigops / heavy_sigops_factor,
+    "output sigop overflow guard");
+
+size_t output::signature_operations(bool bip141) const
+{
+    // Penalize quadratic signature operations (bip141).
+    const auto factor = bip141 ? heavy_sigops_factor : one;
+
+    // Count heavy sigops in the output script.
+    return script_.sigops(false) * factor;
+}
+
+bool output::is_dust(uint64_t minimum_value) const
+{
+    // If provably unspendable it does not expand the unspent output set. Dust
+    // is all about prunability. Miners can be expected take the largest fee
+    // independent of dust, so this is an attempt to prevent miners from seeing
+    // transactions with unprunable outputs.
+    return value_ < minimum_value && !script_.is_unspendable();
 }
 
 } // namespace chain

@@ -71,15 +71,6 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_block_version__true_exected_me
     BOOST_REQUIRE_EQUAL(ec.message(), "block version rejected at current height");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_exected_message)
-{
-    constexpr auto value = error::incorrect_proof_of_work;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
-}
-
 BOOST_AUTO_TEST_CASE(block_error_t__code__timestamp_too_early__true_exected_message)
 {
     constexpr auto value = error::timestamp_too_early;
@@ -87,6 +78,15 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__timestamp_too_early__true_exected_mess
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "block timestamp is too early");
+}
+
+BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_exected_message)
+{
+    constexpr auto value = error::incorrect_proof_of_work;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
 }
 
 // check block
@@ -201,9 +201,9 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_value_limit__true_exected_mes
     BOOST_REQUIRE_EQUAL(ec.message(), "coinbase value too high");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_embedded_sigop_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_sigop_limit__true_exected_message)
 {
-    constexpr auto value = error::block_embedded_sigop_limit;
+    constexpr auto value = error::block_sigop_limit;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
@@ -244,16 +244,6 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__unspent_coinbase_collision__true_exect
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "unspent coinbase collision");
-}
-
-// deprecated
-BOOST_AUTO_TEST_CASE(block_error_t__code__header_missing_metadata__true_exected_message)
-{
-    constexpr auto value = error::header_missing_metadata;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "header missing metadata");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
