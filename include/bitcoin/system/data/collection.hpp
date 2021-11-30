@@ -95,7 +95,7 @@ bool is_sorted(const Collection& list) noexcept;
 template <typename Collection>
 Collection& distinct(Collection& list) noexcept;
 template <typename Collection>
-Collection distinct(const Collection& list) noexcept;
+Collection distinct_copy(const Collection& list) noexcept;
 
 /// Obtain the set difference of minuend less subtrahend.
 template <typename Collection>
@@ -111,13 +111,13 @@ bool intersecting(const Collection& left, const Collection& right) noexcept;
 template <typename Collection>
 Collection& reverse(Collection& list) noexcept;
 template <typename Collection>
-Collection reverse(const Collection& list) noexcept;
+Collection reverse_copy(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>
 Collection& sort(Collection& list) noexcept;
 template <typename Collection>
-Collection sort(const Collection& list) noexcept;
+Collection sort_copy(const Collection& list) noexcept;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>

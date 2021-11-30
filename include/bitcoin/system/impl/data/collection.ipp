@@ -234,7 +234,7 @@ Collection& distinct(Collection& list) noexcept
 }
 
 template <typename Collection>
-Collection distinct(const Collection& list) noexcept
+Collection distinct_copy(const Collection& list) noexcept
 {
     auto copy = list;
     return std::move(distinct(copy));
@@ -274,7 +274,7 @@ Collection& reverse(Collection& list) noexcept
 }
 
 template <typename Collection>
-Collection reverse(const Collection& list) noexcept
+Collection reverse_copy(const Collection& list) noexcept
 {
     auto copy = list;
     return std::move(reverse(copy));
@@ -291,7 +291,7 @@ Collection& sort(Collection& list) noexcept
 
 // TODO: provide optional comparison function parameter.
 template <typename Collection>
-Collection sort(const Collection& list) noexcept
+Collection sort_copy(const Collection& list) noexcept
 {
     auto copy = list;
     return std::move(sort(copy));

@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE(collection__distinct__const_distinct_unsorted_duplicates__s
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE_EQUAL(distinct(set), expected);
+    BOOST_REQUIRE_EQUAL(distinct_copy(set), expected);
 }
 
 // intersecting
@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
-    BOOST_REQUIRE_EQUAL(reverse(set), expected);
+    BOOST_REQUIRE_EQUAL(reverse_copy(set), expected);
 }
 
 // sort
@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(collection__sort__const_unsorted__sorted)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 0, 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE_EQUAL(sort(set), expected);
+    BOOST_REQUIRE_EQUAL(sort_copy(set), expected);
 }
 
 // starts_with
