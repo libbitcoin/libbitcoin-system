@@ -37,11 +37,11 @@ public:
     settings(chain::selection context);
 
     // Utilities.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     uint64_t bitcoin_to_satoshi(uint64_t value) const;
 
     // Computed properties.
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     uint64_t max_money() const;
     uint64_t initial_subsidy() const;
@@ -51,7 +51,7 @@ public:
     uint256_t work_limit() const;
 
     // Consensus settings.
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     uint32_t retargeting_factor;
     uint32_t retargeting_interval_seconds;
@@ -65,7 +65,7 @@ public:
     chain::block genesis_block;
 
     // Fork settings.
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     // Consensus rule change activation and enforcement parameters (opaque).
     uint32_t first_version;

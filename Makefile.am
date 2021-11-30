@@ -48,7 +48,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/operation.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
-    src/chain/prevout.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
@@ -286,7 +285,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/operation.cpp \
     test/chain/output.cpp \
     test/chain/point.cpp \
-    test/chain/prevout.cpp \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \

@@ -96,7 +96,6 @@
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
       <ObjectFileName>$(IntDir)src_chain_point.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\prevout.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <ObjectFileName>$(IntDir)src_chain_script.obj</ObjectFileName>
     </ClCompile>

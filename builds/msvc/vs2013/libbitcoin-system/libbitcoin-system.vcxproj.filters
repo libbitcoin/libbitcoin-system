@@ -231,9 +231,6 @@
     <ClCompile Include="..\..\..\..\src\chain\point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\prevout.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
