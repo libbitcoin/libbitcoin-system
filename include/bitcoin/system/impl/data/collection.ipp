@@ -254,7 +254,9 @@ Collection difference(const Collection& minuend,
     const Collection& subtrahend) noexcept
 {
     Collection copy;
-    copy.reserve(std::size(minuend));
+
+    // Replaced std::size due absence, C++17 feature
+    copy.reserve(minuend.size());
 
     // Linear copy since creating a copy, more efficient than multiple erases.
     for (const auto& min: minuend)

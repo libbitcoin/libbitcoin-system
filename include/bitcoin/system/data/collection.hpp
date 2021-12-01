@@ -57,7 +57,7 @@ bool contains(const Collection& list,
 template <typename Collection>
 typename Collection::difference_type
 find_pair_position(const Collection& list,
-    typename Collection::value_type::first_type& key) noexcept;
+    const typename Collection::value_type::first_type& key) noexcept;
 
 /// Find the position of an element in an ordered collection.
 template <typename Collection>

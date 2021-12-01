@@ -135,6 +135,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__copy__expected)
     const data_slice slice(string);
     const data_slice copy(slice);
     BOOST_REQUIRE_EQUAL(slice.size(), size);
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
 
     // size/data
     BOOST_REQUIRE(!slice.empty());
@@ -142,6 +143,12 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__copy__expected)
     BOOST_REQUIRE_EQUAL(*slice.data(), 'f');
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
     BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
+
+    BOOST_REQUIRE(!copy.empty());
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
+    BOOST_REQUIRE_EQUAL(*copy.data(), 'f');
+    BOOST_REQUIRE_EQUAL(copy.back(), 'r');
+    BOOST_REQUIRE_EQUAL(copy[sub1(size)], 'r');
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__operator__assignment__expected)
@@ -149,6 +156,7 @@ BOOST_AUTO_TEST_CASE(data_slice__operator__assignment__expected)
     const data_slice slice(string);
     const auto copy = slice;
     BOOST_REQUIRE_EQUAL(slice.size(), size);
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
 
     // size/data
     BOOST_REQUIRE(!slice.empty());
@@ -156,6 +164,12 @@ BOOST_AUTO_TEST_CASE(data_slice__operator__assignment__expected)
     BOOST_REQUIRE_EQUAL(*slice.data(), 'f');
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
     BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
+
+    BOOST_REQUIRE(!copy.empty());
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
+    BOOST_REQUIRE_EQUAL(*copy.data(), 'f');
+    BOOST_REQUIRE_EQUAL(copy.back(), 'r');
+    BOOST_REQUIRE_EQUAL(copy[sub1(size)], 'r');
 }
 
 // construct, not empty

@@ -142,7 +142,7 @@ static data_chunk read_element(reader& source)
     }
 
     return source.read_bytes(size);
-};
+}
 
 bool witness::from_data(const data_chunk& encoded, bool prefix)
 {

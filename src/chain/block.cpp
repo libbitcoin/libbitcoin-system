@@ -511,8 +511,9 @@ bool block::is_invalid_witness_commitment() const
 constexpr uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
-    const auto halvings = height / subsidy_interval;
-    return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
+    // C++11 constexpr requires exactly one return statement.
+    return shift_right(initial_block_subsidy_satoshi,
+        (height / subsidy_interval), bip42);
 }
 
 // Prevouts required.

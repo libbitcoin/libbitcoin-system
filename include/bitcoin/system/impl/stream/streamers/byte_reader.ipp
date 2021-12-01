@@ -179,7 +179,9 @@ template <typename IStream>
 template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
-    return std::move(system::reverse(read_forward<Size>()));
+    auto data = read_forward<Size>();
+    auto& reverse = system::reverse(data);
+    return std::move(reverse);
 }
 
 template <typename IStream>
@@ -516,8 +518,8 @@ void byte_reader<IStream>::clear() noexcept
 template <typename IStream>
 size_t byte_reader<IStream>::getter() noexcept
 {
-    static const auto failure = IStream::pos_type(-1);
-    IStream::pos_type position;
+    static const auto failure = typename IStream::pos_type(-1);
+    typename IStream::pos_type position;
 
     // Force these to be consistent, and avoid propagating exceptions.
     // Assuming behavior is consistent with seekg (as documented).

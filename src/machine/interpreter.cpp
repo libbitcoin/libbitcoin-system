@@ -847,7 +847,7 @@ interpreter::result interpreter::op_check_sig(program& program)
     if (bip66 && verify == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
-    program.push(verify == error::success);
+    program.push(verify == error::op_success);
     return error::op_success;
 }
 
