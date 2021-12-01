@@ -827,7 +827,7 @@ code transaction::accept(const context& state) const
         if (is_overspent())
             return error::spend_exceeds_value;
 
-        if (!is_immature(state.height))
+        if (is_immature(state.height))
             return error::coinbase_maturity;
 
         if (bip68 && is_locked(state.height, state.median_time_past))
