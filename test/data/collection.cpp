@@ -326,32 +326,35 @@ BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
 
 BOOST_AUTO_TEST_CASE(collection__distinct__empty__empty)
 {
-    data_chunk data{};
-    BOOST_REQUIRE(distinct(data).empty());
+    BOOST_REQUIRE(distinct(data_chunk{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__single__unchanged)
 {
     const uint8_t expected = 42;
-    data_chunk data{ expected };
-    BOOST_REQUIRE_EQUAL(distinct(data).front(), expected);
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ expected }).front(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__unchanged)
 {
     const data_chunk expected{ 0, 2, 4, 6, 8 };
-    data_chunk data{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE_EQUAL(distinct(data), expected);
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 0, 2, 4, 6, 8 }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
 {
     const data_chunk expected{ 0, 2, 4, 6, 8 };
-    data_chunk data{ 2, 0, 8, 6, 4 };
-    BOOST_REQUIRE_EQUAL(distinct(data), expected);
+    BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 2, 0, 8, 6, 4 }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__distinct__const_distinct_unsorted_duplicates__sorted_distinct)
+{
+    data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    data_chunk expected{ 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(distinct(set), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__distinct_copy__const_distinct_unsorted_duplicates__sorted_distinct)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     data_chunk expected{ 0, 2, 4, 6, 8 };
@@ -486,20 +489,25 @@ BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_subset__expected)
 
 BOOST_AUTO_TEST_CASE(collection__reverse__empty__empty)
 {
-    data_chunk data{};
-    BOOST_REQUIRE(reverse(data).empty());
+    BOOST_REQUIRE(reverse(data_chunk{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__reverse__single__unchanged)
 {
     const uint8_t expected = 42;
-    data_chunk data{ expected };
-    BOOST_REQUIRE_EQUAL(reverse(data).front(), expected);
+    BOOST_REQUIRE_EQUAL(reverse(data_chunk{ expected }).front(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
 {
     data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
+    BOOST_REQUIRE_EQUAL(reverse(set), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__reverse_copy__const__reversed)
+{
+    const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
     BOOST_REQUIRE_EQUAL(reverse_copy(set), expected);
 }
@@ -508,18 +516,23 @@ BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
 
 BOOST_AUTO_TEST_CASE(collection__sort__empty__empty)
 {
-    data_chunk data{};
-    BOOST_REQUIRE(sort(data).empty());
+    BOOST_REQUIRE(sort(data_chunk{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__sort__single__unchanged)
 {
     const uint8_t expected = 42;
-    data_chunk data{ expected };
-    BOOST_REQUIRE_EQUAL(sort(data).front(), expected);
+    BOOST_REQUIRE_EQUAL(sort(data_chunk{ expected }).front(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(collection__sort__const_unsorted__sorted)
+{
+    data_chunk set{ 2, 0, 0, 8, 6, 4 };
+    data_chunk expected{ 0, 0, 2, 4, 6, 8 };
+    BOOST_REQUIRE_EQUAL(sort(set), expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__sort_copy__const_unsorted__sorted)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     data_chunk expected{ 0, 0, 2, 4, 6, 8 };
