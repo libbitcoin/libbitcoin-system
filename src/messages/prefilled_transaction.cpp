@@ -133,11 +133,12 @@ void prefilled_transaction::to_data(uint32_t version,
     to_data(version, out);
 }
 
-void prefilled_transaction::to_data(uint32_t ,
-    writer& sink) const
+void prefilled_transaction::to_data(uint32_t, writer& sink) const
 {
     sink.write_variable(index_);
-    transaction_.to_data(sink);
+
+    // TODO: witness always enabled?
+    transaction_.to_data(sink, true);
 }
 
 size_t prefilled_transaction::serialized_size(uint32_t) const

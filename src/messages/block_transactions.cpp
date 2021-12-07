@@ -159,8 +159,9 @@ void block_transactions::to_data(uint32_t, writer& sink) const
     sink.write_bytes(block_hash_);
     sink.write_variable(transactions_.size());
 
+    // TODO: witness always enabled?
     for (const auto& element: transactions_)
-        element.to_data(sink);
+        element.to_data(sink, true);
 }
 
 size_t block_transactions::serialized_size(uint32_t) const
