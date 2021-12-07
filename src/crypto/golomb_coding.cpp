@@ -78,7 +78,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
             return hash_to_range(item, bound, key);
         });
 
-    return std::move(sort(hashes));
+    return sort(std::move(hashes));
 }
 
 // Golomb-coded set construction

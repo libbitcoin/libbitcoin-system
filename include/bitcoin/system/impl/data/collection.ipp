@@ -49,6 +49,7 @@ template <typename Collection, typename Element>
 typename Collection::difference_type
 binary_search(const Collection& list, const Element& element) noexcept
 {
+    // C++17: std::size.
     const auto size = list.size();
 
     if (list.empty())
@@ -118,6 +119,7 @@ bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept
 {
+    // C++17: std::size.
     return !is_lesser(std::distance(begin, end), value.size()) &&
         std::equal(value.begin(), value.end(), begin);
 }
@@ -167,6 +169,7 @@ insert_sorted(Collection& list, typename Collection::value_type& element,
 template <typename Collection>
 void move_append(Collection& target, Collection& source) noexcept
 {
+    // C++17: std::size.
     target.reserve(target.size() + source.size());
     std::move(std::begin(source), std::end(source), std::back_inserter(target));
 }
@@ -224,20 +227,28 @@ bool is_sorted(const Collection& list) noexcept
 // TODO: specialize vector and generalize on element type.
 // C++17: Parallel policy for std::sort, std::erase.
 // Collection requires erase and shrink_to_fit methods (vector).
+
 template <typename Collection>
-Collection distinct(Collection&& list) noexcept
+void distinct(Collection& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
     list.shrink_to_fit();
-    return list;
+}
+
+template <typename Collection>
+Collection distinct(Collection&& list) noexcept
+{
+    distinct(list);
+    return std::forward<Collection>(list);
 }
 
 template <typename Collection>
 Collection distinct_copy(const Collection& list) noexcept
 {
     auto copy = list;
-    return std::move(distinct(copy));
+    distinct(copy);
+    return copy;
 }
 
 // C++17: Parallel policy for std::find_first_of.
@@ -248,14 +259,14 @@ bool intersecting(const Collection& left, const Collection& right) noexcept
         std::begin(right), std::end(right)) != std::end(left);
 }
 
-// Collection requires reserve and shrink_to_fit methods (vector).
+// Collection requires size, reserve and shrink_to_fit methods (vector).
 template <typename Collection>
 Collection difference(const Collection& minuend,
     const Collection& subtrahend) noexcept
 {
     Collection copy;
 
-    // Replaced std::size due absence, C++17 feature
+    // C++17: std::size.
     copy.reserve(minuend.size());
 
     // Linear copy since creating a copy, more efficient than multiple erases.
@@ -268,35 +279,49 @@ Collection difference(const Collection& minuend,
 }
 
 // C++17: Parallel policy for std::reverse.
+
+template <typename Collection>
+void reverse(Collection& list) noexcept
+{
+    std::reverse(std::begin(list), std::end(list));
+}
+
 template <typename Collection>
 Collection reverse(Collection&& list) noexcept
 {
-    std::reverse(std::begin(list), std::end(list));
-    return list;
+    reverse(list);
+    return std::forward<Collection>(list);
 }
 
 template <typename Collection>
 Collection reverse_copy(const Collection& list) noexcept
 {
     auto copy = list;
-    return std::move(reverse(copy));
+    reverse(copy);
+    return copy;
 }
 
-// TODO: provide optional comparison function parameter.
 // C++17: Parallel policy for std::sort.
+
+template <typename Collection>
+void sort(Collection& list) noexcept
+{
+    std::sort(std::begin(list), std::end(list));
+}
+
 template <typename Collection>
 Collection sort(Collection&& list) noexcept
 {
-    std::sort(std::begin(list), std::end(list));
-    return list;
+    sort(list);
+    return std::forward<Collection>(list);
 }
 
-// TODO: provide optional comparison function parameter.
 template <typename Collection>
 Collection sort_copy(const Collection& list) noexcept
 {
     auto copy = list;
-    return std::move(sort(copy));
+    sort(copy);
+    return copy;
 }
 
 } // namespace system

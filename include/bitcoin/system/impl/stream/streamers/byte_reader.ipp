@@ -179,9 +179,7 @@ template <typename IStream>
 template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_reverse() noexcept
 {
-    auto data = read_forward<Size>();
-    auto& reverse = system::reverse(data);
-    return std::move(reverse);
+    return system::reverse(read_forward<Size>());
 }
 
 template <typename IStream>

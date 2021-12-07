@@ -93,6 +93,8 @@ bool is_sorted(const Collection& list) noexcept;
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
+void distinct(Collection& list) noexcept;
+template <typename Collection>
 Collection distinct(Collection&& list) noexcept;
 template <typename Collection>
 Collection distinct_copy(const Collection& list) noexcept;
@@ -109,11 +111,15 @@ bool intersecting(const Collection& left, const Collection& right) noexcept;
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
+void reverse(Collection& list) noexcept;
+template <typename Collection>
 Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
 Collection reverse_copy(const Collection& list) noexcept;
 
 /// Sort collection elements.
+template <typename Collection>
+void sort(Collection& list) noexcept;
 template <typename Collection>
 Collection sort(Collection&& list) noexcept;
 template <typename Collection>

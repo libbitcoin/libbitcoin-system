@@ -324,40 +324,41 @@ BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
 
 // distinct
 
-BOOST_AUTO_TEST_CASE(collection__distinct__empty__empty)
+BOOST_AUTO_TEST_CASE(collection__distinct_move__empty__empty)
 {
     BOOST_REQUIRE(distinct(data_chunk{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__distinct__single__unchanged)
+BOOST_AUTO_TEST_CASE(collection__distinct_move__single__unchanged)
 {
     const uint8_t expected = 42;
     BOOST_REQUIRE_EQUAL(distinct(data_chunk{ expected }).front(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__distinct__distinct_sorted__unchanged)
+BOOST_AUTO_TEST_CASE(collection__distinct_move__distinct_sorted__unchanged)
 {
     const data_chunk expected{ 0, 2, 4, 6, 8 };
     BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 0, 2, 4, 6, 8 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted__sorted)
+BOOST_AUTO_TEST_CASE(collection__distinct_move__distinct_unsorted__sorted)
 {
     const data_chunk expected{ 0, 2, 4, 6, 8 };
     BOOST_REQUIRE_EQUAL(distinct(data_chunk{ 2, 0, 8, 6, 4 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__distinct__const_distinct_unsorted_duplicates__sorted_distinct)
+BOOST_AUTO_TEST_CASE(collection__distinct__distinct_unsorted_duplicates__sorted_distinct)
 {
     data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    data_chunk expected{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE_EQUAL(distinct(set), expected);
+    const data_chunk expected{ 0, 2, 4, 6, 8 };
+    distinct(set);
+    BOOST_REQUIRE_EQUAL(set, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__distinct_copy__const_distinct_unsorted_duplicates__sorted_distinct)
+BOOST_AUTO_TEST_CASE(collection__distinct_copy__distinct_unsorted_duplicates__sorted_distinct)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    data_chunk expected{ 0, 2, 4, 6, 8 };
+    const data_chunk expected{ 0, 2, 4, 6, 8 };
     BOOST_REQUIRE_EQUAL(distinct_copy(set), expected);
 }
 
@@ -487,25 +488,26 @@ BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_subset__expected)
 
 // reverse
 
-BOOST_AUTO_TEST_CASE(collection__reverse__empty__empty)
+BOOST_AUTO_TEST_CASE(collection__reverse_move__empty__empty)
 {
     BOOST_REQUIRE(reverse(data_chunk{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__reverse__single__unchanged)
+BOOST_AUTO_TEST_CASE(collection__reverse_move__single__unchanged)
 {
     const uint8_t expected = 42;
     BOOST_REQUIRE_EQUAL(reverse(data_chunk{ expected }).front(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__reverse__const__reversed)
+BOOST_AUTO_TEST_CASE(collection__reverse__unsorted_duplicates__reversed)
 {
     data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
-    BOOST_REQUIRE_EQUAL(reverse(set), expected);
+    reverse(set);
+    BOOST_REQUIRE_EQUAL(set, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__reverse_copy__const__reversed)
+BOOST_AUTO_TEST_CASE(collection__reverse_copy__unsorted_duplicates__reversed)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     const data_chunk expected{ 4, 6, 8, 0, 0, 2 };
@@ -514,25 +516,26 @@ BOOST_AUTO_TEST_CASE(collection__reverse_copy__const__reversed)
 
 // sort
 
-BOOST_AUTO_TEST_CASE(collection__sort__empty__empty)
+BOOST_AUTO_TEST_CASE(collection__sort_move__empty__empty)
 {
     BOOST_REQUIRE(sort(data_chunk{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__sort__single__unchanged)
+BOOST_AUTO_TEST_CASE(collection__sort_move__single__unchanged)
 {
     const uint8_t expected = 42;
     BOOST_REQUIRE_EQUAL(sort(data_chunk{ expected }).front(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__sort__const_unsorted__sorted)
+BOOST_AUTO_TEST_CASE(collection__sort_move__unsorted_duplicates__sorted)
 {
     data_chunk set{ 2, 0, 0, 8, 6, 4 };
-    data_chunk expected{ 0, 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE_EQUAL(sort(set), expected);
+    const data_chunk expected{ 0, 0, 2, 4, 6, 8 };
+    sort(set);
+    BOOST_REQUIRE_EQUAL(set, expected);
 }
 
-BOOST_AUTO_TEST_CASE(collection__sort_copy__const_unsorted__sorted)
+BOOST_AUTO_TEST_CASE(collection__sort_copy__unsorted_duplicates__sorted)
 {
     const data_chunk set{ 2, 0, 0, 8, 6, 4 };
     data_chunk expected{ 0, 0, 2, 4, 6, 8 };
