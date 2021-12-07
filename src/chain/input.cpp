@@ -346,11 +346,10 @@ static_assert(max_script_size <
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
 size_t input::signature_operations(bool bip16, bool bip141) const
 {
-    if (!prevout.is_valid())
+    if (bip141 && !prevout.is_valid())
         return max_size_t;
 
     chain::script witness, embedded;
-    const auto& output = prevout.script();
 
     // Penalize quadratic signature operations (bip141).
     const auto factor = bip141 ? heavy_sigops_factor : one;
@@ -358,7 +357,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     // Count heavy sigops in the input script.
     auto sigops = script_.sigops(false) * factor;
 
-    if (bip141 && witness_.extract_sigop_script(witness, output))
+    if (bip141 && witness_.extract_sigop_script(witness, prevout.script()))
     {
         // Add sigops in the witness script (bip141).
         return ceilinged_add(sigops, witness.sigops(true));
