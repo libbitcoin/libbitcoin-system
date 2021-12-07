@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_version__failur
 
     const auto data = expected.to_data(messages::block_transactions::version_minimum);
 
-    BOOST_REQUIRE(raw == data);
+    BOOST_REQUIRE_EQUAL(raw, data);
     messages::block_transactions instance;
     BOOST_REQUIRE(!instance.from_data(messages::block_transactions::version_minimum - 1, data));
 }
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_1__valid_input__success)
 
     const auto data = expected.to_data(messages::block_transactions::version_minimum);
 
-    BOOST_REQUIRE(raw == data);
+    BOOST_REQUIRE_EQUAL(raw, data);
     const auto result = messages::block_transactions::factory(messages::block_transactions::version_minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_2__valid_input__success)
 
     const auto data = expected.to_data(messages::block_transactions::version_minimum);
 
-    BOOST_REQUIRE(raw == data);
+    BOOST_REQUIRE_EQUAL(raw, data);
     stream::in::copy istream(data);
     auto result = messages::block_transactions::factory(messages::block_transactions::version_minimum, istream);
 
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
 
     const auto data = expected.to_data(messages::block_transactions::version_minimum);
 
-    BOOST_REQUIRE(raw == data);
+    BOOST_REQUIRE_EQUAL(raw, data);
     read::bytes::copy source(data);
     const auto result = messages::block_transactions::factory(messages::block_transactions::version_minimum, source);
 
