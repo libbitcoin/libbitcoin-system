@@ -313,8 +313,8 @@ void byte_writer<OStream>::flusher() noexcept
 template <typename OStream>
 size_t byte_writer<OStream>::getter() noexcept
 {
-    static const auto failure = OStream::pos_type(-1);
-    OStream::pos_type position;
+    static const auto failure = typename OStream::pos_type(-1);
+    typename OStream::pos_type position;
 
     // Force these to be consistent, and avoid propagating exceptions.
     // Assuming behavior is consistent with seekg (as documented).

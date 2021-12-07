@@ -508,7 +508,7 @@ bool block::is_invalid_witness_commitment() const
 // explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
 // default, and specified bip42 behavior (shift overflow to zero) with bip42.
 //*****************************************************************************
-constexpr uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
+static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
     const auto halvings = height / subsidy_interval;

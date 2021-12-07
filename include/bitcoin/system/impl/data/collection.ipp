@@ -225,7 +225,7 @@ bool is_sorted(const Collection& list) noexcept
 // C++17: Parallel policy for std::sort, std::erase.
 // Collection requires erase and shrink_to_fit methods (vector).
 template <typename Collection>
-Collection& distinct(Collection& list) noexcept
+Collection distinct(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
@@ -254,7 +254,9 @@ Collection difference(const Collection& minuend,
     const Collection& subtrahend) noexcept
 {
     Collection copy;
-    copy.reserve(std::size(minuend));
+
+    // Replaced std::size due absence, C++17 feature
+    copy.reserve(minuend.size());
 
     // Linear copy since creating a copy, more efficient than multiple erases.
     for (const auto& min: minuend)
@@ -267,7 +269,7 @@ Collection difference(const Collection& minuend,
 
 // C++17: Parallel policy for std::reverse.
 template <typename Collection>
-Collection& reverse(Collection& list) noexcept
+Collection reverse(Collection&& list) noexcept
 {
     std::reverse(std::begin(list), std::end(list));
     return list;
@@ -283,7 +285,7 @@ Collection reverse_copy(const Collection& list) noexcept
 // TODO: provide optional comparison function parameter.
 // C++17: Parallel policy for std::sort.
 template <typename Collection>
-Collection& sort(Collection& list) noexcept
+Collection sort(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     return list;

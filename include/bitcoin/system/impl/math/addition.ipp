@@ -21,6 +21,7 @@
 
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {

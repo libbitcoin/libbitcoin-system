@@ -100,7 +100,7 @@ script::script(reader& source, bool prefix)
 
 // protected
 script::script(operation::list&& ops, bool valid)
-  : ops_(std::move(ops)), valid_(true)
+  : ops_(std::move(ops)), valid_(valid)
 {
 }
 
