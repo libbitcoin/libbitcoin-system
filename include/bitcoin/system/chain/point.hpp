@@ -54,7 +54,7 @@ public:
     point(hash_digest&& hash, uint32_t index);
     point(const hash_digest& hash, uint32_t index);
 
-    point(const data_chunk& data);
+    point(const data_slice& data);
     point(std::istream& stream);
     point(reader& source);
 
@@ -73,7 +73,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_slice& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 

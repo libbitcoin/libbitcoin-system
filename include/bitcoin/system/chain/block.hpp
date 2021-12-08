@@ -57,7 +57,7 @@ public:
     block(chain::header&& header, transaction::list&& txs);
     block(const chain::header& header, const transaction::list& txs);
 
-    block(const data_chunk& data, bool witness);
+    block(const data_slice& data, bool witness);
     block(std::istream& stream, bool witness);
     block(reader& source, bool witness);
 
@@ -73,7 +73,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data, bool witness);
+    bool from_data(const data_slice& data, bool witness);
     bool from_data(std::istream& stream, bool witness);
     bool from_data(reader& source, bool witness);
 

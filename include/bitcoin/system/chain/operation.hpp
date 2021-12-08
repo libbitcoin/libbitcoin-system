@@ -55,10 +55,10 @@ public:
     /// These construct from push-data, not serialized operations (no codes).
     /// When minimal is true the data is interpreted as minimally-encoded push.
     operation(data_chunk&& push_data, bool minimal);
-    operation(const data_chunk& push_data, bool minimal);
+    operation(const data_slice& push_data, bool minimal);
 
     /// These deserialize operations (with codes), not from push-data.
-    operation(const data_chunk& op_data);
+    operation(const data_slice& op_data);
     operation(std::istream& stream);
     operation(reader& source);
 
@@ -75,7 +75,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// These serialize operations (with codes), not to push-data.
-    bool from_data(const data_chunk& encoded);
+    bool from_data(const data_slice& encoded);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 

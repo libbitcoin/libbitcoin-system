@@ -70,7 +70,7 @@ witness::witness(const data_stack& stack)
 {
 }
 
-witness::witness(const data_chunk& encoded, bool prefix)
+witness::witness(const data_slice& encoded, bool prefix)
 {
     from_data(encoded, prefix);
 }
@@ -144,7 +144,7 @@ static data_chunk read_element(reader& source)
     return source.read_bytes(size);
 }
 
-bool witness::from_data(const data_chunk& encoded, bool prefix)
+bool witness::from_data(const data_slice& encoded, bool prefix)
 {
     stream::in::copy istream(encoded);
     return from_data(istream, prefix);

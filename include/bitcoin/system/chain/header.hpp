@@ -59,7 +59,7 @@ public:
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
 
-    header(const data_chunk& data);
+    header(const data_slice& data);
     header(std::istream& stream);
     header(reader& source);
 
@@ -75,7 +75,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_slice& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 

@@ -46,6 +46,7 @@ public:
     }
 
     operator const data_chunk&() const;
+    operator data_slice() const;
 
     friend std::istream& operator>>(std::istream& input,
         base16& argument);

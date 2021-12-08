@@ -53,7 +53,7 @@ public:
     output(uint64_t value, chain::script&& script);
     output(uint64_t value, const chain::script& script);
 
-    output(const data_chunk& data);
+    output(const data_slice& data);
     output(std::istream& stream);
     output(reader& source);
 
@@ -69,7 +69,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_slice& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 

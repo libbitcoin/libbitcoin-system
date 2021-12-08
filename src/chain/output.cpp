@@ -64,7 +64,7 @@ output::output(uint64_t value, const chain::script& script)
 {
 }
 
-output::output(const data_chunk& data)
+output::output(const data_slice& data)
 {
     from_data(data);
 }
@@ -124,7 +124,7 @@ bool output::operator!=(const output& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool output::from_data(const data_chunk& data)
+bool output::from_data(const data_slice& data)
 {
     stream::in::copy istream(data);
     return from_data(istream);

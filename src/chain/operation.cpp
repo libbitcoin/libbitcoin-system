@@ -71,7 +71,7 @@ operation::operation(data_chunk&& uncoded, bool minimal)
     }
 }
 
-operation::operation(const data_chunk& uncoded, bool minimal)
+operation::operation(const data_slice& uncoded, bool minimal)
   : operation(opcode_from_data(uncoded, minimal), uncoded, false)
 {
     // Minimal interpretation affects only single byte push data.
@@ -83,7 +83,7 @@ operation::operation(const data_chunk& uncoded, bool minimal)
     }
 }
 
-operation::operation(const data_chunk& encoded)
+operation::operation(const data_slice& encoded)
 {
     from_data(encoded);
 }
@@ -148,7 +148,7 @@ bool operation::operator!=(const operation& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool operation::from_data(const data_chunk& encoded)
+bool operation::from_data(const data_slice& encoded)
 {
     stream::in::copy istream(encoded);
     return from_data(istream);

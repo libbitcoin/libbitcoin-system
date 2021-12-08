@@ -79,7 +79,7 @@ block::block(chain::header&& header, transaction::list&& txs)
 {
 }
 
-block::block(const data_chunk& data, bool witness)
+block::block(const data_slice& data, bool witness)
 {
     from_data(data, witness);
 }
@@ -144,7 +144,7 @@ bool block::operator!=(const block& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool block::from_data(const data_chunk& data, bool witness)
+bool block::from_data(const data_slice& data, bool witness)
 {
     stream::in::copy stream(data);
     return from_data(stream, witness);

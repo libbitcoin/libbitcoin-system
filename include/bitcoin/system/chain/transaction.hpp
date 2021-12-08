@@ -57,9 +57,9 @@ public:
     transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
         const output::list& outputs);
     
-    transaction(const data_chunk& data, bool witness=false);
-    transaction(std::istream& stream, bool witness=false);
-    transaction(reader& source, bool witness=false);
+    transaction(const data_slice& data, bool witness);
+    transaction(std::istream& stream, bool witness);
+    transaction(reader& source, bool witness);
 
     // Operators.
     // ------------------------------------------------------------------------
@@ -73,7 +73,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data, bool witness);
+    bool from_data(const data_slice& data, bool witness);
     bool from_data(std::istream& stream, bool witness);
     bool from_data(reader& source, bool witness);
 

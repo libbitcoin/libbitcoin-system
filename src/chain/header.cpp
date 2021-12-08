@@ -86,7 +86,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
-header::header(const data_chunk& data)
+header::header(const data_slice& data)
 {
     from_data(data);
 }
@@ -174,7 +174,7 @@ bool header::operator!=(const header& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool header::from_data(const data_chunk& data)
+bool header::from_data(const data_slice& data)
 {
     read::bytes::copy reader(data);
     return from_data(reader);
