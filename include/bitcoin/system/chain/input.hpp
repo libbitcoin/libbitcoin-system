@@ -59,7 +59,7 @@ public:
     input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
 
-    input(const data_chunk& data);
+    input(const data_slice& data);
     input(std::istream& stream);
     input(reader& source);
 
@@ -75,7 +75,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_slice& data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
@@ -110,16 +110,18 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const;
 
     /// Public mutable metadata access, not copied or compared.
-    chain::prevout prevout;
+    mutable chain::prevout prevout;
 
 protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
     input(chain::point&& point, chain::script&& script,
-        chain::witness&& witness, uint32_t sequence, bool valid);
+        chain::witness&& witness, uint32_t sequence, bool valid,
+        chain::prevout&& prevout);
     input(const chain::point& point, const chain::script& script,
-        const chain::witness& witness, uint32_t sequence, bool valid);
+        const chain::witness& witness, uint32_t sequence, bool valid,
+        const chain::prevout& prevout);
 
     void reset();
 

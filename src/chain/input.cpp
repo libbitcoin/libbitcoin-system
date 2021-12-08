@@ -39,7 +39,7 @@ namespace chain {
 
 // Valid default used in signature hashing.
 input::input()
-  : input({}, {}, {}, 0, true)
+  : input({}, {}, {}, 0)
 {
 }
 
@@ -49,7 +49,8 @@ input::input(input&& other)
       std::move(other.script_),
       std::move(other.witness_),
       other.sequence_,
-      other.valid_)
+      other.valid_,
+      other.prevout)
 {
 }
 
@@ -59,35 +60,36 @@ input::input(const input& other)
       other.script_,
       other.witness_,
       other.sequence_,
-      other.valid_)
+      other.valid_,
+      other.prevout)
 {
 }
 
 input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
-  : input(std::move(point), std::move(script), {}, sequence, true)
+  : input(std::move(point), std::move(script), {}, sequence, true, {})
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     uint32_t sequence)
-  : input(point, script, {}, sequence, true)
+  : input(point, script, {}, sequence, true, {})
 {
 }
 
 input::input(chain::point&& point, chain::script&& script,
     chain::witness&& witness, uint32_t sequence)
   : input(std::move(point), std::move(script), std::move(witness), sequence,
-      true)
+      true, {})
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence)
-  : input(point, script, witness, sequence, true)
+  : input(point, script, witness, sequence, true, {})
 {
 }
 
-input::input(const data_chunk& data)
+input::input(const data_slice& data)
 {
     from_data(data);
 }
@@ -104,25 +106,27 @@ input::input(reader& source)
 
 // protected
 input::input(chain::point&& point, chain::script&& script,
-    chain::witness&& witness, uint32_t sequence, bool valid)
+    chain::witness&& witness, uint32_t sequence, bool valid,
+    chain::prevout&& prevout)
   : point_(std::move(point)),
     script_(std::move(script)),
     witness_(std::move(witness)),
     sequence_(sequence),
     valid_(valid),
-    prevout{}
+    prevout(std::move(prevout))
 {
 }
 
 // protected
 input::input(const chain::point& point, const chain::script& script,
-    const chain::witness& witness, uint32_t sequence, bool valid)
+    const chain::witness& witness, uint32_t sequence, bool valid,
+    const chain::prevout& prevout)
   : point_(point),
     script_(script),
     witness_(witness),
     sequence_(sequence),
     valid_(valid),
-    prevout{}
+    prevout(prevout)
 {
 }
 
@@ -165,7 +169,7 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool input::from_data(const data_chunk& data)
+bool input::from_data(const data_slice& data)
 {
     read::bytes::copy reader(data);
     return from_data(reader);
@@ -201,6 +205,7 @@ void input::reset()
     witness_.reset();
     sequence_ = 0;
     valid_ = false;
+    prevout = {};
 }
 
 bool input::is_valid() const
