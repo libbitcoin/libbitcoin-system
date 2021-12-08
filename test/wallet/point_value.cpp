@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(point_value__default_constructor__always__zero_value)
 {
     static const point_value instance;
     BOOST_REQUIRE(instance.hash() == null_hash);
-    BOOST_REQUIRE_EQUAL(instance.index(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.index(), chain::point::null_index);
     BOOST_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(point_value__move_constructor__always__expected)
 {
     point_value other{ { hash1, 42 }, 34 };
     const point_value instance(std::move(other));
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(),  hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(point_value__copy_constructor__always__expected)
 {
     static const point_value other{ { hash1, 42 }, 34 };
     const point_value instance(other);
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(), hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(point_value__constructor4__always__expected)
 {
     chain::point foo{ hash1, 42 };
     static const point_value instance(std::move(foo), 34);
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(), hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(point_value__constructor5__always__expected)
 {
     static const chain::point foo{ hash1, 42 };
     static const point_value instance(foo, 34);
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(), hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(point_value__move_assign__always__expected)
 {
     point_value other{ { hash1, 42 }, 34 };
     const auto instance = std::move(other);
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(), hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(point_value__copy_assign__always__expected)
 {
     static const point_value other{ { hash1, 42 }, 34 };
     const auto instance = other;
-    BOOST_REQUIRE(instance.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance.hash(), hash1);
     BOOST_REQUIRE_EQUAL(instance.index(), 42u);
     BOOST_REQUIRE_EQUAL(instance.value(), 34u);
 }
@@ -95,11 +95,11 @@ BOOST_AUTO_TEST_CASE(point_value__swap__always__expected_reversal)
     // Must be unqualified (no std namespace).
     swap(instance1, instance2);
 
-    BOOST_CHECK(instance2.hash() == hash1);
+    BOOST_REQUIRE_EQUAL(instance2.hash(), hash1);
     BOOST_CHECK_EQUAL(instance2.index(), 42u);
     BOOST_CHECK_EQUAL(instance2.value(), 34u);
 
-    BOOST_CHECK(instance1.hash() == null_hash);
+    BOOST_REQUIRE_EQUAL(instance1.hash(), null_hash);
     BOOST_CHECK_EQUAL(instance1.index(), 43u);
     BOOST_CHECK_EQUAL(instance1.value(), 35u);
 }

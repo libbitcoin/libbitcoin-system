@@ -37,7 +37,7 @@ const uint32_t point::null_index = no_previous_output;
 
 // Valid default used in signature hashing.
 point::point()
-  : point(null_hash, 0, true)
+  : point(null_hash, point::null_index, true)
 {
 }
 
@@ -61,7 +61,7 @@ point::point(const hash_digest& hash, uint32_t index)
 {
 }
 
-point::point(const data_chunk& data)
+point::point(const data_slice& data)
 {
     from_data(data);
 }
@@ -127,7 +127,7 @@ bool point::operator<(const point& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool point::from_data(const data_chunk& data)
+bool point::from_data(const data_slice& data)
 {
     stream::in::copy istream(data);
     return from_data(istream);
