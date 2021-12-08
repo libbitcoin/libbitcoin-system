@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__public_compressed_from_uncompre
 {
     ec_uncompressed point;
     BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
-    const payment_address address({ point, true }, 0x6f);
+    const payment_address address(ec_public{ point, true }, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
 }
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__public_uncompressed_from_compre
 {
     ec_compressed point;
     BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address({ point, false }, 0x6f);
+    const payment_address address(ec_public{ point, false }, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
 }

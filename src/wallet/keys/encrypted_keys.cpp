@@ -66,7 +66,7 @@ static bool address_salt(ek_salt& salt, const payment_address& address)
 static bool address_salt(ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    payment_address address({ point, compressed }, version);
+    payment_address address(ec_public{ point, compressed }, version);
     return address ? address_salt(salt, address) : false;
 }
 
@@ -87,7 +87,7 @@ static bool address_validate(const ek_salt& salt,
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    payment_address address({ point, compressed }, version);
+    payment_address address(ec_public{ point, compressed }, version);
     return address ? address_validate(salt, address) : false;
 }
 
