@@ -31,6 +31,9 @@ class BC_API prevout
   : public output
 {
 public:
+    /// Use base class constructors.
+    using chain::output::output;
+
     //*************************************************************************
     // CONSENSUS: 
     // A height of zero is immature (unspendable) despite unspent state.
