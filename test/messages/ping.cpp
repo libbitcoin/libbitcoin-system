@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(ping__factory_3__bip31_version_round_trip__expected_nonce)
     BOOST_REQUIRE(result == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__nonce_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(ping__nonce_accessor__always__initialized_value)
 {
     uint64_t value = 43564u;
     messages::ping instance(value);
@@ -219,28 +219,28 @@ BOOST_AUTO_TEST_CASE(ping__operator_assign_equals__always__matches_equivalent)
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__duplicates__true)
 {
     const messages::ping expected(4543234u);
     messages::ping instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(ping__operator_boolean_equals__differs__false)
 {
     const messages::ping expected(547553u);
     messages::ping instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(ping__operator_boolean_not_equals__duplicates__false)
 {
     const messages::ping expected(653786u);
     messages::ping instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(ping__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(ping__operator_boolean_not_equals__differs__true)
 {
     const messages::ping expected(89764u);
     messages::ping instance;

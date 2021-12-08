@@ -111,19 +111,19 @@ BOOST_AUTO_TEST_CASE(integer__uint256_constructor_uint32__maximum__equals_maximu
 // hash
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(integer__uint256_hash__default__returns_null_hash)
+BOOST_AUTO_TEST_CASE(integer__uint256_hash__default__null_hash)
 {
     static const uint256_t value;
     BOOST_REQUIRE_EQUAL(value, 0);
 }
 
-BOOST_AUTO_TEST_CASE(integer__uint256_hash__1__returns_unit_hash)
+BOOST_AUTO_TEST_CASE(integer__uint256_hash__1__unit_hash)
 {
     static const uint256_t value("0x0000000000000000000000000000000000000000000000000000000000000001");
     BOOST_REQUIRE_EQUAL(value, 1);
 }
 
-BOOST_AUTO_TEST_CASE(integer__uint256_hash__negative_1__returns_negative_zero_hash)
+BOOST_AUTO_TEST_CASE(integer__uint256_hash__negative_1__negative_zero_hash)
 {
     BOOST_REQUIRE_EQUAL(negative_zero_hash, uint256_t("0x8000000000000000000000000000000000000000000000000000000000000000"));
 }

@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(network_address__factory_3__with_timestamp__success)
         result.serialized_size(messages::version::level::minimum, true));
 }
 
-BOOST_AUTO_TEST_CASE(network_address__timestamp_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(network_address__timestamp_accessor__always__initialized_value)
 {
     const uint32_t timestamp = 734678u;
     messages::network_address instance(
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(network_address__timestamp_setter__roundtrip__success)
     BOOST_REQUIRE(timestamp == instance.timestamp());
 }
 
-BOOST_AUTO_TEST_CASE(network_address__services_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(network_address__services_accessor__always__initialized_value)
 {
     const uint32_t services = 5357534u;
     messages::network_address instance(
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(network_address__services_setter__roundtrip__success)
     BOOST_REQUIRE(services == instance.services());
 }
 
-BOOST_AUTO_TEST_CASE(network_address__ip_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(network_address__ip_accessor__always__initialized_value)
 {
     const messages::ip_address ip = base16_array("127544abcdefa7b6d3e91486c57000aa");
 
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(network_address__ip_setter_2__roundtrip__success)
     BOOST_REQUIRE(ip == instance.ip());
 }
 
-BOOST_AUTO_TEST_CASE(network_address__port_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(network_address__port_accessor__always__initialized_value)
 {
     const uint16_t port = 123u;
     messages::network_address instance(
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_assign_equals_2__always__matches_
     BOOST_REQUIRE(value == instance);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__true)
 {
     const messages::network_address expected(
         14356u,
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__duplicates__retur
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp__returns_true)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp__true)
 {
     const messages::network_address expected(
         14356u,
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs_timestamp
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__false)
 {
     const messages::network_address expected(
         14356u,
@@ -417,7 +417,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_equals__differs__returns_
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__duplicates__false)
 {
     const messages::network_address expected(
         14356u,
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__duplicates__r
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs_timestamp__returns_false)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs_timestamp__false)
 {
     const messages::network_address expected(
         14356u,
@@ -444,7 +444,7 @@ BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs_times
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(network_address__operator_boolean_not_equals__differs__true)
 {
     const messages::network_address expected(
         14356u,

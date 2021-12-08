@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(operation__operator_assign_equals_2__always__matches_equiva
 
 // comparison
 
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__duplicates__true)
 {
     operation alpha;
     operation beta;
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__duplicates__returns_tru
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__differs__false)
 {
     operation alpha;
     operation beta;
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__duplicates__false)
 {
     operation alpha;
     operation beta;
@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__duplicates__returns
     BOOST_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__differs__true)
 {
     operation alpha;
     operation beta;

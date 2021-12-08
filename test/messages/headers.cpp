@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(headers__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(result.serialized_size(version), expected.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(headers__elements_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(headers__elements_accessor_1__always__initialized_value)
 {
     const header::list expected
     {
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(headers__elements_accessor_1__always__returns_initialized_v
     BOOST_REQUIRE(instance.elements() == expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__elements_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(headers__elements_accessor_2__always__initialized_value)
 {
     const header::list expected
     {
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_assign_equals__always__matches_equivalent
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__duplicates__true)
 {
     const messages::headers expected(
     {
@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__differs__false)
 {
     const messages::headers expected(
     {
@@ -462,7 +462,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__duplicates__false)
 {
     const messages::headers expected(
     {
@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__duplicates__returns_f
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__differs__true)
 {
     const messages::headers expected(
     {
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE(headers__operator_boolean_not_equals__differs__returns_true
     BOOST_REQUIRE(instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__to_hashes__empty__returns_empty_list)
+BOOST_AUTO_TEST_CASE(headers__to_hashes__empty__empty_list)
 {
     messages::headers instance;
     hash_list result;
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(headers__to_hashes__empty__returns_empty_list)
     BOOST_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__returns_header_hash_list)
+BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__header_hash_list)
 {
     const hash_list expected
     {
@@ -590,7 +590,7 @@ BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__returns_header_hash_list)
     BOOST_REQUIRE(result == expected);
 }
 
-BOOST_AUTO_TEST_CASE(headers__to_inventory__empty__returns_empty_list)
+BOOST_AUTO_TEST_CASE(headers__to_inventory__empty__empty_list)
 {
     messages::headers instance;
     inventory_vector::list result;
@@ -598,7 +598,7 @@ BOOST_AUTO_TEST_CASE(headers__to_inventory__empty__returns_empty_list)
     BOOST_REQUIRE_EQUAL(0, result.size());
 }
 
-BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__returns_header_hash_inventory_list)
+BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__header_hash_inventory_list)
 {
     const inventory_vector::list expected
     {

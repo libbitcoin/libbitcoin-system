@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(inventory__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version), result.serialized_size(version));
 }
 
-BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__initialized_value)
 {
     const messages::inventory_vector::list values =
     {
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__returns_initiali
     BOOST_REQUIRE(values == instance.inventories());
 }
 
-BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_2__always__initialized_value)
 {
     const messages::inventory_vector::list values =
     {
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_assign_equals__always__matches_equivale
     BOOST_REQUIRE(elements == instance.inventories());
 }
 
-BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__duplicates__true)
 {
     const messages::inventory expected(
     {
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__duplicates__returns_tru
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__differs__false)
 {
     const messages::inventory expected(
     {
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__duplicates__false)
 {
     const messages::inventory expected(
     {
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__duplicates__returns
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__differs__true)
 {
     const messages::inventory expected(
     {
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__differs__returns_tr
     BOOST_REQUIRE(instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__count__no_matching_type__returns_zero)
+BOOST_AUTO_TEST_CASE(inventory__count__no_matching_type__zero)
 {
     messages::inventory instance(
     {
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(inventory__count__no_matching_type__returns_zero)
         instance.count(messages::inventory_vector::type_id::block));
 }
 
-BOOST_AUTO_TEST_CASE(inventory__count__matching_type__returns_count)
+BOOST_AUTO_TEST_CASE(inventory__count__matching_type__count)
 {
     messages::inventory instance(
     {
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(inventory__count__matching_type__returns_count)
         instance.count(messages::inventory_vector::type_id::error));
 }
 
-BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_empty_list)
+BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__empty_list)
 {
     const hash_list hashes = {};
 
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_empty_list)
     BOOST_REQUIRE(hashes == result);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_hashes)
+BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__hashes)
 {
     const hash_list hashes = {
         base16_hash("1111111111111111111111111111111111111111111111111111111111111111"),
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__returns_hashes)
     BOOST_REQUIRE(hashes == result);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__returns_empty_list)
+BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__empty_list)
 {
     const messages::inventory_vector::list expected = {};
 
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__returns_empty_list)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__returns_matches)
+BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__matches)
 {
     const messages::inventory_vector::list expected = {
         messages::inventory_vector(messages::inventory_vector::type_id::error,

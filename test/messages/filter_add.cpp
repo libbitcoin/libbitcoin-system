@@ -163,14 +163,14 @@ BOOST_AUTO_TEST_CASE(filter_add__factory_3__valid_input__success)
         result.serialized_size(messages::version::level::maximum));
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__data_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_add__data_accessor_1__always__initialized_value)
 {
     const data_chunk value = { 0x0f, 0xf0, 0x55, 0xaa };
     messages::filter_add instance(value);
     BOOST_REQUIRE(value == instance.data());
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__data_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_add__data_accessor_2__always__initialized_value)
 {
     const data_chunk value = { 0x0f, 0xf0, 0x55, 0xaa };
     const messages::filter_add instance(value);
@@ -208,28 +208,28 @@ BOOST_AUTO_TEST_CASE(filter_add__operator_assign_equals__always__matches_equival
     BOOST_REQUIRE(data == instance.data());
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__duplicates__true)
 {
     const messages::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     messages::filter_add instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_equals__differs__false)
 {
     const messages::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     messages::filter_add instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_not_equals__duplicates__false)
 {
     const messages::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     messages::filter_add instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(filter_add__operator_boolean_not_equals__differs__true)
 {
     const messages::filter_add expected({ 0x0f, 0xf0, 0x55, 0xaa });
     messages::filter_add instance;

@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::compact_filter::version_minimum), result.serialized_size(messages::compact_filter::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__filter_type_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter__filter_type_accessor__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_type_setter__roundtrip__success)
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_1__always__returns_init
     BOOST_REQUIRE(block_hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter__block_hash_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__block_hash_setter_2__roundtrip__success)
     BOOST_REQUIRE(block_hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_1__always__returns_initiali
     BOOST_REQUIRE(filter == instance.filter());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter__filter_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest block_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_assign_equals__always__matches_equ
     BOOST_REQUIRE(filter == instance.filter());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__duplicates__true)
 {
     const messages::compact_filter expected(
         19u,
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__duplicates__return
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__differs__false)
 {
     const messages::compact_filter expected(
         19u,
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_equals__differs__returns_f
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__duplicates__false)
 {
     const messages::compact_filter expected(
         19u,
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__duplicates__re
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter__operator_boolean_not_equals__differs__true)
 {
     const messages::compact_filter expected(
         19u,

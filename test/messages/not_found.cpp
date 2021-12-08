@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_assign_equals__always__matches_equivale
     BOOST_REQUIRE(elements == instance.inventories());
 }
 
-BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__duplicates__true)
 {
     const messages::not_found expected(
     {
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__duplicates__returns_tru
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__differs__false)
 {
     const messages::not_found expected(
     {
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__duplicates__false)
 {
     const messages::not_found expected(
     {
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__duplicates__returns
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__differs__true)
 {
     const messages::not_found expected(
     {

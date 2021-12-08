@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_assign_equals__always__matches_equivalen
     BOOST_REQUIRE(elements == instance.inventories());
 }
 
-BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__true)
 {
     static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__duplicates__returns_true
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__false)
 {
     static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__false)
 {
     static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__duplicates__returns_
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(get_data__operator_boolean_not_equals__differs__true)
 {
     static const auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const get_data expected

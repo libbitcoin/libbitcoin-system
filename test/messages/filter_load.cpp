@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(filter_load__factory_3__valid_input__success)
         result.serialized_size(messages::version::level::maximum));
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_1__always__initialized_value)
 {
     const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_1__always__returns_initialized
     BOOST_REQUIRE(filter == instance.filter());
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_load__filter_accessor_2__always__initialized_value)
 {
     const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(filter_load__filter_setter_2__roundtrip__success)
     BOOST_REQUIRE(filter == instance.filter());
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__hash_functions_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_load__hash_functions_accessor__always__initialized_value)
 {
     const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(filter_load__hash_functions_setter__roundtrip__success)
     BOOST_REQUIRE(hash_functions == instance.hash_functions());
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__tweak_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_load__tweak_accessor__always__initialized_value)
 {
     const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(filter_load__tweak_setter__roundtrip__success)
     BOOST_REQUIRE(tweak == instance.tweak());
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__flags_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(filter_load__flags_accessor__always__initialized_value)
 {
     const data_chunk filter{ 0x0f, 0xf0, 0x55, 0xaa };
     uint32_t hash_functions = 48u;
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_assign_equals__always__matches_equiva
     BOOST_REQUIRE_EQUAL(flags, instance.flags());
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__true)
 {
     const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__duplicates__returns_t
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__false)
 {
     const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_equals__differs__returns_fals
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__duplicates__false)
 {
     const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__duplicates__retur
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(filter_load__operator_boolean_not_equals__differs__true)
 {
     const messages::filter_load expected({ 0x0f, 0xf0, 0x55, 0xaa }, 643u, 575u, 0xaa);
 

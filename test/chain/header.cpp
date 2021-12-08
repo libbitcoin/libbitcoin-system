@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(header__version_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__version_accessor__always__initialized_value)
 {
     const uint32_t value = 11234u;
     const chain::header instance(
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(header__version_accessor__always__returns_initialized_value
 }
 
 
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__initialized_value)
 {
     const auto value = base16_hash("abababababababababababababababababababababababababababababababab");
     chain::header instance(
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__returns_ini
     BOOST_REQUIRE(value == instance.previous_block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__initialized_value)
 {
     const auto value = base16_hash("abababababababababababababababababababababababababababababababab");
     const chain::header instance(
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__returns_ini
     BOOST_REQUIRE(value == instance.previous_block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__initialized_value)
 {
     const auto value = base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
     chain::header instance(
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__returns_initialized_valu
     BOOST_REQUIRE(value == instance.merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__initialized_value)
 {
     const auto value = base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
     const chain::header instance(
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__returns_initialized_valu
     BOOST_REQUIRE(value == instance.merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__initialized_value)
 {
     uint32_t value = 753234u;
     chain::header instance(
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__returns_initialized_val
     BOOST_REQUIRE_EQUAL(value, instance.timestamp());
 }
 
-BOOST_AUTO_TEST_CASE(header__bits_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__bits_accessor__always__initialized_value)
 {
     uint32_t value = 4356344u;
     chain::header instance(
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(header__bits_accessor__always__returns_initialized_value)
     BOOST_REQUIRE_EQUAL(value, instance.bits());
 }
 
-BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__initialized_value)
 {
     uint32_t value = 34564u;
     chain::header instance(
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 }
 
 // TODO: create test accessor.
-////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__returns_true)
+////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__true)
 ////{
 ////    const auto now = std::chrono::system_clock::now();
 ////    const auto now_time = std::chrono::system_clock::to_time_t(now);
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 ////    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__returns_false)
+////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__false)
 ////{
 ////    const auto now = std::chrono::system_clock::now();
 ////    const auto duration = std::chrono::hours(3);
@@ -303,14 +303,14 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 ////}
 
 // TODO: create test accessor.
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__returns_false)
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__false)
 ////{
 ////    const settings settings(chain::selection::mainnet);
 ////    chain::header instance{ {}, {}, {}, {}, settings.proof_of_work_limit + 1, {} };
 ////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__returns_false)
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__false)
 ////{
 ////    const settings settings(chain::selection::mainnet);
 ////    const chain::header instance(
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 ////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__returns_true)
+////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__true)
 ////{
 ////    const settings settings(chain::selection::mainnet);
 ////    const chain::header instance(
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 ////    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__returns_false)
+////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__false)
 ////{
 ////    const settings settings(chain::selection::mainnet);
 ////    const chain::header instance(
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__returns_initialized_value)
 ////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__returns_true)
+////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__true)
 ////{
 ////    const settings settings(chain::selection::mainnet);
 ////    const chain::header instance(
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__duplicates__true)
 {
     const chain::header expected(
         10u,
@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__differs__false)
 {
     const chain::header expected(
         10u,
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__duplicates__false)
 {
     const chain::header expected(
         10u,
@@ -440,7 +440,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__duplicates__returns_fa
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__differs__true)
 {
     const chain::header expected(
         10u,

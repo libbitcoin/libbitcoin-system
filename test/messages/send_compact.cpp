@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(send_compact__from_data_1__insufficient_version__failure)
     BOOST_REQUIRE(!result);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__high_bandwidth_mode_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(send_compact__high_bandwidth_mode_accessor__always__initialized_value)
 {
     const bool expected = true;
     const messages::send_compact instance(expected, 210u);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(send_compact__high_bandwidth_mode_setter__roundtrip__succes
     BOOST_REQUIRE_EQUAL(expected, instance.high_bandwidth_mode());
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__version_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(send_compact__version_accessor__always__initialized_value)
 {
     const uint64_t expected = 6548u;
     const messages::send_compact instance(false, expected);
@@ -165,28 +165,28 @@ BOOST_AUTO_TEST_CASE(send_compact__operator_assign_equals__always__matches_equiv
     BOOST_REQUIRE_EQUAL(version, instance.version());
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_equals__duplicates__true)
 {
     const messages::send_compact expected(false, 15234u);
     messages::send_compact instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_equals__differs__false)
 {
     const messages::send_compact expected(true, 979797u);
     messages::send_compact instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_not_equals__duplicates__false)
 {
     const messages::send_compact expected(true, 734678u);
     messages::send_compact instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(send_compact__operator_boolean_not_equals__differs__true)
 {
     const messages::send_compact expected(false, 5357534u);
     messages::send_compact instance;

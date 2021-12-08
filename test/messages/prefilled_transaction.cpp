@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_3__valid_input__success)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__index_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__index_accessor__always__initialized_value)
 {
     uint64_t index = 634u;
     chain::transaction tx(5, 23, {}, {});
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__index_setter__roundtrip__success)
     BOOST_REQUIRE(index == instance.index());
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__initialized_value)
 {
     uint64_t index = 634u;
     const chain::transaction tx(5, 23, {}, {});
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__returns_
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_2__always__initialized_value)
 {
     uint64_t index = 634u;
     const chain::transaction tx(5, 23, {}, {});
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_2__always__ma
     BOOST_REQUIRE(value == instance);
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates__true)
 {
     const messages::prefilled_transaction expected(
         1234u,
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates_
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__false)
 {
     const messages::prefilled_transaction expected(
         1234u,
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__re
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplicates__false)
 {
     const messages::prefilled_transaction expected(
         1234u,
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplica
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__differs__true)
 {
     const messages::prefilled_transaction expected(
         1234u,

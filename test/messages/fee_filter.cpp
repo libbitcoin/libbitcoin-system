@@ -133,28 +133,28 @@ BOOST_AUTO_TEST_CASE(fee_filter__operator_assign_equals__always__matches_equival
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_equals__duplicates__true)
 {
     const fee_filter expected(2453u);
     fee_filter instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_equals__differs__false)
 {
     const fee_filter expected(2453u);
     fee_filter instance;
     BOOST_REQUIRE(!(instance == expected));
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_not_equals__duplicates__false)
 {
     const fee_filter expected(2453u);
     fee_filter instance(expected);
     BOOST_REQUIRE(!(instance != expected));
 }
 
-BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(fee_filter__operator_boolean_not_equals__differs__true)
 {
     const fee_filter expected(2453u);
     fee_filter instance;

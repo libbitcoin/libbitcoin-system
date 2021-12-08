@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(header__operator_assign_equals_2__always__matches_equivalen
     BOOST_REQUIRE(value == instance);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__duplicates__true)
 {
     const chain::header expected(
         10u,
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__duplicates__returns_true
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__differs__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__differs__false)
 {
     const chain::header expected(
         10u,
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_1__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__duplicates__false)
 {
     const chain::header expected(
         10u,
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__duplicates__returns_
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__differs__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__differs__true)
 {
     const chain::header expected(
         10u,
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_1__differs__returns_tru
     BOOST_REQUIRE(instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__duplicates__true)
 {
     const messages::header expected(
         10u,
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__duplicates__returns_true
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__differs__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__differs__false)
 {
     const messages::header expected(
         10u,
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_equals_2__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__duplicates__false)
 {
     const messages::header expected(
         10u,
@@ -364,7 +364,7 @@ BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__duplicates__returns_
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__differs__returns_true)
+BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals_2__differs__true)
 {
     const messages::header expected(
         10u,

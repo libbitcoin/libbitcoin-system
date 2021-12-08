@@ -531,7 +531,7 @@ BOOST_AUTO_TEST_CASE(version__factory_3__valid_input__success)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(version__value_accessor__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__value_accessor__initialized_value)
 {
     const uint32_t expected = 210u;
     const messages::version instance
@@ -578,7 +578,7 @@ BOOST_AUTO_TEST_CASE(version__value_setter__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected, instance.value());
 }
 
-BOOST_AUTO_TEST_CASE(version__services_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__services_accessor__always__initialized_value)
 {
     const uint64_t expected = 1515u;
     const messages::version instance
@@ -625,7 +625,7 @@ BOOST_AUTO_TEST_CASE(version__services_setter__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected, instance.services());
 }
 
-BOOST_AUTO_TEST_CASE(version__timestamp_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__timestamp_accessor__always__initialized_value)
 {
     const uint64_t expected = 979797u;
     const messages::version instance
@@ -672,7 +672,7 @@ BOOST_AUTO_TEST_CASE(version__timestamp_setter__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected, instance.timestamp());
 }
 
-BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__initialized_value)
 {
     const messages::network_address expected
     {
@@ -757,7 +757,7 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_setter_2__roundtrip__success)
     BOOST_REQUIRE(result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__initialized_value)
 {
     const messages::network_address expected
     {
@@ -842,7 +842,7 @@ BOOST_AUTO_TEST_CASE(version__address_sender_setter_2__roundtrip__success)
     BOOST_REQUIRE(result.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__nonce_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__nonce_accessor__always__initialized_value)
 {
     const uint64_t expected = 13626u;
     const messages::version instance
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE(version__nonce_setter__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected, instance.nonce());
 }
 
-BOOST_AUTO_TEST_CASE(version__user_agent_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__user_agent_accessor__always__initialized_value)
 {
     const std::string expected = "MyUseRAgenT";
     const messages::version instance
@@ -945,7 +945,7 @@ BOOST_AUTO_TEST_CASE(version__user_agent_setter_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(false, instance.user_agent().empty());
 }
 
-BOOST_AUTO_TEST_CASE(version__start_height_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__start_height_accessor__always__initialized_value)
 {
     const uint32_t expected = 514u;
     const messages::version instance
@@ -992,7 +992,7 @@ BOOST_AUTO_TEST_CASE(version__start_height_setter__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected, instance.start_height());
 }
 
-BOOST_AUTO_TEST_CASE(version__relay_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(version__relay_accessor__always__initialized_value)
 {
     const bool expected = true;
     const messages::version instance
@@ -1083,7 +1083,7 @@ BOOST_AUTO_TEST_CASE(version__operator_assign_equals__always__matches_equivalent
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__true)
 {
     const messages::version expected
     (
@@ -1124,7 +1124,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__false)
 {
     const messages::version expected
     (
@@ -1165,7 +1165,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__duplicates__false)
 {
     const messages::version expected
     (
@@ -1206,7 +1206,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__duplicates__returns_f
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__differs__true)
 {
     const messages::version expected
     (

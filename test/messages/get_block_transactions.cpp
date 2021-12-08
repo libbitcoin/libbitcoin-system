@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__factory_3__valid_input__success)
         result.serialized_size(messages::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_1__always__initialized_value)
 {
     const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_1__always__retu
     BOOST_REQUIRE(hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_accessor_2__always__initialized_value)
 {
     const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__block_hash_setter_2__roundtrip__suc
     BOOST_REQUIRE(hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_1__always__initialized_value)
 {
     const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_1__always__returns
     BOOST_REQUIRE(indexes == instance.indexes());
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_block_transactions__indexes_accessor_2__always__initialized_value)
 {
     const hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const std::vector<uint64_t> indexes = { 1u, 3454u, 4234u, 75123u, 455323u };
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_assign_equals__always__mat
     BOOST_REQUIRE(indexes == instance.indexes());
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates__true)
 {
     const messages::get_block_transactions expected(
         base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__duplicates
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__false)
 {
     const messages::get_block_transactions expected(
         base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_equals__differs__r
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__duplicates__false)
 {
     const messages::get_block_transactions expected(
         base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__duplic
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(get_block_transactions__operator_boolean_not_equals__differs__true)
 {
     const messages::get_block_transactions expected(
         base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),

@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__factory_3__valid_input__success)
             messages::compact_filter_headers::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_type_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_type_accessor__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_type_setter__roundtrip__succ
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_accessor_1__always__retur
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__stop_hash_setter_2__roundtrip__succ
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -414,7 +414,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_accessor_1__
     BOOST_REQUIRE(previous_filter_header == instance.previous_filter_header());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__previous_filter_header_setter_2__ro
     BOOST_REQUIRE(previous_filter_header == instance.previous_filter_header());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_hashes_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_hashes_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_hashes_accessor_1__always__r
     BOOST_REQUIRE(filter_hashes == instance.filter_hashes());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_hashes_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__filter_hashes_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash(
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_assign_equals__always__mat
     BOOST_REQUIRE(filter_hashes == instance.filter_hashes());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__duplicates__true)
 {
     const messages::compact_filter_headers expected(
         19u,
@@ -577,7 +577,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__duplicates
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__differs__false)
 {
     const messages::compact_filter_headers expected(
         19u,
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_equals__differs__r
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_not_equals__duplicates__false)
 {
     const messages::compact_filter_headers expected(
         19u,
@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_not_equals__duplic
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter_headers__operator_boolean_not_equals__differs__true)
 {
     const messages::compact_filter_headers expected(
         19u,

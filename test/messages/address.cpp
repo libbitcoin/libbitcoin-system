@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(address__operator_assign_equals__always__matches_equivalent
     BOOST_REQUIRE(addresses == instance.addresses());
 }
 
-BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__duplicates__true)
 {
     const address expected(
     {
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__differs__false)
 {
     const address expected(
     {
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__duplicates__false)
 {
     const address expected(
     {
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__duplicates__returns_f
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(address__operator_boolean_not_equals__differs__true)
 {
     const address expected(
     {

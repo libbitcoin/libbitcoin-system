@@ -151,26 +151,26 @@
 ////    BOOST_REQUIRE(transactions == instance.transactions());
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__hash__always__returns_header_hash)
+////BOOST_AUTO_TEST_CASE(block__hash__always__header_hash)
 ////{
 ////    chain::block instance;
 ////    BOOST_REQUIRE(instance.header().hash() == instance.hash());
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__uninitialized__returns_true)
+////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__uninitialized__true)
 ////{
 ////    chain::block instance;
 ////    BOOST_REQUIRE(instance.is_valid_merkle_root());
 ////}
 ////
-////////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__non_empty_tx_invalid_block__returns_false)
+////////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__non_empty_tx_invalid_block__false)
 ////////{
 ////////    chain::block instance;
 ////////    instance.set_transactions(chain::transaction::list{ chain::transaction{} });
 ////////    BOOST_REQUIRE(!instance.is_valid_merkle_root());
 ////////}
 ////
-////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__returns_true)
+////BOOST_AUTO_TEST_CASE(block__is_valid_merkle_root__valid__true)
 ////{
 ////    const auto raw_block = to_chunk(base16_array(
 ////        "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a0000000"
@@ -365,7 +365,7 @@
 ////    BOOST_REQUIRE(header.merkle_root() == block100k.generate_merkle_root(false));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__header_accessor__always__returns_initialized_value)
+////BOOST_AUTO_TEST_CASE(block__header_accessor__always__initialized_value)
 ////{
 ////    const chain::header header(10u,
 ////        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -385,7 +385,7 @@
 ////    BOOST_REQUIRE(header == instance.header());
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__returns_initialized_value)
+////BOOST_AUTO_TEST_CASE(block__transactions_accessor__always__initialized_value)
 ////{
 ////    const chain::header header(10u,
 ////        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -433,7 +433,7 @@
 ////    BOOST_REQUIRE(transactions == instance.transactions());
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__duplicates__returns_true)
+////BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__duplicates__true)
 ////{
 ////    const chain::block expected(
 ////        chain::header(10u,
@@ -452,7 +452,7 @@
 ////    BOOST_REQUIRE(instance == expected);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__differs__returns_false)
+////BOOST_AUTO_TEST_CASE(block__operator_boolean_equals__differs__false)
 ////{
 ////    const chain::block expected(
 ////        chain::header(10u,
@@ -472,7 +472,7 @@
 ////    BOOST_REQUIRE(!(instance == expected));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__duplicates__returns_false)
+////BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__duplicates__false)
 ////{
 ////    const chain::block expected(
 ////        chain::header(10u,
@@ -491,7 +491,7 @@
 ////    BOOST_REQUIRE(!(instance != expected));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__differs__returns_true)
+////BOOST_AUTO_TEST_CASE(block__operator_boolean_not_equals__differs__true)
 ////{
 ////    const chain::block expected(
 ////        chain::header(10u,

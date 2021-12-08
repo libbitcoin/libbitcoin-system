@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(compact_block__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::compact_block::version_minimum), result.serialized_size(messages::compact_block::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__returns_initializ
     BOOST_REQUIRE(header == instance.header());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(compact_block__header_setter_2__roundtrip__success)
     BOOST_REQUIRE(value == instance.header());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__nonce_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__nonce_accessor__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(compact_block__nonce_setter__roundtrip__success)
     BOOST_REQUIRE(value == instance.nonce());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -424,7 +424,7 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__returns_initia
     BOOST_REQUIRE(short_ids == instance.short_ids());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_2__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_2__roundtrip__success)
     BOOST_REQUIRE(value == instance.short_ids());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__returns_ini
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_2__always__initialized_value)
 {
     const chain::header header(10u,
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -612,7 +612,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_assign_equals__always__matches_equi
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__true)
 {
     const messages::compact_block expected(
         chain::header(10u,
@@ -638,7 +638,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__returns
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__false)
 {
     const messages::compact_block expected(
         chain::header(10u,
@@ -664,7 +664,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__returns_fa
     BOOST_REQUIRE(!(instance == expected));
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__duplicates__false)
 {
     const messages::compact_block expected(
         chain::header(10u,
@@ -690,7 +690,7 @@ BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__duplicates__ret
     BOOST_REQUIRE(!(instance != expected));
 }
 
-BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__differs__true)
 {
     const messages::compact_block expected(
         chain::header(10u,

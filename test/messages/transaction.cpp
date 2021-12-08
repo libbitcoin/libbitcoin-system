@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_assign_equals_2__always__matches_equi
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__true)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__duplicates__returns
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__false)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_1__differs__returns_fa
     BOOST_REQUIRE_EQUAL(false, alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__false)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__duplicates__ret
     BOOST_REQUIRE_EQUAL(false, alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__true)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -521,7 +521,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_1__differs__return
     BOOST_REQUIRE(alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__true)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__duplicates__returns
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__false)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -576,7 +576,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_equals_2__differs__returns_fa
     BOOST_REQUIRE_EQUAL(false, alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__false)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -604,7 +604,7 @@ BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__duplicates__ret
     BOOST_REQUIRE_EQUAL(false, alpha != beta);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__differs__returns_true)
+BOOST_AUTO_TEST_CASE(transaction__operator_boolean_not_equals_2__differs__true)
 {
     data_chunk raw_tx = to_chunk(base16_array(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"

@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__cancel__roundtrip__success)
     BOOST_REQUIRE_EQUAL(value, instance.cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__returns_initi
     BOOST_REQUIRE(set_cancel == instance.set_cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__max_version__roundtrip__success)
     BOOST_REQUIRE_EQUAL(value, instance.max_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__returns_
     BOOST_REQUIRE(set_sub_version == instance.set_sub_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__priority__roundtrip__success)
     BOOST_REQUIRE_EQUAL(value, instance.priority());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -568,7 +568,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__returns_initiali
     BOOST_REQUIRE_EQUAL(comment, instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -611,7 +611,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_setter_2__roundtrip__success)
     BOOST_REQUIRE(value == instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -635,7 +635,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__returns_initi
     BOOST_REQUIRE_EQUAL(status_bar, instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -678,7 +678,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_setter_2__roundtrip__success)
     BOOST_REQUIRE(value == instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -702,7 +702,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__returns_initial
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__returns_initialized)
+BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -787,7 +787,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_assign_equals__always__matches_equi
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__duplicates__true)
 {
     const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
@@ -797,7 +797,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__duplicates__returns
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__differs__false)
 {
     const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
@@ -807,7 +807,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__differs__returns_fa
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__duplicates__false)
 {
     const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
@@ -817,7 +817,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__duplicates__ret
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__differs__true)
 {
     const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,

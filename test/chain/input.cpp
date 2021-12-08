@@ -29,13 +29,13 @@ const auto valid_raw_input = to_chunk(base16_array(
     "da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b"
     "8066c9c585f9ffffffff"));
 
-BOOST_AUTO_TEST_CASE(input__constructor_1__always__returns_default_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor_1__always__default_initialized)
 {
     input instance;
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__returns_input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__input_initialized)
 {
     const point previous_output{ null_hash, 5434u };
     script script;
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__returns_input_initialize
     BOOST_REQUIRE_EQUAL(sequence, instance.sequence());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__returns_input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__input_initialized)
 {
     const point previous_output{ null_hash, 5434u };
     script script;
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__returns_input_initialize
     BOOST_REQUIRE_EQUAL(sequence, instance.sequence());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_4__valid_input__returns_input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor_4__valid_input__input_initialized)
 {
     input expected;
     BOOST_REQUIRE(expected.from_data(valid_raw_input));
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(input__constructor_4__valid_input__returns_input_initialize
     BOOST_REQUIRE(expected == instance);
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_5__valid_input__returns_input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor_5__valid_input__input_initialized)
 {
     input expected;
     BOOST_REQUIRE(expected.from_data(valid_raw_input));
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_time_type_sequence_age_below_min
     BOOST_REQUIRE(!instance.is_locked(0, prevout.median_time_past + age_seconds));
 }
 
-BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__returns_script_sigops)
+BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__script_sigops)
 {
     const auto raw_script = base16_chunk("02acad");
     script script;
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__returns_script
     BOOST_REQUIRE_EQUAL(script.sigops(false), instance.signature_operations(false, false));
 }
 
-BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_active_cache_empty__returns_script_sigops)
+BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_active_cache_empty__script_sigops)
 {
     const auto raw_script = base16_chunk("02acad");
     script script;
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(input__operator_assign_equals_2__always__matches_equivalent
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__duplicates__true)
 {
     input alpha;
     input beta;
@@ -281,24 +281,24 @@ BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__differs__false)
 {
     input alpha;
     input beta;
     BOOST_REQUIRE(alpha.from_data(valid_raw_input));
-    BOOST_REQUIRE_EQUAL(false, alpha == beta);
+    BOOST_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__duplicates__false)
 {
     input alpha;
     input beta;
     BOOST_REQUIRE(alpha.from_data(valid_raw_input));
     BOOST_REQUIRE(beta.from_data(valid_raw_input));
-    BOOST_REQUIRE_EQUAL(false, alpha != beta);
+    BOOST_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__differs__true)
 {
     input alpha;
     input beta;

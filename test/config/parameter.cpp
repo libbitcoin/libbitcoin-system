@@ -87,55 +87,55 @@ static void load_test_arguments(argument_list& arguments)
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__position)
 
-BOOST_AUTO_TEST_CASE(parameter__position__short_and_long__returns_not_positional)
+BOOST_AUTO_TEST_CASE(parameter__position__short_and_long__not_positional)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::short_long);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), parameter::not_positional);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__short_only__returns_not_positional)
+BOOST_AUTO_TEST_CASE(parameter__position__short_only__not_positional)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::shorty);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), parameter::not_positional);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__long_only__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__long_only__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::longy);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 0);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__simple__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__simple__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::simple);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 1);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__defaulty__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__defaulty__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::defaulty);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 2);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__required__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__required__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::required);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 3);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__toggled__returns_not_positional)
+BOOST_AUTO_TEST_CASE(parameter__position__toggled__not_positional)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::toggled);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), parameter::not_positional);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__vector__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__vector__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::vector);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 4);
 }
 
-BOOST_AUTO_TEST_CASE(parameter__position__multitoken__returns_expected_position)
+BOOST_AUTO_TEST_CASE(parameter__position__multitoken__expected_position)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::multitoken);
     BOOST_REQUIRE_EQUAL(parameter.position(option, names), 5);
@@ -288,19 +288,19 @@ BOOST_AUTO_TEST_SUITE_END()
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__short_name)
 
-BOOST_AUTO_TEST_CASE(parameter__short_name__short_and_long__returns_short)
+BOOST_AUTO_TEST_CASE(parameter__short_name__short_and_long__short)
 {
     CONFIG_TEST_PARAMETER_OPTIONS_SETUP(opt::short_long);
     BOOST_REQUIRE_EQUAL(parameter.short_name(option), 's');
 }
 
-BOOST_AUTO_TEST_CASE(parameter__short_name__short_only__returns_short)
+BOOST_AUTO_TEST_CASE(parameter__short_name__short_only__short)
 {
     CONFIG_TEST_PARAMETER_OPTIONS_SETUP(opt::shorty);
     BOOST_REQUIRE_EQUAL(parameter.short_name(option), 'm');
 }
 
-BOOST_AUTO_TEST_CASE(parameter__short_name__long_only__returns_null_char)
+BOOST_AUTO_TEST_CASE(parameter__short_name__long_only__null_char)
 {
     CONFIG_TEST_PARAMETER_OPTIONS_SETUP(opt::longy);
     BOOST_REQUIRE_EQUAL(parameter.short_name(option), parameter::no_short_name);

@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::block_transactions::version_minimum), result.serialized_size(messages::block_transactions::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const chain::transaction::list transactions
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__returns_
     BOOST_REQUIRE(hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_2__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const chain::transaction::list transactions
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__block_hash_setter_2__roundtrip__success
     BOOST_REQUIRE(hash == instance.block_hash());
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const chain::transaction::list transactions
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__return
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_2__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     const chain::transaction::list transactions
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_assign_equals__always__matches
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__duplicates__true)
 {
     const messages::block_transactions expected(
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__duplicates__re
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__differs__false)
 {
     const messages::block_transactions expected(
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__differs__retur
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__duplicates__false)
 {
     const messages::block_transactions expected(
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
@@ -500,7 +500,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__duplicates
     BOOST_REQUIRE(!(instance != expected));
 }
 
-BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__differs__true)
 {
     const messages::block_transactions expected(
         base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),

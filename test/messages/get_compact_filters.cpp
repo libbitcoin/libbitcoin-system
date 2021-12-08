@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::get_compact_filters::version_minimum), result.serialized_size(messages::get_compact_filters::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__filter_type_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_compact_filters__filter_type_accessor__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__filter_type_setter__roundtrip__success
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__start_height_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_compact_filters__start_height_accessor__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__start_height_setter__roundtrip__succes
     BOOST_REQUIRE(start_height == instance.start_height());
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__stop_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_compact_filters__stop_hash_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__stop_hash_accessor_1__always__returns_
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__stop_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_compact_filters__stop_hash_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const uint32_t start_height = 64323u;
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__operator_assign_equals__always__matche
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__duplicates__true)
 {
     const messages::get_compact_filters expected(
         19u,
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__duplicates__r
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__differs__false)
 {
     const messages::get_compact_filters expected(
         19u,
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_equals__differs__retu
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_not_equals__duplicates__false)
 {
     const messages::get_compact_filters expected(
         19u,
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_not_equals__duplicate
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(get_compact_filters__operator_boolean_not_equals__differs__true)
 {
     const messages::get_compact_filters expected(
         19u,

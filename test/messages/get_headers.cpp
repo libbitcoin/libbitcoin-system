@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_assign_equals__always__matches_equiva
     BOOST_REQUIRE(stop == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__duplicates__true)
 {
     const messages::get_headers expected
     {
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__duplicates__returns_t
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__differs__false)
 {
     const messages::get_headers expected
     {
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_equals__differs__returns_fals
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__duplicates__false)
 {
     const messages::get_headers expected
     {
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__duplicates__retur
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(get_headers__operator_boolean_not_equals__differs__true)
 {
     const messages::get_headers expected
     {

@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__locator_size__10_plus_logs__expected)
     BOOST_REQUIRE_EQUAL(messages::get_blocks::locator_size(10 + 512), 10u + floored_log2(512u));
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_7__returns_7_through_0)
+BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_7__7_through_0)
 {
     const messages::get_blocks::indexes expected{ 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u };
     const auto top = 7u;
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_7__returns_7_through_0)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_138__returns_138_through_129_and_backed_off_to_0)
+BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_138__138_through_129_and_backed_off_to_0)
 {
     const messages::get_blocks::indexes expected
     {
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__locator_heights__top_138__returns_138_through_1
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_1__always__initialized_value)
 {
     hash_list expected = {
         base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_1__always__returns_initia
     BOOST_REQUIRE(expected == instance.start_hashes());
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_accessor_2__always__initialized_value)
 {
     hash_list expected = {
         base16_hash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__start_hashes_setter_2__roundtrip__success)
     BOOST_REQUIRE(values == instance.start_hashes());
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_1__always__initialized_value)
 {
     hash_digest expected = base16_hash(
         "7777777777777777777777777777777777777777777777777777777777777777");
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_1__always__returns_initializ
     BOOST_REQUIRE(expected == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(get_blocks__stop_hash_accessor_2__always__initialized_value)
 {
     hash_digest expected = base16_hash(
         "7777777777777777777777777777777777777777777777777777777777777777");
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_assign_equals__always__matches_equival
     BOOST_REQUIRE(stop == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__duplicates__true)
 {
     const messages::get_blocks expected
     {
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__duplicates__returns_tr
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__differs__false)
 {
     const messages::get_blocks expected
     {
@@ -420,7 +420,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_equals__differs__returns_false
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__duplicates__false)
 {
     const messages::get_blocks expected
     {
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__duplicates__return
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(get_blocks__operator_boolean_not_equals__differs__true)
 {
     const messages::get_blocks expected
     {

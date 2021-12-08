@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::compact_filter_checkpoint::version_minimum), result.serialized_size(messages::compact_filter_checkpoint::version_minimum));
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_type_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_type_accessor__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash("bb5b26270e07d26283238bcbefb622682a43e9c5bb51a8276b3309f7553d4040");
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_type_setter__roundtrip__s
     BOOST_REQUIRE(filter_type == instance.filter_type());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_1__always__re
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__stop_hash_setter_2__roundtrip__s
     BOOST_REQUIRE(stop_hash == instance.stop_hash());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_1__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_1__alway
     BOOST_REQUIRE(filter_headers == instance.filter_headers());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__filter_headers_accessor_2__always__initialized_value)
 {
     const uint8_t filter_type = 55u;
     const hash_digest stop_hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_assign_equals__always__
     BOOST_REQUIRE(filter_headers == instance.filter_headers());
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__duplicates__true)
 {
     const messages::compact_filter_checkpoint expected(
         19u,
@@ -448,7 +448,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__duplica
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__differs__false)
 {
     const messages::compact_filter_checkpoint expected(
         19u,
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_equals__differs
     BOOST_REQUIRE(!(instance == expected));
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__duplicates__false)
 {
     const messages::compact_filter_checkpoint expected(
         19u,
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__dup
     BOOST_REQUIRE(!(instance != expected));
 }
 
-BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(compact_filter_checkpoint__operator_boolean_not_equals__differs__true)
 {
     const messages::compact_filter_checkpoint expected(
         19u,

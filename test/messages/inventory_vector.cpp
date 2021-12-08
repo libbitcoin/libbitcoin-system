@@ -22,52 +22,52 @@ BOOST_AUTO_TEST_SUITE(inventory_vector_tests)
 
 using namespace bc::system::messages;
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_number__error__returns_0)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_number__error__0)
 {
     BOOST_REQUIRE_EQUAL(inventory_vector::to_number(inventory_vector::type_id::error), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_number__transaction__returns_1)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_number__transaction__1)
 {
     BOOST_REQUIRE_EQUAL(inventory_vector::to_number(inventory_vector::type_id::transaction), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_number__block__returns_2)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_number__block__2)
 {
     BOOST_REQUIRE_EQUAL(inventory_vector::to_number(inventory_vector::type_id::block), 2u);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_number__filtered_block__returns_3)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_number__filtered_block__3)
 {
     BOOST_REQUIRE_EQUAL(inventory_vector::to_number(inventory_vector::type_id::filtered_block), 3u);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_number__compact_block__returns_4)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_number__compact_block__4)
 {
     BOOST_REQUIRE_EQUAL(inventory_vector::to_number(inventory_vector::type_id::compact_block), 4u);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_type__0__returns_error)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_type__0__error)
 {
     BOOST_REQUIRE(inventory_vector::type_id::error == inventory_vector::to_type(0));
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_type__1__returns_transaction)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_type__1__transaction)
 {
     BOOST_REQUIRE(inventory_vector::type_id::transaction == inventory_vector::to_type(1));
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_type__2__returns_block)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_type__2__block)
 {
     BOOST_REQUIRE(inventory_vector::type_id::block == inventory_vector::to_type(2));
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_type__3__returns_filtered_block)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_type__3__filtered_block)
 {
     BOOST_REQUIRE(inventory_vector::type_id::filtered_block == inventory_vector::to_type(3));
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__to_type__4__returns_compact_block)
+BOOST_AUTO_TEST_CASE(inventory_vector__to_type__4__compact_block)
 {
     BOOST_REQUIRE(inventory_vector::type_id::compact_block == inventory_vector::to_type(4));
 }
@@ -254,49 +254,49 @@ BOOST_AUTO_TEST_CASE(inventory_vector__to_witness__transaction__expected)
     BOOST_REQUIRE(instance.type() == inventory_vector::type_id::witness_transaction);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__block__returns_true)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__block__true)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::block);
     BOOST_REQUIRE(instance.is_block_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__compact_block__returns_true)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__compact_block__true)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::compact_block);
     BOOST_REQUIRE(instance.is_block_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__filtered_block__returns_true)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__filtered_block__true)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::filtered_block);
     BOOST_REQUIRE(instance.is_block_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__non_block_type__returns_false)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_block_type__non_block_type__false)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::transaction);
     BOOST_REQUIRE_EQUAL(false, instance.is_block_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__transaction__returns_true)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__transaction__true)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::transaction);
     BOOST_REQUIRE(instance.is_transaction_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__non_transaction_type__returns_false)
+BOOST_AUTO_TEST_CASE(inventory_vector__is_transaction_type__non_transaction_type__false)
 {
     inventory_vector instance;
     instance.set_type(inventory_vector::type_id::block);
     BOOST_REQUIRE_EQUAL(false, instance.is_transaction_type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__type_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(inventory_vector__type_accessor__always__initialized_value)
 {
     inventory_vector::type_id type = inventory_vector::type_id::transaction;
     hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__type_setter__roundtrip__success)
     BOOST_REQUIRE(type == instance.type());
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__hash_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(inventory_vector__hash_accessor__always__initialized_value)
 {
     inventory_vector::type_id type = inventory_vector::type_id::transaction;
     hash_digest hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__operator_assign_equals_2__always__matches
     BOOST_REQUIRE(value == instance);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__duplicates__true)
 {
     const inventory_vector expected(
         inventory_vector::type_id::filtered_block,
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__duplicates__retu
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__differs__false)
 {
     const inventory_vector expected(
         inventory_vector::type_id::filtered_block,
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(inventory_vector__operator_boolean_equals__differs__returns
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__false)
 {
     const inventory_vector expected(
         inventory_vector::type_id::filtered_block,
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__returns_fa
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__true)
 {
     const inventory_vector expected(
         inventory_vector::type_id::filtered_block,

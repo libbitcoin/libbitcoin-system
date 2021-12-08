@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(reject__factory_3__valid_input__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(version_maximum), result.serialized_size(version_maximum));
 }
 
-BOOST_AUTO_TEST_CASE(reject__code_accessor__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__code_accessor__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(reject__code_setter__roundtrip__success)
     BOOST_REQUIRE(code == instance.code());
 }
 
-BOOST_AUTO_TEST_CASE(reject__message_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__message_accessor_1__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(reject__message_accessor_1__always__returns_initialized_val
     BOOST_REQUIRE_EQUAL(message, instance.message());
 }
 
-BOOST_AUTO_TEST_CASE(reject__message_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__message_accessor_2__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(reject__message_setter_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(duplicate, instance.message());
 }
 
-BOOST_AUTO_TEST_CASE(reject__reason_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__reason_accessor_1__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(reject__reason_accessor_1__always__returns_initialized_valu
     BOOST_REQUIRE_EQUAL(reason, instance.reason());
 }
 
-BOOST_AUTO_TEST_CASE(reject__reason_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__reason_accessor_2__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -421,7 +421,7 @@ BOOST_AUTO_TEST_CASE(reject__reason_setter_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(duplicate, instance.reason());
 }
 
-BOOST_AUTO_TEST_CASE(reject__data_accessor_1__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__data_accessor_1__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(reject__data_accessor_1__always__returns_initialized_value)
     BOOST_REQUIRE(data == instance.data());
 }
 
-BOOST_AUTO_TEST_CASE(reject__data_accessor_2__always__returns_initialized_value)
+BOOST_AUTO_TEST_CASE(reject__data_accessor_2__always__initialized_value)
 {
     auto code = messages::reject::reason_code::nonstandard;
     std::string message = "Alpha Beta";
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_assign_equals__always__matches_equivalent)
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__duplicates__returns_true)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__duplicates__true)
 {
     const messages::reject expected(
         messages::reject::reason_code::dust,
@@ -491,7 +491,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__duplicates__returns_true)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__differs__returns_false)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__differs__false)
 {
     const messages::reject expected(
         messages::reject::reason_code::dust,
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_equals__differs__returns_false)
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__returns_false)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__false)
 {
     const messages::reject expected(
         messages::reject::reason_code::dust,
@@ -517,7 +517,7 @@ BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__duplicates__returns_fa
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__returns_true)
+BOOST_AUTO_TEST_CASE(reject__operator_boolean_not_equals__differs__true)
 {
     const messages::reject expected(
         messages::reject::reason_code::dust,
