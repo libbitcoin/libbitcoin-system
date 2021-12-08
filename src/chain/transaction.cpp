@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <numeric>
 #include <type_traits>
 #include <utility>
@@ -88,7 +89,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 {
 }
 
-transaction::transaction(const data_chunk& data, bool witness)
+transaction::transaction(const data_slice& data, bool witness)
 {
     from_data(data, witness);
 }
@@ -169,7 +170,7 @@ bool transaction::operator!=(const transaction& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool transaction::from_data(const data_chunk& data, bool witness)
+bool transaction::from_data(const data_slice& data, bool witness)
 {
     stream::in::copy istream(data);
     return from_data(istream, witness);
@@ -569,6 +570,7 @@ bool transaction::is_empty() const
 
 bool transaction::is_null_non_coinbase() const
 {
+    BITCOIN_ASSERT(!is_empty());
     BITCOIN_ASSERT(!is_coinbase());
 
     const auto invalid = [](const input& input)
@@ -577,7 +579,7 @@ bool transaction::is_null_non_coinbase() const
     };
 
     // True if not coinbase but has null previous_output(s).
-    return std::any_of(inputs_.begin(), inputs_.end(), invalid);
+    return std::any_of(std::next(inputs_.begin()), inputs_.end(), invalid);
 }
 
 bool transaction::is_invalid_coinbase_size() const
