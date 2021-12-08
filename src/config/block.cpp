@@ -85,6 +85,7 @@ std::istream& operator>>(std::istream& input, block& argument)
 
     if (!argument.value_.from_data(base16(hexcode), true))
         throw istream_exception(hexcode);
+
     return input;
 }
 
