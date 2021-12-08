@@ -38,6 +38,7 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 // Valid default used in signature hashing.
+// Default prevout (metadata) construction is spent, invalid, max_size_t value. 
 input::input()
   : input({}, {}, {}, 0)
 {

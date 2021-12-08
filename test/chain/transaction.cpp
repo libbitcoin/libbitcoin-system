@@ -43,7 +43,7 @@ const auto tx1 = base16_chunk(
 const auto tx1_hash = base16_hash(
     "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
-const auto tx4 = base16_chunk(
+const auto tx2 = base16_chunk(
     "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
     "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
     "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -62,28 +62,16 @@ const auto tx4 = base16_chunk(
     "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
     "e61e66fe5d88ac00000000");
 
-const auto tx4_hash = base16_hash(
+const auto tx2_hash = base16_hash(
     "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
 
-const auto tx5 = base16_chunk(
-    "01000000023562c207a2a505820324aa03b769ee9c04a221eff59fdab6d52c312544a"
-    "c4b21020000006a473044022075d3dd4cd26137f50d1b8c18b5ecbd13b7309b801f62"
-    "83ebb951b137972d6e5b02206776f5e3acb2d996a9553f2438a4d2566c1fd786d9075"
-    "5a5bca023bd9ae3945b0121029caef1b63490b7deabc9547e3e5d8b13c004b4bfd04d"
-    "fae270874d569e5b89a8ffffffff8593568e460593c3dd30a470977a14928be6a29c6"
-    "14a644c531471a773a63601020000006a47304402201fd9ea7dc62628ea82ff7b38cc"
-    "90b3f2aa8c9ae25aa575600de38c79eafc925602202ca57bcd29d38a3e6aebd6809f7"
-    "be4379d86f173b2ad2d42892dcb1dccca14b60121029caef1b63490b7deabc9547e3e"
-    "5d8b13c004b4bfd04dfae270874d569e5b89a8ffffffff01763d0300000000001976a"
-    "914e0d40d609d0282cc97314e454d194f65c16c257888ac00000000");
-
-const auto tx6 = base16_chunk(
+const auto tx3 = base16_chunk(
     "010000000100000000000000000000000000000000000000000000000000000000000"
     "00000ffffffff23039992060481e1e157082800def50009dfdc102f42697446757279"
     "2f5345475749542f00000000015b382d4b000000001976a9148cf4f6175b2651dcdff"
     "0051970a917ea10189c2d88ac00000000");
 
-const auto tx7 = base16_chunk(
+const auto tx4 = base16_chunk(
     "0100000001b63634c25f23018c18cbb24ad503672fe7c5edc3fef193ec0f581dd"
     "b27d4e401490000006a47304402203b361bfb7e189c77379d6ffc90babe1b9658"
     "39d0b9b60966ade0c4b8de28385f022057432fe6f8f530c54d3513e41da6fb138"
@@ -93,13 +81,15 @@ const auto tx7 = base16_chunk(
     "81a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e38292e"
     "8a8ade38191e381a6e381afe38184e381aae3818400000000");
 
-const auto tx7_hash = base16_hash(
+const auto tx4_hash = base16_hash(
     "cb1e303db604f066225eb14d59d3f8d2231200817bc9d4610d2802586bd93f8a");
 
+// Access protected validation methods.
 class accessor
   : public chain::transaction
 {
 public:
+    // Use base class constructors.
     using chain::transaction::transaction;
 
     bool is_internal_double_spend() const
@@ -213,11 +203,11 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
 {
-    const chain::transaction tx(tx4, true);
+    const chain::transaction tx(tx2, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 
 }
 
@@ -235,12 +225,12 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__stream_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_2__success)
 {
-    stream::in::copy stream(tx4);
+    stream::in::copy stream(tx2);
     const chain::transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_1__success)
@@ -255,18 +245,18 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__reader_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_2__success)
 {
-    read::bytes::copy source(tx4);
+    read::bytes::copy source(tx2);
     const chain::transaction tx(source, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
 {
-    const uint32_t version = 2345u;
-    const uint32_t locktime = 4568656u;
+    const uint32_t version = 2345;
+    const uint32_t locktime = 4568656;
 
     chain::input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
@@ -286,8 +276,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 {
-    const uint32_t version = 2345u;
-    const uint32_t locktime = 4568656u;
+    const uint32_t version = 2345;
+    const uint32_t locktime = 4568656;
 
     chain::input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
@@ -310,44 +300,44 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__assign__move__expected)
 {
-    chain::transaction expected(tx4, true);
-    chain::transaction duplicate(tx4, true);
+    chain::transaction expected(tx2, true);
+    chain::transaction duplicate(tx2, true);
     const chain::transaction instance = std::move(duplicate);
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__assign__copy__expected)
 {
-    const chain::transaction expected(tx4, true);
+    const chain::transaction expected(tx2, true);
     const chain::transaction instance = expected;
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__same__true)
 {
-    const chain::transaction alpha(tx4, true);
-    const chain::transaction beta(tx4, true);
+    const chain::transaction alpha(tx2, true);
+    const chain::transaction beta(tx2, true);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__different_false)
 {
     const chain::transaction alpha;
-    const chain::transaction beta(tx4, true);
+    const chain::transaction beta(tx2, true);
     BOOST_REQUIRE(!(alpha == beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__same__false)
 {
-    const chain::transaction alpha(tx4, true);
-    const chain::transaction beta(tx4, true);
+    const chain::transaction alpha(tx2, true);
+    const chain::transaction beta(tx2, true);
     BOOST_REQUIRE(!(alpha != beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 {
     const chain::transaction alpha;
-    const chain::transaction beta(tx4, true);
+    const chain::transaction beta(tx2, true);
     BOOST_REQUIRE(alpha != beta);
 }
 
@@ -390,11 +380,11 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__slice_1__success)
 BOOST_AUTO_TEST_CASE(transaction__from_data__slice_2__success)
 {
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(tx4, true));
+    BOOST_REQUIRE(tx.from_data(tx2, true));
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
@@ -411,12 +401,12 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_2__success)
 {
     chain::transaction tx;
-    stream::in::copy stream(tx4);
+    stream::in::copy stream(tx2);
     BOOST_REQUIRE(tx.from_data(stream, true));
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
@@ -433,12 +423,12 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
 {
     chain::transaction tx;
-    read::bytes::copy source(tx4);
+    read::bytes::copy source(tx2);
     BOOST_REQUIRE(tx.from_data(source, true));
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx4);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx4.size());
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
 // properties
@@ -508,9 +498,9 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 // This is a garbage script that collides with the former opcode::raw_data sentinel.
 BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
 {
-    const chain::transaction instance(tx7, true);
-    BOOST_REQUIRE_EQUAL(instance.hash(false), tx7_hash);
-    BOOST_REQUIRE_EQUAL(instance.to_data(true), tx7);
+    const chain::transaction instance(tx4, true);
+    BOOST_REQUIRE_EQUAL(instance.hash(false), tx4_hash);
+    BOOST_REQUIRE_EQUAL(instance.to_data(true), tx4);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty_inputs__false)
@@ -655,7 +645,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__fal
         {
             {},
             { { tx1_hash, 27 }, {}, 0 },
-            { { tx7_hash, 36 }, {}, 0 }
+            { { tx4_hash, 36 }, {}, 0 }
         },
         {}
     };
@@ -671,9 +661,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__
         0,
         {
             { { tx1_hash, 42 }, {}, 0 },
-            { { tx4_hash, 27 }, {}, 0 },
-            { { tx7_hash, 36 }, {}, 0 },
-            { { tx7_hash, 36 }, {}, 0 }
+            { { tx2_hash, 27 }, {}, 0 },
+            { { tx4_hash, 36 }, {}, 0 },
+            { { tx4_hash, 36 }, {}, 0 }
         },
         {}
     };
@@ -719,7 +709,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_input_not_null__f
 }
 BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__coinbase_tx__false)
 {
-    const accessor instance(tx6, true);
+    const accessor instance(tx3, true);
     BOOST_REQUIRE(!instance.is_null_non_coinbase());
 }
 

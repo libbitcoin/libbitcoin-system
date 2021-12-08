@@ -75,6 +75,7 @@ transaction::transaction(const transaction& other)
 {
 }
 
+// segregated_ is the first property because of this constructor.
 transaction::transaction(uint32_t version, uint32_t locktime,
     input::list&& inputs, output::list&& outputs)
   : transaction(segregated(inputs), version, locktime, std::move(inputs),
@@ -142,7 +143,6 @@ transaction& transaction::operator=(transaction&& other)
     return *this;
 }
 
-// This can be expensive, try to avoid.
 transaction& transaction::operator=(const transaction& other)
 {
     segregated_ = other.segregated_;
@@ -195,7 +195,7 @@ bool read_puts(Source& source, std::vector<Put>& puts)
     else
     {
         puts.reserve(count);
-        for (size_t put = 0; put < count; ++put)
+        for (auto put = zero; put < count; ++put)
             puts.emplace_back(source);
     }
 
@@ -372,7 +372,7 @@ const output::list& transaction::outputs() const
 uint64_t transaction::fee() const
 {
     // Underflow returns zero (and is_overspent() will be true).
-    // The amount of prevouts spent less that claimed by outputs.
+    // This is value of prevouts spent by inputs minus that claimed by outputs.
     return floored_subtract(value(), claim());
 }
 
@@ -388,7 +388,7 @@ hash_digest transaction::hash(bool witness) const
 
 bool transaction::is_dusty(uint64_t minimum_output_value) const
 {
-    const auto dusty = [minimum_output_value](const output& output)
+    const auto dusty = [=](const output& output)
     {
         return output.is_dust(minimum_output_value);
     };
@@ -398,13 +398,13 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const
 
 size_t transaction::signature_operations(bool bip16, bool bip141) const
 {
-    // This includes BIP16 p2sh additional sigops if prevout is cached.
-    const auto in = [bip16, bip141](size_t total, const input& input)
+    // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
+    const auto in = [=](size_t total, const input& input)
     {
         return ceilinged_add(total, input.signature_operations(bip16, bip141));
     };
 
-    const auto out = [bip141](size_t total, const output& output)
+    const auto out = [=](size_t total, const output& output)
     {
         return ceilinged_add(total, output.signature_operations(bip141));
     };
@@ -498,23 +498,10 @@ bool transaction::is_internal_double_spend() const
     return !is_distinct(points());
 }
 
-////// static/private
-////// This is not consensus critical but if too small there is a disk fill vector.
-////size_t transaction::maximum_size(bool coinbase)
-////{
-////    // TODO: refine maximum size (actual maximum may be higher than practical).
-////    static const auto min_coinbase_tx = 1024;
-////    static const auto max_coinbase_tx = max_block_size - (sizeof(uint32_t) +
-////        header::serialized_size());
-////
-////    // A pool (non-coinbase) tx must fit into a block with at least a coinbase.
-////    return coinbase ? max_coinbase_tx : max_coinbase_tx - min_coinbase_tx;
-////}
-
+// TODO: a pool (non-coinbase) tx must fit into a block (with a coinbase).
 bool transaction::is_oversized() const
 {
     return serialized_size(false) > max_block_size;
-    ////return serialized_size(false) > maximum_size(is_coinbase());
 }
 
 // Guard (contextual).
@@ -538,7 +525,7 @@ bool transaction::is_segregated() const
 
 size_t transaction::weight() const
 {
-    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    // Block weight is 3 * base size * + 1 * total size (bip141).
     return base_size_contribution * serialized_size(false) +
         total_size_contribution * serialized_size(true);
 }
@@ -570,7 +557,6 @@ bool transaction::is_empty() const
 
 bool transaction::is_null_non_coinbase() const
 {
-    BITCOIN_ASSERT(!is_empty());
     BITCOIN_ASSERT(!is_coinbase());
 
     const auto invalid = [](const input& input)
@@ -579,7 +565,7 @@ bool transaction::is_null_non_coinbase() const
     };
 
     // True if not coinbase but has null previous_output(s).
-    return std::any_of(std::next(inputs_.begin()), inputs_.end(), invalid);
+    return std::any_of(inputs_.begin(), inputs_.end(), invalid);
 }
 
 bool transaction::is_invalid_coinbase_size() const
@@ -639,13 +625,13 @@ uint64_t transaction::claim() const
 
 uint64_t transaction::value() const
 {
-    // Overflow returns max_uint64, coinbase returns max_uint64 value.
+    // Overflow and coinbase (default) return max_uint64.
     const auto sum = [](uint64_t total, const input& input)
     {
         return ceilinged_add(total, input.prevout.value());
     };
 
-    // The amount of prevouts spent.
+    // The amount of prevouts (referenced by inputs).
     return std::accumulate(inputs_.begin(), inputs_.end(), uint64_t(0), sum);
 }
 
@@ -685,7 +671,7 @@ bool transaction::is_locked(size_t height, uint32_t median_time_past) const
         return false;
 
     // BIP68: references to median time past are as defined by bip113.
-    const auto locked = [height, median_time_past](const input& input)
+    const auto locked = [=](const input& input)
     {
         return input.is_locked(height, median_time_past);
     };
@@ -700,7 +686,8 @@ bool transaction::is_unconfirmed_spend(size_t height) const
 {
     BITCOIN_ASSERT(!is_coinbase());
 
-    // Zero is either genesis or not found, test maturity first for error code.
+    // Zero is either genesis or not found.
+    // Test maturity first to obtain proper error code.
     // Spends internal to a block are handled by block validation.
     const auto unconfirmed = [=](const input& input)
     {
@@ -810,8 +797,7 @@ code transaction::check() const
 code transaction::accept(const context& state) const
 {
     const auto bip68 = state.is_enabled(forks::bip68_rule);
-    const auto bip113 = state.is_enabled(forks::bip141_rule);
-    const auto bip141 = state.is_enabled(forks::bip141_rule);
+    const auto bip113 = state.is_enabled(forks::bip113_rule);
 
     // Store note: timestamp and mtp should be merged to single field.
     if (is_non_final(state.height, state.timestamp,
@@ -852,7 +838,7 @@ code transaction::connect(const context& state) const
     code ec;
 
     // Skip coinbase.
-    for (size_t input = one; input < inputs_.size(); ++input)
+    for (auto input = one; input < inputs_.size(); ++input)
         if ((ec = connect_input(state, input)))
             return ec;
 

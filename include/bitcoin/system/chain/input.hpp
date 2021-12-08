@@ -109,7 +109,7 @@ public:
     bool reserved_hash(hash_digest& out) const;
     size_t signature_operations(bool bip16, bool bip141) const;
 
-    /// Public mutable metadata access, not copied or compared.
+    /// Public mutable metadata access, copied but not compared for equality.
     mutable chain::prevout prevout;
 
 protected:

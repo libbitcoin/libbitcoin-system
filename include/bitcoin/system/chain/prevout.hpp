@@ -31,7 +31,7 @@ class BC_API prevout
   : public output
 {
 public:
-    /// Use base class constructors.
+    /// Use base class constructors, default construction is invalid.
     using chain::output::output;
 
     //*************************************************************************
