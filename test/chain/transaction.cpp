@@ -32,7 +32,7 @@ const auto tx0_inputs = base16_chunk(
 const auto tx0_last_output = base16_chunk(
     "f0c9c467000000001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac");
 
-const auto tx1 = base16_chunk(
+const auto tx1_data = base16_chunk(
     "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
     "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
     "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -45,7 +45,7 @@ const auto tx1 = base16_chunk(
 const auto tx1_hash = base16_hash(
     "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
-const auto tx2 = base16_chunk(
+const auto tx2_data = base16_chunk(
     "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
     "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
     "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -67,13 +67,13 @@ const auto tx2 = base16_chunk(
 const auto tx2_hash = base16_hash(
     "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
 
-const auto tx3 = base16_chunk(
+const auto tx3_data = base16_chunk(
     "010000000100000000000000000000000000000000000000000000000000000000000"
     "00000ffffffff23039992060481e1e157082800def50009dfdc102f42697446757279"
     "2f5345475749542f00000000015b382d4b000000001976a9148cf4f6175b2651dcdff"
     "0051970a917ea10189c2d88ac00000000");
 
-const auto tx4 = base16_chunk(
+const auto tx4_data = base16_chunk(
     "0100000001b63634c25f23018c18cbb24ad503672fe7c5edc3fef193ec0f581dd"
     "b27d4e401490000006a47304402203b361bfb7e189c77379d6ffc90babe1b9658"
     "39d0b9b60966ade0c4b8de28385f022057432fe6f8f530c54d3513e41da6fb138"
@@ -180,8 +180,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__default__invalid)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__move__expected)
 {
-    const transaction expected(tx1, true);
-    transaction copy(tx1, true);
+    const transaction expected(tx1_data, true);
+    transaction copy(tx1_data, true);
     const transaction instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy__expected)
 {
-    transaction expected(tx1, true);
+    transaction expected(tx1_data, true);
     const transaction instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected);
@@ -239,61 +239,61 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
 {
-    const transaction tx(tx1, true);
+    const transaction tx(tx1_data, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
 {
-    const transaction tx(tx2, true);
+    const transaction tx(tx2_data, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_1__success)
 {
 
-    stream::in::copy stream(tx1);
+    stream::in::copy stream(tx1_data);
     const transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_2__success)
 {
-    stream::in::copy stream(tx2);
+    stream::in::copy stream(tx2_data);
     const transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_1__success)
 {
-    read::bytes::copy source(tx1);
+    read::bytes::copy source(tx1_data);
     const transaction tx(source, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_2__success)
 {
-    read::bytes::copy source(tx2);
+    read::bytes::copy source(tx2_data);
     const transaction tx(source, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 // operators
@@ -301,44 +301,44 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__reader_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__assign__move__expected)
 {
-    const transaction alpha(tx2, true);
-    transaction gamma(tx2, true);
+    const transaction alpha(tx2_data, true);
+    transaction gamma(tx2_data, true);
     const transaction beta = std::move(gamma);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__assign__copy__expected)
 {
-    const transaction alpha(tx2, true);
+    const transaction alpha(tx2_data, true);
     const transaction beta = alpha;
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__same__true)
 {
-    const transaction alpha(tx2, true);
-    const transaction beta(tx2, true);
+    const transaction alpha(tx2_data, true);
+    const transaction beta(tx2_data, true);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__different_false)
 {
     const transaction alpha;
-    const transaction beta(tx2, true);
+    const transaction beta(tx2_data, true);
     BOOST_REQUIRE(!(alpha == beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__same__false)
 {
-    const transaction alpha(tx2, true);
-    const transaction beta(tx2, true);
+    const transaction alpha(tx2_data, true);
+    const transaction beta(tx2_data, true);
     BOOST_REQUIRE(!(alpha != beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 {
     const transaction alpha;
-    const transaction beta(tx2, true);
+    const transaction beta(tx2_data, true);
     BOOST_REQUIRE(alpha != beta);
 }
 
@@ -347,104 +347,104 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__invalid)
 {
-    data_chunk data(2);
+    data_chunk insufficient_data(2);
     transaction instance;
-    BOOST_REQUIRE(!instance.from_data(data, true));
+    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__invalid)
 {
-    const auto data = base16_chunk("0000000103");
+    const auto insufficient_data = base16_chunk("0000000103");
     transaction instance;
-    BOOST_REQUIRE(!instance.from_data(data, true));
+    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__invalid)
 {
-    const auto data = base16_chunk("000000010003");
+    const auto insufficient_data = base16_chunk("000000010003");
     transaction instance;
-    BOOST_REQUIRE(!instance.from_data(data, true));
+    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__from_data__slice_1__success)
+BOOST_AUTO_TEST_CASE(transaction__from_data__data_1__success)
 {
-    const transaction tx(tx1, true);
+    const transaction tx(tx1_data, true);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__from_data__slice_2__success)
+BOOST_AUTO_TEST_CASE(transaction__from_data__data_2__success)
 {
     transaction tx;
-    BOOST_REQUIRE(tx.from_data(tx2, true));
+    BOOST_REQUIRE(tx.from_data(tx2_data, true));
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
 {
     transaction tx;
-    stream::in::copy stream(tx1);
+    stream::in::copy stream(tx1_data);
     BOOST_REQUIRE(tx.from_data(stream, true));
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_2__success)
 {
     transaction tx;
-    stream::in::copy stream(tx2);
+    stream::in::copy stream(tx2_data);
     BOOST_REQUIRE(tx.from_data(stream, true));
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
 {
     transaction tx;
-    read::bytes::copy source(tx1);
+    read::bytes::copy source(tx1_data);
     BOOST_REQUIRE(tx.from_data(source, true));
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
 {
     transaction tx;
-    read::bytes::copy source(tx2);
+    read::bytes::copy source(tx2_data);
     BOOST_REQUIRE(tx.from_data(source, true));
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(transaction__to_data__chunk__expected)
+BOOST_AUTO_TEST_CASE(transaction__to_data__data__expected)
 {
-    const transaction tx(tx1, true);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+    const transaction tx(tx1_data, true);
+    const auto size = tx.to_data(true).size();
+    BOOST_REQUIRE_EQUAL(size, tx.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__to_data__stream__expected)
 {
-    const transaction tx(tx1, true);
+    const transaction tx(tx1_data, true);
     BOOST_REQUIRE(tx.is_valid());
 
     // Write transaction to stream.
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(transaction__to_data__stream__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__to_data__writer__expected)
 {
-    const transaction tx(tx1, true);
+    const transaction tx(tx1_data, true);
     BOOST_REQUIRE(tx.is_valid());
 
     // Write transaction to stream via writer.
@@ -624,9 +624,9 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 // This is a garbage script that collides with the former opcode::raw_data sentinel.
 BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
 {
-    const transaction instance(tx4, true);
+    const transaction instance(tx4_data, true);
     BOOST_REQUIRE_EQUAL(instance.hash(false), tx4_hash);
-    BOOST_REQUIRE_EQUAL(instance.to_data(true), tx4);
+    BOOST_REQUIRE_EQUAL(instance.to_data(true), tx4_data);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty__false)
@@ -739,35 +739,35 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__false)
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__true)
 {
     transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1, true));
+    BOOST_REQUIRE(instance.from_data(tx1_data, true));
     BOOST_REQUIRE(instance.is_dusty(1740950001));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__false)
 {
     transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1, true));
+    BOOST_REQUIRE(instance.from_data(tx1_data, true));
     BOOST_REQUIRE(!instance.is_dusty(257999999));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__true)
 {
     transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1, true));
+    BOOST_REQUIRE(instance.from_data(tx1_data, true));
     BOOST_REQUIRE(instance.is_dusty(1740950000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__false)
 {
     transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1, true));
+    BOOST_REQUIRE(instance.from_data(tx1_data, true));
     BOOST_REQUIRE(!instance.is_dusty(258000000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true)
 {
     transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1, true));
+    BOOST_REQUIRE(instance.from_data(tx1_data, true));
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
 

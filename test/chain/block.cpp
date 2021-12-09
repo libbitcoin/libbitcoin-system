@@ -44,6 +44,7 @@ const transaction::list expected_transactions
 };
 
 const block expected_block{ expected_header, expected_transactions };
+const auto block_data = expected_block.to_data(true);
 
 // Access protected validation methods.
 class accessor
@@ -266,7 +267,7 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_header_bytes__invalid)
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__invalid)
 {
-    const auto data = base16_chunk(
+    const auto insufficient_data = base16_chunk(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
@@ -274,32 +275,29 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__invalid)
         "0114ffffffff0100f2052a0100000043410437b36a7221bc977dce712728a954");
 
     block instance;
-    BOOST_REQUIRE(!instance.from_data(data, true));
+    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__from_data__data__valid)
 {
-    const auto data = expected_block.to_data(true);
     block instance;
-    BOOST_REQUIRE(instance.from_data(data, true));
+    BOOST_REQUIRE(instance.from_data(block_data, true));
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__from_data__stream__valid)
 {
-    const auto data = expected_block.to_data(true);
     block instance;
-    stream::in::copy stream(data);
+    stream::in::copy stream(block_data);
     BOOST_REQUIRE(instance.from_data(stream, true));
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__from_data__reader__valid)
 {
-    const auto data = expected_block.to_data(true);
     block instance;
-    read::bytes::copy source(data);
+    read::bytes::copy source(block_data);
     BOOST_REQUIRE(instance.from_data(source, true));
     BOOST_REQUIRE(instance.is_valid());
 }
@@ -309,8 +307,8 @@ BOOST_AUTO_TEST_CASE(block__from_data__reader__valid)
 
 BOOST_AUTO_TEST_CASE(block__to_data__data__expected)
 {
-    const auto data = expected_block.to_data(true);
-    BOOST_REQUIRE_EQUAL(expected_block.serialized_size(true), data.size());
+    const auto size = expected_block.to_data(true).size();
+    BOOST_REQUIRE_EQUAL(size, expected_block.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(block__to_data__stream__expected)
