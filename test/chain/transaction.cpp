@@ -20,6 +20,8 @@
 
 BOOST_AUTO_TEST_SUITE(chain_transaction_tests)
 
+using namespace system::chain;
+
 const auto tx0_inputs = base16_chunk(
     "f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc4de65310fc"
     "010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294789eb17601"
@@ -86,11 +88,11 @@ const auto tx4_hash = base16_hash(
 
 // Access protected validation methods.
 class accessor
-  : public chain::transaction
+  : public transaction
 {
 public:
     // Use base class constructors.
-    using chain::transaction::transaction;
+    using transaction::transaction;
 
     bool is_internal_double_spend() const
     {
@@ -168,33 +170,34 @@ public:
 
 // constructors
 // ----------------------------------------------------------------------------
+// tests construction, native properties, is_valid, serialized_size
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__default__invalid)
 {
-    const chain::transaction instance;
+    const transaction instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__move__expected)
 {
-    chain::transaction expected;
-    BOOST_REQUIRE(expected.from_data(tx1, true));
-
-    const chain::transaction instance(std::move(expected));
+    const transaction expected(tx1, true);
+    transaction duplicate(tx1, true);
+    const transaction instance(std::move(duplicate));
     BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy__expected)
 {
-    chain::transaction expected(tx1, true);
-    const chain::transaction instance(expected);
+    transaction expected(tx1, true);
+    const transaction instance(expected);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
 {
-    const chain::transaction tx(tx1, true);
+    const transaction tx(tx1, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
@@ -203,30 +206,28 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
 {
-    const chain::transaction tx(tx2, true);
+    const transaction tx(tx2, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
-
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_1__success)
 {
 
     stream::in::copy stream(tx1);
-    const chain::transaction tx(stream, true);
+    const transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
-
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_2__success)
 {
     stream::in::copy stream(tx2);
-    const chain::transaction tx(stream, true);
+    const transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
@@ -236,7 +237,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__stream_2__success)
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_1__success)
 {
     read::bytes::copy source(tx1);
-    const chain::transaction tx(source, true);
+    const transaction tx(source, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
@@ -246,7 +247,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__reader_1__success)
 BOOST_AUTO_TEST_CASE(transaction__constructor__reader_2__success)
 {
     read::bytes::copy source(tx2);
-    const chain::transaction tx(source, true);
+    const transaction tx(source, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
@@ -258,13 +259,13 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     const uint32_t version = 2345;
     const uint32_t locktime = 4568656;
 
-    chain::input input(tx0_inputs);
+    input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
 
-    chain::output output(tx0_last_output);
+    output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    chain::transaction instance(version, locktime, { input }, { output });
+    transaction instance(version, locktime, { input }, { output });
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -279,15 +280,15 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
     const uint32_t version = 2345;
     const uint32_t locktime = 4568656;
 
-    chain::input input(tx0_inputs);
+    input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
 
-    chain::output output(tx0_last_output);
+    output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    chain::input::list inputs{ input };
-    chain::output::list outputs{ output };
-    chain::transaction instance(version, locktime, inputs, outputs);
+    input::list inputs{ input };
+    output::list outputs{ output };
+    transaction instance(version, locktime, inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -300,44 +301,44 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__assign__move__expected)
 {
-    chain::transaction expected(tx2, true);
-    chain::transaction duplicate(tx2, true);
-    const chain::transaction instance = std::move(duplicate);
-    BOOST_REQUIRE(instance == expected);
+    const transaction alpha(tx2, true);
+    transaction gamma(tx2, true);
+    const transaction beta = std::move(gamma);
+    BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__assign__copy__expected)
 {
-    const chain::transaction expected(tx2, true);
-    const chain::transaction instance = expected;
-    BOOST_REQUIRE(instance == expected);
+    const transaction alpha(tx2, true);
+    const transaction beta = alpha;
+    BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__same__true)
 {
-    const chain::transaction alpha(tx2, true);
-    const chain::transaction beta(tx2, true);
+    const transaction alpha(tx2, true);
+    const transaction beta(tx2, true);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__equality__different_false)
 {
-    const chain::transaction alpha;
-    const chain::transaction beta(tx2, true);
+    const transaction alpha;
+    const transaction beta(tx2, true);
     BOOST_REQUIRE(!(alpha == beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__same__false)
 {
-    const chain::transaction alpha(tx2, true);
-    const chain::transaction beta(tx2, true);
+    const transaction alpha(tx2, true);
+    const transaction beta(tx2, true);
     BOOST_REQUIRE(!(alpha != beta));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 {
-    const chain::transaction alpha;
-    const chain::transaction beta(tx2, true);
+    const transaction alpha;
+    const transaction beta(tx2, true);
     BOOST_REQUIRE(alpha != beta);
 }
 
@@ -347,7 +348,7 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__failure)
 {
     data_chunk data(2);
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(!instance.from_data(data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
@@ -355,7 +356,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__failure
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
 {
     const auto data = base16_chunk("0000000103");
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(!instance.from_data(data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
@@ -363,14 +364,14 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
 {
     const auto data = base16_chunk("000000010003");
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(!instance.from_data(data, true));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__slice_1__success)
 {
-    const chain::transaction tx(tx1, true);
+    const transaction tx(tx1, true);
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
     BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
@@ -379,7 +380,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__slice_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__slice_2__success)
 {
-    chain::transaction tx;
+    transaction tx;
     BOOST_REQUIRE(tx.from_data(tx2, true));
     BOOST_REQUIRE(tx.is_valid());
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2);
@@ -389,7 +390,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__slice_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
 {
-    chain::transaction tx;
+    transaction tx;
     stream::in::copy stream(tx1);
     BOOST_REQUIRE(tx.from_data(stream, true));
     BOOST_REQUIRE(tx.is_valid());
@@ -400,7 +401,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__stream_2__success)
 {
-    chain::transaction tx;
+    transaction tx;
     stream::in::copy stream(tx2);
     BOOST_REQUIRE(tx.from_data(stream, true));
     BOOST_REQUIRE(tx.is_valid());
@@ -411,7 +412,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__stream_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
 {
-    chain::transaction tx;
+    transaction tx;
     read::bytes::copy source(tx1);
     BOOST_REQUIRE(tx.from_data(source, true));
     BOOST_REQUIRE(tx.is_valid());
@@ -422,7 +423,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
 {
-    chain::transaction tx;
+    transaction tx;
     read::bytes::copy source(tx2);
     BOOST_REQUIRE(tx.from_data(source, true));
     BOOST_REQUIRE(tx.is_valid());
@@ -431,58 +432,162 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
+// to_data
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__to_data__chunk__expected)
+{
+    transaction tx(tx1, true);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__to_data__stream__expected)
+{
+    transaction tx(tx1, true);
+    BOOST_REQUIRE(tx.is_valid());
+
+    // Write transaction to stream.
+    std::stringstream iostream;
+    tx.to_data(iostream, true);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    transaction copy(iostream, true);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == tx);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__to_data__reader__expected)
+{
+    transaction tx(tx1, true);
+    BOOST_REQUIRE(tx.is_valid());
+
+    // Write transaction to stream via writer.
+    std::stringstream iostream;
+    write::bytes::ostream out(iostream);
+    tx.to_data(out, true);
+    BOOST_REQUIRE(out);
+
+    // Verify stream contents.
+    transaction copy(iostream, true);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == tx);
+}
+
 // properties
 // ----------------------------------------------------------------------------
 
 // weight
 
-////BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
-////{
-////    chain::transaction instance;
-////    auto& inputs = instance.inputs();
-////    inputs.emplace_back();
-////    inputs.back().point().metadata.cache.set_value(123u);
-////    inputs.emplace_back();
-////    inputs.back().point().metadata.cache.set_value(321u);
-////    instance.outputs().emplace_back();
-////    instance.outputs().back().set_value(44u);
-////    BOOST_REQUIRE_EQUAL(instance.fees(), 400u);
-////}
+BOOST_AUTO_TEST_CASE(transaction__fee__empty__zero)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        {},
+        {}
+    };
+
+    // floored_subtract(0, 0)
+    BOOST_REQUIRE_EQUAL(instance.fee(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__fee__default_input__max_uint64)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        { {} },
+        {}
+    };
+
+    // floored_subtract(max_uint64, 0)
+    BOOST_REQUIRE_EQUAL(instance.fee(), max_uint64);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__fee__default_output__zero)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        {},
+        { {} }
+    };
+
+    // floored_subtract(0, max_uint64)
+    BOOST_REQUIRE_EQUAL(instance.fee(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
+{
+    const uint64_t value0 = 123;
+    const uint64_t value1 = 321;
+    const uint64_t claim0 = 11;
+    const uint64_t claim1 = 11;
+    const uint64_t claim2 = 22;
+
+    input input0;
+    input input1;
+    input0.prevout = { value0, {} };
+    input1.prevout = { value1, {} };
+
+    const transaction instance
+    {
+        0,
+        0,
+        { input0, input1 },
+        {
+            { claim0, {} },
+            { claim1, {} },
+            { claim2, {} }
+        }
+    };
+
+    // floored_subtract(values, claims)
+    BOOST_REQUIRE_EQUAL(instance.fee(), value0 + value1 - claim0 - claim1 - claim2);
+}
 
 BOOST_AUTO_TEST_CASE(transaction__claim__empty_outputs__zero)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE_EQUAL(instance.claim(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__claim__two_outputs__sum)
 {
-    const chain::transaction instance
+    const uint64_t claim0 = 123;
+    const uint64_t claim1 = 321;
+    const transaction instance
     {
         0,
         0,
         {},
         {
-            { 1200, {} },
-            { 34, {} }
+            { claim0, {} },
+            { claim1, {} }
         }
     };
 
-    BOOST_REQUIRE_EQUAL(instance.claim(), 1200 + 34);
+
+    // ceilinged_add(claim0, claim1)
+    BOOST_REQUIRE_EQUAL(instance.claim(), claim0 + claim1);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__value__no_prevouts__zero)
+BOOST_AUTO_TEST_CASE(transaction__value__no_inputs__zero)
 {
-    const chain::transaction instance;
+    const transaction instance;
     BOOST_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
+BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
 {
-    chain::input input0{};
-    chain::input input1{};
-
-    chain::transaction instance
+    transaction instance
     {
         0,
         0,
@@ -490,33 +595,54 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
         {}
     };
 
-    instance.inputs()[0].prevout = { 123, {} };
-    instance.inputs()[1].prevout = { 321, {} };
-    BOOST_REQUIRE_EQUAL(instance.value(), 123 + 321);
+    // ceilinged_add(max_uint64, max_uint64)
+    BOOST_REQUIRE_EQUAL(instance.value(), max_uint64);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
+{
+    const uint64_t value0 = 123;
+    const uint64_t value1 = 321;
+
+    input input0;
+    input input1;
+    input0.prevout = { value0, {} };
+    input1.prevout = { value1, {} };
+
+    transaction instance
+    {
+        0,
+        0,
+        { input0, input1 },
+        {}
+    };
+
+    // ceilinged_add(value0, value1)
+    BOOST_REQUIRE_EQUAL(instance.value(), value0 + value1);
 }
 
 // This is a garbage script that collides with the former opcode::raw_data sentinel.
 BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
 {
-    const chain::transaction instance(tx4, true);
+    const transaction instance(tx4, true);
     BOOST_REQUIRE_EQUAL(instance.hash(false), tx4_hash);
     BOOST_REQUIRE_EQUAL(instance.to_data(true), tx4);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty_inputs__false)
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty__false)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(!instance.is_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_null_input__true)
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_input__true)
 {
-    const chain::transaction instance
+    const transaction instance
     {
         0,
         0,
         {
-            { { {}, chain::point::null_index }, {}, 0 }
+            { { {}, point::null_index }, {}, 0 }
         },
         {}
     };
@@ -524,9 +650,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_null_input__true)
     BOOST_REQUIRE(instance.is_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_non_null_input__false)
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__non_null_input__false)
 {
-    const chain::transaction instance
+    const transaction instance
     {
         0,
         0,
@@ -539,15 +665,31 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__one_non_null_input__false)
     BOOST_REQUIRE(!instance.is_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_coinbase__two_inputs_first_null__false)
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__first_null_input__false)
 {
-    const chain::transaction instance
+    const transaction instance
     {
         0,
         0,
         {
-            { { {}, chain::point::null_index }, {}, 0 },
+            { { {}, point::null_index }, {}, 0 },
             { { {}, 42 }, {}, 0 }
+        },
+        {}
+    };
+
+    BOOST_REQUIRE(!instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_inputs__false)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        {
+            { { {}, point::null_index }, {}, 0 },
+            { { {}, point::null_index }, {}, 0 }
         },
         {}
     };
@@ -562,41 +704,41 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__two_inputs_first_null__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__false)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(!instance.is_dusty(0));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__true)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(instance.from_data(tx1, true));
     BOOST_REQUIRE(instance.is_dusty(1740950001));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__false)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(instance.from_data(tx1, true));
     BOOST_REQUIRE(!instance.is_dusty(257999999));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__true)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(instance.from_data(tx1, true));
     BOOST_REQUIRE(instance.is_dusty(1740950000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__false)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(instance.from_data(tx1, true));
     BOOST_REQUIRE(!instance.is_dusty(258000000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true)
 {
-    chain::transaction instance;
+    transaction instance;
     BOOST_REQUIRE(instance.from_data(tx1, true));
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
@@ -604,7 +746,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true
 // TODO: tests with initialized data
 BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero)
 {
-    const chain::transaction instance{ 0, 0, {}, {} };
+    const transaction instance{ 0, 0, {}, {} };
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
 }
 
@@ -628,15 +770,13 @@ BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero
 // validation (protected)
 // ----------------------------------------------------------------------------
 
-// is_internal_double_spend
-
-BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__empty_prevouts__false)
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__empty__false)
 {
     const accessor instance;
     BOOST_REQUIRE(!instance.is_internal_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__false)
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_point_hashes__false)
 {
     const accessor instance
     {
@@ -644,8 +784,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__fal
         0,
         {
             {},
-            { { tx1_hash, 27 }, {}, 0 },
-            { { tx4_hash, 36 }, {}, 0 }
+            { { tx1_hash, 42 }, {}, 0 },
+            { { tx2_hash, 42 }, {}, 0 }
         },
         {}
     };
@@ -653,7 +793,24 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_prevouts__fal
     BOOST_REQUIRE(!instance.is_internal_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__true)
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_points__false)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        {
+            {},
+            { { tx1_hash, 42 }, {}, 0 },
+            { { tx1_hash, 43 }, {}, 0 }
+        },
+        {}
+    };
+
+    BOOST_REQUIRE(!instance.is_internal_double_spend());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_points__true)
 {
     const accessor instance
     {
@@ -661,9 +818,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__
         0,
         {
             { { tx1_hash, 42 }, {}, 0 },
-            { { tx2_hash, 27 }, {}, 0 },
-            { { tx4_hash, 36 }, {}, 0 },
-            { { tx4_hash, 36 }, {}, 0 }
+            { { tx1_hash, 42 }, {}, 0 }
         },
         {}
     };
@@ -674,25 +829,68 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_prevouts__
 // is_oversized
 // is_overweight
 // is_signature_operations_limit
-// is_empty
 
-BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_input_null__true)
+BOOST_AUTO_TEST_CASE(transaction__is_empty__default__true)
+{
+    const accessor instance;
+    BOOST_REQUIRE(instance.is_empty());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_empty__one_input__true)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        { {} },
+        {}
+    };
+
+    BOOST_REQUIRE(instance.is_empty());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_empty__one_output__true)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        {},
+        { {} }
+    };
+
+    BOOST_REQUIRE(instance.is_empty());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_empty__one_intput_one_output__false)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        { {} },
+        { {} }
+    };
+
+    BOOST_REQUIRE(!instance.is_empty());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__non_null_input__false)
 {
     const accessor instance
     {
         0,
         0,
         {
-            { { {}, 42 }, {}, 0 },
-            { { {}, chain::point::null_index }, {}, 0 }
+            { { tx1_hash, point::null_index }, {}, 0 }
         },
         {}
     };
 
-    BOOST_REQUIRE(instance.is_null_non_coinbase());
+    BOOST_REQUIRE(!instance.is_null_non_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_input_not_null__false)
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__non_null_inputs__false)
 {
     const accessor instance
     {
@@ -707,21 +905,48 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_input_not_null__f
 
     BOOST_REQUIRE(!instance.is_null_non_coinbase());
 }
-BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__coinbase_tx__false)
-{
-    const accessor instance(tx3, true);
-    BOOST_REQUIRE(!instance.is_null_non_coinbase());
-}
 
-BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__null_input_prevout__true)
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__first_null_input__true)
 {
     const accessor instance
     {
         0,
         0,
         {
-            { { {}, 0 }, {}, 0 },
-            { {}, {}, 0 }
+            { { {}, point::null_index }, {}, 0 },
+            { { {}, 42 }, {}, 0 }
+        },
+        {}
+    };
+
+    BOOST_REQUIRE(instance.is_null_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_null_input__true)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        {
+            { { {}, 42 }, {}, 0 },
+            { { {}, point::null_index }, {}, 0 }
+        },
+        {}
+    };
+
+    BOOST_REQUIRE(instance.is_null_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__null_inputs__true)
+{
+    const accessor instance
+    {
+        0,
+        0,
+        {
+            { { {}, point::null_index }, {}, 0 },
+            { { {}, point::null_index }, {}, 0 }
         },
         {}
     };
@@ -736,12 +961,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_mi
         0,
         0,
         {
-            { {}, { data_chunk(sub1(chain::min_coinbase_size), 0x00), false }, 0 },
+            { {}, { data_chunk(sub1(min_coinbase_size), 0x00), false }, 0 },
         },
         {}
     };
 
-    BOOST_REQUIRE_LT(instance.inputs().back().script().serialized_size(false), chain::min_coinbase_size);
+    BOOST_REQUIRE_LT(instance.inputs().back().script().serialized_size(false), min_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 
@@ -752,12 +977,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_ma
         0,
         0,
         {
-            { { {}, chain::point::null_index }, { data_chunk(add1(chain::max_coinbase_size), 0x00), false }, 0 },
+            { { {}, point::null_index }, { data_chunk(add1(max_coinbase_size), 0x00), false }, 0 },
         },
         {}
     };
 
-    BOOST_REQUIRE_GT(instance.inputs().back().script().serialized_size(false), chain::max_coinbase_size);
+    BOOST_REQUIRE_GT(instance.inputs().back().script().serialized_size(false), max_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 
@@ -768,7 +993,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_max__fal
         0,
         0,
         {
-            { {}, { data_chunk(chain::max_coinbase_size, 0x00), false }, 0 },
+            { {}, { data_chunk(max_coinbase_size, 0x00), false }, 0 },
         },
         {}
     };
@@ -783,7 +1008,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_min__fal
         0,
         0,
         {
-            { {}, { data_chunk(chain::min_coinbase_size, 0x00), false }, 0 },
+            { {}, { data_chunk(min_coinbase_size, 0x00), false }, 0 },
         },
         {}
     };
@@ -798,7 +1023,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_ma
         0,
         0,
         {
-            { {}, { data_chunk(sub1(chain::max_coinbase_size), 0x00), false }, 0 },
+            { {}, { data_chunk(sub1(max_coinbase_size), 0x00), false }, 0 },
         },
         {}
     };
@@ -813,7 +1038,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_mi
         0,
         0,
         {
-            { {}, { data_chunk(add1(chain::min_coinbase_size), 0x00), false }, 0 },
+            { {}, { data_chunk(add1(min_coinbase_size), 0x00), false }, 0 },
         },
         {}
     };
@@ -844,10 +1069,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater_threshold__false)
 {
     const bool bip113 = false;
-    const size_t height = chain::locktime_threshold + 100;
+    const size_t height = locktime_threshold + 100;
     const uint32_t time = 100;
     const uint32_t past = 0;
-    const uint32_t locktime = chain::locktime_threshold + 50;
+    const uint32_t locktime = locktime_threshold + 50;
 
     const accessor instance
     {
@@ -906,7 +1131,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
     const uint32_t time = 100;
     const uint32_t past = 0;
     const uint32_t locktime = 101;
-    const uint32_t sequence = chain::max_input_sequence;
+    const uint32_t sequence = max_input_sequence;
 
     const accessor instance
     {
@@ -942,8 +1167,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_prevout__true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
 {
-    const chain::input input;
-    input.prevout = { 123, {} };
+    const input input;
+    input.prevout = { 42, {} };
     const accessor instance
     {
         0,
@@ -968,7 +1193,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_overspent__output_exceeds_input__true)
         0,
         0,
         {},
-        { { 1200, {} }, { 34, {} } }
+        { { 1, {} }, { 0, {} } }
     };
 
     BOOST_REQUIRE(instance.is_overspent());
@@ -977,12 +1202,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_overspent__output_exceeds_input__true)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__no_inputs__false)
 {
     const accessor instance;
-    BOOST_REQUIRE(!instance.is_immature(453));
+    BOOST_REQUIRE(!instance.is_immature(coinbase_maturity));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase_prevout__true)
+BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 {
-    const chain::input input{ { tx1_hash, 42 }, {}, 0 };
+    const input input;
+    input.prevout.height = 0;
     input.prevout.coinbase = true;
     const accessor instance
     {
@@ -992,13 +1218,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase_prevout__true)
         {}
     };
 
-    BOOST_REQUIRE(instance.is_immature(453));
+    BOOST_REQUIRE(instance.is_immature(coinbase_maturity));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase_prevout__true)
+BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 {
-    const chain::input input{ { tx1_hash, 42 }, {}, 0 };
-    input.prevout.height = 20;
+    const input input;
+    input.prevout.height = 1;
     input.prevout.coinbase = true;
     const accessor instance
     {
@@ -1008,29 +1234,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase_prevout__true)
         {}
     };
 
-    BOOST_REQUIRE(!instance.inputs().back().point().is_null());
-    BOOST_REQUIRE(instance.is_immature(50));
+    BOOST_REQUIRE(instance.is_immature(coinbase_maturity));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase_prevout_null_input__true)
+BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 {
-    const chain::input input{ { null_hash, chain::point::null_index }, {}, 0 };
-    input.prevout.height = 20;
-    input.prevout.coinbase = true;
-    const accessor instance
-    {
-        0,
-        0,
-        { input },
-        {}
-    };
-
-    BOOST_REQUIRE(instance.is_immature(50));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase_prevout__false)
-{
-    const chain::input input{ { tx1_hash, 42 }, {}, 0 };
+    const input input;
+    input.prevout.height = 1;
     input.prevout.coinbase = false;
     const accessor instance
     {
@@ -1040,13 +1250,29 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase_prevout__fals
         {}
     };
 
-    BOOST_REQUIRE(!instance.is_immature(453));
+    BOOST_REQUIRE(!instance.is_immature(coinbase_maturity));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase_prevout__false)
+BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 {
-    const chain::input input{ { tx1_hash, 42 }, {}, 0 };
-    input.prevout.height = 20;
+    const input input;
+    input.prevout.height = 1;
+    input.prevout.coinbase = true;
+    const accessor instance
+    {
+        0,
+        0,
+        { input },
+        {}
+    };
+
+    BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
+{
+    const input input;
+    input.prevout.height = 1;
     input.prevout.coinbase = false;
     const accessor instance
     {
@@ -1056,7 +1282,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase_prevout__f
         {}
     };
 
-    BOOST_REQUIRE(!instance.is_immature(50));
+    BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
@@ -1125,7 +1351,6 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
     BOOST_REQUIRE(instance.is_locked(0, 0));
 }
 
-
 // is_unconfirmed_spend
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__false)
@@ -1149,7 +1374,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_input__true
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__false)
 {
-    const chain::input input;
+    const input input;
     input.prevout.spent = false;
     const accessor instance
     {
@@ -1164,7 +1389,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__fal
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
 {
-    const chain::input input;
+    const input input;
     input.prevout.spent = true;
     const accessor instance
     {
