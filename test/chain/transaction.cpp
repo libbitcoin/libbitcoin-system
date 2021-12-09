@@ -437,14 +437,14 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
 
 BOOST_AUTO_TEST_CASE(transaction__to_data__chunk__expected)
 {
-    transaction tx(tx1, true);
+    const transaction tx(tx1, true);
     BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1);
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1.size());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__to_data__stream__expected)
 {
-    transaction tx(tx1, true);
+    const transaction tx(tx1, true);
     BOOST_REQUIRE(tx.is_valid());
 
     // Write transaction to stream.
@@ -453,15 +453,15 @@ BOOST_AUTO_TEST_CASE(transaction__to_data__stream__expected)
     BOOST_REQUIRE(iostream);
 
     // Verify stream contents.
-    transaction copy(iostream, true);
+    const transaction copy(iostream, true);
     BOOST_REQUIRE(iostream);
     BOOST_REQUIRE(copy.is_valid());
     BOOST_REQUIRE(copy == tx);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__to_data__reader__expected)
+BOOST_AUTO_TEST_CASE(transaction__to_data__writer__expected)
 {
-    transaction tx(tx1, true);
+    const transaction tx(tx1, true);
     BOOST_REQUIRE(tx.is_valid());
 
     // Write transaction to stream via writer.
@@ -471,7 +471,7 @@ BOOST_AUTO_TEST_CASE(transaction__to_data__reader__expected)
     BOOST_REQUIRE(out);
 
     // Verify stream contents.
-    transaction copy(iostream, true);
+    const transaction copy(iostream, true);
     BOOST_REQUIRE(iostream);
     BOOST_REQUIRE(copy.is_valid());
     BOOST_REQUIRE(copy == tx);
