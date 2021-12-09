@@ -548,7 +548,7 @@ bool block::is_overspent(size_t height, uint64_t subsidy_interval,
         initial_block_subsidy_satoshi, bip42);
 }
 
-size_t block::is_signature_operations_limited(bool bip16, bool bip141) const
+bool block::is_signature_operations_limited(bool bip16, bool bip141) const
 {
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
 
