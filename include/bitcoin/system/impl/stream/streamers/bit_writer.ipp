@@ -34,9 +34,6 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename OStream>
-const uint8_t bit_writer<OStream>::pad = 0x00;
-
 // constructors
 // ----------------------------------------------------------------------------
 

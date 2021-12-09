@@ -61,8 +61,6 @@ protected:
     void do_flush() noexcept override;
 
 private:
-    static const uint8_t pad;
-
     void unload() noexcept;
     void flusher() noexcept;
     uint8_t shift() const noexcept;

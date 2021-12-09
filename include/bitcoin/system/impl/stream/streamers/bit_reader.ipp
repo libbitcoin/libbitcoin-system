@@ -33,9 +33,6 @@
 
 namespace libbitcoin {
 namespace system {
-    
-template <typename IStream>
-const uint8_t bit_reader<IStream>::pad = 0x00;
 
 // constructors
 // ----------------------------------------------------------------------------

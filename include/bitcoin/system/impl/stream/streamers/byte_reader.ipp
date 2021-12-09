@@ -39,15 +39,6 @@ namespace system {
 
 // All public methods must rely on protected for stream state except validity.
 
-// This should be defined on IStream::pos_type, however this is implementation
-// defined and does not expose an integer domain, so rely on std::streamsize.
-template <typename IStream>
-const size_t byte_reader<IStream>::maximum = to_unsigned(
-    std::numeric_limits<std::streamsize>::max());
-
-template <typename IStream>
-const uint8_t byte_reader<IStream>::pad = 0x00;
-
 // constructors
 // ----------------------------------------------------------------------------
 
@@ -285,7 +276,7 @@ std::string byte_reader<IStream>::read_string(size_t size) noexcept
         out.push_back(read_byte());
 
     // Removes zero and all after, required for bitcoin string deserialization.
-    const auto position = out.find(pad);
+    const auto position = out.find('\0');
     out.resize(position == std::string::npos ? out.size() : position);
     out.shrink_to_fit();
 

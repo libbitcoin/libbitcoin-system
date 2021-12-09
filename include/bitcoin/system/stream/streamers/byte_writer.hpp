@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
@@ -38,9 +39,6 @@ class byte_writer
   : public virtual bytewriter
 {
 public:
-    /// The maximum addressable stream position.
-    static const size_t maximum;
-
     /// Constructors.
     byte_writer(OStream& sink) noexcept;
     virtual ~byte_writer() noexcept;
@@ -98,12 +96,18 @@ public:
     bool operator!() const noexcept override;
 
 protected:
+    static constexpr uint8_t pad = 0x00;
+
+    // The maximum addressable stream position.
+    // Should be defined on OStream::pos_type, however that is implementation
+    // defined and is not an integer domain, so rely on std::streamsize.
+    static constexpr size_t maximum = to_unsigned(
+        std::numeric_limits<std::streamsize>::max());
+
     virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;
     virtual void do_flush() noexcept;
 
 private:
-    static const uint8_t pad;
-
     bool valid() const noexcept;
     void invalid() noexcept;
     void validate() noexcept;

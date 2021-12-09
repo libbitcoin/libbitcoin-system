@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <cstddef>
 #include <ios>
-#include <limits>
 #include <ostream>
 #include <string>
 #include <bitcoin/system/assert.hpp>
@@ -40,18 +39,9 @@ namespace system {
     
 // All public methods must rely on protected for stream state except validity.
 
-// This should be defined on OStream::pos_type, however this is implementation
-// defined and does not expose an integer domain, so rely on std::streamsize.
-template <typename OStream>
-const size_t byte_writer<OStream>::maximum = to_unsigned(
-    std::numeric_limits<std::streamsize>::max());
-
-template <typename OStream>
-const uint8_t byte_writer<OStream>::pad = 0x00;
-
 // constructors
 // ----------------------------------------------------------------------------
-    
+
 template <typename OStream>
 byte_writer<OStream>::byte_writer(OStream& sink) noexcept
   : stream_(sink)

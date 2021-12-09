@@ -72,8 +72,6 @@ protected:
     bool get_exhausted() const noexcept override;
 
 private:
-    static const uint8_t pad;
-
     void load() noexcept;
     void reload() noexcept;
     uint8_t peek() noexcept;
