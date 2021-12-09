@@ -77,7 +77,7 @@ public:
     bool from_data(std::istream& stream, bool witness);
     bool from_data(reader& source, bool witness);
 
-    // Deserialization result.
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
@@ -86,8 +86,6 @@ public:
     data_chunk to_data(bool witness) const;
     void to_data(std::ostream& stream, bool witness) const;
     void to_data(writer& sink, bool witness) const;
-
-    size_t serialized_size(bool witness) const;
 
     // Properties.
     // ------------------------------------------------------------------------
@@ -106,6 +104,7 @@ public:
     hash_digest hash(bool witness) const;
     bool is_coinbase() const;
     bool is_segregated() const;
+    size_t serialized_size(bool witness) const;
 
     // Methods.
     // ------------------------------------------------------------------------

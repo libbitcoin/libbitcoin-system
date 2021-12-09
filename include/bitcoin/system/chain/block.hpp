@@ -77,6 +77,7 @@ public:
     bool from_data(std::istream& stream, bool witness);
     bool from_data(reader& source, bool witness);
 
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
@@ -85,8 +86,6 @@ public:
     data_chunk to_data(bool witness) const;
     void to_data(std::ostream& stream, bool witness) const;
     void to_data(writer& sink, bool witness) const;
-
-    size_t serialized_size(bool witness) const;
 
     // Properties.
     // ------------------------------------------------------------------------
@@ -102,6 +101,7 @@ public:
     uint64_t claim() const;
     hash_digest hash() const;
     bool is_segregated() const;
+    size_t serialized_size(bool witness) const;
 
     // Validation.
     // ------------------------------------------------------------------------
@@ -145,7 +145,7 @@ protected:
     // prevouts required
     bool is_overspent(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const;
-    size_t is_signature_operations_limited(bool bip16, bool bip141) const;
+    bool is_signature_operations_limited(bool bip16, bool bip141) const;
 
     // prevout confirmation state required
     bool is_unspent_coinbase_collision(size_t height) const;

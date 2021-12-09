@@ -76,7 +76,7 @@ public:
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 
-    /// The witness deserialized according to count and size prefixing.
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
@@ -103,8 +103,11 @@ public:
     // Properties.
     // ------------------------------------------------------------------------
 
-    size_t serialized_size(bool prefix) const;
+    /// Native properties.
     const data_stack& stack() const;
+
+    /// Computed properties.
+    size_t serialized_size(bool prefix) const;
 
     // Utilities.
     // ------------------------------------------------------------------------

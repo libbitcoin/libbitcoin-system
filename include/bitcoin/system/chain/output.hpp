@@ -73,6 +73,7 @@ public:
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
@@ -82,14 +83,15 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    size_t serialized_size() const;
-
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
     uint64_t value() const;
     const chain::script& script() const;
+
+    /// Computed properties.
+    size_t serialized_size() const;
 
     // Methods.
     // ------------------------------------------------------------------------

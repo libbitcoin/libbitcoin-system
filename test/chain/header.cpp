@@ -21,6 +21,12 @@
 
 BOOST_AUTO_TEST_SUITE(chain_header_tests)
 
+BOOST_AUTO_TEST_CASE(header__merkle_root__empty__null_hash)
+{
+    const chain::header instance;
+    BOOST_REQUIRE_EQUAL(instance.merkle_root(), null_hash);
+}
+
 BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
 {
     chain::header instance;

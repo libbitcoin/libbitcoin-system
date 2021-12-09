@@ -89,9 +89,6 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    // Witness accounts for witness bytes, but are serialized independently.
-    size_t serialized_size(bool witness) const;
-
     // Properties.
     // ------------------------------------------------------------------------
 
@@ -100,6 +97,10 @@ public:
     const chain::script& script() const;
     const chain::witness& witness() const;
     uint32_t sequence() const;
+
+    /// Computed properties.
+    /// Witness accounts for witness bytes, but are serialized independently.
+    size_t serialized_size(bool witness) const;
 
     // Methods.
     // ------------------------------------------------------------------------

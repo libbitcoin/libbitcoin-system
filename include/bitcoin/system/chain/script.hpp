@@ -83,7 +83,7 @@ public:
     /// Deserialization invalidates the iterator.
     bool from_string(const std::string& mnemonic);
 
-    /// A script object is valid if the byte count matches the prefix.
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
@@ -110,9 +110,11 @@ public:
     // Properties.
     // ------------------------------------------------------------------------
 
-    size_t serialized_size(bool prefix) const;
+    /// Native properties.
     const operation::list& operations() const;
-    hash_digest to_payments_key() const;
+
+    /// Computed properties.
+    size_t serialized_size(bool prefix) const;
 
     // Signing.
     // ------------------------------------------------------------------------
@@ -178,6 +180,9 @@ public:
 
     // Utilities (non-static).
     // ------------------------------------------------------------------------
+
+    /// Generate the Electrum standard server payments key (output scripts).
+    hash_digest to_payments_key() const;
 
     /// Common pattern detection.
     const data_chunk& witness_program() const;

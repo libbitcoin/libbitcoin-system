@@ -93,13 +93,12 @@ public:
     // Properties.
     // ------------------------------------------------------------------------
 
-    size_t serialized_size() const;
-
-    /// Get the op code [0..255].
+    /// Native properties.
     opcode code() const;
-
-    /// Get the data, empty if not a push code.
     const data_chunk& data() const;
+
+    /// Computed properties.
+    size_t serialized_size() const;
 
     // Utilities.
     // ------------------------------------------------------------------------

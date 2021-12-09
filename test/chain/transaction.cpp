@@ -181,8 +181,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__default__invalid)
 BOOST_AUTO_TEST_CASE(transaction__constructor__move__expected)
 {
     const transaction expected(tx1, true);
-    transaction duplicate(tx1, true);
-    const transaction instance(std::move(duplicate));
+    transaction copy(tx1, true);
+    const transaction instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected);
 }
@@ -193,6 +193,48 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy__expected)
     const transaction instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
+{
+    const uint32_t version = 2345;
+    const uint32_t locktime = 4568656;
+
+    input input(tx0_inputs);
+    BOOST_REQUIRE(input.is_valid());
+
+    output output(tx0_last_output);
+    BOOST_REQUIRE(output.is_valid());
+
+    transaction instance(version, locktime, { input }, { output });
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(version, instance.version());
+    BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
+    BOOST_REQUIRE_EQUAL(instance.inputs().size(), 1u);
+    BOOST_REQUIRE_EQUAL(instance.outputs().size(), 1u);
+    BOOST_REQUIRE(instance.inputs().front() == input);
+    BOOST_REQUIRE(instance.outputs().front() == output);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
+{
+    const uint32_t version = 2345;
+    const uint32_t locktime = 4568656;
+
+    input input(tx0_inputs);
+    BOOST_REQUIRE(input.is_valid());
+
+    output output(tx0_last_output);
+    BOOST_REQUIRE(output.is_valid());
+
+    input::list inputs{ input };
+    output::list outputs{ output };
+    transaction instance(version, locktime, inputs, outputs);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(version, instance.version());
+    BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
+    BOOST_REQUIRE(inputs == instance.inputs());
+    BOOST_REQUIRE(outputs == instance.outputs());
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
@@ -254,48 +296,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__reader_2__success)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2.size());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
-{
-    const uint32_t version = 2345;
-    const uint32_t locktime = 4568656;
-
-    input input(tx0_inputs);
-    BOOST_REQUIRE(input.is_valid());
-
-    output output(tx0_last_output);
-    BOOST_REQUIRE(output.is_valid());
-
-    transaction instance(version, locktime, { input }, { output });
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(version, instance.version());
-    BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE_EQUAL(instance.inputs().size(), 1u);
-    BOOST_REQUIRE_EQUAL(instance.outputs().size(), 1u);
-    BOOST_REQUIRE(instance.inputs().front() == input);
-    BOOST_REQUIRE(instance.outputs().front() == output);
-}
-
-BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
-{
-    const uint32_t version = 2345;
-    const uint32_t locktime = 4568656;
-
-    input input(tx0_inputs);
-    BOOST_REQUIRE(input.is_valid());
-
-    output output(tx0_last_output);
-    BOOST_REQUIRE(output.is_valid());
-
-    input::list inputs{ input };
-    output::list outputs{ output };
-    transaction instance(version, locktime, inputs, outputs);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(version, instance.version());
-    BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE(inputs == instance.inputs());
-    BOOST_REQUIRE(outputs == instance.outputs());
-}
-
 // operators
 // ----------------------------------------------------------------------------
 
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 // from_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__failure)
+BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__invalid)
 {
     data_chunk data(2);
     transaction instance;
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__failure
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
+BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__invalid)
 {
     const auto data = base16_chunk("0000000103");
     transaction instance;
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__failure)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__failure)
+BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__invalid)
 {
     const auto data = base16_chunk("000000010003");
     transaction instance;

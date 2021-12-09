@@ -77,6 +77,7 @@ public:
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
+    /// Deserialization result.
     bool is_valid() const;
 
     // Serialization.
