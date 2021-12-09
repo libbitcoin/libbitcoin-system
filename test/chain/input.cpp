@@ -20,126 +20,249 @@
 
 BOOST_AUTO_TEST_SUITE(input_tests)
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
-const auto valid_raw_input = to_chunk(base16_array(
+const auto input_data = base16_chunk(
     "54b755c39207d443fd96a8d12c94446a1c6f66e39c95e894c23418d7501f681b01000"
     "0006b48304502203267910f55f2297360198fff57a3631be850965344370f732950b4"
     "7795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915"
     "da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b"
-    "8066c9c585f9ffffffff"));
+    "8066c9c585f9ffffffff");
 
-BOOST_AUTO_TEST_CASE(input__constructor_1__always__default_initialized)
+const input expected_input(input_data);
+
+// constructors
+// ----------------------------------------------------------------------------
+// tests construction, native properties, is_valid
+
+BOOST_AUTO_TEST_CASE(input__constructor__default__valid)
 {
     input instance;
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_2__valid_input__input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor__move__expected)
 {
-    const point previous_output{ null_hash, 5434u };
-    script script;
-    BOOST_REQUIRE(script.from_data(base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1"), false));
-
-    uint32_t sequence = 4568656u;
-
-    input instance(previous_output, script, sequence);
+    auto copy = expected_input;
+    input instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(previous_output == instance.point());
-    BOOST_REQUIRE(script == instance.script());
-    BOOST_REQUIRE_EQUAL(sequence, instance.sequence());
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness() == expected_input.witness());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_3__valid_input__input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor__copy__expected)
 {
-    const point previous_output{ null_hash, 5434u };
-    script script;
-    BOOST_REQUIRE(script.from_data(base16_chunk("ece424a6bb6ddf4db592c0faed60685047a361b1"), false));
-
-    uint32_t sequence = 4568656u;
-
-    auto dup_previous_output = previous_output;
-    auto dup_script = script;
-    input instance(std::move(dup_previous_output), std::move(dup_script), sequence);
-
+    input instance(expected_input);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(previous_output == instance.point());
-    BOOST_REQUIRE(script == instance.script());
-    BOOST_REQUIRE_EQUAL(sequence, instance.sequence());
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness() == expected_input.witness());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_4__valid_input__input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor__move_parameters__expected)
 {
-    input expected;
-    BOOST_REQUIRE(expected.from_data(valid_raw_input));
-
-    input instance(expected);
+    auto point_copy = expected_input.point();
+    auto script_copy = expected_input.script();
+    input instance(std::move(point_copy), std::move(script_copy), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness().empty());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
 }
 
-BOOST_AUTO_TEST_CASE(input__constructor_5__valid_input__input_initialized)
+BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters__expected)
 {
-    input expected;
-    BOOST_REQUIRE(expected.from_data(valid_raw_input));
+    input instance(expected_input.point(), expected_input.script(), expected_input.sequence());
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness().empty());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+}
 
-    input instance(std::move(expected));
+BOOST_AUTO_TEST_CASE(input__constructor__move_parameters_witness__expected)
+{
+    auto point_copy = expected_input.point();
+    auto script_copy = expected_input.script();
+    auto witness_copy = expected_input.witness();
+    input instance(std::move(point_copy), std::move(script_copy), std::move(witness_copy), expected_input.sequence());
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness() == expected_input.witness());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+}
+
+BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters_witness__expected)
+{
+    input instance(expected_input.point(), expected_input.script(), expected_input.witness(), expected_input.sequence());
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == expected_input.point());
+    BOOST_REQUIRE(instance.script() == expected_input.script());
+    BOOST_REQUIRE(instance.witness() == expected_input.witness());
+    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+}
+
+BOOST_AUTO_TEST_CASE(input__from_data__junk_data__valid)
+{
+    // Any set of bytes is a valid script.
+    const auto data = base16_chunk("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
+    input instance(data);
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(input__from_data__insufficient_data__failure)
+BOOST_AUTO_TEST_CASE(input__constructor__data__expected)
 {
-    data_chunk data(2);
+    const input instance(input_data);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_input);
+}
+
+BOOST_AUTO_TEST_CASE(input__constructor__stream__success)
+{
+    stream::in::copy stream(input_data);
+    const input instance(stream);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_input);
+}
+
+BOOST_AUTO_TEST_CASE(input__constructor__reader__success)
+{
+    read::bytes::copy source(input_data);
+    const input instance(source);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_input);
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__assign__move__expected)
+{
+    const auto& alpha = expected_input;
+    auto gamma = alpha;
+    const auto beta = std::move(gamma);
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(input__assign__copy__expected)
+{
+    const auto& alpha = expected_input;
+    const auto beta = alpha;
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(input__equality__same__true)
+{
+    const auto& alpha = expected_input;
+    const input beta(alpha);
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(input__equality__different__false)
+{
+    const auto& alpha = expected_input;
+    const input beta;
+    BOOST_REQUIRE(!(alpha == beta));
+}
+
+BOOST_AUTO_TEST_CASE(input__inequality__same__false)
+{
+    const auto& alpha = expected_input;
+    const input beta(alpha);
+    BOOST_REQUIRE(!(alpha != beta));
+}
+
+BOOST_AUTO_TEST_CASE(input__inequality__different__true)
+{
+    const auto& alpha = expected_input;
+    const input beta;
+    BOOST_REQUIRE(alpha != beta);
+}
+
+// from_data
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__from_data__insufficient_data__invalid)
+{
+    data_chunk insufficient_data(2);
     input instance;
-    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.from_data(insufficient_data));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(input__from_data__valid_data__success)
+BOOST_AUTO_TEST_CASE(input__from_data__data__valid)
 {
-    const auto junk = base16_array("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     input instance;
-    read::bytes::copy reader(junk);
-    BOOST_REQUIRE(instance.from_data(reader));
-}
-
-BOOST_AUTO_TEST_CASE(input__factory_1__valid_input__success)
-{
-    const input instance(valid_raw_input);
+    BOOST_REQUIRE(instance.from_data(input_data));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), valid_raw_input.size());
-
-    // Re-save and compare against original.
-    const auto resave = instance.to_data();
-    BOOST_REQUIRE_EQUAL(resave.size(), valid_raw_input.size());
-    BOOST_REQUIRE(resave == valid_raw_input);
 }
 
-BOOST_AUTO_TEST_CASE(input__factory_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(input__from_data__stream__valid)
 {
-    stream::in::copy stream(valid_raw_input);
-    const input instance(stream);
+    input instance;
+    stream::in::copy stream(input_data);
+    BOOST_REQUIRE(instance.from_data(stream));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), valid_raw_input.size());
-
-    // Re-save and compare against original.
-    const auto resave = instance.to_data();
-    BOOST_REQUIRE_EQUAL(resave.size(), valid_raw_input.size());
-    BOOST_REQUIRE(resave == valid_raw_input);
 }
 
-BOOST_AUTO_TEST_CASE(input__factory_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(input__from_data__reader__valid)
 {
-    read::bytes::copy source(valid_raw_input);
-    const input instance(valid_raw_input);
+    input instance;
+    read::bytes::copy source(input_data);
+    BOOST_REQUIRE(instance.from_data(source));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), valid_raw_input.size());
-
-    // Re-save and compare against original.
-    const auto resave = instance.to_data();
-    BOOST_REQUIRE_EQUAL(resave.size(), valid_raw_input.size());
-    BOOST_REQUIRE(resave == valid_raw_input);
 }
+
+// to_data
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__to_data__data__expected)
+{
+    const auto size = expected_input.to_data().size();
+    BOOST_REQUIRE_EQUAL(size, expected_input.serialized_size(false));
+}
+
+BOOST_AUTO_TEST_CASE(input__to_data__stream__expected)
+{
+    // Write input to stream.
+    std::stringstream iostream;
+    expected_input.to_data(iostream);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    const input copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_input);
+}
+
+BOOST_AUTO_TEST_CASE(input__to_data__writer__expected)
+{
+    // Write input to stream.
+    std::stringstream iostream;
+    write::bytes::ostream out(iostream);
+    expected_input.to_data(out);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    const input copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_input);
+}
+
+// properties
+// ----------------------------------------------------------------------------
+
+// serialized_size
+
+// methods
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(input__is_final__max_input_sequence__true)
 {
@@ -153,7 +276,7 @@ BOOST_AUTO_TEST_CASE(input__is_final__sequence_zero__false)
     BOOST_REQUIRE(!instance.is_final());
 }
 
-BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_equals_minimum__false)
+BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_sequence_age_equals_minimum__false)
 {
     static const auto age = 7u;
     static const auto sequence_enabled_block_type_minimum = age;
@@ -166,7 +289,7 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_equals_mi
 BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_above_minimum__false)
 {
     static const auto age = 7u;
-    static const auto sequence_enabled_block_type_minimum = age - 1;
+    static const auto sequence_enabled_block_type_minimum = sub1(age);
     input instance({}, {}, sequence_enabled_block_type_minimum);
     auto& prevout = instance.prevout;
     prevout.height = 42;
@@ -176,7 +299,7 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_above_min
 BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_below_minimum__true)
 {
     static const auto age = 7u;
-    static const auto sequence_enabled_block_type_minimum = age + 1;
+    static const auto sequence_enabled_block_type_minimum = add1(age);
     input instance({}, {}, sequence_enabled_block_type_minimum);
     auto& prevout = instance.prevout;
     prevout.height = 42;
@@ -237,73 +360,32 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_time_type_sequence_age_below_min
     BOOST_REQUIRE(!instance.is_locked(0, prevout.median_time_past + age_seconds));
 }
 
-BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_inactive__script_sigops)
+// reserved_hash
+
+BOOST_AUTO_TEST_CASE(input__signature_operations__bips_inactive__script_sigops)
 {
-    const auto raw_script = base16_chunk("02acad");
     script script;
-    BOOST_REQUIRE(script.from_data(raw_script, true));
+    BOOST_REQUIRE(script.from_data(base16_chunk("02acad"), true));
     input instance{ {}, script, chain::max_input_sequence };
     BOOST_REQUIRE_EQUAL(script.sigops(false), instance.signature_operations(false, false));
 }
 
-BOOST_AUTO_TEST_CASE(input__signature_operations__bip16_active_cache_empty__script_sigops)
+BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_inactive__script_sigops)
 {
-    const auto raw_script = base16_chunk("02acad");
     script script;
-    BOOST_REQUIRE(script.from_data(raw_script, true));
+    BOOST_REQUIRE(script.from_data(base16_chunk("02acad"), true));
     input instance{ {}, script, chain::max_input_sequence };
-    BOOST_REQUIRE_EQUAL(script.sigops(false), instance.signature_operations(true, false));
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), script.sigops(false));
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), script.sigops(false));
 }
 
-BOOST_AUTO_TEST_CASE(input__operator_assign_equals_1__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_active_missing_prevout__max_size_t_sigops)
 {
-    input expected;
-    BOOST_REQUIRE(expected.from_data(valid_raw_input));
-    const input instance(valid_raw_input);
-    BOOST_REQUIRE(instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(input__operator_assign_equals_2__always__matches_equivalent)
-{
-    input expected;
-    BOOST_REQUIRE(expected.from_data(valid_raw_input));
-    input instance;
-    instance = expected;
-    BOOST_REQUIRE(instance == expected);
-}
-
-BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__duplicates__true)
-{
-    input alpha;
-    input beta;
-    BOOST_REQUIRE(alpha.from_data(valid_raw_input));
-    BOOST_REQUIRE(beta.from_data(valid_raw_input));
-    BOOST_REQUIRE(alpha == beta);
-}
-
-BOOST_AUTO_TEST_CASE(input__operator_boolean_equals__differs__false)
-{
-    input alpha;
-    input beta;
-    BOOST_REQUIRE(alpha.from_data(valid_raw_input));
-    BOOST_REQUIRE(!(alpha == beta));
-}
-
-BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__duplicates__false)
-{
-    input alpha;
-    input beta;
-    BOOST_REQUIRE(alpha.from_data(valid_raw_input));
-    BOOST_REQUIRE(beta.from_data(valid_raw_input));
-    BOOST_REQUIRE(!(alpha != beta));
-}
-
-BOOST_AUTO_TEST_CASE(input__operator_boolean_not_equals__differs__true)
-{
-    input alpha;
-    input beta;
-    BOOST_REQUIRE(alpha.from_data(valid_raw_input));
-    BOOST_REQUIRE(alpha != beta);
+    script script;
+    BOOST_REQUIRE(script.from_data(base16_chunk("02acad"), true));
+    input instance{ {}, script, chain::max_input_sequence };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), max_size_t);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), max_size_t);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
