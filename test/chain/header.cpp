@@ -21,443 +21,354 @@
 
 BOOST_AUTO_TEST_SUITE(chain_header_tests)
 
-BOOST_AUTO_TEST_CASE(header__merkle_root__empty__null_hash)
-{
-    const chain::header instance;
-    BOOST_REQUIRE_EQUAL(instance.merkle_root(), null_hash);
-}
+using namespace system::chain;
 
-BOOST_AUTO_TEST_CASE(header__constructor_1__always__initialized_invalid)
+const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+const auto hash2 = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+const header expected_header
 {
-    chain::header instance;
+    10,
+    hash1,
+    hash2,
+    531234,
+    6523454,
+    68644
+};
+
+// Access protected validation methods.
+class accessor
+  : public header
+{
+public:
+    // Use base class constructors.
+    using header::header;
+
+    bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
+        bool scrypt=false) const
+    {
+        return header::is_invalid_proof_of_work(proof_of_work_limit, scrypt);
+    }
+
+    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const
+    {
+        return header::is_invalid_timestamp(timestamp_limit_seconds);
+    }
+};
+
+// constructors
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__constructor__default__invalid)
+{
+    header instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor_2__always__equals_params)
+BOOST_AUTO_TEST_CASE(header__constructor__move__expected)
 {
-    const uint32_t version = 10u;
-    const auto previous = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const auto merkle = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    const uint32_t timestamp = 531234u;
-    const uint32_t bits = 6523454u;
-    const uint32_t nonce = 68644u;
-
-    chain::header instance(version, previous, merkle, timestamp, bits, nonce);
+    header copy(expected_header);
+    const header instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(version, instance.version());
-    BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
-    BOOST_REQUIRE_EQUAL(bits, instance.bits());
-    BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle_root());
+    BOOST_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor_3__always__equals_params)
+BOOST_AUTO_TEST_CASE(header__constructor__copy__expected)
 {
-    const uint32_t version = 10u;
-    const uint32_t timestamp = 531234u;
-    const uint32_t bits = 6523454u;
-    const uint32_t nonce = 68644u;
-
-    // These must be non-const.
-    auto previous = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    auto merkle = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-
-    chain::header instance(version, std::move(previous), std::move(merkle),
-        timestamp, bits, nonce);
+    const header instance(expected_header);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(version, instance.version());
-    BOOST_REQUIRE_EQUAL(timestamp, instance.timestamp());
-    BOOST_REQUIRE_EQUAL(bits, instance.bits());
-    BOOST_REQUIRE_EQUAL(nonce, instance.nonce());
-    BOOST_REQUIRE(previous == instance.previous_block_hash());
-    BOOST_REQUIRE(merkle == instance.merkle_root());
+    BOOST_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor_4__always__equals_params)
+BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
 {
-    const chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const uint32_t version = 10;
+    const auto previous = hash1;
+    const auto merkle = hash2;
+    const uint32_t timestamp = 531234;
+    const uint32_t bits = 6523454;
+    const uint32_t nonce = 68644;
 
-    chain::header instance(expected);
+    auto merkle_copy = merkle;
+    auto previous_copy = previous;
+    header instance(version, std::move(previous_copy), std::move(merkle_copy), timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE_EQUAL(instance.version(), version);
+    BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
+    BOOST_REQUIRE_EQUAL(instance.merkle_root(), merkle);
+    BOOST_REQUIRE_EQUAL(instance.timestamp(), timestamp);
+    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
+    BOOST_REQUIRE_EQUAL(instance.nonce(), nonce);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor_5__always__equals_params)
+BOOST_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
 {
-    // This must be non-const.
-    chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const uint32_t version = 10;
+    const auto previous = hash1;
+    const auto merkle = hash2;
+    const uint32_t timestamp = 531234;
+    const uint32_t bits = 6523454;
+    const uint32_t nonce = 68644;
 
-    chain::header instance(std::move(expected));
+    header instance(version, previous, merkle, timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(expected == instance);
+    BOOST_REQUIRE_EQUAL(instance.version(), version);
+    BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
+    BOOST_REQUIRE_EQUAL(instance.merkle_root(), merkle);
+    BOOST_REQUIRE_EQUAL(instance.timestamp(), timestamp);
+    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
+    BOOST_REQUIRE_EQUAL(instance.nonce(), nonce);
 }
 
-BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__failure)
+BOOST_AUTO_TEST_CASE(header__constructor__data__expected)
+{
+    const auto data = expected_header.to_data();
+    const header instance(data);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
+}
+
+BOOST_AUTO_TEST_CASE(header__constructor__stream__expected)
+{
+    const auto data = expected_header.to_data();
+    stream::in::copy stream(data);
+    const header instance(stream);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
+}
+
+BOOST_AUTO_TEST_CASE(header__constructor__reader__expected)
+{
+    const auto data = expected_header.to_data();
+    read::bytes::copy source(data);
+    const header instance(source);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__assign__move__expected)
+{
+    const auto& alpha = expected_header;
+    auto gamma = alpha;
+    const auto beta = std::move(gamma);
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(header__assign__copy__expected)
+{
+    const auto& alpha = expected_header;
+    const auto beta = alpha;
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(header__equality__same__true)
+{
+    header instance(expected_header);
+    BOOST_REQUIRE(instance == expected_header);
+}
+
+BOOST_AUTO_TEST_CASE(header__equality__different__false)
+{
+    header instance;
+    BOOST_REQUIRE(!(instance == expected_header));
+}
+
+BOOST_AUTO_TEST_CASE(header__inequality__same__true)
+{
+    header instance(expected_header);
+    BOOST_REQUIRE(!(instance != expected_header));
+}
+
+BOOST_AUTO_TEST_CASE(header__inequality__different__false)
+{
+    header instance;
+    BOOST_REQUIRE(instance != expected_header);
+}
+
+// from_data
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__invalid)
 {
     data_chunk data(10);
-
-    chain::header header;
-
-    BOOST_REQUIRE(!header.from_data(data));
-    BOOST_REQUIRE(!header.is_valid());
+    header instance;
+    BOOST_REQUIRE(!instance.from_data(data));
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__from_data__data__valid)
 {
-    chain::header expected
-    {
-        10,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644,
-    };
-
-    const auto data = expected.to_data();
-
-    const chain::header result(data);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
+    const auto data = expected_header.to_data();
+    const header instance(data);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__from_data__stream__valid)
 {
-    chain::header expected
-    {
-        10,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644
-    };
-
-    const auto data = expected.to_data();
-    stream::in::copy istream(data);
-
-    const chain::header result(istream);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
+    const auto data = expected_header.to_data();
+    stream::in::copy stream(data);
+    const header instance(stream);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__factory_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(header__from_data__reader__valid)
 {
-    const chain::header expected
-    {
-        10,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644
-    };
-
-    const auto data = expected.to_data();
+    const auto data = expected_header.to_data();
     read::bytes::copy source(data);
-
-    const chain::header result(source);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
+    const header instance(source);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__version_accessor__always__initialized_value)
-{
-    const uint32_t value = 11234u;
-    const chain::header instance(
-        value,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        34564u);
+// to_data
+// ----------------------------------------------------------------------------
 
-    BOOST_REQUIRE_EQUAL(value, instance.version());
+BOOST_AUTO_TEST_CASE(header__to_data__data__expected)
+{
+    const auto data = expected_header.to_data();
+    BOOST_REQUIRE_EQUAL(expected_header.serialized_size(), data.size());
 }
 
-
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_1__always__initialized_value)
+BOOST_AUTO_TEST_CASE(header__to_data__stream__expected)
 {
-    const auto value = base16_hash("abababababababababababababababababababababababababababababababab");
-    chain::header instance(
-        11234u,
-        value,
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        34564u);
+    // Write header to stream.
+    std::stringstream iostream;
+    expected_header.to_data(iostream);
+    BOOST_REQUIRE(iostream);
 
-    BOOST_REQUIRE(value == instance.previous_block_hash());
+    // Verify stream contents.
+    const header copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__previous_block_hash_accessor_2__always__initialized_value)
+BOOST_AUTO_TEST_CASE(header__to_data__writer__expected)
 {
-    const auto value = base16_hash("abababababababababababababababababababababababababababababababab");
-    const chain::header instance(
-        11234u,
-        value,
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        34564u);
+    // Write header to stream.
+    std::stringstream iostream;
+    write::bytes::ostream out(iostream);
+    expected_header.to_data(out);
+    BOOST_REQUIRE(iostream);
 
-    BOOST_REQUIRE(value == instance.previous_block_hash());
+    // Verify stream contents.
+    const header copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__merkle_accessor_1__always__initialized_value)
+// properties
+// ----------------------------------------------------------------------------
+
+// hash
+
+BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
 {
-    const auto value = base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
-    chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        value,
-        753234u,
-        4356344u,
-        34564u);
-
-    BOOST_REQUIRE(value == instance.merkle_root());
-}
-
-BOOST_AUTO_TEST_CASE(header__merkle_accessor_2__always__initialized_value)
-{
-    const auto value = base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe");
-    const chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        value,
-        753234u,
-        4356344u,
-        34564u);
-
-    BOOST_REQUIRE(value == instance.merkle_root());
-}
-
-BOOST_AUTO_TEST_CASE(header__timestamp_accessor__always__initialized_value)
-{
-    uint32_t value = 753234u;
-    chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        value,
-        4356344u,
-        34564u);
-
-    BOOST_REQUIRE_EQUAL(value, instance.timestamp());
-}
-
-BOOST_AUTO_TEST_CASE(header__bits_accessor__always__initialized_value)
-{
-    uint32_t value = 4356344u;
-    chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        value,
-        34564u);
-
-    BOOST_REQUIRE_EQUAL(value, instance.bits());
-}
-
-BOOST_AUTO_TEST_CASE(header__nonce_accessor__always__initialized_value)
-{
-    uint32_t value = 34564u;
-    chain::header instance(
-        11234u,
-        base16_hash("abababababababababababababababababababababababababababababababab"),
-        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-        753234u,
-        4356344u,
-        value);
-
-    BOOST_REQUIRE_EQUAL(value, instance.nonce());
-}
-
-// TODO: create test accessor.
-////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_less_than_2_hours_from_now__true)
-////{
-////    const auto now = std::chrono::system_clock::now();
-////    const auto now_time = std::chrono::system_clock::to_time_t(now);
-////    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
-////    BOOST_REQUIRE(instance.is_valid_timestamp(settings().timestamp_limit_seconds));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__is_valid_timestamp__timestamp_greater_than_2_hours_from_now__false)
-////{
-////    const auto now = std::chrono::system_clock::now();
-////    const auto duration = std::chrono::hours(3);
-////    const auto future = std::chrono::system_clock::to_time_t(now + duration);
-////    chain::header instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
-////    BOOST_REQUIRE(!instance.is_valid_timestamp(settings().timestamp_limit_seconds));
-////}
-
-// TODO: create test accessor.
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__bits_exceeds_maximum__false)
-////{
-////    const settings settings(chain::selection::mainnet);
-////    chain::header instance{ {}, {}, {}, {}, settings.proof_of_work_limit + 1, {} };
-////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_greater_bits__false)
-////{
-////    const settings settings(chain::selection::mainnet);
-////    const chain::header instance(
-////        11234u,
-////        base16_hash("abababababababababababababababababababababababababababababababab"),
-////        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
-////        753234u,
-////        0u,
-////        34564u);
-////
-////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__is_valid_proof_of_work__hash_less_than_bits__true)
-////{
-////    const settings settings(chain::selection::mainnet);
-////    const chain::header instance(
-////        4u,
-////        base16_hash("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
-////        base16_hash("a6cb0b0d6531a71abe2daaa4a991e5498e1b6b0b51549568d0f9d55329b905df"),
-////        1474388414u,
-////        402972254u,
-////        2842832236u);
-////
-////    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__false)
-////{
-////    const settings settings(chain::selection::mainnet);
-////    const chain::header instance(
-////        536870912u,
-////        base16_hash("abababababababababababababababababababababababababababababababab"),
-////        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
-////        1535119178u,
-////        436332170u,
-////        2135224651u);
-////
-////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__true)
-////{
-////    const settings settings(chain::selection::mainnet);
-////    const chain::header instance(
-////        536870912u,
-////        base16_hash("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
-////        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
-////        1535119178u,
-////        436332170u,
-////        2135224651u);
-////
-////    BOOST_REQUIRE(instance.is_valid_proof_of_work(settings.proof_of_work_limit, true));
-////    BOOST_REQUIRE(!instance.is_valid_proof_of_work(settings.proof_of_work_limit, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(header__proof1__genesis_mainnet__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(chain::header::difficulty(0x1d00ffff), 0x0000000100010001);
-////}
-
-BOOST_AUTO_TEST_CASE(header__proof2__genesis_mainnet__expected)
-{
-    const chain::block block = settings(chain::selection::mainnet).genesis_block;
+    const auto block = settings(selection::mainnet).genesis_block;
     BOOST_REQUIRE_EQUAL(block.header().difficulty(), 0x0000000100010001);
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_assign_equals__always__matches_equivalent)
+// validation (public)
+// ----------------------------------------------------------------------------
+
+// check
+// accept
+
+// validation (protected)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__bits_exceeds_maximum__true)
 {
-    // This must be non-const.
-    chain::header value(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
-    BOOST_REQUIRE(value.is_valid());
-
-    chain::header instance;
-    BOOST_REQUIRE(!instance.is_valid());
-
-    instance = std::move(value);
-    BOOST_REQUIRE(instance.is_valid());
+    const settings settings(selection::mainnet);
+    const accessor instance{ {}, {}, {}, {}, add1(settings.proof_of_work_limit), {} };
+    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__duplicates__true)
+BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_greater_bits__true)
 {
-    const chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const settings settings(selection::mainnet);
+    const accessor instance
+    {
+        11234,
+        base16_hash("abababababababababababababababababababababababababababababababab"),
+        base16_hash("fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe"),
+        753234,
+        0,
+        34564
+    };
 
-    chain::header instance(expected);
-    BOOST_REQUIRE(instance == expected);
+    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_equals__differs__false)
+BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_less_than_bits_false)
 {
-    const chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const settings settings(selection::mainnet);
+    const accessor instance
+    {
+        4,
+        base16_hash("000000000000000003ddc1e929e2944b8b0039af9aa0d826c480a83d8b39c373"),
+        base16_hash("a6cb0b0d6531a71abe2daaa4a991e5498e1b6b0b51549568d0f9d55329b905df"),
+        1474388414,
+        402972254,
+        2842832236
+    };
 
-    chain::header instance;
-    BOOST_REQUIRE_EQUAL(false, instance == expected);
+    BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__duplicates__false)
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__false)
 {
-    const chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const settings settings(selection::mainnet);
+    const accessor instance
+    {
+        536870912,
+        base16_hash("abababababababababababababababababababababababababababababababab"),
+        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178,
+        436332170,
+        2135224651
+    };
 
-    chain::header instance(expected);
-    BOOST_REQUIRE_EQUAL(false, instance != expected);
+    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
 }
 
-BOOST_AUTO_TEST_CASE(header__operator_boolean_not_equals__differs__true)
+BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__false)
 {
-    const chain::header expected(
-        10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
+    const settings settings(selection::mainnet);
+    const accessor instance
+    {
+        536870912,
+        base16_hash("313ced849aafeff324073bb2bd31ecdcc365ed215a34e827bb797ad33d158542"),
+        base16_hash("5163359dde15eb3f49cbd0926981f065ef1405fc9d4cece8818662b3b65f5dc6"),
+        1535119178,
+        436332170,
+        2135224651
+    };
 
-    chain::header instance;
-    BOOST_REQUIRE(instance != expected);
+    BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
+    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_less_than_2_hours_from_now__false)
+{
+    const auto now = std::chrono::system_clock::now();
+    const auto now_time = std::chrono::system_clock::to_time_t(now);
+    const accessor instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
+    BOOST_REQUIRE(!instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_greater_than_2_hours_from_now__true)
+{
+    const auto now = std::chrono::system_clock::now();
+    const auto duration = std::chrono::hours(3);
+    const auto future = std::chrono::system_clock::to_time_t(now + duration);
+    const accessor instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
+    BOOST_REQUIRE(instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
