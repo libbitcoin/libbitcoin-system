@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
 
     auto merkle_copy = merkle;
     auto previous_copy = previous;
-    header instance(version, std::move(previous_copy), std::move(merkle_copy), timestamp, bits, nonce);
+    const header instance(version, std::move(previous_copy), std::move(merkle_copy), timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.version(), version);
     BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
     const uint32_t bits = 6523454;
     const uint32_t nonce = 68644;
 
-    header instance(version, previous, merkle, timestamp, bits, nonce);
+    const header instance(version, previous, merkle, timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.version(), version);
     BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
