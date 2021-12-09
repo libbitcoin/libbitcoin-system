@@ -26,6 +26,25 @@ const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c1
 const auto hash2 = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 const auto hash3 = base16_hash("bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
+const header expected_header
+{
+    10,
+    hash1,
+    hash2,
+    531234,
+    6523454,
+    68644
+};
+
+const transaction::list expected_transactions
+{
+    { 1, 48, { {} }, { {} } },
+    { 2, 32, { {} }, { {} } },
+    { 4, 16, { {} }, { {} } }
+};
+
+const block expected_block{ expected_header, expected_transactions };
+
 // Access protected validation methods.
 class accessor
   : public block
@@ -119,78 +138,27 @@ BOOST_AUTO_TEST_CASE(block__constructor__default__invalid)
 
 BOOST_AUTO_TEST_CASE(block__constructor__move__expected)
 {
-    const header header
-    {
-        10,
-        hash1,
-        hash2,
-        531234,
-        6523454,
-        68644
-    };
-
-    const transaction::list transactions
-    {
-        { 1, 48, { {} }, { {} } },
-        { 2, 32, { {} }, { {} } },
-        { 4, 16, { {} }, { {} } }
-    };
-
-    const block expected(header, transactions);
-    block copy(header, transactions);
+    const block expected(expected_header, expected_transactions);
+    block copy(expected_header, expected_transactions);
     const block instance(std::move(copy));
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == header);
-    BOOST_REQUIRE(instance.transactions() == transactions);
+    BOOST_REQUIRE(instance.header() == expected_header);
+    BOOST_REQUIRE(instance.transactions() == expected_transactions);
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy__expected)
 {
-    const header header
-    {
-        10,
-        hash1,
-        hash2,
-        531234,
-        6523454,
-        68644
-    };
-
-    const transaction::list transactions
-    {
-        { 1, 48, { {} }, { {} } },
-        { 2, 32, { {} }, { {} } },
-        { 4, 16, { {} }, { {} } }
-    };
-
-    const block expected(header, transactions);
+    const block expected(expected_header, expected_transactions);
     const block instance(expected);
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == header);
-    BOOST_REQUIRE(instance.transactions() == transactions);
+    BOOST_REQUIRE(instance.header() == expected_header);
+    BOOST_REQUIRE(instance.transactions() == expected_transactions);
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
 {
-    const header expected_header
-    {
-        10,
-        hash1,
-        hash2,
-        531234,
-        6523454,
-        68644
-    };
-
-    const transaction::list expected_transactions
-    {
-        { 1, 48, { {} }, { {} } },
-        { 2, 32, { {} }, { {} } },
-        { 4, 16, { {} }, { {} } }
-    };
-
     auto header = expected_header;
     auto transactions = expected_transactions;
     const block instance(std::move(header), std::move(transactions));
@@ -202,23 +170,6 @@ BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
 {
-    const header expected_header
-    {
-        10,
-        hash1,
-        hash2,
-        531234,
-        6523454,
-        68644
-    };
-
-    const transaction::list expected_transactions
-    {
-        { 1, 48, { {} }, { {} } },
-        { 2, 32, { {} }, { {} } },
-        { 4, 16, { {} }, { {} } }
-    };
-
     auto header = expected_header;
     auto transactions = expected_transactions;
     const block instance(header, transactions);
@@ -261,23 +212,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__reader__success)
 
 BOOST_AUTO_TEST_CASE(block__assign__move__expected)
 {
-    const block alpha
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
     auto gamma = alpha;
     const auto beta = std::move(gamma);
     BOOST_REQUIRE(alpha == beta);
@@ -285,116 +220,36 @@ BOOST_AUTO_TEST_CASE(block__assign__move__expected)
 
 BOOST_AUTO_TEST_CASE(block__assign__copy__expected)
 {
-    const block alpha
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
     const auto beta = alpha;
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(block__equality__same__true)
 {
-    const block alpha
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
     const block beta(alpha);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(block__equality__different__false)
 {
-    const block alpha;
-    const block beta
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
+    const block beta;
     BOOST_REQUIRE(!(alpha == beta));
 }
 
 BOOST_AUTO_TEST_CASE(block__inequality__same__false)
 {
-    const block alpha
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
     const block beta(alpha);
     BOOST_REQUIRE(!(alpha != beta));
 }
 
 BOOST_AUTO_TEST_CASE(block__inequality__different__true)
 {
-    const block alpha;
-    const block beta
-    {
-        {
-            10,
-            hash1,
-            hash2,
-            531234,
-            6523454,
-            68644
-        },
-        {
-            { 1, 48, {}, {} },
-            { 2, 32, {}, {} },
-            { 4, 16, {}, {} }
-        }
-    };
-
+    const auto& alpha = expected_block;
+    const block beta;
     BOOST_REQUIRE(alpha != beta);
 }
 
@@ -423,8 +278,69 @@ BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__invalid)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(block__from_data__data__valid)
+{
+    const auto data = expected_block.to_data(true);
+    block instance;
+    BOOST_REQUIRE(instance.from_data(data, true));
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(block__from_data__stream__valid)
+{
+    const auto data = expected_block.to_data(true);
+    block instance;
+    stream::in::copy stream(data);
+    BOOST_REQUIRE(instance.from_data(stream, true));
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(block__from_data__reader__valid)
+{
+    const auto data = expected_block.to_data(true);
+    block instance;
+    read::bytes::copy source(data);
+    BOOST_REQUIRE(instance.from_data(source, true));
+    BOOST_REQUIRE(instance.is_valid());
+}
+
 // to_data
 // ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__to_data__data__expected)
+{
+    const auto data = expected_block.to_data(true);
+    BOOST_REQUIRE_EQUAL(expected_block.serialized_size(true), data.size());
+}
+
+BOOST_AUTO_TEST_CASE(block__to_data__stream__expected)
+{
+    // Write block to stream.
+    std::stringstream iostream;
+    expected_block.to_data(iostream, true);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    const block copy(iostream, true);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_block);
+}
+
+BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
+{
+    // Write block to stream.
+    std::stringstream iostream;
+    write::bytes::ostream out(iostream);
+    expected_block.to_data(out, true);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    const block copy(iostream, true);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(copy.is_valid());
+    BOOST_REQUIRE(copy == expected_block);
+}
 
 // properties
 // ----------------------------------------------------------------------------
