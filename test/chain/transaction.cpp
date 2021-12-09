@@ -635,6 +635,34 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty__false)
     BOOST_REQUIRE(!instance.is_coinbase());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__default_point__true)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        {
+            { {}, {}, 0 }
+        },
+        {}
+    };
+
+    BOOST_REQUIRE(instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase__default_input__true)
+{
+    const transaction instance
+    {
+        0,
+        0,
+        { {} },
+        {}
+    };
+
+    BOOST_REQUIRE(instance.is_coinbase());
+}
+
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_input__true)
 {
     const transaction instance
@@ -862,7 +890,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_empty__one_output__true)
     BOOST_REQUIRE(instance.is_empty());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_empty__one_intput_one_output__false)
+BOOST_AUTO_TEST_CASE(transaction__is_empty__one_input_one_output__false)
 {
     const accessor instance
     {
@@ -1152,13 +1180,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__empty_inputs__false)
     BOOST_REQUIRE(!instance.is_missing_prevouts());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_prevout__true)
+BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
 {
     const accessor instance
     {
         0,
         0,
-        { {} },
+        { {}, {} },
         {}
     };
 
@@ -1167,7 +1195,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_prevout__true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout = { 42, {} };
     const accessor instance
     {
@@ -1207,7 +1235,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__no_inputs__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.height = 0;
     input.prevout.coinbase = true;
     const accessor instance
@@ -1223,7 +1251,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.height = 1;
     input.prevout.coinbase = true;
     const accessor instance
@@ -1239,7 +1267,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.height = 1;
     input.prevout.coinbase = false;
     const accessor instance
@@ -1255,7 +1283,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.height = 1;
     input.prevout.coinbase = true;
     const accessor instance
@@ -1271,7 +1299,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.height = 1;
     input.prevout.coinbase = false;
     const accessor instance
@@ -1293,7 +1321,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
         version,
         0,
         {
-            { {}, {}, 0 }
+            { { {}, 42 }, {}, 0 }
         },
         {}
     };
@@ -1309,7 +1337,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
         version,
         0,
         {
-            { {}, {}, 0 }
+            { { {}, 42 }, {}, 0 }
         },
         {}
     };
@@ -1359,22 +1387,22 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__false
     BOOST_REQUIRE(!instance.is_confirmed_double_spend(42));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_input__true)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__true)
 {
     const accessor instance
     {
         0,
         0,
-        { {} },
+        { {}, {} },
         {}
     };
 
     BOOST_REQUIRE(instance.is_confirmed_double_spend(42));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__false)
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__false)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.spent = false;
     const accessor instance
     {
@@ -1389,7 +1417,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_inputs__fal
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
 {
-    const input input;
+    const input input{ { {}, 42 }, {}, 0 };
     input.prevout.spent = true;
     const accessor instance
     {
