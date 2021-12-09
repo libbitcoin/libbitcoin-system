@@ -443,31 +443,31 @@ BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
 
 BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
 {
-    operation value({ 0x07 }, true);
+    operation value(data_chunk{ 0x07 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_nominal__empty__zero)
 {
-    operation value({}, false);
+    operation value(data_chunk{}, false);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_nominal__0x07__0x07)
 {
-    operation value({ 0x07 }, false);
+    operation value(data_chunk{ 0x07 }, false);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[07]");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__0x42__0x42)
 {
-    operation value({ 0x42 }, true);
+    operation value(data_chunk{ 0x42 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[42]");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__0x112233__0x112233)
 {
-    operation value({ { 0x11, 0x22, 0x33 } }, true);
+    operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
 }
 
