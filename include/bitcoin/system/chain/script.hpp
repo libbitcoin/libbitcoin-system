@@ -60,7 +60,7 @@ public:
     script(operation::list&& ops);
     script(const operation::list& ops);
 
-    script(const data_slice& encoded, bool prefix);
+    script(const data_slice& data, bool prefix);
     script(std::istream& stream, bool prefix);
     script(reader& source, bool prefix);
 
@@ -77,7 +77,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Deserialization invalidates the iterator.
-    bool from_data(const data_slice& encoded, bool prefix);
+    bool from_data(const data_slice& data, bool prefix);
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 

@@ -83,9 +83,9 @@ script::script(const operation::list& ops)
 {
 }
 
-script::script(const data_slice& encoded, bool prefix)
+script::script(const data_slice& data, bool prefix)
 {
-    from_data(encoded, prefix);
+    from_data(data, prefix);
 }
 
 script::script(std::istream& stream, bool prefix)
@@ -140,9 +140,9 @@ bool script::operator!=(const script& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool script::from_data(const data_slice& encoded, bool prefix)
+bool script::from_data(const data_slice& data, bool prefix)
 {
-    stream::in::copy istream(encoded);
+    stream::in::copy istream(data);
     return from_data(istream, prefix);
 }
 
