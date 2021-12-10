@@ -198,11 +198,6 @@ void point::to_data(writer& sink) const
 // Properties.
 // ----------------------------------------------------------------------------
 
-size_t point::serialized_size()
-{
-    return hash_size + sizeof(uint32_t);
-}
-
 const hash_digest& point::hash() const
 {
     return hash_;
@@ -211,6 +206,11 @@ const hash_digest& point::hash() const
 uint32_t point::index() const
 {
     return index_;
+}
+
+size_t point::serialized_size()
+{
+    return hash_size + sizeof(uint32_t);
 }
 
 // Validation.

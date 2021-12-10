@@ -88,8 +88,6 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    static size_t serialized_size();
-
     // Properties.
     // ------------------------------------------------------------------------
 
@@ -99,6 +97,7 @@ public:
 
     /// Computed properties.
     bool is_null() const;
+    static size_t serialized_size();
 
 protected:
     // So input may reset its member.
