@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\witness.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />

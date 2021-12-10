@@ -120,6 +120,9 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\authority.cpp">
       <Filter>src\config</Filter>
     </ClCompile>

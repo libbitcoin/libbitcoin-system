@@ -591,6 +591,7 @@ if (with-tests)
         "../../test/chain/script.cpp"
         "../../test/chain/script.hpp"
         "../../test/chain/transaction.cpp"
+        "../../test/chain/witness.cpp"
         "../../test/chain/enums/opcode.cpp"
         "../../test/config/authority.cpp"
         "../../test/config/base16.cpp"
