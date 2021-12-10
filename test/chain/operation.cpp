@@ -18,54 +18,39 @@
  */
 #include "../test.hpp"
 
-// TODO: test static
-////size_t serialized_size() const
-////opcode opcode_from_size(size_t size)
-////opcode minimal_opcode_from_data(const data_chunk& data);
-////opcode nominal_opcode_from_data(const data_chunk& data)
-////opcode opcode_from_version(uint8_t value)
-////opcode opcode_from_positive(uint8_t value)
-////uint8_t opcode_to_positive(opcode code)
-
-// TODO: test static
-////static bool is_push(opcode code);
-////static bool is_payload(opcode code);
-////static bool is_counted(opcode code);
-////static bool is_version(opcode code);
-////static bool is_numeric(opcode code);
-////static bool is_positive(opcode code);
-////static bool is_invalid(opcode code);
-////static bool is_reserved(opcode code);
-////static bool is_conditional(opcode code);
-////static bool is_relaxed_push(opcode code);
-
-// TODO: test member
-////bool is_push() const;
-////bool is_payload() const;
-////bool is_counted() const;
-////bool is_version() const;
-////bool is_numeric() const;
-////bool is_positive() const;
-////bool is_invalid() const;
-////bool is_reserved() const;
-////bool is_conditional() const;
-////bool is_relaxed_push() const;
-////bool is_oversized() const;
-////bool is_minimal_push() const;
-////bool is_nominal_push() const;
-////bool is_underflow() const;
-
 BOOST_AUTO_TEST_SUITE(operation_tests)
 
 using namespace bc::system::chain;
 
-// constructor (code, data, equality)
+const auto op_data = base16_chunk("0900ff11ee22bb33aa44");
+const auto expected_op = operation(op_data);
+const auto op_data_underflow = base16_chunk("0900ff11ee22bb33");
+const auto push_data_32 = base16_chunk(
+    "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 
-BOOST_AUTO_TEST_CASE(operation__constructor__default__invalid)
+// constructors
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__constructor__default__empty_invalid)
 {
     const operation instance;
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE(instance.is_invalid());
+}
+
+BOOST_AUTO_TEST_CASE(operation__constructor__move__expected)
+{
+    const operation expected(push_data_32, false);
+    auto copy = expected;
+    const operation instance(std::move(copy));
+    BOOST_REQUIRE(expected == instance);
+}
+
+BOOST_AUTO_TEST_CASE(operation__constructor__copy__expected)
+{
+    const operation expected(push_data_32, false);
+    const operation instance(expected);
+    BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor__opcode_checklocktimeverify__empty_valid)
@@ -91,61 +76,42 @@ BOOST_AUTO_TEST_CASE(operation__constructor__opcode_push_two_size___empty)
     BOOST_REQUIRE(!instance.is_invalid());
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_move__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_move__expected)
 {
-    const operation expected(base16_chunk("23156214"), false);
-    auto copy = expected;
-    const operation instance(std::move(copy));
-    BOOST_REQUIRE(expected == instance);
-}
-
-BOOST_AUTO_TEST_CASE(operation__constructor_copy__always__expected)
-{
-    const operation expected(base16_chunk("23156214"), false);
-    const operation instance(expected);
-    BOOST_REQUIRE(expected == instance);
-}
-
-BOOST_AUTO_TEST_CASE(operation__constructor_push_move__always__expected)
-{
-    const auto expected = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    auto copy = expected;
+    auto copy = push_data_32;
     const operation instance(std::move(copy), false);
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
-    BOOST_REQUIRE_EQUAL(instance.data(), expected);
+    BOOST_REQUIRE_EQUAL(instance.data(), push_data_32);
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_data_move_minimal__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_move_minimal__expected)
 {
-    const data_chunk expected{ 0x01 };
-    auto copy = expected;
-    const operation instance(std::move(copy), true);
+    const operation instance(data_chunk{ 0x01 }, true);
 
     // minimal: push_positive_1 <= 0x51 (numbers::positive_1) on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_positive_1);
     BOOST_REQUIRE(instance.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_data_move_non_minimal__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_move_non_minimal__expected)
 {
     const data_chunk expected{ 0x51 };
     auto copy = expected;
-    const operation instance(std::move(copy), false);
+    const operation instance(data_chunk{ 0x51 }, false);
 
     // non-minimal: [1.01] <= 0x51 on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(instance.data(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_push_copy__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_copy__expected)
 {
-    const auto expected = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const operation instance(expected, false);
+    const operation instance(push_data_32, false);
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
-    BOOST_REQUIRE_EQUAL(instance.data(), expected);
+    BOOST_REQUIRE_EQUAL(instance.data(), push_data_32);
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_minimal__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_copy_minimal__expected)
 {
     const data_chunk expected{ 0x01 };
     const operation instance(expected, true);
@@ -155,7 +121,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_minimal__always__expected)
     BOOST_REQUIRE(instance.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_non_minimal__always__expected)
+BOOST_AUTO_TEST_CASE(operation__constructor__push_data_copy_non_minimal__expected)
 {
     const data_chunk expected{ 0x51 };
     const operation instance(expected, false);
@@ -165,7 +131,73 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_non_minimal__always__expec
     BOOST_REQUIRE_EQUAL(instance.data(), expected);
 }
 
-// from_data (code, data)
+BOOST_AUTO_TEST_CASE(operation__constructor__op_data__expected)
+{
+    const operation instance(op_data);
+    BOOST_REQUIRE_EQUAL(instance.to_data(), op_data);
+}
+
+BOOST_AUTO_TEST_CASE(operation__constructor__stream__expected)
+{
+    stream::in::copy istream(op_data);
+    const operation instance(istream);
+    BOOST_REQUIRE_EQUAL(instance.to_data(), op_data);
+}
+
+BOOST_AUTO_TEST_CASE(operation__constructor__reader__expected)
+{
+    read::bytes::copy source(op_data);
+    const operation instance(source);
+    BOOST_REQUIRE_EQUAL(instance.to_data(), op_data);
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__assign__move__expected)
+{
+    const operation alpha(op_data);
+    const auto beta = operation(op_data);
+    BOOST_REQUIRE(beta == alpha);
+}
+
+BOOST_AUTO_TEST_CASE(operation__assign__copy__expected)
+{
+    const operation alpha(op_data);
+    const auto beta = alpha;
+    BOOST_REQUIRE(beta == alpha);
+}
+
+BOOST_AUTO_TEST_CASE(operation__equality__same__expected)
+{
+    const operation alpha(op_data);
+    const operation beta(op_data);
+    BOOST_REQUIRE(alpha == beta);
+}
+
+BOOST_AUTO_TEST_CASE(operation__equality__different__expected)
+{
+    const operation alpha;
+    const operation beta(op_data);
+    BOOST_REQUIRE(!(alpha == beta));
+}
+
+BOOST_AUTO_TEST_CASE(operation__inequality__same__expected)
+{
+    const operation alpha(op_data);
+    const operation beta(op_data);
+    BOOST_REQUIRE(!(alpha != beta));
+}
+
+BOOST_AUTO_TEST_CASE(operation__inequality__different__expected)
+{
+    const operation alpha;
+    const operation beta(op_data);
+    BOOST_REQUIRE(alpha != beta);
+}
+
+// from_data
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(operation__from_data__empty__underflow)
 {
@@ -174,7 +206,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__empty__underflow)
     BOOST_REQUIRE(instance.is_underflow());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_size_0__expected)
 {
     const auto data0 = base16_chunk("");
     const auto data = base16_chunk("00");
@@ -191,7 +223,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_0__success)
     BOOST_REQUIRE_EQUAL(instance.data(), data0);
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_75__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_size_75__expected)
 {
     const auto data75 = data_chunk(75, '.');
     const auto data = splice(base16_array("4b"), data75);
@@ -208,14 +240,12 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_size_75__success)
     BOOST_REQUIRE(instance.data() == data75);
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_negative_1__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_negative_1__expected)
 {
     const auto op_79 = static_cast<uint8_t>(opcode::push_negative_1);
     const auto data = data_chunk{ op_79 };
     operation instance;
 
-    // This is read as an encoded operation, not as data.
-    // Constructors read (unencoded) data and can select minimal encoding.
     BOOST_REQUIRE(instance.from_data(data));
     BOOST_REQUIRE_EQUAL(instance.to_data(), data);
 
@@ -228,7 +258,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_negative_1__success)
     BOOST_REQUIRE(instance.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_1__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_positive_1__expected)
 {
     const auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     const auto data = data_chunk{ op_81 };
@@ -248,7 +278,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_1__success)
     BOOST_REQUIRE(instance.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_positive_16__expected)
 {
     const auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
     const auto data = data_chunk{ op_96 };
@@ -268,7 +298,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_positive_16__success)
     BOOST_REQUIRE(instance.data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_one_size__expected)
 {
     const auto data255 = data_chunk(255, '.');
     const auto data = splice(base16_array("4c" "ff"), data255);
@@ -285,7 +315,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_one_size__success)
     BOOST_REQUIRE_EQUAL(instance.data(), data255);
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_two_size__expected)
 {
     const auto data520 = data_chunk(520, '.');
     const auto data = splice(base16_array("4d" "0802"), data520);
@@ -302,7 +332,7 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_two_size__success)
     BOOST_REQUIRE_EQUAL(instance.data(), data520);
 }
 
-BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
+BOOST_AUTO_TEST_CASE(operation__from_data__push_four_size__expected)
 {
     const auto data520 = data_chunk(520, '.');
     const auto data = splice(base16_array("4e" "08020000"), data520);
@@ -319,12 +349,33 @@ BOOST_AUTO_TEST_CASE(operation__from_data__roundtrip_push_four_size__success)
     BOOST_REQUIRE_EQUAL(instance.data(), data520);
 }
 
-// factory/to_data
+BOOST_AUTO_TEST_CASE(operation__from_data__data__valid)
+{
+    operation instance;
+    BOOST_REQUIRE(instance.from_data(op_data));
+    BOOST_REQUIRE(instance == expected_op);
+}
 
-const auto valid_serialized_op = base16_chunk("0900ff11ee22bb33aa44");
-const auto underflow_serialized_op = base16_chunk("0900ff11ee22bb33");
+BOOST_AUTO_TEST_CASE(operation__from_data__stream__valid)
+{
+    operation instance;
+    stream::in::copy stream(op_data);
+    BOOST_REQUIRE(instance.from_data(stream));
+    BOOST_REQUIRE(instance == expected_op);
+}
 
-BOOST_AUTO_TEST_CASE(operation__factory_1__empty__underflow)
+BOOST_AUTO_TEST_CASE(operation__from_data__reader__valid)
+{
+    operation instance;
+    read::bytes::copy source(op_data);
+    BOOST_REQUIRE(instance.from_data(source));
+    BOOST_REQUIRE(instance == expected_op);
+}
+
+// to_data
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__to_data__empty__underflow)
 {
     const operation instance(data_chunk{});
     BOOST_REQUIRE(instance.is_invalid());
@@ -333,221 +384,45 @@ BOOST_AUTO_TEST_CASE(operation__factory_1__empty__underflow)
     BOOST_REQUIRE(instance.to_data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_1__underflow__underflow)
+BOOST_AUTO_TEST_CASE(input__to_data__data__expected)
 {
-    const operation instance(underflow_serialized_op);
-    BOOST_REQUIRE(instance.is_invalid());
-    BOOST_REQUIRE(instance.is_underflow());
-    BOOST_REQUIRE_EQUAL(instance.data(), underflow_serialized_op);
-    BOOST_REQUIRE_EQUAL(instance.to_data(), underflow_serialized_op);
+    const auto size = expected_op.to_data().size();
+    BOOST_REQUIRE_EQUAL(size, expected_op.serialized_size());
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(input__to_data__stream__expected)
 {
-    const operation instance(valid_serialized_op);
-    BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
+    // Write input to stream.
+    std::stringstream iostream;
+    expected_op.to_data(iostream);
+    BOOST_REQUIRE(iostream);
+
+    // Verify stream contents.
+    const operation copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(!copy.is_invalid());
+    BOOST_REQUIRE(!copy.is_underflow());
+    BOOST_REQUIRE(copy == expected_op);
 }
 
-BOOST_AUTO_TEST_CASE(operation__factory_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(input__to_data__writer__expected)
 {
-    stream::in::copy istream(valid_serialized_op);
-    const operation instance(istream);
-    BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
-}
+    // Write input to stream.
+    std::stringstream iostream;
+    write::bytes::ostream out(iostream);
+    expected_op.to_data(out);
+    BOOST_REQUIRE(iostream);
 
-BOOST_AUTO_TEST_CASE(operation__factory_3__roundtrip__success)
-{
-    read::bytes::copy source(valid_serialized_op);
-    const operation instance(source);
-    BOOST_REQUIRE_EQUAL(instance.to_data(), valid_serialized_op);
-}
-
-// assignment
-
-BOOST_AUTO_TEST_CASE(operation__operator_assign_equals_1__always__matches_equivalent)
-{
-    operation alpha;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    operation beta;
-    operation gamma;
-    BOOST_REQUIRE(gamma.from_data(valid_serialized_op));
-    beta = std::move(gamma);
-    BOOST_REQUIRE(beta == alpha);
-}
-
-BOOST_AUTO_TEST_CASE(operation__operator_assign_equals_2__always__matches_equivalent)
-{
-    operation alpha;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    operation beta;
-    beta = alpha;
-    BOOST_REQUIRE(beta == alpha);
-}
-
-// comparison
-
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__duplicates__true)
-{
-    operation alpha;
-    operation beta;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    BOOST_REQUIRE(beta.from_data(valid_serialized_op));
-    BOOST_REQUIRE(alpha == beta);
-}
-
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_equals__differs__false)
-{
-    operation alpha;
-    operation beta;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    BOOST_REQUIRE(!(alpha == beta));
-}
-
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__duplicates__false)
-{
-    operation alpha;
-    operation beta;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    BOOST_REQUIRE(beta.from_data(valid_serialized_op));
-    BOOST_REQUIRE(!(alpha != beta));
-}
-
-BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__differs__true)
-{
-    operation alpha;
-    operation beta;
-    BOOST_REQUIRE(alpha.from_data(valid_serialized_op));
-    BOOST_REQUIRE(alpha != beta);
-}
-
-// to_string
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_size_0__zero)
-{
-    const operation value(opcode::push_size_0);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_size_75__push_75)
-{
-    // Empty data allows the push code to serialize as an op code.
-    const operation value(opcode::push_size_75);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "push_75");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
-{
-    const operation value(opcode::push_positive_7);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
-{
-    const operation value(data_chunk{ 0x07 }, true);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string_nominal__empty__zero)
-{
-    const operation value(data_chunk{}, false);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string_nominal__0x07__0x07)
-{
-    const operation value(data_chunk{ 0x07 }, false);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[07]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__0x42__0x42)
-{
-    const operation value(data_chunk{ 0x42 }, true);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[42]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__0x112233__0x112233)
-{
-    const operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_size_3__0x112233__0x112233)
-{
-    const data_chunk encoded{ { 0x03, 0x11, 0x22, 0x33 } };
-    operation value;
-    value.from_data(encoded);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_one_size_0x112233__1_0x112233)
-{
-    const data_chunk encoded{ { 0x4c, 0x03, 0x11, 0x22, 0x33 } };
-    operation value;
-    value.from_data(encoded);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[1.112233]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_two_size_0x112233__2_0x112233)
-{
-    const data_chunk encoded{ { 0x4d, 0x03, 0x00, 0x11, 0x22, 0x33 } };
-    operation value;
-    value.from_data(encoded);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[2.112233]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__push_four_size_0x112233__4_0x112233)
-{
-    const data_chunk encoded{ { 0x4e, 0x03, 0x00, 0x00, 0x00, 0x11, 0x22, 0x33 } };
-    operation value;
-    value.from_data(encoded);
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "[4.112233]");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__empty_underflow__empty)
-{
-    operation value;
-    value.from_data({});
-    BOOST_REQUIRE(value.is_invalid());
-    BOOST_REQUIRE(value.is_underflow());
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "<>");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
-{
-    // Should be two bytes of push data.
-    const data_chunk encoded{ { 0x02, 0xff } };
-    operation value;
-    value.from_data(encoded);
-    BOOST_REQUIRE(value.is_invalid());
-    BOOST_REQUIRE(value.is_underflow());
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "<02ff>");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
-{
-    const operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop2");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__nop2_bip65_rule__checklocktimeverify)
-{
-    const operation value(opcode::nop2);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip65_rule), "checklocktimeverify");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__nop3_no_rules__nop3)
-{
-    const operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop3");
-}
-
-BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify)
-{
-    const operation value(opcode::nop3);
-    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip112_rule), "checksequenceverify");
+    // Verify stream contents.
+    const operation copy(iostream);
+    BOOST_REQUIRE(iostream);
+    BOOST_REQUIRE(!copy.is_invalid());
+    BOOST_REQUIRE(!copy.is_underflow());
+    BOOST_REQUIRE(copy == expected_op);
 }
 
 // from_string
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(operation__from_string__negative_1__push_negative_1_empty)
 {
@@ -848,5 +723,173 @@ BOOST_AUTO_TEST_CASE(operation__from_string__checklocktimeverify__nop3_checksequ
     BOOST_REQUIRE(value.code() == opcode::checksequenceverify);
     BOOST_REQUIRE(value.data().empty());
 }
+
+// to_string
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_size_0__zero)
+{
+    const operation value(opcode::push_size_0);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_size_75__push_75)
+{
+    // Empty data allows the push code to serialize as an op code.
+    const operation value(opcode::push_size_75);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "push_75");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
+{
+    const operation value(opcode::push_positive_7);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
+{
+    const operation value(data_chunk{ 0x07 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_nominal__empty__zero)
+{
+    const operation value(data_chunk{}, false);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_nominal__0x07__0x07)
+{
+    const operation value(data_chunk{ 0x07 }, false);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[07]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__0x42__0x42)
+{
+    const operation value(data_chunk{ 0x42 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[42]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__0x112233__0x112233)
+{
+    const operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_size_3__0x112233__0x112233)
+{
+    const data_chunk encoded{ { 0x03, 0x11, 0x22, 0x33 } };
+    operation value;
+    value.from_data(encoded);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_one_size_0x112233__1_0x112233)
+{
+    const data_chunk encoded{ { 0x4c, 0x03, 0x11, 0x22, 0x33 } };
+    operation value;
+    value.from_data(encoded);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[1.112233]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_two_size_0x112233__2_0x112233)
+{
+    const data_chunk encoded{ { 0x4d, 0x03, 0x00, 0x11, 0x22, 0x33 } };
+    operation value;
+    value.from_data(encoded);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[2.112233]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__push_four_size_0x112233__4_0x112233)
+{
+    const data_chunk encoded{ { 0x4e, 0x03, 0x00, 0x00, 0x00, 0x11, 0x22, 0x33 } };
+    operation value;
+    value.from_data(encoded);
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "[4.112233]");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__empty_underflow__empty)
+{
+    operation value;
+    value.from_data({});
+    BOOST_REQUIRE(value.is_invalid());
+    BOOST_REQUIRE(value.is_underflow());
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "<>");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
+{
+    // Should be two bytes of push data.
+    const data_chunk encoded{ { 0x02, 0xff } };
+    operation value;
+    value.from_data(encoded);
+    BOOST_REQUIRE(value.is_invalid());
+    BOOST_REQUIRE(value.is_underflow());
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "<02ff>");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
+{
+    const operation value(opcode::nop2);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop2");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__nop2_bip65_rule__checklocktimeverify)
+{
+    const operation value(opcode::nop2);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip65_rule), "checklocktimeverify");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__nop3_no_rules__nop3)
+{
+    const operation value(opcode::nop3);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop3");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify)
+{
+    const operation value(opcode::nop3);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip112_rule), "checksequenceverify");
+}
+
+// utilities (static)
+// ----------------------------------------------------------------------------
+
+////size_t serialized_size() const
+////opcode opcode_from_size(size_t size)
+////opcode minimal_opcode_from_data(const data_chunk& data);
+////opcode nominal_opcode_from_data(const data_chunk& data)
+////opcode opcode_from_version(uint8_t value)
+////opcode opcode_from_positive(uint8_t value)
+////uint8_t opcode_to_positive(opcode code)
+
+////static bool is_push(opcode code);
+////static bool is_payload(opcode code);
+////static bool is_counted(opcode code);
+////static bool is_version(opcode code);
+////static bool is_numeric(opcode code);
+////static bool is_positive(opcode code);
+////static bool is_invalid(opcode code);
+////static bool is_reserved(opcode code);
+////static bool is_conditional(opcode code);
+////static bool is_relaxed_push(opcode code);
+
+// utilities (member)
+// ----------------------------------------------------------------------------
+
+////bool is_push() const;
+////bool is_payload() const;
+////bool is_counted() const;
+////bool is_version() const;
+////bool is_numeric() const;
+////bool is_positive() const;
+////bool is_invalid() const;
+////bool is_reserved() const;
+////bool is_conditional() const;
+////bool is_relaxed_push() const;
+////bool is_oversized() const;
+////bool is_minimal_push() const;
+////bool is_nominal_push() const;
+////bool is_underflow() const;
 
 BOOST_AUTO_TEST_SUITE_END()
