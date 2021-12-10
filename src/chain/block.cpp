@@ -216,7 +216,7 @@ void block::to_data(std::ostream& stream, bool witness) const
 
 void block::to_data(writer& sink, bool witness) const
 {
-    DEBUG_ONLY(const auto size = serialized_size(witness);)
+    DEBUG_ONLY(const auto bytes = serialized_size(witness);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     header_.to_data(sink);
@@ -225,7 +225,7 @@ void block::to_data(writer& sink, bool witness) const
     for (const auto& transaction: txs_)
         transaction.to_data(sink, witness);
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // Properties.

@@ -290,7 +290,7 @@ void transaction::to_data(std::ostream& stream, bool witness) const
 
 void transaction::to_data(writer& sink, bool witness) const
 {
-    DEBUG_ONLY(const auto size = serialized_size(witness);)
+    DEBUG_ONLY(const auto bytes = serialized_size(witness);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     witness &= segregated_;
@@ -319,7 +319,7 @@ void transaction::to_data(writer& sink, bool witness) const
 
     sink.write_4_bytes_little_endian(locktime_);
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 size_t transaction::serialized_size(bool witness) const

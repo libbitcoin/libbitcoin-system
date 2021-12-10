@@ -214,7 +214,7 @@ void witness::to_data(std::ostream& stream, bool prefix) const
 
 void witness::to_data(writer& sink, bool prefix) const
 {
-    DEBUG_ONLY(const auto size = serialized_size(prefix);)
+    DEBUG_ONLY(const auto bytes = serialized_size(prefix);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     // Witness prefix is an element count, not byte length (unlike script).
@@ -228,7 +228,7 @@ void witness::to_data(writer& sink, bool prefix) const
         sink.write_bytes(element);
     }
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 std::string witness::to_string() const

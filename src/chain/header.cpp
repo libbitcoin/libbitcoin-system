@@ -241,7 +241,7 @@ void header::to_data(std::ostream& stream) const
 
 void header::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto size = serialized_size();)
+    DEBUG_ONLY(const auto bytes = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     sink.write_4_bytes_little_endian(version_);
@@ -251,7 +251,7 @@ void header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // static

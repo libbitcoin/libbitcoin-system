@@ -236,14 +236,14 @@ void input::to_data(std::ostream& stream) const
 // Witness is serialized by transaction.
 void input::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto size = serialized_size(false);)
+    DEBUG_ONLY(const auto bytes = serialized_size(false);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     point_.to_data(sink);
     script_.to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 size_t input::serialized_size(bool witness) const

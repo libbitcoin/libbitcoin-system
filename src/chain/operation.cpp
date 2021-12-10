@@ -233,7 +233,7 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto size = serialized_size();)
+    DEBUG_ONLY(const auto bytes = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     // Underflow is op-undersized data, it is serialized with no opcode.
@@ -265,7 +265,7 @@ void operation::to_data(writer& sink) const
         sink.write_bytes(data_);
     }
 
-    BITCOIN_ASSERT(sink && sink.get_position() - start == size);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // From String.
