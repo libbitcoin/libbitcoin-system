@@ -378,6 +378,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_reference.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slab.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\set.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\uintx.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />

@@ -16,19 +16,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_DATA_DATA_HPP
-#define LIBBITCOIN_SYSTEM_DATA_DATA_HPP
+#ifndef LIBBITCOIN_SYSTEM_DATA_SET_HPP
+#define LIBBITCOIN_SYSTEM_DATA_SET_HPP
 
-#include <cstddef>
-#include <cstdint>
+#include <memory>
+#include <vector>
 #include <bitcoin/system/data/collection.hpp>
-#include <bitcoin/system/data/data_array.hpp>
-#include <bitcoin/system/data/data_chunk.hpp>
-#include <bitcoin/system/data/data_reference.hpp>
-#include <bitcoin/system/data/data_slab.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/data/set.hpp>
-#include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/data/uintx.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+/// Instantiations of this set may not have virtual destructors.
+template<typename Element>
+class set
+  : public std::vector<Element>
+{
+public:
+    /// For no-fill allocation of the set.
+    static const default_allocator<Element> no_fill_allocator{};
+
+    /// Use base class constructors.
+    using std::vector<Element>::vector;
+};
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif

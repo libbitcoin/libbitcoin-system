@@ -87,6 +87,7 @@
 #include <bitcoin/system/data/data_reference.hpp>
 #include <bitcoin/system/data/data_slab.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/data/set.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/error/block_error_t.hpp>
