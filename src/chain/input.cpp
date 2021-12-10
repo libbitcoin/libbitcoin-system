@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/input.hpp>
 
 #include <algorithm>
+#include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
@@ -312,12 +313,10 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const
 
 bool input::reserved_hash(hash_digest& out) const
 {
-    const auto& stack = witness_.stack();
-
-    if (!witness::is_reserved_pattern(stack))
+    if (!witness::is_reserved_pattern(witness_))
         return false;
 
-    std::copy_n(stack.front().begin(), hash_size, out.begin());
+    std::copy_n(witness_.front().begin(), hash_size, out.begin());
     return true;
 }
 

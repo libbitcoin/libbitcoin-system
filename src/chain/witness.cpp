@@ -39,7 +39,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-using namespace bc::system::machine;
+using namespace system::machine;
 static const auto checksig_script = script{ { opcode::checksig } };
 
 // Constructors.
@@ -51,12 +51,12 @@ witness::witness()
 }
 
 witness::witness(witness&& other)
-  : witness(std::move(other.stack_), other.valid_)
+  : witness(std::move(other), other.valid_)
 {
 }
 
 witness::witness(const witness& other)
-  : witness(other.stack_, other.valid_)
+  : witness(other, other.valid_)
 {
 }
 
@@ -87,13 +87,13 @@ witness::witness(reader& source, bool prefix)
 
 // protected
 witness::witness(data_stack&& stack, bool valid)
-  : stack_(std::move(stack)), valid_(valid)
+  : data_stack(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
 witness::witness(const data_stack& stack, bool valid)
-  : stack_(stack), valid_(valid)
+  : data_stack(stack), valid_(valid)
 {
 }
 
@@ -102,26 +102,16 @@ witness::witness(const data_stack& stack, bool valid)
 
 witness& witness::operator=(witness&& other)
 {
-    stack_ = std::move(other.stack_);
     valid_ = other.valid_;
+    data_stack::swap(other);
     return *this;
 }
 
 witness& witness::operator=(const witness& other)
 {
-    stack_ = other.stack_;
     valid_ = other.valid_;
+    data_stack::swap(witness(other));
     return *this;
-}
-
-bool witness::operator==(const witness& other) const
-{
-    return stack_ == other.stack_;
-}
-
-bool witness::operator!=(const witness& other) const
-{
-    return !(*this == other);
 }
 
 // Deserialization.
@@ -173,15 +163,15 @@ bool witness::from_data(reader& source, bool prefix)
         }
         else
         {
-            stack_.reserve(count);
+            reserve(count);
             for (size_t element = 0; element < count; ++element)
-                stack_.push_back(read_element(source));
+                push_back(read_element(source));
         }
     }
     else
     {
         while (!source.is_exhausted())
-            stack_.push_back(read_element(source));
+            push_back(read_element(source));
     }
 
     if (!source)
@@ -191,24 +181,11 @@ bool witness::from_data(reader& source, bool prefix)
     return valid_;
 }
 
-// private/static
-size_t witness::serialized_size(const data_stack& stack)
-{
-    const auto sum = [](size_t total, const data_chunk& element)
-    {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = element.size();
-        return total + variable_size(size) + size;
-    };
-
-    return std::accumulate(stack.begin(), stack.end(), zero, sum);
-}
-
 // protected
 void witness::reset()
 {
-    stack_.clear();
-    stack_.shrink_to_fit();
+    clear();
+    shrink_to_fit();
     valid_ = false;
 }
 
@@ -242,10 +219,10 @@ void witness::to_data(writer& sink, bool prefix) const
 
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable(stack_.size());
+        sink.write_variable(size());
 
     // Tokens encoded as variable integer prefixed byte array (bip144).
-    for (const auto& element: stack_)
+    for (const auto& element: *this)
     {
         sink.write_variable(element.size());
         sink.write_bytes(element);
@@ -265,79 +242,34 @@ std::string witness::to_string() const
         text += "[" + encode_base16(element) + "] ";
     };
 
-    std::for_each(stack_.begin(), stack_.end(), serialize);
+    std::for_each(begin(), end(), serialize);
     return trim_copy(text);
-}
-
-// Iteration.
-// ----------------------------------------------------------------------------
-// These are syntactic sugar that allow the caller to iterate stack directly.
-
-void witness::clear()
-{
-    reset();
-}
-
-bool witness::empty() const
-{
-    return stack_.empty();
-}
-
-size_t witness::size() const
-{
-    return stack_.size();
-}
-
-const data_chunk& witness::front() const
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    return stack_.front();
-}
-
-const data_chunk& witness::back() const
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    return stack_.back();
-}
-
-const data_chunk& witness::operator[](size_t index) const
-{
-    BITCOIN_ASSERT(index < stack_.size());
-    return stack_[index];
-}
-
-witness::iterator witness::begin() const
-{
-    return stack_.begin();
-}
-
-witness::iterator witness::end() const
-{
-    return stack_.end();
 }
 
 // Properties.
 // ----------------------------------------------------------------------------
 
+// private
+size_t witness::serialized_size() const
+{
+    const auto sum = [](size_t total, const data_chunk& element)
+    {
+        // Tokens encoded as variable integer prefixed byte array (bip144).
+        const auto size = element.size();
+        return total + variable_size(size) + size;
+    };
+
+    return std::accumulate(begin(), end(), zero, sum);
+}
+
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(stack_.size()) : zero)
-        + serialized_size(stack_);
-}
-
-const data_stack& witness::stack() const
-{
-    return stack_;
+    return (prefix ? variable_size(size()) : zero) + serialized_size();
 }
 
 // Utilities.
 // ----------------------------------------------------------------------------
-
-inline data_chunk top_element(const data_stack stack)
-{
-    return stack.empty() ? data_chunk{} : stack.back();
-}
 
 // static
 bool witness::is_push_size(const data_stack& stack)
@@ -393,7 +325,9 @@ bool witness::extract_sigop_script(script& out_script,
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    out_script.from_data(top_element(stack_), false);
+                    if (!empty())
+                        out_script.from_data(back(), false);
+
                     return true;
 
                 // Undefined v0 witness script, will not validate.
@@ -418,7 +352,7 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    out_stack = stack_;
+    out_stack = *this;
 
     switch (program_script.version())
     {
