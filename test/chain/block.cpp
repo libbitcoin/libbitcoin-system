@@ -144,8 +144,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__move__expected)
     const block instance(std::move(copy));
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == expected_header);
-    BOOST_REQUIRE(instance.transactions() == expected_transactions);
+    BOOST_REQUIRE(instance == expected_block);
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy__expected)
@@ -154,8 +153,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__copy__expected)
     const block instance(expected);
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == expected_header);
-    BOOST_REQUIRE(instance.transactions() == expected_transactions);
+    BOOST_REQUIRE(instance == expected_block);
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
@@ -164,8 +162,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
     auto transactions = expected_transactions;
     const block instance(std::move(header), std::move(transactions));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == expected_header);
-    BOOST_REQUIRE(instance.transactions() == expected_transactions);
+    BOOST_REQUIRE(instance == expected_block);
 
 }
 
@@ -175,8 +172,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
     const auto transactions = expected_transactions;
     const block instance(header, transactions);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == expected_header);
-    BOOST_REQUIRE(instance.transactions() == expected_transactions);
+    BOOST_REQUIRE(instance == expected_block);
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__data__expected)

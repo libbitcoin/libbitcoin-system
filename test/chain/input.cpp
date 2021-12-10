@@ -46,20 +46,14 @@ BOOST_AUTO_TEST_CASE(input__constructor__move__expected)
     auto copy = expected_input;
     const input instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.point() == expected_input.point());
-    BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness() == expected_input.witness());
-    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+    BOOST_REQUIRE(instance == expected_input);
 }
 
 BOOST_AUTO_TEST_CASE(input__constructor__copy__expected)
 {
     const input instance(expected_input);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.point() == expected_input.point());
-    BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness() == expected_input.witness());
-    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+    BOOST_REQUIRE(instance == expected_input);
 }
 
 BOOST_AUTO_TEST_CASE(input__constructor__move_parameters__expected)
@@ -91,20 +85,14 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters_witness__expected)
     auto witness_copy = expected_input.witness();
     const input instance(std::move(point_copy), std::move(script_copy), std::move(witness_copy), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.point() == expected_input.point());
-    BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness() == expected_input.witness());
-    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+    BOOST_REQUIRE(instance == expected_input);
 }
 
 BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters_witness__expected)
 {
     const input instance(expected_input.point(), expected_input.script(), expected_input.witness(), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.point() == expected_input.point());
-    BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness() == expected_input.witness());
-    BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
+    BOOST_REQUIRE(instance == expected_input);
 }
 
 BOOST_AUTO_TEST_CASE(input__from_data__junk_data__valid)
