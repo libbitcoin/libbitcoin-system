@@ -46,6 +46,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default input is a valid (null point) object with an invalid prevout.
     input();
 
     input(input&& other);

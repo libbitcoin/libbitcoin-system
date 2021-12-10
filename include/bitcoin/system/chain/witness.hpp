@@ -46,6 +46,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default witness is a valid (empty stack) object.
     witness();
 
     witness(witness&& other);

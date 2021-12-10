@@ -47,6 +47,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default transaction is an invalid object.
     transaction();
 
     transaction(transaction&& other);

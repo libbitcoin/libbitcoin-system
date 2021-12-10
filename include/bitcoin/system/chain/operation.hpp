@@ -34,6 +34,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+/// Operations always deserialize successfully, so there is no is_valid()
+/// method. The is_invalid() method pertains to opcode consensus validity.
 class BC_API operation
 {
 public:
@@ -45,6 +47,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default operation is an invalid opcode.
     operation();
 
     operation(operation&& other);

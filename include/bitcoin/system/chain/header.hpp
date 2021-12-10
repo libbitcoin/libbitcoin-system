@@ -47,6 +47,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default header is an invalid object.
     header();
 
     header(header&& other);

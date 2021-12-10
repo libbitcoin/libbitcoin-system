@@ -49,6 +49,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default block is an invalid object.
     block();
 
     block(block&& other);

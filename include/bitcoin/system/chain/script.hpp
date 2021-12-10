@@ -51,6 +51,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default script is a valid (empty script) object.
     script();
 
     script(script&& other);

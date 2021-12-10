@@ -46,7 +46,7 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness()
-  : witness(data_stack{}, false)
+  : witness(data_stack{}, true)
 {
 }
 

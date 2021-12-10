@@ -45,6 +45,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default output is an invalid object (input.prevout relies on this).
     output();
 
     output(output&& other);

@@ -41,7 +41,9 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default checkpoint is an invalid object.
     checkpoint() noexcept;
+
     checkpoint(checkpoint&& other) noexcept;
     checkpoint(const checkpoint& other) noexcept;
 

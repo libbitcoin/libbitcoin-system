@@ -46,6 +46,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
+    /// Default point is a valid (null point) object.
     point();
 
     point(point&& other);
