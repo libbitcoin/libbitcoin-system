@@ -43,6 +43,7 @@ namespace chain {
 class transaction;
 
 class BC_API script
+  : public operation::list
 {
 public:
     typedef std::vector<script> list;
@@ -70,9 +71,6 @@ public:
     script& operator=(script&& other);
     script& operator=(const script& other);
 
-    bool operator==(const script& other) const;
-    bool operator!=(const script& other) const;
-
     // Deserialization.
     // ------------------------------------------------------------------------
 
@@ -96,23 +94,11 @@ public:
 
     std::string to_string(uint32_t active_forks) const;
 
-    // Iteration.
-    // ------------------------------------------------------------------------
-
-    void clear();
-    bool empty() const;
-    size_t size() const;
-    const operation& front() const;
-    const operation& back() const;
-    operation::iterator begin() const;
-    operation::iterator end() const;
-    const operation& operator[](size_t index) const;
-
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    const operation::list& operations() const;
+    const operation::list& ops() const;
 
     /// Computed properties.
     size_t serialized_size(bool prefix) const;
@@ -224,7 +210,6 @@ private:
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
         bool bip143);
 
-    mutable operation::list ops_;
     bool valid_;
 };
 

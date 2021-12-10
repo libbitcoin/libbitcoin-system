@@ -612,11 +612,11 @@ chain::script program::subscript(const endorsements& endorsements) const
     const auto strip = create_delete_ops(endorsements);
 
     // If no intersection, nothing to strip.
-    if (!intersecting(sub.operations(), strip))
+    if (!intersecting(sub.ops(), strip))
         return script_;
 
     // Copy script operations for mutation.
-    return { difference(sub.operations(), strip) };
+    return { difference(sub.ops(), strip) };
 }
 
 // TODO: use sighash and key to generate signature in sign mode.

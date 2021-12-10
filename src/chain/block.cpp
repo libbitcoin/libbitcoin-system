@@ -436,7 +436,7 @@ bool block::is_invalid_coinbase_script(size_t height) const
         return false;
 
     const auto& script = txs_.front().inputs().front().script();
-    return !script::is_coinbase_pattern(script.operations(), height);
+    return !script::is_coinbase_pattern(script, height);
 }
 
 // TODO: add bip50 to chain_state with timestamp range activation.

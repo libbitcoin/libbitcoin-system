@@ -216,7 +216,7 @@ const chain::script& output::script() const
 
 bool output::committed_hash(hash_digest& out) const
 {
-    const auto& ops = script_.operations();
+    const auto& ops = script_.ops();
     if (!script::is_commitment_pattern(ops))
         return false;
 

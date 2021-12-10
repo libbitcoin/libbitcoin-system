@@ -323,11 +323,11 @@ bool input::reserved_hash(hash_digest& out) const
 // private
 bool input::embedded_script(chain::script& out) const
 {
-    const auto& ops = script_.operations();
+    const auto& ops = script_.ops();
     const auto& script = prevout.script();
 
     // There are no embedded sigops when the prevout script is not p2sh.
-    if (!script::is_pay_script_hash_pattern(script.operations()))
+    if (!script::is_pay_script_hash_pattern(script.ops()))
         return false;
 
     // There are no embedded sigops when the input script is not push only.

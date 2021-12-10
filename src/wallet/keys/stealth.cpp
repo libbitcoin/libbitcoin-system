@@ -33,7 +33,7 @@ using namespace bc::system::chain;
 
 bool is_stealth_script(const script& script)
 {
-    return script::is_pay_null_data_pattern(script.operations()) &&
+    return script::is_pay_null_data_pattern(script.ops()) &&
         (script[1].data().size() >= hash_size);
 }
 

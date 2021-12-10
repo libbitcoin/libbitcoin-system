@@ -285,14 +285,14 @@ BOOST_AUTO_TEST_CASE(script__from_string__empty__success)
 {
     script instance;
     BOOST_REQUIRE(instance.from_string(""));
-    BOOST_REQUIRE(instance.operations().empty());
+    BOOST_REQUIRE(instance.ops().empty());
 }
 
 BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
 {
     script instance;
     BOOST_REQUIRE(instance.from_string(SCRIPT_2_OF_3_MULTISIG));
-    const auto& ops = instance.operations();
+    const auto& ops = instance.ops();
     BOOST_REQUIRE_EQUAL(ops.size(), 6u);
     BOOST_REQUIRE(ops[0] == opcode::push_positive_2);
     BOOST_REQUIRE_EQUAL(ops[1].to_string(forks::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");

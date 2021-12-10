@@ -670,26 +670,26 @@ BOOST_AUTO_TEST_CASE(witness_address__identifier__script__version_0_p2sh)
 BOOST_AUTO_TEST_CASE(witness_address__script__version_16_address__valid)
 {
     const witness_address instance{ "bc1sqqqqkfw08p" };
-    BOOST_REQUIRE(chain::script::is_pay_witness_pattern(instance.script().operations()));
+    BOOST_REQUIRE(chain::script::is_pay_witness_pattern(instance.script().ops()));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__script__key_hash__pay_witness_key_hash)
 {
     const witness_address instance{ null_short_hash };
-    BOOST_REQUIRE(chain::script::is_pay_witness_key_hash_pattern(instance.script().operations()));
+    BOOST_REQUIRE(chain::script::is_pay_witness_key_hash_pattern(instance.script().ops()));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__script__script_hash__pay_witness_script_hash)
 {
     const witness_address instance{ null_hash };
-    BOOST_REQUIRE(chain::script::is_pay_witness_script_hash_pattern(instance.script().operations()));
+    BOOST_REQUIRE(chain::script::is_pay_witness_script_hash_pattern(instance.script().ops()));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__script__null_data_script__pay_witness_script_hash)
 {
     const auto script = chain::script(script::to_pay_null_data_pattern(null_hash));
     const witness_address instance{ script };
-    BOOST_REQUIRE(chain::script::is_pay_witness_script_hash_pattern(instance.script().operations()));
+    BOOST_REQUIRE(chain::script::is_pay_witness_script_hash_pattern(instance.script().ops()));
 }
 
 // assignment
