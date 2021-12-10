@@ -110,7 +110,8 @@ witness& witness::operator=(witness&& other)
 witness& witness::operator=(const witness& other)
 {
     valid_ = other.valid_;
-    data_stack::swap(witness(other));
+    witness copy(other);
+    data_stack::swap(copy);
     return *this;
 }
 

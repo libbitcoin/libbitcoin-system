@@ -123,7 +123,8 @@ script& script::operator=(script&& other)
 script& script::operator=(const script& other)
 {
     valid_ = other.valid_;
-    operation::list::swap(script(other));
+    script copy(other);
+    operation::list::swap(copy);
     return *this;
 }
 
