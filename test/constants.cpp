@@ -177,6 +177,10 @@ BOOST_AUTO_TEST_SUITE(constants_tests)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+static_assert(to_byte('\0') == uint8_t{ 0 }, "");
+static_assert(to_byte('x') == uint8_t{ 'x' }, "");
+static_assert(to_byte('\xff') == uint8_t{ 255 }, "");
+
 static_assert(variable_size(1) == 1u, "");
 static_assert(variable_size(0xfe) == 3u, "");
 static_assert(variable_size(0x10000) == 5u, "");

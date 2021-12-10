@@ -154,6 +154,11 @@ constexpr size_t width(Type value) noexcept
     return to_bits(sizeof(value));
 }
 
+constexpr uint8_t to_byte(char character) noexcept
+{
+    return static_cast<uint8_t>(character);
+}
+
 /// Variable integer prefix sentinels.
 constexpr uint8_t varint_two_bytes = 0xfd;
 constexpr uint8_t varint_four_bytes = 0xfe;

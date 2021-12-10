@@ -21,26 +21,19 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <queue>
+#include <memory>
 #include <vector>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /// Byte storage types.
 typedef std::vector<uint8_t> data_chunk;
-typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
-
-/// Cast a character to a byte.
-inline uint8_t to_byte(char character) noexcept
-{
-    // C++14: this can be constexpr.
-    return static_cast<uint8_t>(character);
-}
+typedef std::shared_ptr<data_chunk> chunk_ptr;
+typedef std::shared_ptr<data_stack> stack_ptr;
 
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) noexcept;

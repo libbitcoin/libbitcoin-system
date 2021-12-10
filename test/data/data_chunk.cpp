@@ -20,12 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(data_chunk_tests)
 
-// to_byte
-
-BOOST_AUTO_TEST_CASE(data_chunk__to_byte__character__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_byte('x'), uint8_t{ 'x' });
-}
 
 // to_chunk (byte)
 
