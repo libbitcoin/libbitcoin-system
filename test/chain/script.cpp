@@ -304,19 +304,19 @@ BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
 
 BOOST_AUTO_TEST_CASE(script__empty__default__true)
 {
-    script instance;
+    const script instance;
     BOOST_REQUIRE(instance.empty());
 }
 
 BOOST_AUTO_TEST_CASE(script__empty__no_operations__true)
 {
-    script instance(operation::list{});
+    const script instance(operation::list{});
     BOOST_REQUIRE(instance.empty());
 }
 
 BOOST_AUTO_TEST_CASE(script__empty__non_empty__false)
 {
-    script instance(script::to_pay_null_data_pattern(data_chunk{ 42u }));
+    const script instance(script::to_pay_null_data_pattern(data_chunk{ 42u }));
     BOOST_REQUIRE(!instance.empty());
 }
 

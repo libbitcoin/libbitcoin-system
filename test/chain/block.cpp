@@ -171,8 +171,8 @@ BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
 {
-    auto header = expected_header;
-    auto transactions = expected_transactions;
+    const auto header = expected_header;
+    const auto transactions = expected_transactions;
     const block instance(header, transactions);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.header() == expected_header);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(block__inequality__different__true)
 
 BOOST_AUTO_TEST_CASE(block__from_data__insufficient_header_bytes__invalid)
 {
-    data_chunk data(10);
+    const data_chunk data(10);
     block instance;
     BOOST_REQUIRE(!instance.from_data(data, true));
     BOOST_REQUIRE(!instance.is_valid());
@@ -423,8 +423,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 {
-    transaction to{ 0, 0, {}, {} };
-    transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
+    const transaction to{ 0, 0, {}, {} };
+    const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
     const accessor instance
     {
         {},
@@ -439,8 +439,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 {
-    transaction to{ 0, 0, {}, {} };
-    transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
+    const transaction to{ 0, 0, {}, {} };
+    const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
     const accessor instance
     {
         {},
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
         "14b9a2c9700ff9519516b21af338d28d53ddf5349388ac00743ba40b00000019"
         "76a914eb675c349c474bec8dea2d79d12cff6f330ab48788ac00000000");
 
-    accessor instance(data, true);
+    const accessor instance(data, true);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(!instance.is_invalid_merkle_root());
 }

@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy__expected)
 {
-    transaction expected(tx1_data, true);
+    const transaction expected(tx1_data, true);
     const transaction instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected);
@@ -200,13 +200,13 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     const uint32_t version = 2345;
     const uint32_t locktime = 4568656;
 
-    input input(tx0_inputs);
+    const input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
 
-    output output(tx0_last_output);
+    const output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    transaction instance(version, locktime, { input }, { output });
+    const transaction instance(version, locktime, { input }, { output });
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -221,15 +221,15 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
     const uint32_t version = 2345;
     const uint32_t locktime = 4568656;
 
-    input input(tx0_inputs);
+    const input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
 
-    output output(tx0_last_output);
+    const output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    input::list inputs{ input };
-    output::list outputs{ output };
-    transaction instance(version, locktime, inputs, outputs);
+    const input::list inputs{ input };
+    const output::list outputs{ output };
+    const transaction instance(version, locktime, inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
 
 BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__invalid)
 {
-    data_chunk insufficient_data(2);
+    const data_chunk insufficient_data(2);
     transaction instance;
     BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
     BOOST_REQUIRE(!instance.is_valid());
@@ -604,8 +604,8 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
     const uint64_t value0 = 123;
     const uint64_t value1 = 321;
 
-    input input0;
-    input input1;
+    const input input0;
+    const input input1;
     input0.prevout = { value0, {} };
     input1.prevout = { value1, {} };
 

@@ -63,28 +63,28 @@ using namespace bc::system::chain;
 
 BOOST_AUTO_TEST_CASE(operation__constructor__default__invalid)
 {
-    operation instance;
+    const operation instance;
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE(instance.is_invalid());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor__opcode_checklocktimeverify__empty_valid)
 {
-    operation instance(opcode::checklocktimeverify);
+    const operation instance(opcode::checklocktimeverify);
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE(!instance.is_invalid());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor__opcode_xor__empty_invalid)
 {
-    operation instance(opcode::op_xor);
+    const operation instance(opcode::op_xor);
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE(instance.is_invalid());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor__opcode_push_two_size___empty)
 {
-    operation instance(opcode::push_two_size);
+    const operation instance(opcode::push_two_size);
 
     // If code is push data the data member will be inconsistent (empty).
     BOOST_REQUIRE(instance.data().empty());
@@ -95,14 +95,14 @@ BOOST_AUTO_TEST_CASE(operation__constructor_move__always__expected)
 {
     const operation expected(base16_chunk("23156214"), false);
     auto copy = expected;
-    operation instance(std::move(copy));
+    const operation instance(std::move(copy));
     BOOST_REQUIRE(expected == instance);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_copy__always__expected)
 {
     const operation expected(base16_chunk("23156214"), false);
-    operation instance(expected);
+    const operation instance(expected);
     BOOST_REQUIRE(expected == instance);
 }
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_push_move__always__expected)
 {
     const auto expected = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     auto copy = expected;
-    operation instance(std::move(copy), false);
+    const operation instance(std::move(copy), false);
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
     BOOST_REQUIRE_EQUAL(instance.data(), expected);
 }
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_move_minimal__always__expected)
 {
     const data_chunk expected{ 0x01 };
     auto copy = expected;
-    operation instance(std::move(copy), true);
+    const operation instance(std::move(copy), true);
 
     // minimal: push_positive_1 <= 0x51 (numbers::positive_1) on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_positive_1);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_move_non_minimal__always__expec
 {
     const data_chunk expected{ 0x51 };
     auto copy = expected;
-    operation instance(std::move(copy), false);
+    const operation instance(std::move(copy), false);
 
     // non-minimal: [1.01] <= 0x51 on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_size_1);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_move_non_minimal__always__expec
 BOOST_AUTO_TEST_CASE(operation__constructor_push_copy__always__expected)
 {
     const auto expected = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    operation instance(expected, false);
+    const operation instance(expected, false);
     BOOST_REQUIRE(instance.code() == opcode::push_size_32);
     BOOST_REQUIRE_EQUAL(instance.data(), expected);
 }
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_push_copy__always__expected)
 BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_minimal__always__expected)
 {
     const data_chunk expected{ 0x01 };
-    operation instance(expected, true);
+    const operation instance(expected, true);
 
     // minimal: push_positive_1 <= 0x51 (numbers::positive_1) on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_positive_1);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_minimal__always__expected)
 BOOST_AUTO_TEST_CASE(operation__constructor_data_copy_non_minimal__always__expected)
 {
     const data_chunk expected{ 0x51 };
-    operation instance(expected, false);
+    const operation instance(expected, false);
 
     // non-minimal: [1.51] <= 0x51 on the stack.
     BOOST_REQUIRE(instance.code() == opcode::push_size_1);
@@ -424,50 +424,50 @@ BOOST_AUTO_TEST_CASE(operation__operator_boolean_not_equals__differs__true)
 
 BOOST_AUTO_TEST_CASE(operation__to_string__push_size_0__zero)
 {
-    operation value(opcode::push_size_0);
+    const operation value(opcode::push_size_0);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__push_size_75__push_75)
 {
     // Empty data allows the push code to serialize as an op code.
-    operation value(opcode::push_size_75);
+    const operation value(opcode::push_size_75);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "push_75");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__push_positive_7__7)
 {
-    operation value(opcode::push_positive_7);
+    const operation value(opcode::push_positive_7);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_minimal__0x07__7)
 {
-    operation value(data_chunk{ 0x07 }, true);
+    const operation value(data_chunk{ 0x07 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "7");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_nominal__empty__zero)
 {
-    operation value(data_chunk{}, false);
+    const operation value(data_chunk{}, false);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "zero");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string_nominal__0x07__0x07)
 {
-    operation value(data_chunk{ 0x07 }, false);
+    const operation value(data_chunk{ 0x07 }, false);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[07]");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__0x42__0x42)
 {
-    operation value(data_chunk{ 0x42 }, true);
+    const operation value(data_chunk{ 0x42 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[42]");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__0x112233__0x112233)
 {
-    operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
+    const operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
     BOOST_REQUIRE_EQUAL(value.to_string(0), "[112233]");
 }
 
@@ -525,25 +525,25 @@ BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
 {
-    operation value(opcode::nop2);
+    const operation value(opcode::nop2);
     BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop2");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_bip65_rule__checklocktimeverify)
 {
-    operation value(opcode::nop2);
+    const operation value(opcode::nop2);
     BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip65_rule), "checklocktimeverify");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_no_rules__nop3)
 {
-    operation value(opcode::nop3);
+    const operation value(opcode::nop3);
     BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::no_rules), "nop3");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify)
 {
-    operation value(opcode::nop3);
+    const operation value(opcode::nop3);
     BOOST_REQUIRE_EQUAL(value.to_string(chain::forks::bip112_rule), "checksequenceverify");
 }
 

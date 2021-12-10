@@ -37,14 +37,14 @@ const input expected_input(input_data);
 
 BOOST_AUTO_TEST_CASE(input__constructor__default__valid)
 {
-    input instance;
+    const input instance;
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(input__constructor__move__expected)
 {
     auto copy = expected_input;
-    input instance(std::move(copy));
+    const input instance(std::move(copy));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move__expected)
 
 BOOST_AUTO_TEST_CASE(input__constructor__copy__expected)
 {
-    input instance(expected_input);
+    const input instance(expected_input);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters__expected)
 {
     auto point_copy = expected_input.point();
     auto script_copy = expected_input.script();
-    input instance(std::move(point_copy), std::move(script_copy), expected_input.sequence());
+    const input instance(std::move(point_copy), std::move(script_copy), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters__expected)
 {
-    input instance(expected_input.point(), expected_input.script(), expected_input.sequence());
+    const input instance(expected_input.point(), expected_input.script(), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters_witness__expected)
     auto point_copy = expected_input.point();
     auto script_copy = expected_input.script();
     auto witness_copy = expected_input.witness();
-    input instance(std::move(point_copy), std::move(script_copy), std::move(witness_copy), expected_input.sequence());
+    const input instance(std::move(point_copy), std::move(script_copy), std::move(witness_copy), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters_witness__expected)
 
 BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters_witness__expected)
 {
-    input instance(expected_input.point(), expected_input.script(), expected_input.witness(), expected_input.sequence());
+    const input instance(expected_input.point(), expected_input.script(), expected_input.witness(), expected_input.sequence());
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(input__from_data__junk_data__valid)
 {
     // Any set of bytes is a valid script.
     const auto data = base16_chunk("000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
-    input instance(data);
+    const input instance(data);
     BOOST_REQUIRE(instance.is_valid());
 }
 
