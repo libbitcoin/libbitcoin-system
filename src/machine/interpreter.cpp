@@ -33,7 +33,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 // Operations (shared).
 // ----------------------------------------------------------------------------

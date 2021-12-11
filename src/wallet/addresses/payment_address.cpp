@@ -272,7 +272,7 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { ec_public{ script.front().data() }, p2kh_prefix }
+                { ec_public{ script.ops().front().data() }, p2kh_prefix }
                 ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
@@ -280,7 +280,7 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { bitcoin_short_hash(script.back().data()), p2sh_prefix }
+                { bitcoin_short_hash(script.ops().back().data()), p2sh_prefix }
             };
         }
 
@@ -316,20 +316,20 @@ payment_address payment_address::extract_output(
         case chain::script_pattern::pay_key_hash:
             return
             {
-                to_array<short_hash_size>(script[2].data()),
+                to_array<short_hash_size>(script.ops()[2].data()),
                 p2kh_prefix
             };
         case chain::script_pattern::pay_script_hash:
             return
             { 
-                to_array<short_hash_size>(script[1].data()),
+                to_array<short_hash_size>(script.ops()[1].data()),
                 p2sh_prefix
             };
         case chain::script_pattern::pay_public_key:
             return
             {
                 // pay_public_key is not p2kh but we conflate for tracking.
-                ec_public{ script.front().data() },
+                ec_public{ script.ops().front().data() },
                 p2kh_prefix
             };
 

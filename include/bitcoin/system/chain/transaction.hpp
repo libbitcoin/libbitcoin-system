@@ -41,7 +41,6 @@ namespace chain {
 class BC_API transaction
 {
 public:
-    typedef std::vector<transaction> list;
     typedef std::shared_ptr<transaction> ptr;
 
     // Constructors.
@@ -194,6 +193,8 @@ private:
     output::list outputs_;
     bool valid_;
 };
+
+typedef std::vector<transaction> transactions;
 
 } // namespace chain
 } // namespace system

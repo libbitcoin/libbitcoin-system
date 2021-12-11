@@ -35,7 +35,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 static constexpr uint8_t version_size = sizeof(uint8_t);
 static constexpr uint8_t options_size = sizeof(uint8_t);

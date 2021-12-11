@@ -24,6 +24,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <vector>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
@@ -43,10 +44,8 @@ namespace chain {
 class transaction;
 
 class BC_API script
-  : public operation::list
 {
 public:
-    typedef std::vector<script> list;
     typedef std::shared_ptr<script> ptr;
 
     // Constructors.
@@ -58,8 +57,8 @@ public:
     script(script&& other);
     script(const script& other);
 
-    script(operation::list&& ops);
-    script(const operation::list& ops);
+    script(operations&& ops);
+    script(const operations& ops);
 
     script(const data_slice& data, bool prefix);
     script(std::istream& stream, bool prefix);
@@ -70,6 +69,9 @@ public:
 
     script& operator=(script&& other);
     script& operator=(const script& other);
+
+    bool operator==(const script& other) const;
+    bool operator!=(const script& other) const;
 
     // Deserialization.
     // ------------------------------------------------------------------------
@@ -98,7 +100,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    const operation::list& ops() const;
+    const operations& ops() const;
 
     /// Computed properties.
     size_t serialized_size(bool prefix) const;
@@ -127,42 +129,42 @@ public:
     static bool is_enabled(uint32_t active_forks, forks fork);
 
     /// Consensus patterns.
-    static bool is_push_only(const operation::list& ops);
-    static bool is_relaxed_push(const operation::list& ops);
-    static bool is_coinbase_pattern(const operation::list& ops, size_t height);
-    static bool is_commitment_pattern(const operation::list& ops);
-    static bool is_witness_program_pattern(const operation::list& ops);
+    static bool is_push_only(const operations& ops);
+    static bool is_relaxed_push(const operations& ops);
+    static bool is_coinbase_pattern(const operations& ops, size_t height);
+    static bool is_commitment_pattern(const operations& ops);
+    static bool is_witness_program_pattern(const operations& ops);
 
     /// Common output patterns (psh and pwsh are also consensus).
-    static bool is_pay_null_data_pattern(const operation::list& ops);
-    static bool is_pay_multisig_pattern(const operation::list& ops);
-    static bool is_pay_public_key_pattern(const operation::list& ops);
-    static bool is_pay_key_hash_pattern(const operation::list& ops);
-    static bool is_pay_script_hash_pattern(const operation::list& ops);
-    static bool is_pay_witness_pattern(const operation::list& ops);
-    static bool is_pay_witness_key_hash_pattern(const operation::list& ops);
-    static bool is_pay_witness_script_hash_pattern(const operation::list& ops);
+    static bool is_pay_null_data_pattern(const operations& ops);
+    static bool is_pay_multisig_pattern(const operations& ops);
+    static bool is_pay_public_key_pattern(const operations& ops);
+    static bool is_pay_key_hash_pattern(const operations& ops);
+    static bool is_pay_script_hash_pattern(const operations& ops);
+    static bool is_pay_witness_pattern(const operations& ops);
+    static bool is_pay_witness_key_hash_pattern(const operations& ops);
+    static bool is_pay_witness_script_hash_pattern(const operations& ops);
 
     /// Common input patterns (skh is also consensus).
-    static bool is_sign_multisig_pattern(const operation::list& ops);
-    static bool is_sign_public_key_pattern(const operation::list& ops);
-    static bool is_sign_key_hash_pattern(const operation::list& ops);
-    static bool is_sign_script_hash_pattern(const operation::list& ops);
+    static bool is_sign_multisig_pattern(const operations& ops);
+    static bool is_sign_public_key_pattern(const operations& ops);
+    static bool is_sign_key_hash_pattern(const operations& ops);
+    static bool is_sign_script_hash_pattern(const operations& ops);
 
     /// Stack factories.
-    static operation::list to_pay_null_data_pattern(const data_slice& data);
-    static operation::list to_pay_public_key_pattern(const data_slice& point);
-    static operation::list to_pay_key_hash_pattern(const short_hash& hash);
-    static operation::list to_pay_script_hash_pattern(const short_hash& hash);
-    static operation::list to_pay_multisig_pattern(uint8_t signatures,
+    static operations to_pay_null_data_pattern(const data_slice& data);
+    static operations to_pay_public_key_pattern(const data_slice& point);
+    static operations to_pay_key_hash_pattern(const short_hash& hash);
+    static operations to_pay_script_hash_pattern(const short_hash& hash);
+    static operations to_pay_multisig_pattern(uint8_t signatures,
         const compressed_list& points);
-    static operation::list to_pay_multisig_pattern(uint8_t signatures,
+    static operations to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points);
-    static  operation::list to_pay_witness_pattern(uint8_t version,
+    static  operations to_pay_witness_pattern(uint8_t version,
         const data_slice& data);
-    static operation::list to_pay_witness_key_hash_pattern(
+    static operations to_pay_witness_key_hash_pattern(
         const short_hash& hash);
-    static operation::list to_pay_witness_script_hash_pattern(
+    static operations to_pay_witness_script_hash_pattern(
         const hash_digest& hash);
 
     // Utilities (non-static).
@@ -196,22 +198,26 @@ protected:
     friend class input;
     friend class output;
 
-    script(operation::list&& ops, bool valid);
-    script(const operation::list& ops, bool valid);
+    script(operations&& ops, bool valid);
+    script(const operations& ops, bool valid);
 
     void reset();
     bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
 
 private:
+    static size_t op_count(reader& source);
     static hash_digest generate_unversioned_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint8_t flags);
     static hash_digest generate_version_0_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
         bool bip143);
 
+    operations ops_;
     bool valid_;
 };
+
+typedef std::vector<script> scripts;
 
 } // namespace chain
 } // namespace system

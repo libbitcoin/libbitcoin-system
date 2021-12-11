@@ -23,6 +23,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <vector>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -35,12 +36,9 @@ namespace chain {
     
 class transaction;
 
-/// This class may not have a virtual destructor.
 class BC_API witness
-  : public data_stack
 {
 public:
-    typedef std::vector<witness> list;
     typedef std::shared_ptr<witness> ptr;
 
     // Constructors.
@@ -65,6 +63,9 @@ public:
     witness& operator=(witness&& other);
     witness& operator=(const witness& other);
 
+    bool operator==(const witness& other) const;
+    bool operator!=(const witness& other) const;
+
     // Deserialization (from witness stack).
     // ------------------------------------------------------------------------
     // Prefixed data assumed valid here though caller may confirm with is_valid.
@@ -88,6 +89,9 @@ public:
 
     // Properties.
     // ------------------------------------------------------------------------
+
+    /// Native properties.
+    const data_stack& stack() const;
 
     /// Computed properties.
     size_t serialized_size(bool prefix) const;
@@ -121,8 +125,11 @@ private:
     witness(data_stack&& stack, bool valid);
     witness(const data_stack& stack, bool valid);
 
+    data_stack stack_;
     bool valid_;
 };
+
+typedef std::vector<witness> witnesses;
 
 } // namespace chain
 } // namespace system

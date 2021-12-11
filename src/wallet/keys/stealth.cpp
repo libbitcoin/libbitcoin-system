@@ -29,12 +29,12 @@
 namespace libbitcoin {
 namespace system {
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 bool is_stealth_script(const script& script)
 {
     return script::is_pay_null_data_pattern(script.ops()) &&
-        (script[1].data().size() >= hash_size);
+        (script.ops()[1].data().size() >= hash_size);
 }
 
 bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
@@ -133,7 +133,7 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
             return true;
     }
 
-    out_null_data.clear();
+    out_null_data = {};
     return false;
 }
 
@@ -148,7 +148,7 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     // That requires iteration with probability of 1 in 2 chance of success.
     out_ephemeral_public_key[0] = ec_even_sign;
 
-    const auto& to = script[1].data();
+    const auto& to = script.ops()[1].data();
     const auto from = std::next(out_ephemeral_public_key.begin());
     std::copy_n(to.begin(), hash_size, from);
     return true;
@@ -160,7 +160,7 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
     if (!is_stealth_script(script))
         return false;
 
-    const auto& data = script[1].data();
+    const auto& data = script.ops()[1].data();
     std::copy_n(data.begin(), hash_size, out_unsigned_ephemeral_key.begin());
     return true;
 }

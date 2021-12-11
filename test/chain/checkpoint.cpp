@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(chain_checkpoint_tests)
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 BOOST_AUTO_TEST_CASE(checkpoint__constructor_default__always__null_hash_zero)
 {

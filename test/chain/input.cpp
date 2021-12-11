@@ -22,14 +22,14 @@ BOOST_AUTO_TEST_SUITE(input_tests)
 
 using namespace system::chain;
 
-const auto input_data = base16_chunk(
+static const auto input_data = base16_chunk(
     "54b755c39207d443fd96a8d12c94446a1c6f66e39c95e894c23418d7501f681b01000"
     "0006b48304502203267910f55f2297360198fff57a3631be850965344370f732950b4"
     "7795737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d915"
     "da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b"
     "8066c9c585f9ffffffff");
 
-const input expected_input(input_data);
+static const input expected_input(input_data);
 
 // constructors
 // ----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__move_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness().empty());
+    BOOST_REQUIRE(instance.witness().stack().empty());
     BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
 }
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(input__constructor__copy_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.point() == expected_input.point());
     BOOST_REQUIRE(instance.script() == expected_input.script());
-    BOOST_REQUIRE(instance.witness().empty());
+    BOOST_REQUIRE(instance.witness().stack().empty());
     BOOST_REQUIRE(instance.sequence() == expected_input.sequence());
 }
 

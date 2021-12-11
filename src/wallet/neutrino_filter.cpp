@@ -71,8 +71,8 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 
             // TODO: should this be output_pattern() == 
             // script_pattern::pay_null_data?
-            if (!script.empty() &&
-                (script.front().code() != chain::opcode::op_return))
+            if (!script.ops().empty() &&
+                (script.ops().front().code() != chain::opcode::op_return))
                 scripts.push_back(script.to_data(false));
         }
     }
@@ -98,7 +98,7 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
 bool match_filter(const messages::compact_filter& filter,
     const chain::script& script)
 {
-    if (script.empty() || filter.filter_type() != neutrino_filter_type)
+    if (script.ops().empty() || filter.filter_type() != neutrino_filter_type)
         return false;
 
     stream::in::copy stream(filter.filter());
@@ -116,7 +116,7 @@ bool match_filter(const messages::compact_filter& filter,
 }
 
 bool match_filter(const messages::compact_filter& filter,
-    const chain::script::list& scripts)
+    const chain::scripts& scripts)
 {
     if (scripts.empty() || filter.filter_type() != neutrino_filter_type)
         return false;
@@ -127,7 +127,7 @@ bool match_filter(const messages::compact_filter& filter,
     std::for_each(scripts.begin(), scripts.end(),
         [&](const chain::script& script)
         {
-            if (!script.empty())
+            if (!script.ops().empty())
                 stack.push_back(script.to_data(false));
         });
 
@@ -161,7 +161,7 @@ bool match_filter(const messages::compact_filter& filter,
         return false;
 
     static default_allocator<chain::script> no_fill_allocator{};
-    chain::script::list stack(no_fill_allocator);
+    chain::scripts stack(no_fill_allocator);
     stack.resize(addresses.size());
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),

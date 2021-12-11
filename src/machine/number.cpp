@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 number::number()
   : number(numbers::positive_0)

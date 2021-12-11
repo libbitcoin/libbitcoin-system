@@ -313,10 +313,10 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const
 
 bool input::reserved_hash(hash_digest& out) const
 {
-    if (!witness::is_reserved_pattern(witness_))
+    if (!witness::is_reserved_pattern(witness_.stack()))
         return false;
 
-    std::copy_n(witness_.front().begin(), hash_size, out.begin());
+    std::copy_n(witness_.stack().front().begin(), hash_size, out.begin());
     return true;
 }
 

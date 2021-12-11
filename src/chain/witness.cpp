@@ -51,12 +51,12 @@ witness::witness()
 }
 
 witness::witness(witness&& other)
-  : witness(std::move(other), other.valid_)
+  : witness(std::move(other.stack_), other.valid_)
 {
 }
 
 witness::witness(const witness& other)
-  : witness(other, other.valid_)
+  : witness(other.stack_, other.valid_)
 {
 }
 
@@ -87,13 +87,13 @@ witness::witness(reader& source, bool prefix)
 
 // protected
 witness::witness(data_stack&& stack, bool valid)
-  : data_stack(std::move(stack)), valid_(valid)
+  : stack_(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
 witness::witness(const data_stack& stack, bool valid)
-  : data_stack(stack), valid_(valid)
+  : stack_(stack), valid_(valid)
 {
 }
 
@@ -102,17 +102,26 @@ witness::witness(const data_stack& stack, bool valid)
 
 witness& witness::operator=(witness&& other)
 {
+    stack_ = std::move(other.stack_);
     valid_ = other.valid_;
-    data_stack::swap(other);
     return *this;
 }
 
 witness& witness::operator=(const witness& other)
 {
+    stack_ = other.stack_;
     valid_ = other.valid_;
-    witness copy(other);
-    data_stack::swap(copy);
     return *this;
+}
+
+bool witness::operator==(const witness& other) const
+{
+    return (stack_ == other.stack_);
+}
+
+bool witness::operator!=(const witness& other) const
+{
+    return !(*this == other);
 }
 
 // Deserialization.
@@ -164,15 +173,15 @@ bool witness::from_data(reader& source, bool prefix)
         }
         else
         {
-            reserve(count);
+            stack_.reserve(count);
             for (size_t element = 0; element < count; ++element)
-                push_back(read_element(source));
+                stack_.push_back(read_element(source));
         }
     }
     else
     {
         while (!source.is_exhausted())
-            push_back(read_element(source));
+            stack_.push_back(read_element(source));
     }
 
     if (!source)
@@ -185,8 +194,8 @@ bool witness::from_data(reader& source, bool prefix)
 // protected
 void witness::reset()
 {
-    clear();
-    shrink_to_fit();
+    stack_.clear();
+    stack_.shrink_to_fit();
     valid_ = false;
 }
 
@@ -220,10 +229,10 @@ void witness::to_data(writer& sink, bool prefix) const
 
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable(size());
+        sink.write_variable(stack_.size());
 
     // Tokens encoded as variable integer prefixed byte array (bip144).
-    for (const auto& element: *this)
+    for (const auto& element: stack_)
     {
         sink.write_variable(element.size());
         sink.write_bytes(element);
@@ -238,17 +247,20 @@ std::string witness::to_string() const
         return "<invalid>";
 
     std::string text;
-    const auto serialize = [&text](const data_chunk& element)
-    {
+    for (const auto& element: stack_)
         text += "[" + encode_base16(element) + "] ";
-    };
 
-    std::for_each(begin(), end(), serialize);
-    return trim_copy(text);
+    trim_right(text);
+    return text;
 }
 
 // Properties.
 // ----------------------------------------------------------------------------
+
+const data_stack& witness::stack() const
+{
+    return stack_;
+}
 
 // private
 size_t witness::serialized_size() const
@@ -260,13 +272,13 @@ size_t witness::serialized_size() const
         return total + variable_size(size) + size;
     };
 
-    return std::accumulate(begin(), end(), zero, sum);
+    return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(size()) : zero) + serialized_size();
+    return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
 }
 
 // Utilities.
@@ -292,11 +304,11 @@ bool witness::is_reserved_pattern(const data_stack& stack)
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operation::list to_pay_key_hash(data_chunk&& program)
+inline operations to_pay_key_hash(data_chunk&& program)
 {
     BITCOIN_ASSERT(program.size() == short_hash_size);
 
-    return operation::list
+    return operations
     {
         { opcode::dup },
         { opcode::hash160 },
@@ -311,7 +323,7 @@ bool witness::extract_sigop_script(script& out_script,
     const script& program_script) const
 {
     // Caller may recycle script parameter.
-    out_script.clear();
+    out_script = {};
 
     switch (program_script.version())
     {
@@ -326,8 +338,8 @@ bool witness::extract_sigop_script(script& out_script,
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    if (!empty())
-                        out_script.from_data(back(), false);
+                    if (!stack_.empty())
+                        out_script.from_data(stack_.back(), false);
 
                     return true;
 
@@ -353,7 +365,7 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    out_stack = *this;
+    out_stack = stack_;
 
     switch (program_script.version())
     {

@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(opcode_tests)
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
 // opcode_to_mnemonic
 // ----------------------------------------------------------------------------

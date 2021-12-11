@@ -45,7 +45,7 @@ bool match_filter(const messages::compact_filter& filter,
     const chain::script& script);
 
 bool match_filter(const messages::compact_filter& filter,
-    const chain::script::list& scripts);
+    const chain::scripts& scripts);
 
 bool match_filter(const messages::compact_filter& filter,
     const wallet::payment_address& address);

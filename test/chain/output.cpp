@@ -22,10 +22,10 @@ BOOST_AUTO_TEST_SUITE(output_tests)
 
 using namespace system::chain;
 
-const auto output_data = base16_chunk(
+static const auto output_data = base16_chunk(
     "20300500000000001976a914905f933de850988603aafeeb2fd7fce61e66fe5d88ac");
 
-const output expected_output(output_data);
+static const output expected_output(output_data);
 
 // constructors
 // ----------------------------------------------------------------------------

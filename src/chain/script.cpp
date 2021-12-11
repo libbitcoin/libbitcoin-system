@@ -59,26 +59,26 @@ bool script::is_enabled(uint32_t active_forks, forks fork)
 // ----------------------------------------------------------------------------
 
 script::script()
-  : script(operation::list{}, true)
+  : script(operations{}, true)
 {
 }
 
 script::script(script&& other)
-  : script(std::move(other), other.valid_)
+  : script(std::move(other.ops_), other.valid_)
 {
 }
 
 script::script(const script& other)
-  : script(other, other.valid_)
+  : script(other.ops_, other.valid_)
 {
 }
 
-script::script(operation::list&& ops)
+script::script(operations&& ops)
   : script(std::move(ops), true)
 {
 }
 
-script::script(const operation::list& ops)
+script::script(const operations& ops)
   : script(ops, true)
 {
 }
@@ -99,14 +99,14 @@ script::script(reader& source, bool prefix)
 }
 
 // protected
-script::script(operation::list&& ops, bool valid)
-  : operation::list(std::move(ops)), valid_(valid)
+script::script(operations&& ops, bool valid)
+  : ops_(std::move(ops)), valid_(valid)
 {
 }
 
 // protected
-script::script(const operation::list& ops, bool valid)
-  : operation::list(ops), valid_(valid)
+script::script(const operations& ops, bool valid)
+  : ops_(ops), valid_(valid)
 {
 }
 
@@ -115,17 +115,26 @@ script::script(const operation::list& ops, bool valid)
 
 script& script::operator=(script&& other)
 {
+    ops_ = std::move(other.ops_);
     valid_ = other.valid_;
-    operation::list::swap(other);
     return *this;
 }
 
 script& script::operator=(const script& other)
 {
+    ops_ = other.ops_;
     valid_ = other.valid_;
-    script copy(other);
-    operation::list::swap(copy);
     return *this;
+}
+
+bool script::operator==(const script& other) const
+{
+    return (ops_ == other.ops_);
+}
+
+bool script::operator!=(const script& other) const
+{
+    return !(*this == other);
 }
 
 // Deserialization.
@@ -141,6 +150,20 @@ bool script::from_data(std::istream& stream, bool prefix)
 {
     read::bytes::istream source(stream);
     return from_data(source, prefix);
+}
+
+// static
+size_t script::op_count(reader& source)
+{
+    const auto start = source.get_position();
+    auto count = zero;
+
+    while (operation::count_op(source))
+        ++count;
+
+    // Stream errors ignored, caught in from_data.
+    source.set_position(start);
+    return count;
 }
 
 bool script::from_data(reader& source, bool prefix)
@@ -159,8 +182,10 @@ bool script::from_data(reader& source, bool prefix)
         source.set_limit(size);
     }
 
+    ops_.reserve(op_count(source));
+
     while (!source.is_exhausted())
-        emplace_back(source);
+        ops_.emplace_back(source);
 
     if (prefix)
     {
@@ -193,13 +218,13 @@ bool script::from_string(const std::string& mnemonic)
         return true;
 
     // Create an op list from the split tokens, one operation per token.
-    reserve(tokens.size());
-    operation op;
+    ops_.reserve(tokens.size());
 
     for (const auto& token: tokens)
     {
+        operation op;
         valid_ &= op.from_string(token);
-        push_back(op);
+        ops_.push_back(op);
     }
 
     return valid_;
@@ -208,8 +233,8 @@ bool script::from_string(const std::string& mnemonic)
 // protected
 void script::reset()
 {
-    clear();
-    shrink_to_fit();
+    ops_.clear();
+    ops_.shrink_to_fit();
     valid_ = false;
 }
 
@@ -277,7 +302,7 @@ size_t script::serialized_size(bool prefix) const
         return total + op.serialized_size();
     };
 
-    auto size =  std::accumulate(begin(), end(), zero, op_size);
+    auto size =  std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);
@@ -285,9 +310,9 @@ size_t script::serialized_size(bool prefix) const
     return size;
 }
 
-const operation::list& script::ops() const
+const operations& script::ops() const
 {
-    return *this;
+    return ops_;
 }
 
 // Signing (unversioned).
@@ -600,7 +625,7 @@ bool script::create_endorsement(endorsement& out, const ec_secret& secret,
 // Utilities (static).
 // ----------------------------------------------------------------------------
 
-bool script::is_push_only(const operation::list& ops)
+bool script::is_push_only(const operations& ops)
 {
     const auto push = [](const operation& op)
     {
@@ -613,7 +638,7 @@ bool script::is_push_only(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip16 validation rules.
 //*****************************************************************************
-bool script::is_relaxed_push(const operation::list& ops)
+bool script::is_relaxed_push(const operations& ops)
 {
     const auto push = [&](const operation& op)
     {
@@ -628,7 +653,7 @@ bool script::is_relaxed_push(const operation::list& ops)
 // indicates the height size. This is inconsistent with an extreme future where
 // the size byte overflows. However satoshi actually requires nominal encoding.
 //*****************************************************************************
-bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
+bool script::is_coinbase_pattern(const operations& ops, size_t height)
 {
     return !ops.empty()
         && ops[0].is_nominal_push()
@@ -642,7 +667,7 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 ////    const auto actual = to_data(false);
 ////
 ////    // Create the expected script as a non-minimal byte vector.
-////    script compare(operation::list{ { number(height).data(), false } });
+////    script compare(operations{ { number(height).data(), false } });
 ////    const auto expected = compare.to_data(false);
 ////
 ////    // Require the actual script start with the expected coinbase script.
@@ -652,7 +677,7 @@ bool script::is_coinbase_pattern(const operation::list& ops, size_t height)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to commit to bip141 witness data.
 //*****************************************************************************
-bool script::is_commitment_pattern(const operation::list& ops)
+bool script::is_commitment_pattern(const operations& ops)
 {
     static const auto header = to_big_endian(witness_head);
 
@@ -667,7 +692,7 @@ bool script::is_commitment_pattern(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used in bip141 validation rules.
 //*****************************************************************************
-bool script::is_witness_program_pattern(const operation::list& ops)
+bool script::is_witness_program_pattern(const operations& ops)
 {
     return ops.size() == 2
         && ops[0].is_version()
@@ -678,7 +703,7 @@ bool script::is_witness_program_pattern(const operation::list& ops)
 // The satoshi client tests for 83 bytes total. This allows for the waste of
 // one byte to represent up to 75 bytes using the push_one_size opcode.
 // It also allows any number of push ops and limits it to 0 value and 1 per tx.
-////bool script::is_pay_null_data_pattern(const operation::list& ops)
+////bool script::is_pay_null_data_pattern(const operations& ops)
 ////{
 ////    static constexpr auto op_76 = static_cast<uint8_t>(opcode::push_one_size);
 ////
@@ -689,7 +714,7 @@ bool script::is_witness_program_pattern(const operation::list& ops)
 ////}
 
 // The satoshi client enables configurable data size for policy.
-bool script::is_pay_null_data_pattern(const operation::list& ops)
+bool script::is_pay_null_data_pattern(const operations& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::op_return
@@ -701,7 +726,7 @@ bool script::is_pay_null_data_pattern(const operation::list& ops)
 // The current 16 (or 20) limit does not affect server indexing because bare
 // multisig is not indexable and p2sh multisig is byte-limited to 15 sigs.
 // The satoshi client policy limit is 3 signatures for bare multisig.
-bool script::is_pay_multisig_pattern(const operation::list& ops)
+bool script::is_pay_multisig_pattern(const operations& ops)
 {
     static constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
     static constexpr auto op_16 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -731,14 +756,14 @@ bool script::is_pay_multisig_pattern(const operation::list& ops)
 }
 
 // The satoshi client considers this non-standard for policy.
-bool script::is_pay_public_key_pattern(const operation::list& ops)
+bool script::is_pay_public_key_pattern(const operations& ops)
 {
     return ops.size() == 2
         && is_public_key(ops[0].data())
         && ops[1].code() == opcode::checksig;
 }
 
-bool script::is_pay_key_hash_pattern(const operation::list& ops)
+bool script::is_pay_key_hash_pattern(const operations& ops)
 {
     return ops.size() == 5
         && ops[0].code() == opcode::dup
@@ -751,7 +776,7 @@ bool script::is_pay_key_hash_pattern(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip16 validation rules.
 //*****************************************************************************
-bool script::is_pay_script_hash_pattern(const operation::list& ops)
+bool script::is_pay_script_hash_pattern(const operations& ops)
 {
     return ops.size() == 3
         && ops[0].code() == opcode::hash160
@@ -759,14 +784,14 @@ bool script::is_pay_script_hash_pattern(const operation::list& ops)
         && ops[2].code() == opcode::equal;
 }
 
-bool script::is_pay_witness_pattern(const operation::list& ops)
+bool script::is_pay_witness_pattern(const operations& ops)
 {
     return ops.size() == 2
         && ops[0].is_version()
         && ops[1].is_push();
 }
 
-bool script::is_pay_witness_key_hash_pattern(const operation::list& ops)
+bool script::is_pay_witness_key_hash_pattern(const operations& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::push_size_0
@@ -776,7 +801,7 @@ bool script::is_pay_witness_key_hash_pattern(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip141 validation rules.
 //*****************************************************************************
-bool script::is_pay_witness_script_hash_pattern(const operation::list& ops)
+bool script::is_pay_witness_script_hash_pattern(const operations& ops)
 {
     return ops.size() == 2
         && ops[0].code() == opcode::push_size_0
@@ -786,7 +811,7 @@ bool script::is_pay_witness_script_hash_pattern(const operation::list& ops)
 // The first push is based on wacky satoshi op_check_multisig behavior that
 // we must perpetuate, though it's appearance here is policy not consensus.
 // Limiting to push_size_0 eliminates pattern ambiguity with little downside.
-bool script::is_sign_multisig_pattern(const operation::list& ops)
+bool script::is_sign_multisig_pattern(const operations& ops)
 {
     const auto endorsement = [](const operation& op)
     {
@@ -798,7 +823,7 @@ bool script::is_sign_multisig_pattern(const operation::list& ops)
         && std::all_of(std::next(ops.begin()), ops.end(), endorsement);
 }
 
-bool script::is_sign_public_key_pattern(const operation::list& ops)
+bool script::is_sign_public_key_pattern(const operations& ops)
 {
     return ops.size() == 1
         && is_endorsement(ops[0].data());
@@ -807,7 +832,7 @@ bool script::is_sign_public_key_pattern(const operation::list& ops)
 //*****************************************************************************
 // CONSENSUS: this pattern is used to activate bip141 validation rules.
 //*****************************************************************************
-bool script::is_sign_key_hash_pattern(const operation::list& ops)
+bool script::is_sign_key_hash_pattern(const operations& ops)
 {
     return ops.size() == 2
         && is_endorsement(ops[0].data())
@@ -816,40 +841,40 @@ bool script::is_sign_key_hash_pattern(const operation::list& ops)
 
 // Ambiguous with is_sign_key_hash when second/last op is a public key.
 // Ambiguous with is_sign_public_key_pattern when only op is an endorsement.
-bool script::is_sign_script_hash_pattern(const operation::list& ops)
+bool script::is_sign_script_hash_pattern(const operations& ops)
 {
     return !ops.empty()
         && is_push_only(ops)
         && !ops.back().data().empty();
 }
 
-operation::list script::to_pay_null_data_pattern(const data_slice& data)
+operations script::to_pay_null_data_pattern(const data_slice& data)
 {
     if (data.size() > max_null_data_size)
         return {};
 
-    return operation::list
+    return operations
     {
         { opcode::op_return },
         { to_chunk(data), false }
     };
 }
 
-operation::list script::to_pay_public_key_pattern(const data_slice& point)
+operations script::to_pay_public_key_pattern(const data_slice& point)
 {
     if (!is_public_key(point))
         return {};
 
-    return operation::list
+    return operations
     {
         { to_chunk(point), false },
         { opcode::checksig }
     };
 }
 
-operation::list script::to_pay_key_hash_pattern(const short_hash& hash)
+operations script::to_pay_key_hash_pattern(const short_hash& hash)
 {
-    return operation::list
+    return operations
     {
         { opcode::dup },
         { opcode::hash160 },
@@ -859,9 +884,9 @@ operation::list script::to_pay_key_hash_pattern(const short_hash& hash)
     };
 }
 
-operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
+operations script::to_pay_script_hash_pattern(const short_hash& hash)
 {
-    return operation::list
+    return operations
     {
         { opcode::hash160 },
         { to_chunk(hash), false },
@@ -870,7 +895,7 @@ operation::list script::to_pay_script_hash_pattern(const short_hash& hash)
 }
 
 // TODO: limit to 20 for consistency with op_check_multisig.
-operation::list script::to_pay_multisig_pattern(uint8_t signatures,
+operations script::to_pay_multisig_pattern(uint8_t signatures,
     const compressed_list& points)
 {
     return to_pay_multisig_pattern(signatures,
@@ -881,7 +906,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
 // This supports up to 16 signatures, however check_multisig is limited to 20.
 // The embedded script is limited to 520 bytes, an effective limit of 15 for
 // p2sh multisig, which can be as low as 7 when using all uncompressed keys.
-operation::list script::to_pay_multisig_pattern(uint8_t signatures,
+operations script::to_pay_multisig_pattern(uint8_t signatures,
     const data_stack& points)
 {
     static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -893,12 +918,12 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     const auto n = points.size();
 
     if (m < 1 || m > n || n < 1 || n > max)
-        return operation::list();
+        return operations();
 
     const auto op_m = static_cast<opcode>(m + zero);
     const auto op_n = static_cast<opcode>(points.size() + zero);
 
-    operation::list ops;
+    operations ops;
     ops.reserve(points.size() + 3);
     ops.emplace_back(op_m);
 
@@ -915,7 +940,7 @@ operation::list script::to_pay_multisig_pattern(uint8_t signatures,
     return ops;
 }
 
-operation::list script::to_pay_witness_pattern(uint8_t version, const data_slice& data)
+operations script::to_pay_witness_pattern(uint8_t version, const data_slice& data)
 {
     return
     {
@@ -924,7 +949,7 @@ operation::list script::to_pay_witness_pattern(uint8_t version, const data_slice
     };
 }
 
-operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
+operations script::to_pay_witness_key_hash_pattern(const short_hash& hash)
 {
     return
     {
@@ -933,7 +958,7 @@ operation::list script::to_pay_witness_key_hash_pattern(const short_hash& hash)
     };
 }
 
-operation::list script::to_pay_witness_script_hash_pattern(const hash_digest& hash)
+operations script::to_pay_witness_script_hash_pattern(const hash_digest& hash)
 {
     return
     {
@@ -961,7 +986,7 @@ script_version script::version() const
     if (!is_witness_program_pattern(ops()))
         return script_version::unversioned;
 
-    switch (front().code())
+    switch (ops_.front().code())
     {
         case opcode::push_size_0:
             return script_version::zero;
@@ -1082,10 +1107,10 @@ bool script::is_oversized() const
 // The criteria below are not comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
-    if (empty())
+    if (ops_.empty())
         return false;
 
-    const auto& code = front().code();
+    const auto& code = ops_.front().code();
 
     // There is no condition prior to the first opcode in a script.
     return operation::is_reserved(code) || operation::is_invalid(code);
@@ -1125,7 +1150,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     if ((witnessed = prevout_script.is_pay_to_witness(forks)))
     {
         // The input script must be empty (bip141).
-        if (!in.script().empty())
+        if (!in.script().ops().empty())
             return error::dirty_witness;
 
         // Validate the native script.
@@ -1136,7 +1161,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     // p2sh and p2w are mutually exclusive.
     else if (prevout_script.is_pay_to_script_hash(forks))
     {
-        if (!is_relaxed_push(in.script()))
+        if (!is_relaxed_push(in.script().ops()))
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
@@ -1154,7 +1179,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
         if ((witnessed = embedded_script.is_pay_to_witness(forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
-            if (in.script().size() != one)
+            if (in.script().ops().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
@@ -1165,7 +1190,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     }
 
     // Witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !in.witness().empty())
+    if (!witnessed && !in.witness().stack().empty())
         return error::unexpected_witness;
 
     return error::success;

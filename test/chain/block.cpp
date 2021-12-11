@@ -22,11 +22,11 @@ BOOST_AUTO_TEST_SUITE(chain_block_tests)
 
 using namespace system::chain;
 
-const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-const auto hash2 = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-const auto hash3 = base16_hash("bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
+static const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+static const auto hash2 = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+static const auto hash3 = base16_hash("bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
-const header expected_header
+static const header expected_header
 {
     10,
     hash1,
@@ -36,15 +36,15 @@ const header expected_header
     68644
 };
 
-const transaction::list expected_transactions
+static const transactions expected_transactions
 {
     { 1, 48, { {} }, { {} } },
     { 2, 32, { {} }, { {} } },
     { 4, 16, { {} }, { {} } }
 };
 
-const block expected_block{ expected_header, expected_transactions };
-const auto block_data = expected_block.to_data(true);
+static const block expected_block{ expected_header, expected_transactions };
+static const auto block_data = expected_block.to_data(true);
 
 // Access protected validation methods.
 class accessor
@@ -460,7 +460,7 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
     const accessor instance
     {
         {},
-        transaction::list
+        transactions
         {
             {},
             { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
     const accessor instance
     {
         {},
-        transaction::list
+        transactions
         {
             {},
             { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },

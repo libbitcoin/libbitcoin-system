@@ -37,7 +37,7 @@ class BC_API program
 {
 public:
     typedef data_stack::value_type value_type;
-    typedef chain::operation::iterator op_iterator;
+    typedef chain::operations::const_iterator op_iterator;
     typedef std::map<uint8_t, hash_digest> hash_cache;
 
     // Older libstdc++ does not allow erase with const iterator.
@@ -163,7 +163,7 @@ private:
     // A space-efficient dynamic bitset (specialized by c++ std libr).
     typedef std::vector<bool> bool_stack;
 
-    static chain::operation::list create_delete_ops(const endorsements& data);
+    static chain::operations create_delete_ops(const endorsements& data);
 
     hash_digest signature_hash(const chain::script& subscript,
         uint8_t flags) const;

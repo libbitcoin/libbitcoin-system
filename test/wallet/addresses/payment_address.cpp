@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(payment_address_tests)
 
-using namespace bc::system::chain;
+using namespace system::chain;
 using namespace bc::system::wallet;
 
 // $ bx base16-encode "Satoshi" | bx sha256

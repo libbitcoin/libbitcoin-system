@@ -20,12 +20,12 @@
 
 BOOST_AUTO_TEST_SUITE(operation_tests)
 
-using namespace bc::system::chain;
+using namespace system::chain;
 
-const auto op_data = base16_chunk("0900ff11ee22bb33aa44");
-const auto expected_op = operation(op_data);
-const auto op_data_underflow = base16_chunk("0900ff11ee22bb33");
-const auto push_data_32 = base16_chunk(
+static const auto op_data = base16_chunk("0900ff11ee22bb33aa44");
+static const auto expected_op = operation(op_data);
+static const auto op_data_underflow = base16_chunk("0900ff11ee22bb33");
+static const auto push_data_32 = base16_chunk(
     "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 
 // constructors

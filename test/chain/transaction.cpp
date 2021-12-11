@@ -22,17 +22,17 @@ BOOST_AUTO_TEST_SUITE(chain_transaction_tests)
 
 using namespace system::chain;
 
-const auto tx0_inputs = base16_chunk(
+static const auto tx0_inputs = base16_chunk(
     "f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc4de65310fc"
     "010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294789eb17601"
     "39e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e2830b11547"
     "2fb31de67d16972867f13945012103e589480b2f746381fca01a9b12c517b7a4"
     "82a203c8b2742985da0ac72cc078f2ffffffff");
 
-const auto tx0_last_output = base16_chunk(
+static const auto tx0_last_output = base16_chunk(
     "f0c9c467000000001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac");
 
-const auto tx1_data = base16_chunk(
+static const auto tx1_data = base16_chunk(
     "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
     "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
     "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -42,10 +42,10 @@ const auto tx1_data = base16_chunk(
     "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
     "00");
 
-const auto tx1_hash = base16_hash(
+static const auto tx1_hash = base16_hash(
     "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
-const auto tx2_data = base16_chunk(
+static const auto tx2_data = base16_chunk(
     "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
     "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
     "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -64,16 +64,16 @@ const auto tx2_data = base16_chunk(
     "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
     "e61e66fe5d88ac00000000");
 
-const auto tx2_hash = base16_hash(
+static const auto tx2_hash = base16_hash(
     "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
 
-const auto tx3_data = base16_chunk(
+static const auto tx3_data = base16_chunk(
     "010000000100000000000000000000000000000000000000000000000000000000000"
     "00000ffffffff23039992060481e1e157082800def50009dfdc102f42697446757279"
     "2f5345475749542f00000000015b382d4b000000001976a9148cf4f6175b2651dcdff"
     "0051970a917ea10189c2d88ac00000000");
 
-const auto tx4_data = base16_chunk(
+static const auto tx4_data = base16_chunk(
     "0100000001b63634c25f23018c18cbb24ad503672fe7c5edc3fef193ec0f581dd"
     "b27d4e401490000006a47304402203b361bfb7e189c77379d6ffc90babe1b9658"
     "39d0b9b60966ade0c4b8de28385f022057432fe6f8f530c54d3513e41da6fb138"
@@ -83,7 +83,7 @@ const auto tx4_data = base16_chunk(
     "81a6e7ac91e9a194e38292e5a5aae3828fe3828ce3828be7bea9e58b99e38292e"
     "8a8ade38191e381a6e381afe38184e381aae3818400000000");
 
-const auto tx4_hash = base16_hash(
+static const auto tx4_hash = base16_hash(
     "cb1e303db604f066225eb14d59d3f8d2231200817bc9d4610d2802586bd93f8a");
 
 // Access protected validation methods.

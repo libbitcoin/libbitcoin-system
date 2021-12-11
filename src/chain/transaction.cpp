@@ -512,7 +512,7 @@ bool transaction::segregated(const input::list& inputs)
 {
     const auto witnessed = [](const input& input)
     {
-        return !input.witness().empty();
+        return !input.witness().stack().empty();
     };
 
     return std::any_of(inputs.begin(), inputs.end(), witnessed);

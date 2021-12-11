@@ -56,9 +56,9 @@ public:
     block(chain::block&& other);
     block(const chain::block& other);
 
-    block(chain::header&& header, chain::transaction::list&& transactions);
+    block(chain::header&& header, chain::transactions&& transactions);
     block(const chain::header& header,
-        const chain::transaction::list& transactions);
+        const chain::transactions& transactions);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

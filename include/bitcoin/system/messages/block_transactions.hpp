@@ -44,9 +44,9 @@ public:
 
     block_transactions();
     block_transactions(const hash_digest& block_hash,
-        const chain::transaction::list& transactions);
+        const chain::transactions& transactions);
     block_transactions(hash_digest&& block_hash,
-        chain::transaction::list&& transactions);
+        chain::transactions&& transactions);
     block_transactions(const block_transactions& other);
     block_transactions(block_transactions&& other);
 
@@ -55,10 +55,10 @@ public:
     void set_block_hash(const hash_digest& value);
     void set_block_hash(hash_digest&& value);
 
-    chain::transaction::list& transactions();
-    const chain::transaction::list& transactions() const;
-    void set_transactions(const chain::transaction::list& other);
-    void set_transactions(chain::transaction::list&& other);
+    chain::transactions& transactions();
+    const chain::transactions& transactions() const;
+    void set_transactions(const chain::transactions& other);
+    void set_transactions(chain::transactions&& other);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);
@@ -84,7 +84,7 @@ public:
 
 private:
     hash_digest block_hash_;
-    chain::transaction::list transactions_;
+    chain::transactions transactions_;
 };
 
 } // namespace messages

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_2__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_3__always__equals_params)
     };
 
     chain::header dup_header(header);
-    chain::transaction::list dup_transactions = transactions;
+    chain::transactions dup_transactions = transactions;
     block instance(std::move(dup_header), std::move(dup_transactions));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(header == instance.header());
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_4__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_5__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_6__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(block__constructor_7__always__equals_params)
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_1__always__matches_equivalent
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(block__operator_assign_equals_2__always__matches_equivalent
         6523454u,
         68644u);
 
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         chain::transaction(1, 48, {}, {}),
         chain::transaction(2, 32, {}, {}),

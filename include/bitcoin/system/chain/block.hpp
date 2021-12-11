@@ -55,8 +55,8 @@ public:
     block(block&& other);
     block(const block& other);
 
-    block(chain::header&& header, transaction::list&& txs);
-    block(const chain::header& header, const transaction::list& txs);
+    block(chain::header&& header, transactions&& txs);
+    block(const chain::header& header, const transactions& txs);
 
     block(const data_slice& data, bool witness);
     block(std::istream& stream, bool witness);
@@ -93,7 +93,7 @@ public:
 
     /// Native properties.
     const chain::header& header() const;
-    const transaction::list& transactions() const;
+    const transactions& transactions() const;
     hash_list transaction_hashes(bool witness) const;
 
     /// Computed properties.
@@ -114,8 +114,8 @@ public:
     code connect(const context& state) const;
 
 protected:
-    block(chain::header&& header, transaction::list&& txs, bool valid);
-    block(const chain::header& header, const transaction::list& txs,
+    block(chain::header&& header, chain::transactions&& txs, bool valid);
+    block(const chain::header& header, const chain::transactions& txs,
         bool valid);
 
     void reset();
@@ -174,7 +174,7 @@ private:
     code accept_transactions(const context& state) const;
 
     chain::header header_;
-    transaction::list txs_;
+    chain::transactions txs_;
     bool valid_;
 };
 

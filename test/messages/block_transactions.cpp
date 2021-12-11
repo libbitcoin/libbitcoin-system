@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_2__always__equals_params)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_2__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
     };
 
     auto dup_hash = hash;
-    chain::transaction::list dup_transactions = transactions;
+    chain::transactions dup_transactions = transactions;
     messages::block_transactions instance(std::move(dup_hash), std::move(dup_transactions));
 
     BOOST_REQUIRE(instance.is_valid());
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_4__always__equals_params)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_4__always__equals_params)
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_5__always__equals_params)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__initiali
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_2__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__block_hash_setter_2__roundtrip__success
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__initia
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_2__always__initialized_value)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_2__always__initia
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_1__roundtrip__success)
 {
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -414,13 +414,14 @@ BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_1__roundtrip__succe
 
     messages::block_transactions instance;
     BOOST_REQUIRE(transactions != instance.transactions());
+
     instance.set_transactions(transactions);
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_2__roundtrip__success)
 {
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),
@@ -429,17 +430,18 @@ BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_2__roundtrip__succe
         }
     };
 
-    chain::transaction::list dup_transactions = transactions;
+    auto copy = transactions;
     messages::block_transactions instance;
     BOOST_REQUIRE(transactions != instance.transactions());
-    instance.set_transactions(std::move(dup_transactions));
+
+    instance.set_transactions(std::move(copy));
     BOOST_REQUIRE(transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_assign_equals__always__matches_equivalent)
 {
     const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transaction::list transactions
+    const chain::transactions transactions
     {
         {
             chain::transaction(1, 48, {}, {}),

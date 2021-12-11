@@ -39,11 +39,6 @@ namespace chain {
 class BC_API operation
 {
 public:
-    typedef std::vector<operation> list;
-    typedef std::shared_ptr<operation> ptr;
-
-    typedef list::const_iterator iterator;
-
     // Constructors.
     // ------------------------------------------------------------------------
 
@@ -53,6 +48,7 @@ public:
     operation(operation&& other);
     operation(const operation& other);
 
+    /// Use data constructors for push_data ops.
     operation(opcode code);
 
     /// These construct from push-data, not serialized operations (no codes).
@@ -77,8 +73,8 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    /// These serialize operations (with codes), not to push-data.
-    bool from_data(const data_slice& encoded);
+    /// These deserialize operations (with codes), not from push-data.
+    bool from_data(const data_slice& op_data);
     bool from_data(std::istream& stream);
     bool from_data(reader& source);
 
@@ -155,19 +151,26 @@ public:
     bool is_underflow() const;
 
 protected:
+    // To access count_op.
+    friend class script;
+
+    static bool count_op(reader& source);
     static uint32_t read_data_size(opcode code, reader& source);
 
-    operation(opcode code, data_chunk&& data, bool underflow);
-    operation(opcode code, const data_chunk& data, bool underflow);
+    operation(opcode code, chunk_ptr push_data_ptr, bool underflow);
+    operation(opcode code, data_chunk&& push_data, bool underflow);
+    operation(opcode code, const data_chunk& push_data, bool underflow);
 
-    opcode opcode_from_data(const data_chunk& data, bool minimal);
+    opcode opcode_from_data(const data_chunk& push_data, bool minimal);
     void reset();
 
 private:
     opcode code_;
-    data_chunk data_;
+    chunk_ptr data_;
     bool underflow_;
 };
+
+typedef std::vector<operation> operations;
 
 } // namespace chain
 } // namespace system

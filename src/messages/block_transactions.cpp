@@ -62,13 +62,13 @@ block_transactions::block_transactions()
 }
 
 block_transactions::block_transactions(const hash_digest& block_hash,
-    const chain::transaction::list& transactions)
+    const chain::transactions& transactions)
   : block_hash_(block_hash), transactions_(transactions)
 {
 }
 
 block_transactions::block_transactions(hash_digest&& block_hash,
-    chain::transaction::list&& transactions)
+    chain::transactions&& transactions)
   : block_hash_(std::move(block_hash)), transactions_(std::move(transactions))
 {
 }
@@ -194,22 +194,22 @@ void block_transactions::set_block_hash(hash_digest&& value)
     block_hash_ = std::move(value);
 }
 
-chain::transaction::list& block_transactions::transactions()
+chain::transactions& block_transactions::transactions()
 {
     return transactions_;
 }
 
-const chain::transaction::list& block_transactions::transactions() const
+const chain::transactions& block_transactions::transactions() const
 {
     return transactions_;
 }
 
-void block_transactions::set_transactions(const chain::transaction::list& value)
+void block_transactions::set_transactions(const chain::transactions& value)
 {
     transactions_ = value;
 }
 
-void block_transactions::set_transactions(chain::transaction::list&& value)
+void block_transactions::set_transactions(chain::transactions&& value)
 {
     transactions_ = std::move(value);
 }

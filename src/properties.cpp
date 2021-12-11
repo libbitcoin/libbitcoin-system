@@ -39,7 +39,7 @@
 ////namespace system {
 ////
 ////using namespace pt;
-////using namespace bc::system::chain;
+////using namespace system::chain;
 ////using namespace bc::system::config;
 ////using namespace bc::system::wallet;
 ////

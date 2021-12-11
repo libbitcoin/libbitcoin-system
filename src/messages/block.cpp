@@ -83,13 +83,13 @@ block::block(const chain::block& other)
 {
 }
 
-block::block(chain::header&& header, chain::transaction::list&& transactions)
+block::block(chain::header&& header, chain::transactions&& transactions)
   : chain::block(std::move(header), std::move(transactions))
 {
 }
 
 block::block(const chain::header& header,
-    const chain::transaction::list& transactions)
+    const chain::transactions& transactions)
   : chain::block(header, transactions)
 {
 }

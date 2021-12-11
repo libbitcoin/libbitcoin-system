@@ -69,12 +69,12 @@ block::block(block&& other)
 {
 }
 
-block::block(const chain::header& header, const transaction::list& txs)
+block::block(const chain::header& header, const chain::transactions& txs)
   : block(header, txs, true)
 {
 }
 
-block::block(chain::header&& header, transaction::list&& txs)
+block::block(chain::header&& header, chain::transactions&& txs)
   : block(std::move(header), std::move(txs), true)
 {
 }
@@ -95,7 +95,7 @@ block::block(reader& source, bool witness)
 }
 
 // protected
-block::block(chain::header&& header, transaction::list&& txs, bool valid)
+block::block(chain::header&& header, chain::transactions&& txs, bool valid)
   : header_(std::move(header)),
     txs_(std::move(txs)),
     valid_(valid)
@@ -103,7 +103,7 @@ block::block(chain::header&& header, transaction::list&& txs, bool valid)
 }
 
 // protected
-block::block(const chain::header& header, const transaction::list& txs,
+block::block(const chain::header& header, const chain::transactions& txs,
     bool valid)
   : header_(header),
     txs_(txs),
@@ -250,7 +250,7 @@ const chain::header& block::header() const
     return header_;
 }
 
-const transaction::list& block::transactions() const
+const transactions& block::transactions() const
 {
     return txs_;
 }
@@ -436,7 +436,7 @@ bool block::is_invalid_coinbase_script(size_t height) const
         return false;
 
     const auto& script = txs_.front().inputs().front().script();
-    return !script::is_coinbase_pattern(script, height);
+    return !script::is_coinbase_pattern(script.ops(), height);
 }
 
 // TODO: add bip50 to chain_state with timestamp range activation.

@@ -37,10 +37,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-using namespace bc::system::chain;
-
-static const chain::transaction default_tx_;
-static const chain::script default_script_;
+using namespace system::chain;
 
 static default_allocator<chain::operation> no_fill_op_allocator{};
 
@@ -48,28 +45,28 @@ static default_allocator<chain::operation> no_fill_op_allocator{};
 // ----------------------------------------------------------------------------
 
 program::program()
-  : script_(default_script_),
-    transaction_(default_tx_),
+  : script_{},
+    transaction_{},
     input_index_(0),
     forks_(0),
     value_(0),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin())
+    jump_(script_.ops().begin())
 {
 }
 
 program::program(const script& script)
   : script_(script),
-    transaction_(default_tx_),
+    transaction_{},
     input_index_(0),
     forks_(0),
     value_(0),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin())
+    jump_(script_.ops().begin())
 {
 }
 
@@ -83,7 +80,7 @@ program::program(const script& script, const chain::transaction& transaction,
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin())
+    jump_(script_.ops().begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
     BITCOIN_ASSERT(index < transaction.inputs().size());
@@ -101,7 +98,7 @@ program::program(const script& script, const chain::transaction& transaction,
     version_(version),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin()),
+    jump_(script_.ops().begin()),
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
@@ -119,7 +116,7 @@ program::program(const script& script, const program& other)
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin()),
+    jump_(script_.ops().begin()),
     primary_(other.primary_)
 {
 }
@@ -134,7 +131,7 @@ program::program(const script& script, program&& other, bool)
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.begin()),
+    jump_(script_.ops().begin()),
     primary_(std::move(other.primary_))
 {
 }
@@ -201,7 +198,7 @@ script_version program::version() const
 
 program::op_iterator program::begin() const
 {
-    return script_.begin();
+    return script_.ops().begin();
 }
 
 program::op_iterator program::jump() const
@@ -211,7 +208,7 @@ program::op_iterator program::jump() const
 
 program::op_iterator program::end() const
 {
-    return script_.end();
+    return script_.ops().end();
 }
 
 // Instructions.
@@ -259,7 +256,7 @@ bool program::increment_op_count(int32_t public_keys)
 
 bool program::register_jump(const operation& op)
 {
-    if (script_.empty())
+    if (script_.ops().empty())
         return false;
 
     // This avoids std::find_if using equality operator override.
@@ -269,10 +266,10 @@ bool program::register_jump(const operation& op)
     };
 
     // This is not efficient (linear) but rarely used.
-    jump_ = std::find_if(script_.begin(), script_.end(), finder);
+    jump_ = std::find_if(script_.ops().begin(), script_.ops().end(), finder);
 
     // This is not reachable if op is an element of script_.
-    if (jump_ == script_.end())
+    if (jump_ == script_.ops().end())
         return false;
 
     std::advance(jump_, one);
@@ -583,7 +580,7 @@ chain::script program::subscript() const
     // TODO: Construct script on operations shared pointer and offset parameter.
     // TODO: if offset provided, all iteration starts at offset point. This
     // TODO: precludes copying operations in the case of a jump without mutate.
-    operation::list sub(std::distance(jump(), end()), no_fill_op_allocator);
+    operations sub(std::distance(jump(), end()), no_fill_op_allocator);
     std::copy(jump(), end(), sub.begin());
     return { sub };
 }
@@ -664,10 +661,10 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
-chain::operation::list program::create_delete_ops(const endorsements& data)
+chain::operations program::create_delete_ops(const endorsements& data)
 {
     // Create set of endorsement push data ops and a codeseparator op.
-    operation::list strip(add1(data.size()), no_fill_op_allocator);
+    operations strip(add1(data.size()), no_fill_op_allocator);
 
     // C++17: Parallel policy.
     std::transform(data.begin(), data.end(), strip.begin(),
