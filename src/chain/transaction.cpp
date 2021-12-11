@@ -77,14 +77,14 @@ transaction::transaction(const transaction& other)
 
 // segregated_ is the first property because of this constructor.
 transaction::transaction(uint32_t version, uint32_t locktime,
-    input::list&& inputs, output::list&& outputs)
+    chain::inputs&& inputs, chain::outputs&& outputs)
   : transaction(segregated(inputs), version, locktime, std::move(inputs),
       std::move(outputs), true)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
-    const input::list& inputs, const output::list& outputs)
+    const chain::inputs& inputs, const chain::outputs& outputs)
   : transaction(segregated(inputs), version, locktime, inputs, outputs,
       true)
 {
@@ -107,7 +107,7 @@ transaction::transaction(reader& source, bool witness)
 
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
-    input::list&& inputs, output::list&& outputs, bool valid)
+    chain::inputs&& inputs, chain::outputs&& outputs, bool valid)
   : segregated_(segregated),
     version_(version),
     locktime_(locktime),
@@ -119,7 +119,7 @@ transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
 
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
-    const input::list& inputs, const output::list& outputs, bool valid)
+    const chain::inputs& inputs, const chain::outputs& outputs, bool valid)
   : segregated_(segregated),
     version_(version),
     locktime_(locktime),
@@ -359,12 +359,12 @@ uint32_t transaction::locktime() const
     return locktime_;
 }
 
-const input::list& transaction::inputs() const
+const chain::inputs& transaction::inputs() const
 {
     return inputs_;
 }
 
-const output::list& transaction::outputs() const
+const chain::outputs& transaction::outputs() const
 {
     return outputs_;
 }
@@ -414,10 +414,10 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const
         std::accumulate(outputs_.begin(), outputs_.end(), zero, out);
 }
 
-point::list transaction::points() const
+chain::points transaction::points() const
 {
     static default_allocator<point> no_fill_allocator{};
-    point::list out(no_fill_allocator);
+    chain::points out(no_fill_allocator);
     out.resize(inputs_.size());
 
     const auto point = [](const input& input)
@@ -508,7 +508,7 @@ bool transaction::is_oversized() const
 // ----------------------------------------------------------------------------
 
 // static/private
-bool transaction::segregated(const input::list& inputs)
+bool transaction::segregated(const chain::inputs& inputs)
 {
     const auto witnessed = [](const input& input)
     {

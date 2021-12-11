@@ -41,7 +41,6 @@ namespace chain {
 class BC_API header
 {
 public:
-    typedef std::vector<header> list;
     typedef std::shared_ptr<header> ptr;
 
     // Constructors.
@@ -155,6 +154,8 @@ private:
     uint32_t nonce_;
     bool valid_;
 };
+
+typedef std::vector<header> headers;
 
 } // namespace chain
 } // namespace system

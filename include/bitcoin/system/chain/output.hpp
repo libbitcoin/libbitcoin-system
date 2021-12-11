@@ -36,7 +36,6 @@ namespace chain {
 class BC_API output
 {
 public:
-    typedef std::vector<output> list;
     typedef std::shared_ptr<output> ptr;
 
     /// This is a consensus value required by script::generate_signature_hash.
@@ -112,6 +111,8 @@ private:
     chain::script script_;
     bool valid_;
 };
+
+typedef std::vector<output> outputs;
 
 } // namespace chain
 } // namespace system

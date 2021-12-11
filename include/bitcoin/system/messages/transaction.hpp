@@ -57,9 +57,9 @@ public:
     transaction(const chain::transaction& other);
 
     transaction(uint32_t version, uint32_t locktime,
-        chain::input::list&& inputs, chain::output::list&& outputs);
+        chain::inputs&& inputs, chain::outputs&& outputs);
     transaction(uint32_t version, uint32_t locktime,
-        const chain::input::list& inputs, const chain::output::list& outputs);
+        const chain::inputs& inputs, const chain::outputs& outputs);
 
     bool from_data(uint32_t version, const data_chunk& data);
     bool from_data(uint32_t version, std::istream& stream);

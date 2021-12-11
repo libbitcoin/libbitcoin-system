@@ -43,7 +43,6 @@ namespace chain {
 class BC_API block
 {
 public:
-    typedef std::vector<block> list;
     typedef std::shared_ptr<block> ptr;
 
     // Constructors.
@@ -177,6 +176,8 @@ private:
     chain::transactions txs_;
     bool valid_;
 };
+
+typedef std::vector<block> blocks;
 
 } // namespace chain
 } // namespace system

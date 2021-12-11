@@ -52,10 +52,10 @@ public:
     transaction(transaction&& other);
     transaction(const transaction& other);
 
-    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
-        output::list&& outputs);
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs);
+    transaction(uint32_t version, uint32_t locktime, chain::inputs&& inputs,
+        chain::outputs&& outputs);
+    transaction(uint32_t version, uint32_t locktime,
+        const chain::inputs& inputs, const chain::outputs& outputs);
     
     transaction(const data_slice& data, bool witness);
     transaction(std::istream& stream, bool witness);
@@ -93,8 +93,8 @@ public:
     /// Native properties.
     uint32_t version() const;
     uint32_t locktime() const;
-    const input::list& inputs() const;
-    const output::list& outputs() const;
+    const chain::inputs& inputs() const;
+    const chain::outputs& outputs() const;
 
     /// Computed properties.
     size_t weight() const;
@@ -111,7 +111,7 @@ public:
 
     bool is_dusty(uint64_t minimum_output_value) const;
     size_t signature_operations(bool bip16, bool bip141) const;
-    point::list points() const;
+    chain::points points() const;
     hash_digest outputs_hash() const;
     hash_digest points_hash() const;
     hash_digest sequences_hash() const;
@@ -133,9 +133,9 @@ protected:
     ////friend class block;
 
     transaction(bool segregated, uint32_t version, uint32_t locktime,
-        input::list&& inputs, output::list&& outputs, bool valid);
+        chain::inputs&& inputs, chain::outputs&& outputs, bool valid);
     transaction(bool segregated, uint32_t version, uint32_t locktime,
-        const input::list& inputs, const output::list& outputs, bool valid);
+        const chain::inputs& inputs, const chain::outputs& outputs, bool valid);
 
     void reset();
 
@@ -181,7 +181,7 @@ protected:
 
 private:
     ////static size_t maximum_size(bool coinbase);
-    static bool segregated(const input::list& inputs);
+    static bool segregated(const chain::inputs& inputs);
 
     // delegated
     code connect_input(const context& state, size_t index) const;
@@ -189,8 +189,8 @@ private:
     bool segregated_;
     uint32_t version_;
     uint32_t locktime_;
-    input::list inputs_;
-    output::list outputs_;
+    chain::inputs inputs_;
+    chain::outputs outputs_;
     bool valid_;
 };
 

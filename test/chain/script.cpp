@@ -149,16 +149,13 @@ transaction test_tx(const script_test& test)
     {
         test.version,
         test.locktime,
-        input::list
         {
-            input
             {
-                point{},
+                {},
                 std::move(input_script),
                 test.input_sequence
             }
         },
-        output::list
         {
         }
     };

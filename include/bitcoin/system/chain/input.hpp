@@ -40,7 +40,6 @@ namespace chain {
 class BC_API input
 {
 public:
-    typedef std::vector<input> list;
     typedef std::shared_ptr<input> ptr;
 
     // Constructors.
@@ -136,6 +135,8 @@ private:
     uint32_t sequence_;
     bool valid_;
 };
+
+typedef std::vector<input> inputs;
 
 } // namespace chain
 } // namespace system

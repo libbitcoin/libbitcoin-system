@@ -361,7 +361,7 @@ inline coverage mask_sighash(uint8_t flags)
 static hash_digest sign_none(const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
-    input::list ins;
+    inputs ins;
     const auto& inputs = tx.inputs();
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
     ins.reserve(any ? one : inputs.size());
@@ -398,7 +398,7 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     if (index >= tx.outputs().size())
         return one_hash;
 
-    input::list ins;
+    inputs ins;
     const auto& inputs = tx.inputs();
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
     ins.reserve(any ? one : inputs.size());
@@ -421,9 +421,8 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     }
 
     // Trim and clear outputs except that of the input index (guarded above).
-    const auto& outputs = tx.outputs();
-    output::list outs(add1(index));
-    outs.back() = outputs[index];
+    outputs outs(add1(index));
+    outs.back() = tx.outputs()[index];
 
     // Move new inputs and new outputs to new transaction.
     return signature_hash({ tx.version(), tx.locktime(), std::move(ins),
@@ -433,7 +432,7 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
 static hash_digest sign_all(const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
-    input::list ins;
+    inputs ins;
     const auto& inputs = tx.inputs();
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
     ins.reserve(any ? one : inputs.size());

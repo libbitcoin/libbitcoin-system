@@ -227,8 +227,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
     const output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    const input::list inputs{ input };
-    const output::list outputs{ output };
+    const inputs inputs{ input };
+    const outputs outputs{ output };
     const transaction instance(version, locktime, inputs, outputs);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());

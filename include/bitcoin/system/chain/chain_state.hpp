@@ -49,7 +49,6 @@ public:
     typedef struct { size_t count; size_t high; } range;
 
     typedef std::shared_ptr<chain_state> ptr;
-    typedef checkpoint::list checkpoints;
 
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.

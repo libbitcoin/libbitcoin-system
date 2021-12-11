@@ -36,8 +36,6 @@ namespace chain {
 class BC_API checkpoint
 {
 public:
-    typedef std::vector<checkpoint> list;
-
     // Constructors.
     // ------------------------------------------------------------------------
 
@@ -103,6 +101,8 @@ bool operator==(const checkpoint& left, const checkpoint& right) noexcept;
 bool operator!=(const checkpoint& left, const checkpoint& right) noexcept;
 std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept;
 std::istream& operator>>(std::istream& input, checkpoint& out) noexcept;
+
+typedef std::vector<checkpoint> checkpoints;
 
 } // namespace chain
 } // namespace system

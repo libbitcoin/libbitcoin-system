@@ -118,10 +118,11 @@ bool point::operator!=(const point& other) const
     return !(*this == other);
 }
 
-bool point::operator<(const point& other) const
+bool operator<(const point& left, const point& right)
 {
     // Arbitrary compare, for uniqueness sorting.
-    return index_ == other.index_ ? hash_ < other.hash_ : index_ < other.index_;
+    return left.index() == right.index() ?
+        left.hash() < right.hash() : left.index() < right.index();
 }
 
 // Deserialization.

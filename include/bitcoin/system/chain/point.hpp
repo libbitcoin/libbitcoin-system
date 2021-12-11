@@ -36,7 +36,6 @@ namespace chain {
 class BC_API point
 {
 public:
-    typedef std::vector<point> list;
     typedef std::shared_ptr<point> ptr;
 
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
@@ -67,9 +66,6 @@ public:
 
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
-
-    /// Arbitrary compare, for uniqueness sorting.
-    bool operator<(const point& other) const;
 
     // Deserialization.
     // ------------------------------------------------------------------------
@@ -115,6 +111,11 @@ private:
     uint32_t index_;
     bool valid_;
 };
+
+/// Arbitrary compare, for uniqueness sorting.
+bool operator<(const point& left, const point& right);
+
+typedef std::vector<point> points;
 
 } // namespace chain
 } // namespace system

@@ -85,14 +85,14 @@ transaction::transaction(const chain::transaction& other)
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
-    chain::input::list&& inputs, chain::output::list&& outputs)
+    chain::inputs&& inputs, chain::outputs&& outputs)
   : chain::transaction(version, locktime, std::move(inputs),
         std::move(outputs))
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
-    const chain::input::list& inputs, const chain::output::list& outputs)
+    const chain::inputs& inputs, const chain::outputs& outputs)
   : chain::transaction(version, locktime, inputs, outputs)
 {
 }
