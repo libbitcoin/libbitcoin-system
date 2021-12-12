@@ -69,13 +69,18 @@ block::block(block&& other)
 {
 }
 
+block::block(chain::header&& header, chain::transactions&& txs)
+  : block(std::move(header), std::move(txs), true)
+{
+}
+
 block::block(const chain::header& header, const chain::transactions& txs)
   : block(header, txs, true)
 {
 }
 
-block::block(chain::header&& header, chain::transactions&& txs)
-  : block(std::move(header), std::move(txs), true)
+block::block(chain::header::ptr header, transactions_ptr txs)
+  : block(*header, *txs, true)
 {
 }
 

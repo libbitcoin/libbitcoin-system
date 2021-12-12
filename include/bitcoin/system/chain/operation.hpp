@@ -55,6 +55,7 @@ public:
     /// When minimal is true the data is interpreted as minimally-encoded push.
     operation(data_chunk&& push_data, bool minimal);
     operation(const data_slice& push_data, bool minimal);
+    operation(chunk_ptr push_data, bool minimal);
 
     /// These deserialize operations (with codes), not from push-data.
     operation(const data_slice& op_data);
@@ -171,6 +172,7 @@ private:
 };
 
 typedef std::vector<operation> operations;
+typedef std::shared_ptr<operations> operations_ptr;
 
 } // namespace chain
 } // namespace system

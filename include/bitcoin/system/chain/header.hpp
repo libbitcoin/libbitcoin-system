@@ -58,6 +58,9 @@ public:
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
+    header(uint32_t version, hash_ptr previous_block_hash,
+        hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce);
 
     header(const data_slice& data);
     header(std::istream& stream);
@@ -156,6 +159,7 @@ private:
 };
 
 typedef std::vector<header> headers;
+typedef std::shared_ptr<headers> headers_ptr;
 
 } // namespace chain
 } // namespace system

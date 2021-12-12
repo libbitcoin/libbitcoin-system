@@ -52,6 +52,7 @@ public:
 
     output(uint64_t value, chain::script&& script);
     output(uint64_t value, const chain::script& script);
+    output(uint64_t value, chain::script::ptr script);
 
     output(const data_slice& data);
     output(std::istream& stream);
@@ -113,6 +114,7 @@ private:
 };
 
 typedef std::vector<output> outputs;
+typedef std::shared_ptr<outputs> outputs_ptr;
 
 } // namespace chain
 } // namespace system

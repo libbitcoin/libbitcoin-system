@@ -90,6 +90,14 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 {
 }
 
+transaction::transaction(uint32_t version, uint32_t locktime,
+    inputs_ptr inputs, outputs_ptr outputs)
+  : transaction(segregated(*inputs), version, locktime, *inputs, *outputs,
+      true)
+{
+}
+
+
 transaction::transaction(const data_slice& data, bool witness)
   : transaction(stream::in::copy(data), witness)
 {

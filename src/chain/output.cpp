@@ -64,6 +64,11 @@ output::output(uint64_t value, const chain::script& script)
 {
 }
 
+output::output(uint64_t value, chain::script::ptr script)
+  : output(value, *script, true)
+{
+}
+
 output::output(const data_slice& data)
   : output(stream::in::copy(data))
 {

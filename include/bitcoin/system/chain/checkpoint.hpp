@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
@@ -103,6 +104,7 @@ std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept;
 std::istream& operator>>(std::istream& input, checkpoint& out) noexcept;
 
 typedef std::vector<checkpoint> checkpoints;
+typedef std::shared_ptr<checkpoints> checkpoints_ptr;
 
 } // namespace chain
 } // namespace system

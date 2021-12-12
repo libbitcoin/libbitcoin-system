@@ -53,6 +53,7 @@ public:
 
     point(hash_digest&& hash, uint32_t index);
     point(const hash_digest& hash, uint32_t index);
+    point(hash_ptr hash, uint32_t index);
 
     point(const data_slice& data);
     point(std::istream& stream);
@@ -116,6 +117,7 @@ private:
 bool operator<(const point& left, const point& right);
 
 typedef std::vector<point> points;
+typedef std::shared_ptr<points> points_ptr;
 
 } // namespace chain
 } // namespace system

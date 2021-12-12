@@ -58,6 +58,8 @@ public:
         chain::witness&& witness, uint32_t sequence);
     input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
+    input(chain::point::ptr point, const chain::script::ptr script,
+        chain::witness::ptr witness, uint32_t sequence);
 
     input(const data_slice& data);
     input(std::istream& stream);
@@ -137,6 +139,7 @@ private:
 };
 
 typedef std::vector<input> inputs;
+typedef std::shared_ptr<inputs> inputs_ptr;
 
 } // namespace chain
 } // namespace system

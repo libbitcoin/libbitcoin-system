@@ -56,6 +56,7 @@ public:
 
     block(chain::header&& header, transactions&& txs);
     block(const chain::header& header, const transactions& txs);
+    block(chain::header::ptr header, transactions_ptr txs);
 
     block(const data_slice& data, bool witness);
     block(std::istream& stream, bool witness);
@@ -178,6 +179,7 @@ private:
 };
 
 typedef std::vector<block> blocks;
+typedef std::shared_ptr<blocks> blocks_ptr;
 
 } // namespace chain
 } // namespace system

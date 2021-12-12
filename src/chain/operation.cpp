@@ -95,6 +95,18 @@ operation::operation(const data_slice& push_data, bool minimal)
     }
 }
 
+operation::operation(chunk_ptr push_data, bool minimal)
+  : operation(opcode_from_data(*push_data, minimal), *push_data, false)
+{
+    // Minimal interpretation affects only single byte push data.
+    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
+    if (!is_payload(code_))
+    {
+        data_->clear();
+        data_->shrink_to_fit();
+    }
+}
+
 operation::operation(const data_slice& op_data)
   : operation(stream::in::copy(op_data))
 {

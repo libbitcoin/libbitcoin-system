@@ -83,6 +83,11 @@ script::script(const operations& ops)
 {
 }
 
+script::script(operations_ptr ops)
+  : script(*ops, true)
+{
+}
+
 script::script(const data_slice& data, bool prefix)
   : script(stream::in::copy(data), prefix)
 {

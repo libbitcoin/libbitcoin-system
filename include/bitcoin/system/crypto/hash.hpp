@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -43,6 +44,7 @@ typedef data_array<half_hash_size> half_hash;
 typedef data_array<short_hash_size> short_hash;
 typedef data_array<hash_size> hash_digest;
 typedef data_array<long_hash_size> long_hash;
+typedef std::shared_ptr<hash_digest> hash_ptr;
 
 /// Lists of common bitcoin hashes.
 typedef std::vector<mini_hash> mini_hash_list;

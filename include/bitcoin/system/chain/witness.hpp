@@ -52,6 +52,7 @@ public:
 
     witness(data_stack&& stack);
     witness(const data_stack& stack);
+    witness(stack_ptr stack);
 
     witness(const data_slice& data, bool prefix);
     witness(std::istream& stream, bool prefix);
@@ -130,6 +131,7 @@ private:
 };
 
 typedef std::vector<witness> witnesses;
+typedef std::shared_ptr<witnesses> witnesses_ptr;
 
 } // namespace chain
 } // namespace system

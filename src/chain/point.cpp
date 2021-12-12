@@ -61,6 +61,11 @@ point::point(const hash_digest& hash, uint32_t index)
 {
 }
 
+point::point(hash_ptr hash, uint32_t index)
+  : point(*hash, index, true)
+{
+}
+
 point::point(const data_slice& data)
   : point(stream::in::copy(data))
 {

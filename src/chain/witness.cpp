@@ -70,6 +70,11 @@ witness::witness(const data_stack& stack)
 {
 }
 
+witness::witness(stack_ptr stack)
+  : witness(*stack, true)
+{
+}
+
 witness::witness(const data_slice& data, bool prefix)
   : witness(stream::in::copy(data), prefix)
 {

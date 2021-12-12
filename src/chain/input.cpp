@@ -41,7 +41,7 @@ namespace chain {
 // Valid default used in signature hashing.
 // Default prevout (metadata) construction is spent, invalid, max_size_t value. 
 input::input()
-  : input({}, {}, {}, 0)
+  : input(chain::point{}, {}, {}, 0)
 {
 }
 
@@ -88,6 +88,12 @@ input::input(chain::point&& point, chain::script&& script,
 input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence)
   : input(point, script, witness, sequence, true, {})
+{
+}
+
+input::input(chain::point::ptr point, chain::script::ptr script,
+    chain::witness::ptr witness, uint32_t sequence)
+  : input(*point, *script, *witness, sequence, true, {})
 {
 }
 

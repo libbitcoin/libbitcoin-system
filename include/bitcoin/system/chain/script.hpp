@@ -59,6 +59,7 @@ public:
 
     script(operations&& ops);
     script(const operations& ops);
+    script(operations_ptr ops);
 
     script(const data_slice& data, bool prefix);
     script(std::istream& stream, bool prefix);
@@ -218,6 +219,7 @@ private:
 };
 
 typedef std::vector<script> scripts;
+typedef std::shared_ptr<scripts> scripts_ptr;
 
 } // namespace chain
 } // namespace system
