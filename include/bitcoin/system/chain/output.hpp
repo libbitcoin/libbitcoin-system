@@ -52,7 +52,7 @@ public:
 
     output(uint64_t value, chain::script&& script);
     output(uint64_t value, const chain::script& script);
-    output(uint64_t value, chain::script::ptr script);
+    output(uint64_t value, const chain::script::ptr& script);
 
     output(const data_slice& data);
     output(std::istream& stream);
@@ -102,7 +102,7 @@ public:
     bool is_dust(uint64_t minimum_output_value) const;
 
 protected:
-    output(uint64_t value, chain::script::ptr script, bool valid);
+    output(uint64_t value, const chain::script::ptr& script, bool valid);
 
     void reset();
 

@@ -84,7 +84,7 @@ script::script(const operations& ops)
 {
 }
 
-script::script(operations_ptr ops)
+script::script(const operations_ptr& ops)
   : script(ops, true)
 {
     BITCOIN_ASSERT(ops);
@@ -108,7 +108,7 @@ script::script(reader& source, bool prefix)
 }
 
 // protected
-script::script(operations_ptr ops, bool valid)
+script::script(const operations_ptr& ops, bool valid)
   : ops_(ops), valid_(valid)
 {
 }

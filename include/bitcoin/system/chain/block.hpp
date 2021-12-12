@@ -56,7 +56,7 @@ public:
 
     block(chain::header&& header, transactions&& txs);
     block(const chain::header& header, const transactions& txs);
-    block(chain::header::ptr header, transactions_ptr txs);
+    block(const chain::header::ptr& header, const transactions_ptr& txs);
 
     block(const data_slice& data, bool witness);
     block(std::istream& stream, bool witness);
@@ -114,7 +114,8 @@ public:
     code connect(const context& state) const;
 
 protected:
-    block(chain::header::ptr header, transactions_ptr txs, bool valid);
+    block(const chain::header::ptr& header, const transactions_ptr& txs,
+        bool valid);
 
     void reset();
 

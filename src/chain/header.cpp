@@ -83,8 +83,8 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
-header::header(uint32_t version, hash_ptr previous_block_hash,
-    hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+header::header(uint32_t version, const hash_ptr& previous_block_hash,
+    const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
   : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
       true)
@@ -111,8 +111,8 @@ header::header(reader& source)
 }
 
 // protected
-header::header(uint32_t version, hash_ptr previous_block_hash,
-    hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+header::header(uint32_t version, const hash_ptr& previous_block_hash,
+    const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce, bool valid)
   : version_(version),
     previous_block_hash_(previous_block_hash),

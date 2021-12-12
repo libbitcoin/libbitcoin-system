@@ -71,7 +71,7 @@ witness::witness(const data_stack& stack)
 {
 }
 
-witness::witness(stack_ptr stack)
+witness::witness(const stack_ptr& stack)
   : witness(stack, true)
 {
     BITCOIN_ASSERT(stack);
@@ -95,7 +95,7 @@ witness::witness(reader& source, bool prefix)
 }
 
 // protected
-witness::witness(stack_ptr stack, bool valid)
+witness::witness(const stack_ptr& stack, bool valid)
   : stack_(stack), valid_(valid)
 {
 }

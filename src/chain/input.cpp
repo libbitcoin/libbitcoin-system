@@ -82,7 +82,7 @@ input::input(const chain::point& point, const chain::script& script,
 {
 }
 
-input::input(chain::point::ptr point, chain::script::ptr script,
+input::input(const chain::point::ptr& point, const chain::script::ptr& script,
     uint32_t sequence)
   : input(point, script, std::make_shared<chain::witness>(), sequence, true,
       std::make_shared<chain::prevout>())
@@ -109,8 +109,8 @@ input::input(const chain::point& point, const chain::script& script,
 {
 }
 
-input::input(chain::point::ptr point, chain::script::ptr script,
-    chain::witness::ptr witness, uint32_t sequence)
+input::input(const chain::point::ptr& point, const chain::script::ptr& script,
+    const chain::witness::ptr& witness, uint32_t sequence)
   : input(point, script, witness, sequence, true,
       std::make_shared<chain::prevout>())
 {
@@ -134,9 +134,9 @@ input::input(reader& source)
 }
 
 // protected
-input::input(const chain::point::ptr point, const chain::script::ptr script,
-    const chain::witness::ptr witness, uint32_t sequence, bool valid,
-    const chain::prevout::ptr prevout)
+input::input(const chain::point::ptr& point, const chain::script::ptr& script,
+    const chain::witness::ptr& witness, uint32_t sequence, bool valid,
+    const chain::prevout::ptr& prevout)
   : point_(point),
     script_(script),
     witness_(witness),

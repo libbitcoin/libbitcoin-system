@@ -53,7 +53,7 @@ public:
 
     point(hash_digest&& hash, uint32_t index);
     point(const hash_digest& hash, uint32_t index);
-    point(hash_ptr hash, uint32_t index);
+    point(const hash_ptr& hash, uint32_t index);
 
     point(const data_slice& data);
     point(std::istream& stream);
@@ -100,7 +100,7 @@ protected:
     // So input may reset its member.
     friend class input;
 
-    point(hash_ptr hash, uint32_t index, bool valid);
+    point(const hash_ptr& hash, uint32_t index, bool valid);
 
     void reset();
 

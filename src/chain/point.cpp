@@ -62,7 +62,7 @@ point::point(const hash_digest& hash, uint32_t index)
 {
 }
 
-point::point(hash_ptr hash, uint32_t index)
+point::point(const hash_ptr& hash, uint32_t index)
   : point(hash, index, true)
 {
     BITCOIN_ASSERT(hash);
@@ -86,7 +86,7 @@ point::point(reader& source)
 }
 
 // protected
-point::point(hash_ptr hash, uint32_t index, bool valid)
+point::point(const hash_ptr& hash, uint32_t index, bool valid)
   : hash_(hash), index_(index), valid_(valid)
 {
 }

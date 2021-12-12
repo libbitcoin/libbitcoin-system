@@ -65,7 +65,7 @@ output::output(uint64_t value, const chain::script& script)
 {
 }
 
-output::output(uint64_t value, chain::script::ptr script)
+output::output(uint64_t value, const chain::script::ptr& script)
   : output(value, script, true)
 {
     BITCOIN_ASSERT(script);
@@ -89,7 +89,7 @@ output::output(reader& source)
 }
 
 // protected
-output::output(uint64_t value, chain::script::ptr script, bool valid)
+output::output(uint64_t value, const chain::script::ptr& script, bool valid)
   : value_(value), script_(script), valid_(valid)
 {
 }

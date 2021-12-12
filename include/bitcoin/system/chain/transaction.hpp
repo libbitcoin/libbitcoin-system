@@ -56,8 +56,8 @@ public:
         chain::outputs&& outputs);
     transaction(uint32_t version, uint32_t locktime,
         const chain::inputs& inputs, const chain::outputs& outputs);
-    transaction(uint32_t version, uint32_t locktime, inputs_ptr inputs,
-        outputs_ptr outputs);
+    transaction(uint32_t version, uint32_t locktime, const inputs_ptr& inputs,
+        const outputs_ptr& outputs);
     
     transaction(const data_slice& data, bool witness);
     transaction(std::istream& stream, bool witness);
@@ -135,7 +135,7 @@ protected:
     ////friend class block;
 
     transaction(bool segregated, uint32_t version, uint32_t locktime,
-        inputs_ptr inputs, outputs_ptr outputs, bool valid);
+        const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid);
 
     void reset();
 

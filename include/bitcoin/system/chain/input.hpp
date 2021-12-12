@@ -54,15 +54,15 @@ public:
     input(chain::point&& point, chain::script&& script, uint32_t sequence);
     input(const chain::point& point, const chain::script& script,
         uint32_t sequence);
-    input(chain::point::ptr point, const chain::script::ptr script,
+    input(const chain::point::ptr& point, const chain::script::ptr& script,
         uint32_t sequence);
 
     input(chain::point&& point, chain::script&& script,
         chain::witness&& witness, uint32_t sequence);
     input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence);
-    input(chain::point::ptr point, const chain::script::ptr script,
-        chain::witness::ptr witness, uint32_t sequence);
+    input(const chain::point::ptr& point, const chain::script::ptr& script,
+        const chain::witness::ptr& witness, uint32_t sequence);
 
     input(const data_slice& data);
     input(std::istream& stream);
@@ -122,9 +122,9 @@ protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
-    input(const chain::point::ptr point, const chain::script::ptr script,
-        const chain::witness::ptr witness, uint32_t sequence, bool valid,
-        const chain::prevout::ptr prevout);
+    input(const chain::point::ptr& point, const chain::script::ptr& script,
+        const chain::witness::ptr& witness, uint32_t sequence, bool valid,
+        const chain::prevout::ptr& prevout);
 
     void reset();
 

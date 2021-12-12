@@ -52,7 +52,7 @@ public:
 
     witness(data_stack&& stack);
     witness(const data_stack& stack);
-    witness(stack_ptr stack);
+    witness(const stack_ptr& stack);
 
     witness(const data_slice& data, bool prefix);
     witness(std::istream& stream, bool prefix);
@@ -122,7 +122,7 @@ protected:
 private:
     size_t serialized_size() const;
 
-    witness(stack_ptr stack, bool valid);
+    witness(const stack_ptr& stack, bool valid);
 
     stack_ptr stack_;
     bool valid_;

@@ -58,8 +58,8 @@ public:
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
-    header(uint32_t version, hash_ptr previous_block_hash,
-        hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+    header(uint32_t version, const hash_ptr& previous_block_hash,
+        const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
 
     header(const data_slice& data);
@@ -120,8 +120,8 @@ protected:
     // So block may reset its member.
     friend class block;
 
-    header(uint32_t version, hash_ptr previous_block_hash,
-        hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+    header(uint32_t version, const hash_ptr& previous_block_hash,
+        const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, bool valid);
 
     void reset();

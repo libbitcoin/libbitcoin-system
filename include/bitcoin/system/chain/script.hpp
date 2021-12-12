@@ -59,7 +59,7 @@ public:
 
     script(operations&& ops);
     script(const operations& ops);
-    script(operations_ptr ops);
+    script(const operations_ptr& ops);
 
     script(const data_slice& data, bool prefix);
     script(std::istream& stream, bool prefix);
@@ -199,7 +199,7 @@ protected:
     friend class input;
     friend class output;
 
-    script(operations_ptr ops, bool valid);
+    script(const operations_ptr& ops, bool valid);
 
     void reset();
     bool is_pay_to_witness(uint32_t forks) const;

@@ -89,7 +89,7 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
-    inputs_ptr inputs, outputs_ptr outputs)
+    const inputs_ptr& inputs, const outputs_ptr& outputs)
   : transaction(segregated(*inputs), version, locktime, inputs, outputs,
       true)
 {
@@ -116,7 +116,7 @@ transaction::transaction(reader& source, bool witness)
 
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
-    inputs_ptr inputs, outputs_ptr outputs, bool valid)
+    const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid)
   : segregated_(segregated),
     version_(version),
     locktime_(locktime),

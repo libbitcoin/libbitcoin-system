@@ -81,7 +81,7 @@ block::block(const chain::header& header, const chain::transactions& txs)
 {
 }
 
-block::block(chain::header::ptr header, transactions_ptr txs)
+block::block(const chain::header::ptr& header, const transactions_ptr& txs)
   : block(header, txs, true)
 {
     BITCOIN_ASSERT(header);
@@ -106,7 +106,8 @@ block::block(reader& source, bool witness)
 }
 
 // protected
-block::block(chain::header::ptr header, transactions_ptr txs, bool valid)
+block::block(const chain::header::ptr& header, const transactions_ptr& txs,
+    bool valid)
   : header_(header), txs_(txs), valid_(valid)
 {
 }
