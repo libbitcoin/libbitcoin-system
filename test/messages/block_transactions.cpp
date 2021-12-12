@@ -20,6 +20,17 @@
 
 BOOST_AUTO_TEST_SUITE(block_transactions_tests)
 
+static const auto expected_hash = base16_hash(
+    "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+static const chain::transactions expected_transactions
+{
+    {
+        chain::transaction(1, 48, chain::inputs{}, {}),
+        chain::transaction(2, 32, chain::inputs{}, {}),
+        chain::transaction(4, 16, chain::inputs{}, {})
+    }
+};
+
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_1__always__invalid)
 {
     messages::block_transactions instance;
@@ -28,82 +39,42 @@ BOOST_AUTO_TEST_CASE(block_transactions__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_2__always__equals_params)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions instance(hash, transactions);
+    messages::block_transactions instance(expected_hash, expected_transactions);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(hash == instance.block_hash());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_3__always__equals_params)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    auto dup_hash = hash;
-    chain::transactions dup_transactions = transactions;
+    auto dup_hash = expected_hash;
+    chain::transactions dup_transactions = expected_transactions;
     messages::block_transactions instance(std::move(dup_hash), std::move(dup_transactions));
 
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(hash == instance.block_hash());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_4__always__equals_params)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions value(hash, transactions);
+    messages::block_transactions value(expected_hash, expected_transactions);
     messages::block_transactions instance(value);
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
-    BOOST_REQUIRE(hash == instance.block_hash());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__constructor_5__always__equals_params)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions value(hash, transactions);
+    messages::block_transactions value(expected_hash, expected_transactions);
     messages::block_transactions instance(std::move(value));
 
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(hash == instance.block_hash());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__from_data__insufficient_bytes__failure)
@@ -319,199 +290,104 @@ BOOST_AUTO_TEST_CASE(block_transactions__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_1__always__initialized_value)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions instance(hash, transactions);
-    BOOST_REQUIRE(hash == instance.block_hash());
+    messages::block_transactions instance(expected_hash, expected_transactions);
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_accessor_2__always__initialized_value)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    const messages::block_transactions instance(hash, transactions);
-    BOOST_REQUIRE(hash == instance.block_hash());
+    const messages::block_transactions instance(expected_hash, expected_transactions);
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_setter_1__roundtrip__success)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     messages::block_transactions instance;
-    BOOST_REQUIRE(hash != instance.block_hash());
-    instance.set_block_hash(hash);
-    BOOST_REQUIRE(hash == instance.block_hash());
+    BOOST_REQUIRE(expected_hash != instance.block_hash());
+
+    instance.set_block_hash(expected_hash);
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__block_hash_setter_2__roundtrip__success)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-
-    hash_digest dup_hash = hash;
+    hash_digest dup_hash = expected_hash;
     messages::block_transactions instance;
-    BOOST_REQUIRE(hash != instance.block_hash());
+    BOOST_REQUIRE(expected_hash != instance.block_hash());
+
     instance.set_block_hash(std::move(dup_hash));
-    BOOST_REQUIRE(hash == instance.block_hash());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_1__always__initialized_value)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions instance(hash, transactions);
-    BOOST_REQUIRE(transactions == instance.transactions());
+    messages::block_transactions instance(expected_hash, expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_accessor_2__always__initialized_value)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    const messages::block_transactions instance(hash, transactions);
-    BOOST_REQUIRE(transactions == instance.transactions());
+    const messages::block_transactions instance(expected_hash, expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_1__roundtrip__success)
 {
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
     messages::block_transactions instance;
-    BOOST_REQUIRE(transactions != instance.transactions());
+    BOOST_REQUIRE(expected_transactions != instance.transactions());
 
-    instance.set_transactions(transactions);
-    BOOST_REQUIRE(transactions == instance.transactions());
+    instance.set_transactions(expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__transactions_setter_2__roundtrip__success)
 {
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    auto copy = transactions;
+    auto copy = expected_transactions;
     messages::block_transactions instance;
-    BOOST_REQUIRE(transactions != instance.transactions());
+    BOOST_REQUIRE(expected_transactions != instance.transactions());
 
     instance.set_transactions(std::move(copy));
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_assign_equals__always__matches_equivalent)
 {
-    const auto hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    const chain::transactions transactions
-    {
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        }
-    };
-
-    messages::block_transactions value(hash, transactions);
+    messages::block_transactions value(expected_hash, expected_transactions);
     BOOST_REQUIRE(value.is_valid());
+
     messages::block_transactions instance;
     BOOST_REQUIRE(!instance.is_valid());
+
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(hash == instance.block_hash());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_hash == instance.block_hash());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__duplicates__true)
 {
-    const messages::block_transactions expected(
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        });
-
+    const messages::block_transactions expected(expected_hash, expected_transactions);
     messages::block_transactions instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_equals__differs__false)
 {
-    const messages::block_transactions expected(
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        });
-
+    const messages::block_transactions expected(expected_hash, expected_transactions);
     messages::block_transactions instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__duplicates__false)
 {
-    const messages::block_transactions expected(
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        });
-
+    const messages::block_transactions expected(expected_hash, expected_transactions);
     messages::block_transactions instance(expected);
     BOOST_REQUIRE(!(instance != expected));
 }
 
 BOOST_AUTO_TEST_CASE(block_transactions__operator_boolean_not_equals__differs__true)
 {
-    const messages::block_transactions expected(
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        {
-            chain::transaction(1, 48, {}, {}),
-            chain::transaction(2, 32, {}, {}),
-            chain::transaction(4, 16, {}, {})
-        });
-
+    const messages::block_transactions expected(expected_hash, expected_transactions);
     messages::block_transactions instance;
     BOOST_REQUIRE(instance != expected);
 }

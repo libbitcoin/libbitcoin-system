@@ -20,6 +20,31 @@
 
 BOOST_AUTO_TEST_SUITE(compact_block_tests)
 
+static const chain::header expected_header
+{
+    10u,
+    base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+    base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+    531234u,
+    6523454u,
+    68644u
+};
+
+static const messages::prefilled_transaction::list expected_transactions
+{
+    messages::prefilled_transaction(10, chain::transaction(1, 48, chain::inputs{}, {})),
+    messages::prefilled_transaction(20, chain::transaction(2, 32, chain::inputs{}, {})),
+    messages::prefilled_transaction(30, chain::transaction(4, 16, chain::inputs{}, {}))
+};
+
+static const messages::compact_block::short_id_list expected_short_ids
+{
+    base16_array("aaaaaaaaaaaa"),
+    base16_array("bbbbbbbbbbbb"),
+    base16_array("0f0f0f0f0f0f"),
+    base16_array("f0f0f0f0f0f0")
+};
+
 BOOST_AUTO_TEST_CASE(compact_block__constructor_1__always__invalid)
 {
     messages::compact_block instance;
@@ -28,142 +53,54 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(compact_block__constructor_2__always__equals_params)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list& short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block instance(header, nonce, short_ids, transactions);
+    messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
-    BOOST_REQUIRE(short_ids == instance.short_ids());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-    chain::header dup_header(header);
+    chain::header dup_header(expected_header);
 
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-    messages::compact_block::short_id_list dup_short_ids = short_ids;
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-    messages::prefilled_transaction::list dup_transactions = transactions;
+    messages::compact_block::short_id_list dup_short_ids = expected_short_ids;
+    messages::prefilled_transaction::list dup_transactions = expected_transactions;
     messages::compact_block instance(std::move(dup_header), nonce, std::move(dup_short_ids), std::move(dup_transactions));
 
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
-    BOOST_REQUIRE(short_ids == instance.short_ids());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__constructor_4__always__equals_params)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    const messages::compact_block value(header, nonce, short_ids, transactions);
-
+    const messages::compact_block value(expected_header, nonce, expected_short_ids, expected_transactions);
     messages::compact_block instance(value);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(value == instance);
-    BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
-    BOOST_REQUIRE(short_ids == instance.short_ids());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__constructor_5__always__equals_params)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block value(header, nonce, short_ids, transactions);
-
+    messages::compact_block value(expected_header, nonce, expected_short_ids, expected_transactions);
     messages::compact_block instance(std::move(value));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
-    BOOST_REQUIRE(short_ids == instance.short_ids());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_bytes__failure)
@@ -199,7 +136,7 @@ BOOST_AUTO_TEST_CASE(compact_block__from_data__insufficient_version__failure)
     BOOST_REQUIRE(raw == data);
 
     messages::compact_block instance;
-    BOOST_REQUIRE(!instance.from_data(messages::compact_block::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.from_data(sub1(messages::compact_block::version_minimum), data));
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__factory_1__valid_input__success)
@@ -269,126 +206,45 @@ BOOST_AUTO_TEST_CASE(compact_block__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(compact_block__header_accessor_1__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(header == instance.header());
+    messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_header == instance.header());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__header_accessor_2__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    const messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(header == instance.header());
+    const messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_header == instance.header());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__header_setter_1__roundtrip__success)
 {
-    const chain::header value(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.header());
-    instance.set_header(value);
-    BOOST_REQUIRE(value == instance.header());
+    BOOST_REQUIRE(expected_header != instance.header());
+    instance.set_header(expected_header);
+    BOOST_REQUIRE(expected_header == instance.header());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__header_setter_2__roundtrip__success)
 {
-    const chain::header value(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-    chain::header dup(value);
-
+    chain::header dup(expected_header);
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.header());
+    BOOST_REQUIRE(expected_header != instance.header());
     instance.set_header(std::move(dup));
-    BOOST_REQUIRE(value == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__nonce_accessor__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block instance(header, nonce, short_ids, transactions);
+    messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
     BOOST_REQUIRE(nonce == instance.nonce());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__nonce_setter__roundtrip__success)
 {
     uint64_t value = 123356u;
-
     messages::compact_block instance;
     BOOST_REQUIRE(value != instance.nonce());
     instance.set_nonce(value);
@@ -397,321 +253,105 @@ BOOST_AUTO_TEST_CASE(compact_block__nonce_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_1__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(short_ids == instance.short_ids());
+    messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_accessor_2__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    const messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(short_ids == instance.short_ids());
+    const messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_1__roundtrip__success)
 {
-    const messages::compact_block::short_id_list value
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.short_ids());
-    instance.set_short_ids(value);
-    BOOST_REQUIRE(value == instance.short_ids());
+    BOOST_REQUIRE(expected_short_ids != instance.short_ids());
+    instance.set_short_ids(expected_short_ids);
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__short_ids_setter_2__roundtrip__success)
 {
-    const messages::compact_block::short_id_list value
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-    messages::compact_block::short_id_list dup(value);
-
+    messages::compact_block::short_id_list dup(expected_short_ids);
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.short_ids());
+    BOOST_REQUIRE(expected_short_ids != instance.short_ids());
     instance.set_short_ids(std::move(dup));
-    BOOST_REQUIRE(value == instance.short_ids());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_1__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(transactions == instance.transactions());
+    messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__transactions_accessor_2__always__initialized_value)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    const messages::compact_block instance(header, nonce, short_ids, transactions);
-    BOOST_REQUIRE(transactions == instance.transactions());
+    const messages::compact_block instance(expected_header, nonce, expected_short_ids, expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__transactions_setter_1__roundtrip__success)
 {
-    const messages::prefilled_transaction::list value
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.transactions());
-    instance.set_transactions(value);
-    BOOST_REQUIRE(value == instance.transactions());
+    BOOST_REQUIRE(expected_transactions != instance.transactions());
+    instance.set_transactions(expected_transactions);
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__transactions_setter_2__roundtrip__success)
 {
-    const messages::prefilled_transaction::list value
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-    messages::prefilled_transaction::list dup(value);
-
+    messages::prefilled_transaction::list dup(expected_transactions);
     messages::compact_block instance;
-    BOOST_REQUIRE(value != instance.transactions());
+    BOOST_REQUIRE(expected_transactions != instance.transactions());
     instance.set_transactions(std::move(dup));
-    BOOST_REQUIRE(value == instance.transactions());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_assign_equals__always__matches_equivalent)
 {
-    const chain::header header(10u,
-        base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234u,
-        6523454u,
-        68644u);
-
     uint64_t nonce = 453245u;
-    const messages::compact_block::short_id_list short_ids
-    {
-        base16_array("aaaaaaaaaaaa"),
-        base16_array("bbbbbbbbbbbb"),
-        base16_array("0f0f0f0f0f0f"),
-        base16_array("f0f0f0f0f0f0")
-    };
-
-    const messages::prefilled_transaction::list transactions
-    {
-        messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-        messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-        messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-    };
-
-    messages::compact_block value(header, nonce, short_ids, transactions);
+    messages::compact_block value(expected_header, nonce, expected_short_ids, expected_transactions);
     BOOST_REQUIRE(value.is_valid());
     messages::compact_block instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(header == instance.header());
+    BOOST_REQUIRE(expected_header == instance.header());
     BOOST_REQUIRE(nonce == instance.nonce());
-    BOOST_REQUIRE(short_ids == instance.short_ids());
-    BOOST_REQUIRE(transactions == instance.transactions());
+    BOOST_REQUIRE(expected_short_ids == instance.short_ids());
+    BOOST_REQUIRE(expected_transactions == instance.transactions());
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__duplicates__true)
 {
-    const messages::compact_block expected(
-        chain::header(10u,
-            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-            531234u,
-            6523454u,
-            68644u),
-        12334u,
-        {
-            base16_array("aaaaaaaaaaaa"),
-            base16_array("bbbbbbbbbbbb"),
-            base16_array("0f0f0f0f0f0f"),
-            base16_array("f0f0f0f0f0f0")
-        },
-        {
-            messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-            messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-            messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-        });
-
+    const messages::compact_block expected(expected_header, 12334u, expected_short_ids, expected_transactions);
     messages::compact_block instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_equals__differs__false)
 {
-    const messages::compact_block expected(
-        chain::header(10u,
-            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-            531234u,
-            6523454u,
-            68644u),
-        12334u,
-        {
-            base16_array("aaaaaaaaaaaa"),
-            base16_array("bbbbbbbbbbbb"),
-            base16_array("0f0f0f0f0f0f"),
-            base16_array("f0f0f0f0f0f0")
-        },
-        {
-            messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-            messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-            messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-        });
-
+    const messages::compact_block expected(expected_header, 12334u, expected_short_ids, expected_transactions);
     messages::compact_block instance;
     BOOST_REQUIRE(!(instance == expected));
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__duplicates__false)
 {
-    const messages::compact_block expected(
-        chain::header(10u,
-            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-            531234u,
-            6523454u,
-            68644u),
-        12334u,
-        {
-            base16_array("aaaaaaaaaaaa"),
-            base16_array("bbbbbbbbbbbb"),
-            base16_array("0f0f0f0f0f0f"),
-            base16_array("f0f0f0f0f0f0")
-        },
-        {
-            messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-            messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-            messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-        });
-
+    const messages::compact_block expected(expected_header, 12334u, expected_short_ids, expected_transactions);
     messages::compact_block instance(expected);
     BOOST_REQUIRE(!(instance != expected));
 }
 
 BOOST_AUTO_TEST_CASE(compact_block__operator_boolean_not_equals__differs__true)
 {
-    const messages::compact_block expected(
-        chain::header(10u,
-            base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-            base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-            531234u,
-            6523454u,
-            68644u),
-        12334u,
-        {
-            base16_array("aaaaaaaaaaaa"),
-            base16_array("bbbbbbbbbbbb"),
-            base16_array("0f0f0f0f0f0f"),
-            base16_array("f0f0f0f0f0f0")
-        },
-        {
-            messages::prefilled_transaction(10, chain::transaction(1, 48, {}, {})),
-            messages::prefilled_transaction(20, chain::transaction(2, 32, {}, {})),
-            messages::prefilled_transaction(30, chain::transaction(4, 16, {}, {}))
-        });
-
+    const messages::compact_block expected(expected_header, 12334u, expected_short_ids, expected_transactions);
     messages::compact_block instance;
     BOOST_REQUIRE(instance != expected);
 }

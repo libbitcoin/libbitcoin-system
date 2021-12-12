@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_1__always__invalid)
 BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_2__always__equals_params)
 {
     uint64_t index = 125u;
-    chain::transaction tx(1, 0, {}, {});
+    chain::transaction tx(1, 0, chain::inputs{}, {});
     messages::prefilled_transaction instance(index, tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(index == instance.index());
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_2__always__equals_params
 BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_3__always__equals_params)
 {
     uint64_t index = 125u;
-    chain::transaction tx(1, 0, {}, {});
+    chain::transaction tx(1, 0, chain::inputs{}, {});
     BOOST_REQUIRE(tx.is_valid());
     messages::prefilled_transaction instance(index, std::move(tx));
     BOOST_REQUIRE(instance.is_valid());
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_3__always__equals_params
 BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_4__always__equals_params)
 {
     const messages::prefilled_transaction expected(125u,
-        chain::transaction{1, 0, {}, {} });
+        chain::transaction{1, 0, chain::inputs{}, {} });
 
     messages::prefilled_transaction instance(expected);
     BOOST_REQUIRE(instance.is_valid());
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_4__always__equals_params
 BOOST_AUTO_TEST_CASE(prefilled_transaction__constructor_5__always__equals_params)
 {
     messages::prefilled_transaction expected(125u,
-        chain::transaction{1, 0, {}, {} });
+        chain::transaction{1, 0, chain::inputs{}, {} });
 
     messages::prefilled_transaction instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
@@ -75,16 +75,17 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__from_data__insufficient_bytes__failu
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_1__valid_input__success)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         16,
         chain::transaction
         {
             1,
             0,
-            { },
-            { }
+            chain::inputs{},
+            {}
         }
-    );
+    };
 
     const auto data = expected.to_data(messages::version::level::minimum);
     const auto result = messages::prefilled_transaction::factory(
@@ -96,16 +97,17 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_1__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_2__valid_input__success)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         16,
         chain::transaction
         {
             1,
             0,
-            { },
-            { }
+            chain::inputs{},
+            {}
         }
-    );
+    };
 
     const auto data = expected.to_data(messages::version::level::minimum);
     stream::in::copy istream(data);
@@ -118,16 +120,17 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_2__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_3__valid_input__success)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         16,
         chain::transaction
         {
             1,
             0,
-            { },
-            { }
+            chain::inputs{},
+            {}
         }
-    );
+    };
 
     const auto data = expected.to_data(messages::version::level::minimum);
     read::bytes::copy source(data);
@@ -141,7 +144,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__factory_3__valid_input__success)
 BOOST_AUTO_TEST_CASE(prefilled_transaction__index_accessor__always__initialized_value)
 {
     uint64_t index = 634u;
-    chain::transaction tx(5, 23, {}, {});
+    chain::transaction tx(5, 23, chain::inputs{}, {});
     messages::prefilled_transaction instance(index, tx);
     BOOST_REQUIRE(index == instance.index());
 }
@@ -158,7 +161,7 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__index_setter__roundtrip__success)
 BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__initialized_value)
 {
     uint64_t index = 634u;
-    const chain::transaction tx(5, 23, {}, {});
+    const chain::transaction tx(5, 23, chain::inputs{}, {});
     messages::prefilled_transaction instance(index, tx);
     BOOST_REQUIRE(tx == instance.transaction());
 }
@@ -166,14 +169,14 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_1__always__initiali
 BOOST_AUTO_TEST_CASE(prefilled_transaction__message_accessor_2__always__initialized_value)
 {
     uint64_t index = 634u;
-    const chain::transaction tx(5, 23, {}, {});
+    const chain::transaction tx(5, 23, chain::inputs{}, {});
     const messages::prefilled_transaction instance(index, tx);
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_1__roundtrip__success)
 {
-    const chain::transaction tx(5, 23, {}, {});
+    const chain::transaction tx(5, 23, chain::inputs{}, {});
     messages::prefilled_transaction instance;
     BOOST_REQUIRE(tx != instance.transaction());
     instance.set_transaction(tx);
@@ -182,8 +185,8 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_1__roundtrip__success
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_2__roundtrip__success)
 {
-    const chain::transaction duplicate(16, 57, {}, {});
-    chain::transaction tx(16, 57, {}, {});
+    const chain::transaction duplicate(16, 57, chain::inputs{}, {});
+    chain::transaction tx(16, 57, chain::inputs{}, {});
     messages::prefilled_transaction instance;
     BOOST_REQUIRE(duplicate != instance.transaction());
     instance.set_transaction(std::move(tx));
@@ -192,10 +195,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__message_setter_2__roundtrip__success
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_1__always__matches_equivalent)
 {
-    messages::prefilled_transaction value(
+    const messages::prefilled_transaction value
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     BOOST_REQUIRE(value.is_valid());
 
@@ -208,10 +212,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_1__always__ma
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_2__always__matches_equivalent)
 {
-    const messages::prefilled_transaction value(
+    const messages::prefilled_transaction value
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     BOOST_REQUIRE(value.is_valid());
 
@@ -225,11 +230,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_assign_equals_2__always__ma
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates__true)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
-
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     messages::prefilled_transaction instance(expected);
     BOOST_REQUIRE(instance == expected);
@@ -237,10 +242,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__duplicates_
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__false)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     messages::prefilled_transaction instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
@@ -248,10 +254,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_equals__differs__fa
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplicates__false)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     messages::prefilled_transaction instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
@@ -259,10 +266,11 @@ BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__duplica
 
 BOOST_AUTO_TEST_CASE(prefilled_transaction__operator_boolean_not_equals__differs__true)
 {
-    const messages::prefilled_transaction expected(
+    const messages::prefilled_transaction expected
+    {
         1234u,
-        chain::transaction{ 6u, 10u, {}, {} }
-    );
+        chain::transaction{ 6u, 10u, chain::inputs{}, {} }
+    };
 
     messages::prefilled_transaction instance;
     BOOST_REQUIRE(instance != expected);

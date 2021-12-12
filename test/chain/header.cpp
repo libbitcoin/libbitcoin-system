@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
 BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__bits_exceeds_maximum__true)
 {
     const settings settings(selection::mainnet);
-    const accessor instance{ {}, {}, {}, {}, add1(settings.proof_of_work_limit), {} };
+    const accessor instance{ {}, hash_digest{}, {}, {}, add1(settings.proof_of_work_limit), {} };
     BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_less_than_2_hours_f
 {
     const auto now = std::chrono::system_clock::now();
     const auto now_time = std::chrono::system_clock::to_time_t(now);
-    const accessor instance{ {}, {}, {}, static_cast<uint32_t>(now_time), {}, {} };
+    const accessor instance{ {}, hash_digest{}, {}, static_cast<uint32_t>(now_time), {}, {} };
     BOOST_REQUIRE(!instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
 }
 
@@ -367,7 +367,7 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_greater_than_2_hour
     const auto now = std::chrono::system_clock::now();
     const auto duration = std::chrono::hours(3);
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
-    const accessor instance{ {}, {}, {}, static_cast<uint32_t>(future), {}, {} };
+    const accessor instance{ {}, hash_digest{}, {}, static_cast<uint32_t>(future), {}, {} };
     BOOST_REQUIRE(instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
 }
 

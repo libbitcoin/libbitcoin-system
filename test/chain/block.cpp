@@ -38,9 +38,9 @@ static const header expected_header
 
 static const transactions expected_transactions
 {
-    { 1, 48, { {} }, { {} } },
-    { 2, 32, { {} }, { {} } },
-    { 4, 16, { {} }, { {} } }
+    { 1, 48, inputs{ {} }, { {} } },
+    { 2, 32, inputs{ {} }, { {} } },
+    { 4, 16, inputs{ {} }, { {} } }
 };
 
 static const block expected_block{ expected_header, expected_transactions };
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(block__is_empty__single_transaction__false)
 {
     const accessor instance
     {
-        {},
+        header{},
         { {} }
     };
 
@@ -395,8 +395,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__f
     {
         {},
         {
-            { 0, 0, {}, {} },
-            { 0, 0, {}, {} }
+            { 0, 0, inputs{}, {} },
+            { 0, 0, inputs{}, {} }
         }
     };
 
@@ -409,8 +409,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
     {
         {},
         {
-            { 0, 0, {}, {} },
-            { 0, 0, {}, {} }
+            { 0, 0, inputs{}, {} },
+            { 0, 0, inputs{}, {} }
         }
     };
 
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 {
-    const transaction to{ 0, 0, {}, {} };
+    const transaction to{ 0, 0, inputs{}, {} };
     const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
     const accessor instance
     {
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 {
-    const transaction to{ 0, 0, {}, {} };
+    const transaction to{ 0, 0, inputs{}, {} };
     const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
     const accessor instance
     {
@@ -460,7 +460,6 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
     const accessor instance
     {
         {},
-        transactions
         {
             {},
             { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
@@ -477,7 +476,6 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
     const accessor instance
     {
         {},
-        transactions
         {
             {},
             { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
@@ -502,7 +500,7 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__default_header_non_empty__tr
 {
     const accessor instance
     {
-        {},
+        header{},
         { {} }
     };
 
