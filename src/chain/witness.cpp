@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <numeric>
 #include <string>
 #include <utility>
@@ -46,12 +47,12 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness()
-  : witness(data_stack{}, true)
+  : witness(std::make_shared<data_stack>(), true)
 {
 }
 
 witness::witness(witness&& other)
-  : witness(std::move(other.stack_), other.valid_)
+  : witness(other)
 {
 }
 
@@ -61,18 +62,19 @@ witness::witness(const witness& other)
 }
 
 witness::witness(data_stack&& stack)
-  : witness(std::move(stack), true)
+  : witness(std::make_shared<data_stack>(std::move(stack)), true)
 {
 }
 
 witness::witness(const data_stack& stack)
-  : witness(stack, true)
+  : witness(std::make_shared<data_stack>(stack), true)
 {
 }
 
 witness::witness(stack_ptr stack)
-  : witness(*stack, true)
+  : witness(stack, true)
 {
+    BITCOIN_ASSERT(stack);
 }
 
 witness::witness(const data_slice& data, bool prefix)
@@ -93,13 +95,7 @@ witness::witness(reader& source, bool prefix)
 }
 
 // protected
-witness::witness(data_stack&& stack, bool valid)
-  : stack_(std::move(stack)), valid_(valid)
-{
-}
-
-// protected
-witness::witness(const data_stack& stack, bool valid)
+witness::witness(stack_ptr stack, bool valid)
   : stack_(stack), valid_(valid)
 {
 }
@@ -109,8 +105,7 @@ witness::witness(const data_stack& stack, bool valid)
 
 witness& witness::operator=(witness&& other)
 {
-    stack_ = std::move(other.stack_);
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -123,7 +118,7 @@ witness& witness::operator=(const witness& other)
 
 bool witness::operator==(const witness& other) const
 {
-    return (stack_ == other.stack_);
+    return (*stack_ == *other.stack_);
 }
 
 bool witness::operator!=(const witness& other) const
@@ -163,11 +158,10 @@ bool witness::from_data(std::istream& stream, bool prefix)
     return from_data(source, prefix);
 }
 
-// Prefixed data assumed valid here though caller may confirm with is_valid.
 bool witness::from_data(reader& source, bool prefix)
 {
     ////reset();
-    stack_.clear();
+    stack_->clear();
 
     if (prefix)
     {
@@ -181,15 +175,15 @@ bool witness::from_data(reader& source, bool prefix)
         }
         else
         {
-            stack_.reserve(count);
+            stack_->reserve(count);
             for (size_t element = 0; element < count; ++element)
-                stack_.push_back(read_element(source));
+                stack_->emplace_back(read_element(source));
         }
     }
     else
     {
         while (!source.is_exhausted())
-            stack_.push_back(read_element(source));
+            stack_->emplace_back(read_element(source));
     }
 
     if (!source)
@@ -202,8 +196,8 @@ bool witness::from_data(reader& source, bool prefix)
 // protected
 void witness::reset()
 {
-    stack_.clear();
-    stack_.shrink_to_fit();
+    stack_->clear();
+    stack_->shrink_to_fit();
     valid_ = false;
 }
 
@@ -237,10 +231,10 @@ void witness::to_data(writer& sink, bool prefix) const
 
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable(stack_.size());
+        sink.write_variable(stack_->size());
 
     // Tokens encoded as variable integer prefixed byte array (bip144).
-    for (const auto& element: stack_)
+    for (const auto& element: *stack_)
     {
         sink.write_variable(element.size());
         sink.write_bytes(element);
@@ -255,7 +249,7 @@ std::string witness::to_string() const
         return "<invalid>";
 
     std::string text;
-    for (const auto& element: stack_)
+    for (const auto& element: *stack_)
         text += "[" + encode_base16(element) + "] ";
 
     trim_right(text);
@@ -267,7 +261,7 @@ std::string witness::to_string() const
 
 const data_stack& witness::stack() const
 {
-    return stack_;
+    return *stack_;
 }
 
 // private
@@ -280,13 +274,13 @@ size_t witness::serialized_size() const
         return total + variable_size(size) + size;
     };
 
-    return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
+    return std::accumulate(stack_->begin(), stack_->end(), zero, sum);
 }
 
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
+    return (prefix ? variable_size(stack_->size()) : zero) + serialized_size();
 }
 
 // Utilities.
@@ -346,8 +340,8 @@ bool witness::extract_sigop_script(script& out_script,
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    if (!stack_.empty())
-                        out_script.from_data(stack_.back(), false);
+                    if (!stack_->empty())
+                        out_script.from_data(stack_->back(), false);
 
                     return true;
 
@@ -373,7 +367,7 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    out_stack = stack_;
+    out_stack = *stack_;
 
     switch (program_script.version())
     {

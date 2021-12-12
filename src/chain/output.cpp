@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <memory>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -40,12 +41,12 @@ const uint64_t output::not_found = sighash_null_value;
 // Invalid default used in signature hashing (validity ignored).
 // Invalidity is also used to determine that a prevout is not found.
 output::output()
-  : output(output::not_found, {}, false)
+  : output(output::not_found, std::make_shared<chain::script>(), false)
 {
 }
 
 output::output(output&& other)
-  : output(other.value_, std::move(other.script_), other.valid_)
+  : output(other)
 {
 }
 
@@ -55,18 +56,19 @@ output::output(const output& other)
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : output(value, std::move(script), true)
+  : output(value, std::make_shared<chain::script>(std::move(script)), true)
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : output(value, script, true)
+  : output(value, std::make_shared<chain::script>(script), true)
 {
 }
 
 output::output(uint64_t value, chain::script::ptr script)
-  : output(value, *script, true)
+  : output(value, script, true)
 {
+    BITCOIN_ASSERT(script);
 }
 
 output::output(const data_slice& data)
@@ -87,13 +89,7 @@ output::output(reader& source)
 }
 
 // protected
-output::output(uint64_t value, chain::script&& script, bool valid)
-  : value_(value), script_(std::move(script)), valid_(valid)
-{
-}
-
-// protected
-output::output(uint64_t value, const chain::script& script, bool valid)
+output::output(uint64_t value, chain::script::ptr script, bool valid)
   : value_(value), script_(script), valid_(valid)
 {
 }
@@ -103,9 +99,7 @@ output::output(uint64_t value, const chain::script& script, bool valid)
 
 output& output::operator=(output&& other)
 {
-    value_ = other.value_;
-    script_ = std::move(other.script_);
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -120,7 +114,7 @@ output& output::operator=(const output& other)
 bool output::operator==(const output& other) const
 {
     return (value_ == other.value_)
-        && (script_ == other.script_);
+        && (*script_ == *other.script_);
 }
 
 bool output::operator!=(const output& other) const
@@ -148,7 +142,7 @@ bool output::from_data(reader& source)
     ////reset();
 
     value_ = source.read_8_bytes_little_endian();
-    script_.from_data(source, true);
+    script_->from_data(source, true);
 
     if (!source)
         reset();
@@ -162,7 +156,7 @@ void output::reset()
 {
     // This value is required by signature hashing for output clearance.
     value_ = output::not_found;
-    script_.reset();
+    script_->reset();
     valid_ = false;
 }
 
@@ -195,14 +189,14 @@ void output::to_data(writer& sink) const
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     sink.write_8_bytes_little_endian(value_);
-    script_.to_data(sink, true);
+    script_->to_data(sink, true);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 size_t output::serialized_size() const
 {
-    return sizeof(value_) + script_.serialized_size(true);
+    return sizeof(value_) + script_->serialized_size(true);
 }
 
 // Properties.
@@ -215,7 +209,7 @@ uint64_t output::value() const
 
 const chain::script& output::script() const
 {
-    return script_;
+    return *script_;
 }
 
 // Methods.
@@ -223,7 +217,7 @@ const chain::script& output::script() const
 
 bool output::committed_hash(hash_digest& out) const
 {
-    const auto& ops = script_.ops();
+    const auto& ops = script_->ops();
     if (!script::is_commitment_pattern(ops))
         return false;
 
@@ -244,7 +238,7 @@ size_t output::signature_operations(bool bip141) const
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
     // Count heavy sigops in the output script.
-    return script_.sigops(false) * factor;
+    return script_->sigops(false) * factor;
 }
 
 bool output::is_dust(uint64_t minimum_value) const
@@ -253,7 +247,7 @@ bool output::is_dust(uint64_t minimum_value) const
     // is all about prunability. Miners can be expected take the largest fee
     // independent of dust, so this is an attempt to prevent miners from seeing
     // transactions with unprunable outputs.
-    return value_ < minimum_value && !script_.is_unspendable();
+    return value_ < minimum_value && !script_->is_unspendable();
 }
 
 } // namespace chain

@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/point.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
@@ -37,12 +38,12 @@ const uint32_t point::null_index = no_previous_output;
 
 // Valid default used in signature hashing.
 point::point()
-  : point(null_hash, point::null_index, true)
+  : point(std::make_shared<hash_digest>(null_hash), point::null_index, true)
 {
 }
 
 point::point(point&& other)
-  : point(std::move(other.hash_), other.index_, other.valid_)
+  : point(other)
 {
 }
 
@@ -52,18 +53,19 @@ point::point(const point& other)
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : point(std::move(hash), index, true)
+  : point(std::make_shared<hash_digest>(std::move(hash)), index, true)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : point(hash, index, true)
+  : point(std::make_shared<hash_digest>(hash), index, true)
 {
 }
 
 point::point(hash_ptr hash, uint32_t index)
-  : point(*hash, index, true)
+  : point(hash, index, true)
 {
+    BITCOIN_ASSERT(hash);
 }
 
 point::point(const data_slice& data)
@@ -84,14 +86,8 @@ point::point(reader& source)
 }
 
 // protected
-point::point(const hash_digest& hash, uint32_t index, bool valid)
+point::point(hash_ptr hash, uint32_t index, bool valid)
   : hash_(hash), index_(index), valid_(valid)
-{
-}
-
-// protected
-point::point(hash_digest&& hash, uint32_t index, bool valid)
-  : hash_(std::move(hash)), index_(index), valid_(valid)
 {
 }
 
@@ -100,9 +96,7 @@ point::point(hash_digest&& hash, uint32_t index, bool valid)
 
 point& point::operator=(point&& other)
 {
-    hash_ = std::move(other.hash_);
-    index_ = other.index_;
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -116,7 +110,7 @@ point& point::operator=(const point& other)
 
 bool point::operator==(const point& other) const
 {
-    return (hash_ == other.hash_)
+    return (*hash_ == *other.hash_)
         && (index_ == other.index_);
 }
 
@@ -151,7 +145,7 @@ bool point::from_data(reader& source)
 {
     ////reset();
 
-    hash_ = source.read_hash();
+    hash_ = std::make_shared<hash_digest>(source.read_hash());
     index_ = source.read_4_bytes_little_endian();
 
     if (!source)
@@ -164,7 +158,7 @@ bool point::from_data(reader& source)
 // protected
 void point::reset()
 {
-    hash_.fill(0);
+    hash_->fill(0);
     index_ = 0;
     valid_ = false;
 }
@@ -197,7 +191,7 @@ void point::to_data(writer& sink) const
     DEBUG_ONLY(const auto bytes = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    sink.write_bytes(hash_);
+    sink.write_bytes(*hash_);
     sink.write_4_bytes_little_endian(index_);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
@@ -208,7 +202,7 @@ void point::to_data(writer& sink) const
 
 const hash_digest& point::hash() const
 {
-    return hash_;
+    return *hash_;
 }
 
 uint32_t point::index() const
@@ -226,7 +220,7 @@ size_t point::serialized_size()
 
 bool point::is_null() const
 {
-    return (index_ == null_index) && (hash_ == null_hash);
+    return (index_ == null_index) && (*hash_ == null_hash);
 }
 
 } // namespace chain

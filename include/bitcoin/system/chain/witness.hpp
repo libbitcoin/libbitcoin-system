@@ -69,7 +69,6 @@ public:
 
     // Deserialization (from witness stack).
     // ------------------------------------------------------------------------
-    // Prefixed data assumed valid here though caller may confirm with is_valid.
 
     /// Deserialization invalidates the iterator.
     bool from_data(const data_slice& data, bool prefix);
@@ -123,10 +122,9 @@ protected:
 private:
     size_t serialized_size() const;
 
-    witness(data_stack&& stack, bool valid);
-    witness(const data_stack& stack, bool valid);
+    witness(stack_ptr stack, bool valid);
 
-    data_stack stack_;
+    stack_ptr stack_;
     bool valid_;
 };
 

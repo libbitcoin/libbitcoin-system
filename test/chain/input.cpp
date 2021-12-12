@@ -254,13 +254,13 @@ BOOST_AUTO_TEST_CASE(input__to_data__writer__expected)
 
 BOOST_AUTO_TEST_CASE(input__is_final__max_input_sequence__true)
 {
-    const input instance({}, {}, max_input_sequence);
+    const input instance(point{}, {}, max_input_sequence);
     BOOST_REQUIRE(instance.is_final());
 }
 
 BOOST_AUTO_TEST_CASE(input__is_final__sequence_zero__false)
 {
-    const input instance({}, {}, 0);
+    const input instance(point{}, {}, 0);
     BOOST_REQUIRE(!instance.is_final());
 }
 
@@ -268,8 +268,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_sequence_age_equals_minimum
 {
     static const auto age = 7u;
     static const auto sequence_enabled_block_type_minimum = age;
-    input instance({}, {}, sequence_enabled_block_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_block_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.height = 42;
     BOOST_REQUIRE(!instance.is_locked(prevout.height + age, 0));
 }
@@ -278,8 +278,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_above_min
 {
     static const auto age = 7u;
     static const auto sequence_enabled_block_type_minimum = sub1(age);
-    input instance({}, {}, sequence_enabled_block_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_block_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.height = 42;
     BOOST_REQUIRE(!instance.is_locked(prevout.height + age, 0));
 }
@@ -288,8 +288,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_block_type_sequence_age_below_min
 {
     static const auto age = 7u;
     static const auto sequence_enabled_block_type_minimum = add1(age);
-    input instance({}, {}, sequence_enabled_block_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_block_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.height = 42;
     BOOST_REQUIRE(instance.is_locked(prevout.height + age, 0));
 }
@@ -298,8 +298,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_block_type_sequence_age_below_mi
 {
     static const auto age = 7u;
     static const auto sequence_disabled_block_type_minimum = bit_right<uint32_t>(relative_locktime_disabled_bit) | add1(age);
-    input instance({}, {}, sequence_disabled_block_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_disabled_block_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.height = 42;
     BOOST_REQUIRE(!instance.is_locked(prevout.height + age, 0));
 }
@@ -309,8 +309,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_equals_min
     static const auto age = 7u;
     static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
     static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | age;
-    input instance({}, {}, sequence_enabled_time_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_time_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.median_time_past = 42;
     BOOST_REQUIRE(!instance.is_locked(0, prevout.median_time_past + age_seconds));
 }
@@ -320,8 +320,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_above_mini
     static const auto age = 7u;
     static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
     static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | sub1(age);
-    input instance({}, {}, sequence_enabled_time_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_time_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.median_time_past = 42;
     BOOST_REQUIRE(!instance.is_locked(0, prevout.median_time_past + age_seconds));
 }
@@ -331,8 +331,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__enabled_time_type_sequence_age_below_mini
     static const auto age = 7u;
     static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
     static const auto sequence_enabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_time_locked_bit) | add1(age);
-    input instance({}, {}, sequence_enabled_time_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_enabled_time_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.median_time_past = 42;
     BOOST_REQUIRE(instance.is_locked(0, prevout.median_time_past + age_seconds));
 }
@@ -342,8 +342,8 @@ BOOST_AUTO_TEST_CASE(input__is_locked__disabled_time_type_sequence_age_below_min
     static const auto age = 7u;
     static const auto age_seconds = 7u << relative_locktime_seconds_shift_left;
     static const auto sequence_disabled_time_type_minimum = bit_right<uint32_t>(relative_locktime_disabled_bit) | bit_right<uint32_t>(relative_locktime_time_locked_bit) | add1(age);
-    input instance({}, {}, sequence_disabled_time_type_minimum);
-    auto& prevout = instance.prevout;
+    input instance(point{}, {}, sequence_disabled_time_type_minimum);
+    auto& prevout = *instance.prevout;
     prevout.median_time_past = 42;
     BOOST_REQUIRE(!instance.is_locked(0, prevout.median_time_past + age_seconds));
 }

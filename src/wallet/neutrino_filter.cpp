@@ -55,11 +55,11 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
 
                 // TODO:
 
-                ////const auto& prevout = input.point();
-                ////if (!prevout.metadata.cache.is_valid())
+                ////const auto prevout = input.point();
+                ////if (!prevout->metadata.cache.is_valid())
                 ////    return false;
 
-                ////const auto& script = prevout.metadata.cache.script();
+                ////const auto& script = prevout->metadata.cache.script();
                 ////if (!script.empty())
                 ////    scripts.push_back(script.to_data(false));
             }

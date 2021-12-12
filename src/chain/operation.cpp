@@ -36,21 +36,11 @@ namespace chain {
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
-inline chunk_ptr to_shared(data_chunk&& push_data)
-{
-    return std::make_shared<data_chunk>(std::move(push_data));
-}
-
-inline chunk_ptr to_shared(const data_chunk& push_data)
-{
-    return std::make_shared<data_chunk>(push_data);
-}
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
 operation::operation()
-  : operation(any_invalid, to_shared({}), false)
+  : operation(any_invalid, std::make_shared<data_chunk>(), false)
 {
 }
 
@@ -67,7 +57,7 @@ operation::operation(const operation& other)
 
 // If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code)
-  : operation(code, to_shared({}), false)
+  : operation(code, std::make_shared<data_chunk>(), false)
 {
 }
 
@@ -98,6 +88,8 @@ operation::operation(const data_slice& push_data, bool minimal)
 operation::operation(chunk_ptr push_data, bool minimal)
   : operation(opcode_from_data(*push_data, minimal), *push_data, false)
 {
+    BITCOIN_ASSERT(push_data);
+
     // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
     if (!is_payload(code_))
@@ -135,7 +127,7 @@ operation::operation(opcode code, chunk_ptr push_data, bool underflow)
 // protected
 operation::operation(opcode code, data_chunk&& push_data, bool underflow)
   : code_(code),
-    data_(to_shared(std::move(push_data))),
+    data_(std::make_shared<data_chunk>(std::move(push_data))),
     underflow_(underflow)
 {
 }
@@ -143,7 +135,7 @@ operation::operation(opcode code, data_chunk&& push_data, bool underflow)
 // protected
 operation::operation(opcode code, const data_chunk& push_data, bool underflow)
   : code_(code),
-    data_(to_shared(push_data)),
+    data_(std::make_shared<data_chunk>(push_data)),
     underflow_(underflow)
 {
 }
@@ -214,12 +206,13 @@ bool operation::from_data(reader& source)
 
     // Size of a push-data opcode is not retained, as this is inherent in data.
     code_ = static_cast<opcode>(source.read_byte());
-    data_ = to_shared(source.read_bytes(read_data_size(code_, source)));
+    data_ = std::make_shared<data_chunk>(
+        source.read_bytes(read_data_size(code_, source)));
     underflow_ = !source;
 
     // This requires that provided stream terminates at the end of the script.
-    // when passing ops as part of a stream longer than the script, such as for
-    // a transaction, caller should apply source.set_limit(prefix size), and
+    // When passing ops as part of a stream longer than the script, such as for
+    // a transaction, caller should apply source.set_limit(prefix_size), and
     // clear the stream limit upon return. Stream invalidation and set_position
     // do not alter a stream limit, it just behaves as a smaller stream buffer.
     // Without a limit, source.read_bytes() below consumes the remaining stream.
@@ -227,7 +220,7 @@ bool operation::from_data(reader& source)
     {
         code_ = any_invalid;
         source.set_position(start);
-        data_ = to_shared(source.read_bytes());
+        data_ = std::make_shared<data_chunk>(source.read_bytes());
     }
 
     // This indicates a failure with the stream itself as it cannot be the
@@ -416,7 +409,8 @@ bool operation::from_string(const std::string& mnemonic)
     else if (is_text_token(mnemonic))
     {
         // Extract operation using nominal data size decoding.
-        data_ = to_shared(to_chunk(remove_token_delimiters(mnemonic)));
+        data_ = std::make_shared<data_chunk>(
+            to_chunk(remove_token_delimiters(mnemonic)));
         code_ = nominal_opcode_from_data(*data_);
         valid = true;
     }

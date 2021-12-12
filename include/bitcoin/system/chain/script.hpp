@@ -199,8 +199,7 @@ protected:
     friend class input;
     friend class output;
 
-    script(operations&& ops, bool valid);
-    script(const operations& ops, bool valid);
+    script(operations_ptr ops, bool valid);
 
     void reset();
     bool is_pay_to_witness(uint32_t forks) const;
@@ -214,7 +213,7 @@ private:
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
         bool bip143);
 
-    operations ops_;
+    operations_ptr ops_;
     bool valid_;
 };
 

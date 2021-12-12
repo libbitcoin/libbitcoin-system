@@ -135,9 +135,7 @@ protected:
     ////friend class block;
 
     transaction(bool segregated, uint32_t version, uint32_t locktime,
-        chain::inputs&& inputs, chain::outputs&& outputs, bool valid);
-    transaction(bool segregated, uint32_t version, uint32_t locktime,
-        const chain::inputs& inputs, const chain::outputs& outputs, bool valid);
+        inputs_ptr inputs, outputs_ptr outputs, bool valid);
 
     void reset();
 
@@ -191,8 +189,8 @@ private:
     bool segregated_;
     uint32_t version_;
     uint32_t locktime_;
-    chain::inputs inputs_;
-    chain::outputs outputs_;
+    inputs_ptr inputs_;
+    outputs_ptr outputs_;
     bool valid_;
 };
 

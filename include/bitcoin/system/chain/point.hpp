@@ -100,15 +100,14 @@ protected:
     // So input may reset its member.
     friend class input;
 
-    point(hash_digest&& hash, uint32_t index, bool valid);
-    point(const hash_digest& hash, uint32_t index, bool valid);
+    point(hash_ptr hash, uint32_t index, bool valid);
 
     void reset();
 
 private:
     // The index is consensus-serialized as a fixed 4 bytes, however it is
     // effectively bound to 2^17 by the block byte size limit.
-    hash_digest hash_;
+    hash_ptr hash_;
     uint32_t index_;
     bool valid_;
 };

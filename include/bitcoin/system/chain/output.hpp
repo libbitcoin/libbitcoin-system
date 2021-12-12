@@ -102,14 +102,13 @@ public:
     bool is_dust(uint64_t minimum_output_value) const;
 
 protected:
-    output(uint64_t value, chain::script&& script, bool valid);
-    output(uint64_t value, const chain::script& script, bool valid);
+    output(uint64_t value, chain::script::ptr script, bool valid);
 
     void reset();
 
 private:
     uint64_t value_;
-    chain::script script_;
+    chain::script::ptr script_;
     bool valid_;
 };
 

@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <memory>
 #include <utility>
 #include <boost/thread.hpp>
 #include <bitcoin/system/assert.hpp>
@@ -42,19 +43,13 @@ using wall_clock = std::chrono::system_clock;
 // ----------------------------------------------------------------------------
 
 header::header()
-  : header(0, {}, {}, 0, 0, 0, false)
+  : header(0, std::make_shared<hash_digest>(), std::make_shared<hash_digest>(),
+      0, 0, 0, false)
 {
 }
 
 header::header(header&& other)
-  : header(
-      other.version_,
-      std::move(other.previous_block_hash_),
-      std::move(other.merkle_root_),
-      other.timestamp_,
-      other.bits_,
-      other.nonce_,
-      other.valid_)
+: header(other)
 {
 }
 
@@ -73,7 +68,9 @@ header::header(const header& other)
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
-  : header(version, std::move(previous_block_hash), std::move(merkle_root),
+  : header(version,
+      std::make_shared<hash_digest>(std::move(previous_block_hash)),
+      std::make_shared<hash_digest>(std::move(merkle_root)),
       timestamp, bits, nonce, true)
 {
 }
@@ -81,16 +78,19 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce)
-  : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
-      true)
+  : header(version, std::make_shared<hash_digest>(previous_block_hash),
+      std::make_shared<hash_digest>(merkle_root), timestamp, bits, nonce, true)
 {
 }
 
 header::header(uint32_t version, hash_ptr previous_block_hash,
-    hash_ptr merkle_root, uint32_t timestamp, uint32_t bits, uint32_t nonce)
-  : header(version, *previous_block_hash, *merkle_root, timestamp, bits, nonce,
+    hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
+    uint32_t nonce)
+  : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
       true)
 {
+    BITCOIN_ASSERT(previous_block_hash);
+    BITCOIN_ASSERT(merkle_root);
 }
 
 header::header(const data_slice& data)
@@ -111,22 +111,8 @@ header::header(reader& source)
 }
 
 // protected
-header::header(uint32_t version, hash_digest&& previous_block_hash,
-    hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, bool valid)
-  : version_(version),
-    previous_block_hash_(std::move(previous_block_hash)),
-    merkle_root_(std::move(merkle_root)),
-    timestamp_(timestamp),
-    bits_(bits),
-    nonce_(nonce),
-    valid_(valid)
-{
-}
-
-// protected
-header::header(uint32_t version, const hash_digest& previous_block_hash,
-    const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+header::header(uint32_t version, hash_ptr previous_block_hash,
+    hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce, bool valid)
   : version_(version),
     previous_block_hash_(previous_block_hash),
@@ -143,13 +129,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 
 header& header::operator=(header&& other)
 {
-    version_ = other.version_;
-    previous_block_hash_ = std::move(other.previous_block_hash_);
-    merkle_root_ = std::move(other.merkle_root_);
-    timestamp_ = other.timestamp_;
-    bits_ = other.bits_;
-    nonce_ = other.nonce_;
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -168,8 +148,8 @@ header& header::operator=(const header& other)
 bool header::operator==(const header& other) const
 {
     return (version_ == other.version_)
-        && (previous_block_hash_ == other.previous_block_hash_)
-        && (merkle_root_ == other.merkle_root_)
+        && (*previous_block_hash_ == *other.previous_block_hash_)
+        && (*merkle_root_ == *other.merkle_root_)
         && (timestamp_ == other.timestamp_)
         && (bits_ == other.bits_)
         && (nonce_ == other.nonce_);
@@ -200,8 +180,8 @@ bool header::from_data(reader& source)
     ////reset();
 
     version_ = source.read_4_bytes_little_endian();
-    previous_block_hash_ = source.read_hash();
-    merkle_root_ = source.read_hash();
+    previous_block_hash_ = std::make_shared<hash_digest>(source.read_hash());
+    merkle_root_ = std::make_shared<hash_digest>(source.read_hash());
     timestamp_ = source.read_4_bytes_little_endian();
     bits_ = source.read_4_bytes_little_endian();
     nonce_ = source.read_4_bytes_little_endian();
@@ -217,8 +197,8 @@ bool header::from_data(reader& source)
 void header::reset()
 {
     version_ = 0;
-    previous_block_hash_.fill(0);
-    merkle_root_.fill(0);
+    previous_block_hash_->fill(0);
+    merkle_root_->fill(0);
     timestamp_ = 0;
     bits_ = 0;
     nonce_ = 0;
@@ -254,8 +234,8 @@ void header::to_data(writer& sink) const
     DEBUG_ONLY(const auto start = sink.get_position();)
 
     sink.write_4_bytes_little_endian(version_);
-    sink.write_bytes(previous_block_hash_);
-    sink.write_bytes(merkle_root_);
+    sink.write_bytes(*previous_block_hash_);
+    sink.write_bytes(*merkle_root_);
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
@@ -284,12 +264,12 @@ uint32_t header::version() const
 
 const hash_digest& header::previous_block_hash() const
 {
-    return previous_block_hash_;
+    return *previous_block_hash_;
 }
 
 const hash_digest& header::merkle_root() const
 {
-    return merkle_root_;
+    return *merkle_root_;
 }
 
 uint32_t header::timestamp() const

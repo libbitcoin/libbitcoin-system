@@ -52,7 +52,10 @@ public:
     input(const input& other);
 
     input(chain::point&& point, chain::script&& script, uint32_t sequence);
-    input(const point& point, const chain::script& script, uint32_t sequence);
+    input(const chain::point& point, const chain::script& script,
+        uint32_t sequence);
+    input(chain::point::ptr point, const chain::script::ptr script,
+        uint32_t sequence);
 
     input(chain::point&& point, chain::script&& script,
         chain::witness&& witness, uint32_t sequence);
@@ -113,27 +116,24 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const;
 
     /// Public mutable metadata access, copied but not compared for equality.
-    mutable chain::prevout prevout;
+    mutable chain::prevout::ptr prevout;
 
 protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
-    input(chain::point&& point, chain::script&& script,
-        chain::witness&& witness, uint32_t sequence, bool valid,
-        chain::prevout&& prevout);
-    input(const chain::point& point, const chain::script& script,
-        const chain::witness& witness, uint32_t sequence, bool valid,
-        const chain::prevout& prevout);
+    input(const chain::point::ptr point, const chain::script::ptr script,
+        const chain::witness::ptr witness, uint32_t sequence, bool valid,
+        const chain::prevout::ptr prevout);
 
     void reset();
 
 private:
     bool embedded_script(chain::script& out) const;
 
-    chain::point point_;
-    chain::script script_;
-    chain::witness witness_;
+    chain::point::ptr point_;
+    chain::script::ptr script_;
+    chain::witness::ptr witness_;
     uint32_t sequence_;
     bool valid_;
 };

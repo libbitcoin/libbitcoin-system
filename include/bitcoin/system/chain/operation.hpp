@@ -152,7 +152,7 @@ public:
     bool is_underflow() const;
 
 protected:
-    // To access count_op.
+    // So script may call count_op.
     friend class script;
 
     static bool count_op(reader& source);

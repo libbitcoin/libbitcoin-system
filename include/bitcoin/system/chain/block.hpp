@@ -114,9 +114,7 @@ public:
     code connect(const context& state) const;
 
 protected:
-    block(chain::header&& header, chain::transactions&& txs, bool valid);
-    block(const chain::header& header, const chain::transactions& txs,
-        bool valid);
+    block(chain::header::ptr header, transactions_ptr txs, bool valid);
 
     void reset();
 
@@ -173,8 +171,8 @@ private:
     code connect_transactions(const context& state) const;
     code accept_transactions(const context& state) const;
 
-    chain::header header_;
-    chain::transactions txs_;
+    chain::header::ptr header_;
+    transactions_ptr txs_;
     bool valid_;
 };
 

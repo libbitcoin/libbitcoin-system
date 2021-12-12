@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/input.hpp>
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/context.hpp>
@@ -41,20 +42,16 @@ namespace chain {
 // Valid default used in signature hashing.
 // Default prevout (metadata) construction is spent, invalid, max_size_t value. 
 input::input()
-  : input(chain::point{}, {}, {}, 0)
+  : input(std::make_shared<chain::point>(), std::make_shared<chain::script>(),
+      std::make_shared<chain::witness>(), 0)
 {
 }
 
 input::input(input&& other)
-  : input(
-      std::move(other.point_),
-      std::move(other.script_),
-      std::move(other.witness_),
-      other.sequence_,
-      other.valid_,
-      other.prevout)
+  : input(other)
 {
 }
+
 
 input::input(const input& other)
   : input(
@@ -67,33 +64,55 @@ input::input(const input& other)
 {
 }
 
-input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
-  : input(std::move(point), std::move(script), {}, sequence, true, {})
+input::input(chain::point&& point, chain::script&& script,
+    uint32_t sequence)
+  : input(std::make_shared<chain::point>(std::move(point)),
+      std::make_shared<chain::script>(std::move(script)),
+      std::make_shared<chain::witness>(), sequence, true,
+      std::make_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     uint32_t sequence)
-  : input(point, script, {}, sequence, true, {})
+  : input(std::make_shared<chain::point>(point),
+      std::make_shared<chain::script>(script),
+      std::make_shared<chain::witness>(), sequence, true,
+      std::make_shared<chain::prevout>())
 {
+}
+
+input::input(chain::point::ptr point, chain::script::ptr script,
+    uint32_t sequence)
+  : input(point, script, std::make_shared<chain::witness>(), sequence, true,
+      std::make_shared<chain::prevout>())
+{
+    BITCOIN_ASSERT(point);
+    BITCOIN_ASSERT(script);
 }
 
 input::input(chain::point&& point, chain::script&& script,
     chain::witness&& witness, uint32_t sequence)
-  : input(std::move(point), std::move(script), std::move(witness), sequence,
-      true, {})
+  : input(std::make_shared<chain::point>(std::move(point)),
+      std::make_shared<chain::script>(std::move(script)),
+      std::make_shared<chain::witness>(std::move(witness)), sequence, true,
+      std::make_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence)
-  : input(point, script, witness, sequence, true, {})
+  : input(std::make_shared<chain::point>(point),
+      std::make_shared<chain::script>(script),
+      std::make_shared<chain::witness>(witness), sequence, true,
+      std::make_shared<chain::prevout>())
 {
 }
 
 input::input(chain::point::ptr point, chain::script::ptr script,
     chain::witness::ptr witness, uint32_t sequence)
-  : input(*point, *script, *witness, sequence, true, {})
+  : input(point, script, witness, sequence, true,
+      std::make_shared<chain::prevout>())
 {
 }
 
@@ -115,22 +134,9 @@ input::input(reader& source)
 }
 
 // protected
-input::input(chain::point&& point, chain::script&& script,
-    chain::witness&& witness, uint32_t sequence, bool valid,
-    chain::prevout&& prevout)
-  : point_(std::move(point)),
-    script_(std::move(script)),
-    witness_(std::move(witness)),
-    sequence_(sequence),
-    valid_(valid),
-    prevout(std::move(prevout))
-{
-}
-
-// protected
-input::input(const chain::point& point, const chain::script& script,
-    const chain::witness& witness, uint32_t sequence, bool valid,
-    const chain::prevout& prevout)
+input::input(const chain::point::ptr point, const chain::script::ptr script,
+    const chain::witness::ptr witness, uint32_t sequence, bool valid,
+    const chain::prevout::ptr prevout)
   : point_(point),
     script_(script),
     witness_(witness),
@@ -145,11 +151,7 @@ input::input(const chain::point& point, const chain::script& script,
 
 input& input::operator=(input&& other)
 {
-    point_ = std::move(other.point_);
-    script_ = std::move(other.script_);
-    witness_ = std::move(other.witness_);
-    sequence_ = other.sequence_;
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -166,9 +168,9 @@ input& input::operator=(const input& other)
 bool input::operator==(const input& other) const
 {
     return (sequence_ == other.sequence_)
-        && (point_ == other.point_)
-        && (script_ == other.script_)
-        && (witness_ == other.witness_);
+        && (*point_ == *other.point_)
+        && (*script_ == *other.script_)
+        && (*witness_ == *other.witness_);
 }
 
 bool input::operator!=(const input& other) const
@@ -191,15 +193,16 @@ bool input::from_data(std::istream& stream)
     return from_data(reader);
 }
 
-// Witness is deserialized by transaction.
 bool input::from_data(reader& source)
 {
     ////reset();
 
-    point_.from_data(source);
-    script_.from_data(source, true);
+    point_->from_data(source);
+    script_->from_data(source, true);
     sequence_ = source.read_4_bytes_little_endian();
-    witness_.reset();
+
+    // Witness is deserialized by transaction.
+    witness_->reset();
 
     if (!source)
         reset();
@@ -210,9 +213,9 @@ bool input::from_data(reader& source)
 
 void input::reset()
 {
-    point_.reset();
-    script_.reset();
-    witness_.reset();
+    point_->reset();
+    script_->reset();
+    witness_->reset();
     sequence_ = 0;
     valid_ = false;
     prevout = {};
@@ -247,8 +250,8 @@ void input::to_data(writer& sink) const
     DEBUG_ONLY(const auto bytes = serialized_size(false);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    point_.to_data(sink);
-    script_.to_data(sink, true);
+    point_->to_data(sink);
+    script_->to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
@@ -260,9 +263,9 @@ size_t input::serialized_size(bool witness) const
     // witnesses are serialized by the transaction. This is an ugly hack as a
     // consequence of bip144 not serializing witnesses as part of inputs, which
     // is logically the proper association.
-    return point_.serialized_size()
-        + script_.serialized_size(true)
-        + (witness ? witness_.serialized_size(true) : zero)
+    return point_->serialized_size()
+        + script_->serialized_size(true)
+        + (witness ? witness_->serialized_size(true) : zero)
         + sizeof(sequence_);
 }
 
@@ -271,17 +274,17 @@ size_t input::serialized_size(bool witness) const
 
 const point& input::point() const
 {
-    return point_;
+    return *point_;
 }
 
 const chain::script& input::script() const
 {
-    return script_;
+    return *script_;
 }
 
 const chain::witness& input::witness() const
 {
-    return witness_;
+    return *witness_;
 }
 
 uint32_t input::sequence() const
@@ -311,28 +314,28 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const
     {
         // BIP68: change sequence to seconds by shifting up by 9 bits (x 512).
         auto time = shift_left(blocks, relative_locktime_seconds_shift_left);
-        auto age = floored_subtract(median_time_past, prevout.median_time_past);
+        auto age = floored_subtract(median_time_past, prevout->median_time_past);
         return age < time;
     }
 
-    auto age = floored_subtract(height, prevout.height);
+    auto age = floored_subtract(height, prevout->height);
     return age < blocks;
 }
 
 bool input::reserved_hash(hash_digest& out) const
 {
-    if (!witness::is_reserved_pattern(witness_.stack()))
+    if (!witness::is_reserved_pattern(witness_->stack()))
         return false;
 
-    std::copy_n(witness_.stack().front().begin(), hash_size, out.begin());
+    std::copy_n(witness_->stack().front().begin(), hash_size, out.begin());
     return true;
 }
 
 // private
 bool input::embedded_script(chain::script& out) const
 {
-    const auto& ops = script_.ops();
-    const auto& script = prevout.script();
+    const auto& ops = script_->ops();
+    const auto& script = prevout->script();
 
     // There are no embedded sigops when the prevout script is not p2sh.
     if (!script::is_pay_script_hash_pattern(script.ops()))
@@ -359,7 +362,7 @@ static_assert(max_script_size <
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
 size_t input::signature_operations(bool bip16, bool bip141) const
 {
-    if (bip141 && !prevout.is_valid())
+    if (bip141 && !prevout->is_valid())
         return max_size_t;
 
     chain::script witness, embedded;
@@ -368,9 +371,9 @@ size_t input::signature_operations(bool bip16, bool bip141) const
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
     // Count heavy sigops in the input script.
-    auto sigops = script_.sigops(false) * factor;
+    auto sigops = script_->sigops(false) * factor;
 
-    if (bip141 && witness_.extract_sigop_script(witness, prevout.script()))
+    if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
     {
         // Add sigops in the witness script (bip141).
         return ceilinged_add(sigops, witness.sigops(true));
@@ -378,7 +381,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const
 
     if (bip16 && embedded_script(embedded))
     {
-        if (bip141 && witness_.extract_sigop_script(witness, embedded))
+        if (bip141 && witness_->extract_sigop_script(witness, embedded))
         {
             // Add sigops in the embedded witness script (bip141).
             return ceilinged_add(sigops, witness.sigops(true));

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <utility>
@@ -59,12 +60,12 @@ bool script::is_enabled(uint32_t active_forks, forks fork)
 // ----------------------------------------------------------------------------
 
 script::script()
-  : script(operations{}, true)
+  : script(std::make_shared<operations>(), true)
 {
 }
 
 script::script(script&& other)
-  : script(std::move(other.ops_), other.valid_)
+  : script(other)
 {
 }
 
@@ -74,18 +75,19 @@ script::script(const script& other)
 }
 
 script::script(operations&& ops)
-  : script(std::move(ops), true)
+  : script(std::make_shared<operations>(std::move(ops)), true)
 {
 }
 
 script::script(const operations& ops)
-  : script(ops, true)
+  : script(std::make_shared<operations>(ops), true)
 {
 }
 
 script::script(operations_ptr ops)
-  : script(*ops, true)
+  : script(ops, true)
 {
+    BITCOIN_ASSERT(ops);
 }
 
 script::script(const data_slice& data, bool prefix)
@@ -106,13 +108,7 @@ script::script(reader& source, bool prefix)
 }
 
 // protected
-script::script(operations&& ops, bool valid)
-  : ops_(std::move(ops)), valid_(valid)
-{
-}
-
-// protected
-script::script(const operations& ops, bool valid)
+script::script(operations_ptr ops, bool valid)
   : ops_(ops), valid_(valid)
 {
 }
@@ -122,8 +118,7 @@ script::script(const operations& ops, bool valid)
 
 script& script::operator=(script&& other)
 {
-    ops_ = std::move(other.ops_);
-    valid_ = other.valid_;
+    *this = other;
     return *this;
 }
 
@@ -136,7 +131,7 @@ script& script::operator=(const script& other)
 
 bool script::operator==(const script& other) const
 {
-    return (ops_ == other.ops_);
+    return (*ops_ == *other.ops_);
 }
 
 bool script::operator!=(const script& other) const
@@ -176,7 +171,7 @@ size_t script::op_count(reader& source)
 bool script::from_data(reader& source, bool prefix)
 {
     ////reset();
-    ops_.clear();
+    ops_->clear();
 
     auto size = zero;
     auto start = zero;
@@ -190,10 +185,10 @@ bool script::from_data(reader& source, bool prefix)
         source.set_limit(size);
     }
 
-    ops_.reserve(op_count(source));
+    ops_->reserve(op_count(source));
 
     while (!source.is_exhausted())
-        ops_.emplace_back(source);
+        ops_->emplace_back(source);
 
     if (prefix)
     {
@@ -226,13 +221,13 @@ bool script::from_string(const std::string& mnemonic)
         return true;
 
     // Create an op list from the split tokens, one operation per token.
-    ops_.reserve(tokens.size());
+    ops_->reserve(tokens.size());
 
     for (const auto& token: tokens)
     {
         operation op;
         valid_ &= op.from_string(token);
-        ops_.push_back(op);
+        ops_->push_back(op);
     }
 
     return valid_;
@@ -241,8 +236,8 @@ bool script::from_string(const std::string& mnemonic)
 // protected
 void script::reset()
 {
-    ops_.clear();
-    ops_.shrink_to_fit();
+    ops_->clear();
+    ops_->shrink_to_fit();
     valid_ = false;
 }
 
@@ -310,7 +305,7 @@ size_t script::serialized_size(bool prefix) const
         return total + op.serialized_size();
     };
 
-    auto size =  std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
+    auto size =  std::accumulate(ops_->begin(), ops_->end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);
@@ -320,7 +315,7 @@ size_t script::serialized_size(bool prefix) const
 
 const operations& script::ops() const
 {
-    return ops_;
+    return *ops_;
 }
 
 // Signing (unversioned).
@@ -993,7 +988,7 @@ script_version script::version() const
     if (!is_witness_program_pattern(ops()))
         return script_version::unversioned;
 
-    switch (ops_.front().code())
+    switch (ops_->front().code())
     {
         case opcode::push_size_0:
             return script_version::zero;
@@ -1114,10 +1109,10 @@ bool script::is_oversized() const
 // The criteria below are not comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
-    if (ops_.empty())
+    if (ops_->empty())
         return false;
 
-    const auto& code = ops_.front().code();
+    const auto& code = ops_->front().code();
 
     // There is no condition prior to the first opcode in a script.
     return operation::is_reserved(code) || operation::is_invalid(code);
@@ -1210,7 +1205,7 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
 ////        return error::inputs_overflow;
 ////
 ////    const auto& in = tx.inputs()[index];
-////    const auto& prevout = in.point().metadata.cache;
+////    const auto prevout = in.prevout;
 ////    return verify(tx, index, forks, prevout.script(), prevout.value());
 ////}
 

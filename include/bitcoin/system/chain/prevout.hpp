@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 
+#include <memory>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/output.hpp>
@@ -31,6 +32,8 @@ class BC_API prevout
   : public output
 {
 public:
+    typedef std::shared_ptr<prevout> ptr;
+
     /// Use base class constructors, default construction is invalid.
     using chain::output::output;
 

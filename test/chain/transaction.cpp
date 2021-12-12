@@ -534,8 +534,8 @@ BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
 
     input input0;
     input input1;
-    input0.prevout = { value0, script{} };
-    input1.prevout = { value1, script{} };
+    *input0.prevout = prevout{ value0, script{} };
+    *input1.prevout = { value1, script{} };
 
     const transaction instance
     {
@@ -606,8 +606,8 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 
     const input input0;
     const input input1;
-    input0.prevout = { value0, script{} };
-    input1.prevout = { value1, script{} };
+    *input0.prevout = { value0, script{} };
+    *input1.prevout = { value1, script{} };
 
     transaction instance
     {
@@ -642,7 +642,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__default_point__true)
         0,
         0,
         {
-            { {}, {}, 0 }
+            { {}, script{}, 0 }
         },
         {}
     };
@@ -1145,7 +1145,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
     {
         0,
         locktime,
-        inputs{ { {}, {}, sequence } },
+        { { {}, script{}, sequence } },
         {}
     };
 
@@ -1166,7 +1166,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
         0,
         locktime,
         {
-            { {}, {}, sequence }
+            { {}, script{}, sequence }
         },
         {}
     };
@@ -1196,7 +1196,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout = { 42, script{} };
+    *input.prevout = { 42, script{} };
     const accessor instance
     {
         0,
@@ -1236,8 +1236,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__no_inputs__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.height = 0;
-    input.prevout.coinbase = true;
+    input.prevout->height = 0;
+    input.prevout->coinbase = true;
     const accessor instance
     {
         0,
@@ -1252,8 +1252,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.height = 1;
-    input.prevout.coinbase = true;
+    input.prevout->height = 1;
+    input.prevout->coinbase = true;
     const accessor instance
     {
         0,
@@ -1268,8 +1268,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.height = 1;
-    input.prevout.coinbase = false;
+    input.prevout->height = 1;
+    input.prevout->coinbase = false;
     const accessor instance
     {
         0,
@@ -1284,8 +1284,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.height = 1;
-    input.prevout.coinbase = true;
+    input.prevout->height = 1;
+    input.prevout->coinbase = true;
     const accessor instance
     {
         0,
@@ -1300,8 +1300,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.height = 1;
-    input.prevout.coinbase = false;
+    input.prevout->height = 1;
+    input.prevout->coinbase = false;
     const accessor instance
     {
         0,
@@ -1353,8 +1353,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked_
         version,
         0,
         {
-            { {}, {}, 1 },
-            { {}, {}, 0 }
+            { {}, script{}, 1 },
+            { {}, script{}, 0 }
         },
         {}
     };
@@ -1370,8 +1370,8 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
         version,
         0,
         {
-            { {}, {}, 1 },
-            { {}, {}, 0 }
+            { {}, script{}, 1 },
+            { {}, script{}, 0 }
         },
         {}
     };
@@ -1403,7 +1403,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__tru
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.spent = false;
+    input.prevout->spent = false;
     const accessor instance
     {
         0,
@@ -1418,7 +1418,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__fals
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout.spent = true;
+    input.prevout->spent = true;
     const accessor instance
     {
         0,

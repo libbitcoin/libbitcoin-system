@@ -52,11 +52,11 @@ public:
     header(header&& other);
     header(const header& other);
 
-    header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce);
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
     header(uint32_t version, hash_ptr previous_block_hash,
         hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
@@ -96,7 +96,6 @@ public:
 
     // Properties.
     // ------------------------------------------------------------------------
-
     /// Native properties.
     uint32_t version() const;
     const hash_digest& previous_block_hash() const;
@@ -121,12 +120,8 @@ protected:
     // So block may reset its member.
     friend class block;
 
-    header(uint32_t version, hash_digest&& previous_block_hash,
-        hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, bool valid);
-
-    header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+    header(uint32_t version, hash_ptr previous_block_hash,
+        hash_ptr merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, bool valid);
 
     void reset();
@@ -150,8 +145,8 @@ private:
     static uint256_t difficulty(uint32_t bits);
 
     uint32_t version_;
-    hash_digest previous_block_hash_;
-    hash_digest merkle_root_;
+    hash_ptr previous_block_hash_;
+    hash_ptr merkle_root_;
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;

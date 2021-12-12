@@ -517,7 +517,7 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
     }
 }
 
-////// TODO: add bip112 test cases.
+// TODO: add bip112 test cases.
 
 BOOST_AUTO_TEST_CASE(script__multisig__valid)
 {
