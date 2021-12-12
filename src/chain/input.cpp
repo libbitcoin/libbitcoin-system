@@ -92,17 +92,19 @@ input::input(const chain::point& point, const chain::script& script,
 }
 
 input::input(const data_slice& data)
+  : input(stream::in::copy(data))
 {
-    from_data(data);
 }
 
 input::input(std::istream& stream)
+  : input(read::bytes::istream(stream))
 {
-    from_data(stream);
 }
 
 input::input(reader& source)
+  : input()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source);
 }
 
@@ -186,7 +188,7 @@ bool input::from_data(std::istream& stream)
 // Witness is deserialized by transaction.
 bool input::from_data(reader& source)
 {
-    reset();
+    ////reset();
 
     point_.from_data(source);
     script_.from_data(source, true);

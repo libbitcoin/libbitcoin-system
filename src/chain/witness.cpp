@@ -70,18 +70,20 @@ witness::witness(const data_stack& stack)
 {
 }
 
-witness::witness(const data_slice& encoded, bool prefix)
+witness::witness(const data_slice& data, bool prefix)
+  : witness(stream::in::copy(data), prefix)
 {
-    from_data(encoded, prefix);
 }
 
 witness::witness(std::istream& stream, bool prefix)
+  : witness(read::bytes::istream(stream), prefix)
 {
-    from_data(stream, prefix);
 }
 
 witness::witness(reader& source, bool prefix)
+  : witness()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source, prefix);
 }
 
@@ -144,9 +146,9 @@ static data_chunk read_element(reader& source)
     return source.read_bytes(size);
 }
 
-bool witness::from_data(const data_slice& encoded, bool prefix)
+bool witness::from_data(const data_slice& data, bool prefix)
 {
-    stream::in::copy istream(encoded);
+    stream::in::copy istream(data);
     return from_data(istream, prefix);
 }
 
@@ -159,7 +161,8 @@ bool witness::from_data(std::istream& stream, bool prefix)
 // Prefixed data assumed valid here though caller may confirm with is_valid.
 bool witness::from_data(reader& source, bool prefix)
 {
-    reset();
+    ////reset();
+    stack_.clear();
 
     if (prefix)
     {

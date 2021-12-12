@@ -62,17 +62,19 @@ point::point(const hash_digest& hash, uint32_t index)
 }
 
 point::point(const data_slice& data)
+  : point(stream::in::copy(data))
 {
-    from_data(data);
 }
 
 point::point(std::istream& stream)
+  : point(read::bytes::istream(stream))
 {
-    from_data(stream);
 }
 
 point::point(reader& source)
+  : point()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source);
 }
 
@@ -142,7 +144,7 @@ bool point::from_data(std::istream& stream)
 
 bool point::from_data(reader& source)
 {
-    reset();
+    ////reset();
 
     hash_ = source.read_hash();
     index_ = source.read_4_bytes_little_endian();

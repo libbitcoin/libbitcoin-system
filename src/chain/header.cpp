@@ -87,17 +87,19 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 }
 
 header::header(const data_slice& data)
+  : header(stream::in::copy(data))
 {
-    from_data(data);
 }
 
 header::header(std::istream& stream)
+  : header(read::bytes::istream(stream))
 {
-    from_data(stream);
 }
 
 header::header(reader& source)
+  : header()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source);
 }
 
@@ -188,7 +190,7 @@ bool header::from_data(std::istream& stream)
 
 bool header::from_data(reader& source)
 {
-    reset();
+    ////reset();
 
     version_ = source.read_4_bytes_little_endian();
     previous_block_hash_ = source.read_hash();

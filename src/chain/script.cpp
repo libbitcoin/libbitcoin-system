@@ -84,17 +84,19 @@ script::script(const operations& ops)
 }
 
 script::script(const data_slice& data, bool prefix)
+  : script(stream::in::copy(data), prefix)
 {
-    from_data(data, prefix);
 }
 
 script::script(std::istream& stream, bool prefix)
+  : script(read::bytes::istream(stream), prefix)
 {
-    from_data(stream, prefix);
 }
 
 script::script(reader& source, bool prefix)
+  : script()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source, prefix);
 }
 
@@ -168,7 +170,8 @@ size_t script::op_count(reader& source)
 
 bool script::from_data(reader& source, bool prefix)
 {
-    reset();
+    ////reset();
+    ops_.clear();
 
     auto size = zero;
     auto start = zero;

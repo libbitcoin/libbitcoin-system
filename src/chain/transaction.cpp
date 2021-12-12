@@ -91,17 +91,19 @@ transaction::transaction(uint32_t version, uint32_t locktime,
 }
 
 transaction::transaction(const data_slice& data, bool witness)
+  : transaction(stream::in::copy(data), witness)
 {
-    from_data(data, witness);
 }
 
 transaction::transaction(std::istream& stream, bool witness)
+  : transaction(read::bytes::istream(stream), witness)
 {
-    from_data(stream, witness);
 }
 
 transaction::transaction(reader& source, bool witness)
+  : transaction()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source, witness);
 }
 
@@ -204,7 +206,9 @@ bool read_puts(Source& source, std::vector<Put>& puts)
 
 bool transaction::from_data(reader& source, bool witness)
 {
-    reset();
+    ////reset();
+    inputs_.clear();
+    outputs_.clear();
 
     version_ = source.read_4_bytes_little_endian();
     read_puts(source, inputs_);

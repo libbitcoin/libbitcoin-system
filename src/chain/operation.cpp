@@ -96,17 +96,19 @@ operation::operation(const data_slice& push_data, bool minimal)
 }
 
 operation::operation(const data_slice& op_data)
+  : operation(stream::in::copy(op_data))
 {
-    from_data(op_data);
 }
 
 operation::operation(std::istream& stream)
+  : operation(read::bytes::istream(stream))
 {
-    from_data(stream);
 }
 
 operation::operation(reader& source)
+  : operation()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source);
 }
 

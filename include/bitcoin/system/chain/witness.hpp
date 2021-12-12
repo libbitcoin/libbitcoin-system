@@ -53,7 +53,7 @@ public:
     witness(data_stack&& stack);
     witness(const data_stack& stack);
 
-    witness(const data_slice& encoded, bool prefix);
+    witness(const data_slice& data, bool prefix);
     witness(std::istream& stream, bool prefix);
     witness(reader& source, bool prefix);
 
@@ -71,7 +71,7 @@ public:
     // Prefixed data assumed valid here though caller may confirm with is_valid.
 
     /// Deserialization invalidates the iterator.
-    bool from_data(const data_slice& encoded, bool prefix);
+    bool from_data(const data_slice& data, bool prefix);
     bool from_data(std::istream& stream, bool prefix);
     bool from_data(reader& source, bool prefix);
 

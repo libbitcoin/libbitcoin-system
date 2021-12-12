@@ -80,17 +80,19 @@ block::block(chain::header&& header, chain::transactions&& txs)
 }
 
 block::block(const data_slice& data, bool witness)
+  : block(stream::in::copy(data), witness)
 {
-    from_data(data, witness);
 }
 
 block::block(std::istream& stream, bool witness)
+  : block(read::bytes::istream(stream), witness)
 {
-    from_data(stream, witness);
 }
 
 block::block(reader& source, bool witness)
+  : block()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source, witness);
 }
 
@@ -158,7 +160,8 @@ bool block::from_data(std::istream& stream, bool witness)
 
 bool block::from_data(reader& source, bool witness)
 {
-    reset();
+    ////reset();
+    txs_.clear();
 
     header_.from_data(source);
     const auto count = source.read_size();

@@ -65,17 +65,19 @@ output::output(uint64_t value, const chain::script& script)
 }
 
 output::output(const data_slice& data)
+  : output(stream::in::copy(data))
 {
-    from_data(data);
 }
 
 output::output(std::istream& stream)
+  : output(read::bytes::istream(stream))
 {
-    from_data(stream);
 }
 
 output::output(reader& source)
+  : output()
 {
+    // Above default construct presumed cheaper than factory populated move.
     from_data(source);
 }
 
@@ -138,7 +140,7 @@ bool output::from_data(std::istream& stream)
 
 bool output::from_data(reader& source)
 {
-    reset();
+    ////reset();
 
     value_ = source.read_8_bytes_little_endian();
     script_.from_data(source, true);
