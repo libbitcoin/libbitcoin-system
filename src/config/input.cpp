@@ -64,13 +64,18 @@ input::input()
 {
 }
 
+input::input(const input& other)
+  : input(other.value_)
+{
+}
+
 input::input(const std::string& tuple)
 {
     std::stringstream(tuple) >> *this;
 }
 
-input::input(const input& other)
-  : input(other.value_)
+input::input(const chain::input& value)
+  : value_(value)
 {
 }
 
