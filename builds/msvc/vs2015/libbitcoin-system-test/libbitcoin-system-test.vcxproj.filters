@@ -258,10 +258,13 @@
     <ClCompile Include="..\..\..\..\test\messages\address.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\address_item.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\alert.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\alert_payload.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\alert_item.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\block.cpp">
@@ -288,7 +291,7 @@
     <ClCompile Include="..\..\..\..\test\messages\compact_block.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\compact_transaction.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\compact_block_item.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\compact_transactions.cpp">
@@ -337,9 +340,6 @@
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\merkle_block.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\network_address.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\not_found.cpp">

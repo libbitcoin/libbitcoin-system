@@ -122,8 +122,9 @@ src_libbitcoin_system_la_SOURCES = \
     src/machine/number.cpp \
     src/machine/program.cpp \
     src/messages/address.cpp \
+    src/messages/address_item.cpp \
     src/messages/alert.cpp \
-    src/messages/alert_payload.cpp \
+    src/messages/alert_item.cpp \
     src/messages/block.cpp \
     src/messages/bloom_filter_add.cpp \
     src/messages/bloom_filter_clear.cpp \
@@ -132,7 +133,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/messages/client_filter_checkpoint.cpp \
     src/messages/client_filter_headers.cpp \
     src/messages/compact_block.cpp \
-    src/messages/compact_transaction.cpp \
+    src/messages/compact_block_item.cpp \
     src/messages/compact_transactions.cpp \
     src/messages/fee_filter.cpp \
     src/messages/get_address.cpp \
@@ -150,7 +151,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/messages/memory_pool.cpp \
     src/messages/merkle_block.cpp \
     src/messages/message.cpp \
-    src/messages/network_address.cpp \
     src/messages/not_found.cpp \
     src/messages/ping.cpp \
     src/messages/pong.cpp \
@@ -335,8 +335,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/safe.cpp \
     test/math/sign.cpp \
     test/messages/address.cpp \
+    test/messages/address_item.cpp \
     test/messages/alert.cpp \
-    test/messages/alert_payload.cpp \
+    test/messages/alert_item.cpp \
     test/messages/block.cpp \
     test/messages/bloom_filter_add.cpp \
     test/messages/bloom_filter_clear.cpp \
@@ -345,7 +346,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/messages/client_filter_checkpoint.cpp \
     test/messages/client_filter_headers.cpp \
     test/messages/compact_block.cpp \
-    test/messages/compact_transaction.cpp \
+    test/messages/compact_block_item.cpp \
     test/messages/compact_transactions.cpp \
     test/messages/fee_filter.cpp \
     test/messages/get_address.cpp \
@@ -362,7 +363,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/messages/inventory_item.cpp \
     test/messages/memory_pool.cpp \
     test/messages/merkle_block.cpp \
-    test/messages/network_address.cpp \
     test/messages/not_found.cpp \
     test/messages/ping.cpp \
     test/messages/pong.cpp \
@@ -640,8 +640,9 @@ include_bitcoin_system_math_HEADERS = \
 include_bitcoin_system_messagesdir = ${includedir}/bitcoin/system/messages
 include_bitcoin_system_messages_HEADERS = \
     include/bitcoin/system/messages/address.hpp \
+    include/bitcoin/system/messages/address_item.hpp \
     include/bitcoin/system/messages/alert.hpp \
-    include/bitcoin/system/messages/alert_payload.hpp \
+    include/bitcoin/system/messages/alert_item.hpp \
     include/bitcoin/system/messages/block.hpp \
     include/bitcoin/system/messages/bloom_filter_add.hpp \
     include/bitcoin/system/messages/bloom_filter_clear.hpp \
@@ -650,7 +651,7 @@ include_bitcoin_system_messages_HEADERS = \
     include/bitcoin/system/messages/client_filter_checkpoint.hpp \
     include/bitcoin/system/messages/client_filter_headers.hpp \
     include/bitcoin/system/messages/compact_block.hpp \
-    include/bitcoin/system/messages/compact_transaction.hpp \
+    include/bitcoin/system/messages/compact_block_item.hpp \
     include/bitcoin/system/messages/compact_transactions.hpp \
     include/bitcoin/system/messages/fee_filter.hpp \
     include/bitcoin/system/messages/get_address.hpp \
@@ -670,7 +671,6 @@ include_bitcoin_system_messages_HEADERS = \
     include/bitcoin/system/messages/merkle_block.hpp \
     include/bitcoin/system/messages/message.hpp \
     include/bitcoin/system/messages/messages.hpp \
-    include/bitcoin/system/messages/network_address.hpp \
     include/bitcoin/system/messages/not_found.hpp \
     include/bitcoin/system/messages/ping.hpp \
     include/bitcoin/system/messages/pong.hpp \

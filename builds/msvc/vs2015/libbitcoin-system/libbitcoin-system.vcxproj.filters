@@ -405,10 +405,13 @@
     <ClCompile Include="..\..\..\..\src\messages\address.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\messages\address_item.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\messages\alert.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\alert_payload.cpp">
+    <ClCompile Include="..\..\..\..\src\messages\alert_item.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\messages\block.cpp">
@@ -435,7 +438,7 @@
     <ClCompile Include="..\..\..\..\src\messages\compact_block.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\compact_transaction.cpp">
+    <ClCompile Include="..\..\..\..\src\messages\compact_block_item.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\messages\compact_transactions.cpp">
@@ -487,9 +490,6 @@
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\messages\message.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\network_address.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\messages\not_found.cpp">
@@ -1001,10 +1001,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address_item.hpp">
+      <Filter>include\bitcoin\system\messages</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_payload.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_item.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\block.hpp">
@@ -1031,7 +1034,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_transaction.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block_item.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_transactions.hpp">
@@ -1089,9 +1092,6 @@
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\messages.hpp">
-      <Filter>include\bitcoin\system\messages</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\network_address.hpp">
       <Filter>include\bitcoin\system\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\not_found.hpp">

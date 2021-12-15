@@ -140,8 +140,9 @@
     <ClCompile Include="..\..\..\..\test\math\safe.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\address.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\address_item.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\alert.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\alert_payload.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\alert_item.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\block.cpp">
       <ObjectFileName>$(IntDir)test_messages_block.obj</ObjectFileName>
     </ClCompile>
@@ -154,7 +155,7 @@
     <ClCompile Include="..\..\..\..\test\messages\client_filter_checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\client_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\compact_transaction.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\compact_block_item.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\compact_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\get_address.cpp" />
@@ -171,7 +172,6 @@
     <ClCompile Include="..\..\..\..\test\messages\inventory_item.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\merkle_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\network_address.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\pong.cpp" />

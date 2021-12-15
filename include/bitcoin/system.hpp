@@ -110,8 +110,9 @@
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/messages/address.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 #include <bitcoin/system/messages/alert.hpp>
-#include <bitcoin/system/messages/alert_payload.hpp>
+#include <bitcoin/system/messages/alert_item.hpp>
 #include <bitcoin/system/messages/block.hpp>
 #include <bitcoin/system/messages/bloom_filter_add.hpp>
 #include <bitcoin/system/messages/bloom_filter_clear.hpp>
@@ -120,7 +121,7 @@
 #include <bitcoin/system/messages/client_filter_checkpoint.hpp>
 #include <bitcoin/system/messages/client_filter_headers.hpp>
 #include <bitcoin/system/messages/compact_block.hpp>
-#include <bitcoin/system/messages/compact_transaction.hpp>
+#include <bitcoin/system/messages/compact_block_item.hpp>
 #include <bitcoin/system/messages/compact_transactions.hpp>
 #include <bitcoin/system/messages/fee_filter.hpp>
 #include <bitcoin/system/messages/get_address.hpp>
@@ -140,7 +141,6 @@
 #include <bitcoin/system/messages/merkle_block.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/messages.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
 #include <bitcoin/system/messages/not_found.hpp>
 #include <bitcoin/system/messages/ping.hpp>
 #include <bitcoin/system/messages/pong.hpp>

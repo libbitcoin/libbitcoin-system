@@ -179,8 +179,9 @@
     <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\address.cpp" />
+    <ClCompile Include="..\..\..\..\src\messages\address_item.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\alert.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\alert_payload.cpp" />
+    <ClCompile Include="..\..\..\..\src\messages\alert_item.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\block.cpp">
       <ObjectFileName>$(IntDir)src_messages_block.obj</ObjectFileName>
     </ClCompile>
@@ -193,7 +194,7 @@
     <ClCompile Include="..\..\..\..\src\messages\client_filter_checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\client_filter_headers.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\compact_transaction.cpp" />
+    <ClCompile Include="..\..\..\..\src\messages\compact_block_item.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\compact_transactions.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\fee_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\get_address.cpp" />
@@ -213,7 +214,6 @@
     <ClCompile Include="..\..\..\..\src\messages\message.cpp">
       <ObjectFileName>$(IntDir)src_messages_message.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\network_address.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\not_found.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\ping.cpp" />
     <ClCompile Include="..\..\..\..\src\messages\pong.cpp" />
@@ -403,8 +403,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address_item.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_payload.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_item.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\bloom_filter_add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\bloom_filter_clear.hpp" />
@@ -413,7 +414,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\client_filter_checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\client_filter_headers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_transaction.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block_item.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_transactions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\fee_filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_address.hpp" />
@@ -433,7 +434,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\merkle_block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\messages.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\network_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\not_found.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\pong.hpp" />
