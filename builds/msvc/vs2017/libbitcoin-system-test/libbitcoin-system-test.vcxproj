@@ -80,9 +80,7 @@
       <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\header.cpp">
-      <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
@@ -103,8 +101,8 @@
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)test_config_compact_filter.obj</ObjectFileName>
+    <ClCompile Include="..\..\..\..\test\config\client_filter.cpp">
+      <ObjectFileName>$(IntDir)test_config_client_filter.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
@@ -147,47 +145,44 @@
     <ClCompile Include="..\..\..\..\test\messages\block.cpp">
       <ObjectFileName>$(IntDir)test_messages_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\block_transactions.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)test_messages_compact_filter.obj</ObjectFileName>
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_add.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_clear.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_load.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\client_filter.cpp">
+      <ObjectFileName>$(IntDir)test_messages_client_filter.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\client_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\client_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\compact_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\compact_transaction.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\compact_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\fee_filter.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\filter_add.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\filter_clear.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\filter_load.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\get_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\get_block_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\get_blocks.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filter_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filters.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filter_checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filter_headers.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filters.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\get_compact_transactions.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\get_data.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\get_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\header.cpp">
-      <ObjectFileName>$(IntDir)test_messages_header.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\headers.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\heading.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\inventory_vector.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\inventory_item.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\merkle_block.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\network_address.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\pong.cpp" />
-    <ClCompile Include="..\..\..\..\test\messages\prefilled_transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\reject.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\send_compact.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\send_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\transaction.cpp">
       <ObjectFileName>$(IntDir)test_messages_transaction.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\messages\version.cpp" />
+    <ClCompile Include="..\..\..\..\test\messages\version_acknowledge.cpp" />
     <ClCompile Include="..\..\..\..\test\properties.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />

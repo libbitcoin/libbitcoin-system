@@ -147,7 +147,7 @@
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
+    <ClCompile Include="..\..\..\..\test\config\client_filter.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
@@ -267,58 +267,58 @@
     <ClCompile Include="..\..\..\..\test\messages\block.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\block_transactions.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_add.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_clear.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\bloom_filter_load.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\client_filter.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\client_filter_checkpoint.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\client_filter_headers.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\compact_block.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\compact_transaction.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter_checkpoint.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\compact_filter_headers.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\compact_transactions.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\fee_filter.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\filter_add.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\filter_clear.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\filter_load.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\get_address.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\get_block_transactions.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\get_blocks.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filter_checkpoint.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filter_checkpoint.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filter_headers.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filter_headers.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\get_compact_filters.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\get_client_filters.cpp">
+      <Filter>src\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\messages\get_compact_transactions.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\get_data.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\get_headers.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\header.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\headers.cpp">
@@ -330,7 +330,7 @@
     <ClCompile Include="..\..\..\..\test\messages\inventory.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\inventory_vector.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\inventory_item.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\memory_pool.cpp">
@@ -351,9 +351,6 @@
     <ClCompile Include="..\..\..\..\test\messages\pong.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\prefilled_transaction.cpp">
-      <Filter>src\messages</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\messages\reject.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
@@ -366,10 +363,10 @@
     <ClCompile Include="..\..\..\..\test\messages\transaction.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\verack.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\version.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\messages\version.cpp">
+    <ClCompile Include="..\..\..\..\test\messages\version_acknowledge.cpp">
       <Filter>src\messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\properties.cpp">

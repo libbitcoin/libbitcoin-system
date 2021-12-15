@@ -60,7 +60,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/base64.cpp \
     src/config/base85.cpp \
     src/config/block.cpp \
-    src/config/compact_filter.cpp \
+    src/config/client_filter.cpp \
     src/config/directory.cpp \
     src/config/endpoint.cpp \
     src/config/hash160.cpp \
@@ -125,28 +125,28 @@ src_libbitcoin_system_la_SOURCES = \
     src/messages/alert.cpp \
     src/messages/alert_payload.cpp \
     src/messages/block.cpp \
-    src/messages/block_transactions.cpp \
+    src/messages/bloom_filter_add.cpp \
+    src/messages/bloom_filter_clear.cpp \
+    src/messages/bloom_filter_load.cpp \
+    src/messages/client_filter.cpp \
+    src/messages/client_filter_checkpoint.cpp \
+    src/messages/client_filter_headers.cpp \
     src/messages/compact_block.cpp \
-    src/messages/compact_filter.cpp \
-    src/messages/compact_filter_checkpoint.cpp \
-    src/messages/compact_filter_headers.cpp \
+    src/messages/compact_transaction.cpp \
+    src/messages/compact_transactions.cpp \
     src/messages/fee_filter.cpp \
-    src/messages/filter_add.cpp \
-    src/messages/filter_clear.cpp \
-    src/messages/filter_load.cpp \
     src/messages/get_address.cpp \
-    src/messages/get_block_transactions.cpp \
     src/messages/get_blocks.cpp \
-    src/messages/get_compact_filter_checkpoint.cpp \
-    src/messages/get_compact_filter_headers.cpp \
-    src/messages/get_compact_filters.cpp \
+    src/messages/get_client_filter_checkpoint.cpp \
+    src/messages/get_client_filter_headers.cpp \
+    src/messages/get_client_filters.cpp \
+    src/messages/get_compact_transactions.cpp \
     src/messages/get_data.cpp \
     src/messages/get_headers.cpp \
-    src/messages/header.cpp \
     src/messages/headers.cpp \
     src/messages/heading.cpp \
     src/messages/inventory.cpp \
-    src/messages/inventory_vector.cpp \
+    src/messages/inventory_item.cpp \
     src/messages/memory_pool.cpp \
     src/messages/merkle_block.cpp \
     src/messages/message.cpp \
@@ -154,13 +154,12 @@ src_libbitcoin_system_la_SOURCES = \
     src/messages/not_found.cpp \
     src/messages/ping.cpp \
     src/messages/pong.cpp \
-    src/messages/prefilled_transaction.cpp \
     src/messages/reject.cpp \
     src/messages/send_compact.cpp \
     src/messages/send_headers.cpp \
     src/messages/transaction.cpp \
-    src/messages/verack.cpp \
     src/messages/version.cpp \
+    src/messages/version_acknowledge.cpp \
     src/radix/base_10.cpp \
     src/radix/base_16.cpp \
     src/radix/base_2048.cpp \
@@ -299,7 +298,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/base64.cpp \
     test/config/base85.cpp \
     test/config/block.cpp \
-    test/config/compact_filter.cpp \
+    test/config/client_filter.cpp \
     test/config/endpoint.cpp \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
@@ -339,41 +338,40 @@ test_libbitcoin_system_test_SOURCES = \
     test/messages/alert.cpp \
     test/messages/alert_payload.cpp \
     test/messages/block.cpp \
-    test/messages/block_transactions.cpp \
+    test/messages/bloom_filter_add.cpp \
+    test/messages/bloom_filter_clear.cpp \
+    test/messages/bloom_filter_load.cpp \
+    test/messages/client_filter.cpp \
+    test/messages/client_filter_checkpoint.cpp \
+    test/messages/client_filter_headers.cpp \
     test/messages/compact_block.cpp \
-    test/messages/compact_filter.cpp \
-    test/messages/compact_filter_checkpoint.cpp \
-    test/messages/compact_filter_headers.cpp \
+    test/messages/compact_transaction.cpp \
+    test/messages/compact_transactions.cpp \
     test/messages/fee_filter.cpp \
-    test/messages/filter_add.cpp \
-    test/messages/filter_clear.cpp \
-    test/messages/filter_load.cpp \
     test/messages/get_address.cpp \
-    test/messages/get_block_transactions.cpp \
     test/messages/get_blocks.cpp \
-    test/messages/get_compact_filter_checkpoint.cpp \
-    test/messages/get_compact_filter_headers.cpp \
-    test/messages/get_compact_filters.cpp \
+    test/messages/get_client_filter_checkpoint.cpp \
+    test/messages/get_client_filter_headers.cpp \
+    test/messages/get_client_filters.cpp \
+    test/messages/get_compact_transactions.cpp \
     test/messages/get_data.cpp \
     test/messages/get_headers.cpp \
-    test/messages/header.cpp \
     test/messages/headers.cpp \
     test/messages/heading.cpp \
     test/messages/inventory.cpp \
-    test/messages/inventory_vector.cpp \
+    test/messages/inventory_item.cpp \
     test/messages/memory_pool.cpp \
     test/messages/merkle_block.cpp \
     test/messages/network_address.cpp \
     test/messages/not_found.cpp \
     test/messages/ping.cpp \
     test/messages/pong.cpp \
-    test/messages/prefilled_transaction.cpp \
     test/messages/reject.cpp \
     test/messages/send_compact.cpp \
     test/messages/send_headers.cpp \
     test/messages/transaction.cpp \
-    test/messages/verack.cpp \
     test/messages/version.cpp \
+    test/messages/version_acknowledge.cpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
     test/radix/base_2048.cpp \
@@ -512,7 +510,7 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/base64.hpp \
     include/bitcoin/system/config/base85.hpp \
     include/bitcoin/system/config/block.hpp \
-    include/bitcoin/system/config/compact_filter.hpp \
+    include/bitcoin/system/config/client_filter.hpp \
     include/bitcoin/system/config/config.hpp \
     include/bitcoin/system/config/directory.hpp \
     include/bitcoin/system/config/endpoint.hpp \
@@ -645,29 +643,29 @@ include_bitcoin_system_messages_HEADERS = \
     include/bitcoin/system/messages/alert.hpp \
     include/bitcoin/system/messages/alert_payload.hpp \
     include/bitcoin/system/messages/block.hpp \
-    include/bitcoin/system/messages/block_transactions.hpp \
+    include/bitcoin/system/messages/bloom_filter_add.hpp \
+    include/bitcoin/system/messages/bloom_filter_clear.hpp \
+    include/bitcoin/system/messages/bloom_filter_load.hpp \
+    include/bitcoin/system/messages/client_filter.hpp \
+    include/bitcoin/system/messages/client_filter_checkpoint.hpp \
+    include/bitcoin/system/messages/client_filter_headers.hpp \
     include/bitcoin/system/messages/compact_block.hpp \
-    include/bitcoin/system/messages/compact_filter.hpp \
-    include/bitcoin/system/messages/compact_filter_checkpoint.hpp \
-    include/bitcoin/system/messages/compact_filter_headers.hpp \
+    include/bitcoin/system/messages/compact_transaction.hpp \
+    include/bitcoin/system/messages/compact_transactions.hpp \
     include/bitcoin/system/messages/fee_filter.hpp \
-    include/bitcoin/system/messages/filter_add.hpp \
-    include/bitcoin/system/messages/filter_clear.hpp \
-    include/bitcoin/system/messages/filter_load.hpp \
     include/bitcoin/system/messages/get_address.hpp \
-    include/bitcoin/system/messages/get_block_transactions.hpp \
     include/bitcoin/system/messages/get_blocks.hpp \
-    include/bitcoin/system/messages/get_compact_filter_checkpoint.hpp \
-    include/bitcoin/system/messages/get_compact_filter_headers.hpp \
-    include/bitcoin/system/messages/get_compact_filters.hpp \
+    include/bitcoin/system/messages/get_client_filter_checkpoint.hpp \
+    include/bitcoin/system/messages/get_client_filter_headers.hpp \
+    include/bitcoin/system/messages/get_client_filters.hpp \
+    include/bitcoin/system/messages/get_compact_transactions.hpp \
     include/bitcoin/system/messages/get_data.hpp \
     include/bitcoin/system/messages/get_headers.hpp \
-    include/bitcoin/system/messages/header.hpp \
     include/bitcoin/system/messages/headers.hpp \
     include/bitcoin/system/messages/heading.hpp \
     include/bitcoin/system/messages/identifier.hpp \
     include/bitcoin/system/messages/inventory.hpp \
-    include/bitcoin/system/messages/inventory_vector.hpp \
+    include/bitcoin/system/messages/inventory_item.hpp \
     include/bitcoin/system/messages/memory_pool.hpp \
     include/bitcoin/system/messages/merkle_block.hpp \
     include/bitcoin/system/messages/message.hpp \
@@ -676,13 +674,12 @@ include_bitcoin_system_messages_HEADERS = \
     include/bitcoin/system/messages/not_found.hpp \
     include/bitcoin/system/messages/ping.hpp \
     include/bitcoin/system/messages/pong.hpp \
-    include/bitcoin/system/messages/prefilled_transaction.hpp \
     include/bitcoin/system/messages/reject.hpp \
     include/bitcoin/system/messages/send_compact.hpp \
     include/bitcoin/system/messages/send_headers.hpp \
     include/bitcoin/system/messages/transaction.hpp \
-    include/bitcoin/system/messages/verack.hpp \
-    include/bitcoin/system/messages/version.hpp
+    include/bitcoin/system/messages/version.hpp \
+    include/bitcoin/system/messages/version_acknowledge.hpp
 
 include_bitcoin_system_radixdir = ${includedir}/bitcoin/system/radix
 include_bitcoin_system_radix_HEADERS = \
