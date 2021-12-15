@@ -38,13 +38,15 @@ const identifier version::id = identifier::version;
 const uint32_t messages::version::version_minimum = level::minimum;
 const uint32_t messages::version::version_maximum = level::maximum;
 
+// Time stamps are always used in version messages.
+constexpr auto with_timestamp = false;
+
 // This is just a guess, required as memory guard.
 constexpr size_t max_user_agent = max_uint8;
 
 // static
 version version::deserialize(uint32_t version, reader& source)
 {
-    constexpr auto with_timestamp = false;
     const auto value = source.read_4_bytes_little_endian();
 
     // The relay field is optional at or above version 70001.
@@ -87,8 +89,6 @@ void version::serialize(uint32_t version, writer& sink) const
     DEBUG_ONLY(const auto bytes = size(version);)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    constexpr auto with_timestamp = false;
-
     sink.write_4_bytes_little_endian(value);
     sink.write_8_bytes_little_endian(services);
     sink.write_8_bytes_little_endian(timestamp);
@@ -106,8 +106,6 @@ void version::serialize(uint32_t version, writer& sink) const
 
 size_t version::size(uint32_t version) const
 {
-    constexpr auto with_timestamp = false;
-
     return sizeof(uint32_t)
         + sizeof(uint64_t)
         + sizeof(uint64_t)

@@ -37,7 +37,7 @@ const identifier address::id = identifier::address;
 const uint32_t address::version_minimum = version::level::minimum;
 const uint32_t address::version_maximum = version::level::maximum;
 
-// TODO: make with_timestamp version dependent.
+// Time stamps are always used in address messages.
 constexpr auto with_timestamp = true;
 
 address address::deserialize(uint32_t version, reader& source)
@@ -51,7 +51,6 @@ address address::deserialize(uint32_t version, reader& source)
     for (size_t address = 0; address < addresses.capacity(); ++address)
         addresses.push_back(network_address::deserialize(
             version, source, with_timestamp));
-
 
     return { addresses };
 }
