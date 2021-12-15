@@ -60,7 +60,7 @@ bool script::is_enabled(uint32_t active_forks, forks fork)
 // ----------------------------------------------------------------------------
 
 script::script()
-  : script(std::make_shared<operations>(), true)
+  : script({}, false)
 {
 }
 
@@ -75,19 +75,13 @@ script::script(const script& other)
 }
 
 script::script(operations&& ops)
-  : script(std::make_shared<operations>(std::move(ops)), true)
+  : script(std::move(ops), true)
 {
 }
 
 script::script(const operations& ops)
-  : script(std::make_shared<operations>(ops), true)
-{
-}
-
-script::script(const operations_ptr& ops)
   : script(ops, true)
 {
-    BITCOIN_ASSERT(ops);
 }
 
 script::script(const data_slice& data, bool prefix)
@@ -101,14 +95,23 @@ script::script(std::istream& stream, bool prefix)
 }
 
 script::script(reader& source, bool prefix)
-  : script()
+  : script(from_data(source, prefix))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source, prefix);
+}
+
+script::script(const std::string& mnemonic)
+  : script(from_string(mnemonic))
+{
 }
 
 // protected
-script::script(const operations_ptr& ops, bool valid)
+script::script(operations&& ops, bool valid)
+  : ops_(std::move(ops)), valid_(valid)
+{
+}
+
+// protected
+script::script(const operations& ops, bool valid)
   : ops_(ops), valid_(valid)
 {
 }
@@ -118,7 +121,8 @@ script::script(const operations_ptr& ops, bool valid)
 
 script& script::operator=(script&& other)
 {
-    *this = other;
+    ops_ = std::move(other.ops_);
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -131,7 +135,7 @@ script& script::operator=(const script& other)
 
 bool script::operator==(const script& other) const
 {
-    return (*ops_ == *other.ops_);
+    return (ops_ == other.ops_);
 }
 
 bool script::operator!=(const script& other) const
@@ -142,19 +146,7 @@ bool script::operator!=(const script& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool script::from_data(const data_slice& data, bool prefix)
-{
-    stream::in::copy istream(data);
-    return from_data(istream, prefix);
-}
-
-bool script::from_data(std::istream& stream, bool prefix)
-{
-    read::bytes::istream source(stream);
-    return from_data(source, prefix);
-}
-
-// static
+// static/private
 size_t script::op_count(reader& source)
 {
     const auto start = source.get_position();
@@ -168,10 +160,10 @@ size_t script::op_count(reader& source)
     return count;
 }
 
-bool script::from_data(reader& source, bool prefix)
+// static/private
+script script::from_data(reader& source, bool prefix)
 {
-    ////reset();
-    ops_->clear();
+    operation foo(std::string(""));
 
     auto size = zero;
     auto start = zero;
@@ -185,10 +177,11 @@ bool script::from_data(reader& source, bool prefix)
         source.set_limit(size);
     }
 
-    ops_->reserve(op_count(source));
+    operations ops;
+    ops.reserve(op_count(source));
 
     while (!source.is_exhausted())
-        ops_->emplace_back(source);
+        ops.emplace_back(source);
 
     if (prefix)
     {
@@ -200,52 +193,32 @@ bool script::from_data(reader& source, bool prefix)
             source.invalidate();
     }
 
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
+    return { std::move(ops), source };
 }
 
-bool script::from_string(const std::string& mnemonic)
+// static/private
+script script::from_string(const std::string& mnemonic)
 {
-    reset();
-    valid_ = true;
-
-    // There is always one operation per string token.
-    const auto tokens = split(mnemonic);
+    // There is always one operation per non-empty string token.
+    auto tokens = split(mnemonic);
 
     // Split always returns at least one token, and when trimming it will be
-    // empty only there was nothing but whitespace in the mnemonic.
+    // empty only if there was nothing but whitespace in the mnemonic.
     if (tokens.front().empty())
-        return true;
+        tokens.clear();
 
-    // Create an op list from the split tokens, one operation per token.
-    ops_->reserve(tokens.size());
+    operations ops;
+    ops.reserve(tokens.size());
 
+    // Create an op list from the split tokens.
     for (const auto& token: tokens)
     {
-        operation op;
-        valid_ &= op.from_string(token);
-        ops_->push_back(op);
+        ops.emplace_back(token);
+        if (!ops.back().is_valid())
+            return {};
     }
 
-    return valid_;
-}
-
-// protected
-void script::reset()
-{
-    ops_->clear();
-    ops_->shrink_to_fit();
-    valid_ = false;
-}
-
-bool script::is_valid() const
-{
-    // Any byte vector is a valid script.
-    // This is false only if the byte count did not match the size prefix.
-    return valid_;
+    return { std::move(ops) };
 }
 
 // Serialization.
@@ -298,6 +271,13 @@ std::string script::to_string(uint32_t active_forks) const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool script::is_valid() const
+{
+    // Any byte vector is a valid script.
+    // This is false only if the byte count did not match the size prefix.
+    return valid_;
+}
+
 size_t script::serialized_size(bool prefix) const
 {
     const auto op_size = [](size_t total, const operation& op)
@@ -305,7 +285,7 @@ size_t script::serialized_size(bool prefix) const
         return total + op.serialized_size();
     };
 
-    auto size =  std::accumulate(ops_->begin(), ops_->end(), zero, op_size);
+    auto size = std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);
@@ -315,7 +295,7 @@ size_t script::serialized_size(bool prefix) const
 
 const operations& script::ops() const
 {
-    return *ops_;
+    return ops_;
 }
 
 // Signing (unversioned).
@@ -361,36 +341,8 @@ inline coverage mask_sighash(uint8_t flags)
     }
 }
 
-static hash_digest sign_none(const transaction& tx, uint32_t index,
-    const script& subscript, uint8_t flags)
-{
-    inputs ins;
-    const auto& inputs = tx.inputs();
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
-    ins.reserve(any ? one : inputs.size());
-
-    BITCOIN_ASSERT(index < inputs.size());
-    const auto& self = inputs[index];
-
-    if (any)
-    {
-        // Retain only self.
-        ins.emplace_back(self.point(), subscript, self.sequence());
-    }
-    else
-    {
-        // Erase all input scripts and sequences.
-        for (const auto& input: inputs)
-            ins.emplace_back(input.point(), script{}, 0);
-
-        // Replace self that is lost in the loop.
-        ins[index] = { self.point(), subscript, self.sequence() };
-    }
-
-    // Move new inputs to new transaction and drop outputs.
-    return signature_hash({ tx.version(), tx.locktime(), std::move(ins), {} },
-        flags);
-}
+static const script empty_script{};
+static constexpr uint32_t zero_sequence{ 0 };
 
 static hash_digest sign_single(const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
@@ -398,69 +350,114 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     //*************************************************************************
     // CONSENSUS: wacky satoshi behavior.
     //*************************************************************************
-    if (index >= tx.outputs().size())
+    if (index >= tx.outputs()->size())
         return one_hash;
 
-    inputs ins;
-    const auto& inputs = tx.inputs();
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
-    ins.reserve(any ? one : inputs.size());
-
+    const auto& inputs = *tx.inputs();
     const auto& self = inputs[index];
+    const auto any = !is_zero(flags & coverage::anyone_can_pay);
+
+    auto ins = std::make_shared<input_ptrs>();
+    ins->reserve(any ? one : inputs.size());
 
     if (any)
     {
-        // Retain only self.
-        ins.emplace_back(self.point(), subscript, self.sequence());
+        // Retain only the single input.
+        ins->emplace_back(self);
     }
     else
     {
-        // Erase all input scripts and sequences.
-        for (const auto& input: inputs)
-            ins.emplace_back(input.point(), script{}, 0);
+        ////auto it = inputs.begin();
 
-        // Replace self that is lost in the loop.
-        ins[index] = { self.point(), subscript, self.sequence() };
+        ////for (; *it != self; ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+
+        ////// Erase all input scripts and sequences except self.
+        ////++it;
+
+        ////for (; it != inputs.end(); ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
     }
 
     // Trim and clear outputs except that of the input index (guarded above).
-    outputs outs(add1(index));
-    outs.back() = tx.outputs()[index];
+    auto outs = std::make_shared<output_ptrs>();
+    outs->reserve(add1(index));
 
-    // Move new inputs and new outputs to new transaction.
-    return signature_hash({ tx.version(), tx.locktime(), std::move(ins),
-        std::move(outs) }, flags);
+    ////for (size_t out = 0; out < index; ++index)
+    ////    outs->push_back(to_shared(output{ output::not_found, empty_script }));
+
+    // Set the output of the input index (guarded above).
+    outs->push_back((*tx.outputs())[index]);
+
+    // Move new inputs and trimmed outputs to new transaction.
+    return signature_hash({ tx.version(), tx.locktime(), ins, outs }, flags);
+}
+
+static hash_digest sign_none(const transaction& tx, uint32_t index,
+    const script& subscript, uint8_t flags)
+{
+    const auto& inputs = *tx.inputs();
+    const auto& self = inputs[index];
+    const auto any = !is_zero(flags & coverage::anyone_can_pay);
+
+    auto ins = std::make_shared<input_ptrs>();
+    ins->reserve(any ? one : inputs.size());
+
+    if (any)
+    {
+        // Retain only the single input.
+        ins->emplace_back(self);
+    }
+    else
+    {
+        ////auto it = inputs.begin();
+
+        ////for (; *it != self; ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+
+        ////// Erase all input scripts and sequences except self.
+        ////++it;
+
+        ////for (; it != inputs.end(); ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+    }
+
+    // Move new inputs to new transaction and drop outputs.
+    return signature_hash({ tx.version(), tx.locktime(), ins, {} }, flags);
 }
 
 static hash_digest sign_all(const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
-    inputs ins;
-    const auto& inputs = tx.inputs();
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
-    ins.reserve(any ? one : inputs.size());
-
-    BITCOIN_ASSERT(index < inputs.size());
+    const auto& inputs = *tx.inputs();
     const auto& self = inputs[index];
+    const auto any = !is_zero(flags & coverage::anyone_can_pay);
+
+    auto ins = std::make_shared<input_ptrs>();
+    ins->reserve(any ? one : inputs.size());
 
     if (any)
     {
-        // Retain only self.
-        ins.emplace_back(self.point(), subscript, self.sequence());
+        // Retain only the single input.
+        ins->emplace_back(self);
     }
     else
     {
-        // Erase all input scripts.
-        for (const auto& input: inputs)
-            ins.emplace_back(input.point(), script{}, input.sequence());
+        ////auto& it = inputs.begin();
 
-        // Replace self that is lost in the loop.
-        ins[index] = { self.point(), subscript, self.sequence() };
+        ////for (; *it != self; ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, self->sequence() }));
+
+        ////// Erase all input scripts except self.
+        ////++it;
+
+        ////for (; it != inputs.end(); ++it)
+        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, self->sequence() }));
     }
 
     // Move new inputs and copy outputs to new transaction.
-    transaction out(tx.version(), tx.locktime(), ins, tx.outputs());
-    return signature_hash(out, flags);
+    return signature_hash({ tx.version(), tx.locktime(), ins, tx.outputs() },
+        flags);
 }
 
 // private/static
@@ -470,10 +467,10 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     // The sighash serializations are isolated for clarity and optimization.
     switch (mask_sighash(flags))
     {
-        case coverage::hash_none:
-            return sign_none(tx, index, subscript, flags);
         case coverage::hash_single:
             return sign_single(tx, index, subscript, flags);
+        case coverage::hash_none:
+            return sign_none(tx, index, subscript, flags);
         default:
         case coverage::hash_all:
             return sign_all(tx, index, subscript, flags);
@@ -512,8 +509,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     //// const auto none = (flag == coverage::hash_none);
     const auto all = (flag == coverage::hash_all);
 
-    BITCOIN_ASSERT(index < tx.inputs().size());
-    const auto& input = tx.inputs()[index];
+    const auto& input = (*tx.inputs())[index];
     const auto script_size = subscript.serialized_size(true);
     const auto size = version_0_preimage_size(script_size);
 
@@ -531,7 +527,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     out.write_bytes(!any && all ? tx.sequences_hash() : null_hash);
 
     // 4. outpoint (32-byte hash + 4-byte little endian).
-    input.point().to_data(out);
+    input->point().to_data(out);
 
     // 5. script of the input (with prefix).
     subscript.to_data(out, true);
@@ -540,12 +536,12 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     out.write_little_endian(value);
 
     // 7. sequence of the input (4).
-    out.write_little_endian(input.sequence());
+    out.write_little_endian(input->sequence());
 
     // 8. outputs (or output) double hash, or null hash (32).
     out.write_bytes(all ? tx.outputs_hash() :
-        (single && index < tx.outputs().size() ?
-            bitcoin_hash(tx.outputs()[index].to_data()) : null_hash));
+        (single && index < tx.outputs()->size() ?
+            bitcoin_hash((*tx.outputs())[index]->to_data()) : null_hash));
 
     // 9. transaction locktime (4).
     out.write_little_endian(tx.locktime());
@@ -567,7 +563,7 @@ hash_digest script::generate_signature_hash(const transaction& tx,
     script_version version, bool bip143)
 {
     // This is merely invalid parameterization, not a consensus value.
-    if (index > tx.inputs().size())
+    if (index > tx.inputs()->size())
         return {};
 
     switch (version)
@@ -988,7 +984,7 @@ script_version script::version() const
     if (!is_witness_program_pattern(ops()))
         return script_version::unversioned;
 
-    switch (ops_->front().code())
+    switch (ops_.front().code())
     {
         case opcode::push_size_0:
             return script_version::zero;
@@ -1109,10 +1105,10 @@ bool script::is_oversized() const
 // The criteria below are not comprehensive but are fast to evaluate.
 bool script::is_unspendable() const
 {
-    if (ops_->empty())
+    if (ops_.empty())
         return false;
 
-    const auto& code = ops_->front().code();
+    const auto& code = ops_.front().code();
 
     // There is no condition prior to the first opcode in a script.
     return operation::is_reserved(code) || operation::is_invalid(code);
@@ -1124,18 +1120,18 @@ bool script::is_unspendable() const
 code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     const script& prevout_script, uint64_t value)
 {
-    if (index >= tx.inputs().size())
+    if (index >= tx.inputs()->size())
         return error::inputs_overflow;
 
     code ec;
     bool witnessed;
-    const auto& in = tx.inputs()[index];
+    const auto& in = (*tx.inputs())[index];
 
     // TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
     // TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
 
     // Evaluate input script.
-    program input(in.script(), tx, index, forks);
+    program input(in->script(), tx, index, forks);
     if ((ec = input.evaluate()))
         return ec;
 
@@ -1152,18 +1148,18 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
     if ((witnessed = prevout_script.is_pay_to_witness(forks)))
     {
         // The input script must be empty (bip141).
-        if (!in.script().ops().empty())
+        if (!in->script().ops().empty())
             return error::dirty_witness;
 
         // Validate the native script.
-        if ((ec = in.witness().verify(tx, index, forks, prevout_script, value)))
+        if ((ec = in->witness().verify(tx, index, forks, prevout_script, value)))
             return ec;
     }
 
     // p2sh and p2w are mutually exclusive.
     else if (prevout_script.is_pay_to_script_hash(forks))
     {
-        if (!is_relaxed_push(in.script().ops()))
+        if (!is_relaxed_push(in->script().ops()))
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
@@ -1181,18 +1177,18 @@ code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
         if ((witnessed = embedded_script.is_pay_to_witness(forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
-            if (in.script().ops().size() != one)
+            if (in->script().ops().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
-            if ((ec = in.witness().verify(tx, index, forks, embedded_script,
+            if ((ec = in->witness().verify(tx, index, forks, embedded_script,
                 value)))
                 return ec;
         }
     }
 
     // Witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !in.witness().stack().empty())
+    if (!witnessed && !in->witness().stack().empty())
         return error::unexpected_witness;
 
     return error::success;

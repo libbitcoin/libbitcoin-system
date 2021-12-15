@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
@@ -36,11 +37,14 @@ namespace chain {
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
+// Push data is not possible with an invalid code, combination is invalid.
+static const auto any_data = to_shared<data_chunk>({ 0x42 });
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
 operation::operation()
-  : operation(any_invalid, std::make_shared<data_chunk>(), false)
+  : operation(any_invalid, any_data, false)
 {
 }
 
@@ -57,46 +61,23 @@ operation::operation(const operation& other)
 
 // If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code)
-  : operation(code, std::make_shared<data_chunk>(), false)
+  : operation(code, to_shared<data_chunk>(), false)
 {
 }
 
 operation::operation(data_chunk&& push_data, bool minimal)
-  : operation(opcode_from_data(push_data, minimal), std::move(push_data), false)
+  : operation(from_push_data(to_shared(std::move(push_data)), minimal))
 {
-    // Minimal interpretation affects only single byte push data.
-    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
-    if (!is_payload(code_))
-    {
-        data_->clear();
-        data_->shrink_to_fit();
-    }
 }
 
-operation::operation(const data_slice& push_data, bool minimal)
-  : operation(opcode_from_data(push_data, minimal), push_data, false)
+operation::operation(const data_chunk& push_data, bool minimal)
+  : operation(from_push_data(to_shared(push_data), minimal))
 {
-    // Minimal interpretation affects only single byte push data.
-    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
-    if (!is_payload(code_))
-    {
-        data_->clear();
-        data_->shrink_to_fit();
-    }
 }
 
 operation::operation(chunk_ptr push_data, bool minimal)
-  : operation(opcode_from_data(*push_data, minimal), *push_data, false)
+  : operation(from_push_data(push_data, minimal))
 {
-    BITCOIN_ASSERT(push_data);
-
-    // Minimal interpretation affects only single byte push data.
-    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
-    if (!is_payload(code_))
-    {
-        data_->clear();
-        data_->shrink_to_fit();
-    }
 }
 
 operation::operation(const data_slice& op_data)
@@ -110,33 +91,18 @@ operation::operation(std::istream& stream)
 }
 
 operation::operation(reader& source)
-  : operation()
+  : operation(from_data(source))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source);
+}
+
+operation::operation(const std::string& mnemonic)
+  : operation(from_string(mnemonic))
+{
 }
 
 // protected
 operation::operation(opcode code, chunk_ptr push_data, bool underflow)
-  : code_(code),
-    data_(push_data),
-    underflow_(underflow)
-{
-}
-
-// protected
-operation::operation(opcode code, data_chunk&& push_data, bool underflow)
-  : code_(code),
-    data_(std::make_shared<data_chunk>(std::move(push_data))),
-    underflow_(underflow)
-{
-}
-
-// protected
-operation::operation(opcode code, const data_chunk& push_data, bool underflow)
-  : code_(code),
-    data_(std::make_shared<data_chunk>(push_data)),
-    underflow_(underflow)
+  : code_(code), data_(push_data), underflow_(underflow)
 {
 }
 
@@ -160,6 +126,7 @@ operation& operation::operator=(const operation& other)
 
 bool operation::operator==(const operation& other) const
 {
+    // TODO: when converted, compare input/output membership, not ptrs.
     return (code_ == other.code_)
         && (*data_ == *other.data_)
         && (underflow_ == other.underflow_);
@@ -173,26 +140,12 @@ bool operation::operator!=(const operation& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool operation::from_data(const data_slice& op_data)
-{
-    stream::in::copy istream(op_data);
-    return from_data(istream);
-}
-
-bool operation::from_data(std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(source);
-}
-
-bool operation::from_data(reader& source)
+// static/private
+operation operation::from_data(reader& source)
 {
     // Guard against resetting a previously-invalid stream.
     if (!source)
-    {
-        reset();
-        return false;
-    }
+        return {};
 
     // If stream is not empty then a non-data opcode will always deserialize.
     // A push-data opcode may indicate more bytes than are available. In this
@@ -205,10 +158,18 @@ bool operation::from_data(reader& source)
     const auto start = source.get_position();
 
     // Size of a push-data opcode is not retained, as this is inherent in data.
-    code_ = static_cast<opcode>(source.read_byte());
-    data_ = std::make_shared<data_chunk>(
-        source.read_bytes(read_data_size(code_, source)));
-    underflow_ = !source;
+    auto code = static_cast<opcode>(source.read_byte());
+    const auto size = read_data_size(code, source);
+
+    // Guard against resetting the invalidated stream.
+    if (size > max_block_size)
+    {
+        source.invalidate();
+        return {};
+    }
+
+    auto push = to_shared(source.read_bytes(size));
+    const auto underflow = !source;
 
     // This requires that provided stream terminates at the end of the script.
     // When passing ops as part of a stream longer than the script, such as for
@@ -216,42 +177,159 @@ bool operation::from_data(reader& source)
     // clear the stream limit upon return. Stream invalidation and set_position
     // do not alter a stream limit, it just behaves as a smaller stream buffer.
     // Without a limit, source.read_bytes() below consumes the remaining stream.
-    if (underflow_)
+    if (underflow)
     {
-        code_ = any_invalid;
+        code = any_invalid;
         source.set_position(start);
-        data_ = std::make_shared<data_chunk>(source.read_bytes());
+        push = to_shared(source.read_bytes());
     }
 
-    // This indicates a failure with the stream itself as it cannot be the
-    // result of invalidity of its data. All byte vectors are deserializable.
-    if (!source)
-        reset();
-
-    return source;
+    // All byte vectors are deserializable, stream indicates own failure.
+    return { code, push, underflow };
 }
 
-// static
-// Advances stream, returns true unless exhausted.
-// Does not advance to end position in the case of underflow operation.
-bool operation::count_op(reader& source)
+// static/private
+operation operation::from_push_data(const chunk_ptr& data, bool minimal)
 {
-    if (source.is_exhausted())
+    const auto code = opcode_from_data(*data, minimal);
+
+    // Minimal interpretation affects only single byte push data.
+    // Revert data if (minimal) opcode_from_data produced a numeric encoding.
+    const auto push = is_payload(code) ? data : to_shared<data_chunk>();
+
+    return { code, push, false };
+}
+
+inline bool is_push_token(const std::string& token)
+{
+    return token.size() > one && token.front() == '[' && token.back() == ']';
+}
+
+inline bool is_text_token(const std::string& token)
+{
+    return token.size() > one && token.front() == '\'' && token.back() == '\'';
+}
+
+inline bool is_underflow_token(const std::string& token)
+{
+    return token.size() > one && token.front() == '<' && token.back() == '>';
+}
+
+inline std::string remove_token_delimiters(const std::string& token)
+{
+    BITCOIN_ASSERT(token.size() > one);
+    return std::string(std::next(token.begin()), std::prev(token.end()));
+}
+
+inline string_list split_push_token(const std::string& token)
+{
+    return split(remove_token_delimiters(token), ".", false, false);
+}
+
+static bool opcode_from_data_prefix(opcode& out_code,
+    const std::string& prefix, const data_chunk& push_data)
+{
+    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto size = push_data.size();
+    out_code = operation::opcode_from_size(size);
+
+    if (prefix == "0")
+    {
+        return size <= op_75;
+    }
+    else if (prefix == "1")
+    {
+        out_code = opcode::push_one_size;
+        return size <= max_uint8;
+    }
+    else if (prefix == "2")
+    {
+        out_code = opcode::push_two_size;
+        return size <= max_uint16;
+    }
+    else if (prefix == "4")
+    {
+        out_code = opcode::push_four_size;
+        return size <= max_uint32;
+    }
+
+    return false;
+}
+
+static bool data_from_decimal(data_chunk& out_data,
+    const std::string& token)
+{
+    // Deserialization to a number can convert random text to zero.
+    if (!is_ascii_numeric(token))
         return false;
 
-    const auto code = static_cast<opcode>(source.read_byte());
-    source.skip_bytes(read_data_size(code, source));
+    int64_t value;
+    if (!deserialize(value, token))
+        return false;
+
+    out_data = machine::number(value).data();
     return true;
 }
 
-// protected
-void operation::reset()
+// private/static
+operation operation::from_string(const std::string& mnemonic)
 {
-    code_ = any_invalid;
-    data_->clear();
-    data_->shrink_to_fit();
-    underflow_ = false;
+    opcode code;
+    data_chunk chunk;
+    auto valid = false;
+    auto underflow = false;
+
+    if (is_push_token(mnemonic))
+    {
+        // Data encoding uses single token with one or two parts.
+        const auto parts = split_push_token(mnemonic);
+
+        if (parts.size() == 1)
+        {
+            // Extract operation using nominal data size decoding.
+            if ((valid = decode_base16(chunk, parts.front())))
+                code = nominal_opcode_from_data(chunk);
+        }
+        else if (parts.size() == 2)
+        {
+            // Extract operation using explicit data size decoding.
+            valid = decode_base16(chunk, parts[1]) &&
+                opcode_from_data_prefix(code, parts[0], chunk);
+        }
+    }
+    else if (is_text_token(mnemonic))
+    {
+        // Extract operation using nominal data size decoding.
+        chunk = to_chunk(remove_token_delimiters(mnemonic));
+        code = nominal_opcode_from_data(chunk);
+        valid = true;
+    }
+    else if (is_underflow_token(mnemonic))
+    {
+        // code is ignored for underflow ops.
+        underflow = true;
+        code = any_invalid;
+        valid = decode_base16(chunk, remove_token_delimiters(mnemonic));
+    }
+    else if (opcode_from_mnemonic(code, mnemonic))
+    {
+        // Any push code may have empty data, so this is presumed here.
+        // No data is obtained here from a push opcode (use push/text tokens).
+        valid = true;
+    }
+    else if (data_from_decimal(chunk, mnemonic))
+    {
+        // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
+        code = nominal_opcode_from_data(chunk);
+        valid = true;
+    }
+
+    if (!valid)
+        return {};
+
+    return { code, to_shared(std::move(chunk)), underflow };
 }
+
 
 // Serialization.
 // ----------------------------------------------------------------------------
@@ -308,138 +386,6 @@ void operation::to_data(writer& sink) const
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-// From String.
-// ----------------------------------------------------------------------------
-
-inline bool is_push_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '[' && token.back() == ']';
-}
-
-inline bool is_text_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '\'' && token.back() == '\'';
-}
-
-inline bool is_underflow_token(const std::string& token)
-{
-    return token.size() > 1 && token.front() == '<' && token.back() == '>';
-}
-
-inline std::string remove_token_delimiters(const std::string& token)
-{
-    BITCOIN_ASSERT(token.size() > 1);
-    return std::string(std::next(token.begin()), std::prev(token.end()));
-}
-
-inline string_list split_push_token(const std::string& token)
-{
-    return split(remove_token_delimiters(token), ".", false, false);
-}
-
-static bool opcode_from_data_prefix(opcode& out_code,
-    const std::string& prefix, const data_chunk& push_data)
-{
-    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-    const auto size = push_data.size();
-    out_code = operation::opcode_from_size(size);
-
-    if (prefix == "0")
-    {
-        return size <= op_75;
-    }
-    else if (prefix == "1")
-    {
-        out_code = opcode::push_one_size;
-        return size <= max_uint8;
-    }
-    else if (prefix == "2")
-    {
-        out_code = opcode::push_two_size;
-        return size <= max_uint16;
-    }
-    else if (prefix == "4")
-    {
-        out_code = opcode::push_four_size;
-        return size <= max_uint32;
-    }
-
-    return false;
-}
-
-static bool data_from_decimal(data_chunk& out_data,
-    const std::string& token)
-{
-    // Deserialization to a number can convert random text to zero.
-    if (!is_ascii_numeric(token))
-        return false;
-
-    int64_t value;
-    if (!deserialize(value, token))
-        return false;
-
-    out_data = machine::number(value).data();
-    return true;
-}
-
-// The removal of spaces in v3 data is a compatibility break with our v2.
-bool operation::from_string(const std::string& mnemonic)
-{
-    reset();
-    auto valid = false;
-
-    if (is_push_token(mnemonic))
-    {
-        // Data encoding uses single token with one or two parts.
-        const auto parts = split_push_token(mnemonic);
-
-        if (parts.size() == 1)
-        {
-            // Extract operation using nominal data size decoding.
-            if ((valid = decode_base16(*data_, parts.front())))
-                code_ = nominal_opcode_from_data(*data_);
-        }
-        else if (parts.size() == 2)
-        {
-            // Extract operation using explicit data size decoding.
-            valid = decode_base16(*data_, parts[1]) &&
-                opcode_from_data_prefix(code_, parts[0], *data_);
-        }
-    }
-    else if (is_text_token(mnemonic))
-    {
-        // Extract operation using nominal data size decoding.
-        data_ = std::make_shared<data_chunk>(
-            to_chunk(remove_token_delimiters(mnemonic)));
-        code_ = nominal_opcode_from_data(*data_);
-        valid = true;
-    }
-    else if (is_underflow_token(mnemonic))
-    {
-        // code_ is ignored for underflow_ ops.
-        underflow_ = true;
-        code_ = any_invalid;
-        valid = decode_base16(*data_, remove_token_delimiters(mnemonic));
-    }
-    else if (opcode_from_mnemonic(code_, mnemonic))
-    {
-        // Any push code may have empty data, so this is presumed here.
-        // No data is obtained here from a push opcode (use push/text tokens).
-        valid = true;
-    }
-    else if (data_from_decimal(*data_, mnemonic))
-    {
-        // opcode_from_mnemonic captures [-1, 0, 1..16] integers, others here.
-        code_ = nominal_opcode_from_data(*data_);
-        valid = true;
-    }
-
-    if (!valid)
-        reset();
-
-    return valid;
-}
-
 // To String.
 // ----------------------------------------------------------------------------
 
@@ -462,9 +408,11 @@ static std::string opcode_to_prefix(opcode code, const data_chunk& data)
     }
 }
 
-// The removal of spaces in v3 data is a compatibility break with our v2.
 std::string operation::to_string(uint32_t active_forks) const
 {
+    if (!is_valid())
+        return "(?)";
+
     if (underflow_)
         return "<" + encode_base16(*data_) + ">";
 
@@ -477,6 +425,22 @@ std::string operation::to_string(uint32_t active_forks) const
 
 // Properties.
 // ----------------------------------------------------------------------------
+
+bool operation::is_valid() const
+{
+    // Push data is not possible with an invalid code, combination is invalid.
+    return !(code_ == any_invalid && data_ == any_data);
+}
+
+opcode operation::code() const
+{
+    return code_;
+}
+
+const data_chunk& operation::data() const
+{
+    return *data_;
+}
 
 size_t operation::serialized_size() const
 {
@@ -499,20 +463,23 @@ size_t operation::serialized_size() const
     }
 }
 
-opcode operation::code() const
-{
-    return code_;
-}
-
-const data_chunk& operation::data() const
-{
-    return *data_;
-}
-
 // Utilities.
 // ----------------------------------------------------------------------------
 
-// private
+// static/private
+// Advances stream, returns true unless exhausted.
+// Does not advance to end position in the case of underflow operation.
+bool operation::count_op(reader& source)
+{
+    if (source.is_exhausted())
+        return false;
+
+    const auto code = static_cast<opcode>(source.read_byte());
+    source.skip_bytes(read_data_size(code, source));
+    return true;
+}
+
+// static/private
 uint32_t operation::read_data_size(opcode code, reader& source)
 {
     constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -577,7 +544,7 @@ opcode operation::nominal_opcode_from_data(const data_chunk& data)
     return opcode_from_size(data.size());
 }
 
-// private
+// static/private
 opcode operation::opcode_from_data(const data_chunk& data,
     bool minimal)
 {

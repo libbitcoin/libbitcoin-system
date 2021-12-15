@@ -19,74 +19,42 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_INVENTORY_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_INVENTORY_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <initializer_list>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/inventory_vector.hpp>
+#include <bitcoin/system/messages/inventory_item.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API inventory
+struct BC_API inventory
 {
-public:
-    typedef std::shared_ptr<inventory> ptr;
-    typedef std::shared_ptr<const inventory> const_ptr;
-    typedef inventory_vector::type_id type_id;
-
-    static inventory factory(uint32_t version, const data_chunk& data);
-    static inventory factory(uint32_t version, std::istream& stream);
-    static inventory factory(uint32_t version, reader& source);
-
-    inventory();
-    inventory(const inventory_vector::list& values);
-    inventory(inventory_vector::list&& values);
-    inventory(const hash_list& hashes, type_id type);
-    inventory(const std::initializer_list<inventory_vector>& values);
-    inventory(const inventory& other);
-    inventory(inventory&& other);
-
-    inventory_vector::list& inventories();
-    const inventory_vector::list& inventories() const;
-    void set_inventories(const inventory_vector::list& value);
-    void set_inventories(inventory_vector::list&& value);
-
-    virtual bool from_data(uint32_t version, const data_chunk& data);
-    virtual bool from_data(uint32_t version, std::istream& stream);
-    virtual bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    void to_hashes(hash_list& out, type_id type) const;
-    void reduce(inventory_vector::list& out, type_id type) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-    size_t count(type_id type) const;
-
-    // This class is move assignable but not copy assignable.
-    inventory& operator=(inventory&& other);
-    void operator=(const inventory&) = delete;
-
-    bool operator==(const inventory& other) const;
-    bool operator!=(const inventory& other) const;
+    typedef std::shared_ptr<const inventory> ptr;
+    typedef inventory_item::type_id type_id;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    inventory_vector::list inventories_;
+    // TODO: parameterize with witness parameter (once node is ready).
+    static inventory factory(hash_list&& hashes, type_id type);
+    static inventory factory(const hash_list& hashes, type_id type);
+
+    static inventory deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+    size_t size(uint32_t version) const;
+
+    inventory_item::list filter(type_id type) const;
+    hash_list to_hashes(type_id type) const;
+    size_t count(type_id type) const;
+
+    inventory_item::list items;
 };
 
 } // namespace messages

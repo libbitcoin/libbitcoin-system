@@ -18,133 +18,44 @@
  */
 #include <bitcoin/system/messages/memory_pool.hpp>
 
+#include <cstddef>
+#include <cstdint>
+#include <string>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-    
-const identifier memory_pool::id = identifier::memory_pool;
+
 const std::string memory_pool::command = "mempool";
+const identifier memory_pool::id = identifier::memory_pool;
 const uint32_t memory_pool::version_minimum = version::level::bip35;
 const uint32_t memory_pool::version_maximum = version::level::maximum;
 
-memory_pool memory_pool::factory(uint32_t version,
-    const data_chunk& data)
+// static
+size_t memory_pool::size(uint32_t)
 {
-    memory_pool instance;
-    instance.from_data(version, data);
-    return instance;
+    return zero;
 }
 
-memory_pool memory_pool::factory(uint32_t version,
-    std::istream& stream)
+memory_pool memory_pool::deserialize(uint32_t version, reader& source)
 {
-    memory_pool instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-memory_pool memory_pool::factory(uint32_t version,
-    reader& source)
-{
-    memory_pool instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-// This is a default instance so is invalid.
-// The only way to make this valid is to deserialize it :/.
-memory_pool::memory_pool()
-  : insufficient_version_(true)
-{
-}
-
-// protected
-memory_pool::memory_pool(bool insufficient_version)
-  : insufficient_version_(insufficient_version)
-{
-}
-
-memory_pool::memory_pool(const memory_pool& other)
-  : memory_pool(other.insufficient_version_)
-{
-}
-
-memory_pool::memory_pool(memory_pool&& other)
-  : memory_pool(other.insufficient_version_)
-{
-}
-
-bool memory_pool::is_valid() const
-{
-    return !insufficient_version_;
-}
-
-// This is again a default instance so is invalid.
-void memory_pool::reset()
-{
-    insufficient_version_ = true;
-}
-
-bool memory_pool::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool memory_pool::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool memory_pool::from_data(uint32_t version, reader& source)
-{
-    reset();
-
-    // Initialize as valid from deserialization.
-    insufficient_version_ = false;
-
-    if (version < memory_pool::version_minimum)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    if (!source)
-        reset();
-
-    return source;
+    return {};
 }
 
-data_chunk memory_pool::to_data(uint32_t version) const
+void memory_pool::serialize(uint32_t DEBUG_ONLY(version),
+    writer& DEBUG_ONLY(sink)) const
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void memory_pool::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void memory_pool::to_data(uint32_t, writer&) const
-{
-}
-
-size_t memory_pool::serialized_size(uint32_t version) const
-{
-    return memory_pool::satoshi_fixed_size(version);
-}
-
-size_t memory_pool::satoshi_fixed_size(uint32_t)
-{
-    return 0;
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 } // namespace messages

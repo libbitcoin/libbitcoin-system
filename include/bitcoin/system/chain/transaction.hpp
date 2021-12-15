@@ -41,7 +41,7 @@ namespace chain {
 class BC_API transaction
 {
 public:
-    typedef std::shared_ptr<transaction> ptr;
+    typedef std::shared_ptr<const transaction> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -72,16 +72,6 @@ public:
     bool operator==(const transaction& other) const;
     bool operator!=(const transaction& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data, bool witness);
-    bool from_data(std::istream& stream, bool witness);
-    bool from_data(reader& source, bool witness);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -93,10 +83,11 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     uint32_t version() const;
     uint32_t locktime() const;
-    const chain::inputs& inputs() const;
-    const chain::outputs& outputs() const;
+    const inputs_ptr inputs() const;
+    const outputs_ptr outputs() const;
 
     /// Computed properties.
     size_t weight() const;
@@ -133,11 +124,10 @@ public:
 
 protected:
     ////friend class block;
+    ////void reset();
 
     transaction(bool segregated, uint32_t version, uint32_t locktime,
         const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid);
-
-    void reset();
 
     // Guard (context free).
     // ------------------------------------------------------------------------
@@ -180,22 +170,27 @@ protected:
     bool is_confirmed_double_spend(size_t height) const;
 
 private:
-    ////static size_t maximum_size(bool coinbase);
+    static transaction from_data(reader& source, bool witness);
     static bool segregated(const chain::inputs& inputs);
+    static bool segregated(const inputs_ptr& inputs);
+    ////static size_t maximum_size(bool coinbase);
 
     // delegated
     code connect_input(const context& state, size_t index) const;
 
-    bool segregated_;
+    // Transaction should be stored as shared (adds 16 bytes).
+    // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
     uint32_t locktime_;
     inputs_ptr inputs_;
     outputs_ptr outputs_;
+    bool segregated_;
     bool valid_;
 };
 
 typedef std::vector<transaction> transactions;
-typedef std::shared_ptr<transactions> transactions_ptr;
+typedef std::vector<transaction::ptr> transaction_ptrs;
+typedef std::shared_ptr<transaction_ptrs> transactions_ptr;
 
 } // namespace chain
 } // namespace system

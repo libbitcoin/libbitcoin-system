@@ -30,9 +30,9 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_2__always__equals_params)
 {
-    const messages::inventory_vector::list values =
+    const messages::inventory_item::list values =
     {
-        messages::inventory_vector(
+        messages::inventory_item(
             inventory::type_id::error,
             {
                 {
@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_2__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_3__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    messages::inventory_vector::list values =
+    messages::inventory_item::list values =
     {
-        messages::inventory_vector(type, hash)
+        messages::inventory_item(type, hash)
     };
 
     messages::not_found instance(std::move(values));
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_4__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list hashes = { hash };
 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_5__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::not_found instance{ { type, hash } };
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_5__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_6__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::not_found value{ { type, hash } };
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(not_found__constructor_6__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(not_found__constructor_7__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::not_found value{ { type, hash } };
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(not_found__from_data__insufficient_version__failure)
     {
         {
             {
-                inventory_vector::type_id::error,
+                inventory_item::type_id::error,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(not_found__factory_1__valid_input__success)
     {
         {
             {
-                inventory_vector::type_id::error,
+                inventory_item::type_id::error,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(not_found__factory_2__valid_input__success)
     {
         {
             {
-                inventory_vector::type_id::transaction,
+                inventory_item::type_id::transaction,
                 {
                     {
                         0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(not_found__factory_3__valid_input__success)
     {
         {
             {
-                inventory_vector::type_id::block,
+                inventory_item::type_id::block,
                 {
                     {
                         0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
@@ -244,9 +244,9 @@ BOOST_AUTO_TEST_CASE(not_found__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(not_found__operator_assign_equals__always__matches_equivalent)
 {
-    const messages::inventory_vector::list elements =
+    const messages::inventory_item::list elements =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__duplicates__true)
 {
     const messages::not_found expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_equals__differs__false)
 {
     const messages::not_found expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__duplicates__false)
 {
     const messages::not_found expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(not_found__operator_boolean_not_equals__differs__true)
 {
     const messages::not_found expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 

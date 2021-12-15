@@ -43,7 +43,7 @@ namespace chain {
 class BC_API block
 {
 public:
-    typedef std::shared_ptr<block> ptr;
+    typedef std::shared_ptr<const block> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -71,16 +71,6 @@ public:
     bool operator==(const block& other) const;
     bool operator!=(const block& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data, bool witness);
-    bool from_data(std::istream& stream, bool witness);
-    bool from_data(reader& source, bool witness);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -92,8 +82,10 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     const chain::header& header() const;
-    const transactions& transactions() const;
+    const chain::header::ptr header_ptr() const;
+    const transactions_ptr transactions() const;
     hash_list transaction_hashes(bool witness) const;
 
     /// Computed properties.
@@ -116,8 +108,6 @@ public:
 protected:
     block(const chain::header::ptr& header, const transactions_ptr& txs,
         bool valid);
-
-    void reset();
 
     // Check (context free).
     // ------------------------------------------------------------------------
@@ -159,6 +149,8 @@ protected:
     // TX: error::confirmed_double_spend (prevout confirmation state)
 
 private:
+    static block from_data(reader& source, bool witness);
+
     // context free
     hash_digest generate_merkle_root(bool witness) const;
 
@@ -172,13 +164,14 @@ private:
     code connect_transactions(const context& state) const;
     code accept_transactions(const context& state) const;
 
+    // Block should be stored as shared (adds 16 bytes).
+    // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).
     chain::header::ptr header_;
     transactions_ptr txs_;
     bool valid_;
 };
 
 typedef std::vector<block> blocks;
-typedef std::shared_ptr<blocks> blocks_ptr;
 
 } // namespace chain
 } // namespace system

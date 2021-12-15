@@ -984,9 +984,9 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes2__past_end__expected_invalid)
 
 #ifdef BYTE_READER_STRINGS
 
-// read_string0
+// read_string
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string0__one_byte__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string__one_byte__expected)
 {
     const std::string value{ 0x03, 'a', 'b', 'c' };
     std::istringstream stream{ value };
@@ -994,7 +994,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string0__one_byte__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string0__two_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string__two_bytes__expected)
 {
     const std::string value{ (char)varint_two_bytes, 0x03, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
@@ -1002,7 +1002,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string0__two_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string0__four_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string__four_bytes__expected)
 {
     const std::string value{ (char)varint_four_bytes, 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
@@ -1010,7 +1010,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string0__four_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string0__eight_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string__eight_bytes__expected)
 {
     const std::string value{ (char)varint_eight_bytes, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
@@ -1018,68 +1018,68 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string0__eight_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-// read_string1
+// read_string_buffer
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__zero__empty_valid)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__zero__empty_valid)
 {
     std::istringstream stream;
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE(reader.read_string(0).empty());
+    BOOST_REQUIRE(reader.read_string_buffer(0).empty());
     BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__partial__expected_valid)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__partial__expected_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = to_half(value.length());
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), value.substr(0, length));
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), value.substr(0, length));
     BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__full__expected_valid)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__full__expected_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = value.length();
     std::istringstream stream{ value + "*" };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), value);
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), value);
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
     BOOST_REQUIRE(reader);
 }
 
 // The full number of bytes are read, but not past end.
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__past_end__truncated_valid)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__past_end__truncated_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = value.length();
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(add1(length)), value);
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(add1(length)), value);
     BOOST_REQUIRE(reader);
 }
 
 // The full number of bytes are read, and the string is terminated at null.
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__full_embedded_null__truncated_exhausted)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__full_embedded_null__truncated_exhausted)
 {
     const std::string value{ "abcdef\0hij" };
     const auto length = value.length();
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), "abcdef");
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), "abcdef");
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
 // The full number of bytes are read, and the string is terminated at null.
-BOOST_AUTO_TEST_CASE(byte_reader__read_string1__partial_embedded_null__truncated_not_exhausted)
+BOOST_AUTO_TEST_CASE(byte_reader__read_string_buffer__partial_embedded_null__truncated_not_exhausted)
 {
     const std::string value{ "abcdef\0hij" };
     const auto length = value.length();
     std::istringstream stream{ value + "*" };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), "abcdef");
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), "abcdef");
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(stream.get(), '*');

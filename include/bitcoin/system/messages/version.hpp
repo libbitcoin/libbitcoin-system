@@ -19,12 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_VERSION_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_VERSION_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/network_address.hpp>
@@ -34,15 +32,69 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+// Minimum current libbitcoin protocol version:     31402
+// Minimum current satoshi client protocol version: 31800
+
+// libbitcoin-network
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// version      v2      70001           added relay field
+// verack       v1
+// getaddr      v1
+// addr         v1
+// ping         v1
+// ping         v2      60001   BIP031  added nonce field
+// pong         v1      60001   BIP031
+// reject       v3      70002   BIP061
+// ----------------------------------------------------------------------------
+// alert        --                      no intent to support
+// checkorder   --                      obsolete
+// reply        --                      obsolete
+// submitorder  --                      obsolete
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// libbitcoin-node
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// getblocks    v1
+// inv          v1
+// getdata      v1
+// getdata      v3      70001   BIP037  allows filtered_block flag
+// block        v1
+// tx           v1
+// notfound     v2      70001
+// getheaders   v3      31800
+// headers      v3      31800
+// mempool      --      60002   BIP035
+// mempool      v3      70002           allow multiple inv messages in reply
+// sendheaders  v3      70012   BIP130
+// feefilter    v3      70013   BIP133
+// blocktxn     v3      70014   BIP152
+// cmpctblock   v3      70014   BIP152
+// getblocktxn  v3      70014   BIP152
+// sendcmpct    v3      70014   BIP152
+// merkleblock  v3      70001   BIP037  no bloom filters so unfiltered only
+// ----------------------------------------------------------------------------
+// filterload   --      70001   BIP037  no intent to support, see BIP111
+// filteradd    --      70001   BIP037  no intent to support, see BIP111
+// filterclear  --      70001   BIP037  no intent to support, see BIP111
+// ----------------------------------------------------------------------------
+// cfilter      --      70015   BIP157
+// getcfilters  --      70015   BIP157
+// cfcheckpt    --      70015   BIP157
+// getcfcheckpt --      70015   BIP157
+// cfheaders    --      70015   BIP157
+// getcfheaders --      70015   BIP157
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 // The checksum is ignored by the version command.
-class BC_API version
+struct BC_API version
 {
-public:
-    typedef std::shared_ptr<version> ptr;
-    typedef std::shared_ptr<const version> const_ptr;
+    typedef std::shared_ptr<const version> ptr;
 
     enum level: uint32_t
     {
+        // client filters protocol
+        bip157 = 70015,
+
         // compact blocks protocol
         bip152 = 70014,
 
@@ -61,7 +113,7 @@ public:
         // reject (satoshi node writes version.relay starting here)
         bip61 = 70002,
 
-        // filters, merkle_block, not_found, version.relay
+        // bloom filters, merkle_block, not_found, version.relay
         bip37 = 70001,
 
         // memory_pool
@@ -111,96 +163,29 @@ public:
 
         // The node is capable of responding to getcfilters, getcfheaders,
         // and getcfcheckpt protocol requests.
-        node_compact_filters = (1u << 6)
+        node_client_filters = (1u << 6)
     };
-
-    static version factory(uint32_t version, const data_chunk& data);
-    static version factory(uint32_t version, std::istream& stream);
-    static version factory(uint32_t version, reader& source);
-
-    version();
-    version(uint32_t value, uint64_t services, uint64_t timestamp,
-        const network_address& address_receiver,
-        const network_address& address_sender,
-        uint64_t nonce, const std::string& user_agent, uint32_t start_height,
-        bool relay);
-    version(uint32_t value, uint64_t services, uint64_t timestamp,
-        network_address&& address_receiver, network_address&& address_sender,
-        uint64_t nonce, std::string&& user_agent, uint32_t start_height,
-        bool relay);
-    version(const version& other);
-    version(version&& other);
-
-    uint32_t value() const;
-    void set_value(uint32_t value);
-
-    uint64_t services() const;
-    void set_services(uint64_t services);
-
-    uint64_t timestamp() const;
-    void set_timestamp(uint64_t timestamp);
-
-    network_address& address_receiver();
-    const network_address& address_receiver() const;
-//    void set_address_receiver(const network_address& address);
-    void set_address_receiver(network_address&& address);
-
-    network_address& address_sender();
-    const network_address& address_sender() const;
-//    void set_address_sender(const network_address& address);
-    void set_address_sender(network_address&& address);
-
-    uint64_t nonce() const;
-    void set_nonce(uint64_t nonce);
-
-    std::string& user_agent();
-    const std::string& user_agent() const;
-    void set_user_agent(const std::string& agent);
-    void set_user_agent(std::string&& agent);
-
-    uint32_t start_height() const;
-    void set_start_height(uint32_t height);
-
-    // version >= 70001
-    bool relay() const;
-    void set_relay(bool relay);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    // This class is move assignable but not copy assignable.
-    version& operator=(version&& other);
-    void operator=(const version&) = delete;
-
-    bool operator==(const version& other) const;
-    bool operator!=(const version& other) const;
 
     static const identifier id;
     static const std::string command;
-
-    // static const bounds version;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    uint32_t value_;
-    uint64_t services_;
-    uint64_t timestamp_;
-    network_address address_receiver_;
-    network_address address_sender_;
-    uint64_t nonce_;
-    std::string user_agent_;
-    uint32_t start_height_;
+    static version deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+    size_t size(uint32_t version) const;
+
+    uint32_t value;
+    uint64_t services;
+    uint64_t timestamp;
+    network_address address_receiver;
+    network_address address_sender;
+    uint64_t nonce;
+    std::string user_agent;
+    uint32_t start_height;
 
     // version >= 70001
-    bool relay_;
+    bool relay;
 };
 
 } // namespace messages

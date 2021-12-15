@@ -20,24 +20,26 @@
 
 #include <map>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/messages/address.hpp>
 #include <bitcoin/system/messages/alert.hpp>
 #include <bitcoin/system/messages/block.hpp>
-#include <bitcoin/system/messages/block_transactions.hpp>
+#include <bitcoin/system/messages/compact_transactions.hpp>
 #include <bitcoin/system/messages/compact_block.hpp>
-#include <bitcoin/system/messages/compact_filter.hpp>
-#include <bitcoin/system/messages/compact_filter_checkpoint.hpp>
-#include <bitcoin/system/messages/compact_filter_headers.hpp>
+#include <bitcoin/system/messages/client_filter.hpp>
+#include <bitcoin/system/messages/client_filter_checkpoint.hpp>
+#include <bitcoin/system/messages/client_filter_headers.hpp>
 #include <bitcoin/system/messages/fee_filter.hpp>
-#include <bitcoin/system/messages/filter_add.hpp>
-#include <bitcoin/system/messages/filter_clear.hpp>
-#include <bitcoin/system/messages/filter_load.hpp>
+#include <bitcoin/system/messages/bloom_filter_add.hpp>
+#include <bitcoin/system/messages/bloom_filter_clear.hpp>
+#include <bitcoin/system/messages/bloom_filter_load.hpp>
 #include <bitcoin/system/messages/get_address.hpp>
-#include <bitcoin/system/messages/get_block_transactions.hpp>
+#include <bitcoin/system/messages/get_compact_transactions.hpp>
 #include <bitcoin/system/messages/get_blocks.hpp>
-#include <bitcoin/system/messages/get_compact_filter_checkpoint.hpp>
-#include <bitcoin/system/messages/get_compact_filter_headers.hpp>
-#include <bitcoin/system/messages/get_compact_filters.hpp>
+#include <bitcoin/system/messages/get_client_filter_checkpoint.hpp>
+#include <bitcoin/system/messages/get_client_filter_headers.hpp>
+#include <bitcoin/system/messages/get_client_filters.hpp>
 #include <bitcoin/system/messages/get_data.hpp>
 #include <bitcoin/system/messages/get_headers.hpp>
 #include <bitcoin/system/messages/headers.hpp>
@@ -53,19 +55,13 @@
 #include <bitcoin/system/messages/send_compact.hpp>
 #include <bitcoin/system/messages/send_headers.hpp>
 #include <bitcoin/system/messages/transaction.hpp>
-#include <bitcoin/system/messages/verack.hpp>
+#include <bitcoin/system/messages/version_acknowledge.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
-size_t heading::maximum_size()
-{
-    // This assumes that the heading doesn't shrink in size.
-    return satoshi_fixed_size();
-}
 
 // Pre-Witness:
 // A maximal inventory is 50,000 entries, the largest valid message.
@@ -82,135 +78,56 @@ size_t heading::maximum_size()
 // This calculation should be revisited given any protocol change.
 size_t heading::maximum_payload_size(uint32_t, bool witness)
 {
-    constexpr size_t vector = sizeof(uint32_t) + hash_size;
-    constexpr size_t maximum = 3u + vector * max_inventory;
+    static constexpr size_t vector = sizeof(uint32_t) + hash_size;
+    static constexpr size_t maximum = 3u + vector * max_inventory;
     return witness ? chain::max_block_weight : maximum;
 }
 
-size_t heading::satoshi_fixed_size()
+// static
+heading heading::factory(uint32_t magic, const std::string& command,
+    const data_slice& payload)
 {
-    return sizeof(uint32_t) + command_size + sizeof(uint32_t) +
+    const auto size = payload.size();
+    const auto payload_size = size > max_uint32 ? 0u : size;
+    const auto payload_trimmed = is_zero(payload_size) ? data_slice{} : payload;
+
+    return
+    {
+        magic,
+        command,
+        static_cast<uint32_t>(payload_size),
+        network_checksum(payload_trimmed)
+    };
+}
+
+// static
+size_t heading::size()
+{
+    return
+        sizeof(uint32_t) +
+        command_size +
+        sizeof(uint32_t) +
         sizeof(uint32_t);
 }
 
-heading heading::factory(const data_chunk& data)
+// static
+heading heading::deserialize(reader& source)
 {
-    heading instance;
-    instance.from_data(data);
-    return instance;
+    return
+    {
+        source.read_4_bytes_little_endian(),
+        source.read_string_buffer(command_size),
+        source.read_4_bytes_little_endian(),
+        source.read_4_bytes_little_endian()
+    };
 }
 
-heading heading::factory(std::istream& stream)
+void heading::serialize(writer& sink) const
 {
-    heading instance;
-    instance.from_data(stream);
-    return instance;
-}
-
-heading heading::factory(reader& source)
-{
-    heading instance;
-    instance.from_data(source);
-    return instance;
-}
-
-heading::heading()
-  : magic_(0), command_(), payload_size_(0), checksum_(0)
-{
-}
-
-heading::heading(uint32_t magic, const std::string& command,
-    const data_chunk& payload)
-  : heading(magic, command, static_cast<uint32_t>(payload.size()),
-      network_checksum(payload))
-{
-    if (payload.size() > max_uint32)
-        reset();
-}
-
-// protected
-heading::heading(uint32_t magic, const std::string& command,
-    uint32_t payload_size, uint32_t checksum)
-  : magic_(magic), command_(command), payload_size_(payload_size),
-    checksum_(checksum)
-{
-}
-
-heading::heading(const heading& other)
-  : heading(other.magic_, other.command_, other.payload_size_, other.checksum_)
-{
-}
-
-heading::heading(heading&& other)
-  : heading(other.magic_, std::move(other.command_), other.payload_size_,
-      other.checksum_)
-{
-}
-
-bool heading::is_valid() const
-{
-    return (magic_ != 0)
-        || (payload_size_ != 0)
-        || (checksum_ != 0)
-        || !command_.empty();
-}
-
-void heading::reset()
-{
-    magic_ = 0;
-    command_.clear();
-    command_.shrink_to_fit();
-    payload_size_ = 0;
-    checksum_ = 0;
-}
-
-bool heading::from_data(const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(istream);
-}
-
-bool heading::from_data(std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(source);
-}
-
-bool heading::from_data(reader& source)
-{
-    reset();
-    magic_ = source.read_4_bytes_little_endian();
-    command_ = source.read_string(command_size);
-    payload_size_ = source.read_4_bytes_little_endian();
-    checksum_ = source.read_4_bytes_little_endian();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk heading::to_data() const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(satoshi_fixed_size());
-    stream::out::copy ostream(data);
-    to_data(ostream);
-    return data;
-}
-
-void heading::to_data(std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(out);
-}
-
-void heading::to_data(writer& sink) const
-{
-    sink.write_4_bytes_little_endian(magic_);
-    sink.write_string(command_, command_size);
-    sink.write_4_bytes_little_endian(payload_size_);
-    sink.write_4_bytes_little_endian(checksum_);
+    sink.write_4_bytes_little_endian(magic);
+    sink.write_string_buffer(command, command_size);
+    sink.write_4_bytes_little_endian(payload_size);
+    sink.write_4_bytes_little_endian(checksum);
 }
 
 #define COMMAND_ID(name) { name::command, name::id }
@@ -223,21 +140,21 @@ identifier heading::id() const
         COMMAND_ID(address),
         COMMAND_ID(alert),
         COMMAND_ID(block),
-        COMMAND_ID(block_transactions),
+        COMMAND_ID(compact_transactions),
         COMMAND_ID(compact_block),
-        COMMAND_ID(compact_filter),
-        COMMAND_ID(compact_filter_checkpoint),
-        COMMAND_ID(compact_filter_headers),
+        COMMAND_ID(client_filter),
+        COMMAND_ID(client_filter_checkpoint),
+        COMMAND_ID(client_filter_headers),
         COMMAND_ID(fee_filter),
-        COMMAND_ID(filter_add),
-        COMMAND_ID(filter_clear),
-        COMMAND_ID(filter_load),
+        COMMAND_ID(bloom_filter_add),
+        COMMAND_ID(bloom_filter_clear),
+        COMMAND_ID(bloom_filter_load),
         COMMAND_ID(get_address),
-        COMMAND_ID(get_block_transactions),
+        COMMAND_ID(get_compact_transactions),
         COMMAND_ID(get_blocks),
-        COMMAND_ID(get_compact_filter_checkpoint),
-        COMMAND_ID(get_compact_filter_headers),
-        COMMAND_ID(get_compact_filters),
+        COMMAND_ID(get_client_filter_checkpoint),
+        COMMAND_ID(get_client_filter_headers),
+        COMMAND_ID(get_client_filters),
         COMMAND_ID(get_data),
         COMMAND_ID(get_headers),
         COMMAND_ID(headers),
@@ -251,70 +168,19 @@ identifier heading::id() const
         COMMAND_ID(send_compact),
         COMMAND_ID(send_headers),
         COMMAND_ID(transaction),
-        COMMAND_ID(verack),
+        COMMAND_ID(version_acknowledge),
         COMMAND_ID(version)
     };
 
-    const auto it = identifiers.find(command_);
+    const auto it = identifiers.find(command);
     return (it == identifiers.end() ? identifier::unknown : it->second);
 }
+
 #undef COMMAND_ID
-
-uint32_t heading::payload_size() const
-{
-    return payload_size_;
-}
-
-uint32_t heading::magic() const
-{
-    return magic_;
-}
-
-void heading::set_magic(uint32_t value)
-{
-    magic_ = value;
-}
-
-const std::string& heading::command() const
-{
-    return command_;
-}
-
-void heading::set_command(const std::string& value)
-{
-    command_ = value;
-}
-
-void heading::set_command(std::string&& value)
-{
-    command_ = std::move(value);
-}
 
 bool heading::verify_checksum(const data_slice& body) const
 {
-    return network_checksum(body) == checksum_;
-}
-
-heading& heading::operator=(heading&& other)
-{
-    magic_ = other.magic_;
-    command_ = std::move(other.command_);
-    payload_size_ = other.payload_size_;
-    checksum_ = other.checksum_;
-    return *this;
-}
-
-bool heading::operator==(const heading& other) const
-{
-    return (magic_ == other.magic_)
-        && (command_ == other.command_)
-        && (payload_size_ == other.payload_size_)
-        && (checksum_ == other.checksum_);
-}
-
-bool heading::operator!=(const heading& other) const
-{
-    return !(*this == other);
+    return network_checksum(body) == checksum;
 }
 
 } // namespace messages

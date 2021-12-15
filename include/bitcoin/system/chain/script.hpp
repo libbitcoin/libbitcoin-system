@@ -46,12 +46,12 @@ class transaction;
 class BC_API script
 {
 public:
-    typedef std::shared_ptr<script> ptr;
+    typedef std::shared_ptr<const script> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default script is a valid (empty script) object.
+    /// Default script is an invalid empty script object.
     script();
 
     script(script&& other);
@@ -59,11 +59,12 @@ public:
 
     script(operations&& ops);
     script(const operations& ops);
-    script(const operations_ptr& ops);
 
     script(const data_slice& data, bool prefix);
     script(std::istream& stream, bool prefix);
     script(reader& source, bool prefix);
+
+    script(const std::string& mnemonic);
 
     // Operators.
     // ------------------------------------------------------------------------
@@ -73,20 +74,6 @@ public:
 
     bool operator==(const script& other) const;
     bool operator!=(const script& other) const;
-
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    /// Deserialization invalidates the iterator.
-    bool from_data(const data_slice& data, bool prefix);
-    bool from_data(std::istream& stream, bool prefix);
-    bool from_data(reader& source, bool prefix);
-
-    /// Deserialization invalidates the iterator.
-    bool from_string(const std::string& mnemonic);
-
-    /// Deserialization result.
-    bool is_valid() const;
 
     // Serialization.
     // ------------------------------------------------------------------------
@@ -101,6 +88,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     const operations& ops() const;
 
     /// Computed properties.
@@ -195,17 +183,15 @@ public:
         const script& prevout_script, uint64_t value);
 
 protected:
-    // So inputs and output may reset the member.
-    friend class input;
-    friend class output;
+    script(operations&& ops, bool valid);
+    script(const operations& ops, bool valid);
 
-    script(const operations_ptr& ops, bool valid);
-
-    void reset();
     bool is_pay_to_witness(uint32_t forks) const;
     bool is_pay_to_script_hash(uint32_t forks) const;
 
 private:
+    static script from_data(reader& source, bool prefix);
+    static script from_string(const std::string& mnemonic);
     static size_t op_count(reader& source);
     static hash_digest generate_unversioned_signature_hash(const transaction& tx,
         uint32_t index, const script& subscript, uint8_t flags);
@@ -213,12 +199,12 @@ private:
         uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
         bool bip143);
 
-    operations_ptr ops_;
+    // Script should be stored as shared.
+    operations ops_;
     bool valid_;
 };
 
 typedef std::vector<script> scripts;
-typedef std::shared_ptr<scripts> scripts_ptr;
 
 } // namespace chain
 } // namespace system

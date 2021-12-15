@@ -30,11 +30,11 @@ static const chain::header expected_header
     68644u
 };
 
-static const messages::prefilled_transaction::list expected_transactions
+static const messages::compact_transaction::list expected_transactions
 {
-    messages::prefilled_transaction(10, chain::transaction(1, 48, chain::inputs{}, {})),
-    messages::prefilled_transaction(20, chain::transaction(2, 32, chain::inputs{}, {})),
-    messages::prefilled_transaction(30, chain::transaction(4, 16, chain::inputs{}, {}))
+    messages::compact_transaction(10, chain::transaction(1, 48, chain::inputs{}, {})),
+    messages::compact_transaction(20, chain::transaction(2, 32, chain::inputs{}, {})),
+    messages::compact_transaction(30, chain::transaction(4, 16, chain::inputs{}, {}))
 };
 
 static const messages::compact_block::short_id_list expected_short_ids
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(compact_block__constructor_3__always__equals_params)
 
     uint64_t nonce = 453245u;
     messages::compact_block::short_id_list dup_short_ids = expected_short_ids;
-    messages::prefilled_transaction::list dup_transactions = expected_transactions;
+    messages::compact_transaction::list dup_transactions = expected_transactions;
     messages::compact_block instance(std::move(dup_header), nonce, std::move(dup_short_ids), std::move(dup_transactions));
 
     BOOST_REQUIRE(instance.is_valid());
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(compact_block__transactions_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(compact_block__transactions_setter_2__roundtrip__success)
 {
-    messages::prefilled_transaction::list dup(expected_transactions);
+    messages::compact_transaction::list dup(expected_transactions);
     messages::compact_block instance;
     BOOST_REQUIRE(expected_transactions != instance.transactions());
     instance.set_transactions(std::move(dup));

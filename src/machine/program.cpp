@@ -83,7 +83,7 @@ program::program(const script& script, const chain::transaction& transaction,
     jump_(script_.ops().begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < transaction.inputs().size());
+    BITCOIN_ASSERT(index < transaction.inputs()->size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
@@ -102,7 +102,7 @@ program::program(const script& script, const chain::transaction& transaction,
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < transaction.inputs().size());
+    BITCOIN_ASSERT(index < transaction.inputs()->size());
 }
 
 
@@ -161,7 +161,7 @@ bool program::is_invalid() const
     // TODO: nops rule must be enabled.
     return
         (/*nops_rule && */script_.is_oversized()) ||
-        (input_index_ > transaction_.inputs().size()) ||
+        (input_index_ > transaction_.inputs()->size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
 
@@ -179,8 +179,8 @@ uint64_t program::value() const
 const input& program::input() const
 {
     // This is guarded by is_invalid().
-    BITCOIN_ASSERT(input_index_ < transaction().inputs().size());
-    return transaction_.inputs()[input_index_];
+    BITCOIN_ASSERT(input_index_ < transaction().inputs()->size());
+    return *(*transaction_.inputs())[input_index_];
 }
 
 const chain::transaction& program::transaction() const

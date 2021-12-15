@@ -19,88 +19,41 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_COMPACT_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_COMPACT_BLOCK_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
+#include <cstdint>
+#include <memory>
+#include <string>
 #include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/messages/compact_transaction.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/prefilled_transaction.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API compact_block
+struct BC_API compact_block
 {
-public:
-    typedef std::shared_ptr<compact_block> ptr;
-    typedef std::shared_ptr<const compact_block> const_ptr;
-
+    typedef std::shared_ptr<const compact_block> ptr;
     typedef mini_hash short_id;
     typedef mini_hash_list short_id_list;
-
-    static compact_block factory(uint32_t version, const data_chunk& data);
-    static compact_block factory(uint32_t version, std::istream& stream);
-    static compact_block factory(uint32_t version, reader& source);
-
-    compact_block();
-    compact_block(const chain::header& header, uint64_t nonce,
-        const short_id_list& short_ids,
-        const prefilled_transaction::list& transactions);
-    compact_block(chain::header&& header, uint64_t nonce,
-        short_id_list&& short_ids,
-        prefilled_transaction::list&& transactions);
-    compact_block(const compact_block& other);
-    compact_block(compact_block&& other);
-
-    chain::header& header();
-    const chain::header& header() const;
-    void set_header(const chain::header& value);
-    void set_header(chain::header&& value);
-
-    uint64_t nonce() const;
-    void set_nonce(uint64_t value);
-
-    short_id_list& short_ids();
-    const short_id_list& short_ids() const;
-    void set_short_ids(const short_id_list& value);
-    void set_short_ids(short_id_list&& value);
-
-    prefilled_transaction::list& transactions();
-    const prefilled_transaction::list& transactions() const;
-    void set_transactions(const prefilled_transaction::list& value);
-    void set_transactions(prefilled_transaction::list&& value);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    // This class is move assignable but not copy assignable.
-    compact_block& operator=(compact_block&& other);
-    void operator=(const compact_block&) = delete;
-
-    bool operator==(const compact_block& other) const;
-    bool operator!=(const compact_block& other) const;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    chain::header header_;
-    uint64_t nonce_;
-    short_id_list short_ids_;
-    prefilled_transaction::list transactions_;
+    static compact_block deserialize(uint32_t version, reader& source,
+        bool witness);
+    void serialize(uint32_t version, writer& sink, bool witness) const;
+    size_t size(uint32_t version, bool witness) const;
+
+    chain::header header;
+    uint64_t nonce;
+    short_id_list short_ids;
+    compact_transaction::list transactions;
 };
 
 } // namespace messages

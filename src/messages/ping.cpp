@@ -18,8 +18,12 @@
  */
 #include <bitcoin/system/messages/ping.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -27,144 +31,39 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
+// ping.nonce added by bip31.
 const identifier ping::id = identifier::ping;
 const std::string ping::command = "ping";
 const uint32_t ping::version_minimum = version::level::minimum;
 const uint32_t ping::version_maximum = version::level::maximum;
 
-ping ping::factory(uint32_t version, const data_chunk& data)
+// static
+size_t ping::size(uint32_t version)
 {
-    ping instance;
-    instance.from_data(version, data);
-    return instance;
+    return version < version::level::bip31 ? zero : sizeof(uint64_t);
 }
 
-ping ping::factory(uint32_t version, std::istream& stream)
+// static
+ping ping::deserialize(uint32_t version, reader& source)
 {
-    ping instance;
-    instance.from_data(version, stream);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    const auto nonce = version < version::level::bip31 ? 0u :
+        source.read_8_bytes_little_endian();
+
+    return { nonce };
 }
 
-ping ping::factory(uint32_t version, reader& source)
+void ping::serialize(uint32_t version, writer& sink) const
 {
-    ping instance;
-    instance.from_data(version, source);
-    return instance;
-}
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
 
-size_t ping::satoshi_fixed_size(uint32_t version)
-{
-    return version < version::level::bip31 ? 0 : sizeof(nonce_);
-}
-
-ping::ping()
-  : nonce_(0), nonceless_(false), valid_(false)
-{
-}
-
-ping::ping(uint64_t nonce)
-  : nonce_(nonce), nonceless_(false), valid_(true)
-{
-}
-
-ping::ping(const ping& other)
-  : nonce_(other.nonce_), nonceless_(other.nonceless_), valid_(other.valid_)
-{
-}
-
-bool ping::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool ping::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool ping::from_data(uint32_t version, reader& source)
-{
-    reset();
-
-    valid_ = true;
-    nonceless_ = (version < version::level::bip31);
-
-    if (!nonceless_)
-        nonce_ = source.read_8_bytes_little_endian();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk ping::to_data(uint32_t version) const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void ping::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void ping::to_data(uint32_t version, writer& sink) const
-{
     if (version >= version::level::bip31)
-        sink.write_8_bytes_little_endian(nonce_);
-}
+        sink.write_8_bytes_little_endian(nonce);
 
-bool ping::is_valid() const
-{
-    return valid_ || nonceless_ || nonce_ != 0;
-}
-
-void ping::reset()
-{
-    nonce_ = 0;
-    nonceless_ = false;
-    valid_ = false;
-}
-
-size_t ping::serialized_size(uint32_t version) const
-{
-    return satoshi_fixed_size(version);
-}
-
-uint64_t ping::nonce() const
-{
-    return nonce_;
-}
-
-void ping::set_nonce(uint64_t value)
-{
-    nonce_ = value;
-}
-
-ping& ping::operator=(ping&& other)
-{
-    nonce_ = other.nonce_;
-    return *this;
-}
-
-bool ping::operator==(const ping& other) const
-{
-    // Nonce should be zero if not used.
-    return (nonce_ == other.nonce_);
-}
-
-bool ping::operator!=(const ping& other) const
-{
-    // Nonce should be zero if not used.
-    return !(*this == other);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 } // namespace messages

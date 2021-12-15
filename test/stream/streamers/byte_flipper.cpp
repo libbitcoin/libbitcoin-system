@@ -834,9 +834,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_bytes2__past_end__expected_invalid)
 
 #ifdef BYTE_FLIPPER_READER_STRINGS
 
-// read_string0
+// read_string
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__one_byte__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string__one_byte__expected)
 {
     const std::string value{ 0x03, 'a', 'b', 'c' };
     std::stringstream stream{ value };
@@ -844,7 +844,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__one_byte__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__two_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string__two_bytes__expected)
 {
     const std::string value{ (char)varint_two_bytes, 0x03, 0x00, 'a', 'b', 'c' };
     std::stringstream stream{ value };
@@ -852,7 +852,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__two_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__four_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string__four_bytes__expected)
 {
     const std::string value{ (char)varint_four_bytes, 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::stringstream stream{ value };
@@ -860,7 +860,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__four_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__eight_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string__eight_bytes__expected)
 {
     const std::string value{ (char)varint_eight_bytes, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::stringstream stream{ value };
@@ -868,68 +868,68 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_string0__eight_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
 }
 
-// read_string1
+// read_string_buffer
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__zero__empty_valid)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__zero__empty_valid)
 {
     std::stringstream stream;
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE(reader.read_string(0).empty());
+    BOOST_REQUIRE(reader.read_string_buffer(0).empty());
     BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__partial__expected_valid)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__partial__expected_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = to_half(value.length());
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), value.substr(0, length));
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), value.substr(0, length));
     BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__full__expected_valid)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__full__expected_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = value.length();
     std::stringstream stream{ value + "*" };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), value);
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), value);
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
     BOOST_REQUIRE(reader);
 }
 
 // The full number of bytes are read, but not past end.
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__past_end__truncated_valid)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__past_end__truncated_valid)
 {
     const std::string value{ "abcdefghij" };
     const auto length = value.length();
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(add1(length)), value);
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(add1(length)), value);
     BOOST_REQUIRE(reader);
 }
 
 // The full number of bytes are read, and the string is terminated at null.
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__full_embedded_null__truncated_exhausted)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__full_embedded_null__truncated_exhausted)
 {
     const std::string value{ "abcdef\0hij" };
     const auto length = value.length();
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), "abcdef");
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), "abcdef");
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
 // The full number of bytes are read, and the string is terminated at null.
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string1__partial_embedded_null__truncated_not_exhausted)
+BOOST_AUTO_TEST_CASE(byte_flipper__read_string_buffer__partial_embedded_null__truncated_not_exhausted)
 {
     const std::string value{ "abcdef\0hij" };
     const auto length = value.length();
     std::stringstream stream{ value + "*" };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(length), "abcdef");
+    BOOST_REQUIRE_EQUAL(reader.read_string_buffer(length), "abcdef");
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
@@ -1264,9 +1264,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_bytes2__value__expected)
 
 #ifdef BYTE_FLIPPER_WRITER_STRINGS
 
-// write_string1
+// write_string
 
-BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__one_byte__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__write_string__one_byte__expected)
 {
     std::stringstream stream;
     flip::bytes::iostream writer(stream);
@@ -1277,7 +1277,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__one_byte__expected)
     BOOST_REQUIRE(writer);
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__two_bytes__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__write_string__two_bytes__expected)
 {
     std::stringstream stream;
     flip::bytes::iostream writer(stream);
@@ -1292,7 +1292,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__two_bytes__expected)
 }
 
 ////// Too much memory allocation required to test.
-////BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__four_bytes__expected)
+////BOOST_AUTO_TEST_CASE(byte_flipper__write_string__four_bytes__expected)
 ////{
 ////    std::stringstream stream;
 ////    flip::bytes::iostream writer(stream);
@@ -1308,7 +1308,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__two_bytes__expected)
 ////}
 ////
 ////// Too much memory allocation required to test.
-////BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__eight_bytes__expected)
+////BOOST_AUTO_TEST_CASE(byte_flipper__write_string__eight_bytes__expected)
 ////{
 ////    std::stringstream stream;
 ////    flip::bytes::iostream writer(stream);
@@ -1327,23 +1327,23 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string1__two_bytes__expected)
 ////    BOOST_REQUIRE(writer);
 ////}
 
-// write_string2
+// write_string_buffer
 
-BOOST_AUTO_TEST_CASE(byte_flipper__write_string2__empty__empty)
+BOOST_AUTO_TEST_CASE(byte_flipper__write_string_buffer__empty__empty)
 {
     std::stringstream stream;
     flip::bytes::iostream writer(stream);
-    writer.write_string({}, zero);
+    writer.write_string_buffer({}, zero);
     BOOST_REQUIRE(stream.str().empty());
     BOOST_REQUIRE(writer);
 }
 
-BOOST_AUTO_TEST_CASE(byte_flipper__write_string2__value__expected)
+BOOST_AUTO_TEST_CASE(byte_flipper__write_string_buffer__value__expected)
 {
     std::stringstream stream;
     flip::bytes::iostream writer(stream);
     const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
-    writer.write_string(expected.data(), expected.size());
+    writer.write_string_buffer(expected.data(), expected.size());
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }

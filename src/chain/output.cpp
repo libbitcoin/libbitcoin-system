@@ -41,7 +41,7 @@ const uint64_t output::not_found = sighash_null_value;
 // Invalid default used in signature hashing (validity ignored).
 // Invalidity is also used to determine that a prevout is not found.
 output::output()
-  : output(output::not_found, std::make_shared<chain::script>(), false)
+  : output(output::not_found, to_shared<chain::script>(), false)
 {
 }
 
@@ -56,19 +56,18 @@ output::output(const output& other)
 }
 
 output::output(uint64_t value, chain::script&& script)
-  : output(value, std::make_shared<chain::script>(std::move(script)), true)
+  : output(value, to_shared(std::move(script)), true)
 {
 }
 
 output::output(uint64_t value, const chain::script& script)
-  : output(value, std::make_shared<chain::script>(script), true)
+  : output(value, to_shared(script), true)
 {
 }
 
 output::output(uint64_t value, const chain::script::ptr& script)
-  : output(value, script, true)
+  : output(value, script ? script : to_shared<chain::script>(), true)
 {
-    BITCOIN_ASSERT(script);
 }
 
 output::output(const data_slice& data)
@@ -82,10 +81,8 @@ output::output(std::istream& stream)
 }
 
 output::output(reader& source)
-  : output()
+  : output(from_data(source))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source);
 }
 
 // protected
@@ -125,44 +122,15 @@ bool output::operator!=(const output& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool output::from_data(const data_slice& data)
+// static/private
+output output::from_data(reader& source)
 {
-    stream::in::copy istream(data);
-    return from_data(istream);
-}
-
-bool output::from_data(std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(source);
-}
-
-bool output::from_data(reader& source)
-{
-    ////reset();
-
-    value_ = source.read_8_bytes_little_endian();
-    script_->from_data(source, true);
-
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
-}
-
-// protected
-void output::reset()
-{
-    // This value is required by signature hashing for output clearance.
-    value_ = output::not_found;
-    script_->reset();
-    valid_ = false;
-}
-
-bool output::is_valid() const
-{
-    return valid_;
+    return
+    {
+        source.read_8_bytes_little_endian(),
+        to_shared(chain::script(source, true)),
+        source
+    };
 }
 
 // Serialization.
@@ -202,6 +170,11 @@ size_t output::serialized_size() const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool output::is_valid() const
+{
+    return valid_;
+}
+
 uint64_t output::value() const
 {
     return value_;
@@ -210,6 +183,11 @@ uint64_t output::value() const
 const chain::script& output::script() const
 {
     return *script_;
+}
+
+const chain::script::ptr output::script_ptr() const
+{
+    return script_;
 }
 
 // Methods.
@@ -228,9 +206,8 @@ bool output::committed_hash(hash_digest& out) const
 }
 
 // Product overflows guarded by script size limit.
-static_assert(max_script_size <
-    max_size_t / multisig_default_sigops / heavy_sigops_factor,
-    "output sigop overflow guard");
+static_assert(max_script_size < max_size_t / multisig_default_sigops / 
+    heavy_sigops_factor, "output sigop overflow guard");
 
 size_t output::signature_operations(bool bip141) const
 {

@@ -18,146 +18,46 @@
  */
 #include <bitcoin/system/messages/pong.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
-const identifier pong::id = identifier::pong;
+    
 const std::string pong::command = "pong";
-const uint32_t pong::version_minimum = version::level::minimum;
+const identifier pong::id = identifier::pong;
+const uint32_t pong::version_minimum = version::level::bip31;
 const uint32_t pong::version_maximum = version::level::maximum;
 
-pong pong::factory(uint32_t version, const data_chunk& data)
+// static
+size_t pong::size(uint32_t)
 {
-    pong instance;
-    instance.from_data(version, data);
-    return instance;
+    return sizeof(uint64_t);
 }
 
-pong pong::factory(uint32_t version, std::istream& stream)
+// static
+pong pong::deserialize(uint32_t version, reader& source)
 {
-    pong instance;
-    instance.from_data(version, stream);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    return { source.read_8_bytes_little_endian() };
 }
 
-pong pong::factory(uint32_t version, reader& source)
+void pong::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
 {
-    pong instance;
-    instance.from_data(version, source);
-    return instance;
-}
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
 
-size_t pong::satoshi_fixed_size(uint32_t)
-{
-    return sizeof(nonce_);
-}
+    sink.write_8_bytes_little_endian(nonce);
 
-pong::pong()
-  : nonce_(0), valid_(false)
-{
-}
-
-pong::pong(uint64_t nonce)
-  : nonce_(nonce), valid_(true)
-{
-}
-
-pong::pong(const pong& other)
-  : nonce_(other.nonce_), valid_(other.valid_)
-{
-}
-
-bool pong::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool pong::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool pong::from_data(uint32_t, reader& source)
-{
-    reset();
-
-    valid_ = true;
-    nonce_ = source.read_8_bytes_little_endian();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk pong::to_data(uint32_t version) const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void pong::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void pong::to_data(uint32_t, writer& sink) const
-{
-    sink.write_8_bytes_little_endian(nonce_);
-}
-
-bool pong::is_valid() const
-{
-    return valid_ || (nonce_ != 0);
-}
-
-void pong::reset()
-{
-    nonce_ = 0;
-    valid_ = false;
-}
-
-size_t pong::serialized_size(uint32_t version) const
-{
-    return satoshi_fixed_size(version);
-}
-
-uint64_t pong::nonce() const
-{
-    return nonce_;
-}
-
-void pong::set_nonce(uint64_t value)
-{
-    nonce_ = value;
-}
-
-pong& pong::operator=(pong&& other)
-{
-    nonce_ = other.nonce_;
-    return *this;
-}
-
-bool pong::operator==(const pong& other) const
-{
-    return (nonce_ == other.nonce_);
-}
-
-bool pong::operator!=(const pong& other) const
-{
-    return !(*this == other);
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 } // namespace messages

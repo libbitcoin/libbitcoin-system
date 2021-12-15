@@ -36,7 +36,7 @@ namespace chain {
 class BC_API point
 {
 public:
-    typedef std::shared_ptr<point> ptr;
+    typedef std::shared_ptr<const point> ptr;
 
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
     /// This value is serialized and defined by consensus, not implementation.
@@ -45,7 +45,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default point is a valid (null point) object.
+    /// Default point is an invalid null point (null_hash/null_index) object.
     point();
 
     point(point&& other);
@@ -53,7 +53,6 @@ public:
 
     point(hash_digest&& hash, uint32_t index);
     point(const hash_digest& hash, uint32_t index);
-    point(const hash_ptr& hash, uint32_t index);
 
     point(const data_slice& data);
     point(std::istream& stream);
@@ -68,16 +67,6 @@ public:
     bool operator==(const point& other) const;
     bool operator!=(const point& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -89,6 +78,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     const hash_digest& hash() const;
     uint32_t index() const;
 
@@ -97,17 +87,20 @@ public:
     static size_t serialized_size();
 
 protected:
-    // So input may reset its member.
-    friend class input;
-
-    point(const hash_ptr& hash, uint32_t index, bool valid);
+    point(hash_digest&& hash, uint32_t index, bool valid);
+    point(const hash_digest& hash, uint32_t index, bool valid);
 
     void reset();
 
 private:
+    static point from_data(reader& source);
+
     // The index is consensus-serialized as a fixed 4 bytes, however it is
     // effectively bound to 2^17 by the block byte size limit.
-    hash_ptr hash_;
+
+    // Point should be stored as shared (adds 16 bytes).
+    // copy: 256 + 32 + 1 = 37 bytes (vs. 16 when shared).
+    hash_digest hash_;
     uint32_t index_;
     bool valid_;
 };
@@ -116,7 +109,6 @@ private:
 bool operator<(const point& left, const point& right);
 
 typedef std::vector<point> points;
-typedef std::shared_ptr<points> points_ptr;
 
 } // namespace chain
 } // namespace system

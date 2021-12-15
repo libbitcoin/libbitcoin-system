@@ -46,12 +46,12 @@ public:
     virtual uint32_t read_4_bytes_little_endian() noexcept = 0;
     virtual uint64_t read_8_bytes_little_endian() noexcept = 0;
 
-    /// Read Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
+    /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
     virtual uint64_t read_variable() noexcept = 0;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
-    /// Returns zero and invalidates stream if would overflow size_t.
-    virtual size_t read_size() noexcept = 0;
+    /// Returns zero and invalidates stream if would exceed read limit.
+    virtual size_t read_size(size_t limit=max_size_t) noexcept = 0;
 
     /// Convert read_4_bytes_little_endian to an error code.
     virtual code read_error_code() noexcept = 0;
@@ -76,11 +76,13 @@ public:
     virtual data_chunk read_bytes(size_t size) noexcept = 0;
     virtual void read_bytes(uint8_t* buffer, size_t size) noexcept = 0;
 
-    /// Read Bitcoin length-prefixed string, same as read_string(read_size()).
-    virtual std::string read_string() noexcept = 0;
+    /// Read Bitcoin length-prefixed string.
+    /// Returns empty and invalidates stream if would exceed read limit.
+    virtual std::string read_string(size_t limit=max_size_t) noexcept = 0;
 
-    /// Read string, truncated at at size or first null.
-    virtual std::string read_string(size_t size) noexcept = 0;
+    /// Read string, truncated at size or first null.
+    /// This is only used for reading Bitcoin heading command text.
+    virtual std::string read_string_buffer(size_t size) noexcept = 0;
 
     /// Advance the iterator.
     virtual void skip_byte() noexcept = 0;

@@ -18,8 +18,9 @@
  */
 #include <bitcoin/system/messages/transaction.hpp>
 
-#include <istream>
-#include <utility>
+#include <cstddef>
+#include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
@@ -30,145 +31,36 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier transaction::id = identifier::transaction;
 const std::string transaction::command = "tx";
+const identifier transaction::id = identifier::transaction;
 const uint32_t transaction::version_minimum = version::level::minimum;
 const uint32_t transaction::version_maximum = version::level::maximum;
 
-transaction transaction::factory(uint32_t version,
-    const data_chunk& data)
+// static
+transaction transaction::deserialize(uint32_t version, reader& source,
+    bool witness)
 {
-    transaction instance;
-    instance.from_data(version, data);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    return { to_shared(chain::transaction{ source, witness }) };
 }
 
-transaction transaction::factory(uint32_t version,
-    std::istream& stream)
+void transaction::serialize(uint32_t DEBUG_ONLY(version), writer& sink,
+    bool witness) const
 {
-    transaction instance;
-    instance.from_data(version, stream);
-    return instance;
+    DEBUG_ONLY(const auto bytes = size(version, witness);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    if (transaction)
+        transaction->to_data(sink, witness);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-transaction transaction::factory(uint32_t version,
-    reader& source)
+size_t transaction::size(uint32_t, bool witness) const
 {
-    transaction instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-transaction::transaction()
-  : chain::transaction()
-{
-}
-
-transaction::transaction(transaction&& other)
-  : chain::transaction(std::move(other))
-{
-}
-
-transaction::transaction(const transaction& other)
-  : chain::transaction(other)
-{
-}
-
-transaction::transaction(chain::transaction&& other)
-  : chain::transaction(std::move(other))
-{
-}
-
-transaction::transaction(const chain::transaction& other)
-  : chain::transaction(other)
-{
-}
-
-transaction::transaction(uint32_t version, uint32_t locktime,
-    chain::inputs&& inputs, chain::outputs&& outputs)
-  : chain::transaction(version, locktime, std::move(inputs),
-        std::move(outputs))
-{
-}
-
-transaction::transaction(uint32_t version, uint32_t locktime,
-    const chain::inputs& inputs, const chain::outputs& outputs)
-  : chain::transaction(version, locktime, inputs, outputs)
-{
-}
-
-// Witness is always deserialized if present.
-
-bool transaction::from_data(uint32_t, const data_chunk& data)
-{
-    return chain::transaction::from_data(data, true);
-}
-
-bool transaction::from_data(uint32_t, std::istream& stream)
-{
-    return chain::transaction::from_data(stream, true);
-}
-
-bool transaction::from_data(uint32_t, reader& source)
-{
-    return chain::transaction::from_data(source, true);
-}
-
-// Witness is always serialized if present.
-
-data_chunk transaction::to_data(uint32_t) const
-{
-    return chain::transaction::to_data(true);
-}
-
-void transaction::to_data(uint32_t, std::ostream& stream) const
-{
-    chain::transaction::to_data(stream, true);
-}
-
-void transaction::to_data(uint32_t, writer& sink) const
-{
-    chain::transaction::to_data(sink, true);
-}
-
-// Witness size is always counted if present.
-
-size_t transaction::serialized_size(uint32_t) const
-{
-    return chain::transaction::serialized_size(true);
-}
-
-transaction& transaction::operator=(chain::transaction&& other)
-{
-    reset();
-    chain::transaction::operator=(std::move(other));
-    return *this;
-}
-
-transaction& transaction::operator=(transaction&& other)
-{
-    chain::transaction::operator=(std::move(other));
-    return *this;
-}
-
-bool transaction::operator==(const chain::transaction& other) const
-{
-    return chain::transaction::operator==(other);
-}
-
-bool transaction::operator!=(const chain::transaction& other) const
-{
-    return chain::transaction::operator!=(other);
-}
-
-bool transaction::operator==(const transaction& other) const
-{
-    return chain::transaction::operator==(other);
-}
-
-bool transaction::operator!=(const transaction& other) const
-{
-    return !(*this == other);
+    return transaction ? transaction->serialized_size(witness) : zero;
 }
 
 } // namespace messages

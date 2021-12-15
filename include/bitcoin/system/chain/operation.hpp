@@ -34,15 +34,13 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// Operations always deserialize successfully, so there is no is_valid()
-/// method. The is_invalid() method pertains to opcode consensus validity.
 class BC_API operation
 {
 public:
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default operation is an invalid opcode.
+    /// Default operation is any invalid opcode with underflow set.
     operation();
 
     operation(operation&& other);
@@ -54,13 +52,17 @@ public:
     /// These construct from push-data, not serialized operations (no codes).
     /// When minimal is true the data is interpreted as minimally-encoded push.
     operation(data_chunk&& push_data, bool minimal);
-    operation(const data_slice& push_data, bool minimal);
+    operation(const data_chunk& push_data, bool minimal);
     operation(chunk_ptr push_data, bool minimal);
 
     /// These deserialize operations (with codes), not from push-data.
     operation(const data_slice& op_data);
     operation(std::istream& stream);
     operation(reader& source);
+
+    /// Literal string is disallowed, as it conflicts with const data_slice&.
+    /// An invalid serialization returns op(any_invalid
+    explicit operation(const std::string& mnemonic);
 
     // Operators.
     // ------------------------------------------------------------------------
@@ -70,16 +72,6 @@ public:
 
     bool operator==(const operation& other) const;
     bool operator!=(const operation& other) const;
-
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    /// These deserialize operations (with codes), not from push-data.
-    bool from_data(const data_slice& op_data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-
-    bool from_string(const std::string& mnemonic);
 
     // Serialization.
     // ------------------------------------------------------------------------
@@ -94,6 +86,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     opcode code() const;
     const data_chunk& data() const;
 
@@ -136,6 +129,7 @@ public:
     static bool is_relaxed_push(opcode code);
 
     /// Categories of operations.
+    /// The is_invalid() method pertains only to opcode consensus validity.
     bool is_push() const;
     bool is_payload() const;
     bool is_counted() const;
@@ -152,27 +146,28 @@ public:
     bool is_underflow() const;
 
 protected:
+    operation(opcode code, chunk_ptr push_data_ptr, bool underflow);
+
+private:
     // So script may call count_op.
     friend class script;
 
+    static operation from_data(reader& source);
+    static operation from_push_data(const chunk_ptr& data, bool minimal);
+    static operation from_string(const std::string& mnemonic);
+
     static bool count_op(reader& source);
     static uint32_t read_data_size(opcode code, reader& source);
+    static opcode opcode_from_data(const data_chunk& push_data, bool minimal);
 
-    operation(opcode code, chunk_ptr push_data_ptr, bool underflow);
-    operation(opcode code, data_chunk&& push_data, bool underflow);
-    operation(opcode code, const data_chunk& push_data, bool underflow);
-
-    opcode opcode_from_data(const data_chunk& push_data, bool minimal);
-    void reset();
-
-private:
+    // Operation should not be stored as shared (adds 16 bytes).
+    // copy: 8 + 2 * 64 + 1 = 18 bytes (vs. 16 when shared).
     opcode code_;
     chunk_ptr data_;
     bool underflow_;
 };
 
 typedef std::vector<operation> operations;
-typedef std::shared_ptr<operations> operations_ptr;
 
 } // namespace chain
 } // namespace system

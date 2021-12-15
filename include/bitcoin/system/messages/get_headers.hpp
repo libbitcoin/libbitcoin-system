@@ -19,13 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_GET_HEADERS_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_GET_HEADERS_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/get_blocks.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
@@ -35,38 +32,19 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API get_headers
+struct BC_API get_headers
   : public get_blocks
 {
-public:
-    typedef std::shared_ptr<get_headers> ptr;
-    typedef std::shared_ptr<const get_headers> const_ptr;
-
-    static get_headers factory(uint32_t version, const data_chunk& data);
-    static get_headers factory(uint32_t version, std::istream& stream);
-    static get_headers factory(uint32_t version, reader& source);
-
-    get_headers();
-    get_headers(const hash_list& start, const hash_digest& stop);
-    get_headers(hash_list&& start, hash_digest&& stop);
-    get_headers(const get_headers& other);
-    get_headers(get_headers&& other);
-
-    bool from_data(uint32_t version, const data_chunk& data) override;
-    bool from_data(uint32_t version, std::istream& stream) override;
-    bool from_data(uint32_t version, reader& source) override;
-
-    // This class is move assignable but not copy assignable.
-    get_headers& operator=(get_headers&& other);
-    void operator=(const get_headers&) = delete;
-
-    bool operator==(const get_headers& other) const;
-    bool operator!=(const get_headers& other) const;
+    typedef std::shared_ptr<const get_headers> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+    static get_headers deserialize(uint32_t version, reader& source);
+    ////void serialize(uint32_t version, writer& sink) const;
+    ////size_t size(uint32_t version) const;
 };
 
 } // namespace messages

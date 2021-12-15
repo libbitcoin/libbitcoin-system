@@ -44,4 +44,54 @@
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 
+// Byte copy cost is computed as ceilinged divide of total member bits by 8 (128 bits per shared_ptr).
+// shared_ptr, data_ptr                                           16 byte copy (but 16 bytes extra storage cost)
+// header(hash, hash)                                             81 byte copy (never copied, ptr->block/set)
+// operation(data_ptr)                                            18 byte copy (copied by script, data_ptrs to stack)
+// script(vector(operation))                                      xx byte copy (copied for legacy sighash subscript)
+// witness(vector(data_ptr))                                      xx byte copy (0..2 data_ptrs to program stack)
+// output(script::ptr)                                            25 byte copy (never copied, ptr=>tx [sighash, p2p])
+// prevout:output                                                 41 byte copy (never copied, ptr=>input [connect])
+// point(hash)                                                    37 byte copy (never copied, ptr=>input [sighash])
+// input(point::ptr, script::ptr, witness::ptr, prevout::ptr)     69 byte copy (never copied, ptr=>tx [sighash,p2p])
+// transaction(vector(input::ptr)::ptr, vector(output::ptr)::ptr) 41 byte copy (never copied, ptr=>block [p2p])
+// block(header::ptr, vector(transaction::ptr)::ptr)              33 byte copy (never copied)
+
+// Wire deserialization.
+// Objects deserialized off the p2p/server protocol are not aggregated into
+// composites. Message objects are fully self-deserializing. However it is
+// often necessary to iterate over collections of hashes and headers using a
+// sequence of closures, where one element is passed to the closure and the
+// next passed on its completion handler until all are processed. To avoid
+// copying, each element could be deserialized into vectors of shared pointers.
+// However ashared pointer to the containing object must be passed into the
+// closure for iteration, which keeps references to its members alive. As such
+// each element may be passed as std::ref(element), avoiding the overhead of a
+// shared pointer for each.
+
+// Wire serialization.
+// Objects obtained from the store in response to p2p/server queries are
+// deserialized in parts and aggregated. For example, inputs and outputs are
+// obtained for a transaction, and then passed into the transaction, the header
+// and transactions are obtained for a block and then passed into the block.
+// To avoid costly object copies/moves of collections, we store inputs::ptr,
+// and outputs::ptr on transaction, and transactions::ptr on block. Otherwise a
+// copy/move operation is required for at least a vector of pointers, which
+// may number in the thousands, and if pointers are not used in the vector
+// this would apply to all object instances as well.
+
+// Consensus validation.
+// Op.data is stored as a data_ptr, allowing all push_data to be stacked with a
+// pointer copy. Operations are smaller than pointers, so these are copied.
+// Witnesses and scripts contain vectors of pointers and operations,
+// respectively, so these two objects are always moved as pointers. Point and
+// header contain hashes, so these are always moved as pointers. Points,
+// prevouts, outputs, inputs and transactions are much larger than pointers, so
+// these can reasonably be moved by pointer, although at a 16 byte per instance
+// storage cost. Inputs, and outputs must be created as sets and then moved
+// into a new transaction for signature hashing, so these are retained by
+// transaction as a vector::ptr. A transaction set is never added to a block
+// for validation, but transactions are retained as vector::ptr for wire
+// serialization.
+
 #endif

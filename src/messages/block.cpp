@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,10 +18,9 @@
  */
 #include <bitcoin/system/messages/block.hpp>
 
-#include <cstdint>
 #include <cstddef>
-#include <istream>
-#include <utility>
+#include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
@@ -32,140 +31,35 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier block::id = identifier::block;
 const std::string block::command = "block";
+const identifier block::id = identifier::block;
 const uint32_t block::version_minimum = version::level::minimum;
 const uint32_t block::version_maximum = version::level::maximum;
 
-block block::factory(uint32_t version, const data_chunk& data)
+// static
+block block::deserialize(uint32_t version, reader& source, bool witness)
 {
-    block instance;
-    instance.from_data(version, data);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    return { to_shared(chain::block{ source, witness }) };
 }
 
-block block::factory(uint32_t version, std::istream& stream)
+void block::serialize(uint32_t DEBUG_ONLY(version), writer& sink,
+    bool witness) const
 {
-    block instance;
-    instance.from_data(version, stream);
-    return instance;
+    DEBUG_ONLY(const auto bytes = size(version, witness);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    if (block)
+        block->to_data(sink, witness);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-block block::factory(uint32_t version, reader& source)
+size_t block::size(uint32_t, bool witness) const
 {
-    block instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-block::block()
-  : chain::block()
-{
-}
-
-block::block(block&& other)
-  : chain::block(std::move(other))
-{
-}
-
-block::block(const block& other)
-  : chain::block(other)
-{
-}
-
-block::block(chain::block&& other)
-  : chain::block(std::move(other))
-{
-}
-
-block::block(const chain::block& other)
-  : chain::block(other)
-{
-}
-
-block::block(chain::header&& header, chain::transactions&& transactions)
-  : chain::block(std::move(header), std::move(transactions))
-{
-}
-
-block::block(const chain::header& header,
-    const chain::transactions& transactions)
-  : chain::block(header, transactions)
-{
-}
-
-// Witness is always deserialized if present.
-
-bool block::from_data(uint32_t, const data_chunk& data)
-{
-    return chain::block::from_data(data, true);
-}
-
-bool block::from_data(uint32_t, std::istream& stream)
-{
-    return chain::block::from_data(stream, true);
-}
-
-bool block::from_data(uint32_t, reader& source)
-{
-    return chain::block::from_data(source, true);
-}
-
-// Witness is always serialized if present.
-
-data_chunk block::to_data(uint32_t) const
-{
-    return chain::block::to_data(true);
-}
-
-void block::to_data(uint32_t, std::ostream& stream) const
-{
-    chain::block::to_data(stream, true);
-}
-
-void block::to_data(uint32_t, writer& sink) const
-{
-    chain::block::to_data(sink, true);
-}
-
-// Witness size is always counted if present.
-
-size_t block::serialized_size(uint32_t) const
-{
-    return chain::block::serialized_size(true);
-}
-
-block& block::operator=(chain::block&& other)
-{
-    reset();
-    chain::block::operator=(std::move(other));
-    return *this;
-}
-
-block& block::operator=(block&& other)
-{
-    chain::block::operator=(std::move(other));
-    return *this;
-}
-
-bool block::operator==(const chain::block& other) const
-{
-    return chain::block::operator==(other);
-}
-
-bool block::operator!=(const chain::block& other) const
-{
-    return chain::block::operator!=(other);
-}
-
-bool block::operator==(const block& other) const
-{
-    return chain::block::operator==(other);
-}
-
-bool block::operator!=(const block& other) const
-{
-    return !(*this == other);
+    return block ? block->serialized_size(witness) : zero;
 }
 
 } // namespace messages

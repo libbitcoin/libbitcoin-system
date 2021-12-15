@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(fee_filter__from_data__insufficient_version_failure)
     const fee_filter expected{ 1 };
     const auto data = expected.to_data(fee_filter::version_maximum);
     fee_filter instance;
-    BOOST_REQUIRE(!instance.from_data(filter_add::version_minimum - 1, data));
+    BOOST_REQUIRE(!instance.from_data(bloom_filter_add::version_minimum - 1, data));
 }
 
 BOOST_AUTO_TEST_CASE(fee_filter__factory_1__roundtrip__success)

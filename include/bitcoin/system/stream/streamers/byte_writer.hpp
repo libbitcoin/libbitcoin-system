@@ -59,7 +59,7 @@ public:
     void write_4_bytes_little_endian(uint32_t value) noexcept override;
     void write_8_bytes_little_endian(uint64_t value) noexcept override;
 
-    /// Write Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
+    /// Write Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
     void write_variable(uint64_t value) noexcept override;
 
     /// Call write_4_bytes_little_endian with integer value of error code.
@@ -77,11 +77,13 @@ public:
     /// Write size bytes.
     void write_bytes(const uint8_t* data, size_t size) noexcept override;
 
-    /// Write string to specified length, padded with nulls as required.
+    /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     void write_string(const std::string& value) noexcept override;
 
-    /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    void write_string(const std::string& value, size_t size) noexcept override;
+    /// This is only used for writing Bitcoin command command text.
+    /// Write string to specified length, padded with nulls as required.
+    void write_string_buffer(const std::string& value, size_t size) noexcept
+        override;
 
     /// Flush the buffer.
     void flush() noexcept override;

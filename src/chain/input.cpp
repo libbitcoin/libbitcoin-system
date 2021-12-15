@@ -39,11 +39,14 @@ namespace chain {
 // Constructors.
 // ----------------------------------------------------------------------------
 
-// Valid default used in signature hashing.
-// Default prevout (metadata) construction is spent, invalid, max_size_t value. 
+// Default point is null_hash and point::null_index. 
+// Default prevout (metadata) is spent, invalid, max_size_t value. 
 input::input()
-  : input(std::make_shared<chain::point>(), std::make_shared<chain::script>(),
-      std::make_shared<chain::witness>(), 0)
+  : input(
+      to_shared<chain::point>(),
+      to_shared<chain::script>(),
+      to_shared<chain::witness>(), 0, false,
+      to_shared<chain::prevout>())
 {
 }
 
@@ -51,7 +54,6 @@ input::input(input&& other)
   : input(other)
 {
 }
-
 
 input::input(const input& other)
   : input(
@@ -66,53 +68,57 @@ input::input(const input& other)
 
 input::input(chain::point&& point, chain::script&& script,
     uint32_t sequence)
-  : input(std::make_shared<chain::point>(std::move(point)),
-      std::make_shared<chain::script>(std::move(script)),
-      std::make_shared<chain::witness>(), sequence, true,
-      std::make_shared<chain::prevout>())
+  : input(
+      to_shared(std::move(point)),
+      to_shared(std::move(script)),
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     uint32_t sequence)
-  : input(std::make_shared<chain::point>(point),
-      std::make_shared<chain::script>(script),
-      std::make_shared<chain::witness>(), sequence, true,
-      std::make_shared<chain::prevout>())
+  : input(
+      to_shared(point),
+      to_shared(script),
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point::ptr& point, const chain::script::ptr& script,
     uint32_t sequence)
-  : input(point, script, std::make_shared<chain::witness>(), sequence, true,
+  : input(
+      point ? point : to_shared<chain::point>(),
+      script ? script : to_shared<chain::script>(),
+      std::make_shared<chain::witness>(), sequence, true,
       std::make_shared<chain::prevout>())
 {
-    BITCOIN_ASSERT(point);
-    BITCOIN_ASSERT(script);
 }
 
 input::input(chain::point&& point, chain::script&& script,
     chain::witness&& witness, uint32_t sequence)
-  : input(std::make_shared<chain::point>(std::move(point)),
-      std::make_shared<chain::script>(std::move(script)),
-      std::make_shared<chain::witness>(std::move(witness)), sequence, true,
-      std::make_shared<chain::prevout>())
+  : input(
+      to_shared(std::move(point)),
+      to_shared(std::move(script)),
+      to_shared(std::move(witness)), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point& point, const chain::script& script,
     const chain::witness& witness, uint32_t sequence)
-  : input(std::make_shared<chain::point>(point),
-      std::make_shared<chain::script>(script),
-      std::make_shared<chain::witness>(witness), sequence, true,
-      std::make_shared<chain::prevout>())
+  : input(
+      to_shared(point),
+      to_shared(script),
+      to_shared(witness), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
 input::input(const chain::point::ptr& point, const chain::script::ptr& script,
     const chain::witness::ptr& witness, uint32_t sequence)
-  : input(point, script, witness, sequence, true,
-      std::make_shared<chain::prevout>())
+  : input(point, script, witness, sequence, true, to_shared<chain::prevout>())
 {
 }
 
@@ -127,10 +133,8 @@ input::input(std::istream& stream)
 }
 
 input::input(reader& source)
-  : input()
+  : input(from_data(source))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source);
 }
 
 // protected
@@ -181,49 +185,19 @@ bool input::operator!=(const input& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool input::from_data(const data_slice& data)
+// static/private
+input input::from_data(reader& source)
 {
-    read::bytes::copy reader(data);
-    return from_data(reader);
-}
-
-bool input::from_data(std::istream& stream)
-{
-    read::bytes::istream reader(stream);
-    return from_data(reader);
-}
-
-bool input::from_data(reader& source)
-{
-    ////reset();
-
-    point_->from_data(source);
-    script_->from_data(source, true);
-    sequence_ = source.read_4_bytes_little_endian();
-
     // Witness is deserialized by transaction.
-    witness_->reset();
-
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
-}
-
-void input::reset()
-{
-    point_->reset();
-    script_->reset();
-    witness_->reset();
-    sequence_ = 0;
-    valid_ = false;
-    prevout = {};
-}
-
-bool input::is_valid() const
-{
-    return valid_;
+    return
+    {
+        to_shared(chain::point(source)),
+        to_shared(chain::script(source, true)),
+        {},
+        source.read_4_bytes_little_endian(),
+        source,
+        {}
+    };
 }
 
 // Serialization.
@@ -272,6 +246,11 @@ size_t input::serialized_size(bool witness) const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool input::is_valid() const
+{
+    return valid_;
+}
+
 const point& input::point() const
 {
     return *point_;
@@ -285,6 +264,21 @@ const chain::script& input::script() const
 const chain::witness& input::witness() const
 {
     return *witness_;
+}
+
+const point::ptr input::point_ptr() const
+{
+    return point_;
+}
+
+const chain::script::ptr input::script_ptr() const
+{
+    return script_;
+}
+
+const chain::witness::ptr input::witness_ptr() const
+{
+    return witness_;
 }
 
 uint32_t input::sequence() const
@@ -348,7 +342,8 @@ bool input::embedded_script(chain::script& out) const
 
     // Parse the embedded script from the last input script item (data).
     // This cannot fail because there is no prefix to invalidate the length.
-    return out.from_data(ops.back().data(), false);
+    out = { ops.back().data(), false };
+    return true;
 }
 
 // Product overflows guarded by script size limit.

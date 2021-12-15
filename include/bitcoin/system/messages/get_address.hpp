@@ -21,10 +21,8 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <iostream>
 #include <memory>
 #include <string>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -33,33 +31,18 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API get_address
+struct BC_API get_address
 {
-public:
-    typedef std::shared_ptr<get_address> ptr;
-    typedef std::shared_ptr<const get_address> const_ptr;
-
-    static get_address factory(uint32_t version, const data_chunk& data);
-    static get_address factory(uint32_t version, std::istream& stream);
-    static get_address factory(uint32_t version, reader& source);
-    static size_t satoshi_fixed_size(uint32_t version);
-
-    get_address();
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
+    typedef std::shared_ptr<const get_address> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+    static size_t size(uint32_t version);
+    static get_address deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
 };
 
 } // namespace messages

@@ -79,6 +79,11 @@ input::input(const chain::input& value)
 {
 }
 
+input::input(const chain::input& value)
+  : value_(value)
+{
+}
+
 input::input(const chain::point& value)
   : value_({value, {}, chain::max_input_sequence})
 {

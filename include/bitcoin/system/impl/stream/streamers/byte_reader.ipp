@@ -130,13 +130,13 @@ uint64_t byte_reader<IStream>::read_variable() noexcept
 }
 
 template <typename IStream>
-size_t byte_reader<IStream>::read_size() noexcept
+size_t byte_reader<IStream>::read_size(size_t limit) noexcept
 {
     const auto size = read_variable();
 
     // This facilitates safely passing the size into a follow-on reader.
     // Return zero allows follow-on use before testing reader state.
-    if (size > max_size_t)
+    if (size > limit)
     {
         invalid();
         return zero;
@@ -241,6 +241,13 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
 {
+    if (is_zero(size))
+        return {};
+
+    // This allows caller read an invalid stream without allocation.
+    if (!valid())
+        return{};
+
     data_chunk out(no_fill_byte_allocator);
     out.resize(size);
     do_read_bytes(out.data(), size);
@@ -257,13 +264,13 @@ void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-std::string byte_reader<IStream>::read_string() noexcept
+std::string byte_reader<IStream>::read_string(size_t limit) noexcept
 {
-    return read_string(read_size());
+    return read_string(read_size(limit));
 }
 
 template <typename IStream>
-std::string byte_reader<IStream>::read_string(size_t size) noexcept
+std::string byte_reader<IStream>::read_string_buffer(size_t size) noexcept
 {
     // Isolating get_exhausted to first call is an optimization (must clear).
     if (get_exhausted())

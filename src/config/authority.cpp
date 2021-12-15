@@ -121,7 +121,7 @@ authority::authority(const std::string& authority)
 
 // This is the format returned from peers on the bitcoin network.
 authority::authority(const messages::network_address& address)
-  : authority(address.ip(), address.port())
+  : authority(address.ip, address.port)
 {
 }
 

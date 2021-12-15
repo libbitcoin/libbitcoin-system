@@ -593,18 +593,18 @@ BOOST_AUTO_TEST_CASE(headers__to_hashes__non_empty__header_hash_list)
 BOOST_AUTO_TEST_CASE(headers__to_inventory__empty__empty_list)
 {
     messages::headers instance;
-    inventory_vector::list result;
-    instance.to_inventory(result, inventory_vector::type_id::block);
+    inventory_item::list result;
+    instance.to_inventory(result, inventory_item::type_id::block);
     BOOST_REQUIRE_EQUAL(0, result.size());
 }
 
 BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__header_hash_inventory_list)
 {
-    const inventory_vector::list expected
+    const inventory_item::list expected
     {
-        inventory_vector(inventory_vector::type_id::block, base16_hash("108127a4f5955a546b78807166d8cb9cd3eee1ed530c14d51095bc798685f4d6")),
-        inventory_vector(inventory_vector::type_id::block, base16_hash("37ec64a548b6419769b152d70efc4c356f74c7fda567711d98cac3c55c34a890")),
-        inventory_vector(inventory_vector::type_id::block, base16_hash("d9bbb4b47ca45ec8477cba125262b07b17daae944b54d1780e0a6373d2eed879"))
+        inventory_item(inventory_item::type_id::block, base16_hash("108127a4f5955a546b78807166d8cb9cd3eee1ed530c14d51095bc798685f4d6")),
+        inventory_item(inventory_item::type_id::block, base16_hash("37ec64a548b6419769b152d70efc4c356f74c7fda567711d98cac3c55c34a890")),
+        inventory_item(inventory_item::type_id::block, base16_hash("d9bbb4b47ca45ec8477cba125262b07b17daae944b54d1780e0a6373d2eed879"))
     };
 
     const headers instance(
@@ -638,8 +638,8 @@ BOOST_AUTO_TEST_CASE(headers__to_inventory__non_empty__header_hash_inventory_lis
         }
     });
 
-    inventory_vector::list result;
-    instance.to_inventory(result, inventory_vector::type_id::block);
+    inventory_item::list result;
+    instance.to_inventory(result, inventory_item::type_id::block);
     BOOST_REQUIRE_EQUAL(result.size(), expected.size());
     BOOST_REQUIRE(result == expected);
 }

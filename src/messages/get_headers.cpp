@@ -18,107 +18,41 @@
  */
 #include <bitcoin/system/messages/get_headers.hpp>
 
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier get_headers::id = identifier::get_headers;
 const std::string get_headers::command = "getheaders";
+const identifier get_headers::id = identifier::get_headers;
 const uint32_t get_headers::version_minimum = version::level::headers;
 const uint32_t get_headers::version_maximum = version::level::maximum;
 
-get_headers get_headers::factory(uint32_t version,
-    const data_chunk& data)
+// static
+// Reimplements base class read to prevent a list move operation as well
+// as the need to implement default, base move, and base copy constructors.
+get_headers get_headers::deserialize(uint32_t version, reader& source)
 {
-    get_headers instance;
-    instance.from_data(version, data);
-    return instance;
-}
-
-get_headers get_headers::factory(uint32_t version,
-    std::istream& stream)
-{
-    get_headers instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-get_headers get_headers::factory(uint32_t version,
-    reader& source)
-{
-    get_headers instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-get_headers::get_headers()
-  : get_blocks()
-{
-}
-
-get_headers::get_headers(const hash_list& start, const hash_digest& stop)
-  : get_blocks(start, stop)
-{
-}
-
-get_headers::get_headers(hash_list&& start, hash_digest&& stop)
-  : get_headers(start, stop)
-{
-}
-
-get_headers::get_headers(const get_headers& other)
-  : get_blocks(other)
-{
-}
-
-get_headers::get_headers(get_headers&& other)
-  : get_blocks(other)
-{
-}
-
-bool get_headers::from_data(uint32_t version, const data_chunk& data)
-{
-    return get_blocks::from_data(version, data);
-}
-
-bool get_headers::from_data(uint32_t version, std::istream& stream)
-{
-    return get_blocks::from_data(version, stream);
-}
-
-bool get_headers::from_data(uint32_t version, reader& source)
-{
-    if (!get_blocks::from_data(version, source))
-        return false;
-
-    if (version < get_headers::version_minimum)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    if (!source)
-        reset();
+    // Protocol version is stoopid (and unused).
+    source.skip_bytes(sizeof(uint32_t));
 
-    return source;
-}
+    get_headers get;
+    get.start_hashes.reserve(source.read_size(max_get_blocks));
 
-get_headers& get_headers::operator=(get_headers&& other)
-{
-    set_start_hashes(other.start_hashes());
-    set_stop_hash(other.stop_hash());
-    return *this;
-}
+    for (size_t hash = 0; hash < get.start_hashes.capacity(); ++hash)
+        get.start_hashes.push_back(source.read_hash());
 
-bool get_headers::operator==(const get_headers& other) const
-{
-    return (static_cast<get_blocks>(*this) == static_cast<get_blocks>(other));
-}
-
-bool get_headers::operator!=(const get_headers& other) const
-{
-    return (static_cast<get_blocks>(*this) != static_cast<get_blocks>(other));
+    get.stop_hash = source.read_hash();
+    return get;
 }
 
 } // namespace messages

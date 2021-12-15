@@ -36,14 +36,14 @@ const uint32_t point::null_index = no_previous_output;
 // Constructors.
 // ----------------------------------------------------------------------------
 
-// Valid default used in signature hashing.
+// Invalid default used in signature hashing.
 point::point()
-  : point(std::make_shared<hash_digest>(null_hash), point::null_index, true)
+  : point(null_hash, point::null_index, false)
 {
 }
 
 point::point(point&& other)
-  : point(other)
+  : point(std::move(null_hash), point::null_index, true)
 {
 }
 
@@ -53,19 +53,13 @@ point::point(const point& other)
 }
 
 point::point(hash_digest&& hash, uint32_t index)
-  : point(std::make_shared<hash_digest>(std::move(hash)), index, true)
+  : point(std::move(hash), index, true)
 {
 }
 
 point::point(const hash_digest& hash, uint32_t index)
-  : point(std::make_shared<hash_digest>(hash), index, true)
-{
-}
-
-point::point(const hash_ptr& hash, uint32_t index)
   : point(hash, index, true)
 {
-    BITCOIN_ASSERT(hash);
 }
 
 point::point(const data_slice& data)
@@ -79,14 +73,18 @@ point::point(std::istream& stream)
 }
 
 point::point(reader& source)
-  : point()
+  : point(from_data(source))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source);
 }
 
 // protected
-point::point(const hash_ptr& hash, uint32_t index, bool valid)
+point::point(hash_digest&& hash, uint32_t index, bool valid)
+  : hash_(std::move(hash)), index_(index), valid_(valid)
+{
+}
+
+// protected
+point::point(const hash_digest& hash, uint32_t index, bool valid)
   : hash_(hash), index_(index), valid_(valid)
 {
 }
@@ -96,7 +94,9 @@ point::point(const hash_ptr& hash, uint32_t index, bool valid)
 
 point& point::operator=(point&& other)
 {
-    *this = other;
+    hash_ = std::move(other.hash_);
+    index_ = other.index_;
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -110,7 +110,7 @@ point& point::operator=(const point& other)
 
 bool point::operator==(const point& other) const
 {
-    return (*hash_ == *other.hash_)
+    return (hash_ == other.hash_)
         && (index_ == other.index_);
 }
 
@@ -129,43 +129,15 @@ bool operator<(const point& left, const point& right)
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool point::from_data(const data_slice& data)
+// static/private
+point point::from_data(reader& source)
 {
-    stream::in::copy istream(data);
-    return from_data(istream);
-}
-
-bool point::from_data(std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(source);
-}
-
-bool point::from_data(reader& source)
-{
-    ////reset();
-
-    hash_ = std::make_shared<hash_digest>(source.read_hash());
-    index_ = source.read_4_bytes_little_endian();
-
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
-}
-
-// protected
-void point::reset()
-{
-    hash_->fill(0);
-    index_ = 0;
-    valid_ = false;
-}
-
-bool point::is_valid() const
-{
-    return valid_;
+    return
+    {
+        source.read_hash(),
+        source.read_4_bytes_little_endian(),
+        source
+    };
 }
 
 // Serialization.
@@ -191,7 +163,7 @@ void point::to_data(writer& sink) const
     DEBUG_ONLY(const auto bytes = serialized_size();)
     DEBUG_ONLY(const auto start = sink.get_position();)
 
-    sink.write_bytes(*hash_);
+    sink.write_bytes(hash_);
     sink.write_4_bytes_little_endian(index_);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
@@ -200,9 +172,14 @@ void point::to_data(writer& sink) const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool point::is_valid() const
+{
+    return valid_;
+}
+
 const hash_digest& point::hash() const
 {
-    return *hash_;
+    return hash_;
 }
 
 uint32_t point::index() const
@@ -220,7 +197,7 @@ size_t point::serialized_size()
 
 bool point::is_null() const
 {
-    return (index_ == null_index) && (*hash_ == null_hash);
+    return (index_ == null_index) && (hash_ == null_hash);
 }
 
 } // namespace chain

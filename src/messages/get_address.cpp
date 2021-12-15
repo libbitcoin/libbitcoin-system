@@ -18,8 +18,11 @@
  */
 #include <bitcoin/system/messages/get_address.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -27,93 +30,32 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier get_address::id = identifier::get_address;
 const std::string get_address::command = "getaddr";
+const identifier get_address::id = identifier::get_address;
 const uint32_t get_address::version_minimum = version::level::minimum;
 const uint32_t get_address::version_maximum = version::level::maximum;
 
-get_address get_address::factory(uint32_t version,
-    const data_chunk& data)
+// static
+size_t get_address::size(uint32_t version)
 {
-    get_address instance;
-    instance.from_data(version, data);
-    return instance;
+    return zero;
 }
 
-get_address get_address::factory(uint32_t version,
-    std::istream& stream)
+// static
+get_address get_address::deserialize(uint32_t version, reader& source)
 {
-    get_address instance;
-    instance.from_data(version, stream);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    return {};
 }
 
-get_address get_address::factory(uint32_t version,
-    reader& source)
+void get_address::serialize(uint32_t DEBUG_ONLY(version),
+    writer& DEBUG_ONLY(sink)) const
 {
-    get_address instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-get_address::get_address()
-{
-}
-
-bool get_address::is_valid() const
-{
-    return true;
-}
-
-void get_address::reset()
-{
-}
-
-bool get_address::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool get_address::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream in(stream);
-    return from_data(version, in);
-}
-
-bool get_address::from_data(uint32_t, reader& source)
-{
-    reset();
-    return source;
-}
-
-data_chunk get_address::to_data(uint32_t version) const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void get_address::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void get_address::to_data(uint32_t, writer&) const
-{
-}
-
-size_t get_address::serialized_size(uint32_t version) const
-{
-    return get_address::satoshi_fixed_size(version);
-}
-
-size_t get_address::satoshi_fixed_size(uint32_t)
-{
-    return 0;
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 } // namespace messages

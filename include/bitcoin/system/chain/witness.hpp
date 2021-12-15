@@ -39,12 +39,12 @@ class transaction;
 class BC_API witness
 {
 public:
-    typedef std::shared_ptr<witness> ptr;
+    typedef std::shared_ptr<const witness> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default witness is a valid (empty stack) object.
+    /// Default witness is an invalid empty stack object.
     witness();
 
     witness(witness&& other);
@@ -52,11 +52,12 @@ public:
 
     witness(data_stack&& stack);
     witness(const data_stack& stack);
-    witness(const stack_ptr& stack);
 
     witness(const data_slice& data, bool prefix);
     witness(std::istream& stream, bool prefix);
     witness(reader& source, bool prefix);
+
+    witness(const std::string& mnemonic);
 
     // Operators.
     // ------------------------------------------------------------------------
@@ -66,17 +67,6 @@ public:
 
     bool operator==(const witness& other) const;
     bool operator!=(const witness& other) const;
-
-    // Deserialization (from witness stack).
-    // ------------------------------------------------------------------------
-
-    /// Deserialization invalidates the iterator.
-    bool from_data(const data_slice& data, bool prefix);
-    bool from_data(std::istream& stream, bool prefix);
-    bool from_data(reader& source, bool prefix);
-
-    /// Deserialization result.
-    bool is_valid() const;
 
     // Serialization.
     // ------------------------------------------------------------------------
@@ -91,6 +81,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     const data_stack& stack() const;
 
     /// Computed properties.
@@ -113,23 +104,20 @@ public:
     code verify(const transaction& tx, uint32_t input_index, uint32_t forks,
         const script& program_script, uint64_t value) const;
 
-protected:
-    // So input may reset its member.
-    friend class input;
-
-    void reset();
-
 private:
+    static witness from_data(reader& source, bool prefix);
+    static witness from_string(const std::string& mnemonic);
     size_t serialized_size() const;
 
-    witness(const stack_ptr& stack, bool valid);
+    witness(data_stack&& stack, bool valid);
+    witness(const data_stack& stack, bool valid);
 
-    stack_ptr stack_;
+    // Witness should be stored as shared.
+    data_stack stack_;
     bool valid_;
 };
 
 typedef std::vector<witness> witnesses;
-typedef std::shared_ptr<witnesses> witnesses_ptr;
 
 } // namespace chain
 } // namespace system

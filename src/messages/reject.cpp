@@ -18,10 +18,11 @@
  */
 #include <bitcoin/system/messages/reject.hpp>
 
-#include <bitcoin/system/messages/block.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
-#include <bitcoin/system/messages/transaction.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -29,274 +30,28 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier reject::id = identifier::reject;
 const std::string reject::command = "reject";
+const identifier reject::id = identifier::reject;
 const uint32_t reject::version_minimum = version::level::bip61;
 const uint32_t reject::version_maximum = version::level::maximum;
 
-reject reject::factory(uint32_t version,
-    const data_chunk& data)
+// This is just a guess, required as memory guard.
+constexpr size_t max_message = max_uint16;
+
+// static
+bool reject::is_chain(const std::string& message)
 {
-    reject instance;
-    instance.from_data(version, data);
-    return instance;
+    return (message == block::command) || (message == transaction::command);
 }
 
-reject reject::factory(uint32_t version,
-    std::istream& stream)
+// static
+uint8_t reject::reason_to_byte(reason_code value)
 {
-    reject instance;
-    instance.from_data(version, stream);
-    return instance;
+    return static_cast<uint8_t>(value);
 }
 
-reject reject::factory(uint32_t version,
-    reader& source)
-{
-    reject instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-reject::reject()
-  : code_(reason_code::undefined), message_(), reason_(), data_(null_hash)
-{
-}
-
-reject::reject(reason_code code, const std::string& message,
-    const std::string& reason)
-  : reject(code, message, reason, null_hash)
-{
-}
-
-reject::reject(reason_code code, std::string&& message, std::string&& reason)
-  : code_(code),
-    message_(std::move(message)),
-    reason_(std::move(reason)),
-    data_(null_hash)
-{
-}
-
-reject::reject(reason_code code, const std::string& message,
-    const std::string& reason, const hash_digest& data)
-  : code_(code),
-    message_(message),
-    reason_(reason),
-    data_(data)
-{
-}
-
-reject::reject(reason_code code, std::string&& message, std::string&& reason,
-    hash_digest&& data)
-  : code_(code),
-    message_(std::move(message)),
-    reason_(std::move(reason)),
-    data_(std::move(data))
-{
-}
-
-reject::reject(const reject& other)
-  : reject(other.code_, other.message_, other.reason_, other.data_)
-{
-}
-
-reject::reject(reject&& other)
-  : reject(other.code_, std::move(other.message_), std::move(other.reason_),
-      std::move(other.data_))
-{
-}
-
-bool reject::is_valid() const
-{
-    return !message_.empty()
-        || (code_!= reason_code::undefined)
-        || !reason_.empty()
-        || (data_!= null_hash);
-}
-
-void reject::reset()
-{
-    message_.clear();
-    message_.shrink_to_fit();
-    code_ = reason_code::undefined;
-    reason_.clear();
-    reason_.shrink_to_fit();
-    data_.fill(0);
-}
-
-bool reject::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool reject::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool reject::from_data(uint32_t version, reader& source)
-{
-    reset();
-
-    message_ = source.read_string();
-    code_ = reason_from_byte(source.read_byte());
-    reason_ = source.read_string();
-
-    if ((message_ == block::command) ||
-        (message_ == transaction::command))
-    {
-        // Some nodes do not follow the documented convention of supplying hash
-        // for tx and block rejects. Use this to prevent error on empty stream.
-        const auto bytes = source.read_bytes();
-
-        if (bytes.size() == hash_size)
-            data_ = to_array<hash_size>(bytes);
-    }
-
-    if (version < reject::version_minimum)
-        source.invalidate();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk reject::to_data(uint32_t version) const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void reject::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void reject::to_data(uint32_t, writer& sink) const
-{
-    sink.write_string(message_);
-    sink.write_byte(reason_to_byte(code_));
-    sink.write_string(reason_);
-
-    if ((message_ == block::command) ||
-        (message_ == transaction::command))
-    {
-        sink.write_bytes(data_);
-    }
-}
-
-size_t reject::serialized_size(uint32_t) const
-{
-    size_t size = 1u + variable_size(message_.size()) +
-        message_.size() + variable_size(reason_.size()) + reason_.size();
-
-    if ((message_ == block::command) ||
-        (message_ == transaction::command))
-    {
-        size += hash_size;
-    }
-
-    return size;
-}
-
-reject::reason_code reject::code() const
-{
-    return code_;
-}
-
-void reject::set_code(reason_code value)
-{
-    code_ = value;
-}
-
-std::string& reject::message()
-{
-    return message_;
-}
-
-const std::string& reject::message() const
-{
-    return message_;
-}
-
-void reject::set_message(const std::string& value)
-{
-    message_ = value;
-}
-
-void reject::set_message(std::string&& value)
-{
-    message_ = std::move(value);
-}
-
-std::string& reject::reason()
-{
-    return reason_;
-}
-
-const std::string& reject::reason() const
-{
-    return reason_;
-}
-
-void reject::set_reason(const std::string& value)
-{
-    reason_ = value;
-}
-
-void reject::set_reason(std::string&& value)
-{
-    reason_ = std::move(value);
-}
-
-hash_digest& reject::data()
-{
-    return data_;
-}
-
-const hash_digest& reject::data() const
-{
-    return data_;
-}
-
-void reject::set_data(const hash_digest& value)
-{
-    data_ = value;
-}
-
-void reject::set_data(hash_digest&& value)
-{
-    data_ = std::move(value);
-}
-
-reject& reject::operator=(reject&& other)
-{
-    code_ = other.code_;
-    reason_ = std::move(other.reason_);
-    message_ = std::move(other.message_);
-    data_ = std::move(other.data_);
-    return *this;
-}
-
-bool reject::operator==(const reject& other) const
-{
-    return (code_ == other.code_) && (reason_ == other.reason_)
-        && (message_ == other.message_) && (data_ == other.data_);
-}
-
-bool reject::operator!=(const reject& other) const
-{
-    return !(*this == other);
-}
-
-reject::reason_code reject::reason_from_byte(uint8_t byte)
+// static
+reject::reason_code reject::byte_to_reason(uint8_t byte)
 {
     switch (byte)
     {
@@ -321,29 +76,46 @@ reject::reason_code reject::reason_from_byte(uint8_t byte)
     }
 }
 
-uint8_t reject::reason_to_byte(reason_code value)
+// static
+reject reject::deserialize(uint32_t version, reader& source)
 {
-    switch (value)
+    auto message = source.read_string(max_message);
+    const auto chain = is_chain(message);
+
+    return
     {
-        case reason_code::malformed:
-            return 0x01;
-        case reason_code::invalid:
-            return 0x10;
-        case reason_code::obsolete:
-            return 0x11;
-        case reason_code::duplicate:
-            return 0x12;
-        case reason_code::nonstandard:
-            return 0x40;
-        case reason_code::dust:
-            return 0x41;
-        case reason_code::insufficient_fee:
-            return 0x42;
-        case reason_code::checkpoint:
-            return 0x43;
-        default:
-            return 0x00;
-    }
+        std::move(message),
+        byte_to_reason(source.read_byte()),
+        source.read_string(max_message),
+
+        // Some nodes do not follow the documented convention of supplying hash
+        // for tx and block rejects. Use this to prevent error by ensuring only
+        // and all provided bytes are read. to_array will pad/truncate.
+        chain ? to_array<hash_size>(source.read_bytes()) : null_hash
+    };
+}
+
+void reject::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
+{
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    sink.write_string(message);
+    sink.write_byte(reason_to_byte(code));
+    sink.write_string(reason);
+
+    if (is_chain(message))
+        sink.write_bytes(hash);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
+}
+
+size_t reject::size(uint32_t) const
+{
+    return variable_size(message.length()) + message.length()
+        + sizeof(uint8_t)
+        + variable_size(reason.length()) + reason.length()
+        + is_chain(message) ? hash_size : zero;
 }
 
 } // namespace messages

@@ -19,129 +19,50 @@
 #include <bitcoin/system/messages/get_data.hpp>
 
 #include <algorithm>
-#include <initializer_list>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/inventory.hpp>
-#include <bitcoin/system/messages/inventory_vector.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier get_data::id = identifier::get_data;
+// filtered_block flag allowed by bip37.
 const std::string get_data::command = "getdata";
+const identifier get_data::id = identifier::get_data;
 const uint32_t get_data::version_minimum = version::level::minimum;
 const uint32_t get_data::version_maximum = version::level::maximum;
 
-get_data get_data::factory(uint32_t version,
-    const data_chunk& data)
+// static
+// Reimplements base class read to prevent a list move operation as well
+// as the need to implement default, base move, and base copy constructors.
+get_data get_data::deserialize(uint32_t version, reader& source)
 {
-    get_data instance;
-    instance.from_data(version,data);
-    return instance;
-}
-
-get_data get_data::factory(uint32_t version,
-    std::istream& stream)
-{
-    get_data instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-get_data get_data::factory(uint32_t version,
-    reader& source)
-{
-    get_data instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-get_data::get_data()
-  : inventory()
-{
-}
-
-get_data::get_data(const inventory_vector::list& values)
-  : inventory(values)
-{
-}
-
-get_data::get_data(inventory_vector::list&& values)
-  : inventory(values)
-{
-}
-
-get_data::get_data(const hash_list& hashes, inventory::type_id type)
-  : inventory(hashes, type)
-{
-}
-
-get_data::get_data(const std::initializer_list<inventory_vector>& values)
-  : inventory(values)
-{
-}
-
-get_data::get_data(const get_data& other)
-  : inventory(other)
-{
-}
-
-get_data::get_data(get_data&& other)
-  : inventory(other)
-{
-}
-
-bool get_data::from_data(uint32_t version, const data_chunk& data)
-{
-    return inventory::from_data(version, data);
-}
-
-bool get_data::from_data(uint32_t version, std::istream& stream)
-{
-    return inventory::from_data(version, stream);
-}
-
-bool get_data::from_data(uint32_t version, reader& source)
-{
-    if (!inventory::from_data(version, source))
-        return false;
-
-    if (version < get_data::version_minimum)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    if (!source)
-        reset();
+    get_data get;
+    get.items.resize(source.read_size(max_inventory));
 
-    return source;
+    for (size_t item = 0; item < get.items.capacity(); ++item)
+        get.items.push_back(inventory_item::deserialize(version, source));
+
+    return get;
 }
 
+// TODO: add inventory factory witness parameter (once node is ready).
+// Requires a non-const instance for this in-place efficiency.
 void get_data::to_witness()
 {
-    const auto convert = [](inventory_vector& element)
+    const auto convert = [](inventory_item& item)
     {
-        element.to_witness();
+        item.to_witness();
     };
 
-    std::for_each(inventories().begin(), inventories().end(), convert);
-}
-
-get_data& get_data::operator=(get_data&& other)
-{
-    set_inventories(other.inventories());
-    return *this;
-}
-
-bool get_data::operator==(const get_data& other) const
-{
-    return (static_cast<inventory>(*this) == static_cast<inventory>(other));
-}
-
-bool get_data::operator!=(const get_data& other) const
-{
-    return (static_cast<inventory>(*this) != static_cast<inventory>(other));
+    std::for_each(items.begin(), items.end(), convert);
 }
 
 } // namespace messages

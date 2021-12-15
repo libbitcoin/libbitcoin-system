@@ -26,7 +26,6 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-// The integer encoding is a private data format.
 uint32_t network_checksum(const data_slice& data)
 {
     return from_little_endian<uint32_t>(bitcoin_hash(data));

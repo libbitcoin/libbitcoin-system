@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,12 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_BLOCK_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -33,57 +32,27 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API block
-  : public chain::block
+struct BC_API block
 {
-public:
-    typedef std::shared_ptr<block> ptr;
-    typedef std::shared_ptr<const block> const_ptr;
-    typedef std::vector<ptr> ptr_list;
-    typedef std::vector<const_ptr> const_ptr_list;
-    typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
-    typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
-
-    static block factory(uint32_t version, const data_chunk& data);
-    static block factory(uint32_t version, std::istream& stream);
-    static block factory(uint32_t version, reader& source);
-
-    block();
-
-    block(block&& other);
-    block(const block& other);
-
-    block(chain::block&& other);
-    block(const chain::block& other);
-
-    block(chain::header&& header, chain::transactions&& transactions);
-    block(const chain::header& header,
-        const chain::transactions& transactions);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    size_t serialized_size(uint32_t version) const;
-
-    block& operator=(chain::block&& other);
-
-    // This class is move assignable but not copy assignable.
-    block& operator=(block&& other);
-    void operator=(const block&) = delete;
-
-    bool operator==(const chain::block& other) const;
-    bool operator!=(const chain::block& other) const;
-
-    bool operator==(const block& other) const;
-    bool operator!=(const block& other) const;
+    ////typedef std::vector<block> list;
+    ////typedef std::shared_ptr<block> ptr;
+    ////typedef std::vector<ptr> ptr_list;
+    ////typedef std::shared_ptr<const block> const_ptr;
+    ////typedef std::vector<const_ptr> const_ptr_list;
+    ////typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
+    ////typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
+    typedef std::shared_ptr<const block> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+    static block deserialize(uint32_t version, reader& source, bool witness);
+    void serialize(uint32_t version, writer& sink, bool witness) const;
+    size_t size(uint32_t version, bool witness) const;
+
+    chain::block::ptr block;
 };
 
 } // namespace messages

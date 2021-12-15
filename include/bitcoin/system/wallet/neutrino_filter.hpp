@@ -41,16 +41,16 @@ bool compute_filter(const chain::block& validated_block,
 hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     const data_chunk& filter);
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const chain::script& script);
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const chain::scripts& scripts);
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const wallet::payment_address& address);
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const wallet::payment_address::list& addresses);
 
 } // namespace neutrino

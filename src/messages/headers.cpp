@@ -18,14 +18,14 @@
  */
 #include <bitcoin/system/messages/headers.hpp>
 
-#include <algorithm>
+#include <cstddef>
 #include <cstdint>
-#include <initializer_list>
-#include <istream>
-#include <utility>
+#include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
-#include <bitcoin/system/messages/inventory_vector.hpp>
+#include <bitcoin/system/messages/inventory_item.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -33,219 +33,99 @@
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
-const identifier headers::id = identifier::headers;
+    
 const std::string headers::command = "headers";
+const identifier headers::id = identifier::headers;
 const uint32_t headers::version_minimum = version::level::headers;
 const uint32_t headers::version_maximum = version::level::maximum;
 
-headers headers::factory(uint32_t version, const data_chunk& data)
+// Each header must trail a zero byte (yes, it's stoopid).
+constexpr uint8_t trail = 0x00;
+
+// static
+headers headers::deserialize(uint32_t version, reader& source)
 {
-    headers instance;
-    instance.from_data(version, data);
-    return instance;
-}
-
-headers headers::factory(uint32_t version, std::istream& stream)
-{
-    headers instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-headers headers::factory(uint32_t version, reader& source)
-{
-    headers instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-headers::headers()
-  : elements_()
-{
-}
-
-// Uses headers copy assignment.
-headers::headers(const header::list& values)
-  : elements_(values)
-{
-}
-
-headers::headers(header::list&& values)
-  : elements_(std::move(values))
-{
-}
-
-headers::headers(const std::initializer_list<header>& values)
-  : elements_(values)
-{
-}
-
-headers::headers(const headers& other)
-  : headers(other.elements_)
-{
-}
-
-headers::headers(headers&& other)
-  : headers(std::move(other.elements_))
-{
-}
-
-bool headers::is_valid() const
-{
-    return !elements_.empty();
-}
-
-void headers::reset()
-{
-    elements_.clear();
-    elements_.shrink_to_fit();
-}
-
-bool headers::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool headers::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool headers::from_data(uint32_t version, reader& source)
-{
-    reset();
-
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_get_headers)
-        source.invalidate();
-    else
-        elements_.resize(count);
-
-    // Order is required.
-    for (auto& element: elements_)
-        if (!element.from_data(version, source))
-            break;
-
-    if (version < headers::version_minimum)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    if (!source)
-        reset();
+    chain::header_ptrs headers;
+    headers.reserve(source.read_size(max_get_headers));
 
-    return source;
+    for (size_t header = 0; header < headers.capacity(); ++header)
+    {
+        headers.push_back(to_shared(chain::header(source)));
+
+        if (source.read_byte() != trail)
+            source.invalidate();
+    }
+
+    return { headers };
 }
 
-data_chunk headers::to_data(uint32_t version) const
+void headers::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    sink.write_variable(headers.size());
+
+    for (const auto& header: headers)
+    {
+        header->to_data(sink);
+        sink.write_byte(trail);
+    }
+
+    BITCOIN_ASSERT(sink&& sink.get_position() - start == bytes);
 }
 
-void headers::to_data(uint32_t version, std::ostream& stream) const
+size_t headers::size(uint32_t version) const
 {
-    write::bytes::ostream out(stream);
-    to_data(version, out);
+    return variable_size(headers.size()) +
+        (headers.size() * chain::header::serialized_size() + sizeof(trail));
 }
 
-void headers::to_data(uint32_t version, writer& sink) const
-{
-    sink.write_variable(elements_.size());
-
-    for (const auto& element: elements_)
-        element.to_data(version, sink);
-}
-
+// TODO: This would benefit from block hash store/return as pointer.
 bool headers::is_sequential() const
 {
-    if (elements_.empty())
+    if (headers.empty())
         return true;
 
-    auto previous = elements_.front().hash();
+    auto previous = headers.front()->hash();
 
-    for (auto it = elements_.begin() + 1; it != elements_.end(); ++it)
+    for (auto it = std::next(headers.begin()); it != headers.end(); ++it)
     {
-        if (it->previous_block_hash() != previous)
+        if ((*it)->previous_block_hash() != previous)
             return false;
 
-        previous = it->hash();
+        previous = (*it)->hash();
     }
 
     return true;
 }
 
-void headers::to_hashes(hash_list& out) const
+// TODO: This would benefit from hash_list as list of pointers.
+hash_list headers::to_hashes() const
 {
-    out.clear();
-    out.reserve(elements_.size());
-    const auto map = [&out](const header& header)
-    {
-        out.push_back(header.hash());
-    };
+    hash_list out;
+    out.reserve(headers.size());
 
-    std::for_each(elements_.begin(), elements_.end(), map);
+    for (const auto& header: headers)
+        out.push_back(header->hash());
+
+    return out;
 }
 
-void headers::to_inventory(inventory_vector::list& out,
-    inventory::type_id type) const
+// TODO: This would benefit from inventory_item hash pointers.
+inventory_item::list headers::to_inventory(inventory::type_id type) const
 {
-    out.clear();
-    out.reserve(elements_.size());
-    const auto map = [&out, type](const header& header)
-    {
-        out.emplace_back(type, header.hash());
-    };
+    inventory_item::list out;
+    out.reserve(headers.size());
 
-    std::for_each(elements_.begin(), elements_.end(), map);
-}
+    // msvc: emplace_back(type, header->hash()) does not compile.
+    for (const auto& header: headers)
+        out.push_back({ type, header->hash() });
 
-size_t headers::serialized_size(uint32_t version) const
-{
-    return variable_size(elements_.size()) +
-        (elements_.size() * header::satoshi_fixed_size(version));
-}
-
-header::list& headers::elements()
-{
-    return elements_;
-}
-
-const header::list& headers::elements() const
-{
-    return elements_;
-}
-
-void headers::set_elements(const header::list& values)
-{
-    elements_ = values;
-}
-
-void headers::set_elements(header::list&& values)
-{
-    elements_ = std::move(values);
-}
-
-headers& headers::operator=(headers&& other)
-{
-    elements_ = std::move(other.elements_);
-    return *this;
-}
-
-bool headers::operator==(const headers& other) const
-{
-    return (elements_ == other.elements_);
-}
-
-bool headers::operator!=(const headers& other) const
-{
-    return !(*this == other);
+    return out;
 }
 
 } // namespace messages

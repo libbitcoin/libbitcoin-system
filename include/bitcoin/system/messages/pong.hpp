@@ -19,12 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_PONG_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_PONG_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -33,50 +31,21 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API pong
+struct BC_API pong
 {
-public:
-    typedef std::shared_ptr<pong> ptr;
-    typedef std::shared_ptr<const pong> const_ptr;
-
-    static pong factory(uint32_t version, const data_chunk& data);
-    static pong factory(uint32_t version, std::istream& stream);
-    static pong factory(uint32_t version, reader& source);
-    static size_t satoshi_fixed_size(uint32_t version);
-
-    pong();
-    pong(uint64_t nonce);
-    pong(const pong& other);
-
-    uint64_t nonce() const;
-    void set_nonce(uint64_t value);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    // This class is move assignable but not copy assignable.
-    pong& operator=(pong&& other);
-    void operator=(const pong&) = delete;
-
-    bool operator==(const pong& other) const;
-    bool operator!=(const pong& other) const;
+    typedef std::shared_ptr<const pong> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    uint64_t nonce_;
-    bool valid_;
+    static size_t size(uint32_t version);
+    static pong deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+
+    uint64_t nonce;
+    bool valid;
 };
 
 } // namespace messages

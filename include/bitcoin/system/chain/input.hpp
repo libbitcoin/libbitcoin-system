@@ -40,12 +40,12 @@ namespace chain {
 class BC_API input
 {
 public:
-    typedef std::shared_ptr<input> ptr;
+    typedef std::shared_ptr<const input> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default input is a valid (null point) object with an invalid prevout.
+    /// Default input is an invalid null point object with an invalid prevout.
     input();
 
     input(input&& other);
@@ -77,16 +77,6 @@ public:
     bool operator==(const input& other) const;
     bool operator!=(const input& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -98,9 +88,13 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     const chain::point& point() const;
     const chain::script& script() const;
     const chain::witness& witness() const;
+    const chain::point::ptr point_ptr() const;
+    const chain::script::ptr script_ptr() const;
+    const chain::witness::ptr witness_ptr() const;
     uint32_t sequence() const;
 
     /// Computed properties.
@@ -129,8 +123,12 @@ protected:
     void reset();
 
 private:
+    static input from_data(reader& source);
     bool embedded_script(chain::script& out) const;
 
+    // Input should be stored as shared (adds 16 bytes).
+    // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).
+    // mutable chain::prevout::ptr prevout; (public)
     chain::point::ptr point_;
     chain::script::ptr script_;
     chain::witness::ptr witness_;
@@ -139,7 +137,8 @@ private:
 };
 
 typedef std::vector<input> inputs;
-typedef std::shared_ptr<inputs> inputs_ptr;
+typedef std::vector<input::ptr> input_ptrs;
+typedef std::shared_ptr<input_ptrs> inputs_ptr;
 
 } // namespace chain
 } // namespace system

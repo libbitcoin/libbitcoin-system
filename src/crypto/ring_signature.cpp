@@ -301,9 +301,9 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
 
 hash_digest digest(const data_slice& message, const key_rings& rings)
 {
-    const auto sum = [](size_t size, const compressed_list& ring)
+    const auto sum = [](size_t total, const compressed_list& ring)
     {
-        return size + ring.size() * ec_compressed_size;
+        return total + ring.size() * ec_compressed_size;
     };
 
     const auto size = std::accumulate(rings.begin(), rings.end(),

@@ -34,6 +34,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// TODO: derive from (or alias) point.
 class BC_API checkpoint
 {
 public:
@@ -104,7 +105,6 @@ std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept;
 std::istream& operator>>(std::istream& input, checkpoint& out) noexcept;
 
 typedef std::vector<checkpoint> checkpoints;
-typedef std::shared_ptr<checkpoints> checkpoints_ptr;
 
 } // namespace chain
 } // namespace system

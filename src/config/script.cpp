@@ -46,7 +46,7 @@ script::script(const chain::script& value)
 
 script::script(const data_chunk& value)
 {
-    value_.from_data(value, false);
+    value_ = chain::script(value, false);
 }
 
 script::script(const std::vector<std::string>& tokens)
@@ -79,10 +79,10 @@ std::istream& operator>>(std::istream& input, script& argument)
 {
     std::istreambuf_iterator<char> end;
     std::string mnemonic(std::istreambuf_iterator<char>(input), end);
-    trim(mnemonic);
 
-    // Test for invalid result sentinel.
-    if (!argument.value_.from_string(mnemonic) && mnemonic.length() > 0)
+    argument.value_ = chain::script(mnemonic);
+
+    if (!argument.value_.is_valid())
         throw istream_exception(mnemonic);
 
     return input;

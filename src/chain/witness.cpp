@@ -47,7 +47,7 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness()
-  : witness(std::make_shared<data_stack>(), true)
+  : witness({}, false)
 {
 }
 
@@ -62,19 +62,13 @@ witness::witness(const witness& other)
 }
 
 witness::witness(data_stack&& stack)
-  : witness(std::make_shared<data_stack>(std::move(stack)), true)
+  : witness(std::move(stack), true)
 {
 }
 
 witness::witness(const data_stack& stack)
-  : witness(std::make_shared<data_stack>(stack), true)
-{
-}
-
-witness::witness(const stack_ptr& stack)
   : witness(stack, true)
 {
-    BITCOIN_ASSERT(stack);
 }
 
 witness::witness(const data_slice& data, bool prefix)
@@ -88,14 +82,23 @@ witness::witness(std::istream& stream, bool prefix)
 }
 
 witness::witness(reader& source, bool prefix)
-  : witness()
+  : witness(from_data(source, prefix))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source, prefix);
+}
+
+witness::witness(const std::string& mnemonic)
+  : witness(from_string(mnemonic))
+{
 }
 
 // protected
-witness::witness(const stack_ptr& stack, bool valid)
+witness::witness(data_stack&& stack, bool valid)
+  : stack_(std::move(stack)), valid_(valid)
+{
+}
+
+// protected
+witness::witness(const data_stack& stack, bool valid)
   : stack_(stack), valid_(valid)
 {
 }
@@ -105,7 +108,8 @@ witness::witness(const stack_ptr& stack, bool valid)
 
 witness& witness::operator=(witness&& other)
 {
-    *this = other;
+    stack_ = std::move(other.stack_);
+    valid_ = other.valid_;
     return *this;
 }
 
@@ -118,7 +122,8 @@ witness& witness::operator=(const witness& other)
 
 bool witness::operator==(const witness& other) const
 {
-    return (*stack_ == *other.stack_);
+    // TODO: after changing to vector(data_ptr) compare membership, not ptrs.
+    return (stack_ == other.stack_);
 }
 
 bool witness::operator!=(const witness& other) const
@@ -132,78 +137,69 @@ bool witness::operator!=(const witness& other) const
 static data_chunk read_element(reader& source)
 {
     // Each witness encoded as variable integer prefixed byte array (bip144).
-    const auto size = source.read_size();
-
-    // The max_script_size and max_push_data_size constants limit evaluation,
-    // but not all stacks evaluate, so use max_block_weight to guard memory
-    // allocation here.
-    if (size > max_block_weight)
-    {
-        source.invalidate();
-        return {};
-    }
-
-    return source.read_bytes(size);
+    return source.read_bytes(source.read_size(max_block_weight));
 }
 
-bool witness::from_data(const data_slice& data, bool prefix)
+// static/private
+witness witness::from_data(reader& source, bool prefix)
 {
-    stream::in::copy istream(data);
-    return from_data(istream, prefix);
-}
-
-bool witness::from_data(std::istream& stream, bool prefix)
-{
-    read::bytes::istream source(stream);
-    return from_data(source, prefix);
-}
-
-bool witness::from_data(reader& source, bool prefix)
-{
-    ////reset();
-    stack_->clear();
+    data_stack stack;
 
     if (prefix)
     {
         // Each witness is prefixed with number of elements (bip144).
         // Witness prefix is an element count, not byte length.
-        auto count = source.read_size();
+        stack.reserve(source.read_size(max_block_weight));
 
-        if (count > max_block_weight)
-        {
-            source.invalidate();
-        }
-        else
-        {
-            stack_->reserve(count);
-            for (size_t element = 0; element < count; ++element)
-                stack_->emplace_back(read_element(source));
-        }
+        for (size_t element = 0; element < stack.capacity(); ++element)
+            stack.emplace_back(read_element(source));
     }
     else
     {
         while (!source.is_exhausted())
-            stack_->emplace_back(read_element(source));
+            stack.emplace_back(read_element(source));
     }
 
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
+    return { stack, source };
 }
 
-// protected
-void witness::reset()
+inline bool is_push_token(const std::string& token)
 {
-    stack_->clear();
-    stack_->shrink_to_fit();
-    valid_ = false;
+    return token.size() > one && token.front() == '[' && token.back() == ']';
 }
 
-bool witness::is_valid() const
+inline std::string remove_token_delimiters(const std::string& token)
 {
-    return valid_;
+    BITCOIN_ASSERT(token.size() > one);
+    return std::string(std::next(token.begin()), std::prev(token.end()));
+}
+
+// static/private
+witness witness::from_string(const std::string& mnemonic)
+{
+    // There is always one data element per non-empty string token.
+    auto tokens = split(mnemonic);
+
+    // Split always returns at least one token, and when trimming it will be
+    // empty only if there was nothing but whitespace in the mnemonic.
+    if (tokens.front().empty())
+        tokens.clear();
+
+    data_chunk data;
+    data_stack stack;
+    stack.reserve(tokens.size());
+
+    // Create data stack from the split tokens.
+    for (const auto& token: tokens)
+    {
+        if (is_push_token(token) && decode_base16(data,
+            remove_token_delimiters(token)))
+            stack.push_back(data);
+        else
+            return {};
+    }
+
+    return { std::move(stack) };
 }
 
 // Serialization.
@@ -231,10 +227,10 @@ void witness::to_data(writer& sink, bool prefix) const
 
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable(stack_->size());
+        sink.write_variable(stack_.size());
 
     // Tokens encoded as variable integer prefixed byte array (bip144).
-    for (const auto& element: *stack_)
+    for (const auto& element: stack_)
     {
         sink.write_variable(element.size());
         sink.write_bytes(element);
@@ -246,10 +242,10 @@ void witness::to_data(writer& sink, bool prefix) const
 std::string witness::to_string() const
 {
     if (!valid_)
-        return "<invalid>";
+        return "(?)";
 
     std::string text;
-    for (const auto& element: *stack_)
+    for (const auto& element: stack_)
         text += "[" + encode_base16(element) + "] ";
 
     trim_right(text);
@@ -259,9 +255,14 @@ std::string witness::to_string() const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool witness::is_valid() const
+{
+    return valid_;
+}
+
 const data_stack& witness::stack() const
 {
-    return *stack_;
+    return stack_;
 }
 
 // private
@@ -274,13 +275,13 @@ size_t witness::serialized_size() const
         return total + variable_size(size) + size;
     };
 
-    return std::accumulate(stack_->begin(), stack_->end(), zero, sum);
+    return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
 size_t witness::serialized_size(bool prefix) const
 {
     // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(stack_->size()) : zero) + serialized_size();
+    return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
 }
 
 // Utilities.
@@ -340,8 +341,8 @@ bool witness::extract_sigop_script(script& out_script,
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    if (!stack_->empty())
-                        out_script.from_data(stack_->back(), false);
+                    if (!stack_.empty())
+                        out_script = { stack_.back(), false };
 
                     return true;
 
@@ -367,7 +368,7 @@ bool witness::extract_script(script& out_script,
     data_stack& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
-    out_stack = *stack_;
+    out_stack = stack_;
 
     switch (program_script.version())
     {
@@ -387,7 +388,7 @@ bool witness::extract_script(script& out_script,
 
                     // Create a pay-to-key-hash input script from the program.
                     // The hash160 of public key must match program (bip141).
-                    out_script = script{ to_pay_key_hash(std::move(program)) };
+                    out_script = { to_pay_key_hash(std::move(program)) };
                     return true;
                 }
 
@@ -402,7 +403,7 @@ bool witness::extract_script(script& out_script,
                         return false;
 
                     // Input script is popped from the stack (bip141).
-                    out_script.from_data(pop(out_stack), false);
+                    out_script = { pop(out_stack), false };
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),

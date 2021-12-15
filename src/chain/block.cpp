@@ -54,8 +54,8 @@ static default_allocator<hash_digest> no_fill_hash_allocator{};
 // ----------------------------------------------------------------------------
 
 block::block()
-  : block(std::make_shared<chain::header>(),
-      std::make_shared<chain::transactions>(), false)
+  : block(to_shared<chain::header>(), to_shared<chain::transaction_ptrs>(),
+      false)
 {
 }
 
@@ -70,22 +70,19 @@ block::block(const block& other)
 }
 
 block::block(chain::header&& header, chain::transactions&& txs)
-  : block(std::make_shared<chain::header>(std::move(header)),
-      std::make_shared<chain::transactions>(std::move(txs)), true)
+  ////: block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
 }
 
 block::block(const chain::header& header, const chain::transactions& txs)
-  : block(std::make_shared<chain::header>(header),
-      std::make_shared<chain::transactions>(txs), true)
+  : block(to_shared<chain::header>(header), to_shareds(txs), true)
 {
 }
 
 block::block(const chain::header::ptr& header, const transactions_ptr& txs)
-  : block(header, txs, true)
+  : block(header ? header : to_shared<chain::header>(),
+      txs ? txs : to_shared<transaction_ptrs>(), true)
 {
-    BITCOIN_ASSERT(header);
-    BITCOIN_ASSERT(txs);
 }
 
 block::block(const data_slice& data, bool witness)
@@ -99,10 +96,8 @@ block::block(std::istream& stream, bool witness)
 }
 
 block::block(reader& source, bool witness)
-  : block()
+  : block(from_data(source, witness))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source, witness);
 }
 
 // protected
@@ -131,6 +126,7 @@ block& block::operator=(const block& other)
 
 bool block::operator==(const block& other) const
 {
+    // TODO: compare transactions, not pointers.
     return (*header_ == *other.header_)
         && (*txs_ == *other.txs_);
 }
@@ -143,57 +139,26 @@ bool block::operator!=(const block& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool block::from_data(const data_slice& data, bool witness)
+// static/private
+block block::from_data(reader& source, bool witness)
 {
-    stream::in::copy stream(data);
-    return from_data(stream, witness);
-}
-
-bool block::from_data(std::istream& stream, bool witness)
-{
-    read::bytes::istream source(stream);
-    return from_data(source, witness);
-}
-
-bool block::from_data(reader& source, bool witness)
-{
-    ////reset();
-    txs_->clear();
-
-    header_->from_data(source);
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
+    const auto read_transactions = [=](reader& source)
     {
-        source.invalidate();
-    }
-    else
+        transactions_ptr txs;
+        txs->reserve(source.read_size(max_block_size));
+
+        ////for (size_t tx = 0; tx < txs->capacity(); ++tx)
+        ////    txs->emplace_back(transaction{ source, witness });
+
+        return txs;
+    };
+
+    return
     {
-        txs_->reserve(count);
-        for (size_t tx = 0; tx < count; ++tx)
-            txs_->emplace_back(source, witness);
-    }
-
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
-}
-
-// private
-void block::reset()
-{
-    header_->reset();
-    txs_->clear();
-    txs_->shrink_to_fit();
-    valid_ = false;
-}
-
-bool block::is_valid() const
-{
-    return valid_;
+        to_shared(chain::header(source)),
+        read_transactions(source),
+        source
+    };
 }
 
 // Serialization.
@@ -222,8 +187,8 @@ void block::to_data(writer& sink, bool witness) const
     header_->to_data(sink);
     sink.write_variable(txs_->size());
 
-    for (const auto& transaction: *txs_)
-        transaction.to_data(sink, witness);
+    for (const auto& tx: *txs_)
+        tx->to_data(sink, witness);
 
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
@@ -231,28 +196,24 @@ void block::to_data(writer& sink, bool witness) const
 // Properties.
 // ----------------------------------------------------------------------------
 
-size_t block::serialized_size(bool witness) const
+bool block::is_valid() const
 {
-    // Overflow returns max_size_t.
-    const auto sum = [witness](size_t total, const transaction& tx)
-    {
-        return ceilinged_add(total, tx.serialized_size(witness));
-    };
-
-    return header_->serialized_size()
-        + variable_size(txs_->size())
-        + std::accumulate(txs_->begin(), txs_->end(), zero, sum);
-
+    return valid_;
 }
 
-const chain::header& block::header() const
+const chain::header&block::header() const
 {
     return *header_;
 }
 
-const transactions& block::transactions() const
+const chain::header::ptr block::header_ptr() const
 {
-    return *txs_;
+    return header_;
+}
+
+const transactions_ptr block::transactions() const
+{
+    return txs_;
 }
 
 hash_list block::transaction_hashes(bool witness) const
@@ -260,9 +221,9 @@ hash_list block::transaction_hashes(bool witness) const
     hash_list out(no_fill_hash_allocator);
     out.resize(txs_->size());
 
-    const auto hash = [witness](const transaction& tx)
+    const auto hash = [witness](const transaction::ptr& tx)
     {
-        return tx.hash(witness);
+        return tx->hash(witness);
     };
 
     std::transform(txs_->begin(), txs_->end(), out.begin(), hash);
@@ -275,6 +236,20 @@ hash_digest block::hash() const
     return header_->hash();
 }
 
+size_t block::serialized_size(bool witness) const
+{
+    // Overflow returns max_size_t.
+    const auto sum = [witness](size_t total, const transaction::ptr& tx)
+    {
+        return ceilinged_add(total, tx->serialized_size(witness));
+    };
+
+    return header_->serialized_size()
+        + variable_size(txs_->size())
+        + std::accumulate(txs_->begin(), txs_->end(), zero, sum);
+
+}
+
 // Connect.
 // ----------------------------------------------------------------------------
 
@@ -284,13 +259,10 @@ hash_digest block::hash() const
 ////    // A set is used to collapse duplicates.
 ////    std::set<hash_digest> hashes;
 ////
-////    const auto hasher = [&hashes](const transaction& tx)
-////    {
-////        hashes.insert(tx.hash());
-////    };
+////    for (const auto& tx: *txs_)
+////        hashes.insert(tx->hash(false));
 ////
-////    std::for_each(txs_->begin(), txs_->end(), hasher);
-////    return hashes.size() == txs.size();
+////    return hashes.size() == txs_->size();
 ////}
 
 bool block::is_empty() const
@@ -305,7 +277,7 @@ bool block::is_oversized() const
 
 bool block::is_first_non_coinbase() const
 {
-    return !txs_->front().is_coinbase();
+    return !txs_->front()->is_coinbase();
 }
 
 // True if there is another coinbase other than the first tx.
@@ -315,9 +287,9 @@ bool block::is_extra_coinbases() const
     if (txs_->empty())
         return false;
 
-    const auto value = [](const transaction& tx)
+    const auto value = [](const transaction::ptr& tx)
     {
-        return tx.is_coinbase();
+        return tx->is_coinbase();
     };
 
     return std::any_of(std::next(txs_->begin()), txs_->end(), value);
@@ -331,15 +303,15 @@ bool block::is_forward_reference() const
 {
     std::unordered_map<hash_digest, bool> hashes(txs_->size());
 
-    const auto is_forward = [&hashes](const input& input)
+    const auto is_forward = [&hashes](const input::ptr& input)
     {
-        return !is_zero(hashes.count(input.point().hash()));
+        return !is_zero(hashes.count(input->point().hash()));
     };
 
     for (const auto& tx: boost::adaptors::reverse(*txs_))
     {
-        hashes.emplace(tx.hash(false), true);
-        if (std::any_of(tx.inputs().begin(), tx.inputs().end(), is_forward))
+        hashes.emplace(tx->hash(false), bool{});
+        if (std::any_of(tx->inputs()->begin(), tx->inputs()->end(), is_forward))
             return true;
     }
 
@@ -350,9 +322,9 @@ bool block::is_forward_reference() const
 size_t block::non_coinbase_inputs() const
 {
     // Overflow returns max_size_t.
-    const auto inputs = [](size_t total, const transaction& tx)
+    const auto inputs = [](size_t total, const transaction::ptr& tx)
     {
-        return ceilinged_add(total, tx.inputs().size());
+        return ceilinged_add(total, tx->inputs()->size());
     };
 
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
@@ -366,9 +338,9 @@ bool block::is_internal_double_spend() const
     // A set is used to collapse duplicate points.
     std::set<point> outs;
 
-    const auto inserter = [&outs](const transaction& tx)
+    const auto inserter = [&outs](const transaction::ptr& tx)
     {
-        auto out = tx.points();
+        auto out = tx->points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     };
 
@@ -432,10 +404,10 @@ bool block::is_overweight() const
 
 bool block::is_invalid_coinbase_script(size_t height) const
 {
-    if (txs_->empty() || txs_->front().inputs().empty())
+    if (txs_->empty() || txs_->front()->inputs()->empty())
         return false;
 
-    const auto& script = txs_->front().inputs().front().script();
+    const auto& script = txs_->front()->inputs()->front()->script();
     return !script::is_coinbase_pattern(script.ops(), height);
 }
 
@@ -452,29 +424,26 @@ bool block::is_hash_limit_exceeded() const
     std::set<hash_digest> hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
-    hashes.insert(txs_->front().hash(false));
+    hashes.insert(txs_->front()->hash(false));
 
-    const auto tx_inserter = [=, &hashes](const transaction& tx)
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
-        const auto input_inserter = [&hashes](const input& input)
-        {
-            hashes.insert(input.point().hash());
-        };
+        // Insert the transaction hash.
+        hashes.insert((*tx)->hash(false));
 
-        hashes.insert(tx.hash(false));
-        const auto& inputs = tx.inputs();
-        std::for_each(inputs.begin(), inputs.end(), input_inserter);
-    };
+        // Insert all input point hashes.
+        for (const auto& in: *(*tx)->inputs())
+            hashes.insert(in->point().hash());
+    }
 
-    std::for_each(std::next(txs_->begin()), txs_->end(), tx_inserter);
     return hashes.size() > hash_limit;
 }
 
 bool block::is_segregated() const
 {
-    const auto segregated = [](const transaction& tx)
+    const auto segregated = [](const transaction::ptr& tx)
     {
-        return tx.is_segregated();
+        return tx->is_segregated();
     };
 
     return std::any_of(txs_->begin(), txs_->end(), segregated);
@@ -482,16 +451,16 @@ bool block::is_segregated() const
 
 bool block::is_invalid_witness_commitment() const
 {
-    if (txs_->empty() || txs_->front().inputs().empty())
+    if (txs_->empty() || txs_->front()->inputs()->empty())
         return false;
 
     hash_digest reserved, committed;
     const auto& coinbase = txs_->front();
 
     // Last output of commitment pattern holds committed value (bip141).
-    if (coinbase.inputs().front().reserved_hash(reserved))
-        for (const auto& output: boost::adaptors::reverse(coinbase.outputs()))
-            if (output.committed_hash(committed))
+    if (coinbase->inputs()->front()->reserved_hash(reserved))
+        for (const auto& output: boost::adaptors::reverse(*coinbase->outputs()))
+            if (output->committed_hash(committed))
                 return committed == bitcoin_hash(
                     splice(generate_merkle_root(true), reserved));
     
@@ -520,9 +489,9 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 uint64_t block::fees() const
 {
     // Overflow returns max_uint64.
-    const auto value = [](uint64_t total, const transaction& tx)
+    const auto value = [](uint64_t total, const transaction::ptr& tx)
     {
-        return ceilinged_add(total, tx.fee());
+        return ceilinged_add(total, tx->fee());
     };
 
     return std::accumulate(txs_->begin(), txs_->end(), uint64_t(0), value);
@@ -530,7 +499,7 @@ uint64_t block::fees() const
 
 uint64_t block::claim() const
 {
-    return txs_->empty() ? zero : txs_->front().value();
+    return txs_->empty() ? zero : txs_->front()->value();
 }
 
 uint64_t block::reward(size_t height, uint64_t subsidy_interval,
@@ -553,9 +522,9 @@ bool block::is_signature_operations_limited(bool bip16, bool bip141) const
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
 
     // Overflow returns max_size_t.
-    const auto value = [bip16, bip141](size_t total, const transaction& tx)
+    const auto value = [bip16, bip141](size_t total, const transaction::ptr& tx)
     {
-        return ceilinged_add(total, tx.signature_operations(bip16, bip141));
+        return ceilinged_add(total, tx->signature_operations(bip16, bip141));
     };
 
     return std::accumulate(txs_->begin(), txs_->end(), zero, value) > limit;
@@ -570,10 +539,10 @@ bool block::is_signature_operations_limited(bool bip16, bool bip141) const
 //*****************************************************************************
 bool block::is_unspent_coinbase_collision(size_t height) const
 {
-    if (txs_->empty() || txs_->front().inputs().empty())
+    if (txs_->empty() || txs_->front()->inputs()->empty())
         return false;
 
-    const auto prevout = txs_->front().inputs().front().prevout;
+    const auto prevout = txs_->front()->inputs()->front()->prevout;
 
     // This requires that prevout.spent was populated for the height of the
     // validating block, otherwise a collision (unspent) must be assumed.
@@ -588,7 +557,7 @@ code block::check_transactions() const
     code ec;
 
     for (const auto& tx: *txs_)
-        if ((ec = tx.check()))
+        if ((ec = tx->check()))
             return ec;
 
     return error::block_success;
@@ -599,7 +568,7 @@ code block::accept_transactions(const context& state) const
     code ec;
 
     for (const auto& tx: *txs_)
-        if ((ec = tx.accept(state)))
+        if ((ec = tx->accept(state)))
             return ec;
 
     return error::block_success;
@@ -610,7 +579,7 @@ code block::connect_transactions(const context& state) const
     code ec;
 
     for (const auto& tx: *txs_)
-        if ((ec = tx.connect(state)))
+        if ((ec = tx->connect(state)))
             return ec;
 
     return error::block_success;

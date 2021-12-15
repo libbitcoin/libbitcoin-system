@@ -30,9 +30,9 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_1__always__invalid)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_2__always__equals_params)
 {
-    const messages::inventory_vector::list values =
+    const messages::inventory_item::list values =
     {
-        messages::inventory_vector(
+        messages::inventory_item(
             inventory::type_id::error,
             {
                 {
@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_2__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_3__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-    messages::inventory_vector::list values =
+    messages::inventory_item::list values =
     {
-        messages::inventory_vector(type, hash)
+        messages::inventory_item(type, hash)
     };
 
     messages::inventory instance(std::move(values));
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_3__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_4__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
     const hash_list hashes = { hash };
 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_4__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_5__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::inventory instance{ { type, hash } };
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_5__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_6__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     const messages::inventory value{ { type, hash } };
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(inventory__constructor_6__always__equals_params)
 
 BOOST_AUTO_TEST_CASE(inventory__constructor_7__always__equals_params)
 {
-    messages::inventory_vector::type_id type = messages::inventory_vector::type_id::error;
+    messages::inventory_item::type_id type = messages::inventory_item::type_id::error;
     auto hash = base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 
     messages::inventory value{ { type, hash } };
@@ -219,9 +219,9 @@ BOOST_AUTO_TEST_CASE(inventory__factory_3__valid_input__success)
 
 BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__initialized_value)
 {
-    const messages::inventory_vector::list values =
+    const messages::inventory_item::list values =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -231,9 +231,9 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_1__always__initialized_valu
 
 BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_2__always__initialized_value)
 {
-    const messages::inventory_vector::list values =
+    const messages::inventory_item::list values =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -243,9 +243,9 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_accessor_2__always__initialized_valu
 
 BOOST_AUTO_TEST_CASE(inventory__inventories_setter_1__roundtrip__success)
 {
-    const messages::inventory_vector::list values =
+    const messages::inventory_item::list values =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -257,9 +257,9 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_setter_1__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(inventory__inventories_setter_2__roundtrip__success)
 {
-    messages::inventory_vector::list values =
+    messages::inventory_item::list values =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -271,9 +271,9 @@ BOOST_AUTO_TEST_CASE(inventory__inventories_setter_2__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(inventory__operator_assign_equals__always__matches_equivalent)
 {
-    const messages::inventory_vector::list elements =
+    const messages::inventory_item::list elements =
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     };
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__duplicates__true)
 {
     const messages::inventory expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_equals__differs__false)
 {
     const messages::inventory expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__duplicates__false)
 {
     const messages::inventory expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(inventory__operator_boolean_not_equals__differs__true)
 {
     const messages::inventory expected(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
@@ -337,30 +337,30 @@ BOOST_AUTO_TEST_CASE(inventory__count__no_matching_type__zero)
 {
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     BOOST_REQUIRE_EQUAL(0u,
-        instance.count(messages::inventory_vector::type_id::block));
+        instance.count(messages::inventory_item::type_id::block));
 }
 
 BOOST_AUTO_TEST_CASE(inventory__count__matching_type__count)
 {
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
-        messages::inventory_vector(messages::inventory_vector::type_id::block,
+        messages::inventory_item(messages::inventory_item::type_id::block,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))
     });
 
     BOOST_REQUIRE_EQUAL(3u,
-        instance.count(messages::inventory_vector::type_id::error));
+        instance.count(messages::inventory_item::type_id::error));
 }
 
 BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__empty_list)
@@ -369,18 +369,18 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__empty_list)
 
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
-        messages::inventory_vector(messages::inventory_vector::type_id::block,
+        messages::inventory_item(messages::inventory_item::type_id::block,
             base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     hash_list result;
-    instance.to_hashes(result, messages::inventory_vector::type_id::transaction);
+    instance.to_hashes(result, messages::inventory_item::type_id::transaction);
     BOOST_REQUIRE(hashes == result);
 }
 
@@ -394,67 +394,67 @@ BOOST_AUTO_TEST_CASE(inventory__to_hashes__matching_type__hashes)
 
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
-        messages::inventory_vector(messages::inventory_vector::type_id::block,
+        messages::inventory_item(messages::inventory_item::type_id::block,
             base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
     hash_list result;
-    instance.to_hashes(result, messages::inventory_vector::type_id::error);
+    instance.to_hashes(result, messages::inventory_item::type_id::error);
     BOOST_REQUIRE(hashes == result);
 }
 
 BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__empty_list)
 {
-    const messages::inventory_vector::list expected = {};
+    const messages::inventory_item::list expected = {};
 
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
-        messages::inventory_vector(messages::inventory_vector::type_id::block,
+        messages::inventory_item(messages::inventory_item::type_id::block,
             base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
-    messages::inventory_vector::list result;
-    instance.reduce(result, messages::inventory_vector::type_id::transaction);
+    messages::inventory_item::list result;
+    instance.reduce(result, messages::inventory_item::type_id::transaction);
     BOOST_REQUIRE(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(inventory__reduce__matching_type__matches)
 {
-    const messages::inventory_vector::list expected = {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+    const messages::inventory_item::list expected = {
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     };
 
     messages::inventory instance(
     {
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("1111111111111111111111111111111111111111111111111111111111111111")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("2222222222222222222222222222222222222222222222222222222222222222")),
-        messages::inventory_vector(messages::inventory_vector::type_id::block,
+        messages::inventory_item(messages::inventory_item::type_id::block,
             base16_hash("3333333333333333333333333333333333333333333333333333333333333333")),
-        messages::inventory_vector(messages::inventory_vector::type_id::error,
+        messages::inventory_item(messages::inventory_item::type_id::error,
             base16_hash("4444444444444444444444444444444444444444444444444444444444444444"))
     });
 
-    messages::inventory_vector::list result;
-    instance.reduce(result, messages::inventory_vector::type_id::error);
+    messages::inventory_item::list result;
+    instance.reduce(result, messages::inventory_item::type_id::error);
     BOOST_REQUIRE_EQUAL(expected.size(), result.size());
     BOOST_REQUIRE(expected == result);
 }

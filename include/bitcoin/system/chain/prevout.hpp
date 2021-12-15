@@ -28,11 +28,13 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Prevout should be stored as shared (adds 16 bytes).
+// copy: output(3 * 64 + 1) + 2 * 64 + 2 = 41 bytes (vs. 16 when shared).
 class BC_API prevout
   : public output
 {
 public:
-    typedef std::shared_ptr<prevout> ptr;
+    typedef std::shared_ptr<const prevout> ptr;
 
     /// Use base class constructors, default construction is invalid.
     using chain::output::output;

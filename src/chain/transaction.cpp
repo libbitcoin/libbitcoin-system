@@ -50,8 +50,11 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 transaction::transaction()
-  : transaction(false, 0, 0, std::make_shared<chain::inputs>(),
-      std::make_shared<chain::outputs>(), false)
+  : transaction(
+      false, 0, 0,
+      to_shared<input_ptrs>(),
+      to_shared<output_ptrs>(),
+      false)
 {
 }
 
@@ -74,27 +77,22 @@ transaction::transaction(const transaction& other)
 // segregated_ is the first property because of this constructor.
 transaction::transaction(uint32_t version, uint32_t locktime,
     chain::inputs&& inputs, chain::outputs&& outputs)
-  : transaction(segregated(inputs), version, locktime,
-      std::make_shared<chain::inputs>(std::move(inputs)),
-      std::make_shared<chain::outputs>(std::move(outputs)), true)
+  ////: transaction(segregated(inputs), version, locktime,
+  ////    to_shareds(std::move(inputs)), to_shareds(std::move(outputs)), true)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const chain::inputs& inputs, const chain::outputs& outputs)
   : transaction(segregated(inputs), version, locktime,
-      std::make_shared<chain::inputs>(inputs),
-      std::make_shared<chain::outputs>(outputs), true)
+      to_shareds(inputs), to_shareds(outputs), true)
 {
 }
 
 transaction::transaction(uint32_t version, uint32_t locktime,
     const inputs_ptr& inputs, const outputs_ptr& outputs)
-  : transaction(segregated(*inputs), version, locktime, inputs, outputs,
-      true)
+  : transaction(segregated(inputs), version, locktime, inputs, outputs, true)
 {
-    BITCOIN_ASSERT(inputs);
-    BITCOIN_ASSERT(outputs);
 }
 
 transaction::transaction(const data_slice& data, bool witness)
@@ -108,20 +106,18 @@ transaction::transaction(std::istream& stream, bool witness)
 }
 
 transaction::transaction(reader& source, bool witness)
-  : transaction()
+  : transaction(from_data(source, witness))
 {
-    // Above default construct presumed cheaper than factory populated move.
-    from_data(source, witness);
 }
 
 // protected
 transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
     const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid)
-  : segregated_(segregated),
-    version_(version),
+  : version_(version),
     locktime_(locktime),
-    inputs_(inputs),
-    outputs_(outputs),
+    inputs_(inputs ? inputs : to_shared<std::vector<input::ptr>>()),
+    outputs_(outputs ? outputs : to_shared<std::vector<output::ptr>>()),
+    segregated_(segregated),
     valid_(valid)
 {
 }
@@ -137,17 +133,18 @@ transaction& transaction::operator=(transaction&& other)
 
 transaction& transaction::operator=(const transaction& other)
 {
-    segregated_ = other.segregated_;
     version_ = other.version_;
     locktime_ = other.locktime_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
+    segregated_ = other.segregated_;
     valid_ = other.valid_;
     return *this;
 }
 
 bool transaction::operator==(const transaction& other) const
 {
+    // TODO: compare input/output membership, not ptrs.
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
         && (*inputs_ == *other.inputs_)
@@ -162,100 +159,61 @@ bool transaction::operator!=(const transaction& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-bool transaction::from_data(const data_slice& data, bool witness)
+template<class Put, class Source>
+std::shared_ptr<std::vector<std::shared_ptr<Put>>> read_puts(Source& source)
 {
-    stream::in::copy istream(data);
-    return from_data(istream, witness);
+    std::shared_ptr<std::vector<std::shared_ptr<Put>>> puts;
+    puts->reserve(source.read_size(max_block_size));
+
+    //////for (auto put = zero; put < puts->capacity(); ++put)
+    //////    puts->emplace_back(source);
+
+    return puts;
 }
 
-bool transaction::from_data(std::istream& stream, bool witness)
+// static/private
+transaction transaction::from_data(reader& source, bool witness)
 {
-    read::bytes::istream source(stream);
-    return from_data(source, witness);
-}
+    const auto version = source.read_4_bytes_little_endian();
 
-template<class Source, class Put>
-bool read_puts(Source& source, std::vector<Put>& puts)
-{
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_block_size)
-    {
-        source.invalidate();
-    }
-    else
-    {
-        puts.reserve(count);
-        for (auto put = zero; put < count; ++put)
-            puts.emplace_back(source);
-    }
-
-    return source;
-}
-
-bool transaction::from_data(reader& source, bool witness)
-{
-    ////reset();
-    inputs_->clear();
-    outputs_->clear();
-
-    version_ = source.read_4_bytes_little_endian();
-    read_puts(source, *inputs_);
+    // Inputs must be non-const so that they may assign the witness.
+    auto inputs = read_puts<chain::input>(source);
+    outputs_ptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
-    segregated_ =
-        inputs_->size() == witness_marker &&
+    const auto segregated =
+        inputs->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
 
     // Detect witness as no inputs (marker) and expected flag (bip144).
-    if (segregated_)
+    if (segregated)
     {
         // Skip over the peeked witness flag.
         source.skip_byte();
 
-        read_puts(source, *inputs_);
-        read_puts(source, *outputs_);
+        // Inputs must be non-const so that they may assign the witness.
+        inputs = read_puts<chain::input>(source);
+        outputs = read_puts<const chain::output>(source);
 
         // Read or skip witnesses as specified.
-        for (auto& input: *inputs_)
+        for (auto& input: *inputs)
         {
             if (witness)
-                input.witness_->from_data(source, true);
+                input->witness_ = to_shared(chain::witness{ source, true });
             else
-                source.skip_bytes(input.witness().serialized_size(true));
+                source.skip_bytes(input->witness().serialized_size(true));
         }
     }
     else
     {
-        read_puts(source, *outputs_);
+        // Default witness is populated on input construct.
+        outputs = read_puts<const chain::output>(source);
     }
 
-    locktime_ = source.read_4_bytes_little_endian();
+    const auto locktime = source.read_4_bytes_little_endian();
 
-    if (!source)
-        reset();
-
-    valid_ = source;
-    return valid_;
-}
-
-// protected
-void transaction::reset()
-{
-    segregated_ = false;
-    version_ = 0;
-    locktime_ = 0;
-    inputs_->clear();
-    inputs_->shrink_to_fit();
-    outputs_->clear();
-    outputs_->shrink_to_fit();
-    valid_ = false;
-}
-
-bool transaction::is_valid() const
-{
-    return valid_;
+    // to_const is overhead, creating an extra shared pointer per input.
+    return { segregated, version, locktime, to_const(inputs), outputs, source };
 }
 
 // Serialization.
@@ -299,17 +257,15 @@ void transaction::to_data(writer& sink, bool witness) const
 
     sink.write_variable(inputs_->size());
     for (const auto& input: *inputs_)
-        input.to_data(sink);
+        input->to_data(sink);
 
     sink.write_variable(outputs_->size());
     for (const auto& input: *outputs_)
-        input.to_data(sink);
+        input->to_data(sink);
 
     if (witness)
-    {
         for (auto& input: *inputs_)
-            input.witness().to_data(sink, true);
-    }
+            input->witness().to_data(sink, true);
 
     sink.write_4_bytes_little_endian(locktime_);
 
@@ -320,15 +276,15 @@ size_t transaction::serialized_size(bool witness) const
 {
     witness &= segregated_;
 
-    const auto ins = [=](size_t size, const input& input)
+    const auto ins = [=](size_t total, const input::ptr& input)
     {
         // Inputs account for witness bytes. 
-        return size + input.serialized_size(witness);
+        return total + input->serialized_size(witness);
     };
 
-    const auto outs = [](size_t size, const output& output)
+    const auto outs = [](size_t total, const output::ptr& output)
     {
-        return size + output.serialized_size();
+        return total + output->serialized_size();
     };
 
     return sizeof(version_)
@@ -343,6 +299,11 @@ size_t transaction::serialized_size(bool witness) const
 // Properties.
 // ----------------------------------------------------------------------------
 
+bool transaction::is_valid() const
+{
+    return valid_;
+}
+
 uint32_t transaction::version() const
 {
     return version_;
@@ -353,14 +314,14 @@ uint32_t transaction::locktime() const
     return locktime_;
 }
 
-const chain::inputs& transaction::inputs() const
+const inputs_ptr transaction::inputs() const
 {
-    return *inputs_;
+    return inputs_;
 }
 
-const chain::outputs& transaction::outputs() const
+const outputs_ptr transaction::outputs() const
 {
-    return *outputs_;
+    return outputs_;
 }
 
 uint64_t transaction::fee() const
@@ -382,9 +343,9 @@ hash_digest transaction::hash(bool witness) const
 
 bool transaction::is_dusty(uint64_t minimum_output_value) const
 {
-    const auto dusty = [=](const output& output)
+    const auto dusty = [=](const output::ptr& output)
     {
-        return output.is_dust(minimum_output_value);
+        return output->is_dust(minimum_output_value);
     };
 
     return std::any_of(outputs_->begin(), outputs_->end(), dusty);
@@ -393,14 +354,14 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const
 size_t transaction::signature_operations(bool bip16, bool bip141) const
 {
     // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
-    const auto in = [=](size_t total, const input& input)
+    const auto in = [=](size_t total, const input::ptr& input)
     {
-        return ceilinged_add(total, input.signature_operations(bip16, bip141));
+        return ceilinged_add(total, input->signature_operations(bip16, bip141));
     };
 
-    const auto out = [=](size_t total, const output& output)
+    const auto out = [=](size_t total, const output::ptr& output)
     {
-        return ceilinged_add(total, output.signature_operations(bip141));
+        return ceilinged_add(total, output->signature_operations(bip141));
     };
 
     // Overflow returns max_size_t.
@@ -414,9 +375,9 @@ chain::points transaction::points() const
     chain::points out(no_fill_allocator);
     out.resize(inputs_->size());
 
-    const auto point = [](const input& input)
+    const auto point = [](const input::ptr& input)
     {
-        return input.point();
+        return input->point();
     };
 
     std::transform(inputs_->begin(), inputs_->end(), out.begin(), point);
@@ -425,17 +386,17 @@ chain::points transaction::points() const
 
 hash_digest transaction::outputs_hash() const
 {
-    const auto size = std::accumulate(outputs().begin(), outputs().end(), zero,
-        [&](size_t total, const output& output)
+    const auto size = std::accumulate(outputs()->begin(), outputs()->end(), zero,
+        [&](size_t total, const output::ptr& output)
         {
-            return total + output.serialized_size();
+            return total + output->serialized_size();
         });
 
     data_chunk data(no_fill_byte_allocator);
     data.resize(size);
     write::bytes::copy writer(data);
-    for (const auto& output: outputs())
-        output.to_data(writer);
+    for (const auto& output: *outputs())
+        output->to_data(writer);
 
     BITCOIN_ASSERT(writer && writer.get_position() == size);
     return bitcoin_hash(data);
@@ -443,18 +404,18 @@ hash_digest transaction::outputs_hash() const
 
 hash_digest transaction::points_hash() const
 {
-    const auto size = std::accumulate(inputs().begin(), inputs().end(), zero,
-        [&](size_t total, const input& input)
+    const auto size = std::accumulate(inputs()->begin(), inputs()->end(), zero,
+        [&](size_t total, const input::ptr& input)
         {
-            return total + input.point().serialized_size();
+            return total + input->point().serialized_size();
         });
 
     data_chunk data(no_fill_byte_allocator);
     data.resize(size);
     write::bytes::copy writer(data);
 
-    for (const auto& input: inputs())
-        input.point().to_data(writer);
+    for (const auto& input: *inputs())
+        input->point().to_data(writer);
 
     BITCOIN_ASSERT(writer && writer.get_position() == size);
     return bitcoin_hash(data);
@@ -462,18 +423,18 @@ hash_digest transaction::points_hash() const
 
 hash_digest transaction::sequences_hash() const
 {
-    const auto size = std::accumulate(inputs().begin(), inputs().end(), zero,
-        [&](size_t total, const input& input)
+    const auto size = std::accumulate(inputs()->begin(), inputs()->end(), zero,
+        [&](size_t total, const input::ptr& input)
         {
-            return total + sizeof(input.sequence());
+            return total + sizeof(input->sequence());
         });
 
     data_chunk data(no_fill_byte_allocator);
     data.resize(size);
     write::bytes::copy writer(data);
 
-    for (const auto& input: inputs())
-        writer.write_4_bytes_little_endian(input.sequence());
+    for (const auto& input: *inputs())
+        writer.write_4_bytes_little_endian(input->sequence());
 
     BITCOIN_ASSERT(writer && writer.get_position() == size);
     return bitcoin_hash(data);
@@ -484,7 +445,7 @@ hash_digest transaction::sequences_hash() const
 
 bool transaction::is_coinbase() const
 {
-    return inputs_->size() == one && inputs_->front().point().is_null();
+    return inputs_->size() == one && inputs_->front()->point().is_null();
 }
 
 bool transaction::is_internal_double_spend() const
@@ -510,6 +471,20 @@ bool transaction::segregated(const chain::inputs& inputs)
     };
 
     return std::any_of(inputs.begin(), inputs.end(), witnessed);
+}
+
+// static/private
+bool transaction::segregated(const inputs_ptr& inputs)
+{
+    if (!inputs)
+        return false;
+
+    const auto witnessed = [](const input::ptr& input)
+    {
+        return !input->witness().stack().empty();
+    };
+
+    return std::any_of(inputs->begin(), inputs->end(), witnessed);
 }
 
 bool transaction::is_segregated() const
@@ -553,9 +528,9 @@ bool transaction::is_null_non_coinbase() const
 {
     BITCOIN_ASSERT(!is_coinbase());
 
-    const auto invalid = [](const input& input)
+    const auto invalid = [](const input::ptr& input)
     {
-        return input.point().is_null();
+        return input->point().is_null();
     };
 
     // True if not coinbase but has null previous_output(s).
@@ -567,7 +542,7 @@ bool transaction::is_invalid_coinbase_size() const
     BITCOIN_ASSERT(is_coinbase());
 
     // True if coinbase and has invalid input[0] script size.
-    const auto script_size = inputs_->front().script().serialized_size(false);
+    const auto script_size = inputs_->front()->script().serialized_size(false);
     return script_size < min_coinbase_size || script_size > max_coinbase_size;
 }
 
@@ -581,9 +556,9 @@ bool transaction::is_non_final(size_t height, uint32_t timestamp,
     // timestamps, rather than the timestamp of the block including the tx.
     const auto time = bip113 ? median_time_past : timestamp;
 
-    const auto finalized = [](const input& input)
+    const auto finalized = [](const input::ptr& input)
     {
-        return input.is_final();
+        return input->is_final();
     };
 
     const auto height_time = locktime_ < locktime_threshold ? height : time;
@@ -597,9 +572,9 @@ bool transaction::is_missing_prevouts() const
     BITCOIN_ASSERT(!is_coinbase());
 
     // Invalidity indicates not found.
-    const auto missing = [](const input& input)
+    const auto missing = [](const input::ptr& input)
     {
-        return !input.prevout->is_valid();
+        return !input->prevout->is_valid();
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), missing);
@@ -608,9 +583,9 @@ bool transaction::is_missing_prevouts() const
 uint64_t transaction::claim() const
 {
     // Overflow returns max_uint64.
-    const auto sum = [](uint64_t total, const output& output)
+    const auto sum = [](uint64_t total, const output::ptr& output)
     {
-        return ceilinged_add(total, output.value());
+        return ceilinged_add(total, output->value());
     };
 
     // The amount claimed by outputs.
@@ -620,9 +595,9 @@ uint64_t transaction::claim() const
 uint64_t transaction::value() const
 {
     // Overflow and coinbase (default) return max_uint64.
-    const auto sum = [](uint64_t total, const input& input)
+    const auto sum = [](uint64_t total, const input::ptr& input)
     {
-        return ceilinged_add(total, input.prevout->value());
+        return ceilinged_add(total, input->prevout->value());
     };
 
     // The amount of prevouts (referenced by inputs).
@@ -646,10 +621,10 @@ bool transaction::is_immature(size_t height) const
     // Overflow returns max_size_t.
     // Zero is either genesis or not found, either is immature.
     // Spends internal to a block are handled by block validation.
-    const auto immature = [=](const input& input)
+    const auto immature = [=](const input::ptr& input)
     {
-        return input.prevout->coinbase && (is_zero(input.prevout->height) ||
-            height < ceilinged_add(input.prevout->height, coinbase_maturity));
+        return input->prevout->coinbase && (is_zero(input->prevout->height) ||
+            height < ceilinged_add(input->prevout->height, coinbase_maturity));
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), immature);
@@ -665,9 +640,9 @@ bool transaction::is_locked(size_t height, uint32_t median_time_past) const
         return false;
 
     // BIP68: references to median time past are as defined by bip113.
-    const auto locked = [=](const input& input)
+    const auto locked = [=](const input::ptr& input)
     {
-        return input.is_locked(height, median_time_past);
+        return input->is_locked(height, median_time_past);
     };
 
     // BIP68: when the relative lock time is block based, it is interpreted as
@@ -683,10 +658,10 @@ bool transaction::is_unconfirmed_spend(size_t height) const
     // Zero is either genesis or not found.
     // Test maturity first to obtain proper error code.
     // Spends internal to a block are handled by block validation.
-    const auto unconfirmed = [=](const input& input)
+    const auto unconfirmed = [=](const input::ptr& input)
     {
-        return is_zero(input.prevout->height) &&
-            !(height > input.prevout->height);
+        return is_zero(input->prevout->height) &&
+            !(height > input->prevout->height);
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), unconfirmed);
@@ -697,9 +672,9 @@ bool transaction::is_confirmed_double_spend(size_t height) const
     BITCOIN_ASSERT(!is_coinbase());
 
     // Spends internal to a block are handled by block validation.
-    const auto spent = [=](const input& input)
+    const auto spent = [=](const input::ptr& input)
     {
-        return input.prevout->spent && height > input.prevout->height;
+        return input->prevout->spent && height > input->prevout->height;
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), spent);
@@ -714,7 +689,7 @@ code transaction::connect_input(const context& state, size_t index) const
     // This is guarded as a protected method.
     BITCOIN_ASSERT(!is_zero(index) && index < inputs_->size());
 
-    const auto prevout = (*inputs_)[index].prevout;
+    const auto prevout = (*inputs_)[index]->prevout;
     BITCOIN_ASSERT(prevout->is_valid());
 
     // Verify the transaction input script against the previous output.

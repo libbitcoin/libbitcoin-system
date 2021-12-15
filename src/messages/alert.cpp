@@ -18,6 +18,8 @@
  */
 #include <bitcoin/system/messages/alert.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
@@ -28,180 +30,42 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier alert::id = identifier::alert;
 const std::string alert::command = "alert";
+const identifier alert::id = identifier::alert;
 const uint32_t alert::version_minimum = version::level::minimum;
 const uint32_t alert::version_maximum = version::level::maximum;
 
-alert alert::factory(uint32_t version, const data_chunk& data)
+// static
+alert alert::deserialize(uint32_t version, reader& source)
 {
-    alert instance;
-    instance.from_data(version, data);
-    return instance;
+    if (version < version_minimum || version > version_maximum)
+        source.invalidate();
+
+    return
+    {
+        source.read_bytes(source.read_size(chain::max_block_size)),
+        source.read_bytes(source.read_size(chain::max_block_size))
+    };
 }
 
-alert alert::factory(uint32_t version, std::istream& stream)
+// TODO: assert written bytes.
+void alert::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
 {
-    alert instance;
-    instance.from_data(version, stream);
-    return instance;
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    sink.write_variable(payload.size());
+    sink.write_bytes(payload);
+    sink.write_variable(signature.size());
+    sink.write_bytes(signature);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-alert alert::factory(uint32_t version, reader& source)
+size_t alert::size(uint32_t) const
 {
-    alert instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-alert::alert()
-  : payload_(), signature_()
-{
-}
-
-alert::alert(const data_chunk& payload, const data_chunk& signature)
-  : payload_(payload), signature_(signature)
-{
-}
-
-alert::alert(data_chunk&& payload, data_chunk&& signature)
-  : payload_(std::move(payload)), signature_(std::move(signature))
-{
-}
-
-alert::alert(const alert& other)
-  : alert(other.payload_, other.signature_)
-{
-}
-
-alert::alert(alert&& other)
-  : alert(std::move(other.payload_), std::move(other.signature_))
-{
-}
-
-bool alert::is_valid() const
-{
-    return !payload_.empty() || !signature_.empty();
-}
-
-void alert::reset()
-{
-    payload_.clear();
-    payload_.shrink_to_fit();
-    signature_.clear();
-    signature_.shrink_to_fit();
-}
-
-bool alert::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool alert::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool alert::from_data(uint32_t, reader& source)
-{
-    reset();
-
-    payload_ = source.read_bytes(source.read_size());
-    signature_ = source.read_bytes(source.read_size());
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-data_chunk alert::to_data(uint32_t version) const
-{
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
-
-void alert::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void alert::to_data(uint32_t, writer& sink) const
-{
-    sink.write_variable(payload_.size());
-    sink.write_bytes(payload_);
-    sink.write_variable(signature_.size());
-    sink.write_bytes(signature_);
-}
-
-size_t alert::serialized_size(uint32_t) const
-{
-    return variable_size(payload_.size()) + payload_.size() +
-        variable_size(signature_.size()) + signature_.size();
-}
-
-data_chunk& alert::payload()
-{
-    return payload_;
-}
-
-const data_chunk& alert::payload() const
-{
-    return payload_;
-}
-
-void alert::set_payload(const data_chunk& value)
-{
-    payload_ = value;
-}
-
-void alert::set_payload(data_chunk&& value)
-{
-    payload_ = std::move(value);
-}
-
-data_chunk& alert::signature()
-{
-    return signature_;
-}
-
-const data_chunk& alert::signature() const
-{
-    return signature_;
-}
-
-void alert::set_signature(const data_chunk& value)
-{
-    signature_ = value;
-}
-
-void alert::set_signature(data_chunk&& value)
-{
-    signature_ = std::move(value);
-}
-
-alert& alert::operator=(alert&& other)
-{
-    payload_ = std::move(other.payload_);
-    signature_ = std::move(other.signature_);
-    return *this;
-}
-
-bool alert::operator==(const alert& other) const
-{
-    return (payload_ == other.payload_)
-        && (signature_ == other.signature_);
-}
-
-bool alert::operator!=(const alert& other) const
-{
-    return !(*this == other);
+    return variable_size(payload.size()) + payload.size()
+        + variable_size(signature.size()) + signature.size();
 }
 
 } // namespace messages

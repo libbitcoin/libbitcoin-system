@@ -44,7 +44,7 @@ public:
     virtual void write_4_bytes_little_endian(uint32_t value) noexcept = 0;
     virtual void write_8_bytes_little_endian(uint64_t value) noexcept = 0;
 
-    /// Write Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
+    /// Write Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
     virtual void write_variable(uint64_t value) noexcept = 0;
 
     /// Call write_4_bytes_little_endian with integer value of error code.
@@ -63,10 +63,12 @@ public:
     virtual void write_bytes(const uint8_t* data, size_t size) noexcept = 0;
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    virtual void write_string(const std::string& value, size_t size) noexcept = 0;
-
-    /// Write string to specified length, padded with nulls as required.
     virtual void write_string(const std::string& value) noexcept = 0;
+
+    /// This is only used for writing Bitcoin command command text.
+    /// Write string to specified length, padded with nulls as required.
+    virtual void write_string_buffer(const std::string& value, size_t size)
+        noexcept = 0;
 
     /// Flush the buffer.
     virtual void flush() noexcept = 0;

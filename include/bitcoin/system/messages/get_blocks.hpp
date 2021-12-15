@@ -19,14 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_GET_BLOCKS_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_GET_BLOCKS_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -35,62 +33,26 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API get_blocks
+struct BC_API get_blocks
 {
-public:
     typedef std::vector<size_t> indexes;
-    typedef std::shared_ptr<get_blocks> ptr;
-    typedef std::shared_ptr<const get_blocks> const_ptr;
-
-    static get_blocks factory(uint32_t version, const data_chunk& data);
-    static get_blocks factory(uint32_t version, std::istream& stream);
-    static get_blocks factory(uint32_t version, reader& source);
-
-    static size_t locator_size(size_t top);
-    static indexes locator_heights(size_t top);
-
-    get_blocks();
-    get_blocks(const hash_list& start, const hash_digest& stop);
-    get_blocks(hash_list&& start, hash_digest&& stop);
-    get_blocks(const get_blocks& other);
-    get_blocks(get_blocks&& other);
-
-    hash_list& start_hashes();
-    const hash_list& start_hashes() const;
-    void set_start_hashes(const hash_list& value);
-    void set_start_hashes(hash_list&& value);
-
-    hash_digest& stop_hash();
-    const hash_digest& stop_hash() const;
-    void set_stop_hash(const hash_digest& value);
-    void set_stop_hash(hash_digest&& value);
-
-    virtual bool from_data(uint32_t version, const data_chunk& data);
-    virtual bool from_data(uint32_t version, std::istream& stream);
-    virtual bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    // This class is move assignable but not copy assignable.
-    get_blocks& operator=(get_blocks&& other);
-    void operator=(const get_blocks&) = delete;
-
-    bool operator==(const get_blocks& other) const;
-    bool operator!=(const get_blocks& other) const;
+    typedef std::shared_ptr<const get_blocks> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    // 10 sequential hashes, then exponential samples until reaching genesis.
-    hash_list start_hashes_;
-    hash_digest stop_hash_;
+    static size_t locator_size(size_t top);
+    static indexes locator_heights(size_t top);
+
+    static get_blocks deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+    size_t size(uint32_t version) const;
+
+    ////uint32_t protocol_version;
+    hash_list start_hashes;
+    hash_digest stop_hash;
 };
 
 } // namespace messages

@@ -3520,7 +3520,7 @@
 ////
 ////BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
 ////{
-////    const messages::compact_filter filter(
+////    const messages::client_filter filter(
 ////        0x00,
 ////        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
 ////        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
@@ -3534,7 +3534,7 @@
 ////
 ////BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
 ////{
-////    const messages::compact_filter filter(
+////    const messages::client_filter filter(
 ////        0x00,
 ////        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
 ////        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
@@ -3548,7 +3548,7 @@
 ////
 ////BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
 ////{
-////    const messages::compact_filter filter(
+////    const messages::client_filter filter(
 ////        0x00,
 ////        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
 ////        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
@@ -3570,7 +3570,7 @@
 ////
 ////BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
 ////{
-////    const messages::compact_filter filter(
+////    const messages::client_filter filter(
 ////        0x00,
 ////        base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
 ////        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));

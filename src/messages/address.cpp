@@ -18,174 +18,61 @@
  */
 #include <bitcoin/system/messages/address.hpp>
 
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
+#include <bitcoin/system/messages/network_address.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
-
-const identifier address::id = identifier::address;
+    
 const std::string address::command = "addr";
+const identifier address::id = identifier::address;
 const uint32_t address::version_minimum = version::level::minimum;
 const uint32_t address::version_maximum = version::level::maximum;
 
-address address::factory(uint32_t version, const data_chunk& data)
+// TODO: make with_timestamp version dependent.
+constexpr auto with_timestamp = true;
+
+address address::deserialize(uint32_t version, reader& source)
 {
-    address instance;
-    instance.from_data(version, data);
-    return instance;
-}
-
-address address::factory(uint32_t version, std::istream& stream)
-{
-    address instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-address address::factory(uint32_t version, reader& source)
-{
-    address instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-address::address()
-  : addresses_()
-{
-}
-
-address::address(const network_address::list& addresses)
-  : addresses_(addresses)
-{
-}
-
-address::address(network_address::list&& addresses)
-  : addresses_(std::move(addresses))
-{
-}
-
-address::address(const address& other)
-  : address(other.addresses_)
-{
-}
-
-address::address(address&& other)
-  : address(std::move(other.addresses_))
-{
-}
-
-bool address::is_valid() const
-{
-    return !addresses_.empty();
-}
-
-void address::reset()
-{
-    addresses_.clear();
-    addresses_.shrink_to_fit();
-}
-
-bool address::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy istream(data);
-    return from_data(version, istream);
-}
-
-bool address::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool address::from_data(uint32_t version, reader& source)
-{
-    reset();
-
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_address)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
-    else
-        addresses_.resize(count);
 
-    for (auto& address: addresses_)
-        if (!address.from_data(version, source, true))
-            break;
+    network_address::list addresses;
+    addresses.reserve(source.read_size(max_address));
 
-    if (!source)
-        reset();
+    for (size_t address = 0; address < addresses.capacity(); ++address)
+        addresses.push_back(network_address::deserialize(
+            version, source, with_timestamp));
 
-    return source;
+
+    return { addresses };
 }
 
-data_chunk address::to_data(uint32_t version) const
+void address::serialize(uint32_t version, writer& sink) const
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
+
+    sink.write_variable(addresses.size());
+
+    for (const auto& net: addresses)
+        net.serialize(version, sink, with_timestamp);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-void address::to_data(uint32_t version, std::ostream& stream) const
+size_t address::size(uint32_t version) const
 {
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void address::to_data(uint32_t version, writer& sink) const
-{
-    sink.write_variable(addresses_.size());
-
-    for (const auto& net_address: addresses_)
-        net_address.to_data(version, sink, true);
-}
-
-size_t address::serialized_size(uint32_t version) const
-{
-    return variable_size(addresses_.size()) +
-        (addresses_.size() * network_address::satoshi_fixed_size(version, true));
-}
-
-network_address::list& address::addresses()
-{
-    return addresses_;
-}
-
-const network_address::list& address::addresses() const
-{
-    return addresses_;
-}
-
-void address::set_addresses(const network_address::list& value)
-{
-    addresses_ = value;
-}
-
-void address::set_addresses(network_address::list&& value)
-{
-    addresses_ = std::move(value);
-}
-
-address& address::operator=(address&& other)
-{
-    addresses_ = std::move(other.addresses_);
-    return *this;
-}
-
-bool address::operator==(const address& other) const
-{
-    return (addresses_ == other.addresses_);
-}
-
-bool address::operator!=(const address& other) const
-{
-    return !(*this == other);
+    return variable_size(addresses.size()) +
+        (addresses.size() * network_address::size(version, with_timestamp));
 }
 
 } // namespace messages

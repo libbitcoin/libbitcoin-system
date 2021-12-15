@@ -36,7 +36,7 @@ namespace chain {
 class BC_API output
 {
 public:
-    typedef std::shared_ptr<output> ptr;
+    typedef std::shared_ptr<const output> ptr;
 
     /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
@@ -67,16 +67,6 @@ public:
     bool operator==(const output& other) const;
     bool operator!=(const output& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -88,8 +78,10 @@ public:
     // ------------------------------------------------------------------------
 
     /// Native properties.
+    bool is_valid() const;
     uint64_t value() const;
     const chain::script& script() const;
+    const chain::script::ptr script_ptr() const;
 
     /// Computed properties.
     size_t serialized_size() const;
@@ -104,16 +96,19 @@ public:
 protected:
     output(uint64_t value, const chain::script::ptr& script, bool valid);
 
-    void reset();
-
 private:
+    static output from_data(reader& source);
+
+    // Output should be stored as shared (adds 16 bytes).
+    // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
     uint64_t value_;
     chain::script::ptr script_;
     bool valid_;
 };
 
 typedef std::vector<output> outputs;
-typedef std::shared_ptr<outputs> outputs_ptr;
+typedef std::vector<output::ptr> output_ptrs;
+typedef std::shared_ptr<output_ptrs> outputs_ptr;
 
 } // namespace chain
 } // namespace system

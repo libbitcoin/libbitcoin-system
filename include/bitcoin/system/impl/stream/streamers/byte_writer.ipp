@@ -192,11 +192,11 @@ template <typename OStream>
 void byte_writer<OStream>::write_string(const std::string& value) noexcept
 {
     write_variable(value.size());
-    write_string(value, value.size());
+    write_string_buffer(value, value.size());
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_string(const std::string& value,
+void byte_writer<OStream>::write_string_buffer(const std::string& value,
     size_t size) noexcept
 {
     const auto length = std::min(size, value.size());
@@ -204,7 +204,7 @@ void byte_writer<OStream>::write_string(const std::string& value,
     // Write the substring without creating a copy.
     write_bytes(data_slice(value).data(), length);
 
-    // Pad to length with zeros, required for bitcoin string serialization.
+    // Pad to length with zeros, required for Bitcoin heading serialization.
     write_bytes(data_chunk(size - length, pad));
 }
 

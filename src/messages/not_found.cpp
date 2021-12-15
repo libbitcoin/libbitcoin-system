@@ -18,118 +18,39 @@
  */
 #include <bitcoin/system/messages/not_found.hpp>
 
-#include <initializer_list>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/inventory.hpp>
+#include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
     
-const identifier not_found::id = identifier::not_found;
 const std::string not_found::command = "notfound";
+const identifier not_found::id = identifier::not_found;
 const uint32_t not_found::version_minimum = version::level::bip37;
 const uint32_t not_found::version_maximum = version::level::maximum;
 
-not_found not_found::factory(uint32_t version,
-    const data_chunk& data)
+// static
+// Reimplements base class read to prevent a list move operation as well
+// as the need to implement default, base move, and base copy constructors.
+not_found not_found::deserialize(uint32_t version, reader& source)
 {
-    not_found instance;
-    instance.from_data(version, data);
-    return instance;
-}
-
-not_found not_found::factory(uint32_t version,
-    std::istream& stream)
-{
-    not_found instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-not_found not_found::factory(uint32_t version,
-    reader& source)
-{
-    not_found instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-not_found::not_found()
-  : inventory()
-{
-}
-
-not_found::not_found(const inventory_vector::list& values)
-  : inventory(values)
-{
-}
-
-not_found::not_found(inventory_vector::list&& values)
-  : inventory(values)
-{
-}
-
-not_found::not_found(const hash_list& hashes, inventory::type_id type)
-  : inventory(hashes, type)
-{
-}
-
-not_found::not_found(const std::initializer_list<inventory_vector>& values)
-  : inventory(values)
-{
-}
-
-not_found::not_found(const not_found& other)
-  : inventory(other)
-{
-}
-
-not_found::not_found(not_found&& other)
-  : inventory(other)
-{
-}
-
-bool not_found::from_data(uint32_t version, const data_chunk& data)
-{
-    return inventory::from_data(version, data);
-}
-
-bool not_found::from_data(uint32_t version, std::istream& stream)
-{
-    return inventory::from_data(version, stream);
-}
-
-bool not_found::from_data(uint32_t version, reader& source)
-{
-    if (!inventory::from_data(version, source))
-        return false;
-
-    if (version < not_found::version_minimum)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    if (!source)
-        reset();
+    not_found lost;
+    lost.items.resize(source.read_size(max_inventory));
 
-    return source;
-}
+    for (size_t item = 0; item < lost.items.capacity(); ++item)
+        lost.items.push_back(inventory_item::deserialize(version, source));
 
-not_found& not_found::operator=(not_found&& other)
-{
-    set_inventories(other.inventories());
-    return *this;
-}
-
-bool not_found::operator==(const not_found& other) const
-{
-    return (static_cast<inventory>(*this) == static_cast<inventory>(other));
-}
-
-bool not_found::operator!=(const not_found& other) const
-{
-    return (static_cast<inventory>(*this) != static_cast<inventory>(other));
+    return lost;
 }
 
 } // namespace messages

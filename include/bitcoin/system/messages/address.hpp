@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_ADDRESS_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_ADDRESS_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/network_address.hpp>
@@ -33,51 +33,20 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API address
+struct BC_API address
 {
-public:
-    typedef std::shared_ptr<address> ptr;
-    typedef std::shared_ptr<const address> const_ptr;
-
-    static address factory(uint32_t version, const data_chunk& data);
-    static address factory(uint32_t version, std::istream& stream);
-    static address factory(uint32_t version, reader& source);
-
-    address();
-    address(const network_address::list& addresses);
-    address(network_address::list&& addresses);
-    address(const address& other);
-    address(address&& other);
-
-    network_address::list& addresses();
-    const network_address::list& addresses() const;
-    void set_addresses(const network_address::list& value);
-    void set_addresses(network_address::list&& value);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    /// This class is move assignable but not copy assignable.
-    address& operator=(address&& other);
-    void operator=(const address&) = delete;
-
-    bool operator==(const address& other) const;
-    bool operator!=(const address& other) const;
+    typedef std::shared_ptr<const address> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    network_address::list addresses_;
+    static address deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+    size_t size(uint32_t version) const;
+
+    network_address::list addresses;
 };
 
 } // namespace messages

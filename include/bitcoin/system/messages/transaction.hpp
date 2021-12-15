@@ -19,12 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_TRANSACTION_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <iostream>
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -33,58 +32,27 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API transaction
-  : public chain::transaction
+struct BC_API transaction
 {
-public:
-    typedef std::shared_ptr<transaction> ptr;
-    typedef std::shared_ptr<const transaction> const_ptr;
-    typedef std::vector<ptr> ptr_list;
-    typedef std::vector<const_ptr> const_ptr_list;
-    typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
-    typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
-
-    static transaction factory(uint32_t version, const data_chunk& data);
-    static transaction factory(uint32_t version, std::istream& stream);
-    static transaction factory(uint32_t version, reader& source);
-
-    transaction();
-
-    transaction(transaction&& other);
-    transaction(chain::transaction&& other);
-
-    transaction(const transaction& other);
-    transaction(const chain::transaction& other);
-
-    transaction(uint32_t version, uint32_t locktime,
-        chain::inputs&& inputs, chain::outputs&& outputs);
-    transaction(uint32_t version, uint32_t locktime,
-        const chain::inputs& inputs, const chain::outputs& outputs);
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    size_t serialized_size(uint32_t version) const;
-
-    transaction& operator=(chain::transaction&& other);
-
-    /// This class is move assignable but not copy assignable.
-    transaction& operator=(transaction&& other);
-    void operator=(const transaction&) = delete;
-
-    bool operator==(const chain::transaction& other) const;
-    bool operator!=(const chain::transaction& other) const;
-
-    bool operator==(const transaction& other) const;
-    bool operator!=(const transaction& other) const;
+    ////typedef std::shared_ptr<transaction> ptr;
+    ////typedef std::shared_ptr<const transaction> const_ptr;
+    ////typedef std::vector<ptr> ptr_list;
+    ////typedef std::vector<const_ptr> const_ptr_list;
+    ////typedef std::shared_ptr<const_ptr_list> const_ptr_list_ptr;
+    ////typedef std::shared_ptr<const const_ptr_list> const_ptr_list_const_ptr;
+    typedef std::shared_ptr<const transaction> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
+
+    static transaction deserialize(uint32_t version, reader& source,
+        bool witness);
+    void serialize(uint32_t version, writer& sink, bool witness) const;
+    size_t size(uint32_t version, bool witness) const;
+
+    chain::transaction::ptr transaction;
 };
 
 } // namespace messages

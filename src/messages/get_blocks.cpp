@@ -18,6 +18,11 @@
  */
 #include <bitcoin/system/messages/get_blocks.hpp>
 
+#include <cstddef>
+#include <cstdint>
+#include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
@@ -33,45 +38,24 @@ const std::string get_blocks::command = "getblocks";
 const uint32_t get_blocks::version_minimum = version::level::minimum;
 const uint32_t get_blocks::version_maximum = version::level::maximum;
 
-get_blocks get_blocks::factory(uint32_t version,
-    const data_chunk& data)
-{
-    get_blocks instance;
-    instance.from_data(version, data);
-    return instance;
-}
-
-get_blocks get_blocks::factory(uint32_t version,
-    std::istream& stream)
-{
-    get_blocks instance;
-    instance.from_data(version, stream);
-    return instance;
-}
-
-get_blocks get_blocks::factory(uint32_t version,
-    reader& source)
-{
-    get_blocks instance;
-    instance.from_data(version, source);
-    return instance;
-}
-
-// This predicts the size of locator_heights output.
+// static
+// Predict the size of locator_heights output.
 size_t get_blocks::locator_size(size_t top)
 {
-    size_t size = 0, step = 1;
+    auto size = zero, step = one;
+
     for (auto height = top; height > 0; height = floored_subtract(height, step))
         if (++size > 9u)
-            step <<= 1;
+            step = shift_left(step, one);
 
     return ++size;
 }
 
-// This algorithm is a network best practice, not a consensus rule.
+// static
+// This algorithm is a p2p best practice, not a consensus or p2p rule.
 get_blocks::indexes get_blocks::locator_heights(size_t top)
 {
-    size_t step = 1;
+    auto step = one;
     indexes heights;
     heights.reserve(locator_size(top));
 
@@ -82,181 +66,65 @@ get_blocks::indexes get_blocks::locator_heights(size_t top)
 
         // Push top 10 indexes then back off exponentially.
         if (heights.size() > 9u)
-            step <<= 1;
+            step = shift_left(step, one);
     }
 
     // Push the genesis block index.
-    heights.push_back(0);
+    heights.push_back(zero);
     return heights;
 }
 
-get_blocks::get_blocks()
-  : start_hashes_(), stop_hash_(null_hash)
+get_blocks get_blocks::deserialize(uint32_t version, reader& source)
 {
-}
-
-get_blocks::get_blocks(const hash_list& start, const hash_digest& stop)
-  : start_hashes_(start), stop_hash_(stop)
-{
-}
-
-get_blocks::get_blocks(hash_list&& start, hash_digest&& stop)
-  : start_hashes_(std::move(start)), stop_hash_(std::move(stop))
-{
-}
-
-get_blocks::get_blocks(const get_blocks& other)
-  : get_blocks(other.start_hashes_, other.stop_hash_)
-{
-}
-
-get_blocks::get_blocks(get_blocks&& other)
-  : get_blocks(std::move(other.start_hashes_), std::move(other.stop_hash_))
-{
-}
-
-bool get_blocks::is_valid() const
-{
-    return !start_hashes_.empty() || (stop_hash_ != null_hash);
-}
-
-void get_blocks::reset()
-{
-    start_hashes_.clear();
-    start_hashes_.shrink_to_fit();
-    stop_hash_.fill(0);
-}
-
-bool get_blocks::from_data(uint32_t version, const data_chunk& data)
-{
-    stream::in::copy stream(data);
-    return from_data(version, stream);
-}
-
-bool get_blocks::from_data(uint32_t version, std::istream& stream)
-{
-    read::bytes::istream source(stream);
-    return from_data(version, source);
-}
-
-bool get_blocks::from_data(uint32_t, reader& source)
-{
-    reset();
-
-    // Discard protocol version because it is stupid.
-    source.read_4_bytes_little_endian();
-    const auto count = source.read_size();
-
-    // Guard against potential for arbitrary memory allocation.
-    if (count > max_get_blocks)
+    if (version < version_minimum || version > version_maximum)
         source.invalidate();
-    else
-        start_hashes_.reserve(count);
 
-    for (size_t hash = 0; hash < count && source; ++hash)
-        start_hashes_.push_back(source.read_hash());
+    const auto read_start_hashes = [](reader& source)
+    {
+        hash_list start_hashes;
+        start_hashes.reserve(source.read_size(max_get_blocks));
 
-    stop_hash_ = source.read_hash();
+        for (size_t hash = 0; hash < start_hashes.capacity(); ++hash)
+            start_hashes.push_back(source.read_hash());
 
-    if (!source)
-        reset();
+        return start_hashes;
+    };
 
-    return source;
+    // Protocol version is stoopid (and unused).
+    source.skip_bytes(sizeof(uint32_t));
+
+    return
+    {
+        ////source.read_4_bytes_little_endian(),
+        read_start_hashes(source),
+        source.read_hash()
+    };
 }
 
-data_chunk get_blocks::to_data(uint32_t version) const
+void get_blocks::serialize(uint32_t version, writer& sink) const
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(version));
-    stream::out::copy ostream(data);
-    to_data(version, ostream);
-    return data;
-}
+    DEBUG_ONLY(const auto bytes = size(version);)
+    DEBUG_ONLY(const auto start = sink.get_position();)
 
-void get_blocks::to_data(uint32_t version, std::ostream& stream) const
-{
-    write::bytes::ostream out(stream);
-    to_data(version, out);
-}
-
-void get_blocks::to_data(uint32_t version, writer& sink) const
-{
+    // Write version vs. member protocol_version.
+    ////sink.write_4_bytes_little_endian(protocol_version);
     sink.write_4_bytes_little_endian(version);
-    sink.write_variable(start_hashes_.size());
+    sink.write_variable(start_hashes.size());
 
-    for (const auto& start_hash: start_hashes_)
+    for (const auto& start_hash: start_hashes)
         sink.write_bytes(start_hash);
 
-    sink.write_bytes(stop_hash_);
+    sink.write_bytes(stop_hash);
+
+    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-size_t get_blocks::serialized_size(uint32_t) const
+size_t get_blocks::size(uint32_t version) const
 {
-    return size_t(36) + variable_size(start_hashes_.size()) +
-        hash_size * start_hashes_.size();
-}
-
-hash_list& get_blocks::start_hashes()
-{
-    return start_hashes_;
-}
-
-const hash_list& get_blocks::start_hashes() const
-{
-    return start_hashes_;
-}
-
-void get_blocks::set_start_hashes(const hash_list& value)
-{
-    start_hashes_ = value;
-}
-
-void get_blocks::set_start_hashes(hash_list&& value)
-{
-    start_hashes_ = std::move(value);
-}
-
-hash_digest& get_blocks::stop_hash()
-{
-    return stop_hash_;
-}
-
-const hash_digest& get_blocks::stop_hash() const
-{
-    return stop_hash_;
-}
-
-void get_blocks::set_stop_hash(const hash_digest& value)
-{
-    stop_hash_ = value;
-}
-
-void get_blocks::set_stop_hash(hash_digest&& value)
-{
-    stop_hash_ = std::move(value);
-}
-
-get_blocks& get_blocks::operator=(get_blocks&& other)
-{
-    start_hashes_ = std::move(other.start_hashes_);
-    stop_hash_ = std::move(other.stop_hash_);
-    return *this;
-}
-
-bool get_blocks::operator==(const get_blocks& other) const
-{
-    auto result = (start_hashes_.size() == other.start_hashes_.size()) &&
-        (stop_hash_ == other.stop_hash_);
-
-    for (size_t i = 0; i < start_hashes_.size() && result; i++)
-        result = (start_hashes_[i] == other.start_hashes_[i]);
-
-    return result;
-}
-
-bool get_blocks::operator!=(const get_blocks& other) const
-{
-    return !(*this == other);
+    return sizeof(uint32_t) +
+        hash_size +
+        variable_size(start_hashes.size()) +
+            (hash_size * start_hashes.size());
 }
 
 } // namespace messages

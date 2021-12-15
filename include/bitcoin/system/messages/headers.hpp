@@ -19,76 +19,39 @@
 #ifndef LIBBITCOIN_SYSTEM_MESSAGES_HEADERS_HPP
 #define LIBBITCOIN_SYSTEM_MESSAGES_HEADERS_HPP
 
-#include <cstdint>
 #include <cstddef>
-#include <initializer_list>
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/messages/header.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
-#include <bitcoin/system/messages/inventory_vector.hpp>
+#include <bitcoin/system/messages/inventory_item.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
 
-class BC_API headers
+struct BC_API headers
 {
-public:
-    typedef std::shared_ptr<headers> ptr;
-    typedef std::shared_ptr<const headers> const_ptr;
-
-    static headers factory(uint32_t version, const data_chunk& data);
-    static headers factory(uint32_t version, std::istream& stream);
-    static headers factory(uint32_t version, reader& source);
-
-    headers();
-    headers(const header::list& values);
-    headers(header::list&& values);
-    headers(const std::initializer_list<header>& values);
-    headers(const headers& other);
-    headers(headers&& other);
-
-    header::list& elements();
-    const header::list& elements() const;
-    void set_elements(const header::list& values);
-    void set_elements(header::list&& values);
-
-    bool is_sequential() const;
-    void to_hashes(hash_list& out) const;
-    void to_inventory(inventory_vector::list& out,
-        inventory::type_id type) const;
-
-    bool from_data(uint32_t version, const data_chunk& data);
-    bool from_data(uint32_t version, std::istream& stream);
-    bool from_data(uint32_t version, reader& source);
-    data_chunk to_data(uint32_t version) const;
-    void to_data(uint32_t version, std::ostream& stream) const;
-    void to_data(uint32_t version, writer& sink) const;
-    bool is_valid() const;
-    void reset();
-    size_t serialized_size(uint32_t version) const;
-
-    // This class is move assignable but not copy assignable.
-    headers& operator=(headers&& other);
-    void operator=(const headers&) = delete;
-
-    bool operator==(const headers& other) const;
-    bool operator!=(const headers& other) const;
+    typedef std::shared_ptr<const headers> ptr;
 
     static const identifier id;
     static const std::string command;
     static const uint32_t version_minimum;
     static const uint32_t version_maximum;
 
-private:
-    header::list elements_;
+    static headers deserialize(uint32_t version, reader& source);
+    void serialize(uint32_t version, writer& sink) const;
+    size_t size(uint32_t version) const;
+
+    bool is_sequential() const;
+    hash_list to_hashes() const;
+    inventory_item::list to_inventory(inventory::type_id type) const;
+
+    chain::header_ptrs headers;
 };
 
 } // namespace messages

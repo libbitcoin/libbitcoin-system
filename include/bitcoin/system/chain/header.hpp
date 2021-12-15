@@ -41,7 +41,7 @@ namespace chain {
 class BC_API header
 {
 public:
-    typedef std::shared_ptr<header> ptr;
+    typedef std::shared_ptr<const header> ptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -58,9 +58,6 @@ public:
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce);
-    header(uint32_t version, const hash_ptr& previous_block_hash,
-        const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
 
     header(const data_slice& data);
     header(std::istream& stream);
@@ -75,16 +72,6 @@ public:
     bool operator==(const header& other) const;
     bool operator!=(const header& other) const;
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
-
-    bool from_data(const data_slice& data);
-    bool from_data(std::istream& stream);
-    bool from_data(reader& source);
-
-    /// Deserialization result.
-    bool is_valid() const;
-
     // Serialization.
     // ------------------------------------------------------------------------
 
@@ -92,11 +79,11 @@ public:
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
 
-    static size_t serialized_size();
 
     // Properties.
     // ------------------------------------------------------------------------
     /// Native properties.
+    bool is_valid() const;
     uint32_t version() const;
     const hash_digest& previous_block_hash() const;
     const hash_digest& merkle_root() const;
@@ -107,6 +94,7 @@ public:
     /// Computed properties.
     hash_digest hash() const;
     uint256_t difficulty() const;
+    static size_t serialized_size();
 
     // Validation.
     // ------------------------------------------------------------------------
@@ -117,14 +105,12 @@ public:
     code accept(const chain_state& state) const;
 
 protected:
-    // So block may reset its member.
-    friend class block;
-
-    header(uint32_t version, const hash_ptr& previous_block_hash,
-        const hash_ptr& merkle_root, uint32_t timestamp, uint32_t bits,
+    header(uint32_t version, hash_digest&& previous_block_hash,
+        hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, bool valid);
-
-    void reset();
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, bool valid);
 
     // Check (context free).
     // ------------------------------------------------------------------------
@@ -142,11 +128,14 @@ protected:
     // error::incorrect_proof_of_work
 
 private:
+    static header from_data(reader& source);
     static uint256_t difficulty(uint32_t bits);
 
+    // Header should be stored as shared (adds 16 bytes).
+    // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).
     uint32_t version_;
-    hash_ptr previous_block_hash_;
-    hash_ptr merkle_root_;
+    hash_digest previous_block_hash_;
+    hash_digest merkle_root_;
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;
@@ -154,7 +143,8 @@ private:
 };
 
 typedef std::vector<header> headers;
-typedef std::shared_ptr<headers> headers_ptr;
+typedef std::vector<header::ptr> header_ptrs;
+typedef std::shared_ptr<header_ptrs> headers_ptr;
 
 } // namespace chain
 } // namespace system

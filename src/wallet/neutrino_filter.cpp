@@ -28,6 +28,9 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
+// TODO: replace use of messages::client_filter, moving to network.
+// TODO: maybe just use an simple three value struct.
+
 namespace libbitcoin {
 namespace system {
 namespace neutrino {
@@ -45,17 +48,17 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
     data_stack scripts;
 
-    for (const auto& tx: validated_block.transactions())
+    for (const auto& tx: *validated_block.transactions())
     {
-        if (!tx.is_coinbase())
+        if (!tx->is_coinbase())
         {
-            for (const auto& input: tx.inputs())
+            for (const auto& input: *(tx->inputs()))
             {
                 return false;
 
                 // TODO:
 
-                ////const auto prevout = input.point();
+                ////const auto prevout = input->point();
                 ////if (!prevout->metadata.cache.is_valid())
                 ////    return false;
 
@@ -65,9 +68,9 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
             }
         }
 
-        for (const auto& output: tx.outputs())
+        for (const auto& output: *(tx->outputs()))
         {
-            const auto& script = output.script();
+            const auto& script = output->script();
 
             // TODO: should this be output_pattern() == 
             // script_pattern::pay_null_data?
@@ -95,13 +98,13 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
 }
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const chain::script& script)
 {
-    if (script.ops().empty() || filter.filter_type() != neutrino_filter_type)
+    if (script.ops().empty() || filter.filter_type != neutrino_filter_type)
         return false;
 
-    stream::in::copy stream(filter.filter());
+    stream::in::copy stream(filter.filter);
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
@@ -109,16 +112,16 @@ bool match_filter(const messages::compact_filter& filter,
         return false;
 
     const auto target = script.to_data(false);
-    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash());
+    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash);
     const auto key = to_siphash_key(hash);
 
     return golomb::match(target, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const chain::scripts& scripts)
 {
-    if (scripts.empty() || filter.filter_type() != neutrino_filter_type)
+    if (scripts.empty() || filter.filter_type != neutrino_filter_type)
         return false;
 
     data_stack stack;
@@ -134,30 +137,30 @@ bool match_filter(const messages::compact_filter& filter,
     if (stack.empty())
         return false;
 
-    stream::in::copy stream(filter.filter());
+    stream::in::copy stream(filter.filter);
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
     if (!reader)
         return false;
 
-    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash());
+    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash);
     const auto key = to_siphash_key(hash);
 
     stack.shrink_to_fit();
     return golomb::match(stack, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const wallet::payment_address& address)
 {
     return match_filter(filter, address.output_script());
 }
 
-bool match_filter(const messages::compact_filter& filter,
+bool match_filter(const messages::client_filter& filter,
     const wallet::payment_address::list& addresses)
 {
-    if (addresses.empty() || filter.filter_type() != neutrino_filter_type)
+    if (addresses.empty() || filter.filter_type != neutrino_filter_type)
         return false;
 
     static default_allocator<chain::script> no_fill_allocator{};

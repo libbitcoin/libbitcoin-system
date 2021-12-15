@@ -292,52 +292,52 @@
 ////    bool json);
 ////
 /////**
-//// * Generate a property list for a compact_filter.
+//// * Generate a property list for a client_filter.
 //// * @param[in]  filter  The compact filter.
 //// * @return             A property list.
 //// */
-////BC_API pt::ptree property_list(const messages::compact_filter& filter);
+////BC_API pt::ptree property_list(const messages::client_filter& filter);
 ////
 /////**
-//// * Generate a property tree for a compact_filter.
+//// * Generate a property tree for a client_filter.
 //// * @param[in]  filter  The compact filter.
 //// * @return             A property tree.
 //// */
-////BC_API pt::ptree property_tree(const messages::compact_filter& filter);
+////BC_API pt::ptree property_tree(const messages::client_filter& filter);
 ////
 /////**
-//// * Generate a property list for a compact_filter_checkpoint.
+//// * Generate a property list for a client_filter_checkpoint.
 //// * @param[in]  checkpoint  The compact filter checkpoint.
 //// * @param[in]  json        Use json array formatting.
 //// * @return                 A property list.
 //// */
 ////BC_API pt::ptree property_list(
-////    const messages::compact_filter_checkpoint& checkpoint, bool json);
+////    const messages::client_filter_checkpoint& checkpoint, bool json);
 ////
 /////**
-//// * Generate a property tree for a compact_filter_checkpoint.
+//// * Generate a property tree for a client_filter_checkpoint.
 //// * @param[in]  checkpoint  The compact filter checkpoint.
 //// * @param[in]  json        Use json array formatting.
 //// * @return                 A property tree.
 //// */
 ////BC_API pt::ptree property_tree(
-////    const messages::compact_filter_checkpoint& checkpoint, bool json);
+////    const messages::client_filter_checkpoint& checkpoint, bool json);
 ////
 /////**
-//// * Generate a property list for a compact_filter_headers.
+//// * Generate a property list for a client_filter_headers.
 //// * @param[in]  headers  The compact filter headers.
 //// * @return              A property list.
 //// */
-////BC_API pt::ptree property_list(const messages::compact_filter_headers& headers,
+////BC_API pt::ptree property_list(const messages::client_filter_headers& headers,
 ////    bool json);
 ////
 /////**
-//// * Generate a property tree for a compact_filter_headers.
+//// * Generate a property tree for a client_filter_headers.
 //// * @param[in]  headers  The compact filter headers.
 //// * @param[in]  json     Use json array formatting.
 //// * @return              A property tree.
 //// */
-////BC_API pt::ptree property_tree(const messages::compact_filter_headers& headers,
+////BC_API pt::ptree property_tree(const messages::client_filter_headers& headers,
 ////    bool json);
 ////
 /////**

@@ -60,12 +60,12 @@ public:
     uint32_t read_4_bytes_little_endian() noexcept override;
     uint64_t read_8_bytes_little_endian() noexcept override;
 
-    /// Read Bitcoin variable integer (3, 5, or 9 bytes, little-endian).
+    /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
     uint64_t read_variable() noexcept override;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
-    /// Returns zero and invalidates stream if would overflow size_t.
-    size_t read_size() noexcept override;
+    /// Returns zero and invalidates stream if would exceed read limit.
+    size_t read_size(size_t limit=max_size_t) noexcept override;
 
     /// Convert read_4_bytes_little_endian to an error code.
     code read_error_code() noexcept override;
@@ -96,11 +96,13 @@ public:
     data_chunk read_bytes(size_t size) noexcept override;
     void read_bytes(uint8_t* buffer, size_t size) noexcept override;
 
-    /// Read Bitcoin length-prefixed string, same as read_string(read_size()).
-    std::string read_string() noexcept override;
+    /// Read Bitcoin length-prefixed string.
+    /// Returns empty and invalidates stream if would exceed read limit.
+    std::string read_string(size_t limit=max_size_t) noexcept override;
 
-    /// Read string, truncated at at size or first null.
-    std::string read_string(size_t size) noexcept override;
+    /// Read string, truncated at size or first null.
+    /// This is only used for reading Bitcoin heading command text.
+    std::string read_string_buffer(size_t size) noexcept override;
 
     /// Advance the iterator.
     void skip_byte() noexcept override;

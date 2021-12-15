@@ -61,7 +61,9 @@ std::istream& operator>>(std::istream& input, header& argument)
     std::string hexcode;
     input >> hexcode;
 
-    if (!argument.value_.from_data(base16(hexcode)))
+    argument.value_ = chain::header(base16(hexcode));
+
+    if (!argument.value_.is_valid())
         throw istream_exception(hexcode);
 
     return input;
