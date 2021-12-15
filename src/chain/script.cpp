@@ -711,6 +711,13 @@ bool script::is_witness_program_pattern(const operations& ops)
 ////        && ops[1].data().size() <= max_null_data_size;
 ////}
 
+// Used by neutrino.
+bool script::is_pay_op_return_pattern(const operations& ops)
+{
+    return !ops.empty()
+        && ops[0].code() == opcode::op_return;
+}
+
 // The satoshi client enables configurable data size for policy.
 bool script::is_pay_null_data_pattern(const operations& ops)
 {

@@ -68,11 +68,10 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter)
         {
             const auto& script = output->script();
 
-            // ----------------------------------------------------------------
-            // TODO: should be script::is_pay_null_data_pattern(script.ops())?
-            // ----------------------------------------------------------------
-            if (!script.ops().empty() && (script.ops().front().code() !=
-                chain::opcode::op_return))
+            // bip138: any "nil" items MUST NOT be included.
+            // bip138:exclude all outputs that start with OP_RETURN.
+            if (!script.ops().empty() &&
+                !chain::script::is_pay_op_return_pattern(script.ops()))
                 scripts.push_back(script.to_data(false));
         }
     }

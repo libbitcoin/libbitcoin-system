@@ -125,6 +125,7 @@ public:
     static bool is_witness_program_pattern(const operations& ops);
 
     /// Common output patterns (psh and pwsh are also consensus).
+    static bool is_pay_op_return_pattern(const operations& ops);
     static bool is_pay_null_data_pattern(const operations& ops);
     static bool is_pay_multisig_pattern(const operations& ops);
     static bool is_pay_public_key_pattern(const operations& ops);
