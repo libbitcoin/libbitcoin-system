@@ -26,7 +26,7 @@
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/messages/compact_transaction.hpp>
+#include <bitcoin/system/messages/compact_block_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -53,7 +53,7 @@ struct BC_API compact_block
     chain::header header;
     uint64_t nonce;
     short_id_list short_ids;
-    compact_transaction::list transactions;
+    compact_block_item::list transactions;
 };
 
 } // namespace messages

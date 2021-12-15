@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/messages/network_address.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -45,7 +45,7 @@ data_array<Size> read_forward(reader& source)
 }
 
 // static
-size_t network_address::size(uint32_t, bool with_timestamp)
+size_t address_item::size(uint32_t, bool with_timestamp)
 {
     return (with_timestamp ? sizeof(uint32_t) : zero)
         + sizeof(uint64_t)
@@ -54,7 +54,7 @@ size_t network_address::size(uint32_t, bool with_timestamp)
 }
 
 // static
-network_address network_address::deserialize(uint32_t, reader& source,
+address_item address_item::deserialize(uint32_t, reader& source,
     bool with_timestamp)
 {
     return
@@ -66,7 +66,7 @@ network_address network_address::deserialize(uint32_t, reader& source,
     };
 }
 
-void network_address::serialize(uint32_t DEBUG_ONLY(version), writer& sink,
+void address_item::serialize(uint32_t DEBUG_ONLY(version), writer& sink,
     bool with_timestamp) const
 {
     DEBUG_ONLY(const auto bytes = size(version, with_timestamp);)

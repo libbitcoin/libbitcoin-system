@@ -18,15 +18,15 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(alert_payload_tests)
+BOOST_AUTO_TEST_SUITE(alert_item_tests)
 
-BOOST_AUTO_TEST_CASE(alert_payload__constructor_1__always__invalid)
+BOOST_AUTO_TEST_CASE(alert_item__constructor_1__always__invalid)
 {
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__constructor_2__always__equals_params)
+BOOST_AUTO_TEST_CASE(alert_item__constructor_2__always__equals_params)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_2__always__equals_params)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_2__always__equals_params)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__constructor_3__always__equals_params)
+BOOST_AUTO_TEST_CASE(alert_item__constructor_3__always__equals_params)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_3__always__equals_params)
     auto dup_status_bar = status_bar;
     auto dup_reserved = reserved;
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, std::move(dup_set_cancel), min_version, max_version,
         std::move(dup_set_sub_version), priority, std::move(dup_comment),
         std::move(dup_status_bar), std::move(dup_reserved));
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_3__always__equals_params)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__constructor_4__always__equals_params)
+BOOST_AUTO_TEST_CASE(alert_item__constructor_4__always__equals_params)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -121,11 +121,11 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_4__always__equals_params)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload value(version, relay_until, expiration, id,
+    messages::alert_item value(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    messages::alert_payload instance(value);
+    messages::alert_item instance(value);
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_4__always__equals_params)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__constructor_5__always__equals_params)
+BOOST_AUTO_TEST_CASE(alert_item__constructor_5__always__equals_params)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -159,11 +159,11 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_5__always__equals_params)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload value(version, relay_until, expiration, id,
+    messages::alert_item value(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
-    messages::alert_payload instance(std::move(value));
+    messages::alert_item instance(std::move(value));
 
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
@@ -181,16 +181,16 @@ BOOST_AUTO_TEST_CASE(alert_payload__constructor_5__always__equals_params)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__from_data__insufficient_bytes__failure)
+BOOST_AUTO_TEST_CASE(alert_item__from_data__insufficient_bytes__failure)
 {
     data_chunk raw{ 0xab, 0x11 };
-    messages::alert_payload instance;
+    messages::alert_item instance;
 
     BOOST_REQUIRE(!instance.from_data(messages::version::level::minimum, raw));
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_1__wiki_sample_test__success)
+BOOST_AUTO_TEST_CASE(alert_item__factory_1__wiki_sample_test__success)
 {
     const data_chunk raw
     {
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_1__wiki_sample_test__success)
         0x75, 0x61, 0x72, 0x79, 0x00
     };
 
-    const messages::alert_payload expected
+    const messages::alert_item expected
     {
         1,
         1329620535,
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_1__wiki_sample_test__success)
         ""
     };
 
-    const auto result = messages::alert_payload::factory(
+    const auto result = messages::alert_item::factory(
         messages::version::level::minimum, raw);
 
     BOOST_REQUIRE(result.is_valid());
@@ -238,9 +238,9 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_1__wiki_sample_test__success)
     BOOST_REQUIRE_EQUAL(data.size(), expected.serialized_size(messages::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__factory_1__roundtrip__success)
 {
-    messages::alert_payload expected
+    messages::alert_item expected
     {
         5,
         105169,
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_1__roundtrip__success)
     };
 
     const auto data = expected.to_data(messages::version::level::minimum);
-    const auto result = messages::alert_payload::factory(
+    const auto result = messages::alert_item::factory(
         messages::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
@@ -271,9 +271,9 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_1__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__factory_2__roundtrip__success)
 {
-    messages::alert_payload expected
+    messages::alert_item expected
     {
         5,
         105169,
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_2__roundtrip__success)
 
     const auto data = expected.to_data(messages::version::level::minimum);
     stream::in::copy istream(data);
-    const auto result = messages::alert_payload::factory(
+    const auto result = messages::alert_item::factory(
         messages::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -305,9 +305,9 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_2__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__factory_3__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__factory_3__roundtrip__success)
 {
-    const messages::alert_payload expected
+    const messages::alert_item expected
     {
         5,
         105169,
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_3__roundtrip__success)
 
     const auto data = expected.to_data(messages::version::level::minimum);
     read::bytes::copy source(data);
-    const auto result = messages::alert_payload::factory(messages::version::level::minimum, source);
+    const auto result = messages::alert_item::factory(messages::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -338,52 +338,52 @@ BOOST_AUTO_TEST_CASE(alert_payload__factory_3__roundtrip__success)
     BOOST_REQUIRE_EQUAL(expected.serialized_size(messages::version::level::minimum), result.serialized_size(messages::version::level::minimum));
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__version__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__version__roundtrip__success)
 {
     uint32_t value = 1234u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.version() != value);
     instance.set_version(value);
     BOOST_REQUIRE_EQUAL(value, instance.version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__relay_until__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__relay_until__roundtrip__success)
 {
     uint64_t value = 5121234u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.relay_until() != value);
     instance.set_relay_until(value);
     BOOST_REQUIRE_EQUAL(value, instance.relay_until());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__expiration__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__expiration__roundtrip__success)
 {
     uint64_t value = 5121234u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.expiration() != value);
     instance.set_expiration(value);
     BOOST_REQUIRE_EQUAL(value, instance.expiration());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__id__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__id__roundtrip__success)
 {
     uint32_t value = 68215u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.id() != value);
     instance.set_id(value);
     BOOST_REQUIRE_EQUAL(value, instance.id());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__cancel__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__cancel__roundtrip__success)
 {
     uint32_t value = 68215u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.cancel() != value);
     instance.set_cancel(value);
     BOOST_REQUIRE_EQUAL(value, instance.cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__set_cancel_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_1__always__initialized)
     BOOST_REQUIRE(set_cancel == instance.set_cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__set_cancel_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -423,7 +423,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    const messages::alert_payload instance(version, relay_until, expiration, id,
+    const messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -431,44 +431,44 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_accessor_2__always__initialized)
     BOOST_REQUIRE(set_cancel == instance.set_cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__set_cancel_setter_1__roundtrip__success)
 {
     const std::vector<uint32_t> value = { 68215u, 34542u, 4756u };
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.set_cancel() != value);
     instance.set_set_cancel(value);
     BOOST_REQUIRE(value == instance.set_cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_cancel_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__set_cancel_setter_2__roundtrip__success)
 {
     const std::vector<uint32_t> value = { 68215u, 34542u, 4756u };
     auto dup_value = value;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.set_cancel() != value);
     instance.set_set_cancel(std::move(dup_value));
     BOOST_REQUIRE(value == instance.set_cancel());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__min_version__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__min_version__roundtrip__success)
 {
     uint32_t value = 68215u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.min_version() != value);
     instance.set_min_version(value);
     BOOST_REQUIRE_EQUAL(value, instance.min_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__max_version__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__max_version__roundtrip__success)
 {
     uint32_t value = 68215u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.max_version() != value);
     instance.set_max_version(value);
     BOOST_REQUIRE_EQUAL(value, instance.max_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__set_sub_version_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__initiali
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_1__always__initiali
     BOOST_REQUIRE(set_sub_version == instance.set_sub_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__set_sub_version_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -508,7 +508,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__initiali
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    const messages::alert_payload instance(version, relay_until, expiration, id,
+    const messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -516,35 +516,35 @@ BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_accessor_2__always__initiali
     BOOST_REQUIRE(set_sub_version == instance.set_sub_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__set_sub_version_setter_1__roundtrip__success)
 {
     const std::vector<std::string> value = { "asdfa", "sgfdf", "Tryertsd" };
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.set_sub_version() != value);
     instance.set_set_sub_version(value);
     BOOST_REQUIRE(value == instance.set_sub_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__set_sub_version_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__set_sub_version_setter_2__roundtrip__success)
 {
     const std::vector<std::string> value = { "asdfa", "sgfdf", "Tryertsd" };
     auto dup_value = value;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.set_sub_version() != value);
     instance.set_set_sub_version(std::move(dup_value));
     BOOST_REQUIRE(value == instance.set_sub_version());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__priority__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__priority__roundtrip__success)
 {
     uint32_t value = 68215u;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.priority() != value);
     instance.set_priority(value);
     BOOST_REQUIRE_EQUAL(value, instance.priority());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__comment_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -568,7 +568,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_1__always__initialized)
     BOOST_REQUIRE_EQUAL(comment, instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__comment_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -584,7 +584,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    const messages::alert_payload instance(version, relay_until, expiration, id,
+    const messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -592,26 +592,26 @@ BOOST_AUTO_TEST_CASE(alert_payload__comment_accessor_2__always__initialized)
     BOOST_REQUIRE_EQUAL(comment, instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__comment_setter_1__roundtrip__success)
 {
     const std::string value = "asdfa";
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.comment() != value);
     instance.set_comment(value);
     BOOST_REQUIRE(value == instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__comment_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__comment_setter_2__roundtrip__success)
 {
     const std::string value = "Tryertsd";
     auto dup_value = value;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.comment() != value);
     instance.set_comment(std::move(dup_value));
     BOOST_REQUIRE(value == instance.comment());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__status_bar_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -635,7 +635,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_1__always__initialized)
     BOOST_REQUIRE_EQUAL(status_bar, instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__status_bar_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -651,7 +651,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    const messages::alert_payload instance(version, relay_until, expiration, id,
+    const messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -659,26 +659,26 @@ BOOST_AUTO_TEST_CASE(alert_payload__status_bar_accessor_2__always__initialized)
     BOOST_REQUIRE_EQUAL(status_bar, instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__status_bar_setter_1__roundtrip__success)
 {
     const std::string value = "asdfa";
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.status_bar() != value);
     instance.set_status_bar(value);
     BOOST_REQUIRE(value == instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__status_bar_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__status_bar_setter_2__roundtrip__success)
 {
     const std::string value = "Tryertsd";
     auto dup_value = value;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.status_bar() != value);
     instance.set_status_bar(std::move(dup_value));
     BOOST_REQUIRE(value == instance.status_bar());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__reserved_accessor_1__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -694,7 +694,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload instance(version, relay_until, expiration, id,
+    messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -702,7 +702,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_1__always__initialized)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__initialized)
+BOOST_AUTO_TEST_CASE(alert_item__reserved_accessor_2__always__initialized)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -718,7 +718,7 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__initialized)
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    const messages::alert_payload instance(version, relay_until, expiration, id,
+    const messages::alert_item instance(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
@@ -726,26 +726,26 @@ BOOST_AUTO_TEST_CASE(alert_payload__reserved_accessor_2__always__initialized)
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__reserved_setter_1__roundtrip__success)
 {
     const std::string value = "asdfa";
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.reserved() != value);
     instance.set_reserved(value);
     BOOST_REQUIRE(value == instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__reserved_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(alert_item__reserved_setter_2__roundtrip__success)
 {
     const std::string value = "Tryertsd";
     auto dup_value = value;
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance.reserved() != value);
     instance.set_reserved(std::move(dup_value));
     BOOST_REQUIRE(value == instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_assign_equals__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(alert_item__operator_assign_equals__always__matches_equivalent)
 {
     const uint32_t version = 3452u;
     const uint64_t relay_until = 64556u;
@@ -761,13 +761,13 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_assign_equals__always__matches_equi
     const std::string status_bar = "fgjdfhjg";
     const std::string reserved = "utyurtevc";
 
-    messages::alert_payload value(version, relay_until, expiration, id,
+    messages::alert_item value(version, relay_until, expiration, id,
         cancel, set_cancel, min_version, max_version, set_sub_version,
         priority, comment, status_bar, reserved);
 
     BOOST_REQUIRE(value.is_valid());
 
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(!instance.is_valid());
 
     instance = std::move(value);
@@ -787,43 +787,43 @@ BOOST_AUTO_TEST_CASE(alert_payload__operator_assign_equals__always__matches_equi
     BOOST_REQUIRE_EQUAL(reserved, instance.reserved());
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__duplicates__true)
+BOOST_AUTO_TEST_CASE(alert_item__operator_boolean_equals__duplicates__true)
 {
-    const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
+    const messages::alert_item expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
-    messages::alert_payload instance(expected);
+    messages::alert_item instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_equals__differs__false)
+BOOST_AUTO_TEST_CASE(alert_item__operator_boolean_equals__differs__false)
 {
-    const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
+    const messages::alert_item expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__duplicates__false)
+BOOST_AUTO_TEST_CASE(alert_item__operator_boolean_not_equals__duplicates__false)
 {
-    const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
+    const messages::alert_item expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
-    messages::alert_payload instance(expected);
+    messages::alert_item instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(alert_payload__operator_boolean_not_equals__differs__true)
+BOOST_AUTO_TEST_CASE(alert_item__operator_boolean_not_equals__differs__true)
 {
-    const messages::alert_payload expected(3452u, 64556u, 78545u, 43547u,
+    const messages::alert_item expected(3452u, 64556u, 78545u, 43547u,
         546562345u, { 2345u, 346754u, 234u, 4356u }, 4644u, 89876u,
         { "foo", "bar", "baz" }, 34323u, "asfgsddsa", "fgjdfhjg", "utyurtevc");
 
-    messages::alert_payload instance;
+    messages::alert_item instance;
     BOOST_REQUIRE(instance != expected);
 }
 

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/messages/identifier.hpp>
+#include <bitcoin/system/messages/inventory_item.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>

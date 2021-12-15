@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/assert.hpp>
+////#include <bitcoin/system/messages/alert_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
@@ -48,7 +49,6 @@ alert alert::deserialize(uint32_t version, reader& source)
     };
 }
 
-// TODO: assert written bytes.
 void alert::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
 {
     DEBUG_ONLY(const auto bytes = size(version);)

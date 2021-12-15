@@ -16,48 +16,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/messages/compact_transaction.hpp>
+#ifndef LIBBITCOIN_SYSTEM_MESSAGES_COMPACT_BLOCK_ITEM_HPP
+#define LIBBITCOIN_SYSTEM_MESSAGES_COMPACT_BLOCK_ITEM_HPP
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/assert.hpp>
+#include <memory>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/message.hpp>
-#include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace messages {
 
-compact_transaction compact_transaction::deserialize(uint32_t, reader& source,
-    bool witness)
+/// This is also known as a "prefilled transaction".
+struct BC_API compact_block_item
 {
-    return 
-    {
-        source.read_variable(),
-        chain::transaction(source, witness)
-    };
-}
+public:
+    typedef std::vector<compact_block_item> list;
+    typedef std::shared_ptr<const compact_block_item> ptr;
 
-void compact_transaction::serialize(uint32_t DEBUG_ONLY(version), writer& sink,
-    bool witness) const
-{
-    DEBUG_ONLY(const auto bytes = size(version, witness);)
-    DEBUG_ONLY(const auto start = sink.get_position();)
+    static compact_block_item deserialize(uint32_t version, reader& source,
+        bool witness);
+    void serialize(uint32_t version, writer& sink, bool witness) const;
+    size_t size(uint32_t version, bool witness) const;
 
-    sink.write_variable(index);
-    transaction.to_data(sink, witness);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
-}
-
-size_t compact_transaction::size(uint32_t, bool witness) const
-{
-    return variable_size(index)
-        + transaction.serialized_size(witness);
-}
+    uint64_t index;
+    chain::transaction transaction;
+};
 
 } // namespace messages
 } // namespace system
 } // namespace libbitcoin
+
+#endif

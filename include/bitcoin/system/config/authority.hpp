@@ -25,7 +25,7 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -46,7 +46,7 @@ public:
     /// [2001:db8::2]:port or 1.2.240.1:port.
     authority(const std::string& authority);
 
-    authority(const messages::network_address& address);
+    authority(const messages::address_item& address);
     authority(const messages::ip_address& ip, uint16_t port);
 
     /// The host can be in one of three forms:
@@ -79,7 +79,7 @@ public:
     std::string to_string() const;
 
     /// The authority converted to a network address.
-    messages::network_address to_network_address() const;
+    messages::address_item to_address_item() const;
 
     bool operator==(const authority& other) const;
     bool operator!=(const authority& other) const;

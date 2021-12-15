@@ -22,9 +22,9 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/system/assert.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
 #include <bitcoin/system/messages/version.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -45,11 +45,11 @@ address address::deserialize(uint32_t version, reader& source)
     if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    network_address::list addresses;
+    address_item::list addresses;
     addresses.reserve(source.read_size(max_address));
 
     for (size_t address = 0; address < addresses.capacity(); ++address)
-        addresses.push_back(network_address::deserialize(
+        addresses.push_back(address_item::deserialize(
             version, source, with_timestamp));
 
     return { addresses };
@@ -71,7 +71,7 @@ void address::serialize(uint32_t version, writer& sink) const
 size_t address::size(uint32_t version) const
 {
     return variable_size(addresses.size()) +
-        (addresses.size() * network_address::size(version, with_timestamp));
+        (addresses.size() * address_item::size(version, with_timestamp));
 }
 
 } // namespace messages

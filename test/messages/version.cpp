@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_2__always__equals_params)
     uint64_t services = 263546u;
     uint64_t timestamp = 7668534u;
 
-    messages::network_address receiver
+    messages::address_item receiver
     {
         734678u,
         5357534u,
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_2__always__equals_params)
         123u
     };
 
-    messages::network_address sender
+    messages::address_item sender
     {
         46324u,
         156u,
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_3__always__equals_params)
     uint64_t services = 263546u;
     uint64_t timestamp = 7668534u;
 
-    messages::network_address receiver
+    messages::address_item receiver
     {
         734678u,
         5357534u,
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_3__always__equals_params)
         123u
     };
 
-    messages::network_address sender
+    messages::address_item sender
     {
         46324u,
         156u,
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_4__always__equals_params)
     uint64_t services = 263546u;
     uint64_t timestamp = 7668534u;
 
-    messages::network_address receiver
+    messages::address_item receiver
     {
         734678u,
         5357534u,
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_4__always__equals_params)
         123u
     };
 
-    messages::network_address sender
+    messages::address_item sender
     {
         46324u,
         156u,
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_5__always__equals_params)
     uint64_t services = 263546u;
     uint64_t timestamp = 7668534u;
 
-    messages::network_address receiver
+    messages::address_item receiver
     {
         734678u,
         5357534u,
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(version__constructor_5__always__equals_params)
         123u
     };
 
-    messages::network_address sender
+    messages::address_item sender
     {
         46324u,
         156u,
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(version__from_data__mismatched_sender_services__invalid)
         210u,
         sender_services,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(version__from_data__mismatched_sender_services__invalid)
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             sender_services + 1,
@@ -674,7 +674,7 @@ BOOST_AUTO_TEST_CASE(version__timestamp_setter__roundtrip__success)
 
 BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__initialized_value)
 {
-    const messages::network_address expected
+    const messages::address_item expected
     {
         734678u,
         5357534u,
@@ -715,7 +715,7 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__initialized_val
 
 //BOOST_AUTO_TEST_CASE(version__address_receiver_setter_1__roundtrip__success)
 //{
-//    messages::network_address expected
+//    messages::address_item expected
 //    {
 //        734678u,
 //        5357534u,
@@ -731,7 +731,7 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_accessor__always__initialized_val
 //    messages::version instance;
 //    BOOST_REQUIRE(!instance.address_receiver().is_valid());
 //    instance.address_receiver(expected);
-//    const messages::network_address result = instance.address_receiver();
+//    const messages::address_item result = instance.address_receiver();
 //    BOOST_REQUIRE(result == expected);
 //    BOOST_REQUIRE(result.is_valid());
 //}
@@ -740,7 +740,7 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_setter_2__roundtrip__success)
 {
     messages::version instance;
     BOOST_REQUIRE(!instance.address_receiver().is_valid());
-    instance.set_address_receiver(messages::network_address
+    instance.set_address_receiver(messages::address_item
     {
         734678u,
         5357534u,
@@ -753,13 +753,13 @@ BOOST_AUTO_TEST_CASE(version__address_receiver_setter_2__roundtrip__success)
         123u
     });
 
-    const messages::network_address result = instance.address_receiver();
+    const messages::address_item result = instance.address_receiver();
     BOOST_REQUIRE(result.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__initialized_value)
 {
-    const messages::network_address expected
+    const messages::address_item expected
     {
         46324u,
         1515u,
@@ -800,7 +800,7 @@ BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__initialized_value
 
 //BOOST_AUTO_TEST_CASE(version__address_sender_setter_1__roundtrip__success)
 //{
-//    messages::network_address expected
+//    messages::address_item expected
 //    {
 //        46324u,
 //        1515u,
@@ -816,7 +816,7 @@ BOOST_AUTO_TEST_CASE(version__address_sender_accessor__always__initialized_value
 //    messages::version instance;
 //    BOOST_REQUIRE(!instance.address_sender().is_valid());
 //    instance.address_sender(expected);
-//    const messages::network_address result = instance.address_sender();
+//    const messages::address_item result = instance.address_sender();
 //    BOOST_REQUIRE(result == expected);
 //    BOOST_REQUIRE(result.is_valid());
 //}
@@ -825,7 +825,7 @@ BOOST_AUTO_TEST_CASE(version__address_sender_setter_2__roundtrip__success)
 {
     messages::version instance;
     BOOST_REQUIRE(!instance.address_sender().is_valid());
-    instance.set_address_sender(messages::network_address
+    instance.set_address_sender(messages::address_item
     {
         46324u,
         1515u,
@@ -838,7 +838,7 @@ BOOST_AUTO_TEST_CASE(version__address_sender_setter_2__roundtrip__success)
         351u
     });
 
-    const messages::network_address result = instance.address_sender();
+    const messages::address_item result = instance.address_sender();
     BOOST_REQUIRE(result.is_valid());
 }
 
@@ -1046,7 +1046,7 @@ BOOST_AUTO_TEST_CASE(version__operator_assign_equals__always__matches_equivalent
         210u,
         15234u,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -1058,7 +1058,7 @@ BOOST_AUTO_TEST_CASE(version__operator_assign_equals__always__matches_equivalent
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             57835u,
@@ -1090,7 +1090,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__true)
         210u,
         15234u,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -1102,7 +1102,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__duplicates__true)
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             57835u,
@@ -1131,7 +1131,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__false)
         210u,
         15234u,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -1143,7 +1143,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_equals__differs__false)
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             57835u,
@@ -1172,7 +1172,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__duplicates__false)
         210u,
         15234u,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -1184,7 +1184,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__duplicates__false)
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             57835u,
@@ -1213,7 +1213,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__differs__true)
         210u,
         15234u,
         979797u,
-        messages::network_address
+        messages::address_item
         {
             734678u,
             5357534u,
@@ -1225,7 +1225,7 @@ BOOST_AUTO_TEST_CASE(version__operator_boolean_not_equals__differs__true)
             },
             123u
         },
-        messages::network_address
+        messages::address_item
         {
             46324u,
             57835u,

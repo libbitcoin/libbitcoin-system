@@ -25,6 +25,7 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+////#include <bitcoin/system/messages/alert_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -45,6 +46,8 @@ struct BC_API alert
     void serialize(uint32_t version, writer& sink) const;
     size_t size(uint32_t version) const;
 
+    // TODO:
+    ////alert_item payload;
     data_chunk payload;
     data_chunk signature;
 };

@@ -25,8 +25,8 @@
 #include <string>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -46,7 +46,7 @@ struct BC_API address
     void serialize(uint32_t version, writer& sink) const;
     size_t size(uint32_t version) const;
 
-    network_address::list addresses;
+    address_item::list addresses;
 };
 
 } // namespace messages

@@ -26,7 +26,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/inventory.hpp>
-#include <bitcoin/system/messages/inventory_item.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/messages/alert_payload.hpp>
+#include <bitcoin/system/messages/alert_item.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -36,7 +36,7 @@ constexpr size_t max_message = max_uint8;
 constexpr size_t max_messages = 42;
 
 // Libbitcoin doesn't use this.
-const ec_uncompressed alert_payload::satoshi_public_key
+const ec_uncompressed alert_item::satoshi_public_key
 {
     {
         0x04, 0xfc, 0x97, 0x02, 0x84, 0x78, 0x40, 0xaa, 0xf1, 0x95, 0xde,
@@ -48,7 +48,7 @@ const ec_uncompressed alert_payload::satoshi_public_key
     }
 };
 
-alert_payload alert_payload::deserialize(uint32_t, reader& source)
+alert_item alert_item::deserialize(uint32_t, reader& source)
 {
     const auto read_cans = [](reader& source)
     {
@@ -90,7 +90,7 @@ alert_payload alert_payload::deserialize(uint32_t, reader& source)
     };
 }
 
-void alert_payload::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
+void alert_item::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
 {
     DEBUG_ONLY(const auto bytes = size(version);)
     DEBUG_ONLY(const auto start = sink.get_position();)
@@ -120,7 +120,7 @@ void alert_payload::serialize(uint32_t DEBUG_ONLY(version), writer& sink) const
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-size_t alert_payload::size(uint32_t) const
+size_t alert_item::size(uint32_t) const
 {
     const auto subs = [](size_t total, const std::string& sub)
     {

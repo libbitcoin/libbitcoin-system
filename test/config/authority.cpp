@@ -67,8 +67,8 @@ static bool ip_equal(const messages::ip_address& left,
     return std::equal(left.begin(), left.end(), right.begin());
 }
 
-static bool net_equal(const messages::network_address& left,
-    const messages::network_address& right)
+static bool net_equal(const messages::address_item& left,
+    const messages::address_item& right)
 {
     return ip_equal(left.ip(), right.ip()) && (left.port() == right.port());
 }
@@ -109,10 +109,10 @@ BOOST_AUTO_TEST_CASE(authority__port__ipv6_authority__expected)
     BOOST_REQUIRE_EQUAL(host.port(), expected_port);
 }
 
-BOOST_AUTO_TEST_CASE(authority__port__network_address__expected)
+BOOST_AUTO_TEST_CASE(authority__port__address_item__expected)
 {
     const uint16_t expected_port = 42;
-    const messages::network_address address
+    const messages::address_item address
     {
         0, 0, test_ipv6_address, expected_port
     };
@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE(authority__ip__ipv6_compatible_alternative_authority__expec
     BOOST_REQUIRE(ip_equal(host.ip(), test_compatible_ip_address));
 }
 
-BOOST_AUTO_TEST_CASE(authority__ip__network_address__expected)
+BOOST_AUTO_TEST_CASE(authority__ip__address_item__expected)
 {
     const auto& expected_ip = test_ipv6_address;
-    const messages::network_address address
+    const messages::address_item address
     {
         0, 0, test_ipv6_address, 42
     };
@@ -311,50 +311,50 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
 
-BOOST_AUTO_TEST_SUITE(authority__to_network_address)
+BOOST_AUTO_TEST_SUITE(authority__to_address_item)
 
-BOOST_AUTO_TEST_CASE(authority__to_network_address__default__ipv6_unspecified)
+BOOST_AUTO_TEST_CASE(authority__to_address_item__default__ipv6_unspecified)
 {
-    const messages::network_address expected_address
+    const messages::address_item expected_address
     {
         0, 0, test_unspecified_ip_address, 0,
     };
 
     const authority host;
-    BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
+    BOOST_REQUIRE(net_equal(host.to_address_item(), expected_address));
 }
 
-BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_mapped_ip_address__ipv4)
+BOOST_AUTO_TEST_CASE(authority__to_address_item__ipv4_mapped_ip_address__ipv4)
 {
-    const messages::network_address expected_address
+    const messages::address_item expected_address
     {
         0, 0, test_mapped_ip_address, 42,
     };
 
     const authority host(expected_address.ip(), expected_address.port());
-    BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
+    BOOST_REQUIRE(net_equal(host.to_address_item(), expected_address));
 }
 
-BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv4_compatible_ip_address__ipv6_alternative)
+BOOST_AUTO_TEST_CASE(authority__to_address_item__ipv4_compatible_ip_address__ipv6_alternative)
 {
-    const messages::network_address expected_address
+    const messages::address_item expected_address
     {
         0, 0, test_compatible_ip_address, 42,
     };
 
     const authority host(expected_address.ip(), expected_address.port());
-    BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
+    BOOST_REQUIRE(net_equal(host.to_address_item(), expected_address));
 }
 
-BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv6_address__ipv6_compressed)
+BOOST_AUTO_TEST_CASE(authority__to_address_item__ipv6_address__ipv6_compressed)
 {
-    const messages::network_address expected_address
+    const messages::address_item expected_address
     {
         0, 0, test_ipv6_address, 42,
     };
 
     const authority host(expected_address.ip(), expected_address.port());
-    BOOST_REQUIRE(net_equal(host.to_network_address(), expected_address));
+    BOOST_REQUIRE(net_equal(host.to_address_item(), expected_address));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

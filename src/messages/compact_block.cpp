@@ -24,7 +24,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/messages/compact_transaction.hpp>
+#include <bitcoin/system/messages/compact_block_item.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
 #include <bitcoin/system/messages/message.hpp>
 #include <bitcoin/system/messages/version.hpp>
@@ -59,14 +59,14 @@ compact_block compact_block::deserialize(uint32_t version, reader& source,
 
     const auto read_transactions = [=](reader& source)
     {
-        compact_transaction::list transactions;
-        transactions.reserve(source.read_size(chain::max_block_size));
+        compact_block_item::list txs;
+        txs.reserve(source.read_size(chain::max_block_size));
 
-        for (size_t id = 0; id < transactions.capacity(); ++id)
-            transactions.push_back(
-                compact_transaction::deserialize(version, source, witness));
+        for (size_t id = 0; id < txs.capacity(); ++id)
+            txs.push_back(compact_block_item::deserialize(
+                version, source, witness));
 
-        return transactions;
+        return txs;
     };
 
     return 
@@ -101,7 +101,7 @@ void compact_block::serialize(uint32_t version, writer& sink,
 
 size_t compact_block::size(uint32_t version, bool witness) const
 {
-    const auto txs_sizes = [=](size_t total, const compact_transaction& tx)
+    const auto txs_sizes = [=](size_t total, const compact_block_item& tx)
     {
         return total + tx.size(version, witness);
     };

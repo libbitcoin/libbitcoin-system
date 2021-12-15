@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MESSAGES_ALERT_PAYLOAD_HPP
-#define LIBBITCOIN_SYSTEM_MESSAGES_ALERT_PAYLOAD_HPP
+#ifndef LIBBITCOIN_SYSTEM_MESSAGES_ALERT_ITEM_HPP
+#define LIBBITCOIN_SYSTEM_MESSAGES_ALERT_ITEM_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -32,13 +32,13 @@ namespace libbitcoin {
 namespace system {
 namespace messages {
 
-struct BC_API alert_payload
+struct BC_API alert_item
 {
     typedef std::vector<uint32_t> cancels;
     typedef std::vector<std::string> sub_versions;
     static const ec_uncompressed satoshi_public_key;
 
-    static alert_payload deserialize(uint32_t version, reader& source);
+    static alert_item deserialize(uint32_t version, reader& source);
     void serialize(uint32_t version, writer& sink) const;
     size_t size(uint32_t version) const;
 

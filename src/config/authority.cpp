@@ -28,7 +28,7 @@
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -120,7 +120,7 @@ authority::authority(const std::string& authority)
 }
 
 // This is the format returned from peers on the bitcoin network.
-authority::authority(const messages::network_address& address)
+authority::authority(const messages::address_item& address)
   : authority(address.ip, address.port)
 {
 }
@@ -190,16 +190,16 @@ std::string authority::to_hostname() const
     return ipv4_hostname.empty() ? to_ipv6_hostname(ip_) : ipv4_hostname;
 }
 
-messages::network_address authority::to_network_address() const
+messages::address_item authority::to_address_item() const
 {
     static constexpr uint32_t services = 0;
     static constexpr uint32_t timestamp = 0;
-    const messages::network_address network_address
+    const messages::address_item address_item
     {
         timestamp, services, ip(), port(),
     };
 
-    return network_address;
+    return address_item;
 }
 
 std::string authority::to_string() const

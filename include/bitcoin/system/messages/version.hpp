@@ -25,7 +25,7 @@
 #include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/messages/identifier.hpp>
-#include <bitcoin/system/messages/network_address.hpp>
+#include <bitcoin/system/messages/address_item.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -178,8 +178,8 @@ struct BC_API version
     uint32_t value;
     uint64_t services;
     uint64_t timestamp;
-    network_address address_receiver;
-    network_address address_sender;
+    address_item address_receiver;
+    address_item address_sender;
     uint64_t nonce;
     std::string user_agent;
     uint32_t start_height;

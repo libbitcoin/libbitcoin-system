@@ -18,64 +18,64 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(compact_transaction_tests)
+BOOST_AUTO_TEST_SUITE(compact_block_item_tests)
 
-BOOST_AUTO_TEST_CASE(compact_transaction__constructor_1__always__invalid)
+BOOST_AUTO_TEST_CASE(compact_block_item__constructor_1__always__invalid)
 {
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__constructor_2__always__equals_params)
+BOOST_AUTO_TEST_CASE(compact_block_item__constructor_2__always__equals_params)
 {
     uint64_t index = 125u;
     chain::transaction tx(1, 0, chain::inputs{}, {});
-    messages::compact_transaction instance(index, tx);
+    messages::compact_block_item instance(index, tx);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(index == instance.index());
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__constructor_3__always__equals_params)
+BOOST_AUTO_TEST_CASE(compact_block_item__constructor_3__always__equals_params)
 {
     uint64_t index = 125u;
     chain::transaction tx(1, 0, chain::inputs{}, {});
     BOOST_REQUIRE(tx.is_valid());
-    messages::compact_transaction instance(index, std::move(tx));
+    messages::compact_block_item instance(index, std::move(tx));
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(index == instance.index());
     BOOST_REQUIRE(instance.transaction().is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__constructor_4__always__equals_params)
+BOOST_AUTO_TEST_CASE(compact_block_item__constructor_4__always__equals_params)
 {
-    const messages::compact_transaction expected(125u,
+    const messages::compact_block_item expected(125u,
         chain::transaction{1, 0, chain::inputs{}, {} });
 
-    messages::compact_transaction instance(expected);
+    messages::compact_block_item instance(expected);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(expected == instance);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__constructor_5__always__equals_params)
+BOOST_AUTO_TEST_CASE(compact_block_item__constructor_5__always__equals_params)
 {
-    messages::compact_transaction expected(125u,
+    messages::compact_block_item expected(125u,
         chain::transaction{1, 0, chain::inputs{}, {} });
 
-    messages::compact_transaction instance(std::move(expected));
+    messages::compact_block_item instance(std::move(expected));
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__from_data__insufficient_bytes__failure)
+BOOST_AUTO_TEST_CASE(compact_block_item__from_data__insufficient_bytes__failure)
 {
     const data_chunk raw{ 1 };
-    messages::compact_transaction instance{};
+    messages::compact_block_item instance{};
     BOOST_REQUIRE_EQUAL(false, instance.from_data(messages::version::level::minimum, raw));
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__factory_1__valid_input__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__factory_1__valid_input__success)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         16,
         chain::transaction
@@ -88,16 +88,16 @@ BOOST_AUTO_TEST_CASE(compact_transaction__factory_1__valid_input__success)
     };
 
     const auto data = expected.to_data(messages::version::level::minimum);
-    const auto result = messages::compact_transaction::factory(
+    const auto result = messages::compact_block_item::factory(
         messages::version::level::minimum, data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__factory_2__valid_input__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__factory_2__valid_input__success)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         16,
         chain::transaction
@@ -111,16 +111,16 @@ BOOST_AUTO_TEST_CASE(compact_transaction__factory_2__valid_input__success)
 
     const auto data = expected.to_data(messages::version::level::minimum);
     stream::in::copy istream(data);
-    const auto result = messages::compact_transaction::factory(
+    const auto result = messages::compact_block_item::factory(
         messages::version::level::minimum, istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__factory_3__valid_input__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__factory_3__valid_input__success)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         16,
         chain::transaction
@@ -134,68 +134,68 @@ BOOST_AUTO_TEST_CASE(compact_transaction__factory_3__valid_input__success)
 
     const auto data = expected.to_data(messages::version::level::minimum);
     read::bytes::copy source(data);
-    const auto result = messages::compact_transaction::factory(
+    const auto result = messages::compact_block_item::factory(
         messages::version::level::minimum, source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__index_accessor__always__initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block_item__index_accessor__always__initialized_value)
 {
     uint64_t index = 634u;
     chain::transaction tx(5, 23, chain::inputs{}, {});
-    messages::compact_transaction instance(index, tx);
+    messages::compact_block_item instance(index, tx);
     BOOST_REQUIRE(index == instance.index());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__index_setter__roundtrip__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__index_setter__roundtrip__success)
 {
     uint64_t index = 634u;
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE(index != instance.index());
     instance.set_index(index);
     BOOST_REQUIRE(index == instance.index());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__message_accessor_1__always__initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block_item__message_accessor_1__always__initialized_value)
 {
     uint64_t index = 634u;
     const chain::transaction tx(5, 23, chain::inputs{}, {});
-    messages::compact_transaction instance(index, tx);
+    messages::compact_block_item instance(index, tx);
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__message_accessor_2__always__initialized_value)
+BOOST_AUTO_TEST_CASE(compact_block_item__message_accessor_2__always__initialized_value)
 {
     uint64_t index = 634u;
     const chain::transaction tx(5, 23, chain::inputs{}, {});
-    const messages::compact_transaction instance(index, tx);
+    const messages::compact_block_item instance(index, tx);
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__message_setter_1__roundtrip__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__message_setter_1__roundtrip__success)
 {
     const chain::transaction tx(5, 23, chain::inputs{}, {});
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE(tx != instance.transaction());
     instance.set_transaction(tx);
     BOOST_REQUIRE(tx == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__message_setter_2__roundtrip__success)
+BOOST_AUTO_TEST_CASE(compact_block_item__message_setter_2__roundtrip__success)
 {
     const chain::transaction duplicate(16, 57, chain::inputs{}, {});
     chain::transaction tx(16, 57, chain::inputs{}, {});
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE(duplicate != instance.transaction());
     instance.set_transaction(std::move(tx));
     BOOST_REQUIRE(duplicate == instance.transaction());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_assign_equals_1__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_assign_equals_1__always__matches_equivalent)
 {
-    const messages::compact_transaction value
+    const messages::compact_block_item value
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
@@ -203,16 +203,16 @@ BOOST_AUTO_TEST_CASE(compact_transaction__operator_assign_equals_1__always__matc
 
     BOOST_REQUIRE(value.is_valid());
 
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 
     instance = std::move(value);
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_assign_equals_2__always__matches_equivalent)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_assign_equals_2__always__matches_equivalent)
 {
-    const messages::compact_transaction value
+    const messages::compact_block_item value
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(compact_transaction__operator_assign_equals_2__always__matc
 
     BOOST_REQUIRE(value.is_valid());
 
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 
     instance = value;
@@ -228,51 +228,51 @@ BOOST_AUTO_TEST_CASE(compact_transaction__operator_assign_equals_2__always__matc
     BOOST_REQUIRE(value == instance);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_boolean_equals__duplicates__true)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_boolean_equals__duplicates__true)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
     };
 
-    messages::compact_transaction instance(expected);
+    messages::compact_block_item instance(expected);
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_boolean_equals__differs__false)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_boolean_equals__differs__false)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
     };
 
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE_EQUAL(false, instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_boolean_not_equals__duplicates__false)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_boolean_not_equals__duplicates__false)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
     };
 
-    messages::compact_transaction instance(expected);
+    messages::compact_block_item instance(expected);
     BOOST_REQUIRE_EQUAL(false, instance != expected);
 }
 
-BOOST_AUTO_TEST_CASE(compact_transaction__operator_boolean_not_equals__differs__true)
+BOOST_AUTO_TEST_CASE(compact_block_item__operator_boolean_not_equals__differs__true)
 {
-    const messages::compact_transaction expected
+    const messages::compact_block_item expected
     {
         1234u,
         chain::transaction{ 6u, 10u, chain::inputs{}, {} }
     };
 
-    messages::compact_transaction instance;
+    messages::compact_block_item instance;
     BOOST_REQUIRE(instance != expected);
 }
 

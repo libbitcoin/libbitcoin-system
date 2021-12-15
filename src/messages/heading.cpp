@@ -25,21 +25,21 @@
 #include <bitcoin/system/messages/address.hpp>
 #include <bitcoin/system/messages/alert.hpp>
 #include <bitcoin/system/messages/block.hpp>
-#include <bitcoin/system/messages/compact_transactions.hpp>
-#include <bitcoin/system/messages/compact_block.hpp>
-#include <bitcoin/system/messages/client_filter.hpp>
-#include <bitcoin/system/messages/client_filter_checkpoint.hpp>
-#include <bitcoin/system/messages/client_filter_headers.hpp>
-#include <bitcoin/system/messages/fee_filter.hpp>
 #include <bitcoin/system/messages/bloom_filter_add.hpp>
 #include <bitcoin/system/messages/bloom_filter_clear.hpp>
 #include <bitcoin/system/messages/bloom_filter_load.hpp>
+#include <bitcoin/system/messages/client_filter.hpp>
+#include <bitcoin/system/messages/client_filter_checkpoint.hpp>
+#include <bitcoin/system/messages/client_filter_headers.hpp>
+#include <bitcoin/system/messages/compact_block.hpp>
+#include <bitcoin/system/messages/compact_transactions.hpp>
+#include <bitcoin/system/messages/fee_filter.hpp>
 #include <bitcoin/system/messages/get_address.hpp>
-#include <bitcoin/system/messages/get_compact_transactions.hpp>
 #include <bitcoin/system/messages/get_blocks.hpp>
 #include <bitcoin/system/messages/get_client_filter_checkpoint.hpp>
 #include <bitcoin/system/messages/get_client_filter_headers.hpp>
 #include <bitcoin/system/messages/get_client_filters.hpp>
+#include <bitcoin/system/messages/get_compact_transactions.hpp>
 #include <bitcoin/system/messages/get_data.hpp>
 #include <bitcoin/system/messages/get_headers.hpp>
 #include <bitcoin/system/messages/headers.hpp>
@@ -140,21 +140,21 @@ identifier heading::id() const
         COMMAND_ID(address),
         COMMAND_ID(alert),
         COMMAND_ID(block),
-        COMMAND_ID(compact_transactions),
-        COMMAND_ID(compact_block),
-        COMMAND_ID(client_filter),
-        COMMAND_ID(client_filter_checkpoint),
-        COMMAND_ID(client_filter_headers),
-        COMMAND_ID(fee_filter),
         COMMAND_ID(bloom_filter_add),
         COMMAND_ID(bloom_filter_clear),
         COMMAND_ID(bloom_filter_load),
+        COMMAND_ID(client_filter),
+        COMMAND_ID(client_filter_checkpoint),
+        COMMAND_ID(client_filter_headers),
+        COMMAND_ID(compact_block),
+        COMMAND_ID(compact_transactions),
+        COMMAND_ID(fee_filter),
         COMMAND_ID(get_address),
-        COMMAND_ID(get_compact_transactions),
         COMMAND_ID(get_blocks),
         COMMAND_ID(get_client_filter_checkpoint),
         COMMAND_ID(get_client_filter_headers),
         COMMAND_ID(get_client_filters),
+        COMMAND_ID(get_compact_transactions),
         COMMAND_ID(get_data),
         COMMAND_ID(get_headers),
         COMMAND_ID(headers),
