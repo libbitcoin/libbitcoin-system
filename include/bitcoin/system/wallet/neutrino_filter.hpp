@@ -27,30 +27,33 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/messages/messages.hpp>
-#include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
-bool compute_filter(const chain::block& validated_block,
-    data_chunk& out_filter);
+struct BC_API block_filter
+{
+    hash_digest hash;
+    data_chunk filter;
+};
 
-hash_digest compute_filter_header(const hash_digest& previous_block_hash,
+bool BC_API compute_filter(const chain::block& block, data_chunk& out_filter);
+
+hash_digest BC_API compute_filter_header(const hash_digest& previous_block,
     const data_chunk& filter);
 
-bool match_filter(const messages::client_filter& filter,
+bool BC_API match_filter(const block_filter& filter,
     const chain::script& script);
 
-bool match_filter(const messages::client_filter& filter,
+bool BC_API match_filter(const block_filter& filter,
     const chain::scripts& scripts);
 
-bool match_filter(const messages::client_filter& filter,
+bool BC_API match_filter(const block_filter& filter,
     const wallet::payment_address& address);
 
-bool match_filter(const messages::client_filter& filter,
+bool BC_API match_filter(const block_filter& filter,
     const wallet::payment_address::list& addresses);
 
 } // namespace neutrino

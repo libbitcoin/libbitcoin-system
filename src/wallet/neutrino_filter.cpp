@@ -42,29 +42,25 @@ constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
 constexpr auto rate = golomb_target_false_positive_rate;
 
-bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
+bool compute_filter(const chain::block& block, data_chunk& out_filter)
 {
-    const auto hash = validated_block.hash();
+    const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
     data_stack scripts;
 
-    for (const auto& tx: *validated_block.transactions())
+    for (const auto& tx: *block.transactions())
     {
         if (!tx->is_coinbase())
         {
             for (const auto& input: *(tx->inputs()))
             {
-                return false;
+                if (!input->prevout->is_valid())
+                    return false;
 
-                // TODO:
+                const auto& script = input->prevout->script();
 
-                ////const auto prevout = input->point();
-                ////if (!prevout->metadata.cache.is_valid())
-                ////    return false;
-
-                ////const auto& script = prevout->metadata.cache.script();
-                ////if (!script.empty())
-                ////    scripts.push_back(script.to_data(false));
+                if (!script.ops().empty())
+                    scripts.push_back(script.to_data(false));
             }
         }
 
@@ -72,10 +68,11 @@ bool compute_filter(const chain::block& validated_block, data_chunk& out_filter)
         {
             const auto& script = output->script();
 
-            // TODO: should this be output_pattern() == 
-            // script_pattern::pay_null_data?
-            if (!script.ops().empty() &&
-                (script.ops().front().code() != chain::opcode::op_return))
+            // ----------------------------------------------------------------
+            // TODO: should be script::is_pay_null_data_pattern(script.ops())?
+            // ----------------------------------------------------------------
+            if (!script.ops().empty() && (script.ops().front().code() !=
+                chain::opcode::op_return))
                 scripts.push_back(script.to_data(false));
         }
     }
@@ -98,10 +95,9 @@ hash_digest compute_filter_header(const hash_digest& previous_block_hash,
     return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
 }
 
-bool match_filter(const messages::client_filter& filter,
-    const chain::script& script)
+bool match_filter(const block_filter& filter, const chain::script& script)
 {
-    if (script.ops().empty() || filter.filter_type != neutrino_filter_type)
+    if (script.ops().empty())
         return false;
 
     stream::in::copy stream(filter.filter);
@@ -112,16 +108,15 @@ bool match_filter(const messages::client_filter& filter,
         return false;
 
     const auto target = script.to_data(false);
-    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash);
+    const auto hash = slice<zero, to_half(hash_size)>(filter.hash);
     const auto key = to_siphash_key(hash);
 
     return golomb::match(target, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const messages::client_filter& filter,
-    const chain::scripts& scripts)
+bool match_filter(const block_filter& filter, const chain::scripts& scripts)
 {
-    if (scripts.empty() || filter.filter_type != neutrino_filter_type)
+    if (scripts.empty())
         return false;
 
     data_stack stack;
@@ -144,23 +139,23 @@ bool match_filter(const messages::client_filter& filter,
     if (!reader)
         return false;
 
-    const auto hash = slice<zero, to_half(hash_size)>(filter.block_hash);
+    const auto hash = slice<zero, to_half(hash_size)>(filter.hash);
     const auto key = to_siphash_key(hash);
 
     stack.shrink_to_fit();
     return golomb::match(stack, stream, set_size, key, golomb_bits, rate);
 }
 
-bool match_filter(const messages::client_filter& filter,
+bool match_filter(const block_filter& filter,
     const wallet::payment_address& address)
 {
     return match_filter(filter, address.output_script());
 }
 
-bool match_filter(const messages::client_filter& filter,
+bool match_filter(const block_filter& filter,
     const wallet::payment_address::list& addresses)
 {
-    if (addresses.empty() || filter.filter_type != neutrino_filter_type)
+    if (addresses.empty())
         return false;
 
     static default_allocator<chain::script> no_fill_allocator{};

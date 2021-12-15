@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef MOVE_TO_BX
+
 // Sponsored in part by Digital Contract Design, LLC
 
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_CLIENT_FILTER_HPP
@@ -63,3 +65,5 @@ private:
 } // namespace libbitcoin
 
 #endif
+
+#endif //MOVE_TO_BX

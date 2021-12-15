@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef MOVE_TO_BX
+
 // Sponsored in part by Digital Contract Design, LLC
 
 #include <bitcoin/system/config/client_filter.hpp>
@@ -127,3 +129,5 @@ std::ostream& operator<<(std::ostream& output, const client_filter& argument)
 } // namespace config
 } // namespace system
 } // namespace libbitcoin
+
+#endif // MOVE_TO_BX
