@@ -701,7 +701,7 @@ BOOST_AUTO_TEST_CASE(script__generate_signature_hash__all__expected)
     const auto value = 0u;
     const auto bip143 = false;
     const auto sighash = script::generate_signature_hash(test_tx, index, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
-    const auto expected = base16_hash("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+    const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
 }
 
