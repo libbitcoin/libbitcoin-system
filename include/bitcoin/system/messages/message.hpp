@@ -69,19 +69,20 @@ namespace system {
 ////// HACK: declare these in bc namespace to reduce length.
 ////DECLARE_MESSAGE_POINTER_TYPES(address);
 ////DECLARE_MESSAGE_POINTER_TYPES(block);
-////DECLARE_MESSAGE_POINTER_TYPES(compact_block);
 ////DECLARE_MESSAGE_POINTER_TYPES(client_filter);
 ////DECLARE_MESSAGE_POINTER_TYPES(client_filter_checkpoint);
 ////DECLARE_MESSAGE_POINTER_TYPES(client_filter_headers);
+////DECLARE_MESSAGE_POINTER_TYPES(compact_block);
+////DECLARE_MESSAGE_POINTER_TYPES(compact_transactions);
 ////DECLARE_MESSAGE_POINTER_TYPES(fee_filter);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_address);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_blocks);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_client_filter_checkpoint);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_client_filter_headers);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_client_filters);
+////DECLARE_MESSAGE_POINTER_TYPES(get_compact_transactions);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_data);
 ////DECLARE_MESSAGE_POINTER_TYPES(get_headers);
-////DECLARE_MESSAGE_POINTER_TYPES(header);
 ////DECLARE_MESSAGE_POINTER_TYPES(headers);
 ////DECLARE_MESSAGE_POINTER_TYPES(inventory);
 ////DECLARE_MESSAGE_POINTER_TYPES(memory_pool);
