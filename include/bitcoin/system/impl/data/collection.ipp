@@ -23,6 +23,7 @@
 #include <array>
 #include <cstddef>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
@@ -77,14 +78,6 @@ binary_search(const Collection& list, const Element& element) noexcept
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept
 {
-    ////std::vector<To> out(source.size());
-    ////std::transform(std::begin(source), std::end(source), std::begin(out),
-    ////    [](const From& element)
-    ////    {
-    ////        return static_cast<To>(element);
-    ////    });
-
-    // More efficient than array here because can be value-initialized.
     return { std::begin(source), std::end(source) };
 }
 
@@ -113,6 +106,20 @@ bool contains(const Collection& list,
             return value == element;
         });
 }
+
+// TODO: test.
+template <typename Element>
+bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
+    std::vector<std::shared_ptr<const Element>>& right)
+{
+    return std::equal(left.begin(), left.end(), right.begin(), right.end(),
+        [](const std::shared_ptr<const Element>& first,
+           const std::shared_ptr<const Element>& second)
+        {
+            return (first && second && (*first == *second)) ||
+                (!first && !second);
+        });
+};
 
 template <typename Collection>
 bool starts_with(const typename Collection::const_iterator& begin,

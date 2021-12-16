@@ -53,6 +53,11 @@ template <typename Collection>
 bool contains(const Collection& list,
     const typename Collection::value_type& element) noexcept;
 
+/// Determine if a vector of shared pointers to elements have equal elements.
+template <typename Element>
+bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
+    std::vector<std::shared_ptr<const Element>>& right);
+
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
 typename Collection::difference_type

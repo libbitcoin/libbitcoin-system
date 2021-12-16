@@ -126,9 +126,9 @@ block& block::operator=(const block& other)
 
 bool block::operator==(const block& other) const
 {
-    // TODO: compare transactions, not pointers.
+    // Compares transaction elements, not pointers.
     return (*header_ == *other.header_)
-        && (*txs_ == *other.txs_);
+        && equal_points(*txs_, *other.txs_);
 }
 
 bool block::operator!=(const block& other) const

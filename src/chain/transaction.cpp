@@ -144,11 +144,11 @@ transaction& transaction::operator=(const transaction& other)
 
 bool transaction::operator==(const transaction& other) const
 {
-    // TODO: compare input/output membership, not ptrs.
+    // Compares input/output elements, not pointers.
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
-        && (*inputs_ == *other.inputs_)
-        && (*outputs_ == *other.outputs_);
+        && equal_points(*inputs_, *other.inputs_)
+        && equal_points(*outputs_, *other.outputs_);
 }
 
 bool transaction::operator!=(const transaction& other) const
