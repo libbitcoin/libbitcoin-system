@@ -34,10 +34,10 @@ static const point expected_point(point_data);
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(output__constructor__default__valid)
+BOOST_AUTO_TEST_CASE(output__constructor__default__invalid)
 {
     const point instance;
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(output__constructor__move__valid)

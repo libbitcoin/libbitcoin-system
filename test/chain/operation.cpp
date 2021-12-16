@@ -31,10 +31,10 @@ static const auto push_data_32 = base16_chunk(
 // constructors
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(operation__constructor__default__empty_invalid)
+BOOST_AUTO_TEST_CASE(operation__constructor__default__one_invalid)
 {
     const operation instance;
-    BOOST_REQUIRE(instance.data().empty());
+    BOOST_REQUIRE_EQUAL(instance.data().size(), one);
     BOOST_REQUIRE(instance.is_invalid());
 }
 
@@ -153,10 +153,11 @@ BOOST_AUTO_TEST_CASE(operation__constructor__reader__expected)
 
 // more constructor
 
-BOOST_AUTO_TEST_CASE(operation__constructor__empty__underflow)
+BOOST_AUTO_TEST_CASE(operation__constructor__empty__invalid_not_underflow)
 {
     operation instance;
-    BOOST_REQUIRE(instance.is_underflow());
+    BOOST_REQUIRE(instance.is_invalid());
+    BOOST_REQUIRE(!instance.is_underflow());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor__push_size_0__expected)
@@ -348,7 +349,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__1__push_positive_1_empty)
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__16__push_positive_16_empty)
 {
-    operation value(std::string("6"));
+    operation value(std::string("16"));
     BOOST_REQUIRE(value.code() == opcode::push_positive_16);
     BOOST_REQUIRE(value.data().empty());
 }
