@@ -163,8 +163,6 @@ size_t script::op_count(reader& source)
 // static/private
 script script::from_data(reader& source, bool prefix)
 {
-    operation foo(std::string(""));
-
     auto size = zero;
     auto start = zero;
 
