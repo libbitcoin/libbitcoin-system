@@ -191,7 +191,7 @@ transaction transaction::from_data(reader& source, bool witness)
         // Skip over the peeked witness flag.
         source.skip_byte();
 
-        // Inputs must be non-const so that they may assign the witness.
+        // Inputs and outputs are constructed on a vector of const pointers.
         inputs = read_puts<input>(source);
         outputs = read_puts<output>(source);
 
@@ -200,8 +200,9 @@ transaction transaction::from_data(reader& source, bool witness)
         {
             if (witness)
             {
-                // This wastes a shared pointer per input to bypass const.
-                auto setter = std::const_pointer_cast<chain::input>(input);
+                // Safe to cast as this method exclusively owns the input and
+                // input::witness_ a mutable public property of the instance.
+                const auto setter = const_cast<chain::input*>(input.get());
                 setter->witness_ = to_shared(chain::witness{ source, true });
             }
             else
