@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef MOVE_TO_BX
+
 // Sponsored in part by Digital Contract Design, LLC
 
 #include "../test.hpp"
@@ -108,3 +110,5 @@ BOOST_AUTO_TEST_CASE(client_filter__ostream__boost_lexical_cast__expected)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // MOVE_TO_BX
