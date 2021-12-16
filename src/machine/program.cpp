@@ -665,11 +665,13 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 // ****************************************************************************
 chain::operations program::create_delete_ops(const endorsements& data)
 {
+    constexpr auto non_mininal = false;
+
     operations strip;
     strip.reserve(add1(data.size()));
 
     for (const auto& push: data)
-        strip.emplace_back(push, false);
+        strip.emplace_back(push, non_mininal);
 
     strip.emplace_back(opcode::codeseparator);
     return strip;
