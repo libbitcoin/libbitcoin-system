@@ -22,7 +22,6 @@
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
@@ -128,7 +127,7 @@ bool recover_public(const secp256k1_context* context, data_array<Size>& out,
             ec_success && serialize(context, out, pubkey);
 }
 
-// normalize, verify (parse???) 
+// parsed - normalize, verify
 bool verify_signature(const secp256k1_context* context,
     const secp256k1_pubkey& point, const hash_digest& hash,
     const ec_signature& signature)
@@ -180,24 +179,26 @@ bool ec_add(ec_compressed& left, const ec_uncompressed& right)
     return compress(out, right) && ec_add(left, out);
 }
 
-// combine, serialize (parse???)
+// parse, combine, serialize
 bool ec_sum(ec_compressed& out, const compressed_list& points)
 {
     if (points.empty())
         return false;
 
-    secp256k1_pubkey pubkey;
-    ptr_vector<secp256k1_pubkey> keys(points.size());
     const auto context = verification.context();
+
+    secp256k1_pubkey pubkey;
+    std::vector<secp256k1_pubkey*> keys;
+    keys.reserve(points.size());
 
     for (const auto& point: points)
     {
         keys.push_back(new secp256k1_pubkey);
-        if (!parse(context, keys.back(), point))
+        if (!parse(context, *keys.back(), point))
             return false;
     }
 
-    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.c_array(),
+    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.data(),
         points.size()) == ec_success && serialize(context, out, pubkey);
 }
 
