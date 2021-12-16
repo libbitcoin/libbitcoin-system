@@ -572,8 +572,8 @@ chain::script program::subscript() const
     // TODO: Retain the script as a shared object. Currently both subscript
     // TODO: methods return either a reference or a constructed copy. This
     // TODO: necessitates returning a copy in either case. This copy can be
-    // TODO: eliminated by passing a shared_from_this() generated pointer in
-    // TODO: one case and a constructed shared pointer instance in the other.
+    // TODO: eliminated by passing shared pointer copy in one case and a new
+    // TODO: shared pointer instance in the other.
     if (jump() == begin())
         return script_;
 
@@ -610,7 +610,7 @@ chain::script program::subscript(const endorsements& endorsements) const
 
     // If no intersection, nothing to strip.
     if (!intersecting(sub.ops(), strip))
-        return script_;
+        return sub;
 
     // Copy script operations for mutation.
     return { difference(sub.ops(), strip) };
@@ -658,20 +658,18 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 // Private.
 // ----------------------------------------------------------------------------
 
+// TODO: no_fill_op_allocator was not working, review all.
+
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
 chain::operations program::create_delete_ops(const endorsements& data)
 {
-    // Create set of endorsement push data ops and a codeseparator op.
-    operations strip(add1(data.size()), no_fill_op_allocator);
+    operations strip;
+    strip.reserve(add1(data.size()));
 
-    // C++17: Parallel policy.
-    std::transform(data.begin(), data.end(), strip.begin(),
-        [](const endorsement& data)
-        {
-            return operation{ data, false };
-        });
+    for (const auto& push: data)
+        strip.emplace_back(push);
 
     strip.emplace_back(opcode::codeseparator);
     return strip;
