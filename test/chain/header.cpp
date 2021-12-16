@@ -187,43 +187,6 @@ BOOST_AUTO_TEST_CASE(header__inequality__different__false)
     BOOST_REQUIRE(instance != expected_header);
 }
 
-// from_data
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(header__from_data__insufficient_bytes__invalid)
-{
-    data_chunk data(10);
-    header instance;
-    BOOST_REQUIRE(!instance.from_data(data));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(header__from_data__data__valid)
-{
-    const auto data = expected_header.to_data();
-    const header instance(data);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
-}
-
-BOOST_AUTO_TEST_CASE(header__from_data__stream__valid)
-{
-    const auto data = expected_header.to_data();
-    stream::in::copy stream(data);
-    const header instance(stream);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
-}
-
-BOOST_AUTO_TEST_CASE(header__from_data__reader__valid)
-{
-    const auto data = expected_header.to_data();
-    read::bytes::copy source(data);
-    const header instance(source);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
-}
-
 // to_data
 // ----------------------------------------------------------------------------
 

@@ -117,40 +117,6 @@ BOOST_AUTO_TEST_CASE(output__inequality__different__true)
     BOOST_REQUIRE(alpha != beta);
 }
 
-// from_data
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(output__from_data__insufficient_data__invalid)
-{
-    data_chunk insufficient_data(2);
-    output instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(output__from_data__data__valid)
-{
-    output instance;
-    BOOST_REQUIRE(instance.from_data(output_data));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(output__from_data__stream__valid)
-{
-    output instance;
-    stream::in::copy stream(output_data);
-    BOOST_REQUIRE(instance.from_data(stream));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(output__from_data__reader__valid)
-{
-    output instance;
-    read::bytes::copy source(output_data);
-    BOOST_REQUIRE(instance.from_data(source));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
 // to_data
 // ----------------------------------------------------------------------------
 
@@ -201,10 +167,10 @@ BOOST_AUTO_TEST_CASE(output__to_data__writer__expected)
 
 BOOST_AUTO_TEST_CASE(output__signature_operations__bip141_inactive__script_sigops)
 {
-    script script;
-    BOOST_REQUIRE(script.from_data(base16_chunk("02acad"), true));
+    const script script(base16_chunk("02acad"), true);
+    BOOST_REQUIRE(script.is_valid());
 
-    output instance{ 42, script };
+    const output instance{ 42, script };
     BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations(false));
 }
 

@@ -120,40 +120,6 @@ BOOST_AUTO_TEST_CASE(point__inequality__different__true)
     BOOST_REQUIRE(alpha != beta);
 }
 
-// from_data
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(point__from_data__insufficient_data__invalid)
-{
-    data_chunk insufficient_data(2);
-    point instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(point__from_data__data__valid)
-{
-    point instance;
-    BOOST_REQUIRE(instance.from_data(point_data));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(point__from_data__stream__valid)
-{
-    point instance;
-    stream::in::copy stream(point_data);
-    BOOST_REQUIRE(instance.from_data(stream));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(point__from_data__reader__valid)
-{
-    point instance;
-    read::bytes::copy source(point_data);
-    BOOST_REQUIRE(instance.from_data(source));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
 // to_data
 // ----------------------------------------------------------------------------
 

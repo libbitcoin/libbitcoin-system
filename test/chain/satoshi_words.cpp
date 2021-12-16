@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(satoshi_words)
 BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 {
     const auto block = settings(chain::selection::mainnet).genesis_block;
-    const auto message = to_string(block.transactions()[0].inputs()[0].script().ops()[2].data());
+    const auto message = to_string((*(*block.transactions())[0]->inputs())[0]->script().ops()[2].data());
     BOOST_REQUIRE_EQUAL(message, "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks");
 }
 

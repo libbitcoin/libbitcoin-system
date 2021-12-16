@@ -250,54 +250,6 @@ BOOST_AUTO_TEST_CASE(block__inequality__different__true)
     BOOST_REQUIRE(alpha != beta);
 }
 
-// from_data
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(block__from_data__insufficient_header_bytes__invalid)
-{
-    const data_chunk data(10);
-    block instance;
-    BOOST_REQUIRE(!instance.from_data(data, true));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(block__from_data__insufficient_transaction_bytes__invalid)
-{
-    const auto insufficient_data = base16_chunk(
-        "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
-        "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
-        "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
-        "00000000000000000000000000000000000000000000ffffffff07049d8e2f1b"
-        "0114ffffffff0100f2052a0100000043410437b36a7221bc977dce712728a954");
-
-    block instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(block__from_data__data__valid)
-{
-    block instance;
-    BOOST_REQUIRE(instance.from_data(block_data, true));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(block__from_data__stream__valid)
-{
-    block instance;
-    stream::in::copy stream(block_data);
-    BOOST_REQUIRE(instance.from_data(stream, true));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(block__from_data__reader__valid)
-{
-    block instance;
-    read::bytes::copy source(block_data);
-    BOOST_REQUIRE(instance.from_data(source, true));
-    BOOST_REQUIRE(instance.is_valid());
-}
-
 // to_data
 // ----------------------------------------------------------------------------
 

@@ -210,10 +210,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE_EQUAL(instance.inputs().size(), 1u);
-    BOOST_REQUIRE_EQUAL(instance.outputs().size(), 1u);
-    BOOST_REQUIRE(instance.inputs().front() == input);
-    BOOST_REQUIRE(instance.outputs().front() == output);
+    BOOST_REQUIRE_EQUAL(instance.inputs()->size(), 1u);
+    BOOST_REQUIRE_EQUAL(instance.outputs()->size(), 1u);
+    BOOST_REQUIRE(*instance.inputs()->front() == input);
+    BOOST_REQUIRE(*instance.outputs()->front() == output);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
@@ -233,8 +233,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE(inputs == instance.inputs());
-    BOOST_REQUIRE(outputs == instance.outputs());
+    BOOST_REQUIRE(inputs[0] == *(*instance.inputs())[0]);
+    BOOST_REQUIRE(outputs[0] == *(*instance.outputs())[0]);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
@@ -340,96 +340,6 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
     const transaction alpha;
     const transaction beta(tx2_data, true);
     BOOST_REQUIRE(alpha != beta);
-}
-
-// from_data
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_version_bytes__invalid)
-{
-    const data_chunk insufficient_data(2);
-    transaction instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_input_bytes__invalid)
-{
-    const auto insufficient_data = base16_chunk("0000000103");
-    transaction instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__insufficient_output_bytes__invalid)
-{
-    const auto insufficient_data = base16_chunk("000000010003");
-    transaction instance;
-    BOOST_REQUIRE(!instance.from_data(insufficient_data, true));
-    BOOST_REQUIRE(!instance.is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__data_1__success)
-{
-    const transaction tx(tx1_data, true);
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__data_2__success)
-{
-    transaction tx;
-    BOOST_REQUIRE(tx.from_data(tx2_data, true));
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__stream_1__success)
-{
-    transaction tx;
-    stream::in::copy stream(tx1_data);
-    BOOST_REQUIRE(tx.from_data(stream, true));
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__stream_2__success)
-{
-    transaction tx;
-    stream::in::copy stream(tx2_data);
-    BOOST_REQUIRE(tx.from_data(stream, true));
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__reader_1__success)
-{
-    transaction tx;
-    read::bytes::copy source(tx1_data);
-    BOOST_REQUIRE(tx.from_data(source, true));
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
-}
-
-BOOST_AUTO_TEST_CASE(transaction__from_data__reader_2__success)
-{
-    transaction tx;
-    read::bytes::copy source(tx2_data);
-    BOOST_REQUIRE(tx.from_data(source, true));
-    BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
-    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
-    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
 // to_data
@@ -732,42 +642,43 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_inputs__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__no_outputs_zero__false)
 {
-    transaction instance;
+    const transaction instance;
+    BOOST_REQUIRE(!instance.is_valid());
     BOOST_REQUIRE(!instance.is_dusty(0));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_above_both__true)
 {
-    transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1_data, true));
+    const transaction instance(tx1_data, true);
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.is_dusty(1740950001));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_below_both__false)
 {
-    transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1_data, true));
+    const transaction instance(tx1_data, true);
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(!instance.is_dusty(257999999));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_upper__true)
 {
-    transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1_data, true));
+    const transaction instance(tx1_data, true);
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.is_dusty(1740950000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__false)
 {
-    transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1_data, true));
+    const transaction instance(tx1_data, true);
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(!instance.is_dusty(258000000));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true)
 {
-    transaction instance;
-    BOOST_REQUIRE(instance.from_data(tx1_data, true));
+    const transaction instance(tx1_data, true);
+    BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
 
@@ -994,7 +905,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_mi
         {}
     };
 
-    BOOST_REQUIRE_LT(instance.inputs().back().script().serialized_size(false), min_coinbase_size);
+    BOOST_REQUIRE_LT(instance.inputs()->back()->script().serialized_size(false), min_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 
@@ -1010,7 +921,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_ma
         {}
     };
 
-    BOOST_REQUIRE_GT(instance.inputs().back().script().serialized_size(false), max_coinbase_size);
+    BOOST_REQUIRE_GT(instance.inputs()->back()->script().serialized_size(false), max_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 
