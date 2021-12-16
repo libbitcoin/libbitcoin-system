@@ -266,7 +266,7 @@ void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
 template <typename IStream>
 std::string byte_reader<IStream>::read_string(size_t limit) noexcept
 {
-    return read_string(read_size(limit));
+    return read_string_buffer(read_size(limit));
 }
 
 template <typename IStream>
