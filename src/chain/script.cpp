@@ -367,24 +367,34 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     }
     else
     {
-        ////auto it = inputs.begin();
+        auto it = inputs.begin();
 
-        ////for (; *it != self; ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+        for (; *it != self; ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    zero_sequence 
+                });
 
-        ////// Erase all input scripts and sequences except self.
-        ////++it;
+        // Erase all input scripts and sequences except self.
+        ++it;
 
-        ////for (; it != inputs.end(); ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+        for (; it != inputs.end(); ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    zero_sequence
+                });
     }
 
     // Trim and clear outputs except that of the input index (guarded above).
     auto outs = std::make_shared<output_ptrs>();
     outs->reserve(add1(index));
 
-    ////for (size_t out = 0; out < index; ++index)
-    ////    outs->push_back(to_shared(output{ output::not_found, empty_script }));
+    for (size_t out = 0; out < index; ++index)
+        outs->emplace_back(new output{ output::not_found, empty_script });
 
     // Set the output of the input index (guarded above).
     outs->push_back((*tx.outputs())[index]);
@@ -410,16 +420,26 @@ static hash_digest sign_none(const transaction& tx, uint32_t index,
     }
     else
     {
-        ////auto it = inputs.begin();
+        auto it = inputs.begin();
 
-        ////for (; *it != self; ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+        for (; *it != self; ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    zero_sequence
+                });
 
-        ////// Erase all input scripts and sequences except self.
-        ////++it;
+        // Erase all input scripts and sequences except self.
+        ++it;
 
-        ////for (; it != inputs.end(); ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, zero_sequence }));
+        for (; it != inputs.end(); ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    zero_sequence
+                });
     }
 
     // Move new inputs to new transaction and drop outputs.
@@ -443,16 +463,26 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
     }
     else
     {
-        ////auto& it = inputs.begin();
+        auto& it = inputs.begin();
 
-        ////for (; *it != self; ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, self->sequence() }));
+        for (; *it != self; ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    self->sequence()
+                });
 
-        ////// Erase all input scripts except self.
-        ////++it;
+        // Erase all input scripts except self.
+        ++it;
 
-        ////for (; it != inputs.end(); ++it)
-        ////    ins->push_back(to_shared(input{ (*it)->point(), empty_script, self->sequence() }));
+        for (; it != inputs.end(); ++it)
+            ins->emplace_back(new input
+                {
+                    (*it)->point(),
+                    empty_script,
+                    self->sequence()
+                });
     }
 
     // Move new inputs and copy outputs to new transaction.

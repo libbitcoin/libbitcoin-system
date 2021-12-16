@@ -77,8 +77,8 @@ transaction::transaction(const transaction& other)
 // segregated_ is the first property because of this constructor.
 transaction::transaction(uint32_t version, uint32_t locktime,
     chain::inputs&& inputs, chain::outputs&& outputs)
-  ////: transaction(segregated(inputs), version, locktime,
-  ////    to_shareds(std::move(inputs)), to_shareds(std::move(outputs)), true)
+  : transaction(segregated(inputs), version, locktime,
+      to_shareds(std::move(inputs)), to_shareds(std::move(outputs)), true)
 {
 }
 
@@ -115,8 +115,8 @@ transaction::transaction(bool segregated, uint32_t version, uint32_t locktime,
     const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid)
   : version_(version),
     locktime_(locktime),
-    inputs_(inputs ? inputs : to_shared<std::vector<input::ptr>>()),
-    outputs_(outputs ? outputs : to_shared<std::vector<output::ptr>>()),
+    inputs_(inputs ? inputs : to_shared<input_ptrs>()),
+    outputs_(outputs ? outputs : to_shared<output_ptrs>()),
     segregated_(segregated),
     valid_(valid)
 {
@@ -160,13 +160,13 @@ bool transaction::operator!=(const transaction& other) const
 // ----------------------------------------------------------------------------
 
 template<class Put, class Source>
-std::shared_ptr<std::vector<std::shared_ptr<Put>>> read_puts(Source& source)
+std::shared_ptr<std::vector<std::shared_ptr<const Put>>> read_puts(Source& source)
 {
-    std::shared_ptr<std::vector<std::shared_ptr<Put>>> puts;
+    std::shared_ptr<std::vector<std::shared_ptr<const Put>>> puts;
     puts->reserve(source.read_size(max_block_size));
 
-    //////for (auto put = zero; put < puts->capacity(); ++put)
-    //////    puts->emplace_back(source);
+    for (auto put = zero; put < puts->capacity(); ++put)
+        puts->emplace_back(new Put{ source });
 
     return puts;
 }
@@ -192,16 +192,22 @@ transaction transaction::from_data(reader& source, bool witness)
         source.skip_byte();
 
         // Inputs must be non-const so that they may assign the witness.
-        inputs = read_puts<chain::input>(source);
-        outputs = read_puts<const chain::output>(source);
+        inputs = read_puts<input>(source);
+        outputs = read_puts<output>(source);
 
         // Read or skip witnesses as specified.
         for (auto& input: *inputs)
         {
             if (witness)
-                input->witness_ = to_shared(chain::witness{ source, true });
+            {
+                // This wastes a shared pointer per input to bypass const.
+                auto setter = std::const_pointer_cast<chain::input>(input);
+                setter->witness_ = to_shared(chain::witness{ source, true });
+            }
             else
+            {
                 source.skip_bytes(input->witness().serialized_size(true));
+            }
         }
     }
     else
@@ -213,7 +219,7 @@ transaction transaction::from_data(reader& source, bool witness)
     const auto locktime = source.read_4_bytes_little_endian();
 
     // to_const is overhead, creating an extra shared pointer per input.
-    return { segregated, version, locktime, to_const(inputs), outputs, source };
+    return { segregated, version, locktime, inputs, outputs, source };
 }
 
 // Serialization.

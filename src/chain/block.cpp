@@ -70,7 +70,7 @@ block::block(const block& other)
 }
 
 block::block(chain::header&& header, chain::transactions&& txs)
-  ////: block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
+  : block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
 }
 
@@ -147,8 +147,8 @@ block block::from_data(reader& source, bool witness)
         transactions_ptr txs;
         txs->reserve(source.read_size(max_block_size));
 
-        ////for (size_t tx = 0; tx < txs->capacity(); ++tx)
-        ////    txs->emplace_back(transaction{ source, witness });
+        for (size_t tx = 0; tx < txs->capacity(); ++tx)
+            txs->emplace_back(new transaction{ source, witness });
 
         return txs;
     };
