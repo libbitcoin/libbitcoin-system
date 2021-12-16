@@ -155,7 +155,7 @@ block block::from_data(reader& source, bool witness)
 
     return
     {
-        to_shared(chain::header(source)),
+        to_shared(new chain::header{ source }),
         read_transactions(source),
         source
     };

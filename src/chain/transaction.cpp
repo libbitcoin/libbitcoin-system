@@ -203,7 +203,7 @@ transaction transaction::from_data(reader& source, bool witness)
                 // Safe to cast as this method exclusively owns the input and
                 // input::witness_ a mutable public property of the instance.
                 const auto setter = const_cast<chain::input*>(input.get());
-                setter->witness_ = to_shared(chain::witness{ source, true });
+                setter->witness_ = to_shared(new chain::witness{ source, true });
             }
             else
             {

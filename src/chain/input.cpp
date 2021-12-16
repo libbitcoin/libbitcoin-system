@@ -66,8 +66,7 @@ input::input(const input& other)
 {
 }
 
-input::input(chain::point&& point, chain::script&& script,
-    uint32_t sequence)
+input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
@@ -191,12 +190,12 @@ input input::from_data(reader& source)
     // Witness is deserialized by transaction.
     return
     {
-        to_shared(chain::point(source)),
-        to_shared(chain::script(source, true)),
-        {},
+        to_shared(new chain::point{ source }),
+        to_shared(new chain::script{ source, true }),
+        to_shared<chain::witness>(),
         source.read_4_bytes_little_endian(),
         source,
-        {}
+        to_shared<chain::prevout>()
     };
 }
 

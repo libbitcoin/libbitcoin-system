@@ -128,7 +128,7 @@ output output::from_data(reader& source)
     return
     {
         source.read_8_bytes_little_endian(),
-        to_shared(chain::script(source, true)),
+        to_shared(new chain::script{ source, true }),
         source
     };
 }

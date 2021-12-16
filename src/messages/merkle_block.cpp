@@ -53,7 +53,7 @@ merkle_block merkle_block::deserialize(uint32_t version, reader& source)
 
     return
     {
-        to_shared(chain::header(source)),
+        to_shared(new chain::header{ source }),
         source.read_4_bytes_little_endian(),
         read_hashes(source),
         source.read_bytes(source.read_size(chain::max_block_size))

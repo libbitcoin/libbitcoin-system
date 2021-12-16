@@ -45,6 +45,13 @@ inline std::shared_ptr<Type> to_shared()
     return std::make_shared<Type>();
 }
 
+/// Create shared pointer to const from the instance pointer.
+template <typename Type>
+inline std::shared_ptr<const Type> to_shared(Type* value)
+{
+    return std::shared_ptr<const Type>(value);
+}
+
 /// Create shared pointer to const from the moved instance.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(Type&& value)

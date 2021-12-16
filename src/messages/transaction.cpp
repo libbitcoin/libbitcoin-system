@@ -43,7 +43,7 @@ transaction transaction::deserialize(uint32_t version, reader& source,
     if (version < version_minimum || version > version_maximum)
         source.invalidate();
 
-    return { to_shared(chain::transaction{ source, witness }) };
+    return { to_shared(new chain::transaction{ source, witness }) };
 }
 
 void transaction::serialize(uint32_t DEBUG_ONLY(version), writer& sink,

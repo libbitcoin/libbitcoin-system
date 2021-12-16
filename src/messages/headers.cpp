@@ -53,7 +53,7 @@ headers headers::deserialize(uint32_t version, reader& source)
 
     for (size_t header = 0; header < headers.capacity(); ++header)
     {
-        headers.push_back(to_shared(chain::header(source)));
+        headers.emplace_back(new chain::header{ source });
 
         if (source.read_byte() != trail)
             source.invalidate();
