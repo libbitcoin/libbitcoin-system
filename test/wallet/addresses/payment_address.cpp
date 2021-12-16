@@ -82,6 +82,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret__valid_expected)
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, SECRET));
+
     const payment_address address(secret);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED);
@@ -103,6 +104,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret_mainnet_uncompressed__va
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, SECRET));
+
     const payment_address address({ secret, payment_address::mainnet_p2kh, false });
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED);
@@ -154,6 +156,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__public_compressed_from_uncompre
 {
     ec_uncompressed point;
     BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
+
     const payment_address address(ec_public{ point, true }, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
@@ -163,6 +166,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__public_uncompressed_from_compre
 {
     ec_compressed point;
     BOOST_REQUIRE(decode_base16(point, COMPRESSED));
+
     const payment_address address(ec_public{ point, false }, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
@@ -174,6 +178,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__hash__valid_expected)
 {
     short_hash hash;
     BOOST_REQUIRE(decode_base16(hash, COMPRESSED_HASH));
+
     const payment_address address(hash);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED);
@@ -183,6 +188,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__uncompressed_hash_testnet__vali
 {
     short_hash hash;
     BOOST_REQUIRE(decode_base16(hash, UNCOMPRESSED_HASH));
+
     const payment_address address(hash, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
@@ -192,8 +198,9 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__uncompressed_hash_testnet__vali
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__script__valid_expected)
 {
-    script ops;
-    BOOST_REQUIRE(ops.from_string(SCRIPT));
+    script ops(SCRIPT);
+    BOOST_REQUIRE(ops.is_valid());
+
     const payment_address address(ops);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT);
@@ -201,8 +208,9 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__script__valid_expected)
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__script_testnet__valid_expected)
 {
-    script ops;
-    BOOST_REQUIRE(ops.from_string(SCRIPT));
+    script ops(SCRIPT);
+    BOOST_REQUIRE(ops.is_valid());
+
     const payment_address address(ops, 0xc4);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT_TESTNET);
@@ -214,6 +222,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__copy_payment__valid_expected)
 {
     payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
+
     const payment_address address(pay);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT);
@@ -225,6 +234,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
 {
     payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
+
     const payment_address address(pay);
     const payment_address copy(address);
     BOOST_REQUIRE(copy);
@@ -235,6 +245,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__move__valid_expected)
 {
     payment::value_type pay;
     BOOST_REQUIRE(decode_base16(pay, PAYMENT));
+
     payment_address address(pay);
     const payment_address copy(std::move(address));
     BOOST_REQUIRE(copy);
@@ -259,8 +270,9 @@ BOOST_AUTO_TEST_CASE(payment_address__prefix__testnet__testnet)
 
 BOOST_AUTO_TEST_CASE(payment_address__prefix__script__valid_mainnet_p2sh)
 {
-    script ops;
-    BOOST_REQUIRE(ops.from_string(SCRIPT));
+    script ops(SCRIPT);
+    BOOST_REQUIRE(ops.is_valid());
+
     const payment_address address(ops);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.prefix(), payment_address::mainnet_p2sh);
