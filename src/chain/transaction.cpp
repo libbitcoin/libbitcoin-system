@@ -269,8 +269,8 @@ void transaction::to_data(writer& sink, bool witness) const
         input->to_data(sink);
 
     sink.write_variable(outputs_->size());
-    for (const auto& input: *outputs_)
-        input->to_data(sink);
+    for (const auto& output: *outputs_)
+        output->to_data(sink);
 
     if (witness)
         for (auto& input: *inputs_)
