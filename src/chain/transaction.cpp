@@ -217,6 +217,8 @@ transaction transaction::from_data(reader& source, bool witness)
         outputs = read_puts<const chain::output>(source);
     }
 
+    // TODO: move locktime_ after outputs in member/construction order.
+    // TODO: will make it consistent with serialization order, as all others.
     const auto locktime = source.read_4_bytes_little_endian();
 
     // to_const is overhead, creating an extra shared pointer per input.
