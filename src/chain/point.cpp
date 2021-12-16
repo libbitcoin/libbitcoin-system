@@ -43,7 +43,7 @@ point::point()
 }
 
 point::point(point&& other)
-  : point(std::move(null_hash), point::null_index, true)
+  : point(std::move(other.hash_), other.index_, true)
 {
 }
 
