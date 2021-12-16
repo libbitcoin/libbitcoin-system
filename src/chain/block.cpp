@@ -144,7 +144,7 @@ block block::from_data(reader& source, bool witness)
 {
     const auto read_transactions = [=](reader& source)
     {
-        transactions_ptr txs;
+        auto txs = to_shared<transaction_ptrs>();
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)

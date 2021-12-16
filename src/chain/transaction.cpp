@@ -162,7 +162,7 @@ bool transaction::operator!=(const transaction& other) const
 template<class Put, class Source>
 std::shared_ptr<std::vector<std::shared_ptr<const Put>>> read_puts(Source& source)
 {
-    std::shared_ptr<std::vector<std::shared_ptr<const Put>>> puts;
+    auto puts = to_shared<std::vector<std::shared_ptr<const Put>>>();
     puts->reserve(source.read_size(max_block_size));
 
     for (auto put = zero; put < puts->capacity(); ++put)
