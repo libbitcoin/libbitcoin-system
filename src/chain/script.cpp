@@ -514,7 +514,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
             {
                 (*it)->point_ptr(),
                 empty_script_ptr,
-                self->sequence()
+                (*it)->sequence()
             });
 
         // Erase all input scripts except self.
@@ -530,7 +530,7 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
             {
                 (*it)->point_ptr(),
                 empty_script_ptr,
-                self->sequence()
+                (*it)->sequence()
             });
     }
 
