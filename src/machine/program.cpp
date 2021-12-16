@@ -669,7 +669,7 @@ chain::operations program::create_delete_ops(const endorsements& data)
     strip.reserve(add1(data.size()));
 
     for (const auto& push: data)
-        strip.emplace_back(push);
+        strip.emplace_back(push, false);
 
     strip.emplace_back(opcode::codeseparator);
     return strip;
