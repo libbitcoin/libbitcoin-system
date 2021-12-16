@@ -83,7 +83,7 @@ std::istream& operator>>(std::istream& input, block& argument)
     std::string hexcode;
     input >> hexcode;
 
-    argument.value_ = chain::block(base16(hexcode), true);
+    argument.value_ = chain::block{ base16(hexcode), true };
 
     if (!argument.value_.is_valid())
         throw istream_exception(hexcode);

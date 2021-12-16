@@ -65,7 +65,7 @@ std::istream& operator>>(std::istream& input, transaction& argument)
     std::string hexcode;
     input >> hexcode;
 
-    argument.value_ = chain::transaction(base16(hexcode), true);
+    argument.value_ = chain::transaction{ base16(hexcode), true };
 
     if (!argument.value_.is_valid())
         throw istream_exception(hexcode);
