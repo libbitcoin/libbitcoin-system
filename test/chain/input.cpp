@@ -38,7 +38,7 @@ static const input expected_input(input_data);
 BOOST_AUTO_TEST_CASE(input__constructor__default__valid)
 {
     const input instance;
-    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(input__constructor__move__expected)
