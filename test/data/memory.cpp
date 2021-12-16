@@ -16,20 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_DATA_DATA_HPP
-#define LIBBITCOIN_SYSTEM_DATA_DATA_HPP
+#include "../test.hpp"
 
-#include <cstddef>
-#include <cstdint>
-#include <bitcoin/system/data/collection.hpp>
-#include <bitcoin/system/data/data_array.hpp>
-#include <bitcoin/system/data/data_chunk.hpp>
-#include <bitcoin/system/data/data_reference.hpp>
-#include <bitcoin/system/data/data_slab.hpp>
-#include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/data/memory.hpp>
-#include <bitcoin/system/data/set.hpp>
-#include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/data/uintx.hpp>
+BOOST_AUTO_TEST_SUITE(memory_tests)
 
-#endif
+BOOST_AUTO_TEST_CASE(memory_test)
+{
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

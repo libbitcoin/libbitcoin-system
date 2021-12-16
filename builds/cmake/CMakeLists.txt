@@ -620,6 +620,7 @@ if (with-tests)
         "../../test/data/data_slab.cpp"
         "../../test/data/data_slice.cpp"
         "../../test/data/integer.cpp"
+        "../../test/data/memory.cpp"
         "../../test/data/string.cpp"
         "../../test/error/block_error_t.cpp"
         "../../test/error/error.cpp"

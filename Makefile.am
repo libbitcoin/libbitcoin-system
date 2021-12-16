@@ -318,6 +318,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/data_slab.cpp \
     test/data/data_slice.cpp \
     test/data/integer.cpp \
+    test/data/memory.cpp \
     test/data/string.cpp \
     test/error/block_error_t.cpp \
     test/error/error.cpp \
@@ -547,6 +548,7 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/data_reference.hpp \
     include/bitcoin/system/data/data_slab.hpp \
     include/bitcoin/system/data/data_slice.hpp \
+    include/bitcoin/system/data/memory.hpp \
     include/bitcoin/system/data/set.hpp \
     include/bitcoin/system/data/string.hpp \
     include/bitcoin/system/data/uintx.hpp
@@ -575,7 +577,8 @@ include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/data_array.ipp \
     include/bitcoin/system/impl/data/data_reference.ipp \
     include/bitcoin/system/impl/data/data_slab.ipp \
-    include/bitcoin/system/impl/data/data_slice.ipp
+    include/bitcoin/system/impl/data/data_slice.ipp \
+    include/bitcoin/system/impl/data/memory.ipp
 
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \

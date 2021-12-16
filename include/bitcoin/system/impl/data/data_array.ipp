@@ -26,9 +26,9 @@
 #include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
-#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/data/memory.hpp>
 
 namespace libbitcoin {
 namespace system {

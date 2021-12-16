@@ -926,6 +926,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\memory.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\set.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
@@ -1511,6 +1514,9 @@
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp">
+      <Filter>include\bitcoin\system\impl\data</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp">
