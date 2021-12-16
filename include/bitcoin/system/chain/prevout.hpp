@@ -34,7 +34,8 @@ class BC_API prevout
   : public output
 {
 public:
-    typedef std::shared_ptr<const prevout> ptr;
+    // prevout::ptr is non-const.
+    typedef std::shared_ptr<prevout> ptr;
 
     /// Use base class constructors, default construction is invalid.
     using chain::output::output;
