@@ -379,7 +379,12 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     if (any)
     {
         // Retain only the single input.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
     }
     else
     {
@@ -387,22 +392,27 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
 
         for (; *it != self; ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    zero_sequence 
-                });
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                zero_sequence 
+            });
 
         // Erase all input scripts and sequences except self.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
 
         for (++it; it != inputs.end(); ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    zero_sequence
-                });
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                zero_sequence
+            });
     }
 
     // Trim and clear outputs except that of the input index (guarded above).
@@ -433,7 +443,12 @@ static hash_digest sign_none(const transaction& tx, uint32_t index,
     if (any)
     {
         // Retain only the single input.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
     }
     else
     {
@@ -441,23 +456,28 @@ static hash_digest sign_none(const transaction& tx, uint32_t index,
 
         for (; *it != self; ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    zero_sequence
-                });
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                zero_sequence
+            });
 
         // Erase all input scripts and sequences except self.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
 
         for (++it; it != inputs.end(); ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    zero_sequence
-                });
-    }
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                zero_sequence
+            });
+}
 
     static const auto outs = std::make_shared<output_ptrs>();
 
@@ -478,7 +498,12 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
     if (any)
     {
         // Retain only the single input.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
     }
     else
     {
@@ -486,22 +511,27 @@ static hash_digest sign_all(const transaction& tx, uint32_t index,
 
         for (; *it != self; ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    self->sequence()
-                });
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                self->sequence()
+            });
 
         // Erase all input scripts except self.
-        ins->push_back(self);
+        ins->emplace_back(new input
+            {
+                self->point_ptr(),
+                to_shared(subscript),
+                self->sequence()
+            });
 
         for (++it; it != inputs.end(); ++it)
             ins->emplace_back(new input
-                {
-                    (*it)->point_ptr(),
-                    empty_script_ptr,
-                    self->sequence()
-                });
+            {
+                (*it)->point_ptr(),
+                empty_script_ptr,
+                self->sequence()
+            });
     }
 
     // Move new inputs and copy outputs to new transaction.
