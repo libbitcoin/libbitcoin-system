@@ -308,16 +308,16 @@ inline hash_digest signature_hash(const transaction& tx, uint8_t flags)
     // There is no rational interpretation of a signature hash for a coinbase.
     BITCOIN_ASSERT(!tx.is_coinbase());
 
-    const auto size = tx.serialized_size(false) + sizeof(uint32_t);
+    constexpr auto witness = false;
+    const auto size = tx.serialized_size(witness) + sizeof(uint32_t);
     data_chunk data(no_fill_byte_allocator);
     data.resize(size);
     write::bytes::copy out(data);
 
-    tx.to_data(out, false);
+    tx.to_data(out, witness);
     out.write_4_bytes_little_endian(flags);
 
-    // TODO: add position tracking to writer (similar to reader).
-    ////BITCOIN_ASSERT(out.get_position() == size)
+    BITCOIN_ASSERT(out.get_position() == size);
     return bitcoin_hash(data);
 }
 
@@ -410,7 +410,7 @@ static hash_digest sign_single(const transaction& tx, uint32_t index,
     outs->reserve(add1(index));
 
     // Fill up to index with null outputs.
-    for (size_t out = 0; out < index; ++index)
+    for (size_t out = 0; out < index; ++out)
         outs->push_back(null_output_ptr);
 
     // Set the output of the input index (guarded above).
