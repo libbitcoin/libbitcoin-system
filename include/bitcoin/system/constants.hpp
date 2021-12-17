@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
-#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 
