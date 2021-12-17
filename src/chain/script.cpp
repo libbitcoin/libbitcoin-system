@@ -299,6 +299,16 @@ const operations& script::ops() const
 // Signing (unversioned).
 // ----------------------------------------------------------------------------
 
+// Precompute fixed elements of signature hashing.
+static constexpr auto prefixed = true;
+static const auto null_output = output{}.to_data();
+static const auto empty_script = script{}.to_data(prefixed);
+static const auto zero_sequence = to_little_endian<uint32_t>(0);
+static const auto null_output_size = null_output.size();
+static const auto empty_script_size = empty_script.size();
+static const auto minimum_input_size = point::serialized_size() +
+    empty_script_size + sizeof(uint32_t);
+
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -316,16 +326,6 @@ inline coverage mask_sighash(uint8_t flags)
             return coverage::hash_all;
     }
 }
-
-// Precompute fixed elements of signature hashing.
-static constexpr auto prefixed = true;
-static const auto null_output = output{}.to_data();
-static const auto empty_script = script{}.to_data(prefixed);
-static const auto zero_sequence = to_little_endian<uint32_t>(0);
-static const auto null_output_size = null_output.size();
-static const auto empty_script_size = empty_script.size();
-static const auto minimum_input_size = point::serialized_size() +
-    empty_script_size + sizeof(uint32_t);
 
 static void sign_single(writer& sink, const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
