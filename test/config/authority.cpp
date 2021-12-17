@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifdef MOVE_TO_NETWORK
+
 #include "../test.hpp"
 #include <sstream>
 #include <boost/program_options.hpp>
@@ -563,3 +566,5 @@ BOOST_AUTO_TEST_CASE(authority__construct__invalid_port__throws_invalid_option)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // MOVE_TO_NETWORK

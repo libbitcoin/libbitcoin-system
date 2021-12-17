@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef MOVE_TO_BX
+#ifdef MOVE_TO_NETWORK
 
 // Sponsored in part by Digital Contract Design, LLC
 
@@ -111,4 +111,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif // MOVE_TO_BX
+#endif // MOVE_TO_NETWORK

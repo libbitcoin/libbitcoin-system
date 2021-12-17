@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef MOVE_TO_BX
+#ifdef MOVE_TO_NETWORK
 
 // Sponsored in part by Digital Contract Design, LLC
 
@@ -130,4 +130,4 @@ std::ostream& operator<<(std::ostream& output, const client_filter& argument)
 } // namespace system
 } // namespace libbitcoin
 
-#endif // MOVE_TO_BX
+#endif // MOVE_TO_NETWORK

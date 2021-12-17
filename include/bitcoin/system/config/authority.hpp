@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifdef MOVE_TO_NETWORK
+
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_AUTHORITY_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_AUTHORITY_HPP
 
@@ -99,3 +102,5 @@ private:
 } // namespace libbitcoin
 
 #endif
+
+#endif // MOVE_TO_NETWORK

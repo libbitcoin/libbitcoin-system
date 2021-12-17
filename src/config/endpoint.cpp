@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifdef MOVE_TO_NETWORK
+
 #include <bitcoin/system/config/endpoint.hpp>
 
 #include <cstdint>
@@ -158,3 +161,5 @@ std::ostream& operator<<(std::ostream& output, const endpoint& argument)
 } // namespace config
 } // namespace system
 } // namespace libbitcoin
+
+#endif // MOVE_TO_NETWORK
