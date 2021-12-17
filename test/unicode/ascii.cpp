@@ -53,17 +53,42 @@ BOOST_AUTO_TEST_CASE(ascii__is_ascii_number__ascii_numbers__true)
 
 BOOST_AUTO_TEST_CASE(ascii__is_ascii_number__non_ascii_numbers__false)
 {
+    // These tests are invalid, as the conversion to uint32_t is just a cast.
+    // These fail in clang, as it recognizes them as multiple byte characters.
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅰ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅱ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅲ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅳ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅴ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅵ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅶ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅷ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅸ'));
+    ////BOOST_REQUIRE(!is_ascii_number('Ⅹ'));
+
+    // These verify (on msvc/gcc) that the utf8 characters are cast to uint32.
+    ////BOOST_REQUIRE(0x00e285a0 == 'Ⅰ');
+    ////BOOST_REQUIRE(0x00e285a1 == 'Ⅱ');
+    ////BOOST_REQUIRE(0x00e285a2 == 'Ⅲ');
+    ////BOOST_REQUIRE(0x00e285a3 == 'Ⅳ');
+    ////BOOST_REQUIRE(0x00e285a4 == 'Ⅴ');
+    ////BOOST_REQUIRE(0x00e285a5 == 'Ⅵ');
+    ////BOOST_REQUIRE(0x00e285a6 == 'Ⅶ');
+    ////BOOST_REQUIRE(0x00e285a7 == 'Ⅷ');
+    ////BOOST_REQUIRE(0x00e285a8 == 'Ⅸ');
+    ////BOOST_REQUIRE(0x00e285a9 == 'Ⅹ');
+
     // Roman numeral characters (unicode).
-    BOOST_REQUIRE(!is_ascii_number('Ⅰ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅱ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅲ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅳ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅴ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅵ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅶ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅷ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅸ'));
-    BOOST_REQUIRE(!is_ascii_number('Ⅹ'));
+    BOOST_REQUIRE(!is_ascii_number(0x00002160));
+    BOOST_REQUIRE(!is_ascii_number(0x00002161));
+    BOOST_REQUIRE(!is_ascii_number(0x00002162));
+    BOOST_REQUIRE(!is_ascii_number(0x00002163));
+    BOOST_REQUIRE(!is_ascii_number(0x00002164));
+    BOOST_REQUIRE(!is_ascii_number(0x00002165));
+    BOOST_REQUIRE(!is_ascii_number(0x00002166));
+    BOOST_REQUIRE(!is_ascii_number(0x00002167));
+    BOOST_REQUIRE(!is_ascii_number(0x00002168));
+    BOOST_REQUIRE(!is_ascii_number(0x00002169));
 }
 
 BOOST_AUTO_TEST_CASE(ascii__is_ascii_number__non_numbers__false)
