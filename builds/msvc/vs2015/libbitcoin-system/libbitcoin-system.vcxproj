@@ -173,7 +173,6 @@
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
-    <ClCompile Include="..\..\..\..\src\properties.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -305,7 +304,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\console_result.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\checksum.hpp" />
@@ -349,8 +347,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\properties.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp" />

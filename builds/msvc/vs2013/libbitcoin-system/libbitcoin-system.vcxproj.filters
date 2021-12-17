@@ -402,9 +402,6 @@
     <ClCompile Include="..\..\..\..\src\machine\program.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\properties.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
@@ -752,9 +749,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\console_result.hpp">
-      <Filter>include\bitcoin\system</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
@@ -883,12 +877,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp">
       <Filter>include\bitcoin\system\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp">
-      <Filter>include\bitcoin\system</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\properties.hpp">
-      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp">
       <Filter>include\bitcoin\system\radix</Filter>

@@ -15,13 +15,10 @@
  */
 
 #include <bitcoin/system/assert.hpp>
-#include <bitcoin/system/console_result.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/optional.hpp>
-#include <bitcoin/system/properties.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/chain/block.hpp>

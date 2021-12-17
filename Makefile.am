@@ -36,7 +36,6 @@ src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPP
 src_libbitcoin_system_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_log_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_system_la_SOURCES = \
-    src/properties.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
@@ -231,7 +230,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
     test/main.cpp \
-    test/properties.cpp \
     test/settings.cpp \
     test/test.cpp \
     test/test.hpp \
@@ -384,13 +382,10 @@ include_bitcoin_HEADERS = \
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
     include/bitcoin/system/assert.hpp \
-    include/bitcoin/system/console_result.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
-    include/bitcoin/system/optional.hpp \
-    include/bitcoin/system/properties.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/version.hpp
 

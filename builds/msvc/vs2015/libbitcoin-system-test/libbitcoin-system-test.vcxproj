@@ -136,7 +136,6 @@
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\safe.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
-    <ClCompile Include="..\..\..\..\test\properties.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />

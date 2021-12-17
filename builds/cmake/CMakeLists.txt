@@ -277,7 +277,6 @@ add_definitions(
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
 add_library( ${CANONICAL_LIB_NAME}
-    "../../src/properties.cpp"
     "../../src/settings.cpp"
     "../../src/chain/block.cpp"
     "../../src/chain/chain_state.cpp"
@@ -533,7 +532,6 @@ if (with-tests)
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
         "../../test/main.cpp"
-        "../../test/properties.cpp"
         "../../test/settings.cpp"
         "../../test/test.cpp"
         "../../test/test.hpp"
