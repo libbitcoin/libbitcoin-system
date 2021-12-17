@@ -299,28 +299,6 @@ const operations& script::ops() const
 // Signing (unversioned).
 // ----------------------------------------------------------------------------
 
-// ****************************************************************************
-// CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
-// bytes in the signature hash preimage serialization.
-// ****************************************************************************
-inline hash_digest signature_hash(const transaction& tx, uint8_t flags)
-{
-    // There is no rational interpretation of a signature hash for a coinbase.
-    BITCOIN_ASSERT(!tx.is_coinbase());
-
-    constexpr auto witness = false;
-    const auto size = tx.serialized_size(witness) + sizeof(uint32_t);
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(size);
-    write::bytes::copy out(data);
-
-    tx.to_data(out, witness);
-    out.write_4_bytes_little_endian(flags);
-
-    BITCOIN_ASSERT(out.get_position() == size);
-    return bitcoin_hash(data);
-}
-
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -339,233 +317,235 @@ inline coverage mask_sighash(uint8_t flags)
     }
 }
 
-// Signature Hashing
-// Transaction:
-// The transaction is const. Instead of copying the entire transaction and
-// changing its input and output values, a new transaction is created from
-// existing and new values. This precludes a wasteful copy construction across
-// the entire transaction. Construction of the transaction consists of copying
-// two shared pointers and two integral values.
-// Inputs:
-// If other than 'any' is specified, a set of inputs is constructed by copying
-// just two pointers (empty script is static) and an integral value for each.
-// The pointer to the index input is always copied to the inputs collection.
-// Outputs:
-// When 'single' is specified, a set of default outputs is constructed by
-// copying just a single static default output pointer for each output. Then
-// then the indexed output pointer is appended. If 'none' or 'all' is specified
-// the outputs pointer is merely defaulted or copied to the transaction.
+// Precompute fixed elements of signature hashing.
+static constexpr auto prefixed = true;
+static const auto null_output = output{}.to_data();
+static const auto empty_script = script{}.to_data(prefixed);
+static const auto zero_sequence = to_little_endian<uint32_t>(0);
+static const auto null_output_size = null_output.size();
+static const auto empty_script_size = empty_script.size();
+static const auto minimum_input_size = point::serialized_size() +
+    empty_script_size + sizeof(uint32_t);
 
-static constexpr uint32_t zero_sequence{ 0 };
-static const auto null_output_ptr = to_shared(new output{});
-static const auto empty_script_ptr = to_shared(new script{});
-
-static hash_digest sign_single(const transaction& tx, uint32_t index,
+static void sign_single(writer& sink, const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
-    //*************************************************************************
-    // CONSENSUS: wacky satoshi behavior.
-    //*************************************************************************
-    if (index >= tx.outputs()->size())
-        return one_hash;
-
-    const auto& inputs = *tx.inputs();
-    const auto& self = inputs[index];
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
-
-    auto ins = std::make_shared<input_ptrs>();
-    ins->reserve(any ? one : inputs.size());
-
-    if (any)
+    const auto write_inputs = [&tx, &subscript, index, flags](writer& sink)
     {
-        // Retain only the single input.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
-    }
-    else
+        const auto& inputs = *tx.inputs();
+        const auto& self = inputs[index];
+        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        input_ptrs::const_iterator input;
+
+        sink.write_variable(any ? one : inputs.size());
+
+        for (input = inputs.begin(); !any && *input != self; ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_bytes(zero_sequence);
+        }
+
+        self->point().to_data(sink);
+        subscript.to_data(sink, prefixed);
+        sink.write_4_bytes_little_endian(self->sequence());
+
+        for (++input; !any && input != inputs.end(); ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_bytes(zero_sequence);
+        }
+    };
+
+    const auto write_outputs = [&tx, index](writer& sink)
     {
-        auto it = inputs.begin();
+        sink.write_variable(add1(index));
 
-        for (; *it != self; ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                zero_sequence 
-            });
+        for (size_t output = 0; output < index; ++output)
+            sink.write_bytes(null_output);
 
-        // Erase all input scripts and sequences except self.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
+        // Index guarded in generate_signature_hash.
+        (*tx.outputs())[index]->to_data(sink);
+    };
 
-        for (++it; it != inputs.end(); ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                zero_sequence
-            });
-    }
-
-    // Trim and clear outputs except that of the input index (guarded above).
-    auto outs = std::make_shared<output_ptrs>();
-    outs->reserve(add1(index));
-
-    // Fill up to index with null outputs.
-    for (size_t out = 0; out < index; ++out)
-        outs->push_back(null_output_ptr);
-
-    // Set the output of the input index (guarded above).
-    outs->push_back((*tx.outputs())[index]);
-
-    // Move new inputs and trimmed outputs to new transaction.
-    return signature_hash({ tx.version(), tx.locktime(), ins, outs }, flags);
+    sink.write_4_bytes_little_endian(tx.version());
+    write_inputs(sink);
+    write_outputs(sink);
+    sink.write_4_bytes_little_endian(tx.locktime());
+    sink.write_4_bytes_little_endian(flags);
 }
 
-static hash_digest sign_none(const transaction& tx, uint32_t index,
+static void sign_none(writer& sink, const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
-    const auto& inputs = *tx.inputs();
-    const auto& self = inputs[index];
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
-
-    auto ins = std::make_shared<input_ptrs>();
-    ins->reserve(any ? one : inputs.size());
-
-    if (any)
+    const auto write_inputs = [&tx, &subscript, index, flags](writer& sink)
     {
-        // Retain only the single input.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
-    }
-    else
-    {
-        auto it = inputs.begin();
+        const auto& inputs = *tx.inputs();
+        const auto& self = inputs[index];
+        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        input_ptrs::const_iterator input;
 
-        for (; *it != self; ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                zero_sequence
-            });
+        sink.write_variable(any ? one : inputs.size());
 
-        // Erase all input scripts and sequences except self.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
+        for (input = inputs.begin(); !any && *input != self; ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_bytes(zero_sequence);
+        }
 
-        for (++it; it != inputs.end(); ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                zero_sequence
-            });
+        self->point().to_data(sink);
+        subscript.to_data(sink, prefixed);
+        sink.write_4_bytes_little_endian(self->sequence());
+
+        for (++input; !any && input != inputs.end(); ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_bytes(zero_sequence);
+        }
+    };
+
+    sink.write_4_bytes_little_endian(tx.version());
+    write_inputs(sink);
+    sink.write_variable(zero);
+    sink.write_4_bytes_little_endian(tx.locktime());
+    sink.write_4_bytes_little_endian(flags);
 }
 
-    static const auto outs = std::make_shared<output_ptrs>();
-
-    // Move new inputs to new transaction and drop outputs.
-    return signature_hash({ tx.version(), tx.locktime(), ins, outs }, flags);
-}
-
-static hash_digest sign_all(const transaction& tx, uint32_t index,
+static void sign_all(writer& sink, const transaction& tx, uint32_t index,
     const script& subscript, uint8_t flags)
 {
+    const auto write_inputs = [&tx, &subscript, index, flags](writer& sink)
+    {
+        const auto& inputs = *tx.inputs();
+        const auto& self = inputs[index];
+        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        input_ptrs::const_iterator input;
+
+        sink.write_variable(any ? one : inputs.size());
+
+        for (input = inputs.begin(); !any && *input != self; ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_4_bytes_little_endian((*input)->sequence());
+        }
+
+        self->point().to_data(sink);
+        subscript.to_data(sink, prefixed);
+        sink.write_4_bytes_little_endian(self->sequence());
+
+        for (++input; !any && input != inputs.end(); ++input)
+        {
+            (*input)->point().to_data(sink);
+            sink.write_bytes(empty_script);
+            sink.write_4_bytes_little_endian((*input)->sequence());
+        }
+    };
+
+    const auto write_outputs = [&tx, index](writer& sink)
+    {
+        sink.write_variable(tx.outputs()->size());
+        for (const auto& output: *tx.outputs())
+            output->to_data(sink);
+    };
+
+    sink.write_4_bytes_little_endian(tx.version());
+    write_inputs(sink);
+    write_outputs(sink);
+    sink.write_4_bytes_little_endian(tx.locktime());
+    sink.write_4_bytes_little_endian(flags);
+}
+
+inline size_t unversioned_preimage_size(const transaction& tx,
+    uint32_t index, const script& subscript, uint8_t flags)
+{
     const auto& inputs = *tx.inputs();
-    const auto& self = inputs[index];
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
+    const auto& outputs = *tx.outputs();
 
-    auto ins = std::make_shared<input_ptrs>();
-    ins->reserve(any ? one : inputs.size());
+    auto ins = to_bool(flags & coverage::anyone_can_pay) ? one : inputs.size();
+    const auto inputs_size = variable_size(ins) + (ins * minimum_input_size) +
+        (subscript.serialized_size(prefixed) - empty_script_size);
 
-    if (any)
+    switch (mask_sighash(flags))
     {
-        // Retain only the single input.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
+        case coverage::hash_single:
+            return sizeof(uint32_t)
+                + inputs_size
+                + variable_size(add1(index)) + (index * null_output_size) +
+                    outputs[index]->serialized_size()
+                + sizeof(uint32_t)
+                + sizeof(uint32_t);
+
+        case coverage::hash_none:
+            return sizeof(uint32_t)
+                + inputs_size
+                + variable_size(zero)
+                + sizeof(uint32_t)
+                + sizeof(uint32_t);
+
+        default:
+        case coverage::hash_all:
+            return sizeof(uint32_t)
+                + inputs_size
+                + variable_size(outputs.size()) +
+                    std::accumulate(outputs.begin(), outputs.end(), zero,
+                        [](size_t total, const output::ptr& output)
+                        {
+                            return total + output->serialized_size();
+                        })
+                + sizeof(uint32_t)
+                + sizeof(uint32_t);
     }
-    else
-    {
-        auto& it = inputs.begin();
-
-        for (; *it != self; ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                (*it)->sequence()
-            });
-
-        // Erase all input scripts except self.
-        ins->emplace_back(new input
-            {
-                self->point_ptr(),
-                to_shared(subscript),
-                self->sequence()
-            });
-
-        for (++it; it != inputs.end(); ++it)
-            ins->emplace_back(new input
-            {
-                (*it)->point_ptr(),
-                empty_script_ptr,
-                (*it)->sequence()
-            });
-    }
-
-    // Move new inputs and copy outputs to new transaction.
-    return signature_hash({ tx.version(), tx.locktime(), ins, tx.outputs() },
-        flags);
 }
 
 // private/static
 hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint8_t flags)
 {
-    // The sighash serializations are isolated for clarity and optimization.
-    switch (mask_sighash(flags))
+    // Set options.
+    const auto flag = mask_sighash(flags);
+
+    //*************************************************************************
+    // CONSENSUS: wacky satoshi behavior.
+    //*************************************************************************
+    if ((flag == coverage::hash_single) && index >= tx.outputs()->size())
+        return one_hash;
+
+    // Create writer.
+    data_chunk data(no_fill_byte_allocator);
+    data.resize(unversioned_preimage_size(tx, index, subscript, flags));
+    write::bytes::copy sink(data);
+
+    switch (flag)
     {
         case coverage::hash_single:
-            return sign_single(tx, index, subscript, flags);
+            sign_single(sink, tx, index, subscript, flags);
+            break;
         case coverage::hash_none:
-            return sign_none(tx, index, subscript, flags);
+            sign_none(sink, tx, index, subscript, flags);
+            break;
         default:
         case coverage::hash_all:
-            return sign_all(tx, index, subscript, flags);
+            sign_all(sink, tx, index, subscript, flags);
     }
+
+    BITCOIN_ASSERT(sink.get_position() == data.size());
+    return bitcoin_hash(data);
 }
 
 // Signing (version 0).
 // ----------------------------------------------------------------------------
 
-static size_t version_0_preimage_size(size_t script_size)
+inline size_t version_0_preimage_size(const script& subscript)
 {
     return sizeof(uint32_t)
         + hash_size
         + hash_size
         + point::serialized_size()
-        + script_size
+        + subscript.serialized_size(true)
         + sizeof(uint64_t)
         + sizeof(uint32_t)
         + hash_size
@@ -582,67 +562,72 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     if (!bip143)
         return generate_unversioned_signature_hash(tx, index, subscript, flags);
 
-    const auto flag = mask_sighash(flags);
+    // Set options.
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
-    const auto single = (flag == coverage::hash_single);
-    //// const auto none = (flag == coverage::hash_none);
+    const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
+    const auto single = (flag == coverage::hash_single) &&
+        index < tx.outputs()->size();
 
+    // Create writer.
     const auto& input = (*tx.inputs())[index];
-    const auto script_size = subscript.serialized_size(true);
-    const auto size = version_0_preimage_size(script_size);
-
     data_chunk data(no_fill_byte_allocator);
-    data.resize(size);
-    write::bytes::copy out(data);
+    data.resize(version_0_preimage_size(subscript));
+    write::bytes::copy sink(data);
 
     // 1. transaction version (4).
-    out.write_little_endian(tx.version());
+    sink.write_little_endian(tx.version());
 
     // 2. inpoints double sha256 hash (32).
-    out.write_bytes(!any ? tx.points_hash() : null_hash);
+    sink.write_bytes(!any ? tx.points_hash() : null_hash);
 
     // 3. sequences double sha256 hash (32).
-    out.write_bytes(!any && all ? tx.sequences_hash() : null_hash);
+    sink.write_bytes(!any && all ? tx.sequences_hash() : null_hash);
 
     // 4. outpoint (32-byte hash + 4-byte little endian).
-    input->point().to_data(out);
+    input->point().to_data(sink);
 
     // 5. script of the input (with prefix).
-    subscript.to_data(out, true);
+    subscript.to_data(sink, true);
 
     // 6. value of the output spent by this input (8).
-    out.write_little_endian(value);
+    sink.write_little_endian(value);
 
     // 7. sequence of the input (4).
-    out.write_little_endian(input->sequence());
+    sink.write_little_endian(input->sequence());
 
     // 8. outputs (or output) double hash, or null hash (32).
-    out.write_bytes(all ? tx.outputs_hash() :
-        (single && index < tx.outputs()->size() ?
-            bitcoin_hash((*tx.outputs())[index]->to_data()) : null_hash));
+    sink.write_bytes(all ? tx.outputs_hash() : (single ?
+        bitcoin_hash((*tx.outputs())[index]->to_data()) : null_hash));
 
     // 9. transaction locktime (4).
-    out.write_little_endian(tx.locktime());
+    sink.write_little_endian(tx.locktime());
 
     // 10. hash type of the signature (4 [not 1]).
-    out.write_4_bytes_little_endian(flags);
+    sink.write_4_bytes_little_endian(flags);
 
-    // TODO: add position tracking to writer (similar to reader).
-    ////BITCOIN_ASSERT(out.get_position() == size)
+    BITCOIN_ASSERT(sink.get_position() == data.size());
     return bitcoin_hash(data);
 }
 
 // Signing (unversioned and version 0).
 // ----------------------------------------------------------------------------
 
+// ****************************************************************************
+// CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
+// bytes in the signature hash preimage serialization.
+// ****************************************************************************
+
 // static
+// Empty return indicates program misparameterization, not consensus possible.
 hash_digest script::generate_signature_hash(const transaction& tx,
     uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
     script_version version, bool bip143)
 {
-    // This is merely invalid parameterization, not a consensus value.
-    if (index > tx.inputs()->size())
+    // There is no rational interpretation of a signature hash for a coinbase.
+    BITCOIN_ASSERT(!tx.is_coinbase());
+
+    if (index >= tx.inputs()->size())
         return {};
 
     switch (version)
@@ -655,7 +640,6 @@ hash_digest script::generate_signature_hash(const transaction& tx,
                 value, flags, bip143);
         case script_version::reserved:
         default:
-            BITCOIN_ASSERT_MSG(false, "invalid script version");
             return {};
     }
 }
