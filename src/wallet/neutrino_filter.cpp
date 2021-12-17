@@ -28,9 +28,6 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
-// TODO: replace use of messages::client_filter, moving to network.
-// TODO: maybe just use an simple three value struct.
-
 namespace libbitcoin {
 namespace system {
 namespace neutrino {
