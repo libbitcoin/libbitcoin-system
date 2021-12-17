@@ -116,9 +116,7 @@
     <ClCompile Include="..\..\..\..\src\config\block.cpp">
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\client_filter.cpp">
-      <ObjectFileName>$(IntDir)src_config_client_filter.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\client_filter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
@@ -178,53 +176,6 @@
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\address.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\address_item.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\alert.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\alert_item.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\block.cpp">
-      <ObjectFileName>$(IntDir)src_messages_block.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\bloom_filter_add.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\bloom_filter_clear.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\bloom_filter_load.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\client_filter.cpp">
-      <ObjectFileName>$(IntDir)src_messages_client_filter.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\client_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\client_filter_headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\compact_block_item.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\compact_transactions.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\fee_filter.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_address.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_blocks.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_client_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_client_filter_headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_client_filters.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_compact_transactions.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_data.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\get_headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\heading.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\inventory_item.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\memory_pool.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\merkle_block.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\message.cpp">
-      <ObjectFileName>$(IntDir)src_messages_message.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\not_found.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\ping.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\pong.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\reject.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\send_compact.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\send_headers.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\transaction.cpp">
-      <ObjectFileName>$(IntDir)src_messages_transaction.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\messages\version.cpp" />
-    <ClCompile Include="..\..\..\..\src\messages\version_acknowledge.cpp" />
     <ClCompile Include="..\..\..\..\src\properties.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
@@ -283,9 +234,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\message.cpp">
-      <ObjectFileName>$(IntDir)src_wallet_message.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\electrum.cpp">
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_electrum.obj</ObjectFileName>
     </ClCompile>
@@ -403,47 +352,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\address_item.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\alert_item.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\bloom_filter_add.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\bloom_filter_clear.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\bloom_filter_load.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\client_filter.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\client_filter_checkpoint.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\client_filter_headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_block_item.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\compact_transactions.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\fee_filter.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_blocks.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_client_filter_checkpoint.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_client_filter_headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_client_filters.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_compact_transactions.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_data.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\get_headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\heading.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\identifier.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\inventory_item.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\memory_pool.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\merkle_block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\message.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\messages.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\not_found.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\ping.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\pong.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\reject.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\send_compact.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\send_headers.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\transaction.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\version.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\messages\version_acknowledge.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\optional.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\properties.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
