@@ -139,6 +139,11 @@ BC_API hash_digest scrypt_hash(const data_slice& data);
 /// Generate a bitcoin hash.
 BC_API hash_digest bitcoin_hash(const data_slice& data);
 
+/// Generate a bitcoin hash of first + second concatenation.
+/// This hash function is used in merkle root generation.
+BC_API hash_digest bitcoin_hash(const data_slice& first,
+    const data_slice& second);
+
 /// Generate a bitcoin short hash.
 BC_API short_hash bitcoin_short_hash(const data_slice& data);
 
@@ -154,7 +159,7 @@ BC_API data_chunk sha1_hash_chunk(const data_slice& data);
 BC_API hash_digest sha256_hash(const data_slice& data);
 BC_API data_chunk sha256_hash_chunk(const data_slice& data);
 
-/// Generate a sha256 hash.
+/// Generate a sha256 hash of first + second concatenation.
 /// This hash function is used in electrum seed stretching.
 BC_API hash_digest sha256_hash(const data_slice& first,
     const data_slice& second);

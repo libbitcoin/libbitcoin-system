@@ -372,7 +372,7 @@ hash_digest block::generate_merkle_root(bool witness) const
     {
         // Hash each pair of concatenated transaction hashes.
         for (auto it = merkle.begin(); it != merkle.end(); std::advance(it, 2))
-            buffer.push_back(bitcoin_hash(splice(it[0], it[1])));
+            buffer.push_back(bitcoin_hash(it[0], it[1]));
 
         std::swap(merkle, buffer);
         buffer.clear();

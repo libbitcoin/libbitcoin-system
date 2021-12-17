@@ -116,6 +116,11 @@ hash_digest bitcoin_hash(const data_slice& data)
     return sha256_hash(sha256_hash(data));
 }
 
+hash_digest bitcoin_hash(const data_slice& first, const data_slice& second)
+{
+    return sha256_hash(sha256_hash(first, second));
+}
+
 short_hash bitcoin_short_hash(const data_slice& data)
 {
     return ripemd160_hash(sha256_hash(data));
