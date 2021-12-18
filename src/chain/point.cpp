@@ -187,6 +187,7 @@ uint32_t point::index() const
     return index_;
 }
 
+// static
 size_t point::serialized_size()
 {
     return hash_size + sizeof(uint32_t);

@@ -222,17 +222,6 @@ void header::to_data(writer& sink) const
     BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
-// static
-size_t header::serialized_size()
-{
-    return sizeof(version_)
-        + hash_size
-        + hash_size
-        + sizeof(timestamp_)
-        + sizeof(bits_)
-        + sizeof(nonce_);
-}
-
 // Properties.
 // ----------------------------------------------------------------------------
 
@@ -306,6 +295,17 @@ uint256_t header::difficulty(uint32_t bits)
 uint256_t header::difficulty() const
 {
     return difficulty(bits_);
+}
+
+// static
+size_t header::serialized_size()
+{
+    return sizeof(version_)
+        + hash_size
+        + hash_size
+        + sizeof(timestamp_)
+        + sizeof(bits_)
+        + sizeof(nonce_);
 }
 
 // Check.
