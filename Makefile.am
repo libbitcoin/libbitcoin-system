@@ -334,6 +334,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/wallet/keys/encrypted_keys.cpp \
     test/wallet/keys/hd_private.cpp \
     test/wallet/keys/hd_public.cpp \
+    test/wallet/keys/mini_keys.cpp \
     test/wallet/keys/stealth.cpp \
     test/wallet/mnemonics/electrum.cpp \
     test/wallet/mnemonics/electrum.hpp \

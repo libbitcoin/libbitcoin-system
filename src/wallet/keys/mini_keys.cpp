@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/mini_keys.hpp>
 
-#include <cstdint>
 #include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 
@@ -26,11 +25,11 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-bool check_minikey(const std::string& minikey)
+static bool check_minikey(const std::string& minikey)
 {
-    // Legacy minikeys are 22 chars long
+    // Legacy minikeys are 22 chars long.
     const auto size = minikey.size();
-    const auto valid = size == 22u || size == 30u;
+    const auto valid = (size == 22u || size == 30u);
     return valid && sha256_hash(minikey + "?").front() == 0x00;
 }
 

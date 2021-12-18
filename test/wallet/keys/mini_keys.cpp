@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,22 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
+#include "../../test.hpp"
 
-#include <string>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
+BOOST_AUTO_TEST_SUITE(mini_keys_tests)
 
-namespace libbitcoin {
-namespace system {
-namespace wallet {
+BOOST_AUTO_TEST_CASE(minikey_to_secret__test)
+{
+    BOOST_REQUIRE(true);
+}
 
-/// Convert Cascasius minikey to secret parameter.
-BC_API bool minikey_to_secret(ec_secret& out_secret, const std::string& key);
-
-} // namespace wallet
-} // namespace system
-} // namespace libbitcoin
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()
