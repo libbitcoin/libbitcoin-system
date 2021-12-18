@@ -35,10 +35,12 @@
 namespace libbitcoin {
 namespace system {
 
-// These conversions are efficient, performing no data copies or reversals.
+// These conversions are efficient, performing no buffer copies or reversals.
 // array/uintx_t sizes are inferred by type, and vector/uintx by value.
 // High order bits are padded when read (from) is insufficient.
 // High order bits are ignored when write (to) is insufficient.
+// uintx return can handle data of arbitrary size.
+// Limit sizeof to integral integers.
 
 // byte convertors
 // ----------------------------------------------------------------------------
@@ -204,28 +206,24 @@ data_chunk to_little_endian_chunk(Integer value) noexcept
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_big_endian(const data_slice& data) noexcept
 {
-    // Limit sizeof to integral integers.
     return from_big<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_little_endian(const data_slice& data) noexcept
 {
-    // Limit sizeof to integral integers.
     return from_little<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
-    // Limit sizeof to integral integers.
     return to_big_endian_array<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
-    // Limit sizeof to integral integers.
     return to_little_endian_array<sizeof(Integer)>(value);
 }
 
@@ -234,32 +232,29 @@ data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 // ----------------------------------------------------------------------------
 // Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is a
 // signed type (though otherwise would be declared as uintx_t<0>).
+// data_chunk size determined by uintx (vs. type).
 
 template <typename Integer, if_base_of<Integer, uintx>>
 Integer from_big_endian(const data_slice& data) noexcept
 {
-    // uintx return can handle data of arbitrary size.
     return from_big<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 Integer from_little_endian(const data_slice& data) noexcept
 {
-    // uintx return can handle data of arbitrary size.
     return from_little<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 data_chunk to_big_endian(const Integer& value) noexcept
 {
-    // data_chunk size determined by uintx (vs. type).
     return to_big_endian_chunk(value);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 data_chunk to_little_endian(const Integer& value) noexcept
 {
-    // data_chunk size determined by uintx (vs. type).
     return to_little_endian_chunk(value);
 }
 
@@ -297,9 +292,8 @@ data_array<Bytes> to_little_endian(const Integer& value) noexcept
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_big_endian(std::istream& stream) noexcept
 {
-    // Limit sizeof to integral integers.
     std::vector<char> buffer(sizeof(Integer));
-    stream.read(buffer.data(), buffer.size());
+    stream.read(buffer.data(), sizeof(Integer));
     buffer.resize(stream.gcount());
     return from_big_endian<Integer>(buffer);
 }
@@ -307,9 +301,8 @@ Integer from_big_endian(std::istream& stream) noexcept
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_little_endian(std::istream& stream) noexcept
 {
-    // Limit sizeof to integral integers.
     std::vector<char> buffer(sizeof(Integer));
-    stream.read(buffer.data(), buffer.size());
+    stream.read(buffer.data(), sizeof(Integer));
     buffer.resize(stream.gcount());
     return from_little_endian<Integer>(buffer);
 }
@@ -317,17 +310,15 @@ Integer from_little_endian(std::istream& stream) noexcept
 template <typename Integer, if_integral_integer<Integer>>
 void to_big_endian(std::ostream& stream, Integer value) noexcept
 {
-    // Limit sizeof (in above override) to integral integers.
-    const auto buffer = to_big_endian(value);
-    stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+    stream.write(reinterpret_cast<const char*>(
+        to_big_endian(value).data()), sizeof(Integer));
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 void to_little_endian(std::ostream& stream, Integer value) noexcept
 {
-    // Limit sizeof (in above override) to integral integers.
-    const auto buffer = to_little_endian(value);
-    stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+    stream.write(reinterpret_cast<const char*>(
+        to_little_endian(value).data()), sizeof(Integer));
 }
 
 // iterator => integral
@@ -337,17 +328,13 @@ void to_little_endian(std::ostream& stream, Integer value) noexcept
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
 Integer from_big_endian_unchecked(const Iterator& data) noexcept
 {
-    // Limit sizeof to integral integers.
-    const auto slice = data_slice(data, std::next(data, sizeof(Integer)));
-    return from_big_endian<Integer>(slice);
+    return from_big_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
 Integer from_little_endian_unchecked(const Iterator& data) noexcept
 {
-    // Limit sizeof to integral integers.
-    const auto slice = data_slice(data, std::next(data, sizeof(Integer)));
-    return from_little_endian<Integer>(slice);
+    return from_little_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
 } // namespace system
