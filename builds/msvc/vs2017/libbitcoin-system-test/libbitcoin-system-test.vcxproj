@@ -159,6 +159,7 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_flipper.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />

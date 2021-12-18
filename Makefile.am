@@ -81,29 +81,17 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/secp256k1_initializer.hpp \
     src/crypto/siphash.cpp \
     src/crypto/external/aes256.c \
-    src/crypto/external/aes256.h \
     src/crypto/external/crypto_scrypt.c \
-    src/crypto/external/crypto_scrypt.h \
     src/crypto/external/hmac_sha256.c \
-    src/crypto/external/hmac_sha256.h \
     src/crypto/external/hmac_sha512.c \
-    src/crypto/external/hmac_sha512.h \
     src/crypto/external/lax_der_parsing.c \
-    src/crypto/external/lax_der_parsing.h \
     src/crypto/external/pbkdf2_sha256.c \
-    src/crypto/external/pbkdf2_sha256.h \
     src/crypto/external/pkcs5_pbkdf2.c \
-    src/crypto/external/pkcs5_pbkdf2.h \
     src/crypto/external/ripemd160.c \
-    src/crypto/external/ripemd160.h \
     src/crypto/external/sha1.c \
-    src/crypto/external/sha1.h \
     src/crypto/external/sha256.c \
-    src/crypto/external/sha256.h \
     src/crypto/external/sha512.c \
-    src/crypto/external/sha512.h \
     src/crypto/external/zeroize.c \
-    src/crypto/external/zeroize.h \
     src/data/data_chunk.cpp \
     src/data/data_reference.cpp \
     src/data/data_slab.cpp \
@@ -313,6 +301,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/stream/streamers/byte_flipper.cpp \
     test/stream/streamers/byte_reader.cpp \
     test/stream/streamers/byte_writer.cpp \
+    test/stream/streamers/sha256_writer.cpp \
     test/unicode/ascii.cpp \
     test/unicode/code_points.cpp \
     test/unicode/conversion.cpp \
@@ -448,6 +437,21 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/ring_signature.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
+include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
+include_bitcoin_system_crypto_external_HEADERS = \
+    include/bitcoin/system/crypto/external/aes256.h \
+    include/bitcoin/system/crypto/external/crypto_scrypt.h \
+    include/bitcoin/system/crypto/external/hmac_sha256.h \
+    include/bitcoin/system/crypto/external/hmac_sha512.h \
+    include/bitcoin/system/crypto/external/lax_der_parsing.h \
+    include/bitcoin/system/crypto/external/pbkdf2_sha256.h \
+    include/bitcoin/system/crypto/external/pkcs5_pbkdf2.h \
+    include/bitcoin/system/crypto/external/ripemd160.h \
+    include/bitcoin/system/crypto/external/sha1.h \
+    include/bitcoin/system/crypto/external/sha256.h \
+    include/bitcoin/system/crypto/external/sha512.h \
+    include/bitcoin/system/crypto/external/zeroize.h
+
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/collection.hpp \
@@ -520,7 +524,8 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     include/bitcoin/system/impl/stream/streamers/bit_reader.ipp \
     include/bitcoin/system/impl/stream/streamers/bit_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/byte_reader.ipp \
-    include/bitcoin/system/impl/stream/streamers/byte_writer.ipp
+    include/bitcoin/system/impl/stream/streamers/byte_writer.ipp \
+    include/bitcoin/system/impl/stream/streamers/sha256_writer.ipp
 
 include_bitcoin_system_impl_wallet_addressesdir = ${includedir}/bitcoin/system/impl/wallet/addresses
 include_bitcoin_system_impl_wallet_addresses_HEADERS = \
@@ -593,7 +598,8 @@ include_bitcoin_system_stream_streamers_HEADERS = \
     include/bitcoin/system/stream/streamers/bit_writer.hpp \
     include/bitcoin/system/stream/streamers/byte_flipper.hpp \
     include/bitcoin/system/stream/streamers/byte_reader.hpp \
-    include/bitcoin/system/stream/streamers/byte_writer.hpp
+    include/bitcoin/system/stream/streamers/byte_writer.hpp \
+    include/bitcoin/system/stream/streamers/sha256_writer.hpp
 
 include_bitcoin_system_stream_streamers_interfacesdir = ${includedir}/bitcoin/system/stream/streamers/interfaces
 include_bitcoin_system_stream_streamers_interfaces_HEADERS = \

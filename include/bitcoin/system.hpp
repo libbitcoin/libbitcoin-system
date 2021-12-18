@@ -74,6 +74,18 @@
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
+#include <bitcoin/system/crypto/external/aes256.h>
+#include <bitcoin/system/crypto/external/crypto_scrypt.h>
+#include <bitcoin/system/crypto/external/hmac_sha256.h>
+#include <bitcoin/system/crypto/external/hmac_sha512.h>
+#include <bitcoin/system/crypto/external/lax_der_parsing.h>
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.h>
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.h>
+#include <bitcoin/system/crypto/external/ripemd160.h>
+#include <bitcoin/system/crypto/external/sha1.h>
+#include <bitcoin/system/crypto/external/sha256.h>
+#include <bitcoin/system/crypto/external/sha512.h>
+#include <bitcoin/system/crypto/external/zeroize.h>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_array.hpp>
@@ -135,6 +147,7 @@
 #include <bitcoin/system/stream/streamers/byte_flipper.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
+#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
