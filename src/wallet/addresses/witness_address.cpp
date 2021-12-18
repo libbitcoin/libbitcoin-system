@@ -370,7 +370,7 @@ witness_address witness_address::from_script(const chain::script& script,
     if (!script.is_valid())
         return {};
 
-    // .to_data(false) is the script wire serialization without terminator.
+    // .to_data(false) is the script wire serialization without prefix.
     return from_long(sha256_hash(script.to_data(false)), prefix);
 }
 

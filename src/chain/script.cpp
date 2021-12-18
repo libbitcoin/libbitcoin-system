@@ -276,6 +276,21 @@ bool script::is_valid() const
     return valid_;
 }
 
+const operations& script::ops() const
+{
+    return ops_;
+}
+
+// Consensus (witness::extract_script) and Electrum server payments key.
+hash_digest script::hash() const
+{
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+    to_data(sink, false);
+    sink.flush();
+    return sha256;
+}
+
 size_t script::serialized_size(bool prefix) const
 {
     const auto op_size = [](size_t total, const operation& op)
@@ -291,11 +306,6 @@ size_t script::serialized_size(bool prefix) const
     return size;
 }
 
-const operations& script::ops() const
-{
-    return ops_;
-}
-
 // Signing (unversioned).
 // ----------------------------------------------------------------------------
 
@@ -304,10 +314,6 @@ static constexpr auto prefixed = true;
 static const auto null_output = output{}.to_data();
 static const auto empty_script = script{}.to_data(prefixed);
 static const auto zero_sequence = to_little_endian<uint32_t>(0);
-static const auto null_output_size = null_output.size();
-static const auto empty_script_size = empty_script.size();
-static const auto minimum_input_size = point::serialized_size() +
-    empty_script_size + sizeof(uint32_t);
 
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
@@ -459,47 +465,52 @@ static void sign_all(writer& sink, const transaction& tx, uint32_t index,
     sink.write_4_bytes_little_endian(flags);
 }
 
-inline size_t unversioned_preimage_size(const transaction& tx,
-    uint32_t index, const script& subscript, uint8_t flags)
-{
-    const auto& inputs = *tx.inputs();
-    const auto& outputs = *tx.outputs();
-
-    auto ins = to_bool(flags & coverage::anyone_can_pay) ? one : inputs.size();
-    const auto inputs_size = variable_size(ins) + (ins * minimum_input_size) +
-        (subscript.serialized_size(prefixed) - empty_script_size);
-
-    switch (mask_sighash(flags))
-    {
-        case coverage::hash_single:
-            return sizeof(uint32_t)
-                + inputs_size
-                + variable_size(add1(index)) + (index * null_output_size) +
-                    outputs[index]->serialized_size()
-                + sizeof(uint32_t)
-                + sizeof(uint32_t);
-
-        case coverage::hash_none:
-            return sizeof(uint32_t)
-                + inputs_size
-                + variable_size(zero)
-                + sizeof(uint32_t)
-                + sizeof(uint32_t);
-
-        default:
-        case coverage::hash_all:
-            return sizeof(uint32_t)
-                + inputs_size
-                + variable_size(outputs.size()) +
-                    std::accumulate(outputs.begin(), outputs.end(), zero,
-                        [](size_t total, const output::ptr& output)
-                        {
-                            return total + output->serialized_size();
-                        })
-                + sizeof(uint32_t)
-                + sizeof(uint32_t);
-    }
-}
+////inline size_t unversioned_preimage_size(const transaction& tx,
+////    uint32_t index, const script& subscript, uint8_t flags)
+////{
+////    static const auto null_output_size = null_output.size();
+////    static const auto empty_script_size = empty_script.size();
+////    static const auto minimum_input_size = point::serialized_size() +
+////        empty_script_size + sizeof(uint32_t);
+////
+////    const auto& inputs = *tx.inputs();
+////    const auto& outputs = *tx.outputs();
+////
+////    auto ins = to_bool(flags & coverage::anyone_can_pay) ? one : inputs.size();
+////    const auto inputs_size = variable_size(ins) + (ins * minimum_input_size) +
+////        (subscript.serialized_size(prefixed) - empty_script_size);
+////
+////    switch (mask_sighash(flags))
+////    {
+////        case coverage::hash_single:
+////            return sizeof(uint32_t)
+////                + inputs_size
+////                + variable_size(add1(index)) + (index * null_output_size) +
+////                    outputs[index]->serialized_size()
+////                + sizeof(uint32_t)
+////                + sizeof(uint32_t);
+////
+////        case coverage::hash_none:
+////            return sizeof(uint32_t)
+////                + inputs_size
+////                + variable_size(zero)
+////                + sizeof(uint32_t)
+////                + sizeof(uint32_t);
+////
+////        default:
+////        case coverage::hash_all:
+////            return sizeof(uint32_t)
+////                + inputs_size
+////                + variable_size(outputs.size()) +
+////                    std::accumulate(outputs.begin(), outputs.end(), zero,
+////                        [](size_t total, const output::ptr& output)
+////                        {
+////                            return total + output->serialized_size();
+////                        })
+////                + sizeof(uint32_t)
+////                + sizeof(uint32_t);
+////    }
+////}
 
 // private/static
 hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
@@ -514,10 +525,9 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
     if ((flag == coverage::hash_single) && index >= tx.outputs()->size())
         return one_hash;
 
-    // Create writer.
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(unversioned_preimage_size(tx, index, subscript, flags));
-    write::bytes::copy sink(data);
+    // Create hash writer.
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
 
     switch (flag)
     {
@@ -532,26 +542,26 @@ hash_digest script::generate_unversioned_signature_hash(const transaction& tx,
             sign_all(sink, tx, index, subscript, flags);
     }
 
-    BITCOIN_ASSERT(sink.get_position() == data.size());
-    return bitcoin_hash(data);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 // Signing (version 0).
 // ----------------------------------------------------------------------------
 
-inline size_t version_0_preimage_size(const script& subscript)
-{
-    return sizeof(uint32_t)
-        + hash_size
-        + hash_size
-        + point::serialized_size()
-        + subscript.serialized_size(true)
-        + sizeof(uint64_t)
-        + sizeof(uint32_t)
-        + hash_size
-        + sizeof(uint32_t)
-        + sizeof(uint32_t);
-}
+////inline size_t version_0_preimage_size(const script& subscript)
+////{
+////    return sizeof(uint32_t)
+////        + hash_size
+////        + hash_size
+////        + point::serialized_size()
+////        + subscript.serialized_size(true)
+////        + sizeof(uint64_t)
+////        + sizeof(uint32_t)
+////        + hash_size
+////        + sizeof(uint32_t)
+////        + sizeof(uint32_t);
+////}
 
 // private/static
 hash_digest script::generate_version_0_signature_hash(const transaction& tx,
@@ -566,14 +576,15 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     const auto any = !is_zero(flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
-    const auto single = (flag == coverage::hash_single) &&
-        index < tx.outputs()->size();
-
-    // Create writer.
+    const auto single = (flag == coverage::hash_single);
     const auto& input = (*tx.inputs())[index];
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(version_0_preimage_size(subscript));
-    write::bytes::copy sink(data);
+
+    // Create hash writer.
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+
+    // TODO: tx.points_hash(), tx.sequences_hash(), and tx.outputs_hash() can be
+    // cached for validation across all inputs of the transaction.
 
     // 1. transaction version (4).
     sink.write_little_endian(tx.version());
@@ -588,7 +599,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     input->point().to_data(sink);
 
     // 5. script of the input (with prefix).
-    subscript.to_data(sink, true);
+    subscript.to_data(sink, prefixed);
 
     // 6. value of the output spent by this input (8).
     sink.write_little_endian(value);
@@ -596,9 +607,9 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     // 7. sequence of the input (4).
     sink.write_little_endian(input->sequence());
 
-    // 8. outputs (or output) double hash, or null hash (32).
-    sink.write_bytes(all ? tx.outputs_hash() : (single ?
-        bitcoin_hash((*tx.outputs())[index]->to_data()) : null_hash));
+    // 8. output (or outputs) double sha256 hash, or null hash (32).
+    sink.write_bytes(single ? tx.output_hash(index) :
+        (all ? tx.outputs_hash() : null_hash));
 
     // 9. transaction locktime (4).
     sink.write_little_endian(tx.locktime());
@@ -606,8 +617,8 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     // 10. hash type of the signature (4 [not 1]).
     sink.write_4_bytes_little_endian(flags);
 
-    BITCOIN_ASSERT(sink.get_position() == data.size());
-    return bitcoin_hash(data);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 // Signing (unversioned and version 0).
@@ -1037,11 +1048,6 @@ operations script::to_pay_witness_script_hash_pattern(const hash_digest& hash)
 
 // Utilities (non-static).
 // ----------------------------------------------------------------------------
-
-hash_digest script::to_payments_key() const
-{
-    return sha256_hash(to_data(false));
-}
 
 const data_chunk& script::witness_program() const
 {

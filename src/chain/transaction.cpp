@@ -343,8 +343,14 @@ uint64_t transaction::fee() const
 hash_digest transaction::hash(bool witness) const
 {
     // Witness coinbase tx hash is assumed to be null_hash (bip141).
-    return witness && segregated_ && is_coinbase() ? null_hash :
-        bitcoin_hash(to_data(witness));
+    if (witness && segregated_ && is_coinbase())
+        return null_hash;
+
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+    to_data(sink, witness);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 // Methods.
@@ -393,60 +399,57 @@ chain::points transaction::points() const
     return out;
 }
 
+hash_digest transaction::output_hash(uint32_t index) const
+{
+    //*************************************************************************
+    // CONSENSUS: if index exceeds outputs in signature hash, return null_hash.
+    //*************************************************************************
+    if (index >= outputs_->size())
+        return null_hash;
+
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+
+    (*outputs_)[index]->to_data(sink);
+
+    sink.flush();
+    return sha256_hash(sha256);
+}
+
 hash_digest transaction::outputs_hash() const
 {
-    const auto size = std::accumulate(outputs()->begin(), outputs()->end(), zero,
-        [&](size_t total, const output::ptr& output)
-        {
-            return total + output->serialized_size();
-        });
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
 
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(size);
-    write::bytes::copy writer(data);
     for (const auto& output: *outputs())
-        output->to_data(writer);
+        output->to_data(sink);
 
-    BITCOIN_ASSERT(writer && writer.get_position() == size);
-    return bitcoin_hash(data);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 hash_digest transaction::points_hash() const
 {
-    const auto size = std::accumulate(inputs()->begin(), inputs()->end(), zero,
-        [&](size_t total, const input::ptr& input)
-        {
-            return total + input->point().serialized_size();
-        });
-
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(size);
-    write::bytes::copy writer(data);
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
 
     for (const auto& input: *inputs())
-        input->point().to_data(writer);
+        input->point().to_data(sink);
 
-    BITCOIN_ASSERT(writer && writer.get_position() == size);
-    return bitcoin_hash(data);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 hash_digest transaction::sequences_hash() const
 {
-    const auto size = std::accumulate(inputs()->begin(), inputs()->end(), zero,
-        [&](size_t total, const input::ptr& input)
-        {
-            return total + sizeof(input->sequence());
-        });
-
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(size);
-    write::bytes::copy writer(data);
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
 
     for (const auto& input: *inputs())
-        writer.write_4_bytes_little_endian(input->sequence());
+        sink.write_4_bytes_little_endian(input->sequence());
 
-    BITCOIN_ASSERT(writer && writer.get_position() == size);
-    return bitcoin_hash(data);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 // Guard (context free).

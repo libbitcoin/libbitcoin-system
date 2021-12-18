@@ -301,7 +301,7 @@ static bool create_token(encrypted_token& out_token,
     auto factor = scrypt_token(normal(passphrase), owner_salt);
 
     if (lot_sequence)
-        factor = bitcoin_hash(splice(factor, owner_entropy));
+        factor = bitcoin_hash(factor, owner_entropy);
 
     ec_compressed point;
     if (!secret_to_public(point, factor))
@@ -384,7 +384,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     auto secret = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (parse.lot_sequence())
-        secret = bitcoin_hash(splice(secret, parse.entropy()));
+        secret = bitcoin_hash(secret, parse.entropy());
 
     ec_compressed point;
     if (!secret_to_public(point, secret))
@@ -403,7 +403,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 
     aes256_decrypt(derived.second, extended);
     const auto decrypt1 = xor_data<half>(extended, derived.first);
-    const auto factor = bitcoin_hash(splice(decrypt1, part.second));
+    const auto factor = bitcoin_hash(decrypt1, part.second);
     if (!ec_multiply(secret, factor))
         return false;
 
@@ -475,7 +475,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     auto factor = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (lot_sequence)
-        factor = bitcoin_hash(splice(factor, parse.entropy()));
+        factor = bitcoin_hash(factor, parse.entropy());
 
     ec_compressed point;
     if (!secret_to_public(point, factor))

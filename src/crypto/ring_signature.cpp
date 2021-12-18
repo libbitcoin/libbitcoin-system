@@ -355,30 +355,31 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     if (rings.size() >= max_uint32 || signature.proofs.size() != rings.size())
         return false;
 
-    data_chunk e0_data;
-    e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
+    // Hash data to produce e0 value.
+    hash_digest e0_hash;
+    hash::sha256::copy sink(e0_hash);
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
         // Calculate first e value for this ring.
         const auto e_i_0 = borromean_hash(digest, signature.challenge, i, zero);
+
         if (!e_i_0)
             return false;
 
         // Calculate the last R value.
         const auto last_R = calculate_last_R_verify(rings[i], e_i_0, i, digest,
             signature);
+
         if (!last_R)
             return false;
 
         // Add this ring to e0.
-        extend(e0_data, last_R.point());
+        sink.write_bytes(last_R.point());
     }
 
-    extend(e0_data, digest);
-
-    // Hash data to produce e0 value.
-    const auto e0_hash = sha256_hash(e0_data);
+    sink.write_bytes(digest);
+    sink.flush();
 
     // Verification step.
     return e0_hash == signature.challenge;

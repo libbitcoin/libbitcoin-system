@@ -39,13 +39,13 @@ hash_digest hash_message(const data_slice& message)
     // This is a specified magic prefix.
     static const std::string prefix("Bitcoin Signed Message:\n");
 
-    data_chunk data;
-    write::bytes::data out(data);
-    out.write_string(prefix);
-    out.write_variable(message.size());
-    out.write_bytes(message);
-    out.flush();
-    return bitcoin_hash(data);
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+    sink.write_string(prefix);
+    sink.write_variable(message.size());
+    sink.write_bytes(message);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 static bool recover(short_hash& out_hash, bool compressed,

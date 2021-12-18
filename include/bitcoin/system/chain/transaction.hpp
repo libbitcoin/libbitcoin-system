@@ -105,6 +105,7 @@ public:
     bool is_dusty(uint64_t minimum_output_value) const;
     size_t signature_operations(bool bip16, bool bip141) const;
     chain::points points() const;
+    hash_digest output_hash(uint32_t index) const;
     hash_digest outputs_hash() const;
     hash_digest points_hash() const;
     hash_digest sequences_hash() const;

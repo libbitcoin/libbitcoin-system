@@ -92,6 +92,7 @@ public:
     const operations& ops() const;
 
     /// Computed properties.
+    hash_digest hash() const;
     size_t serialized_size(bool prefix) const;
 
     // Signing.
@@ -159,9 +160,6 @@ public:
 
     // Utilities (non-static).
     // ------------------------------------------------------------------------
-
-    /// Generate the Electrum standard server payments key (output scripts).
-    hash_digest to_payments_key() const;
 
     /// Common pattern detection.
     const data_chunk& witness_program() const;

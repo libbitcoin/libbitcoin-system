@@ -461,8 +461,8 @@ bool block::is_invalid_witness_commitment() const
     if (coinbase->inputs()->front()->reserved_hash(reserved))
         for (const auto& output: boost::adaptors::reverse(*coinbase->outputs()))
             if (output->committed_hash(committed))
-                return committed == bitcoin_hash(
-                    splice(generate_merkle_root(true), reserved));
+                return committed == bitcoin_hash(generate_merkle_root(true),
+                    reserved);
     
     // If no block tx has witness data the commitment is optional (bip141).
     return !is_segregated();

@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_SUITE(encrypted__decrypt_public)
     BOOST_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
     BOOST_REQUIRE_EQUAL(out_version, version); \
     BOOST_REQUIRE(!out_is_compressed); \
-    const auto derived_address = payment_address({ out_point, out_is_compressed }, out_version).encoded()
+    const auto derived_address = payment_address(ec_public{ out_point, out_is_compressed }, out_version).encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
 BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)

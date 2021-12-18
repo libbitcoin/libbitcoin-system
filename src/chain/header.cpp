@@ -263,7 +263,11 @@ uint32_t header::nonce() const
 // computed
 hash_digest header::hash() const
 {
-    return bitcoin_hash(to_data());
+    hash_digest sha256;
+    hash::sha256::copy sink(sha256);
+    to_data(sink);
+    sink.flush();
+    return sha256_hash(sha256);
 }
 
 // static/private
