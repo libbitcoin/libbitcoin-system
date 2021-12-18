@@ -21,6 +21,18 @@
 
 #include <bitcoin/system/crypto/checksum.hpp>
 #include <bitcoin/system/crypto/encryption.hpp>
+#include <bitcoin/system/crypto/external/aes256.h>
+#include <bitcoin/system/crypto/external/crypto_scrypt.h>
+#include <bitcoin/system/crypto/external/hmac_sha256.h>
+#include <bitcoin/system/crypto/external/hmac_sha512.h>
+#include <bitcoin/system/crypto/external/lax_der_parsing.h>
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.h>
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.h>
+#include <bitcoin/system/crypto/external/ripemd160.h>
+#include <bitcoin/system/crypto/external/sha1.h>
+#include <bitcoin/system/crypto/external/sha256.h>
+#include <bitcoin/system/crypto/external/sha512.h>
+#include <bitcoin/system/crypto/external/zeroize.h>
 #include <bitcoin/system/crypto/elliptic_curve.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>

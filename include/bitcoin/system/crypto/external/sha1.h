@@ -38,7 +38,7 @@ typedef struct SHA1CTX
     size_t index;
 } SHA1CTX;
 
-void SHA1_(const uint8_t* message, size_t length,
+void SHA1(const uint8_t* message, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH]);
 
 void SHA1Init(SHA1CTX* context);

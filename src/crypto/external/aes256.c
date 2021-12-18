@@ -17,7 +17,7 @@
  *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "aes256.h"
+#include "../../../include/bitcoin/system/crypto/external/aes256.h"
 
 #include <errno.h>
 #include <stdint.h>

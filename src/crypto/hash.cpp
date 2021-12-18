@@ -22,15 +22,15 @@
 #include <cstdint>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/serial/serial.hpp>
-#include "external/crypto_scrypt.h"
-#include "external/hmac_sha256.h"
-#include "external/hmac_sha512.h"
-#include "external/pbkdf2_sha256.h"
-#include "external/pkcs5_pbkdf2.h"
-#include "external/ripemd160.h"
-#include "external/sha1.h"
-#include "external/sha256.h"
-#include "external/sha512.h"
+#include <bitcoin/system/crypto/external/crypto_scrypt.h>
+#include <bitcoin/system/crypto/external/hmac_sha256.h>
+#include <bitcoin/system/crypto/external/hmac_sha512.h>
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.h>
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.h>
+#include <bitcoin/system/crypto/external/ripemd160.h>
+#include <bitcoin/system/crypto/external/sha1.h>
+#include <bitcoin/system/crypto/external/sha256.h>
+#include <bitcoin/system/crypto/external/sha512.h>
 
 namespace libbitcoin {
 namespace system {
@@ -143,28 +143,28 @@ data_chunk ripemd160_hash_chunk(const data_slice& data)
 short_hash sha1_hash(const data_slice& data)
 {
     short_hash hash;
-    SHA1_(data.data(), data.size(), hash.data());
+    SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
 data_chunk sha1_hash_chunk(const data_slice& data)
 {
     data_chunk hash(short_hash_size);
-    SHA1_(data.data(), data.size(), hash.data());
+    SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
 hash_digest sha256_hash(const data_slice& data)
 {
     hash_digest hash;
-    SHA256_(data.data(), data.size(), hash.data());
+    SHA256(data.data(), data.size(), hash.data());
     return hash;
 }
 
 data_chunk sha256_hash_chunk(const data_slice& data)
 {
     data_chunk hash(hash_size);
-    SHA256_(data.data(), data.size(), hash.data());
+    SHA256(data.data(), data.size(), hash.data());
     return hash;
 }
 
@@ -198,7 +198,7 @@ data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
 long_hash sha512_hash(const data_slice& data)
 {
     long_hash hash;
-    SHA512_(data.data(), data.size(), hash.data());
+    SHA512(data.data(), data.size(), hash.data());
     return hash;
 }
 

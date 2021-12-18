@@ -39,6 +39,7 @@
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
+#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
 #include <bitcoin/system/stream/streamers.hpp>
 #include <bitcoin/system/stream/streams.hpp>
 #include <bitcoin/system/stream/stream_result.hpp>

@@ -6,9 +6,9 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#include "ripemd160.h"
+#include "../../../include/bitcoin/system/crypto/external/ripemd160.h"
 
-#include "zeroize.h"
+#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 /* collect four bytes into one word: */
 #define BYTES_TO_DWORD(bytes) \

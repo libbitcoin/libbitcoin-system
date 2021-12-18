@@ -26,13 +26,13 @@
  * This file was originally written by Colin Percival as part of the Tarsnap
  * online backup system.
  */
-#include "crypto_scrypt.h"
+#include "../../../include/bitcoin/system/crypto/external/crypto_scrypt.h"
 
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pbkdf2_sha256.h"
+#include "../../../include/bitcoin/system/crypto/external/pbkdf2_sha256.h"
 
 static void blkcpy(uint8_t*, uint8_t*, size_t);
 static void blkxor(uint8_t*, uint8_t*, size_t);

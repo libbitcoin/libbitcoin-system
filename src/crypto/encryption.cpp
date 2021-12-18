@@ -22,7 +22,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/crypto/elliptic_curve.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
-#include "external/aes256.h"
+#include <bitcoin/system/crypto/external/aes256.h>
 
 namespace libbitcoin {
 namespace system {

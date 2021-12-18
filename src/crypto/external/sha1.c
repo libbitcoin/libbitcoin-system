@@ -30,7 +30,7 @@
  * Adapted:
  *      by Libbitcoin Developers on 7 September 2016
  */
-#include "sha1.h"
+#include "../../../include/bitcoin/system/crypto/external/sha1.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -41,7 +41,7 @@
 void SHA1PadMessage(SHA1CTX* context);
 void SHA1ProcessMessageBlock(SHA1CTX* context);
 
-void SHA1_(const uint8_t* message, size_t length,
+void SHA1(const uint8_t* message, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH])
 {
     SHA1CTX context;

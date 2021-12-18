@@ -41,6 +41,7 @@
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
+#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -117,6 +118,24 @@ namespace flip
 
         /// A bit reader/writer of a data_slab (no push and requires own sink).
         using copy = make_streamer<flip_sink<data_slab>, bit_flipper>;
+    }
+}
+
+namespace hash
+{
+    namespace sha256
+    {
+        /// A hash writer that writes a hash to a std::ostream.
+        using ostream = sha256_writer<std::ostream>;
+
+        /// A hash writer that copies a hash to a data_slab.
+        using copy = make_streamer<copy_sink<data_slab>, sha256_writer>;
+
+        /// A hash writer that inserts a hash into a container.
+        template <typename Container>
+        using push = make_streamer<push_sink<Container>, sha256_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
     }
 }
 

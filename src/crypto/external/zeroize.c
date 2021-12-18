@@ -15,7 +15,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "zeroize.h"
+#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 #include <stddef.h>
 #include <stdint.h>

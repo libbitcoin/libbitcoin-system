@@ -26,7 +26,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include "external/lax_der_parsing.h"
+#include <bitcoin/system/crypto/external/lax_der_parsing.h>
 #include "secp256k1_initializer.hpp"
 
 namespace libbitcoin {

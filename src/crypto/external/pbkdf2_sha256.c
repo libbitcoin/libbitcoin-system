@@ -23,15 +23,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "pbkdf2_sha256.h"
+#include "../../../include/bitcoin/system/crypto/external/pbkdf2_sha256.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include "hmac_sha256.h"
-#include "zeroize.h"
+#include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
+#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 static inline void be32enc(void* pp, uint32_t x)
 {
