@@ -23,6 +23,7 @@
 #include <functional>
 #include <vector>
 #include <bitcoin/system/compat.hpp>
+#include <cstddef>
 
 namespace libbitcoin {
 namespace wallet {
