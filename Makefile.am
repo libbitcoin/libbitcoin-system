@@ -51,7 +51,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/transaction.cpp \
     src/chain/witness.cpp \
     src/chain/enums/opcode.cpp \
-    src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
     src/config/base32.cpp \
@@ -59,9 +58,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/base64.cpp \
     src/config/base85.cpp \
     src/config/block.cpp \
-    src/config/client_filter.cpp \
     src/config/directory.cpp \
-    src/config/endpoint.cpp \
     src/config/hash160.cpp \
     src/config/hash256.cpp \
     src/config/header.cpp \
@@ -249,7 +246,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/transaction.cpp \
     test/chain/witness.cpp \
     test/chain/enums/opcode.cpp \
-    test/config/authority.cpp \
     test/config/base16.cpp \
     test/config/base2.cpp \
     test/config/base32.cpp \
@@ -257,8 +253,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/base64.cpp \
     test/config/base85.cpp \
     test/config/block.cpp \
-    test/config/client_filter.cpp \
-    test/config/endpoint.cpp \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
@@ -421,7 +415,6 @@ include_bitcoin_system_chain_enums_HEADERS = \
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \
-    include/bitcoin/system/config/authority.hpp \
     include/bitcoin/system/config/base16.hpp \
     include/bitcoin/system/config/base2.hpp \
     include/bitcoin/system/config/base32.hpp \
@@ -429,10 +422,8 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/base64.hpp \
     include/bitcoin/system/config/base85.hpp \
     include/bitcoin/system/config/block.hpp \
-    include/bitcoin/system/config/client_filter.hpp \
     include/bitcoin/system/config/config.hpp \
     include/bitcoin/system/config/directory.hpp \
-    include/bitcoin/system/config/endpoint.hpp \
     include/bitcoin/system/config/hash160.hpp \
     include/bitcoin/system/config/hash256.hpp \
     include/bitcoin/system/config/header.hpp \

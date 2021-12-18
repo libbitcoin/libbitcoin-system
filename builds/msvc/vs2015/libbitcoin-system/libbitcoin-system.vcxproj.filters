@@ -228,9 +228,6 @@
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\authority.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base16.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -252,13 +249,7 @@
     <ClCompile Include="..\..\..\..\src\config\block.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\client_filter.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp">
@@ -674,9 +665,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp">
-      <Filter>include\bitcoin\system\config</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
@@ -698,16 +686,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\client_filter.hpp">
-      <Filter>include\bitcoin\system\config</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\config.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\directory.hpp">
-      <Filter>include\bitcoin\system\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\endpoint.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash160.hpp">

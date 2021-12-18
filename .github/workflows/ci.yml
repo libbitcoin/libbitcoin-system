@@ -1,0 +1,99 @@
+###############################################################################
+#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+name: Continuous Integration Build
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+  verify-linux-installsh:
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: "clang"
+            assert: ""
+            cc: "clang"
+            cflags: "-Os -fPIE"
+            cxx: "clang++"
+            cxxflags: "-Os -fPIE"
+            link: "--disable-static"
+            icu: ""
+            boost: "--build-boost"
+
+          - os: ubuntu-latest
+            compiler: "clang"
+            assert: ""
+            cc: "clang"
+            cflags: "-Os -fPIE"
+            cxx: "clang++"
+            cxxflags: "-Os -fPIE"
+            link: "--disable-shared"
+            icu: "--build-icu --with-icu"
+            boost: "--build-boost"
+
+          - os: ubuntu-latest
+            compiler: "gcc"
+            assert: ""
+            cc: "gcc"
+            cflags: "-Os -fPIE"
+            cxx: "g++"
+            cxxflags: "-Os -fPIE"
+            link: "--disable-static"
+            icu: ""
+            boost: "--build-boost"
+
+          - os: ubuntu-latest
+            compiler: "gcc"
+            assert: "--disable-ndebug"
+            cc: "gcc"
+            cflags: "-Og -g --coverage -fPIE"
+            cxx: "g++"
+            cxxflags: "-Og -g --coverage -fPIE"
+            link: "--disable-shared"
+            icu: "--build-icu --with-icu"
+            boost: "--build-boost"
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: ${{ matrix.cc }}
+      CFLAGS: '${{ matrix.cflags }}'
+      CXX: ${{ matrix.cxx }}
+      CXXFLAGS: '${{ matrix.cxxflags }}'
+      CI_REPOSITORY: '${{ github.repository }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install git ${{ matrix.compiler }} build-essential autoconf automake libtool pkg-config
+
+      - name: Execute install.sh
+        run: >
+          ./install.sh
+          ${{ matrix.link }}
+          ${{ matrix.assert }}
+          --enable-isystem
+          ${{ matrix.icu }}
+          ${{ matrix.boost }}
+          --build-dir=${{ github.workspace }}/build/
+          --prefix=${{ github.workspace }}/dependencies/
+
+      - name: Display error logs
+        if: ${{ failure() }}
+        run: |
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+          gcc -v
+          clang -v
+

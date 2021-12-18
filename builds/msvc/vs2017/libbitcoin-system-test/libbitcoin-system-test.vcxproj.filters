@@ -120,9 +120,6 @@
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\authority.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\base16.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -142,12 +139,6 @@
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\client_filter.cpp">
-      <Filter>src\config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp">
