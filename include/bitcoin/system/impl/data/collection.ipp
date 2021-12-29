@@ -119,7 +119,7 @@ bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
             return (first && second && (*first == *second)) ||
                 (!first && !second);
         });
-};
+}
 
 template <typename Collection>
 bool starts_with(const typename Collection::const_iterator& begin,
