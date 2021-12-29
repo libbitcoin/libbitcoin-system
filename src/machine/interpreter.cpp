@@ -870,7 +870,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (!program.pop(count))
         return error::op_check_multisig_verify4;
 
-    if (count > keys.size())
+    if (is_greater(count, keys.size()))
         return error::op_check_multisig_verify5;
 
     data_stack endorsements;
