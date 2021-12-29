@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chain_chain_state_tests)
+BOOST_AUTO_TEST_SUITE(chain_state_tests)
 
 struct test_chain_state: chain::chain_state
 {

@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <chrono>
 
-BOOST_AUTO_TEST_SUITE(chain_header_tests)
+BOOST_AUTO_TEST_SUITE(header_tests)
 
 using namespace system::chain;
 

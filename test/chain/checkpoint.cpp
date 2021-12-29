@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chain_checkpoint_tests)
+BOOST_AUTO_TEST_SUITE(checkpoint_tests)
 
 using namespace system::chain;
 

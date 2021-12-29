@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chain_block_tests)
+BOOST_AUTO_TEST_SUITE(block_tests)
 
 using namespace system::chain;
 
