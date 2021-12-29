@@ -617,7 +617,7 @@ chain::script program::subscript(const endorsements& endorsements) const
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-bool program::prepare(ec_signature& signature, data_chunk& key,
+bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
     hash_digest& hash, const system::endorsement& endorsement) const
 {
     uint8_t flags;
@@ -636,7 +636,7 @@ bool program::prepare(ec_signature& signature, data_chunk& key,
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-bool program::prepare(ec_signature& signature, data_chunk& key,
+bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
     hash_digest& hash, hash_cache& cache, const system::endorsement& endorsement,
     const script& subscript) const
 {
