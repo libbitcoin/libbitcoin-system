@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
     {
         0,
         0,
-        { {}, {} },
+        inputs{ {}, {} },
         {}
     };
 
@@ -1097,7 +1097,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
     {
         0,
         0,
-        { {}, {} },
+        inputs{ {}, {} },
         {}
     };
 
@@ -1304,7 +1304,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__tru
     {
         0,
         0,
-        { {}, {} },
+        inputs{ {}, {} },
         {}
     };
 
