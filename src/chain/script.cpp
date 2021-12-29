@@ -461,7 +461,7 @@ static void sign_all(writer& sink, const transaction& tx, uint32_t index,
         }
     };
 
-    const auto write_outputs = [&tx, index](writer& sink)
+    const auto write_outputs = [&tx](writer& sink)
     {
         sink.write_variable(tx.outputs()->size());
         for (const auto& output: *tx.outputs())
