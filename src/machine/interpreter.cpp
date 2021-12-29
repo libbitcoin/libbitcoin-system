@@ -44,7 +44,7 @@ interpreter::result interpreter::op_unevaluated(opcode code)
 }
 
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
-interpreter::result interpreter::op_nop(program& program, opcode code)
+interpreter::result interpreter::op_nop(program& program, opcode /*code*/)
 {
     if (script::is_enabled(program.forks(), forks::nops_rule))
         return error::op_success;
