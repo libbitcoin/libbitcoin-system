@@ -65,7 +65,9 @@ public:
         const chain::witness::ptr& witness, uint32_t sequence);
 
     input(const data_slice& data);
+    input(std::istream&& stream);
     input(std::istream& stream);
+    input(reader&& source);
     input(reader& source);
 
     // Operators.

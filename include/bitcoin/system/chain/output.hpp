@@ -55,7 +55,9 @@ public:
     output(uint64_t value, const chain::script::ptr& script);
 
     output(const data_slice& data);
+    output(std::istream&& stream);
     output(std::istream& stream);
+    output(reader&& source);
     output(reader& source);
 
     // Operators.

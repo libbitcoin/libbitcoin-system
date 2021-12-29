@@ -67,8 +67,18 @@ point::point(const data_slice& data)
 {
 }
 
+point::point(std::istream&& stream)
+  : point(read::bytes::istream(stream))
+{
+}
+
 point::point(std::istream& stream)
   : point(read::bytes::istream(stream))
+{
+}
+
+point::point(reader&& source)
+  : point(from_data(source))
 {
 }
 

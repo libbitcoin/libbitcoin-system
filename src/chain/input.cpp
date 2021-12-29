@@ -126,8 +126,18 @@ input::input(const data_slice& data)
 {
 }
 
+input::input(std::istream&& stream)
+  : input(read::bytes::istream(stream))
+{
+}
+
 input::input(std::istream& stream)
   : input(read::bytes::istream(stream))
+{
+}
+
+input::input(reader&& source)
+  : input(from_data(source))
 {
 }
 

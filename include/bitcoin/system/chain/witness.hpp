@@ -54,7 +54,9 @@ public:
     witness(const data_stack& stack);
 
     witness(const data_slice& data, bool prefix);
+    witness(std::istream&& stream, bool prefix);
     witness(std::istream& stream, bool prefix);
+    witness(reader&& source, bool prefix);
     witness(reader& source, bool prefix);
 
     witness(const std::string& mnemonic);

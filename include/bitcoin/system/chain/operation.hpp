@@ -57,7 +57,9 @@ public:
 
     /// These deserialize operations (with codes), not from push-data.
     operation(const data_slice& op_data);
+    operation(std::istream&& stream);
     operation(std::istream& stream);
+    operation(reader&& source);
     operation(reader& source);
 
     /// Literal string is disallowed, as it conflicts with const data_slice&.

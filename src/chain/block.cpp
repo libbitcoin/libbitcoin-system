@@ -90,8 +90,18 @@ block::block(const data_slice& data, bool witness)
 {
 }
 
+block::block(std::istream&& stream, bool witness)
+  : block(read::bytes::istream(stream), witness)
+{
+}
+
 block::block(std::istream& stream, bool witness)
   : block(read::bytes::istream(stream), witness)
+{
+}
+
+block::block(reader&& source, bool witness)
+  : block(from_data(source, witness))
 {
 }
 

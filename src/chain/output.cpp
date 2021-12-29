@@ -75,8 +75,18 @@ output::output(const data_slice& data)
 {
 }
 
+output::output(std::istream&& stream)
+  : output(read::bytes::istream(stream))
+{
+}
+
 output::output(std::istream& stream)
   : output(read::bytes::istream(stream))
+{
+}
+
+output::output(reader&& source)
+  : output(from_data(source))
 {
 }
 

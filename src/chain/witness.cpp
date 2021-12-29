@@ -47,7 +47,7 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness()
-  : witness({}, false)
+  : witness(data_stack{}, false)
 {
 }
 
@@ -76,8 +76,18 @@ witness::witness(const data_slice& data, bool prefix)
 {
 }
 
+witness::witness(std::istream&& stream, bool prefix)
+  : witness(read::bytes::istream(stream), prefix)
+{
+}
+
 witness::witness(std::istream& stream, bool prefix)
   : witness(read::bytes::istream(stream), prefix)
+{
+}
+
+witness::witness(reader&& source, bool prefix)
+  : witness(from_data(source, prefix))
 {
 }
 

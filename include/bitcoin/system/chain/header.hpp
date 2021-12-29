@@ -60,7 +60,9 @@ public:
         uint32_t nonce);
 
     header(const data_slice& data);
+    header(std::istream&& stream);
     header(std::istream& stream);
+    header(reader&& source);
     header(reader& source);
 
     // Operators.

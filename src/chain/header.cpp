@@ -91,8 +91,18 @@ header::header(const data_slice& data)
 {
 }
 
+header::header(std::istream&& stream)
+  : header(read::bytes::istream(stream))
+{
+}
+
 header::header(std::istream& stream)
   : header(read::bytes::istream(stream))
+{
+}
+
+header::header(reader&& source)
+  : header(from_data(source))
 {
 }
 

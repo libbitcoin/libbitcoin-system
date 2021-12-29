@@ -60,7 +60,9 @@ public:
         const outputs_ptr& outputs);
     
     transaction(const data_slice& data, bool witness);
+    transaction(std::istream&& stream, bool witness);
     transaction(std::istream& stream, bool witness);
+    transaction(reader&& source, bool witness);
     transaction(reader& source, bool witness);
 
     // Operators.

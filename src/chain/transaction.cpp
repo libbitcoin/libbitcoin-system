@@ -100,8 +100,18 @@ transaction::transaction(const data_slice& data, bool witness)
 {
 }
 
+transaction::transaction(std::istream&& stream, bool witness)
+  : transaction(read::bytes::istream(stream), witness)
+{
+}
+
 transaction::transaction(std::istream& stream, bool witness)
   : transaction(read::bytes::istream(stream), witness)
+{
+}
+
+transaction::transaction(reader&& source, bool witness)
+  : transaction(from_data(source, witness))
 {
 }
 

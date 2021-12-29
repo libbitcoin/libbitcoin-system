@@ -85,8 +85,18 @@ operation::operation(const data_slice& op_data)
 {
 }
 
+operation::operation(std::istream&& stream)
+  : operation(read::bytes::istream(stream))
+{
+}
+
 operation::operation(std::istream& stream)
   : operation(read::bytes::istream(stream))
+{
+}
+
+operation::operation(reader&& source)
+  : operation(from_data(source))
 {
 }
 

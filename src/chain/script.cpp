@@ -60,7 +60,7 @@ bool script::is_enabled(uint32_t active_forks, forks fork)
 // ----------------------------------------------------------------------------
 
 script::script()
-  : script({}, false)
+  : script(operations{}, false)
 {
 }
 
@@ -89,8 +89,18 @@ script::script(const data_slice& data, bool prefix)
 {
 }
 
+script::script(std::istream&& stream, bool prefix)
+  : script(read::bytes::istream(stream), prefix)
+{
+}
+
 script::script(std::istream& stream, bool prefix)
   : script(read::bytes::istream(stream), prefix)
+{
+}
+
+script::script(reader&& source, bool prefix)
+  : script(from_data(source, prefix))
 {
 }
 

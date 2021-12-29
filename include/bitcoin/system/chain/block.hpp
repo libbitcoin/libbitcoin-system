@@ -59,7 +59,9 @@ public:
     block(const chain::header::ptr& header, const transactions_ptr& txs);
 
     block(const data_slice& data, bool witness);
+    block(std::istream&& stream, bool witness);
     block(std::istream& stream, bool witness);
+    block(reader&& source, bool witness);
     block(reader& source, bool witness);
 
     // Operators.

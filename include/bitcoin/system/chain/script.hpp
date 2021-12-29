@@ -61,7 +61,9 @@ public:
     script(const operations& ops);
 
     script(const data_slice& data, bool prefix);
+    script(std::istream&& stream, bool prefix);
     script(std::istream& stream, bool prefix);
+    script(reader&& source, bool prefix);
     script(reader& source, bool prefix);
 
     script(const std::string& mnemonic);

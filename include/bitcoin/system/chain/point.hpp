@@ -55,7 +55,9 @@ public:
     point(const hash_digest& hash, uint32_t index);
 
     point(const data_slice& data);
+    point(std::istream&& stream);
     point(std::istream& stream);
+    point(reader&& source);
     point(reader& source);
 
     // Operators.
