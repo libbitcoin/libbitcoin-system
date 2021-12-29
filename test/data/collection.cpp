@@ -25,6 +25,7 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 
 // TODO:
 // contains
+// equal_points
 // find_pair_position
 // find_position
 // insert_sorted

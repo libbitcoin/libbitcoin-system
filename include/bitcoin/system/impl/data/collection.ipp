@@ -107,7 +107,6 @@ bool contains(const Collection& list,
         });
 }
 
-// TODO: test.
 template <typename Element>
 bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
     std::vector<std::shared_ptr<const Element>>& right)
