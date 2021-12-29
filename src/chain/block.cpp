@@ -652,7 +652,6 @@ code block::accept(const context& state, size_t subsidy_interval,
     const auto bip34 = state.is_enabled(bip34_rule);
     const auto bip42 = state.is_enabled(bip42_rule);
     const auto bip50 = state.is_enabled(bip50_rule);
-    const auto bip113 = state.is_enabled(bip113_rule);
     const auto bip141 = state.is_enabled(bip141_rule);
 
     // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
