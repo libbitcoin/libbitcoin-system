@@ -39,14 +39,16 @@ namespace machine {
 
 using namespace system::chain;
 
+static const script default_script{};
+static const transaction default_transaction{};
 static default_allocator<chain::operation> no_fill_op_allocator{};
 
 // Constructors.
 // ----------------------------------------------------------------------------
 
 program::program()
-  : script_{},
-    transaction_{},
+  : script_(default_script),
+    transaction_(default_transaction),
     input_index_(0),
     forks_(0),
     value_(0),
@@ -59,7 +61,7 @@ program::program()
 
 program::program(const script& script)
   : script_(script),
-    transaction_{},
+    transaction_(default_transaction),
     input_index_(0),
     forks_(0),
     value_(0),
