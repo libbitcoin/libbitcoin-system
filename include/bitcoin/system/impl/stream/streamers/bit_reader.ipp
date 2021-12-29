@@ -39,7 +39,7 @@ namespace system {
 
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) noexcept
-  : byte_reader<IStream>(source), byte_(byte_reader<IStream>::pad),
+  : byte_reader<IStream>(source), byte_(byte_reader<IStream>::pad()),
     offset_(byte_bits)
 {
 }
@@ -165,7 +165,7 @@ void bit_reader<IStream>::load() noexcept
 {
     // The next bit read will be from this byte.
     offset_ = 0;
-    byte_ = byte_reader<IStream>::pad;
+    byte_ = byte_reader<IStream>::pad();
     byte_reader<IStream>::do_read_bytes(&byte_, one);
 }
 
@@ -173,7 +173,7 @@ template <typename IStream>
 void bit_reader<IStream>::reload() noexcept
 {
     offset_ = byte_bits;
-    byte_ = byte_reader<IStream>::pad;
+    byte_ = byte_reader<IStream>::pad();
     byte_reader<IStream>::do_rewind_bytes(two);
     byte_reader<IStream>::do_read_bytes(&byte_, one);
 }

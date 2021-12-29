@@ -36,7 +36,7 @@
 
 namespace libbitcoin {
 namespace system {
-    
+
 // All public methods must rely on protected for stream state except validity.
 
 // constructors
@@ -205,7 +205,7 @@ void byte_writer<OStream>::write_string_buffer(const std::string& value,
     write_bytes(data_slice(value).data(), length);
 
     // Pad to length with zeros, required for Bitcoin heading serialization.
-    write_bytes(data_chunk(size - length, pad));
+    write_bytes(data_chunk(size - length, pad()));
 }
 
 // context
@@ -251,7 +251,7 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     // It is not generally more efficient to call stream_.put() for one byte.
 
     // Write past stream start invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum);
+    BITCOIN_ASSERT(size <= maximum());
     stream_.write(reinterpret_cast<const char*>(data),
         static_cast<typename OStream::pos_type>(size));
 

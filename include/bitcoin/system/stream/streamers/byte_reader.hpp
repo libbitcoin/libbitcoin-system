@@ -134,13 +134,15 @@ public:
     bool operator!() const noexcept override;
 
 protected:
-    static constexpr uint8_t pad = 0x00;
+    static constexpr uint8_t pad() { return 0x00; };
 
     // The maximum addressable stream position.
     // Should be defined on IStream::pos_type, however that is implementation
     // defined and is not an integer domain, so rely on std::streamsize.
-    static constexpr size_t maximum = to_unsigned(
-        std::numeric_limits<std::streamsize>::max());
+    static constexpr size_t maximum()
+    {
+        return to_unsigned(std::numeric_limits<std::streamsize>::max());
+    };
 
     virtual uint8_t do_peek_byte() noexcept;
     virtual void do_read_bytes(uint8_t* buffer, size_t size) noexcept;

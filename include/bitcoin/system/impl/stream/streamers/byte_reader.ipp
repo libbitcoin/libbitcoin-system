@@ -215,7 +215,7 @@ uint8_t byte_reader<IStream>::peek_byte() noexcept
 template <typename IStream>
 uint8_t byte_reader<IStream>::read_byte() noexcept
 {
-    uint8_t value = pad;
+    uint8_t value = pad();
     do_read_bytes(&value, one);
     return value;
 }
@@ -389,7 +389,7 @@ template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 {
     if (limiter(one))
-        return pad;
+        return pad();
 
     // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
@@ -397,7 +397,7 @@ uint8_t byte_reader<IStream>::do_peek_byte() noexcept
     // the stream is peeked past end, including when empty.
     const auto value = stream_.peek();
     validate();
-    return valid() ? value : pad;
+    return valid() ? value : pad();
 }
 
 template <typename IStream>
@@ -414,7 +414,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
     // invalid if the stream is get past end, including when empty.
 
     // Read past stream end invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum);
+    BITCOIN_ASSERT(size <= maximum());
     stream_.read(reinterpret_cast<char*>(buffer),
         static_cast<typename IStream::pos_type>(size));
 
@@ -428,7 +428,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
         return;
 
     // Skip past stream end invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum);
+    BITCOIN_ASSERT(size <= maximum());
     seeker(static_cast<typename IStream::pos_type>(size));
 }
 
@@ -442,7 +442,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
     remaining_ = ceilinged_add(remaining_, size);
 
     // Rewind past stream start invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum);
+    BITCOIN_ASSERT(size <= maximum());
     seeker(-static_cast<typename IStream::pos_type>(size));
 }
 
