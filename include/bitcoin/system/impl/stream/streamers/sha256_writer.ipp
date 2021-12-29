@@ -72,8 +72,7 @@ void sha256_writer<OStream>::flusher() noexcept
 {
     hash_digest hash;
     SHA256Final(&context_, hash.data());
-    byte_writer<OStream>::do_write_bytes(hash.data(),
-        byte_writer<OStream>::maximum());
+    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }
 
