@@ -316,7 +316,6 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__default__unlimited)
 // set_position back tests both set_position and rewind.
 BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_back__limited)
 {
-    const auto size = 5;
     std::istringstream stream{ "abcde" };
     read::bytes::istream reader(stream);
 
@@ -363,7 +362,6 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_back__limited)
 // set_position forward tests both set_position and skip.
 BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_forward_peek__limited)
 {
-    const auto size = 5;
     std::istringstream stream{ "abcde" };
     read::bytes::istream reader(stream);
 

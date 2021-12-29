@@ -33,7 +33,6 @@ namespace system {
 namespace neutrino {
 
 // Golomb-Rice related values (bip158).
-constexpr uint8_t neutrino_filter_type = 0x00;
 constexpr uint8_t golomb_bits = 19;
 constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
