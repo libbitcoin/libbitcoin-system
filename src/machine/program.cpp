@@ -156,7 +156,7 @@ code program::evaluate(const operation& op)
 bool program::is_invalid() const
 {
     const auto bip141 = script::is_enabled(forks_, forks::bip141_rule);
-    const auto nops_rule = script::is_enabled(forks_, forks::nops_rule);
+    ////const auto nops_rule = script::is_enabled(forks_, forks::nops_rule);
 
     // TODO: nops rule must be enabled.
     return
