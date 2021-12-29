@@ -10,7 +10,7 @@ name: Continuous Integration Build
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-  verify-linux-installsh:
+  verify-installsh:
 
     strategy:
       fail-fast: false
@@ -18,7 +18,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            packager: "apt"
+            packages: "clang"
             compiler: "clang"
+            coverage: "false"
             assert: ""
             cc: "clang"
             cflags: "-Os -fPIE"
@@ -29,7 +32,10 @@ jobs:
             boost: "--build-boost"
 
           - os: ubuntu-latest
+            packager: "apt"
+            packages: "clang"
             compiler: "clang"
+            coverage: "false"
             assert: ""
             cc: "clang"
             cflags: "-Os -fPIE"
@@ -40,7 +46,10 @@ jobs:
             boost: "--build-boost"
 
           - os: ubuntu-latest
+            packager: "apt"
+            packages: "gcc"
             compiler: "gcc"
+            coverage: "false"
             assert: ""
             cc: "gcc"
             cflags: "-Os -fPIE"
@@ -51,12 +60,43 @@ jobs:
             boost: "--build-boost"
 
           - os: ubuntu-latest
+            packager: "apt"
+            packages: "gcc"
             compiler: "gcc"
+            coverage: "true"
             assert: "--disable-ndebug"
             cc: "gcc"
             cflags: "-Og -g --coverage -fPIE"
             cxx: "g++"
             cxxflags: "-Og -g --coverage -fPIE"
+            link: "--disable-shared"
+            icu: "--build-icu --with-icu"
+            boost: "--build-boost"
+
+          - os: macos-latest
+            packager: "brew"
+            packages: "boost"
+            compiler: "clang"
+            coverage: "false"
+            assert: ""
+            cc: "clang"
+            cflags: "-Os -fPIE"
+            cxx: "clang++"
+            cxxflags: "-Os -fPIE"
+            link: "--disable-static"
+            icu: "--with-icu"
+            boost: ""
+
+          - os: macos-latest
+            packager: "brew"
+            packages: ""
+            compiler: "clang"
+            coverage: "false"
+            assert: ""
+            cc: "clang"
+            cflags: "-Os -fPIE"
+            cxx: "clang++"
+            cxxflags: "-Os -fPIE"
             link: "--disable-shared"
             icu: "--build-icu --with-icu"
             boost: "--build-boost"
@@ -74,10 +114,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Prepare toolchain
+      - name: Prepare toolchain [apt]
+        if: ${{ matrix.packager == 'apt' }}
         run: |
           sudo apt-get update
-          sudo apt-get install git ${{ matrix.compiler }} build-essential autoconf automake libtool pkg-config
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+
+      - name: Prepare toolchain [brew]
+        if: ${{ matrix.packager == 'brew' }}
+        run: |
+          brew install git autoconf automake libtool pkg-config ${{ matrix.packages }}
 
       - name: Execute install.sh
         run: >
@@ -90,10 +136,30 @@ jobs:
           --build-dir=${{ github.workspace }}/build/
           --prefix=${{ github.workspace }}/dependencies/
 
-      - name: Display error logs
+      - name: Coveralls Calculation [apt-only]
+        if: ${{ (matrix.packager == 'apt') && (matrix.coverage == 'true') }}
+        run: |
+          sudo apt-get install lcov
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/dependencies/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Coveralls.io Upload
+        if: ${{ matrix.coverage == 'true' }}
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Display errors from logs
         if: ${{ failure() }}
         run: |
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+          echo "----------------------------------------------------"
+          echo "Error display"
+          echo "Error display"
+          echo "Error display"
+          echo "----------------------------------------------------"
           gcc -v
           clang -v
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
