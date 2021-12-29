@@ -112,7 +112,11 @@ template <typename Element>
 bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
     std::vector<std::shared_ptr<const Element>>& right)
 {
-    return std::equal(left.begin(), left.end(), right.begin(), right.end(),
+    // C++14: a new std::equal overload can replace this guard.
+    if (left.size() != right.size())
+        return false;
+
+    return std::equal(left.begin(), left.end(), right.begin(),
         [](const std::shared_ptr<const Element>& first,
            const std::shared_ptr<const Element>& second)
         {
