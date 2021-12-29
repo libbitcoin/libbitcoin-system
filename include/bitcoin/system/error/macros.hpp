@@ -21,6 +21,7 @@
 
 #include <string>
 #include <system_error>
+#include <type_traits>
 #include <unordered_map>
 
 // The category parameter must be namespaced. The category name must correspond
