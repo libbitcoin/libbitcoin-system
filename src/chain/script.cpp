@@ -249,16 +249,11 @@ void script::to_data(std::ostream& stream, bool prefix) const
 
 void script::to_data(writer& sink, bool prefix) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size(prefix);)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     if (prefix)
         sink.write_variable(serialized_size(false));
 
     for (const auto& op: ops())
         op.to_data(sink);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 std::string script::to_string(uint32_t active_forks) const

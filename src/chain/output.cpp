@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -163,13 +162,8 @@ void output::to_data(std::ostream& stream) const
 
 void output::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size();)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     sink.write_8_bytes_little_endian(value_);
     script_->to_data(sink, true);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 size_t output::serialized_size() const

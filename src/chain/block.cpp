@@ -29,7 +29,6 @@
 #include <utility>
 #include <unordered_map>
 #include <boost/range/adaptor/reversed.hpp>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
@@ -191,16 +190,11 @@ void block::to_data(std::ostream& stream, bool witness) const
 
 void block::to_data(writer& sink, bool witness) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size(witness);)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     header_->to_data(sink);
     sink.write_variable(txs_->size());
 
     for (const auto& tx: *txs_)
         tx->to_data(sink, witness);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // Properties.

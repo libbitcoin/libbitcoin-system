@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <utility>
 #include <boost/thread.hpp>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -219,17 +218,12 @@ void header::to_data(std::ostream& stream) const
 
 void header::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size();)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     sink.write_4_bytes_little_endian(version_);
     sink.write_bytes(previous_block_hash_);
     sink.write_bytes(merkle_root_);
     sink.write_4_bytes_little_endian(timestamp_);
     sink.write_4_bytes_little_endian(bits_);
     sink.write_4_bytes_little_endian(nonce_);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // Properties.

@@ -361,9 +361,6 @@ void operation::to_data(std::ostream& stream) const
 
 void operation::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size();)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     // Underflow is op-undersized data, it is serialized with no opcode.
     // An underflow could only be a final token in a script deserialization.
     if (is_underflow())
@@ -392,8 +389,6 @@ void operation::to_data(writer& sink) const
 
         sink.write_bytes(*data_);
     }
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // To String.

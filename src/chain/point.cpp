@@ -170,13 +170,8 @@ void point::to_data(std::ostream& stream) const
 
 void point::to_data(writer& sink) const
 {
-    DEBUG_ONLY(const auto bytes = serialized_size();)
-    DEBUG_ONLY(const auto start = sink.get_position();)
-
     sink.write_bytes(hash_);
     sink.write_4_bytes_little_endian(index_);
-
-    BITCOIN_ASSERT(sink && sink.get_position() - start == bytes);
 }
 
 // Properties.
