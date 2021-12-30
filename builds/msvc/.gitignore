@@ -1,3 +1,5 @@
+*.bin
+*.json
 *.suo
 *.opensdf
 *.sdf
