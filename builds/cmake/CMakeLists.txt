@@ -187,7 +187,7 @@ endif()
 
 # Find secp256k1
 #------------------------------------------------------------------------------
-find_package( Secp256K1 0.1.0.19 REQUIRED )
+find_package( Secp256K1 0.1.0.20 REQUIRED )
 
 # Define project common includes directories
 #------------------------------------------------------------------------------
