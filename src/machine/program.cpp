@@ -582,7 +582,8 @@ chain::script program::subscript() const
     // TODO: Construct script on operations shared pointer and offset parameter.
     // TODO: if offset provided, all iteration starts at offset point. This
     // TODO: precludes copying operations in the case of a jump without mutate.
-    operations sub(std::distance(jump(), end()), no_fill_op_allocator);
+    operations sub(no_fill_op_allocator);
+    sub.resize(std::distance(jump(), end()));
     std::copy(jump(), end(), sub.begin());
     return { sub };
 }
