@@ -22,8 +22,8 @@
 // These test general std::error behaviors, see _t tests for codes.
 BOOST_AUTO_TEST_SUITE(error_tests)
 
-static const auto bitcoin_category_name = "bc";
 static const auto system_category_name = "system";
+static const auto bitcoin_category_name = "bc";
 static const auto default_message = "system code";
 static const auto success_message = "success";
 static const auto not_found_message = "object does not exist";
@@ -112,7 +112,8 @@ BOOST_AUTO_TEST_CASE(error_t__code__category_name__expected)
 
 BOOST_AUTO_TEST_CASE(error_t__code__default_error_condition_category_name__expected)
 {
-    BOOST_REQUIRE_EQUAL(code().default_error_condition().category().name(), system_category_name);
+    // This varies by platform ("generic" on macOS/clang, "system" elsewhere).
+    ////BOOST_REQUIRE_EQUAL(code().default_error_condition().category().name(), system_category_name);
     BOOST_REQUIRE_EQUAL(code(error::not_found).default_error_condition().category().name(), bitcoin_category_name);
 }
 
