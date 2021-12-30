@@ -109,7 +109,7 @@ public:
     static long_hash to_seed(const hd_private& key);
 
     electrum();
-    electrum(const electrum& other);
+    ////electrum(const electrum& other);
     electrum(const electrum_v1& old);
 
     /// Construct from the "recovery seed" (mnemonic phrase).

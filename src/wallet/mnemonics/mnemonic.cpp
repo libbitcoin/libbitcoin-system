@@ -197,10 +197,10 @@ mnemonic::mnemonic()
 {
 }
 
-mnemonic::mnemonic(const mnemonic& other)
-  : languages(other)
-{
-}
+////mnemonic::mnemonic(const mnemonic& other)
+////  : languages(other)
+////{
+////}
 
 mnemonic::mnemonic(const std::string& sentence, language identifier)
   : mnemonic(split(sentence, identifier), identifier)

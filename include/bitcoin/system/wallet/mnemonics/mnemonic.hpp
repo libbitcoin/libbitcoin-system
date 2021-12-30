@@ -71,7 +71,7 @@ public:
     static bool is_valid_word_count(size_t count);
 
     mnemonic();
-    mnemonic(const mnemonic& other);
+    ////mnemonic(const mnemonic& other);
 
     /// wiki.trezor.io/recovery_seed
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).
