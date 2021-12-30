@@ -22,7 +22,7 @@ jobs:
             packages: "clang"
             compiler: "clang"
             coverage: "false"
-            assert: ""
+            assert: "--disable-ndebug"
             cc: "clang"
             cflags: "-Os -fPIE"
             cxx: "clang++"
@@ -64,7 +64,7 @@ jobs:
             packages: "gcc"
             compiler: "gcc"
             coverage: "true"
-            assert: "--disable-ndebug"
+            assert: ""
             cc: "gcc"
             cflags: "-Og -g --coverage -fPIE"
             cxx: "g++"
@@ -151,14 +151,9 @@ jobs:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
-      - name: Display errors from logs
-        if: ${{ failure() }}
+      - name: Display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
         run: |
-          echo "----------------------------------------------------"
-          echo "Error display"
-          echo "Error display"
-          echo "Error display"
-          echo "----------------------------------------------------"
           gcc -v
           clang -v
           cat ${{ github.workspace }}/build/build-*/bootstrap.log

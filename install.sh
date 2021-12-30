@@ -748,8 +748,8 @@ build_all()
 {
     build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
     build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    build_from_github libbitcoin secp256k1 version7 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
-    build_from_ci libbitcoin libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
+    build_from_github evoskuil secp256k1 version8 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_ci evoskuil libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
 
 
