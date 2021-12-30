@@ -19,22 +19,36 @@
 #ifndef LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 #define LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <string>
 #include <system_error>
-#include <type_traits>
 #include <unordered_map>
 
 // The category parameter must be namespaced. The category name must correspond
 // to the error type by the naming convention: category_t as the error type.
+// std::hash specialization is unrelated to error registration.
 #define DECLARE_STD_ERROR_REGISTRATION(cat) \
 namespace std { \
 template <> \
 struct is_error_code_enum<cat##_t> \
-  : public true_type {}; \
+  : public true_type \
+{ \
+}; \
 template <> \
 struct is_error_condition_enum<cat##_condition_t> \
-  : public true_type {}; \
-}
+  : public true_type \
+{ \
+}; \
+template<> struct hash<cat##_t> \
+{ \
+    size_t operator()(const cat##_t& value) const \
+    { \
+        return std::hash<uint8_t>()(static_cast<uint8_t>(value)); \
+    } \
+}; \
+} // namespace std
 
 // For use of codes without conditions.
 #define DECLARE_ERROR_T_CODE_CATEGORY(cat) \
