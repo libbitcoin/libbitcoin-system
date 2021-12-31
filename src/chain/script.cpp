@@ -345,12 +345,12 @@ static void sign_single(writer& sink, const transaction& tx, uint32_t index,
     {
         const auto& inputs = *tx.inputs();
         const auto& self = inputs[index];
-        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_ptrs::const_iterator input;
 
-        sink.write_variable(any ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs.size());
 
-        for (input = inputs.begin(); !any && *input != self; ++input)
+        for (input = inputs.begin(); !anyone && *input != self; ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -361,7 +361,7 @@ static void sign_single(writer& sink, const transaction& tx, uint32_t index,
         subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
-        for (++input; !any && input != inputs.end(); ++input)
+        for (++input; !anyone && input != inputs.end(); ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -394,12 +394,12 @@ static void sign_none(writer& sink, const transaction& tx, uint32_t index,
     {
         const auto& inputs = *tx.inputs();
         const auto& self = inputs[index];
-        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_ptrs::const_iterator input;
 
-        sink.write_variable(any ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs.size());
 
-        for (input = inputs.begin(); !any && *input != self; ++input)
+        for (input = inputs.begin(); !anyone && *input != self; ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -410,7 +410,7 @@ static void sign_none(writer& sink, const transaction& tx, uint32_t index,
         subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
-        for (++input; !any && input != inputs.end(); ++input)
+        for (++input; !anyone && input != inputs.end(); ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -432,12 +432,12 @@ static void sign_all(writer& sink, const transaction& tx, uint32_t index,
     {
         const auto& inputs = *tx.inputs();
         const auto& self = inputs[index];
-        const auto any = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_ptrs::const_iterator input;
 
-        sink.write_variable(any ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs.size());
 
-        for (input = inputs.begin(); !any && *input != self; ++input)
+        for (input = inputs.begin(); !anyone && *input != self; ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -448,7 +448,7 @@ static void sign_all(writer& sink, const transaction& tx, uint32_t index,
         subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
-        for (++input; !any && input != inputs.end(); ++input)
+        for (++input; !anyone && input != inputs.end(); ++input)
         {
             (*input)->point().to_data(sink);
             sink.write_bytes(empty_script);
@@ -578,7 +578,7 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
         return generate_unversioned_signature_hash(tx, index, subscript, flags);
 
     // Set options.
-    const auto any = !is_zero(flags & coverage::anyone_can_pay);
+    const auto anyone = !is_zero(flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
@@ -588,17 +588,19 @@ hash_digest script::generate_version_0_signature_hash(const transaction& tx,
     hash_digest sha256;
     hash::sha256::copy sink(sha256);
 
-    // TODO: tx.points_hash(), tx.sequences_hash(), and tx.outputs_hash() can be
-    // cached for validation across all inputs of the transaction.
+    // tx.points_hash() [!anyone]
+    // tx.sequences_hash() [!anyone && all]
+    // tx.outputs_hash() [all]
+    // Above can be cached for validation across all inputs of the transaction.
 
     // 1. transaction version (4).
     sink.write_little_endian(tx.version());
 
     // 2. inpoints double sha256 hash (32).
-    sink.write_bytes(!any ? tx.points_hash() : null_hash);
+    sink.write_bytes(!anyone ? tx.points_hash() : null_hash);
 
     // 3. sequences double sha256 hash (32).
-    sink.write_bytes(!any && all ? tx.sequences_hash() : null_hash);
+    sink.write_bytes(!anyone && all ? tx.sequences_hash() : null_hash);
 
     // 4. outpoint (32-byte hash + 4-byte little endian).
     input->point().to_data(sink);
