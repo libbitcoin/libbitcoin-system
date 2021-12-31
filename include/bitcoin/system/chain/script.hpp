@@ -97,23 +97,6 @@ public:
     hash_digest hash() const;
     size_t serialized_size(bool prefix) const;
 
-    // Signing.
-    // ------------------------------------------------------------------------
-
-    static hash_digest generate_signature_hash(const transaction& tx,
-        uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
-        script_version version, bool bip143);
-
-    static bool check_signature(const ec_signature& signature,
-        const data_slice& public_key, const script& subscript,
-        const transaction& tx, uint32_t index, uint64_t value, uint8_t flags,
-        script_version version, bool bip143);
-
-    static bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& prevout_script, const transaction& tx,
-        uint32_t index, uint64_t value, uint8_t flags, script_version version,
-        bool bip143);
-
     // Utilities (static).
     // ------------------------------------------------------------------------
 
@@ -194,11 +177,6 @@ private:
     static script from_data(reader& source, bool prefix);
     static script from_string(const std::string& mnemonic);
     static size_t op_count(reader& source);
-    static hash_digest generate_unversioned_signature_hash(const transaction& tx,
-        uint32_t index, const script& subscript, uint8_t flags);
-    static hash_digest generate_version_0_signature_hash(const transaction& tx,
-        uint32_t index, const script& subscript, uint64_t value, uint8_t flags,
-        bool bip143);
 
     // Script should be stored as shared.
     operations ops_;

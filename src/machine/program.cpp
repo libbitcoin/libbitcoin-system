@@ -126,7 +126,7 @@ program::program(const script& script, const program& other)
 // Condition, alternate, jump and operation_count are not moved.
 program::program(const script& script, program&& other, bool)
   : script_(script),
-    transaction_(other.transaction_),
+    transaction_(std::move(other.transaction_)),
     input_index_(other.input_index_),
     forks_(other.forks_),
     value_(other.value_),
@@ -686,8 +686,8 @@ hash_digest program::signature_hash(const script& subscript, uint8_t flags) cons
     const auto bip143 = script::is_enabled(forks(), forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return script::generate_signature_hash(transaction(), input_index_,
-        subscript, value(), flags, version(), bip143);
+    return transaction_.signature_hash(input_index_, subscript, value(), flags,
+        version(), bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.

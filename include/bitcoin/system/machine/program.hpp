@@ -160,7 +160,7 @@ public:
         const chain::script& subscript) const;
 
 private:
-    // A space-efficient dynamic bitset (specialized by c++ std libr).
+    // A space-efficient dynamic bitset (specialized by c++ std lib).
     typedef std::vector<bool> bool_stack;
 
     static chain::operations create_delete_ops(const endorsements& data);

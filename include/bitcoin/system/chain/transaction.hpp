@@ -112,6 +112,19 @@ public:
     hash_digest points_hash() const;
     hash_digest sequences_hash() const;
 
+    bool check_signature(const ec_signature& signature,
+        const data_slice& public_key, const script& subscript,
+        uint32_t index, uint64_t value, uint8_t flags, script_version version,
+        bool bip143) const;
+
+    bool create_endorsement(endorsement& out, const ec_secret& secret,
+        const script& prevout_script, uint32_t index, uint64_t value,
+        uint8_t flags, script_version version, bool bip143) const;
+
+    hash_digest signature_hash(uint32_t index,
+        const script& subscript, uint64_t value, uint8_t flags,
+        script_version version, bool bip143) const;
+
     // Guards (for tx pool without compact blocks).
     // ------------------------------------------------------------------------
 
@@ -180,6 +193,19 @@ private:
 
     // delegated
     code connect_input(const context& state, size_t index) const;
+
+    // signature hash
+    void signature_hash_single(writer& sink, uint32_t index,
+        const script& subscript, uint8_t flags) const;
+    void signature_hash_none(writer& sink, uint32_t index,
+        const script& subscript, uint8_t flags) const;
+    void signature_hash_all(writer& sink, uint32_t index,
+        const script& subscript, uint8_t flags) const;
+    hash_digest unversioned_signature_hash(uint32_t index,
+        const script& subscript, uint8_t flags) const;
+    hash_digest version_0_signature_hash(uint32_t index,
+        const script& subscript, uint64_t value, uint8_t flags,
+        bool bip143) const;
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
