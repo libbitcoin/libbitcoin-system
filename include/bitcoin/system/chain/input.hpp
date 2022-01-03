@@ -122,8 +122,6 @@ protected:
         const chain::witness::ptr& witness, uint32_t sequence, bool valid,
         const chain::prevout::ptr& prevout);
 
-    void reset();
-
 private:
     static input from_data(reader& source);
     bool embedded_script(chain::script& out) const;

@@ -92,8 +92,6 @@ protected:
     point(hash_digest&& hash, uint32_t index, bool valid);
     point(const hash_digest& hash, uint32_t index, bool valid);
 
-    void reset();
-
 private:
     static point from_data(reader& source);
 
