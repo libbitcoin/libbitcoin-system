@@ -562,7 +562,7 @@ chain::script::ptr program::subscript() const
     // TODO: Construct script on operations shared pointer and offset parameter.
     // TODO: if offset provided, all iteration starts at offset point. This
     // TODO: prevents wasted copying ops in the case of a jump without mutate.
-    return to_shared<script>(new script{ { jump(), end() } });
+    return to_shared<script>(new script{ operations{ jump(), end() } });
 }
 
 // ****************************************************************************
