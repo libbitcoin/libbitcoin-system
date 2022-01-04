@@ -75,7 +75,7 @@ jobs:
 
           - os: macos-latest
             packager: "brew"
-            packages: "boost icu4c"
+            packages: ""
             compiler: "clang"
             coverage: "false"
             assert: ""
@@ -84,8 +84,8 @@ jobs:
             cxx: "clang++"
             cxxflags: "-Os -fPIE"
             link: "--disable-static"
-            icu: "--with-icu"
-            boost: ""
+            icu: "--build-icu --with-icu"
+            boost: "--build-boost"
 
           - os: macos-latest
             packager: "brew"
