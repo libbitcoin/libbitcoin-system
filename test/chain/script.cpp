@@ -949,7 +949,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_3_tx__success)
     (*tx.inputs())[0]->prevout.reset(new prevout{ value0, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
 
     const auto value1 = 16777215u;
-    (*tx.inputs())[1]->prevout.reset(new prevout{ value0, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
+    (*tx.inputs())[1]->prevout.reset(new prevout{ value1, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
 
     // native P2WSH witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
