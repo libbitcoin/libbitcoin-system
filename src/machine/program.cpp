@@ -667,7 +667,6 @@ chain::operations program::create_delete_ops(const endorsements& data)
     return strip;
 }
 
-// TODO: validate inputs from tx.connect and initialize private segwit cache.
 hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
