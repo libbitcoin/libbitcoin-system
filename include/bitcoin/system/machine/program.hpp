@@ -54,22 +54,24 @@ public:
     /// Create an instance that does not expect to verify signatures.
     /// This is useful for script utilities but not with input metadata.
     /// This can run ops via run(op, program) or the script via run(program).
-    program(const chain::script& script);
+    program(const chain::script::ptr& script);
 
     /// Create an instance with empty stacks, value unused/max (input run).
-    program(const chain::script& script, const chain::transaction& transaction,
-        uint32_t index, uint32_t forks);
+    program(const chain::script::ptr& script,
+        const chain::transaction& transaction, uint32_t index,
+        uint32_t forks);
 
     /// Create an instance with initialized stack (witness run, v0 by default).
-    program(const chain::script& script, const chain::transaction& transaction,
+    program(const chain::script::ptr& script,
+        const chain::transaction& transaction,
         uint32_t index, uint32_t forks, data_stack&& stack, uint64_t value,
         chain::script_version version=chain::script_version::zero);
 
     /// Create using copied tx, input, forks, value, stack (prevout run).
-    program(const chain::script& script, const program& other);
+    program(const chain::script::ptr& script, const program& other);
 
     /// Create using copied tx, input, forks, value and moved stack (p2sh run).
-    program(const chain::script& script, program&& other, bool move);
+    program(const chain::script::ptr& script, program&& other, bool move);
 
     /// Utilities.
     bool is_invalid() const;
@@ -145,10 +147,10 @@ public:
     // ------------------------------------------------------------------------
 
     /// Returns the subscript indicated by the last registered jump operation.
-    chain::script subscript() const;
+    chain::script::ptr subscript() const;
 
     /// Parameterized overload strips opcodes from returned subscript.
-    chain::script subscript(const endorsements& endorsements) const;
+    chain::script::ptr subscript(const endorsements& endorsements) const;
 
     bool prepare(ec_signature& signature, data_chunk& key, hash_digest& hash,
         const system::endorsement& endorsement) const;
@@ -170,7 +172,7 @@ private:
 
     bool stack_to_bool(bool clean) const;
 
-    const chain::script& script_;
+    const chain::script::ptr script_;
     const chain::transaction& transaction_;
     const uint32_t input_index_;
     const uint32_t forks_;

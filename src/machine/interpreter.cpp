@@ -910,7 +910,7 @@ interpreter::result interpreter::op_check_multisig_verify(
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
             if (!program.prepare(signature, key, hash, cache, *endorsement,
-                subscript))
+                *subscript))
                 return error::op_check_multisig_verify_parse;
 
             if (system::verify_signature(key, hash, signature))

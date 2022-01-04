@@ -39,15 +39,13 @@ namespace machine {
 
 using namespace system::chain;
 
-static const script default_script{};
 static const transaction default_transaction{};
-static default_allocator<chain::operation> no_fill_op_allocator{};
 
 // Constructors.
 // ----------------------------------------------------------------------------
 
 program::program()
-  : script_(default_script),
+  : script_(to_shared<script>()),
     transaction_(default_transaction),
     input_index_(0),
     forks_(0),
@@ -55,11 +53,11 @@ program::program()
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin())
+    jump_(script_->ops().begin())
 {
 }
 
-program::program(const script& script)
+program::program(const script::ptr& script)
   : script_(script),
     transaction_(default_transaction),
     input_index_(0),
@@ -68,48 +66,48 @@ program::program(const script& script)
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin())
+    jump_(script_->ops().begin())
 {
 }
 
-program::program(const script& script, const chain::transaction& transaction,
+program::program(const script::ptr& script, const chain::transaction& tx,
     uint32_t index, uint32_t forks)
   : script_(script),
-    transaction_(transaction),
+    transaction_(tx),
     input_index_(index),
     forks_(forks),
     value_(max_uint64),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin())
+    jump_(script_->ops().begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
     BITCOIN_ASSERT(index < transaction.inputs()->size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
-program::program(const script& script, const chain::transaction& transaction,
+program::program(const script::ptr& script, const chain::transaction& tx,
     uint32_t index, uint32_t forks, data_stack&& stack, uint64_t value,
     script_version version)
   : script_(script),
-    transaction_(transaction),
+    transaction_(tx),
     input_index_(index),
     forks_(forks),
     value_(value),
     version_(version),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin()),
+    jump_(script_->ops().begin()),
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < transaction.inputs()->size());
+    BITCOIN_ASSERT(index < tx.inputs()->size());
 }
 
 
 // Condition, alternate, jump and operation_count are not copied.
-program::program(const script& script, const program& other)
+program::program(const script::ptr& script, const program& other)
   : script_(script),
     transaction_(other.transaction_),
     input_index_(other.input_index_),
@@ -118,22 +116,22 @@ program::program(const script& script, const program& other)
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin()),
+    jump_(script_->ops().begin()),
     primary_(other.primary_)
 {
 }
 
 // Condition, alternate, jump and operation_count are not moved.
-program::program(const script& script, program&& other, bool)
+program::program(const script::ptr& script, program&& other, bool)
   : script_(script),
-    transaction_(std::move(other.transaction_)),
+    transaction_(other.transaction_),
     input_index_(other.input_index_),
     forks_(other.forks_),
     value_(other.value_),
     version_(script_version::unversioned),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_.ops().begin()),
+    jump_(script_->ops().begin()),
     primary_(std::move(other.primary_))
 {
 }
@@ -149,7 +147,7 @@ bool program::is_invalid() const
 
     // TODO: nops rule must be enabled.
     return
-        (/*nops_rule && */script_.is_oversized()) ||
+        (/*nops_rule && */script_->is_oversized()) ||
         (input_index_ > transaction_.inputs()->size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
@@ -187,7 +185,7 @@ script_version program::version() const
 
 program::op_iterator program::begin() const
 {
-    return script_.ops().begin();
+    return script_->ops().begin();
 }
 
 program::op_iterator program::jump() const
@@ -197,7 +195,7 @@ program::op_iterator program::jump() const
 
 program::op_iterator program::end() const
 {
-    return script_.ops().end();
+    return script_->ops().end();
 }
 
 // Instructions.
@@ -245,7 +243,7 @@ bool program::increment_op_count(int32_t public_keys)
 
 bool program::register_jump(const operation& op)
 {
-    if (script_.ops().empty())
+    if (script_->ops().empty())
         return false;
 
     // This avoids std::find_if using equality operator override.
@@ -255,10 +253,10 @@ bool program::register_jump(const operation& op)
     };
 
     // This is not efficient (linear) but rarely used.
-    jump_ = std::find_if(script_.ops().begin(), script_.ops().end(), finder);
+    jump_ = std::find_if(script_->ops().begin(), script_->ops().end(), finder);
 
     // This is not reachable if op is an element of script_.
-    if (jump_ == script_.ops().end())
+    if (jump_ == script_->ops().end())
         return false;
 
     std::advance(jump_, one);
@@ -556,23 +554,15 @@ bool program::succeeded() const
 // CONSENSUS: Witness v0 scripts are not stripped (bip143/v0).
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script program::subscript() const
+chain::script::ptr program::subscript() const
 {
-    // TODO: Retain the script as a shared object. Currently both subscript
-    // TODO: methods return either a reference or a constructed copy. This
-    // TODO: necessitates returning a copy in either case. This copy can be
-    // TODO: eliminated by passing shared pointer copy in one case and a new
-    // TODO: shared pointer instance in the other.
     if (jump() == begin())
         return script_;
 
     // TODO: Construct script on operations shared pointer and offset parameter.
     // TODO: if offset provided, all iteration starts at offset point. This
-    // TODO: precludes copying operations in the case of a jump without mutate.
-    operations sub(no_fill_op_allocator);
-    sub.resize(std::distance(jump(), end()));
-    std::copy(jump(), end(), sub.begin());
-    return { sub };
+    // TODO: prevents wasted copying ops in the case of a jump without mutate.
+    return to_shared<script>(new script{ { jump(), end() } });
 }
 
 // ****************************************************************************
@@ -581,7 +571,7 @@ chain::script program::subscript() const
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script program::subscript(const endorsements& endorsements) const
+chain::script::ptr program::subscript(const endorsements& endorsements) const
 {
     const auto sub = subscript();
 
@@ -599,11 +589,11 @@ chain::script program::subscript(const endorsements& endorsements) const
     const auto strip = create_delete_ops(endorsements);
 
     // If no intersection, nothing to strip.
-    if (!intersecting(sub.ops(), strip))
+    if (!intersecting(sub->ops(), strip))
         return sub;
 
-    // Copy script operations for mutation.
-    return { difference(sub.ops(), strip) };
+    // Create a new script from stripped copy of operations.
+    return to_shared<script>(new script{ difference(sub->ops(), strip) });
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
@@ -618,7 +608,7 @@ bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    hash = signature_hash(subscript({ endorsement }), flags);
+    hash = signature_hash(*subscript({ endorsement }), flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = script::is_enabled(forks(), forks::bip66_rule);
@@ -647,8 +637,6 @@ bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
 
 // Private.
 // ----------------------------------------------------------------------------
-
-// TODO: no_fill_op_allocator was not working, review all.
 
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.

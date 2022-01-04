@@ -1168,12 +1168,12 @@ code transaction::connect(const context& state, uint32_t index) const
     // TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
 
     // Evaluate input script.
-    program input(in->script(), *this, index, state.forks);
+    program input(in->script_ptr(), *this, index, state.forks);
     if ((ec = interpreter::run(input)))
         return ec;
 
     // Evaluate output script using stack result from input script.
-    program prevout(in->prevout->script(), input);
+    program prevout(in->prevout->script_ptr(), input);
     if ((ec = interpreter::run(prevout)))
         return ec;
 
@@ -1189,9 +1189,37 @@ code transaction::connect(const context& state, uint32_t index) const
             return error::dirty_witness;
 
         // Validate the native script.
-        if ((ec = connect(in->witness(), index, state.forks,
-            in->prevout->script(), in->prevout->value())))
-            return ec;
+        switch (in->prevout->script().version())
+        {
+            case script_version::zero:
+            {
+                data_stack stack;
+                script witness_script;
+                if (!in->witness().extract_script(witness_script, stack,
+                    in->prevout->script()))
+                    return error::invalid_witness;
+
+                // A defined version indicates bip141 is active (not bip143).
+                program witness(to_shared<script>(witness_script), *this,
+                    index, state.forks, std::move(stack), in->prevout->value(),
+                    in->prevout->script().version());
+
+                if ((ec = interpreter::run(witness)))
+                    return ec;
+
+                // A v0 script must succeed with a clean true stack (bip141).
+                return witness.stack_result(true) ? error::script_success :
+                    error::stack_false;
+            }
+
+            // These versions are reserved for future extensions (bip141).
+            case script_version::reserved:
+                return error::script_success;
+
+            case script_version::unversioned:
+            default:
+                return error::unversioned_script;
+        }
     }
 
     // p2sh and p2w are mutually exclusive.
@@ -1203,7 +1231,7 @@ code transaction::connect(const context& state, uint32_t index) const
         // Embedded script must be at the top of the stack (bip16).
         script embedded_script(input.pop(), false);
 
-        program embedded(embedded_script, std::move(input), true);
+        program embedded(to_shared<script>(embedded_script), std::move(input), true);
         if ((ec = interpreter::run(embedded)))
             return ec;
 
@@ -1219,9 +1247,37 @@ code transaction::connect(const context& state, uint32_t index) const
                 return error::dirty_witness;
 
             // Validate the non-native script.
-            if ((ec = connect(in->witness(), index, state.forks, embedded_script,
-                in->prevout->value())))
-                return ec;
+            switch (embedded_script.version())
+            {
+                case script_version::zero:
+                {
+                    data_stack stack;
+                    script witness_script;
+                    if (!in->witness().extract_script(witness_script, stack,
+                        embedded_script))
+                        return error::invalid_witness;
+
+                    // A defined version indicates bip141 is active (not bip143).
+                    program witness(to_shared<script>(witness_script), *this,
+                        index, state.forks, std::move(stack),
+                        in->prevout->value(), embedded_script.version());
+
+                    if ((ec = interpreter::run(witness)))
+                        return ec;
+
+                    // A v0 script must succeed with a clean true stack (bip141).
+                    return witness.stack_result(true) ? error::script_success :
+                        error::stack_false;
+                }
+
+                // These versions are reserved for future extensions (bip141).
+                case script_version::reserved:
+                    return error::script_success;
+
+                case script_version::unversioned:
+                default:
+                    return error::unversioned_script;
+            }
         }
     }
 
@@ -1230,49 +1286,6 @@ code transaction::connect(const context& state, uint32_t index) const
         return error::unexpected_witness;
 
     return error::script_success;
-}
-
-// static
-// The program script is either a prevout script or an embedded script.
-// It validates this witness, from which the witness script is derived.
-code transaction::connect(const chain::witness& witness, uint32_t index, uint32_t forks,
-    const script& program_script, uint64_t value) const
-{
-    using namespace system::machine;
-
-    code ec;
-    script script;
-    data_stack stack;
-    const auto version = program_script.version();
-
-    // Versions (and version 0) are defined by bip141.
-    switch (version)
-    {
-        case script_version::zero:
-        {
-            if (!witness.extract_script(script, stack, program_script))
-                return error::invalid_witness;
-
-            // A defined version indicates bip141 is active (not bip143).
-            program witness(script, *this, index, forks, std::move(stack),
-                value, version);
-
-            if ((ec = interpreter::run(witness)))
-                return ec;
-
-            // A v0 script must succeed with a clean true stack (bip141).
-            return witness.stack_result(true) ? error::script_success :
-                error::stack_false;
-        }
-
-        // These versions are reserved for future extensions (bip141).
-        case script_version::reserved:
-            return error::script_success;
-
-        case script_version::unversioned:
-        default:
-            return error::unversioned_script;
-    }
 }
 
 } // namespace chain
