@@ -1146,9 +1146,11 @@ code transaction::accept(const context& state) const
 code transaction::connect(const context& state) const
 {
     code ec;
+
+    // Cache witness hash components that don't change per input.
     initialize_hash_cache();
 
-    // Skip coinbase.
+    // Validate scripts, skip coinbase.
     for (uint32_t input = one; input < inputs_->size(); ++input)
         if ((ec = connect(state, input)))
             return ec;
@@ -1156,6 +1158,8 @@ code transaction::connect(const context& state) const
     return error::transaction_success;
 }
 
+// TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
+// TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
 code transaction::connect(const context& state, uint32_t index) const
 {
     using namespace system::machine;
@@ -1163,9 +1167,6 @@ code transaction::connect(const context& state, uint32_t index) const
     code ec;
     bool witnessed;
     const auto& in = (*inputs_)[index];
-
-    // TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
-    // TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
 
     // Evaluate input script.
     program input(in->script_ptr(), *this, index, state.forks);
