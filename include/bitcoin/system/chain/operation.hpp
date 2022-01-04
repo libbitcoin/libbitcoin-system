@@ -158,6 +158,8 @@ private:
     static operation from_push_data(const chunk_ptr& data, bool minimal);
     static operation from_string(const std::string& mnemonic);
 
+    static chunk_ptr no_data();
+    static chunk_ptr any_data();
     static bool count_op(reader& source);
     static uint32_t read_data_size(opcode code, reader& source);
     static opcode opcode_from_data(const data_chunk& push_data, bool minimal);

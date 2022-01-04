@@ -37,14 +37,27 @@ namespace chain {
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
-// Push data is not possible with an invalid code, combination is invalid.
-static const auto any_data = to_shared<data_chunk>({ 0x42 });
+
+// static
+chunk_ptr operation::no_data()
+{
+    static const auto empty = to_shared<data_chunk>();
+    return empty;
+}
+
+// static
+chunk_ptr operation::any_data()
+{
+    // Push data is not possible with an invalid code, combination is invalid.
+    static const auto any = to_shared<data_chunk>({ 0x42 });
+    return any;
+}
 
 // Constructors.
 // ----------------------------------------------------------------------------
 
 operation::operation()
-  : operation(any_invalid, any_data, false)
+  : operation(any_invalid, any_data(), false)
 {
 }
 
@@ -61,7 +74,7 @@ operation::operation(const operation& other)
 
 // If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code)
-  : operation(code, to_shared<data_chunk>(), false)
+  : operation(code, no_data(), false)
 {
 }
 
@@ -136,7 +149,7 @@ operation& operation::operator=(const operation& other)
 
 bool operation::operator==(const operation& other) const
 {
-    // TODO: when converted, compare input/output membership, not ptrs.
+    // Ccompare data values not pointers.
     return (code_ == other.code_)
         && (*data_ == *other.data_)
         && (underflow_ == other.underflow_);
@@ -205,7 +218,7 @@ operation operation::from_push_data(const chunk_ptr& data, bool minimal)
 
     // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
-    const auto push = is_payload(code) ? data : to_shared<data_chunk>();
+    const auto push = is_payload(code) ? data : no_data();
 
     return { code, push, false };
 }
@@ -434,7 +447,7 @@ std::string operation::to_string(uint32_t active_forks) const
 bool operation::is_valid() const
 {
     // Push data is not possible with an invalid code, combination is invalid.
-    return !(code_ == any_invalid && data_ == any_data);
+    return !(code_ == any_invalid && !underflow_ && !data_->empty());
 }
 
 opcode operation::code() const
