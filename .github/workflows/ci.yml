@@ -75,7 +75,7 @@ jobs:
 
           - os: macos-latest
             packager: "brew"
-            packages: "boost"
+            packages: "boost icu4c"
             compiler: "clang"
             coverage: "false"
             assert: ""
@@ -130,7 +130,6 @@ jobs:
           ./install.sh
           ${{ matrix.link }}
           ${{ matrix.assert }}
-          --enable-isystem
           ${{ matrix.icu }}
           ${{ matrix.boost }}
           --build-dir=${{ github.workspace }}/build/
