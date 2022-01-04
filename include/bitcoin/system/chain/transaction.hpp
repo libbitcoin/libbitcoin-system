@@ -187,8 +187,6 @@ protected:
     // ------------------------------------------------------------------------
 
     code connect(const context& state, uint32_t index) const;
-    code connect(const chain::witness& witness, uint32_t index, uint32_t forks,
-        const script& script, uint64_t value) const;
 
 private:
     static transaction from_data(reader& source, bool witness);
