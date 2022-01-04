@@ -83,7 +83,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     jump_(script_->ops().begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < transaction.inputs()->size());
+    BITCOIN_ASSERT(index < transaction_.inputs()->size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
