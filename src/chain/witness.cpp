@@ -432,50 +432,6 @@ bool witness::extract_script(script& out_script,
     }
 }
 
-// Validation.
-// ----------------------------------------------------------------------------
-
-// static
-// The program script is either a prevout script or an embedded script.
-// It validates this witness, from which the witness script is derived.
-code witness::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& program_script, uint64_t value) const
-{
-    code ec;
-    script script;
-    data_stack stack;
-    const auto version = program_script.version();
-
-    // Versions (and version 0) are defined by bip141.
-    switch (version)
-    {
-        case script_version::zero:
-        {
-            if (!extract_script(script, stack, program_script))
-                return error::invalid_witness;
-
-            // A defined version indicates bip141 is active (not bip143).
-            program witness(script, tx, input_index, forks, std::move(stack),
-                value, version);
-
-            if ((ec = witness.evaluate()))
-                return ec;
-
-            // A v0 script must succeed with a clean true stack (bip141).
-            return witness.stack_result(true) ? error::script_success :
-                error::stack_false;
-        }
-
-        // These versions are reserved for future extensions (bip141).
-        case script_version::reserved:
-            return error::success;
-
-        case script_version::unversioned:
-        default:
-            return error::unversioned_script;
-    }
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

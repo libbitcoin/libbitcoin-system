@@ -112,6 +112,11 @@ public:
     hash_digest points_hash() const;
     hash_digest sequences_hash() const;
 
+    // signature_hash exposed for op_check_multisig caching.
+    hash_digest signature_hash(uint32_t index,
+        const script& subscript, uint64_t value, uint8_t flags,
+        script_version version, bool bip143) const;
+
     bool check_signature(const ec_signature& signature,
         const data_slice& public_key, const script& subscript,
         uint32_t index, uint64_t value, uint8_t flags, script_version version,
@@ -120,10 +125,6 @@ public:
     bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, uint32_t index, uint64_t value,
         uint8_t flags, script_version version, bool bip143) const;
-
-    hash_digest signature_hash(uint32_t index,
-        const script& subscript, uint64_t value, uint8_t flags,
-        script_version version, bool bip143) const;
 
     // Guards (for tx pool without compact blocks).
     // ------------------------------------------------------------------------
@@ -139,9 +140,6 @@ public:
     code connect(const context& state) const;
 
 protected:
-    ////friend class block;
-    ////void reset();
-
     transaction(bool segregated, uint32_t version, uint32_t locktime,
         const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid);
 
@@ -185,14 +183,18 @@ protected:
     bool is_unconfirmed_spend(size_t height) const;
     bool is_confirmed_double_spend(size_t height) const;
 
+    // Connect (contextual).
+    // ------------------------------------------------------------------------
+
+    code connect(const context& state, uint32_t index) const;
+    code connect(const chain::witness& witness, uint32_t index, uint32_t forks,
+        const script& script, uint64_t value) const;
+
 private:
     static transaction from_data(reader& source, bool witness);
     static bool segregated(const chain::inputs& inputs);
     static bool segregated(const inputs_ptr& inputs);
     ////static size_t maximum_size(bool coinbase);
-
-    // delegated
-    code connect_input(const context& state, size_t index) const;
 
     // signature hash
     void signature_hash_single(writer& sink, uint32_t index,
@@ -215,6 +217,20 @@ private:
     outputs_ptr outputs_;
     bool segregated_;
     bool valid_;
+
+    // Witness transaction signature caching.
+    // ------------------------------------------------------------------------
+
+    struct hash_cache
+    {
+        hash_digest outputs;
+        hash_digest points;
+        hash_digest sequences;
+    };
+
+    void initialize_hash_cache() const;
+
+    mutable std::unique_ptr<hash_cache> cache_;
 };
 
 typedef std::vector<transaction> transactions;

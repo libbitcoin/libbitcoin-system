@@ -1360,11 +1360,6 @@ code interpreter::run(program& program)
         error::invalid_stack_scope;
 }
 
-code interpreter::run(const operation& op, program& program)
-{
-    return run_op(op, program);
-}
-
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin

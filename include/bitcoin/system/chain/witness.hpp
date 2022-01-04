@@ -100,12 +100,6 @@ public:
     bool extract_script(script& out_script, data_stack& out_stack,
         const script& program_script) const;
 
-    // Validation.
-    // ------------------------------------------------------------------------
-
-    code verify(const transaction& tx, uint32_t input_index, uint32_t forks,
-        const script& program_script, uint64_t value) const;
-
 private:
     static witness from_data(reader& source, bool prefix);
     static witness from_string(const std::string& mnemonic);

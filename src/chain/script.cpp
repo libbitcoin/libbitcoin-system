@@ -26,7 +26,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
@@ -739,14 +738,14 @@ script_pattern script::input_pattern() const
 
 bool script::is_pay_to_witness(uint32_t forks) const
 {
-    // This is used internally as an optimization over using script::pattern.
+    // This is an optimization over using script::pattern.
     return is_enabled(forks, forks::bip141_rule) &&
         is_witness_program_pattern(ops());
 }
 
 bool script::is_pay_to_script_hash(uint32_t forks) const
 {
-    // This is used internally as an optimization over using script::pattern.
+    // This is an optimization over using script::pattern.
     return is_enabled(forks, forks::bip16_rule) &&
         is_pay_script_hash_pattern(ops());
 }
@@ -806,97 +805,6 @@ bool script::is_unspendable() const
     // There is no condition prior to the first opcode in a script.
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
-
-// Validation.
-// ----------------------------------------------------------------------------
-
-code script::verify(const transaction& tx, uint32_t index, uint32_t forks,
-    const script& prevout_script, uint64_t value)
-{
-    if (index >= tx.inputs()->size())
-        return error::inputs_overflow;
-
-    code ec;
-    bool witnessed;
-    const auto& in = (*tx.inputs())[index];
-
-    // TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
-    // TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
-
-    // Evaluate input script.
-    program input(in->script(), tx, index, forks);
-    if ((ec = input.evaluate()))
-        return ec;
-
-    // Evaluate output script using stack result from input script.
-    program prevout(prevout_script, input);
-    if ((ec = prevout.evaluate()))
-        return ec;
-
-    // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout.stack_result(false))
-        return error::stack_false;
-
-    // Triggered by output script push of version and witness program (bip141).
-    if ((witnessed = prevout_script.is_pay_to_witness(forks)))
-    {
-        // The input script must be empty (bip141).
-        if (!in->script().ops().empty())
-            return error::dirty_witness;
-
-        // Validate the native script.
-        if ((ec = in->witness().verify(tx, index, forks, prevout_script, value)))
-            return ec;
-    }
-
-    // p2sh and p2w are mutually exclusive.
-    else if (prevout_script.is_pay_to_script_hash(forks))
-    {
-        if (!is_relaxed_push(in->script().ops()))
-            return error::invalid_script_embed;
-
-        // Embedded script must be at the top of the stack (bip16).
-        script embedded_script(input.pop(), false);
-
-        program embedded(embedded_script, std::move(input), true);
-        if ((ec = embedded.evaluate()))
-            return ec;
-
-        // This precludes embedded witness programs of -0 (undocumented).
-        if (!embedded.stack_result(false))
-            return error::stack_false;
-
-        // Triggered by embedded push of version and witness program (bip141).
-        if ((witnessed = embedded_script.is_pay_to_witness(forks)))
-        {
-            // The input script must be a push of the embedded_script (bip141).
-            if (in->script().ops().size() != one)
-                return error::dirty_witness;
-
-            // Validate the non-native script.
-            if ((ec = in->witness().verify(tx, index, forks, embedded_script,
-                value)))
-                return ec;
-        }
-    }
-
-    // Witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !in->witness().stack().empty())
-        return error::unexpected_witness;
-
-    return error::success;
-}
-
-////code script::verify(const transaction& tx, uint32_t index,
-////    uint32_t forks)
-////{
-////    if (index >= tx.inputs().size())
-////        return error::inputs_overflow;
-////
-////    const auto& in = tx.inputs()[index];
-////    const auto prevout = in.prevout;
-////    return verify(tx, index, forks, prevout.script(), prevout.value());
-////}
 
 } // namespace chain
 } // namespace system

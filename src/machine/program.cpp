@@ -138,19 +138,6 @@ program::program(const script& script, program&& other, bool)
 {
 }
 
-// Instructions.
-// ----------------------------------------------------------------------------
-
-code program::evaluate()
-{
-    return interpreter::run(*this);
-}
-
-code program::evaluate(const operation& op)
-{
-    return interpreter::run(op, *this);
-}
-
 // Constant registers.
 // ----------------------------------------------------------------------------
 
@@ -680,6 +667,7 @@ chain::operations program::create_delete_ops(const endorsements& data)
     return strip;
 }
 
+// TODO: validate inputs from tx.connect and initialize private segwit cache.
 hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.

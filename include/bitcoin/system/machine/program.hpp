@@ -87,8 +87,6 @@ public:
     op_iterator end() const;
 
     /// Instructions.
-    code evaluate();
-    code evaluate(const chain::operation& op);
     bool increment_op_count(const chain::operation& op);
     bool increment_op_count(int32_t public_keys);
     bool register_jump(const chain::operation& op);

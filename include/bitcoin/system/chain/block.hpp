@@ -163,8 +163,8 @@ private:
 
     // delegated
     code check_transactions() const;
-    code connect_transactions(const context& state) const;
     code accept_transactions(const context& state) const;
+    code connect_transactions(const context& state) const;
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).

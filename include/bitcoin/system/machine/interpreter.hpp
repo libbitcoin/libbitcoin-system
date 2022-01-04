@@ -130,10 +130,6 @@ public:
     /// Run program script.
     static code run(program& program);
 
-    /// Run individual operations (idependent of the script).
-    /// For best performance use script runner for a sequence of operations.
-    static code run(const chain::operation& op, program& program);
-
 private:
     static result run_op(const chain::operation& op, program& program);
 };

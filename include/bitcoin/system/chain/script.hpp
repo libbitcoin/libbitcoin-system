@@ -121,6 +121,10 @@ public:
     static bool is_pay_witness_key_hash_pattern(const operations& ops);
     static bool is_pay_witness_script_hash_pattern(const operations& ops);
 
+    /// Pattern optimizaitons.
+    bool is_pay_to_witness(uint32_t forks) const;
+    bool is_pay_to_script_hash(uint32_t forks) const;
+
     /// Common input patterns (skh is also consensus).
     static bool is_sign_multisig_pattern(const operations& ops);
     static bool is_sign_public_key_pattern(const operations& ops);
@@ -158,20 +162,9 @@ public:
     bool is_oversized() const;
     bool is_unspendable() const;
 
-    // Validation.
-    // ------------------------------------------------------------------------
-
-    /// This overload obtains the previous output from metadata.
-    ////static code verify(const transaction& tx, uint32_t index, uint32_t forks);
-    static code verify(const transaction& tx, uint32_t index, uint32_t forks,
-        const script& prevout_script, uint64_t value);
-
 protected:
     script(operations&& ops, bool valid);
     script(const operations& ops, bool valid);
-
-    bool is_pay_to_witness(uint32_t forks) const;
-    bool is_pay_to_script_hash(uint32_t forks) const;
 
 private:
     static script from_data(reader& source, bool prefix);
