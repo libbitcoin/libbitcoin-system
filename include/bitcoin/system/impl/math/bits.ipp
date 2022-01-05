@@ -112,13 +112,13 @@ constexpr Value bit_right(size_t offset)
 template <typename Value, if_integer<Value>>
 constexpr bool get_right(Value value, size_t offset)
 {
-    return !is_zero(value & bit_right<Value>(offset));
+    return to_bool(value & bit_right<Value>(offset));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr bool get_left(Value value, size_t offset)
 {
-    return !is_zero(value & bit_left<Value>(offset));
+    return to_bool(value & bit_left<Value>(offset));
 }
 
 // set

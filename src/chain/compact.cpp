@@ -45,12 +45,12 @@ DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 
 inline bool is_negated(uint32_t compact)
 {
-    return !is_zero(compact & sign_bit);
+    return to_bool(compact & sign_bit);
 }
 
 inline bool is_nonzero(uint32_t compact)
 {
-    return !is_zero(compact & mantissa_max);
+    return to_bool(compact & mantissa_max);
 }
 
 inline uint8_t log_256(uint32_t mantissa)
@@ -66,7 +66,7 @@ inline uint8_t log_256(uint32_t mantissa)
 inline bool is_overflow(uint8_t exponent, uint32_t mantissa)
 {
     // Overflow if exponent would shift the mantissa more than 32 bytes.
-    return !is_zero(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
+    return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
 }
 
 inline uint32_t shift_low(uint8_t exponent)

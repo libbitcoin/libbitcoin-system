@@ -29,12 +29,12 @@ namespace chain {
 
 bool context::is_enabled(chain::forks fork) const
 {
-    return !is_zero(fork & forks);
+    return to_bool(fork & forks);
 }
 
 bool context::is_policy(chain::policy police) const
 {
-    return !is_zero(police & policy);
+    return to_bool(police & policy);
 }
 
 } // namespace chain

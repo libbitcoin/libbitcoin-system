@@ -52,7 +52,7 @@ using namespace bc::system::machine;
 
 bool script::is_enabled(uint32_t active_forks, forks fork)
 {
-    return !is_zero(fork & active_forks);
+    return to_bool(fork & active_forks);
 }
 
 // Constructors.

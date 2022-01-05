@@ -680,7 +680,7 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
         return unversioned_signature_hash(index, subscript, flags);
 
     // Set options.
-    const auto anyone = !is_zero(flags & coverage::anyone_can_pay);
+    const auto anyone = to_bool(flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
