@@ -39,13 +39,8 @@ public:
     typedef chain::chunk_ptrs::value_type ptr_type;
     typedef chain::chunk_ptrs::value_type::element_type value_type;
     typedef chain::operations::const_iterator op_iterator;
-    typedef std::map<uint8_t, hash_digest> hash_cache;
-
-    // Older libstdc++ does not allow erase with const iterator.
-    // This is a bug that requires we increase the minimum compiler version.
-    // So previously stack_iterator was a non-const iterator (new change).
-    ////typedef chunk_ptrs::iterator stack_iterator;
     typedef chain::chunk_ptrs::const_iterator stack_iterator;
+    typedef std::map<uint8_t, hash_digest> hash_cache;
 
     /// Create an instance that does not expect to verify signatures.
     /// This is useful for script utilities but not with input metadata.
@@ -75,6 +70,7 @@ public:
 
     /// Utilities.
     bool is_invalid() const;
+    bool is_enabled(chain::forks rule) const;
 
     /// Constant registers.
     uint32_t forks() const;
@@ -100,19 +96,22 @@ public:
     void push(bool value);
     void push_move(value_type&& item);
     void push_copy(const value_type& item);
+    void push_ref(ptr_type&& item);
+    void push_ref(const ptr_type& item);
 
     /// Primary pop.
     value_type pop();
+    ptr_type pop_ref();
     bool pop(int32_t& out_value);
     bool pop(number& out_number, size_t maxiumum_size=chain::max_number_size);
     bool pop_binary(number& first, number& second);
     bool pop_ternary(number& first, number& second, number& third);
     bool pop_position(stack_iterator& out_position);
-    bool pop(data_stack& section, int32_t signed_count);
+    bool pop(chain::chunk_ptrs& section, int32_t signed_count);
 
     /// Primary push/pop optimizations (active).
     void duplicate(size_t index);
-    void swap(size_t index_left, size_t index_right);
+    void swap(size_t left, size_t right);
     void erase(const stack_iterator& position);
     void erase(const stack_iterator& first, const stack_iterator& last);
 
@@ -123,16 +122,16 @@ public:
     bool stack_result(bool clean) const;
     bool is_stack_overflow() const;
     bool if_(const chain::operation& op) const;
-    const value_type& item(size_t index) /*const*/;
-    bool top(number& out_number, size_t maxiumum_size=chain::max_number_size) /*const*/;
-    stack_iterator position(size_t index) /*const*/;
+    bool top(number& out_number, size_t maxiumum_size=chain::max_number_size) const;
+    stack_iterator position(size_t index) const;
+    ptr_type item(size_t index) const;
 
     // Alternate stack.
     // ------------------------------------------------------------------------
 
     bool empty_alternate() const;
-    void push_alternate(value_type&& value);
-    value_type pop_alternate();
+    void push_alternate(ptr_type&& value);
+    ptr_type pop_alternate();
 
     // Conditional stack.
     // ------------------------------------------------------------------------
@@ -150,25 +149,26 @@ public:
     chain::script::ptr subscript() const;
 
     /// Parameterized overload strips opcodes from returned subscript.
-    chain::script::ptr subscript(const endorsements& endorsements) const;
+    chain::script::ptr subscript(const chain::chunk_ptrs& endorsements) const;
 
-    bool prepare(ec_signature& signature, data_chunk& key, hash_digest& hash,
-        const system::endorsement& endorsement) const;
+    bool prepare(ec_signature& signature, const data_chunk& key,
+        hash_digest& hash, const chain::chunk_ptr& endorsement) const;
 
-    bool prepare(ec_signature& signature, data_chunk& key, hash_digest& hash,
-        hash_cache& cache, const system::endorsement& endorsement,
+    bool prepare(ec_signature& signature, const data_chunk& key,
+        hash_digest& hash, hash_cache& cache, const chain::chunk_ptr& endorsement,
         const chain::script& subscript) const;
 
 private:
     // A space-efficient dynamic bitset (specialized by c++ std lib).
     typedef std::vector<bool> bool_stack;
 
-    static chain::operations create_delete_ops(const endorsements& data);
+    static chain::operations create_delete_ops(
+        const chain::chunk_ptrs& endorsements);
 
     hash_digest signature_hash(const chain::script& subscript,
         uint8_t flags) const;
-    hash_digest signature_hash(hash_cache& cache,
-        const chain::script& subscript, uint8_t flags) const;
+    hash_digest signature_hash(hash_cache& cache, const chain::script& subscript,
+        uint8_t flags) const;
 
     bool stack_to_bool(bool clean) const;
 

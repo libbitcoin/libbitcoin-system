@@ -136,14 +136,14 @@ program::program(const script::ptr& script, program&& other, bool)
 {
 }
 
-// Constant registers.
+// Utilities.
 // ----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_invalid() const
 {
-    const auto bip141 = script::is_enabled(forks_, forks::bip141_rule);
-    ////const auto nops_rule = script::is_enabled(forks_, forks::nops_rule);
+    const auto bip141 = is_enabled(forks::bip141_rule);
+    ////const auto nops_rule = is_enabled(forks::nops_rule);
 
     // TODO: nops rule must be enabled.
     return
@@ -151,6 +151,14 @@ bool program::is_invalid() const
         (input_index_ > transaction_.inputs()->size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
+
+bool program::is_enabled(chain::forks rule) const
+{
+    return to_bool(forks() & rule);
+}
+
+// Constant registers.
+// ----------------------------------------------------------------------------
 
 uint32_t program::forks() const
 {
@@ -275,13 +283,23 @@ void program::push(bool value)
 // Be explicit about the intent to move or copy, to get compiler help.
 void program::push_move(value_type&& item)
 {
-    primary_.push_back(to_shared<value_type>(std::move(item)));
+    push_ref(to_shared<value_type>(std::move(item)));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
 void program::push_copy(const value_type& item)
 {
-    primary_.push_back(to_shared<value_type>(item));
+    push_ref(to_shared<value_type>(item));
+}
+
+void program::push_ref(ptr_type&& item)
+{
+    primary_.push_back(std::move(item));
+}
+
+void program::push_ref(const ptr_type& item)
+{
+    primary_.push_back(item);
 }
 
 // Primary stack (pop).
@@ -290,10 +308,16 @@ void program::push_copy(const value_type& item)
 // This must be guarded.
 program::value_type program::pop()
 {
+    return *pop_ref();
+}
+
+// This must be guarded.
+program::ptr_type program::pop_ref()
+{
     BITCOIN_ASSERT(!empty());
     const auto value = primary_.back();
     primary_.pop_back();
-    return *value;
+    return value;
 }
 
 bool program::pop(int32_t& out_value)
@@ -308,7 +332,7 @@ bool program::pop(int32_t& out_value)
 
 bool program::pop(number& out_number, size_t maxiumum_size)
 {
-    return !empty() && out_number.set_data(pop(), maxiumum_size);
+    return !empty() && out_number.set_data(*pop_ref(), maxiumum_size);
 }
 
 bool program::pop_binary(number& first, number& second)
@@ -345,7 +369,7 @@ bool program::pop_position(stack_iterator& out_position)
 }
 
 // pop1/pop2/.../pop[count]
-bool program::pop(data_stack& section, int32_t signed_count)
+bool program::pop(chunk_ptrs& section, int32_t signed_count)
 {
     if (is_negative(signed_count))
         return false;
@@ -355,8 +379,9 @@ bool program::pop(data_stack& section, int32_t signed_count)
     if (size() < count)
         return false;
 
+    section.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        section.push_back(pop());
+        section.push_back(pop_ref());
 
     return true;
 }
@@ -367,16 +392,16 @@ bool program::pop(data_stack& section, int32_t signed_count)
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
 void program::duplicate(size_t index)
 {
-    push_copy(item(index));
+    push_ref(item(index));
 }
 
 // pop1/pop2/push1/push2
-void program::swap(size_t index_left, size_t index_right)
+void program::swap(size_t left, size_t right)
 {
-    // TODO: refactor to allow DRY without const_cast here.
+    // position(index) is const, but must have non-const iterators here.
     std::swap(
-        const_cast<data_stack::value_type&>(item(index_left)),
-        const_cast<data_stack::value_type&>(item(index_right)));
+        *std::prev(primary_.end(), ++left),
+        *std::prev(primary_.end(), ++right));
 }
 
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
@@ -386,8 +411,7 @@ void program::erase(const stack_iterator& position)
 }
 
 // pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
-void program::erase(const stack_iterator& first,
-    const stack_iterator& last)
+void program::erase(const stack_iterator& first, const stack_iterator& last)
 {
     primary_.erase(first, last);
 }
@@ -459,23 +483,25 @@ bool program::if_(const operation& op) const
     return op.is_conditional() || succeeded();
 }
 
-// This must be guarded.
-const program::value_type& program::item(size_t index) /*const*/
+bool program::top(number& out_number, size_t maxiumum_size) const
 {
-    return **position(index);
-}
-
-bool program::top(number& out_number, size_t maxiumum_size)
-{
-    return !empty() && out_number.set_data(item(zero), maxiumum_size);
+    return !empty() && out_number.set_data(*item(zero), maxiumum_size);
 }
 
 // This must be guarded.
-program::stack_iterator program::position(size_t index) /*const*/
+program::stack_iterator program::position(size_t index) const
 {
-    // Decrementing 1 (prev) makes the stack index zero-based (unlike satoshi).
     BITCOIN_ASSERT(index < size());
+
+    // Stack index is zero-based (zero is top).
     return std::prev(primary_.end(), ++index);
+}
+
+// This must be guarded.
+program::ptr_type program::item(size_t index) const
+{
+    // Stack index is zero-based (zero is top).
+    return *position(index);
 }
 
 // Alternate stack.
@@ -486,18 +512,18 @@ bool program::empty_alternate() const
     return alternate_.empty();
 }
 
-void program::push_alternate(value_type&& value)
+void program::push_alternate(ptr_type&& value)
 {
-    alternate_.push_back(to_shared<data_chunk>(std::move(value)));
+    alternate_.push_back(std::move(value));
 }
 
 // This must be guarded.
-program::value_type program::pop_alternate()
+program::ptr_type program::pop_alternate()
 {
     BITCOIN_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
     alternate_.pop_back();
-    return *value;
+    return value;
 }
 
 // Conditional stack.
@@ -571,13 +597,13 @@ chain::script::ptr program::subscript() const
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script::ptr program::subscript(const endorsements& endorsements) const
+chain::script::ptr program::subscript(const chunk_ptrs& endorsements) const
 {
     const auto sub = subscript();
 
     // bip143: op stripping is not applied to bip141 v0 scripts.
     // The bip141 fork sets the version property, so this is a distinct check.
-    if (script::is_enabled(forks(), forks::bip143_rule))
+    if (is_enabled(forks::bip143_rule))
         return sub;
 
     // TODO: Construct opcode with shared pointer to data, and stack with
@@ -597,41 +623,41 @@ chain::script::ptr program::subscript(const endorsements& endorsements) const
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
-    hash_digest& hash, const system::endorsement& endorsement) const
+bool program::prepare(ec_signature& signature, const data_chunk&,
+    hash_digest& hash, const chunk_ptr& endorsement) const
 {
     uint8_t flags;
     data_slice distinguished;
 
     // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(flags, distinguished, endorsement))
+    if (!parse_endorsement(flags, distinguished, *endorsement))
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(*subscript({ endorsement }), flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = script::is_enabled(forks(), forks::bip66_rule);
+    const auto bip66 = is_enabled(forks::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
-    hash_digest& hash, hash_cache& cache, const system::endorsement& endorsement,
+bool program::prepare(ec_signature& signature, const data_chunk&,
+    hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
     const script& subscript) const
 {
     uint8_t flags;
     data_slice distinguished;
 
     // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(flags, distinguished, endorsement))
+    if (!parse_endorsement(flags, distinguished, *endorsement))
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(cache, subscript, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = script::is_enabled(forks(), forks::bip66_rule);
+    const auto bip66 = is_enabled(forks::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
@@ -641,14 +667,14 @@ bool program::prepare(ec_signature& signature, data_chunk& /*key*/,
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
-chain::operations program::create_delete_ops(const endorsements& data)
+chain::operations program::create_delete_ops(const chunk_ptrs& endorsements)
 {
     constexpr auto non_mininal = false;
 
     operations strip;
-    strip.reserve(add1(data.size()));
+    strip.reserve(add1(endorsements.size()));
 
-    for (const auto& push: data)
+    for (const auto& push: endorsements)
         strip.emplace_back(push, non_mininal);
 
     strip.emplace_back(opcode::codeseparator);
@@ -658,11 +684,11 @@ chain::operations program::create_delete_ops(const endorsements& data)
 hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
-    const auto bip143 = script::is_enabled(forks(), forks::bip143_rule);
+    const auto bip143 = is_enabled(forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(input_index_, subscript, value(), flags,
-        version(), bip143);
+    return transaction_.signature_hash(input_index_, subscript, value_, flags,
+        version_, bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.
