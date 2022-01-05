@@ -95,6 +95,7 @@ public:
     bool is_valid() const;
     opcode code() const;
     const data_chunk& data() const;
+    chunk_ptr data_ptr() const;
 
     /// Computed properties.
     size_t serialized_size() const;

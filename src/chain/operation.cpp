@@ -460,6 +460,11 @@ const data_chunk& operation::data() const
     return *data_;
 }
 
+chunk_ptr operation::data_ptr() const
+{
+    return data_;
+}
+
 size_t operation::serialized_size() const
 {
     static constexpr auto op_size = sizeof(uint8_t);
