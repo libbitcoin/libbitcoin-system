@@ -37,7 +37,7 @@ namespace system {
 /// byte checksum, though any length up to min(Size, 256) is allowed here.
 /// Accessing Checksum (length) parameter requires explicitly specifying both.
 
-static const size_t checksum_default_size = sizeof(uint32_t);
+static constexpr size_t checksum_default_size = sizeof(uint32_t);
 
 /// Append the bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.

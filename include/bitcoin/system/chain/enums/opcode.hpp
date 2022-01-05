@@ -306,17 +306,19 @@ enum class opcode : uint8_t
 };
 
 /// Convert the opcode to a mnemonic string.
-BC_API std::string opcode_to_mnemonic(opcode value, uint32_t active_forks);
+BC_API std::string opcode_to_mnemonic(opcode value,
+    uint32_t active_forks) noexcept;
 
 /// Convert a string to an opcode.
-BC_API bool opcode_from_mnemonic(opcode& out_code, const std::string& value);
+BC_API bool opcode_from_mnemonic(opcode& out_code,
+    const std::string& value) noexcept;
 
 /// Convert any opcode to a string hexadecimal representation.
-BC_API std::string opcode_to_hexadecimal(opcode code);
+BC_API std::string opcode_to_hexadecimal(opcode code) noexcept;
 
 /// Convert any hexadecimal byte to an opcode.
 BC_API bool opcode_from_hexadecimal(opcode& out_code,
-    const std::string& value);
+    const std::string& value) noexcept;
 
 } // namespace chain
 } // namespace system
