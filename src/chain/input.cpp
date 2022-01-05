@@ -325,7 +325,7 @@ bool input::reserved_hash(hash_digest& out) const
     if (!witness::is_reserved_pattern(witness_->stack()))
         return false;
 
-    std::copy_n(witness_->stack().front().begin(), hash_size, out.begin());
+    std::copy_n(witness_->stack().front()->begin(), hash_size, out.begin());
     return true;
 }
 

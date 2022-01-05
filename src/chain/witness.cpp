@@ -47,12 +47,12 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness()
-  : witness(data_stack{}, false)
+  : witness(chunk_ptrs{}, false)
 {
 }
 
 witness::witness(witness&& other)
-  : witness(other)
+  : witness(std::move(other.stack_), other.valid_)
 {
 }
 
@@ -61,12 +61,12 @@ witness::witness(const witness& other)
 {
 }
 
-witness::witness(data_stack&& stack)
+witness::witness(chunk_ptrs&& stack)
   : witness(std::move(stack), true)
 {
 }
 
-witness::witness(const data_stack& stack)
+witness::witness(const chunk_ptrs& stack)
   : witness(stack, true)
 {
 }
@@ -102,13 +102,13 @@ witness::witness(const std::string& mnemonic)
 }
 
 // protected
-witness::witness(data_stack&& stack, bool valid)
+witness::witness(chunk_ptrs&& stack, bool valid)
   : stack_(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
-witness::witness(const data_stack& stack, bool valid)
+witness::witness(const chunk_ptrs& stack, bool valid)
   : stack_(stack), valid_(valid)
 {
 }
@@ -153,7 +153,7 @@ static data_chunk read_element(reader& source)
 // static/private
 witness witness::from_data(reader& source, bool prefix)
 {
-    data_stack stack;
+    chunk_ptrs stack;
 
     if (prefix)
     {
@@ -162,12 +162,12 @@ witness witness::from_data(reader& source, bool prefix)
         stack.reserve(source.read_size(max_block_weight));
 
         for (size_t element = 0; element < stack.capacity(); ++element)
-            stack.emplace_back(read_element(source));
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
     }
     else
     {
         while (!source.is_exhausted())
-            stack.emplace_back(read_element(source));
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
     }
 
     return { stack, source };
@@ -196,7 +196,7 @@ witness witness::from_string(const std::string& mnemonic)
         tokens.clear();
 
     data_chunk data;
-    data_stack stack;
+    chunk_ptrs stack;
     stack.reserve(tokens.size());
 
     // Create data stack from the split tokens.
@@ -204,7 +204,7 @@ witness witness::from_string(const std::string& mnemonic)
     {
         if (is_push_token(token) && decode_base16(data,
             remove_token_delimiters(token)))
-            stack.push_back(data);
+            stack.push_back(to_shared<data_chunk>(std::move(data)));
         else
             return {};
     }
@@ -239,8 +239,8 @@ void witness::to_data(writer& sink, bool prefix) const
     // Tokens encoded as variable integer prefixed byte array (bip144).
     for (const auto& element: stack_)
     {
-        sink.write_variable(element.size());
-        sink.write_bytes(element);
+        sink.write_variable(element->size());
+        sink.write_bytes(*element);
     }
 }
 
@@ -251,7 +251,7 @@ std::string witness::to_string() const
 
     std::string text;
     for (const auto& element: stack_)
-        text += "[" + encode_base16(element) + "] ";
+        text += "[" + encode_base16(*element) + "] ";
 
     trim_right(text);
     return text;
@@ -265,7 +265,7 @@ bool witness::is_valid() const
     return valid_;
 }
 
-const data_stack& witness::stack() const
+const chunk_ptrs& witness::stack() const
 {
     return stack_;
 }
@@ -273,10 +273,10 @@ const data_stack& witness::stack() const
 // private
 size_t witness::serialized_size() const
 {
-    const auto sum = [](size_t total, const data_chunk& element)
+    const auto sum = [](size_t total, const chunk_ptr& element)
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = element.size();
+        const auto size = element->size();
         return total + variable_size(size) + size;
     };
 
@@ -293,11 +293,11 @@ size_t witness::serialized_size(bool prefix) const
 // ----------------------------------------------------------------------------
 
 // static
-bool witness::is_push_size(const data_stack& stack)
+bool witness::is_push_size(const chunk_ptrs& stack)
 {
-    const auto push_size = [](const data_chunk& element)
+    const auto push_size = [](const chunk_ptr& element)
     {
-        return element.size() <= max_push_data_size;
+        return element->size() <= max_push_data_size;
     };
 
     return std::all_of(stack.begin(), stack.end(), push_size);
@@ -305,10 +305,10 @@ bool witness::is_push_size(const data_stack& stack)
 
 // static
 // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-bool witness::is_reserved_pattern(const data_stack& stack)
+bool witness::is_reserved_pattern(const chunk_ptrs& stack)
 {
     return stack.size() == 1 &&
-        stack[0].size() == hash_size;
+        stack[0]->size() == hash_size;
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
@@ -347,7 +347,7 @@ bool witness::extract_sigop_script(script& out_script,
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
                     if (!stack_.empty())
-                        out_script = { stack_.back(), false };
+                        out_script = { *stack_.back(), false };
 
                     return true;
 
@@ -370,7 +370,7 @@ bool witness::extract_sigop_script(script& out_script,
 
 // Extract script and initial execution stack.
 bool witness::extract_script(script& out_script,
-    data_stack& out_stack, const script& program_script) const
+    chunk_ptrs& out_stack, const script& program_script) const
 {
     auto program = program_script.witness_program();
     out_stack = stack_;
@@ -408,7 +408,7 @@ bool witness::extract_script(script& out_script,
                         return false;
 
                     // Input script is popped from the stack (bip141).
-                    out_script = { pop(out_stack), false };
+                    out_script = { *pop(out_stack), false };
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),

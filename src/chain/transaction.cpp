@@ -1194,7 +1194,7 @@ code transaction::connect(const context& state, uint32_t index) const
         {
             case script_version::zero:
             {
-                data_stack stack;
+                chunk_ptrs stack;
                 script witness_script;
                 if (!in->witness().extract_script(witness_script, stack,
                     in->prevout->script()))
@@ -1252,7 +1252,7 @@ code transaction::connect(const context& state, uint32_t index) const
             {
                 case script_version::zero:
                 {
-                    data_stack stack;
+                    chunk_ptrs stack;
                     script witness_script;
                     if (!in->witness().extract_script(witness_script, stack,
                         embedded_script))

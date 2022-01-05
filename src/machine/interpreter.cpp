@@ -266,8 +266,8 @@ interpreter::result interpreter::op_rot2(program& program)
     const auto position_5 = program.position(5);
     const auto position_4 = program.position(4);
 
-    auto copy_5 = *position_5;
-    auto copy_4 = *position_4;
+    auto copy_5 = **position_5;
+    auto copy_4 = **position_4;
 
     program.erase(position_5, add1(position_4));
     program.push_move(std::move(copy_5));
@@ -344,7 +344,7 @@ interpreter::result interpreter::op_pick(program& program)
     if (!program.pop_position(position))
         return error::op_pick;
 
-    program.push_copy(*position);
+    program.push_copy(**position);
     return error::op_success;
 }
 
@@ -354,7 +354,7 @@ interpreter::result interpreter::op_roll(program& program)
     if (!program.pop_position(position))
         return error::op_roll;
 
-    auto copy = *position;
+    auto copy = **position;
     program.erase(position);
     program.push_move(std::move(copy));
     return error::op_success;

@@ -88,7 +88,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
 
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script::ptr& script, const chain::transaction& tx,
-    uint32_t index, uint32_t forks, data_stack&& stack, uint64_t value,
+    uint32_t index, uint32_t forks, chunk_ptrs&& stack, uint64_t value,
     script_version version)
   : script_(script),
     transaction_(tx),
@@ -275,25 +275,25 @@ void program::push(bool value)
 // Be explicit about the intent to move or copy, to get compiler help.
 void program::push_move(value_type&& item)
 {
-    primary_.push_back(std::move(item));
+    primary_.push_back(to_shared<value_type>(std::move(item)));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
 void program::push_copy(const value_type& item)
 {
-    primary_.push_back(item);
+    primary_.push_back(to_shared<value_type>(item));
 }
 
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
 // This must be guarded.
-data_chunk program::pop()
+program::value_type program::pop()
 {
     BITCOIN_ASSERT(!empty());
     const auto value = primary_.back();
     primary_.pop_back();
-    return value;
+    return *value;
 }
 
 bool program::pop(int32_t& out_value)
@@ -407,7 +407,7 @@ bool program::stack_to_bool(bool clean) const
 {
     const auto& top = primary_.back();
 
-    if (top.empty() || (clean && primary_.size() != one))
+    if (top->empty() || (clean && primary_.size() != one))
         return false;
 
     auto not_zero = [](uint8_t value)
@@ -420,8 +420,8 @@ bool program::stack_to_bool(bool clean) const
         return (value & ~numbers::negative_sign) != numbers::positive_0;
     };
 
-    return non_zero(top.back()) ||
-        std::any_of(top.begin(), std::prev(top.end()), not_zero);
+    return non_zero(top->back()) ||
+        std::any_of(top->begin(), std::prev(top->end()), not_zero);
 }
 
 size_t program::size() const
@@ -460,14 +460,14 @@ bool program::if_(const operation& op) const
 }
 
 // This must be guarded.
-const data_stack::value_type& program::item(size_t index) /*const*/
+const program::value_type& program::item(size_t index) /*const*/
 {
-    return *position(index);
+    return **position(index);
 }
 
 bool program::top(number& out_number, size_t maxiumum_size)
 {
-    return !empty() && out_number.set_data(item(0), maxiumum_size);
+    return !empty() && out_number.set_data(item(zero), maxiumum_size);
 }
 
 // This must be guarded.
@@ -488,7 +488,7 @@ bool program::empty_alternate() const
 
 void program::push_alternate(value_type&& value)
 {
-    alternate_.push_back(std::move(value));
+    alternate_.push_back(to_shared<data_chunk>(std::move(value)));
 }
 
 // This must be guarded.
@@ -497,7 +497,7 @@ program::value_type program::pop_alternate()
     BITCOIN_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
     alternate_.pop_back();
-    return value;
+    return *value;
 }
 
 // Conditional stack.

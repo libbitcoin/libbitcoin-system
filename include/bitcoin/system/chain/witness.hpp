@@ -50,8 +50,8 @@ public:
     witness(witness&& other);
     witness(const witness& other);
 
-    witness(data_stack&& stack);
-    witness(const data_stack& stack);
+    witness(chunk_ptrs&& stack);
+    witness(const chunk_ptrs& stack);
 
     witness(const data_slice& data, bool prefix);
     witness(std::istream&& stream, bool prefix);
@@ -84,7 +84,7 @@ public:
 
     /// Native properties.
     bool is_valid() const;
-    const data_stack& stack() const;
+    const chunk_ptrs& stack() const;
 
     /// Computed properties.
     size_t serialized_size(bool prefix) const;
@@ -92,12 +92,12 @@ public:
     // Utilities.
     // ------------------------------------------------------------------------
 
-    static bool is_push_size(const data_stack& stack);
-    static bool is_reserved_pattern(const data_stack& stack);
+    static bool is_push_size(const chunk_ptrs& stack);
+    static bool is_reserved_pattern(const chunk_ptrs& stack);
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const;
-    bool extract_script(script& out_script, data_stack& out_stack,
+    bool extract_script(script& out_script, chunk_ptrs& out_stack,
         const script& program_script) const;
 
 private:
@@ -105,11 +105,11 @@ private:
     static witness from_string(const std::string& mnemonic);
     size_t serialized_size() const;
 
-    witness(data_stack&& stack, bool valid);
-    witness(const data_stack& stack, bool valid);
+    witness(chunk_ptrs&& stack, bool valid);
+    witness(const chunk_ptrs& stack, bool valid);
 
     // Witness should be stored as shared.
-    data_stack stack_;
+    chunk_ptrs stack_;
     bool valid_;
 };
 
