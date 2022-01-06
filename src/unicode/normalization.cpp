@@ -31,6 +31,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
@@ -89,7 +90,7 @@ static bool normal_form(std::string& out, const std::string& in,
     const auto norm = to_win32_normal_form(form);
 
     // Guard cast to int.
-    if (size > std::numeric_limits<int>::max())
+    if (is_greater(size, std::numeric_limits<int>::max()))
         return false;
 
     const auto length = static_cast<int>(size);

@@ -484,7 +484,8 @@ bool block::is_invalid_witness_commitment() const
 static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42)
 {
-    const auto halvings = height / subsidy_interval;
+    // Guard: quotient domain cannot increase with positive integer divisor.
+    const auto halvings = static_cast<size_t>(height / subsidy_interval);
     return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
 }
 

@@ -102,10 +102,11 @@ protected:
 
     // The maximum addressable stream position.
     // Should be defined on OStream::pos_type, however that is implementation
-    // defined and is not an integer domain, so rely on std::streamsize.
+    // defined and is not an integer domain. Could rely on std::streamsize,
+    // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum()
     {
-        return to_unsigned(std::numeric_limits<std::streamsize>::max());
+        return std::numeric_limits<size_t>::max();
     };
 
     virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;

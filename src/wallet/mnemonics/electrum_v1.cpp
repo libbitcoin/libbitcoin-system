@@ -164,9 +164,9 @@ string_list electrum_v1::encoder(const data_chunk& entropy, language identifier)
 
         // Guard: dictionary membership has been verified.
         // Guard: any positive number modulo 1626 is always [0-1625].
-        words.push_back(dictionaries_.at(uno, identifier));
-        words.push_back(dictionaries_.at(dos, identifier));
-        words.push_back(dictionaries_.at(tre, identifier));
+        words.push_back(dictionaries_.at(static_cast<size_t>(uno), identifier));
+        words.push_back(dictionaries_.at(static_cast<size_t>(dos), identifier));
+        words.push_back(dictionaries_.at(static_cast<size_t>(tre), identifier));
     }
 
     return words;

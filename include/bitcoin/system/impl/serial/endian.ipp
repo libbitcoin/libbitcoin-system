@@ -28,6 +28,7 @@
 #include <utility>
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -292,18 +293,20 @@ data_array<Bytes> to_little_endian(const Integer& value) noexcept
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_big_endian(std::istream& stream) noexcept
 {
+    // Guard: stream.gcount() is <= sizeof(Integer) after stream.read.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
-    buffer.resize(stream.gcount());
+    buffer.resize(static_cast<size_t>(stream.gcount()));
     return from_big_endian<Integer>(buffer);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_little_endian(std::istream& stream) noexcept
 {
+    // Guard: stream.gcount() is <= sizeof(Integer) after stream.read.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
-    buffer.resize(stream.gcount());
+    buffer.resize(static_cast<size_t>(stream.gcount()));
     return from_little_endian<Integer>(buffer);
 }
 
