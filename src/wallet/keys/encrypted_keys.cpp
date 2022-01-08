@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <boost/locale.hpp>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -294,7 +293,7 @@ static bool create_token(encrypted_token& out_token,
     const ek_entropy& owner_entropy,
     const data_array<parse_encrypted_token::prefix_size>& prefix)
 {
-    BITCOIN_ASSERT(owner_salt.size() == ek_salt_size ||
+    BC_ASSERT(owner_salt.size() == ek_salt_size ||
         owner_salt.size() == ek_entropy_size);
 
     const auto lot_sequence = owner_salt.size() == ek_salt_size;

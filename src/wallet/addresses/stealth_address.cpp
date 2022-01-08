@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <iostream>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>

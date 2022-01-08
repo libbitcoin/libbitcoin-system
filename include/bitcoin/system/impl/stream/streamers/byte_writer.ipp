@@ -25,10 +25,10 @@
 #include <ios>
 #include <ostream>
 #include <string>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
@@ -251,7 +251,7 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     // It is not generally more efficient to call stream_.put() for one byte.
 
     // Write past stream start invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum());
     stream_.write(reinterpret_cast<const char*>(data),
         static_cast<typename OStream::pos_type>(size));
 

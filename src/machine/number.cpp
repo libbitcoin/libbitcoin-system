@@ -20,7 +20,6 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -52,7 +51,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
     // Bitcoin defined max script number sizes are 4 and 5 bytes.
     // The negation technique below requires that the value_ sign bit is never
     // set following conversion from little endian data, so guard here.
-    BITCOIN_ASSERT_MSG(max_size < sizeof(value_), "invalid number size");
+    BC_ASSERT_MSG(max_size < sizeof(value_), "invalid number size");
 
     if (data.size() > max_size)
         return false;
@@ -191,13 +190,13 @@ bool number::operator!=(const number& other) const
 
 number number::operator+(int64_t value) const
 {
-    BITCOIN_ASSERT(value_ + value == ceilinged_add(value_, value));
+    BC_ASSERT(value_ + value == ceilinged_add(value_, value));
     return number(value_ + value);
 }
 
 number number::operator-(int64_t value) const
 {
-    BITCOIN_ASSERT(value_ - value == floored_subtract(value_, value));
+    BC_ASSERT(value_ - value == floored_subtract(value_, value));
     return number(value_ - value);
 }
 
@@ -218,7 +217,7 @@ number number::operator+() const
 
 number number::operator-() const
 {
-    BITCOIN_ASSERT_MSG(value_ != min_int64, "out of range");
+    BC_ASSERT_MSG(value_ != min_int64, "out of range");
     return number(-value_);
 }
 
@@ -234,14 +233,14 @@ number& number::operator-=(const number& other)
 
 number& number::operator+=(int64_t value)
 {
-    BITCOIN_ASSERT(value_ + value == ceilinged_add(value_, value));
+    BC_ASSERT(value_ + value == ceilinged_add(value_, value));
     value_ += value;
     return *this;
 }
 
 number& number::operator-=(int64_t value)
 {
-    BITCOIN_ASSERT(value_ - value == floored_subtract(value_, value));
+    BC_ASSERT(value_ - value == floored_subtract(value_, value));
     value_ -= value;
     return *this;
 }

@@ -22,7 +22,6 @@
 #include <vector>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -252,7 +251,7 @@ std::string printer::format_settings_table()
         split_setting_name(parameter, name, section);
         if (section.empty())
         {
-            BITCOIN_ASSERT_MSG(false, "Invalid config setting metadata.");
+            BC_ASSERT_MSG(false, "Invalid config setting metadata.");
             continue;
         }
 

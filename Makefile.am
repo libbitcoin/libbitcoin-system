@@ -365,7 +365,6 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
-    include/bitcoin/system/assert.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \

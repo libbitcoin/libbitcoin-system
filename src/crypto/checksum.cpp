@@ -19,9 +19,9 @@
 #include <bitcoin/system/crypto/checksum.hpp>
 
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
@@ -48,7 +48,7 @@ void append_checksum(data_chunk& data)
 {
     const auto check = bitcoin_checksum(data);
     extend(data, to_little_endian<uint32_t>(check));
-    BITCOIN_ASSERT(verify_checksum(data));
+    BC_ASSERT(verify_checksum(data));
 }
 
 bool verify_checksum(const data_slice& data)
@@ -158,7 +158,7 @@ base32_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
     auto checked = base32_unpack(program);
     checked.insert(checked.begin(), static_cast<uint5_t>(version));
     bech32_append_checksum(checked, prefix, version);
-    BITCOIN_ASSERT(bech32_verify_checksum(checked, prefix, version));
+    BC_ASSERT(bech32_verify_checksum(checked, prefix, version));
 
     return checked;
 }

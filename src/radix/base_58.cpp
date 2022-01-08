@@ -19,8 +19,8 @@
 #include <bitcoin/system/radix/base_58.hpp>
 
 #include <algorithm>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 
 // base58
 // Base 58 is an ascii data encoding with a domain of 58 symbols (characters).
@@ -83,7 +83,7 @@ void pack_value(data_chunk& indexes, size_t carry)
         carry /= 58u;
     }
 
-    BITCOIN_ASSERT(is_zero(carry));
+    BC_ASSERT(is_zero(carry));
 }
 
 std::string encode_base58(const data_slice& unencoded)
@@ -145,7 +145,7 @@ void unpack_char(data_chunk& data, size_t carry)
         carry /= 256;
     }
 
-    BITCOIN_ASSERT(is_zero(carry));
+    BC_ASSERT(is_zero(carry));
 }
 
 bool decode_base58(data_chunk& out, const std::string& in)

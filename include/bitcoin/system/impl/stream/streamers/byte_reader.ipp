@@ -25,10 +25,10 @@
 #include <istream>
 #include <limits>
 #include <string>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
@@ -414,7 +414,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
     // invalid if the stream is get past end, including when empty.
 
     // Read past stream end invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum());
     stream_.read(reinterpret_cast<char*>(buffer),
         static_cast<typename IStream::pos_type>(size));
 
@@ -428,7 +428,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
         return;
 
     // Skip past stream end invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum());
     seeker(static_cast<typename IStream::pos_type>(size));
 }
 
@@ -442,7 +442,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
     remaining_ = ceilinged_add(remaining_, size);
 
     // Rewind past stream start invalidates stream unless size exceeds maximum.
-    BITCOIN_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum());
     seeker(-static_cast<typename IStream::pos_type>(size));
 }
 

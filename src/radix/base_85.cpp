@@ -51,9 +51,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 // base85
 // Base 85 is an ascii data encoding with a domain of 85 symbols (characters).
@@ -120,7 +120,7 @@ bool encode_base85(std::string& out, const data_slice& in)
     }
 
     out.assign(encoded.begin(), encoded.end());
-    BITCOIN_ASSERT(out.size() == encoded_size);
+    BC_ASSERT(out.size() == encoded_size);
     return true;
 }
 
@@ -155,7 +155,7 @@ bool decode_base85(data_chunk& out, const std::string& in)
     }
 
     out.assign(decoded.begin(), decoded.end());
-    BITCOIN_ASSERT(out.size() == decoded_size);
+    BC_ASSERT(out.size() == decoded_size);
     return true;
 }
 

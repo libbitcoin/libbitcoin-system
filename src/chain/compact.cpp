@@ -19,9 +19,9 @@
 #include <bitcoin/system/chain/compact.hpp>
 
 #include <cstdint>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/uintx.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,8 +37,8 @@ static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
 static constexpr size_t mantissa_bits = to_bits(sub1(sizeof(uint32_t)));
 
 // assertions
-DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
-DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
+BC_DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
+BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 
 // Inlines
 // ----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ inline bool is_nonzero(uint32_t compact)
 
 inline uint8_t log_256(uint32_t mantissa)
 {
-    BITCOIN_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
+    BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
 
     return
         (mantissa > 0x0000ffff ? 3 :
@@ -71,13 +71,13 @@ inline bool is_overflow(uint8_t exponent, uint32_t mantissa)
 
 inline uint32_t shift_low(uint8_t exponent)
 {
-    BITCOIN_ASSERT(exponent <= 3);
+    BC_ASSERT(exponent <= 3);
     return to_bits(3 - exponent);
 }
 
 inline uint32_t shift_high(uint8_t exponent)
 {
-    BITCOIN_ASSERT(exponent > 3);
+    BC_ASSERT(exponent > 3);
     return to_bits(exponent - 3);
 }
 
@@ -181,8 +181,8 @@ uint32_t compact::from_big(const uint256_t& big)
         mantissa >>= byte_bits;
     }
 
-    BITCOIN_ASSERT_MSG(is_zero(exponent & first_byte_mask), "size excess");
-    BITCOIN_ASSERT_MSG(is_zero(mantissa & mantissa_mask), "value excess");
+    BC_ASSERT_MSG(is_zero(exponent & first_byte_mask), "size excess");
+    BC_ASSERT_MSG(is_zero(mantissa & mantissa_mask), "value excess");
 
     // Assemble the compact notation.
     return (exponent << mantissa_bits) | mantissa;

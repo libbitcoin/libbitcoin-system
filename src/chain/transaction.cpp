@@ -28,7 +28,6 @@
 #include <utility>
 #include <vector>
 #include <boost/optional.hpp>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -38,6 +37,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -741,7 +741,7 @@ hash_digest transaction::signature_hash(uint32_t index,
     script_version version, bool bip143) const
 {
     // There is no rational interpretation of a signature hash for a coinbase.
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // Null return implies program misparameterization, not consensus possible.
     if (index >= inputs()->size())
@@ -880,7 +880,7 @@ bool transaction::is_empty() const
 
 bool transaction::is_null_non_coinbase() const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     const auto invalid = [](const input::ptr& input)
     {
@@ -893,7 +893,7 @@ bool transaction::is_null_non_coinbase() const
 
 bool transaction::is_invalid_coinbase_size() const
 {
-    BITCOIN_ASSERT(is_coinbase());
+    BC_ASSERT(is_coinbase());
 
     // True if coinbase and has invalid input[0] script size.
     const auto script_size = inputs_->front()->script().serialized_size(false);
@@ -923,7 +923,7 @@ bool transaction::is_non_final(size_t height, uint32_t timestamp,
 
 bool transaction::is_missing_prevouts() const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // Invalidity indicates not found.
     const auto missing = [](const input::ptr& input)
@@ -960,7 +960,7 @@ uint64_t transaction::value() const
 
 bool transaction::is_overspent() const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     return claim() > value();
 }
@@ -970,7 +970,7 @@ bool transaction::is_overspent() const
 //*****************************************************************************
 bool transaction::is_immature(size_t height) const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // Overflow returns max_size_t.
     // Zero is either genesis or not found, either is immature.
@@ -987,7 +987,7 @@ bool transaction::is_immature(size_t height) const
 bool transaction::is_locked(size_t height, uint32_t median_time_past) const
 {
     // BIP68: not applied to the sequence of the input of a coinbase.
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // BIP68: applied to txs with a version greater than or equal to two.
     if (version_ < relative_locktime_min_version)
@@ -1007,7 +1007,7 @@ bool transaction::is_locked(size_t height, uint32_t median_time_past) const
 // Spends internal to a block are handled by block validation.
 bool transaction::is_unconfirmed_spend(size_t height) const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // Zero is either genesis or not found.
     // Test maturity first to obtain proper error code.
@@ -1023,7 +1023,7 @@ bool transaction::is_unconfirmed_spend(size_t height) const
 
 bool transaction::is_confirmed_double_spend(size_t height) const
 {
-    BITCOIN_ASSERT(!is_coinbase());
+    BC_ASSERT(!is_coinbase());
 
     // Spends internal to a block are handled by block validation.
     const auto spent = [=](const input::ptr& input)

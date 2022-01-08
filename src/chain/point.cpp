@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <memory>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/stream/stream.hpp>

@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/encryption.hpp>
 
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/crypto/elliptic_curve.hpp>
 #include <bitcoin/system/crypto/hash.hpp>

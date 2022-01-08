@@ -26,12 +26,12 @@
 #include <numeric>
 #include <string>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -180,7 +180,7 @@ inline bool is_push_token(const std::string& token)
 
 inline std::string remove_token_delimiters(const std::string& token)
 {
-    BITCOIN_ASSERT(token.size() > one);
+    BC_ASSERT(token.size() > one);
     return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
@@ -314,7 +314,7 @@ bool witness::is_reserved_pattern(const chunk_ptrs& stack)
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
 inline operations to_pay_key_hash(data_chunk&& program)
 {
-    BITCOIN_ASSERT(program.size() == short_hash_size);
+    BC_ASSERT(program.size() == short_hash_size);
 
     return operations
     {

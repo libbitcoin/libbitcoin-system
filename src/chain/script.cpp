@@ -26,7 +26,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>

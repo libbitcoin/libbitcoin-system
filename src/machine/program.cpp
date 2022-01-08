@@ -23,11 +23,11 @@
 #include <cstdint>
 #include <iterator>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -83,7 +83,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     jump_(script_->ops().begin())
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < transaction_.inputs()->size());
+    BC_ASSERT(index < transaction_.inputs()->size());
 }
 
 // Condition, alternate, jump and operation_count are not copied.
@@ -102,7 +102,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BITCOIN_ASSERT(index < tx.inputs()->size());
+    BC_ASSERT(index < tx.inputs()->size());
 }
 
 
@@ -174,7 +174,7 @@ uint64_t program::value() const
 const input& program::input() const
 {
     // This is guarded by is_invalid().
-    BITCOIN_ASSERT(input_index_ < transaction().inputs()->size());
+    BC_ASSERT(input_index_ < transaction().inputs()->size());
     return *(*transaction_.inputs())[input_index_];
 }
 
@@ -225,7 +225,7 @@ inline bool operation_overflow(size_t count)
 bool program::increment_op_count(const operation& op)
 {
     // Addition is safe due to script size constraint.
-    BITCOIN_ASSERT(max_size_t - one >= operation_count_);
+    BC_ASSERT(max_size_t - one >= operation_count_);
 
     if (operation::is_counted(op.code()))
         ++operation_count_;
@@ -243,7 +243,7 @@ bool program::increment_op_count(int32_t public_keys)
         return false;
 
     // Addition is safe due to script size constraint.
-    BITCOIN_ASSERT(max_size_t - public_keys >= operation_count_);
+    BC_ASSERT(max_size_t - public_keys >= operation_count_);
 
     operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
@@ -314,7 +314,7 @@ program::value_type program::pop()
 // This must be guarded.
 program::ptr_type program::pop_ref()
 {
-    BITCOIN_ASSERT(!empty());
+    BC_ASSERT(!empty());
     const auto value = primary_.back();
     primary_.pop_back();
     return value;
@@ -461,7 +461,7 @@ bool program::empty() const
 // This must be guarded (intended for interpreter internal use).
 bool program::stack_true(bool clean) const
 {
-    BITCOIN_ASSERT(!empty());
+    BC_ASSERT(!empty());
     return stack_to_bool(clean);
 }
 
@@ -491,7 +491,7 @@ bool program::top(number& out_number, size_t maxiumum_size) const
 // This must be guarded.
 program::stack_iterator program::position(size_t index) const
 {
-    BITCOIN_ASSERT(index < size());
+    BC_ASSERT(index < size());
 
     // Stack index is zero-based (zero is top).
     return std::prev(primary_.end(), ++index);
@@ -520,7 +520,7 @@ void program::push_alternate(ptr_type&& value)
 // This must be guarded.
 program::ptr_type program::pop_alternate()
 {
-    BITCOIN_ASSERT(!alternate_.empty());
+    BC_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
     alternate_.pop_back();
     return value;
@@ -538,7 +538,7 @@ void program::open(bool value)
 // This must be guarded.
 void program::negate()
 {
-    BITCOIN_ASSERT(!closed());
+    BC_ASSERT(!closed());
     const auto value = condition_.back();
     negative_count_ += (value ? 1 : -1);
     condition_.back() = !value;
@@ -550,7 +550,7 @@ void program::negate()
 // This must be guarded.
 void program::close()
 {
-    BITCOIN_ASSERT(!closed());
+    BC_ASSERT(!closed());
     const auto value = condition_.back();
     negative_count_ += (value ? 0 : -1);
     condition_.pop_back();

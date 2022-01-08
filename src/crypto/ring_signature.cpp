@@ -96,7 +96,7 @@ static key_rings partition_keys_into_rings(const secret_keys_map& secret_keys,
 static bool create_key_indexes(index_list& out, const key_rings& rings,
     const key_rings& known_keys_by_ring)
 {
-    BITCOIN_ASSERT(known_keys_by_ring.size() == rings.size());
+    BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
@@ -118,7 +118,7 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     const secret_keys_map& secret_keys)
 {
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
-    BITCOIN_ASSERT(known_keys_by_ring.size() == rings.size());
+    BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
     const auto empty = [](const compressed_list& ring)
     {
@@ -150,7 +150,7 @@ static ec_point calculate_last_R_signing(const compressed_list& ring,
     // Start one above index of known key and loop until the end.
     for (uint32_t j = add1(known_key_index); j < ring.size(); ++j)
     {
-        BITCOIN_ASSERT(j < signature.proofs[i].size());
+        BC_ASSERT(j < signature.proofs[i].size());
         const ec_scalar s(signature.proofs[i][j]);
         if (!s)
             return {};
@@ -174,9 +174,9 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
 {
     data_chunk e0_data;
     e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
-    BITCOIN_ASSERT(known_key_indexes.size() == rings.size());
-    BITCOIN_ASSERT(out.proofs.size() == rings.size());
-    BITCOIN_ASSERT(salts.size() == rings.size());
+    BC_ASSERT(known_key_indexes.size() == rings.size());
+    BC_ASSERT(out.proofs.size() == rings.size());
+    BC_ASSERT(salts.size() == rings.size());
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
@@ -204,8 +204,8 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
     const hash_digest& digest, const uint32_t i,
     const uint32_t known_key_index)
 {
-    BITCOIN_ASSERT(signature.proofs[i].size() > known_key_index);
-    BITCOIN_ASSERT(ring.size() > known_key_index);
+    BC_ASSERT(signature.proofs[i].size() > known_key_index);
+    BC_ASSERT(ring.size() > known_key_index);
 
     // Loop until index of known key.
     for (uint32_t j = 0; j < known_key_index; ++j)
@@ -246,10 +246,10 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
             return false;
 
         // Find secret key used for calculation in the next step.
-        BITCOIN_ASSERT(known_key_index < ring.size());
+        BC_ASSERT(known_key_index < ring.size());
         const auto& known_public_key = ring[known_key_index];
 
-        BITCOIN_ASSERT(secret_keys.find(known_public_key) != secret_keys.end());
+        BC_ASSERT(secret_keys.find(known_public_key) != secret_keys.end());
         const auto& secret = secret_keys[known_public_key];
 
         // Now close the ring using this calculation:
@@ -272,7 +272,7 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
     const ring_signature& signature)
 {
     ec_point R_i_j;
-    BITCOIN_ASSERT(signature.proofs[i].size() == ring.size());
+    BC_ASSERT(signature.proofs[i].size() == ring.size());
 
     for (uint32_t j = 0; j < ring.size(); ++j)
     {

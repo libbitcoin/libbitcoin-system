@@ -21,12 +21,12 @@
 
 #include <cstdint>
 #include <memory>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
@@ -240,7 +240,7 @@ inline bool is_underflow_token(const std::string& token)
 
 inline std::string remove_token_delimiters(const std::string& token)
 {
-    BITCOIN_ASSERT(token.size() > one);
+    BC_ASSERT(token.size() > one);
     return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
@@ -526,7 +526,7 @@ uint32_t operation::read_data_size(opcode code, reader& source)
 //*****************************************************************************
 opcode operation::opcode_from_size(size_t size)
 {
-    BITCOIN_ASSERT(size <= max_uint32);
+    BC_ASSERT(size <= max_uint32);
     constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
     if (size <= op_75)
@@ -577,22 +577,22 @@ opcode operation::opcode_from_data(const data_chunk& data,
 
 opcode operation::opcode_from_version(uint8_t value)
 {
-    BITCOIN_ASSERT(value <= numbers::positive_16);
+    BC_ASSERT(value <= numbers::positive_16);
     return (value == numbers::positive_0) ? opcode::push_size_0 :
         operation::opcode_from_positive(value);
 }
 
 opcode operation::opcode_from_positive(uint8_t value)
 {
-    BITCOIN_ASSERT(value >= numbers::positive_1);
-    BITCOIN_ASSERT(value <= numbers::positive_16);
+    BC_ASSERT(value >= numbers::positive_1);
+    BC_ASSERT(value <= numbers::positive_16);
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     return static_cast<opcode>(value + sub1(op_81));
 }
 
 uint8_t operation::opcode_to_positive(opcode code)
 {
-    BITCOIN_ASSERT(is_positive(code));
+    BC_ASSERT(is_positive(code));
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     return static_cast<uint8_t>(code) - add1(op_81);
 }

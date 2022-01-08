@@ -38,7 +38,7 @@ namespace system {
 // 'value' parameter implements sufficient binary comparison operator
 // overloads (e.g. operator<(const char* left, const std::string& right).
 // Therefore we avoid this assertion and rely entirely on caller sorting.
-////BITCOIN_ASSERT(is_sorted(list));
+////BC_ASSERT(is_sorted(list));
 // TODO: provide optional comparison function, std::sort accepts:
 // en.cppreference.com/w/cpp/utility/functional/less
 

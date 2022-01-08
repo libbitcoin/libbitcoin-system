@@ -22,7 +22,6 @@
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>

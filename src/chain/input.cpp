@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>

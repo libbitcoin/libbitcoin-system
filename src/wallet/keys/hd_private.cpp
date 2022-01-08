@@ -22,7 +22,6 @@
 #include <iostream>
 #include <string>
 #include <utility>
-#include <bitcoin/system/assert.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

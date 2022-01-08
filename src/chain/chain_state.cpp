@@ -289,7 +289,7 @@ size_t chain_state::bip9_bit1_height(size_t height,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings)
 {
-    BITCOIN_ASSERT_MSG(!compact(bits_high(values)).is_overflowed(),
+    BC_ASSERT_MSG(!compact(bits_high(values)).is_overflowed(),
         "previous block has bad bits");
 
     // Invalid parameter via public interface, test is_valid for results.
@@ -359,7 +359,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     size_t retargeting_interval, uint32_t proof_of_work_limit,
     uint32_t block_spacing_seconds)
 {
-    BITCOIN_ASSERT(!is_zero(values.height));
+    BC_ASSERT(!is_zero(values.height));
 
     // Overflow allowed here since supported coins would not do so.
     const auto easy_spacing_seconds = block_spacing_seconds << 1;
@@ -379,7 +379,7 @@ uint32_t chain_state::easy_work_required(const data& values,
 
     // Since the set of heights is either a full retarget range or ends at
     // zero this is not reachable unless the data set is invalid.
-    BITCOIN_ASSERT(false);
+    BC_ASSERT(false);
     return proof_of_work_limit;
 }
 
@@ -401,7 +401,7 @@ bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits,
 {
     // Zero is a retarget height, ensuring termination before height underflow.
     // This is guaranteed, just asserting here to document the safeguard.
-    BITCOIN_ASSERT_MSG(is_retarget_height(zero, retargeting_interval),
+    BC_ASSERT_MSG(is_retarget_height(zero, retargeting_interval),
         "loop overflow potential");
 
     return bits != proof_of_work_limit ||
@@ -643,7 +643,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header, const system::settings& settings)
 {
-    BITCOIN_ASSERT(header.previous_block_hash() == parent.hash());
+    BC_ASSERT(header.previous_block_hash() == parent.hash());
 
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
