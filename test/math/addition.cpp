@@ -81,30 +81,53 @@ constexpr uint16_t unsigned_minimum = 0;
 constexpr uint16_t unsigned_maximum = max_uint16;
 constexpr uint16_t unsigned_half = to_half(unsigned_maximum);
 
-// ceilinged_add (unsigned)
-static_assert(ceilinged_add(unsigned_minimum, unsigned_minimum) == unsigned_minimum, "");
-static_assert(ceilinged_add(unsigned_minimum, unsigned_maximum) == unsigned_maximum, "");
-static_assert(ceilinged_add(unsigned_maximum, unsigned_minimum) == unsigned_maximum, "");
-static_assert(ceilinged_add(unsigned_maximum, unsigned_maximum) == unsigned_maximum, "");
-static_assert(ceilinged_add(unsigned_maximum, unsigned_half) == unsigned_maximum, "");
-static_assert(ceilinged_add(unsigned_half, unsigned_maximum) == unsigned_maximum, "");
-static_assert(ceilinged_add(unsigned_half, unsigned_half) == sub1(unsigned_maximum), "");
-static_assert(std::is_same<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>::value, "");
-
-// floor_subtract (unsigned)
-static_assert(floored_subtract(unsigned_minimum, unsigned_minimum) == unsigned_minimum, "");
-static_assert(floored_subtract(unsigned_maximum, unsigned_minimum) == unsigned_maximum, "");
-static_assert(floored_subtract(unsigned_minimum, unsigned_maximum) == unsigned_minimum, "");
-static_assert(floored_subtract(unsigned_maximum, unsigned_maximum) == unsigned_minimum, "");
-static_assert(floored_subtract(unsigned_maximum, unsigned_half) == add1(unsigned_half), "");
-static_assert(floored_subtract(unsigned_half, unsigned_maximum) == unsigned_minimum, "");
-static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_minimum, "");
-static_assert(std::is_same<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>::value, "");
-
 constexpr auto signed_minimum = min_int16;
 constexpr auto signed_zero = int16_t{ 0 };
 constexpr auto signed_maximum = max_int16;
 constexpr auto signed_half = to_half(signed_maximum);
+
+// overflows (signed)
+static_assert(!overflows(signed_zero, signed_zero), "");
+static_assert(!overflows(signed_minimum, signed_zero), "");
+static_assert(!overflows(signed_zero, signed_minimum), "");
+static_assert(overflows(signed_minimum, signed_minimum), "");
+static_assert(!overflows(signed_minimum, signed_maximum), "");
+static_assert(!overflows(signed_maximum, signed_minimum), "");
+static_assert(overflows(signed_maximum, signed_maximum), "");
+static_assert(overflows(signed_maximum, signed_half), "");
+static_assert(overflows(signed_half, signed_maximum), "");
+static_assert(!overflows(signed_half, signed_half), "");
+
+// overflows (unsigned)
+static_assert(!overflows(unsigned_minimum, unsigned_minimum), "");
+static_assert(!overflows(unsigned_minimum, unsigned_maximum), "");
+static_assert(!overflows(unsigned_maximum, unsigned_minimum), "");
+static_assert(overflows(unsigned_maximum, unsigned_maximum), "");
+static_assert(overflows(unsigned_maximum, unsigned_half), "");
+static_assert(overflows(unsigned_half, unsigned_maximum), "");
+static_assert(!overflows(unsigned_half, unsigned_half) , "");
+
+// underflows (signed)
+static_assert(!underflows(signed_zero, signed_zero), "");
+static_assert(!underflows(signed_minimum, signed_zero), "");
+static_assert(underflows(signed_zero, signed_minimum), "");
+static_assert(!underflows(signed_minimum, signed_zero), "");
+static_assert(!underflows(signed_minimum, signed_minimum), "");
+static_assert(underflows(signed_maximum, signed_minimum), "");
+static_assert(underflows(signed_minimum, signed_maximum), "");
+static_assert(!underflows(signed_maximum, signed_maximum), "");
+static_assert(!underflows(signed_maximum, signed_half), "");
+static_assert(!underflows(signed_half, signed_maximum), "");
+static_assert(!underflows(signed_half, signed_half), "");
+
+// underflows (unsigned)
+static_assert(!underflows(unsigned_minimum, unsigned_minimum), "");
+static_assert(!underflows(unsigned_maximum, unsigned_minimum), "");
+static_assert(underflows(unsigned_minimum, unsigned_maximum), "");
+static_assert(!underflows(unsigned_maximum, unsigned_maximum), "");
+static_assert(!underflows(unsigned_maximum, unsigned_half), "");
+static_assert(underflows(unsigned_half, unsigned_maximum), "");
+static_assert(!underflows(unsigned_half, unsigned_half), "");
 
 // ceilinged_add (signed)
 static_assert(ceilinged_add(signed_zero, signed_zero) == signed_zero, "");
@@ -117,6 +140,16 @@ static_assert(ceilinged_add(signed_maximum, signed_maximum) == signed_maximum, "
 static_assert(ceilinged_add(signed_maximum, signed_half) == signed_maximum, "");
 static_assert(ceilinged_add(signed_half, signed_maximum) == signed_maximum, "");
 static_assert(ceilinged_add(signed_half, signed_half) == sub1(signed_maximum), "");
+static_assert(std::is_same<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>::value, "");
+
+// ceilinged_add (unsigned)
+static_assert(ceilinged_add(unsigned_minimum, unsigned_minimum) == unsigned_minimum, "");
+static_assert(ceilinged_add(unsigned_minimum, unsigned_maximum) == unsigned_maximum, "");
+static_assert(ceilinged_add(unsigned_maximum, unsigned_minimum) == unsigned_maximum, "");
+static_assert(ceilinged_add(unsigned_maximum, unsigned_maximum) == unsigned_maximum, "");
+static_assert(ceilinged_add(unsigned_maximum, unsigned_half) == unsigned_maximum, "");
+static_assert(ceilinged_add(unsigned_half, unsigned_maximum) == unsigned_maximum, "");
+static_assert(ceilinged_add(unsigned_half, unsigned_half) == sub1(unsigned_maximum), "");
 static_assert(std::is_same<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>::value, "");
 
 // floor_subtract (signed)
@@ -132,3 +165,13 @@ static_assert(floored_subtract(signed_maximum, signed_half) == add1(+signed_half
 static_assert(floored_subtract(signed_half, signed_maximum) == sub1(-signed_half), "");
 static_assert(floored_subtract(signed_half, signed_half) == 0, "");
 static_assert(std::is_same<decltype(floored_subtract<int16_t>(0, 0)), int16_t>::value, "");
+
+// floor_subtract (unsigned)
+static_assert(floored_subtract(unsigned_minimum, unsigned_minimum) == unsigned_minimum, "");
+static_assert(floored_subtract(unsigned_maximum, unsigned_minimum) == unsigned_maximum, "");
+static_assert(floored_subtract(unsigned_minimum, unsigned_maximum) == unsigned_minimum, "");
+static_assert(floored_subtract(unsigned_maximum, unsigned_maximum) == unsigned_minimum, "");
+static_assert(floored_subtract(unsigned_maximum, unsigned_half) == add1(unsigned_half), "");
+static_assert(floored_subtract(unsigned_half, unsigned_maximum) == unsigned_minimum, "");
+static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_minimum, "");
+static_assert(std::is_same<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>::value, "");

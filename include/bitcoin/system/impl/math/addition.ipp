@@ -43,49 +43,66 @@ constexpr Result subtract(Left left, Right right) noexcept
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+constexpr bool overflows(Integer left, Integer right) noexcept
 {
     // C++14: local variables allowed in constexpr.
-    return
-        (is_zero(right) ||
-            (is_negative(right) &&
-                (left >= std::numeric_limits<Integer>::min() - right)) ||
-            (!is_negative(right) &&
-                (left <= std::numeric_limits<Integer>::max() - right))) ?
-            (right + left) :
-        ((is_negative(right)) ?
-            std::numeric_limits<Integer>::min() :
-            std::numeric_limits<Integer>::max());
+    return !is_zero(right) &&
+        (!is_negative(right) ||
+            (left < std::numeric_limits<Integer>::min() - right)) &&
+        (is_negative(right) ||
+            (left > std::numeric_limits<Integer>::max() - right));
+}
+
+template <typename Integer, if_unsigned_integer<Integer>>
+constexpr bool overflows(Integer left, Integer right) noexcept
+{
+    return right > (std::numeric_limits<Integer>::max() - left);
+}
+
+template <typename Integer, if_signed_integer<Integer>>
+constexpr bool underflows(Integer left, Integer right) noexcept
+{
+    // C++14: local variables allowed in constexpr.
+    return !is_zero(right) &&
+        (!is_negative(right) ||
+            (left > std::numeric_limits<Integer>::max() + right)) &&
+        (is_negative(right) ||
+            (left < std::numeric_limits<Integer>::min() + right));
+}
+
+template <typename Integer, if_unsigned_integer<Integer>>
+constexpr bool underflows(Integer left, Integer right) noexcept
+{
+    return right > left;
+}
+
+template <typename Integer, if_signed_integer<Integer>>
+constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+{
+    return overflows(left, right) ? (is_negative(right) ?
+        std::numeric_limits<Integer>::min() :
+        std::numeric_limits<Integer>::max()) : (left + right);
+}
+
+template <typename Integer, if_unsigned_integer<Integer>>
+constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+{
+    return overflows(left, right) ? std::numeric_limits<Integer>::max() :
+        (left + right);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer floored_subtract(Integer left, Integer right) noexcept
 {
-    // C++14: local variables allowed in constexpr.
-    return
-        (is_zero(right) ||
-            (is_negative(right) &&
-                (left <= std::numeric_limits<Integer>::max() + right)) ||
-            (!is_negative(right) &&
-                (left >= std::numeric_limits<Integer>::min() + right))) ?
-        (left - right) :
-        ((is_negative(right)) ?
-            std::numeric_limits<Integer>::max() :
-            std::numeric_limits<Integer>::min());
-}
-
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
-{
-    // C++14: local variables allowed in constexpr.
-    return (left > (std::numeric_limits<Integer>::max() - right)) ?
-        std::numeric_limits<Integer>::max() : (left + right);
+    return underflows(left, right) ? (is_negative(right) ?
+        std::numeric_limits<Integer>::max() :
+        std::numeric_limits<Integer>::min()) : (left - right);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer floored_subtract(Integer left, Integer right) noexcept
 {
-    return (right >= left) ? std::numeric_limits<Integer>::min() :
+    return underflows(left, right) ? std::numeric_limits<Integer>::min() :
         (left - right);
 }
 

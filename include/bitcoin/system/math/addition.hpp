@@ -34,17 +34,39 @@ template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr Result subtract(Left left, Right right) noexcept;
 
+/// The term 'overflow' is used here to describe a sum that is above the
+/// maximum or below the minimum of the integer domain. Similarly, 'underflow'
+/// is used here to describe a difference that is above the maximum or below
+/// the minimum of the integer domain. In other words, add overflows and
+/// subtract underflows.
+
+/// True if add would overflow.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr bool overflows(Integer left, Integer right) noexcept;
+
+/// True if add would overflow.
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr bool overflows(Integer left, Integer right) noexcept;
+
+/// True if subtract would underflow.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr bool underflows(Integer left, Integer right) noexcept;
+
+/// True if subtract would underflow.
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr bool underflows(Integer left, Integer right) noexcept;
+
 /// Integer maximum if would overflow, otherwise the sum.
 template <typename Integer, if_signed_integer<Integer> = true>
+constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
+
+/// Integer maximum if would overflow, otherwise the sum.
+template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
 
 /// Integer minimum if would underflow, otherwise the difference.
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr Integer floored_subtract(Integer left, Integer right) noexcept;
-
-/// Integer maximum if would overflow, otherwise the sum.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
 
 /// Integer minimum (0) if would underflow, otherwise the difference.
 template <typename Integer, if_unsigned_integer<Integer> = true>
