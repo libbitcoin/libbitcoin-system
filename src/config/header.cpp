@@ -30,8 +30,18 @@ namespace config {
 
 using namespace boost::program_options;
 
-header::header()
+header::header() noexcept
   : value_()
+{
+}
+
+header::header(const chain::header& value) noexcept
+  : value_(value)
+{
+}
+
+header::header(const header& other) noexcept
+  : header(other.value_)
 {
 }
 
@@ -41,17 +51,7 @@ header::header(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-header::header(const chain::header& value)
-  : value_(value)
-{
-}
-
-header::header(const header& other)
-  : header(other.value_)
-{
-}
-
-header::operator const chain::header&() const
+header::operator const chain::header&() const noexcept
 {
     return value_;
 }
@@ -69,7 +69,7 @@ std::istream& operator>>(std::istream& input, header& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const header& argument)
+std::ostream& operator<<(std::ostream& output, const header& argument) noexcept
 {
     const auto bytes = argument.value_.to_data();
 

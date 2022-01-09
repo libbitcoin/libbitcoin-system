@@ -28,7 +28,17 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base64::base64()
+base64::base64() noexcept
+{
+}
+
+base64::base64(const data_chunk& value) noexcept
+  : value_(value)
+{
+}
+
+base64::base64(const base64& other) noexcept
+  : base64(other.value_)
 {
 }
 
@@ -37,17 +47,7 @@ base64::base64(const std::string& base64)
     std::stringstream(base64) >> *this;
 }
 
-base64::base64(const data_chunk& value)
-  : value_(value)
-{
-}
-
-base64::base64(const base64& other)
-  : base64(other.value_)
-{
-}
-
-base64::operator const data_chunk&() const
+base64::operator const data_chunk&() const noexcept
 {
     return value_;
 }
@@ -63,7 +63,7 @@ std::istream& operator>>(std::istream& input, base64& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base64& argument)
+std::ostream& operator<<(std::ostream& output, const base64& argument) noexcept
 {
     output << encode_base64(argument.value_);
     return output;

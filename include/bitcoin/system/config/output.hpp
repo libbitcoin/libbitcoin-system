@@ -35,15 +35,15 @@ namespace config {
 class BC_API output
 {
 public:
-    output();
+    output() noexcept;
     output(const std::string& tuple);
 
     /// Parsed properties
-    bool is_stealth() const;
-    uint64_t amount() const;
-    uint8_t version() const;
-    const chain::script& script() const;
-    const short_hash& pay_to_hash() const;
+    bool is_stealth() const noexcept;
+    uint64_t amount() const noexcept;
+    uint8_t version() const noexcept;
+    const chain::script& script() const noexcept;
+    const short_hash& pay_to_hash() const noexcept;
 
     friend std::istream& operator>>(std::istream& input, output& argument);
 

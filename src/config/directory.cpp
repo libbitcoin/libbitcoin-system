@@ -31,7 +31,7 @@ namespace system {
 namespace config {
 
 // Returns empty string if unable to retrieve (including when not in Windows).
-std::string windows_config_directory()
+std::string windows_config_directory() noexcept
 {
 #ifdef _MSC_VER
     wchar_t directory[MAX_PATH];

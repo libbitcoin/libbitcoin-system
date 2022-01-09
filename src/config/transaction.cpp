@@ -30,8 +30,18 @@ namespace config {
 
 using namespace boost::program_options;
 
-transaction::transaction()
+transaction::transaction() noexcept
   : value_()
+{
+}
+
+transaction::transaction(const chain::transaction& value) noexcept
+  : value_(value)
+{
+}
+
+transaction::transaction(const transaction& other) noexcept
+  : transaction(other.value_)
 {
 }
 
@@ -40,22 +50,12 @@ transaction::transaction(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-transaction::transaction(const chain::transaction& value)
-  : value_(value)
-{
-}
-
-transaction::transaction(const transaction& other)
-  : transaction(other.value_)
-{
-}
-
-chain::transaction& transaction::data()
+chain::transaction& transaction::data() noexcept
 {
     return value_;
 }
 
-transaction::operator const chain::transaction&() const
+transaction::operator const chain::transaction&() const noexcept
 {
     return value_;
 }
@@ -73,7 +73,8 @@ std::istream& operator>>(std::istream& input, transaction& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const transaction& argument)
+std::ostream& operator<<(std::ostream& output,
+    const transaction& argument) noexcept
 {
     output << base16(argument.value_.to_data(true));
     return output;

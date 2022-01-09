@@ -28,8 +28,18 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-block::block()
+block::block() noexcept
   : value_()
+{
+}
+
+block::block(const chain::block& value) noexcept
+  : value_(value)
+{
+}
+
+block::block(const block& other) noexcept
+  : block(other.value_)
 {
 }
 
@@ -39,39 +49,29 @@ block::block(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-block::block(const chain::block& value)
-  : value_(value)
-{
-}
-
-block::block(const block& other)
-  : block(other.value_)
-{
-}
-
-block& block::operator=(const block& other)
+block& block::operator=(const block& other) noexcept
 {
     value_ = chain::block(other.value_);
     return *this;
 }
 
-block& block::operator=(chain::block&& other)
+block& block::operator=(chain::block&& other) noexcept
 {
     value_ = std::move(other);
     return *this;
 }
 
-bool block::operator==(const block& other) const
+bool block::operator==(const block& other) const noexcept
 {
     return value_ == other.value_;
 }
 
-block::operator const chain::block&() const
+block::operator const chain::block&() const noexcept
 {
     return value_;
 }
 
-std::string block::to_string() const
+std::string block::to_string() const noexcept
 {
     std::stringstream value;
     value << *this;
@@ -91,7 +91,7 @@ std::istream& operator>>(std::istream& input, block& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const block& argument)
+std::ostream& operator<<(std::ostream& output, const block& argument) noexcept
 {
     const auto bytes = argument.value_.to_data(true);
 

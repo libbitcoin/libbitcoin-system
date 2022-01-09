@@ -29,7 +29,17 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base16::base16()
+base16::base16() noexcept
+{
+}
+
+base16::base16(const data_chunk& value) noexcept
+  : value_(value)
+{
+}
+
+base16::base16(const base16& other) noexcept
+  : base16(other.value_)
 {
 }
 
@@ -38,22 +48,12 @@ base16::base16(const std::string& hexcode)
     std::stringstream(hexcode) >> *this;
 }
 
-base16::base16(const data_chunk& value)
-  : value_(value)
-{
-}
-
-base16::base16(const base16& other)
-  : base16(other.value_)
-{
-}
-
-base16::operator const data_chunk&() const
+base16::operator const data_chunk&() const noexcept
 {
     return value_;
 }
 
-base16::operator data_slice() const
+base16::operator data_slice() const noexcept
 {
     return { value_.begin(), value_.end() };
 }
@@ -72,7 +72,7 @@ std::istream& operator>>(std::istream& input, base16& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base16& argument)
+std::ostream& operator<<(std::ostream& output, const base16& argument) noexcept
 {
     output << encode_base16(argument.value_);
     return output;

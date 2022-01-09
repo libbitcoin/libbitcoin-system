@@ -32,19 +32,19 @@ namespace config {
 class BC_API transaction
 {
 public:
-    transaction();
-    transaction(const transaction& other);
+    transaction() noexcept;
+    transaction(const transaction& other) noexcept;
+    transaction(const chain::transaction& value) noexcept;
     transaction(const std::string& hexcode);
-    transaction(const chain::transaction& value);
 
-    chain::transaction& data();
+    chain::transaction& data() noexcept;
 
-    operator const chain::transaction&() const;
+    operator const chain::transaction&() const noexcept;
 
     friend std::istream& operator>>(std::istream& input,
         transaction& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const transaction& argument);
+        const transaction& argument) noexcept;
 
 private:
     chain::transaction value_;

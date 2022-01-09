@@ -34,16 +34,16 @@ class BC_API point
 public:
     static const std::string delimiter;
 
-    point();
-    point(const point& other);
+    point() noexcept;
+    point(const point& other) noexcept;
+    point(const chain::point& value) noexcept;
     point(const std::string& tuple);
-    point(const chain::point& value);
 
-    operator const chain::point&() const;
+    operator const chain::point&() const noexcept;
 
     friend std::istream& operator>>(std::istream& input, point& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const point& argument);
+        const point& argument) noexcept;
 
 private:
     chain::point value_;

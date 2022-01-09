@@ -28,8 +28,18 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base85::base85()
+base85::base85() noexcept
   : value_()
+{
+}
+
+base85::base85(const data_chunk& value) noexcept
+  : value_(value)
+{
+}
+
+base85::base85(const base85& other) noexcept
+  : base85(other.value_)
 {
 }
 
@@ -38,22 +48,12 @@ base85::base85(const std::string& base85)
     std::stringstream(base85) >> *this;
 }
 
-base85::base85(const data_chunk& value)
-  : value_(value)
-{
-}
-
-base85::base85(const base85& other)
-  : base85(other.value_)
-{
-}
-
-base85::operator bool() const
+base85::operator bool() const noexcept
 {
     return (value_.size() % 4) == 0u;
 }
 
-base85::operator const data_chunk&() const
+base85::operator const data_chunk&() const noexcept
 {
     return value_;
 }

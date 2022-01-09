@@ -27,7 +27,17 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base2::base2()
+base2::base2() noexcept
+{
+}
+
+base2::base2(const binary& value) noexcept
+  : value_(value)
+{
+}
+
+base2::base2(const base2& other) noexcept
+  : base2(other.value_)
 {
 }
 
@@ -36,22 +46,12 @@ base2::base2(const std::string& binary)
     std::stringstream(binary) >> *this;
 }
 
-base2::base2(const binary& value)
-  : value_(value)
-{
-}
-
-base2::base2(const base2& other)
-  : base2(other.value_)
-{
-}
-
-size_t base2::size() const
+size_t base2::size() const noexcept
 {
     return value_.bits();
 }
 
-base2::operator const binary&() const
+base2::operator const binary&() const noexcept
 {
     return value_;
 }
@@ -68,7 +68,7 @@ std::istream& operator>>(std::istream& input, base2& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base2& argument)
+std::ostream& operator<<(std::ostream& output, const base2& argument) noexcept
 {
     output << argument.value_;
     return output;

@@ -28,7 +28,17 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base32::base32()
+base32::base32() noexcept
+{
+}
+
+base32::base32(const data_chunk& value) noexcept
+  : value_(value)
+{
+}
+
+base32::base32(const base32& other) noexcept
+  : base32(other.value_)
 {
 }
 
@@ -37,17 +47,7 @@ base32::base32(const std::string& base32)
     std::stringstream(base32) >> *this;
 }
 
-base32::base32(const data_chunk& value)
-  : value_(value)
-{
-}
-
-base32::base32(const base32& other)
-  : base32(other.value_)
-{
-}
-
-base32::operator const data_chunk&() const
+base32::operator const data_chunk&() const noexcept
 {
     return value_;
 }
@@ -63,7 +63,7 @@ std::istream& operator>>(std::istream& input, base32& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base32& argument)
+std::ostream& operator<<(std::ostream& output, const base32& argument) noexcept
 {
     output << encode_base32(argument.value_);
     return output;

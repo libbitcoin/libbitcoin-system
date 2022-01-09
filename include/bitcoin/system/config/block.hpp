@@ -32,22 +32,22 @@ namespace config {
 class BC_API block
 {
 public:
-    block();
-    block(const block& other);
+    block() noexcept;
+    block(const block& other) noexcept;
+    block(const chain::block& value) noexcept;
     block(const std::string& hexcode);
-    block(const chain::block& value);
 
-    block& operator=(const block& other);
-    block& operator=(chain::block&& other);
-    bool operator==(const block& other) const;
+    block& operator=(const block& other) noexcept;
+    block& operator=(chain::block&& other) noexcept;
+    bool operator==(const block& other) const noexcept;
 
-    operator const chain::block&() const;
+    operator const chain::block&() const noexcept;
 
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
     friend std::istream& operator>>(std::istream& input, block& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const block& argument);
+        const block& argument) noexcept;
 
 private:
     chain::block value_;

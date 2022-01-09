@@ -34,24 +34,25 @@ namespace config {
 class BC_API script
 {
 public:
-    script();
-    script(const script& other);
-    script(const std::string& mnemonic);
-    script(const chain::script& value);
-    script(const data_chunk& value);
+    script() noexcept;
+    script(const script& other) noexcept;
+    script(const chain::script& value) noexcept;
+    script(const data_chunk& value) noexcept;
     script(const std::vector<std::string>& tokens);
+    script(const std::string& mnemonic);
 
     /// Serialize the script to bytes according to the p2p wire protocol.
-    data_chunk to_data() const;
+    data_chunk to_data() const noexcept;
 
     /// Return a pretty-printed copy of the script.
-    std::string to_string(uint32_t flags=chain::forks::all_rules) const;
+    std::string to_string(
+        uint32_t flags=chain::forks::all_rules) const noexcept;
 
-    operator const chain::script&() const;
+    operator const chain::script&() const noexcept;
 
     friend std::istream& operator>>(std::istream& input, script& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const script& argument);
+        const script& argument) noexcept;
 
 private:
     chain::script value_;

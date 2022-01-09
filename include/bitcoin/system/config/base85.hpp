@@ -34,21 +34,20 @@ namespace config {
 class BC_API base85
 {
 public:
-    base85();
-    base85(const base85& other);
+    base85() noexcept;
+    base85(const base85& other) noexcept;
+    base85(const data_chunk& value) noexcept;
     base85(const std::string& base85);
-    base85(const data_chunk& value);
 
     /// True if the data size is evenly divisible by 4.
-    operator bool() const;
+    operator bool() const noexcept;
 
-    operator const data_chunk&() const;
+    operator const data_chunk&() const noexcept;
 
     /// the key as a base85 encoded (z85) string.
     std::string to_string() const;
 
-    friend std::istream& operator>>(std::istream& input,
-        base85& argument);
+    friend std::istream& operator>>(std::istream& input, base85& argument);
     friend std::ostream& operator<<(std::ostream& output,
         const base85& argument);
 

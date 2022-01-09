@@ -33,7 +33,8 @@ namespace config {
 using namespace boost::program_options;
 
 // input is a private encoding in bx.
-static bool decode_input(chain::input& input, const std::string& tuple)
+static bool decode_input(chain::input& input,
+    const std::string& tuple) noexcept
 {
     const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() != 2)
@@ -50,7 +51,7 @@ static bool decode_input(chain::input& input, const std::string& tuple)
 }
 
 // input is currently a private encoding in bx.
-static std::string encode_input(const chain::input& input)
+static std::string encode_input(const chain::input& input) noexcept
 {
     std::stringstream result;
     result << point(input.point()) << point::delimiter
@@ -59,13 +60,23 @@ static std::string encode_input(const chain::input& input)
     return result.str();
 }
 
-input::input()
+input::input() noexcept
   : value_()
 {
 }
 
-input::input(const input& other)
+input::input(const input& other) noexcept
   : input(other.value_)
+{
+}
+
+input::input(const chain::input& value) noexcept
+  : value_(value)
+{
+}
+
+input::input(const chain::point& value) noexcept
+  : value_({value, {}, chain::max_input_sequence})
 {
 }
 
@@ -74,17 +85,7 @@ input::input(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-input::input(const chain::input& value)
-  : value_(value)
-{
-}
-
-input::input(const chain::point& value)
-  : value_({value, {}, chain::max_input_sequence})
-{
-}
-
-input::operator const chain::input&() const
+input::operator const chain::input&() const noexcept
 {
     return value_;
 }
@@ -100,7 +101,7 @@ std::istream& operator>>(std::istream& stream, input& argument)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const input& argument)
+std::ostream& operator<<(std::ostream& output, const input& argument) noexcept
 {
     output << encode_input(argument.value_);
     return output;

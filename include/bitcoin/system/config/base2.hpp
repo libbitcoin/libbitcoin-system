@@ -34,20 +34,19 @@ class BC_API base2
 {
 public:
 
-    base2();
-    base2(const base2& other);
-    base2(const binary& value);
+    base2() noexcept;
+    base2(const base2& other) noexcept;
+    base2(const binary& value) noexcept;
     base2(const std::string& binary);
 
     /// Get number of bits.
-    size_t size() const;
+    size_t size() const noexcept;
 
-    operator const binary&() const;
+    operator const binary&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
-        base2& argument);
+    friend std::istream& operator>>(std::istream& input, base2& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const base2& argument);
+        const base2& argument) noexcept;
 
 private:
     binary value_;

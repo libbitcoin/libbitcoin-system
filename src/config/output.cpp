@@ -42,7 +42,7 @@ constexpr size_t minimum_seed_bits = 128;
 // The minimum safe length of a seed in bytes (16).
 constexpr size_t minimum_seed_size = minimum_seed_bits / 8u;
 
-output::output()
+output::output() noexcept
   : is_stealth_(false), amount_(0), version_(0), script_(),
     pay_to_hash_(null_short_hash)
 {
@@ -54,27 +54,27 @@ output::output(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-bool output::is_stealth() const
+bool output::is_stealth() const noexcept
 {
     return is_stealth_;
 }
 
-uint64_t output::amount() const
+uint64_t output::amount() const noexcept
 {
     return amount_;
 }
 
-uint8_t output::version() const
+uint8_t output::version() const noexcept
 {
     return version_;
 }
 
-const chain::script& output::script() const
+const chain::script& output::script() const noexcept
 {
     return script_;
 }
 
-const short_hash& output::pay_to_hash() const
+const short_hash& output::pay_to_hash() const noexcept
 {
     return pay_to_hash_;
 }

@@ -28,35 +28,34 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-hash256::hash256()
+hash256::hash256() noexcept
   : value_(null_hash)
 {
 }
 
-hash256::hash256(const std::string& hexcode)
-  : hash256()
-{
-    std::stringstream(hexcode) >> *this;
-}
-
-hash256::hash256(const hash_digest& value)
+hash256::hash256(const hash_digest& value) noexcept
   : value_(value)
 {
 }
 
-hash256::hash256(const hash256& other)
+hash256::hash256(const hash256& other) noexcept
   : hash256(other.value_)
 {
 }
 
-std::string hash256::to_string() const
+hash256::hash256(const std::string& hexcode)
+{
+    std::stringstream(hexcode) >> *this;
+}
+
+std::string hash256::to_string() const noexcept
 {
     std::stringstream value;
     value << *this;
     return value.str();
 }
 
-hash256::operator const hash_digest&() const
+hash256::operator const hash_digest&() const noexcept
 {
     return value_;
 }
@@ -72,7 +71,7 @@ std::istream& operator>>(std::istream& input, hash256& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const hash256& argument)
+std::ostream& operator<<(std::ostream& output, const hash256& argument) noexcept
 {
     output << encode_hash(argument.value_);
     return output;

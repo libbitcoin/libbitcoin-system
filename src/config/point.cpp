@@ -37,7 +37,8 @@ using namespace boost::program_options;
 const std::string point::delimiter = ":";
 
 // Point format is currently private to bx.
-static bool decode_point(chain::point& point, const std::string& tuple)
+static bool decode_point(chain::point& point,
+    const std::string& tuple) noexcept
 {
     uint32_t index;
     const auto tokens = split(tuple, point::delimiter);
@@ -50,15 +51,25 @@ static bool decode_point(chain::point& point, const std::string& tuple)
 }
 
 // Point format is currently private to bx.
-static std::string encode_point(const chain::point& point)
+static std::string encode_point(const chain::point& point) noexcept
 {
     std::stringstream result;
     result << hash256(point.hash()) << point::delimiter << point.index();
     return result.str();
 }
 
-point::point()
+point::point() noexcept
   : value_()
+{
+}
+
+point::point(const chain::point& value) noexcept
+  : value_(value)
+{
+}
+
+point::point(const point& other) noexcept
+  : point(other.value_)
 {
 }
 
@@ -67,17 +78,7 @@ point::point(const std::string& tuple)
     std::stringstream(tuple) >> *this;
 }
 
-point::point(const chain::point& value)
-  : value_(value)
-{
-}
-
-point::point(const point& other)
-  : point(other.value_)
-{
-}
-
-point::operator const chain::point&() const
+point::operator const chain::point&() const noexcept
 {
     return value_;
 }
@@ -93,7 +94,7 @@ std::istream& operator>>(std::istream& input, point& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const point& argument)
+std::ostream& operator<<(std::ostream& output, const point& argument) noexcept
 {
     output << encode_point(argument.value_);
     return output;

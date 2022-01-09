@@ -28,7 +28,17 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base58::base58()
+base58::base58() noexcept
+{
+}
+
+base58::base58(const data_chunk& value) noexcept
+  : value_(value)
+{
+}
+
+base58::base58(const base58& other) noexcept
+  : base58(other.value_)
 {
 }
 
@@ -37,17 +47,7 @@ base58::base58(const std::string& base58)
     std::stringstream(base58) >> *this;
 }
 
-base58::base58(const data_chunk& value)
-  : value_(value)
-{
-}
-
-base58::base58(const base58& other)
-  : base58(other.value_)
-{
-}
-
-base58::operator const data_chunk&() const
+base58::operator const data_chunk&() const noexcept
 {
     return value_;
 }
@@ -63,7 +63,7 @@ std::istream& operator>>(std::istream& input, base58& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const base58& argument)
+std::ostream& operator<<(std::ostream& output, const base58& argument) noexcept
 {
     output << encode_base58(argument.value_);
     return output;

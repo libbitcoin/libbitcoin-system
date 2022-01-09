@@ -29,8 +29,28 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-script::script()
+script::script() noexcept
   : value_()
+{
+}
+
+script::script(const script& other) noexcept
+  : script(other.value_)
+{
+}
+
+script::script(const chain::script& value) noexcept
+  : value_(value)
+{
+}
+
+script::script(const data_chunk& value) noexcept
+{
+    value_ = chain::script(value, false);
+}
+
+script::script(const std::vector<std::string>& tokens)
+  : script(join(tokens))
 {
 }
 
@@ -39,38 +59,17 @@ script::script(const std::string& mnemonic)
     std::stringstream(mnemonic) >> *this;
 }
 
-script::script(const chain::script& value)
-  : value_(value)
-{
-}
-
-script::script(const data_chunk& value)
-{
-    value_ = chain::script(value, false);
-}
-
-script::script(const std::vector<std::string>& tokens)
-{
-    const auto mnemonic = join(tokens);
-    std::stringstream(mnemonic) >> *this;
-}
-
-script::script(const script& other)
-  : script(other.value_)
-{
-}
-
-data_chunk script::to_data() const
+data_chunk script::to_data() const noexcept
 {
     return value_.to_data(false);
 }
 
-std::string script::to_string(uint32_t flags) const
+std::string script::to_string(uint32_t flags) const noexcept
 {
     return value_.to_string(flags);
 }
 
-script::operator const chain::script&() const
+script::operator const chain::script&() const noexcept
 {
     return value_;
 }
@@ -88,7 +87,7 @@ std::istream& operator>>(std::istream& input, script& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const script& argument)
+std::ostream& operator<<(std::ostream& output, const script& argument) noexcept
 {
     static constexpr auto flags = chain::forks::all_rules;
     output << argument.value_.to_string(flags);

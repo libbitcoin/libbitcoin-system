@@ -32,17 +32,17 @@ namespace config {
 class BC_API input
 {
 public:
-    input();
-    input(const input& other);
+    input() noexcept;
+    input(const input& other) noexcept;
+    input(const chain::input& value) noexcept;
+    input(const chain::point& value) noexcept;
     input(const std::string& tuple);
-    input(const chain::input& value);
-    input(const chain::point& value);
 
-    operator const chain::input&() const;
+    operator const chain::input&() const noexcept;
 
     friend std::istream& operator>>(std::istream& stream, input& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const input& argument);
+        const input& argument) noexcept;
 
 private:
     chain::input value_;

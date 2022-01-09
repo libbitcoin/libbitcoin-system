@@ -32,16 +32,16 @@ namespace config {
 class BC_API header
 {
 public:
-    header();
-    header(const header& other);
+    header() noexcept;
+    header(const header& other) noexcept;
+    header(const chain::header& value) noexcept;
     header(const std::string& hexcode);
-    header(const chain::header& value);
 
-    operator const chain::header&() const;
+    operator const chain::header&() const noexcept;
 
     friend std::istream& operator>>(std::istream& input, header& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const header& argument);
+        const header& argument) noexcept;
 
 private:
     chain::header value_;

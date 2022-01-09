@@ -31,7 +31,7 @@ namespace config {
 
 // Declare config_default_path() via BC_DECLARE_CONFIG_DEFAULT_PATH(relative).
 #define CONFIG_DEFAULT_PATH(directory, subdirectory) \
-    static boost::filesystem::path config_default_path() \
+    static boost::filesystem::path config_default_path() noexcept \
     { \
         const boost::filesystem::path folder(directory); \
         return folder / subdirectory; \
@@ -52,7 +52,7 @@ namespace config {
  * Get the windows configuration directory.
  * @return Path or empty string if unable to retrieve.
  */
-BC_API std::string windows_config_directory();
+BC_API std::string windows_config_directory() noexcept;
 
 } // namespace config
 } // namespace system
