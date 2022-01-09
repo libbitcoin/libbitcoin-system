@@ -34,30 +34,30 @@ using namespace std::chrono;
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // Values may or may not be truly random depending on the underlying device.
 
-void pseudo_random::fill(data_chunk& out)
+void pseudo_random::fill(data_chunk& out) noexcept
 {
-    std::transform(out.begin(), out.end(), out.begin(), [](uint8_t)
+    std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) noexcept
     {
         return next();
     });
 }
 
-uint8_t pseudo_random::next()
+uint8_t pseudo_random::next() noexcept
 {
     return next(std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max());
 }
 
-uint8_t pseudo_random::next(uint8_t begin, uint8_t end)
+uint8_t pseudo_random::next(uint8_t begin, uint8_t end) noexcept
 {
     std::uniform_int_distribution<uint16_t> distribution(begin, end);
     return static_cast<uint8_t>(distribution(get_twister()));
 }
 
-std::mt19937& pseudo_random::get_twister()
+std::mt19937& pseudo_random::get_twister() noexcept
 {
     // Boost.thread will clean up the thread statics using this function.
-    const auto deleter = [](std::mt19937* twister)
+    const auto deleter = [](std::mt19937* twister) noexcept
     {
         delete twister;
     };
@@ -66,7 +66,7 @@ std::mt19937& pseudo_random::get_twister()
     static boost::thread_specific_ptr<std::mt19937> twister(deleter);
 
     // Use the clock for seeding.
-    const auto get_clock_seed = []()
+    const auto get_clock_seed = []() noexcept
     {
         const auto now = high_resolution_clock::now();
         return static_cast<uint32_t>(now.time_since_epoch().count());
@@ -88,7 +88,7 @@ std::mt19937& pseudo_random::get_twister()
 // [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
 steady_clock::duration pseudo_random::duration(
-    const steady_clock::duration& expiration, uint8_t ratio)
+    const steady_clock::duration& expiration, uint8_t ratio) noexcept
 {
     if (is_zero(ratio))
         return expiration;

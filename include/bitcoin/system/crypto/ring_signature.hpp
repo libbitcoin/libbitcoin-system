@@ -39,7 +39,7 @@ typedef std::vector<compressed_list> key_rings;
 
 /// A borromean ring signature.
 /// theta = {e_0, s_{i_j} : 0 <= i <= n, 0 <= j <= m_i}
-struct ring_signature
+struct BC_API ring_signature
 {
     typedef std::vector<secret_list> proof_list;
 
@@ -49,7 +49,8 @@ struct ring_signature
 
 /// Prepare hash digest for use in ring signature signing and verification.
 /// Returns ring signature digest: sha256(message || flatten(rings)).
-BC_API hash_digest digest(const data_slice& message, const key_rings& rings);
+BC_API hash_digest digest(const data_slice& message,
+    const key_rings& rings) noexcept;
 
 /// Create a borromean ring signature.
 /// There must exist a valid signing key for each ring of public keys.
@@ -64,7 +65,7 @@ BC_API hash_digest digest(const data_slice& message, const key_rings& rings);
 /// return false if the signing operation fails.
 BC_API bool sign(ring_signature& out, const secret_list& secrets,
     const key_rings& rings, const hash_digest& digest,
-    const secret_list& salts);
+    const secret_list& salts) noexcept;
 
 /// Verify a borromean ring signature.
 /// rings        The rings each with N_i public keys.
@@ -72,7 +73,7 @@ BC_API bool sign(ring_signature& out, const secret_list& secrets,
 /// signature    Signature.
 /// return false if the verify operation fails.
 BC_API bool verify(const key_rings& rings, const hash_digest& digest,
-    const ring_signature& signature);
+    const ring_signature& signature) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

@@ -38,33 +38,33 @@ namespace system {
 // Hash conversions of corresponding integers.
 // ----------------------------------------------------------------------------
 
-mini_hash to_hash(const uint48_t& value)
+mini_hash to_hash(const uint48_t& value) noexcept
 {
     return to_little_endian<to_bytes(48)>(value);
 }
 
-quarter_hash to_hash(const uint64_t& value)
+quarter_hash to_hash(const uint64_t& value) noexcept
 {
     // Use integral uint64_t.
     return to_little_endian(value);
 }
 
-half_hash to_hash(const uint128_t& value)
+half_hash to_hash(const uint128_t& value) noexcept
 {
     return to_little_endian<to_bytes(128)>(value);
 }
 
-short_hash to_hash(const uint160_t& value)
+short_hash to_hash(const uint160_t& value) noexcept
 {
     return to_little_endian<to_bytes(160)>(value);
 }
 
-hash_digest to_hash(const uint256_t& value)
+hash_digest to_hash(const uint256_t& value) noexcept
 {
     return to_little_endian<to_bytes(256)>(value);
 }
 
-long_hash to_hash(const uint512_t& value)
+long_hash to_hash(const uint512_t& value) noexcept
 {
     return to_little_endian<to_bytes(512)>(value);
 }
@@ -72,33 +72,33 @@ long_hash to_hash(const uint512_t& value)
 // Integer conversions of corresponding hashes.
 // ----------------------------------------------------------------------------
 
-uint48_t to_uint48(const mini_hash& hash)
+uint48_t to_uint48(const mini_hash& hash) noexcept
 {
     return from_little_endian<to_bytes(48)>(hash);
 }
 
-uint64_t to_uint64(const quarter_hash& hash)
+uint64_t to_uint64(const quarter_hash& hash) noexcept
 {
     // Use integral uint64_t.
     return from_little_endian<uint64_t>(hash);
 }
 
-uint128_t to_uint128(const half_hash& hash)
+uint128_t to_uint128(const half_hash& hash) noexcept
 {
     return from_little_endian<to_bytes(128)>(hash);
 }
 
-uint160_t to_uint160(const short_hash& hash)
+uint160_t to_uint160(const short_hash& hash) noexcept
 {
     return from_little_endian<to_bytes(160)>(hash);
 }
 
-uint256_t to_uint256(const hash_digest& hash)
+uint256_t to_uint256(const hash_digest& hash) noexcept
 {
     return from_little_endian<to_bytes(256)>(hash);
 }
 
-uint512_t to_uint512(const long_hash& hash)
+uint512_t to_uint512(const long_hash& hash) noexcept
 {
     return from_little_endian<to_bytes(512)>(hash);
 }
@@ -106,69 +106,71 @@ uint512_t to_uint512(const long_hash& hash)
 // Hash generators.
 // ----------------------------------------------------------------------------
 
-hash_digest scrypt_hash(const data_slice& data)
+hash_digest scrypt_hash(const data_slice& data) noexcept
 {
     return scrypt<hash_size>(data, data, 1024u, 1u, 1u);
 }
 
-hash_digest bitcoin_hash(const data_slice& data)
+hash_digest bitcoin_hash(const data_slice& data) noexcept
 {
     return sha256_hash(sha256_hash(data));
 }
 
-hash_digest bitcoin_hash(const data_slice& first, const data_slice& second)
+hash_digest bitcoin_hash(const data_slice& first,
+    const data_slice& second) noexcept
 {
     return sha256_hash(sha256_hash(first, second));
 }
 
-short_hash bitcoin_short_hash(const data_slice& data)
+short_hash bitcoin_short_hash(const data_slice& data) noexcept
 {
     return ripemd160_hash(sha256_hash(data));
 }
 
-short_hash ripemd160_hash(const data_slice& data)
+short_hash ripemd160_hash(const data_slice& data) noexcept
 {
     short_hash hash;
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk ripemd160_hash_chunk(const data_slice& data)
+data_chunk ripemd160_hash_chunk(const data_slice& data) noexcept
 {
     data_chunk hash(short_hash_size);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
-short_hash sha1_hash(const data_slice& data)
+short_hash sha1_hash(const data_slice& data) noexcept
 {
     short_hash hash;
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk sha1_hash_chunk(const data_slice& data)
+data_chunk sha1_hash_chunk(const data_slice& data) noexcept
 {
     data_chunk hash(short_hash_size);
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
-hash_digest sha256_hash(const data_slice& data)
+hash_digest sha256_hash(const data_slice& data) noexcept
 {
     hash_digest hash;
     SHA256(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk sha256_hash_chunk(const data_slice& data)
+data_chunk sha256_hash_chunk(const data_slice& data) noexcept
 {
     data_chunk hash(hash_size);
     SHA256(data.data(), data.size(), hash.data());
     return hash;
 }
 
-hash_digest sha256_hash(const data_slice& first, const data_slice& second)
+hash_digest sha256_hash(const data_slice& first,
+    const data_slice& second) noexcept
 {
     hash_digest hash;
     SHA256CTX context;
@@ -179,7 +181,8 @@ hash_digest sha256_hash(const data_slice& first, const data_slice& second)
     return hash;
 }
 
-hash_digest hmac_sha256_hash(const data_slice& data, const data_slice& key)
+hash_digest hmac_sha256_hash(const data_slice& data,
+    const data_slice& key) noexcept
 {
     hash_digest hash;
     HMACSHA256(data.data(), data.size(), key.data(), key.size(), hash.data());
@@ -187,7 +190,7 @@ hash_digest hmac_sha256_hash(const data_slice& data, const data_slice& key)
 }
 
 data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length)
+    const data_slice& salt, size_t iterations, size_t length)noexcept
 {
     data_chunk hash(length);
     pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
@@ -195,14 +198,15 @@ data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
     return hash;
 }
 
-long_hash sha512_hash(const data_slice& data)
+long_hash sha512_hash(const data_slice& data) noexcept
 {
     long_hash hash;
     SHA512(data.data(), data.size(), hash.data());
     return hash;
 }
 
-long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key)
+long_hash hmac_sha512_hash(const data_slice& data,
+    const data_slice& key) noexcept
 {
     long_hash hash;
     HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
@@ -210,9 +214,9 @@ long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key)
 }
 
 long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations)
+    const data_slice& salt, size_t iterations) noexcept
 {
-    long_hash hash = null_long_hash;
+    auto hash = null_long_hash;
     pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
         salt.data(), salt.size(), hash.data(), hash.size(), iterations);
 
@@ -222,7 +226,8 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
 }
 
 data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism, size_t length)
+    uint64_t work, uint32_t resources, uint32_t parallelism,
+    size_t length) noexcept
 {
     data_chunk out(length, 0x00);
     crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
@@ -234,7 +239,7 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
 }
 
 // Objectives: deterministic, uniform distribution, efficient computation.
-size_t djb2_hash(const data_slice& data)
+size_t djb2_hash(const data_slice& data) noexcept
 {
     // Nothing special here except that it tested well against collisions.
     size_t hash = 5381;

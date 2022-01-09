@@ -37,54 +37,54 @@ namespace golomb {
 // ----------------------------------------------------------------------------
 
 data_chunk construct(const data_stack& items, uint8_t bits,
-    const half_hash& entropy, uint64_t target_false_positive_rate);
+    const half_hash& entropy, uint64_t target_false_positive_rate) noexcept;
 
 data_chunk construct(const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate);
+    const siphash_key& entropy, uint64_t target_false_positive_rate) noexcept;
 
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
-    const half_hash& entropy, uint64_t target_false_positive_rate);
+    const half_hash& entropy, uint64_t target_false_positive_rate) noexcept;
 
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate);
+    const siphash_key& entropy, uint64_t target_false_positive_rate) noexcept;
 
 // Single element match
 // ----------------------------------------------------------------------------
 
 bool match(const data_chunk& target, const data_chunk& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_chunk& target, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 // Intersection match
 // ----------------------------------------------------------------------------
 
 bool match(const data_stack& targets, const data_chunk& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_stack& targets, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate);
+    uint64_t target_false_positive_rate) noexcept;
 
 } // namespace golomb
 } // namespace system

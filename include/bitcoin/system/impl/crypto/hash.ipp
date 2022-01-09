@@ -28,7 +28,7 @@ namespace system {
 
 template<size_t Size>
 data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism)
+    uint64_t work, uint32_t resources, uint32_t parallelism) noexcept
 {
     return to_array<Size>(scrypt_chunk(data, salt, work, resources,
         parallelism, Size));

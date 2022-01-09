@@ -37,7 +37,7 @@ typedef std::vector<uint32_t> index_list;
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
 
 static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
-    uint32_t i, uint32_t j)
+    uint32_t i, uint32_t j) noexcept
 {
     // e = H(M || R || i || j)
     data_chunk data(hash_size + R.size() + 2u * sizeof(uint32_t), 0x00);
@@ -50,7 +50,8 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
 }
 
 // Take a list of secret keys and generate a mapping from public key -> secret.
-static bool generate_keys_map(secret_keys_map& out, const secret_list& secrets)
+static bool generate_keys_map(secret_keys_map& out,
+    const secret_list& secrets) noexcept
 {
     for (const auto& secret: secrets)
     {
@@ -67,7 +68,7 @@ static bool generate_keys_map(secret_keys_map& out, const secret_list& secrets)
 // Make a list of public keys for which we have the corresponding secret key
 // in a single ring of public keys.
 static const compressed_list known_keys_in_ring(
-    const secret_keys_map& secret_keys, const compressed_list& ring)
+    const secret_keys_map& secret_keys, const compressed_list& ring) noexcept
 {
     compressed_list known_ring;
 
@@ -80,7 +81,7 @@ static const compressed_list known_keys_in_ring(
 
 // For all rings, make a list of known public keys corresponding to each ring.
 static key_rings partition_keys_into_rings(const secret_keys_map& secret_keys,
-    const key_rings& rings)
+    const key_rings& rings) noexcept
 {
     key_rings known_keys;
     for (const auto& ring: rings)
@@ -94,7 +95,7 @@ static key_rings partition_keys_into_rings(const secret_keys_map& secret_keys,
 // private key of B, it will return 1 (the index in the ring).
 // This function computes this for all rings.
 static bool create_key_indexes(index_list& out, const key_rings& rings,
-    const key_rings& known_keys_by_ring)
+    const key_rings& known_keys_by_ring) noexcept
 {
     BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
@@ -115,12 +116,12 @@ static bool create_key_indexes(index_list& out, const key_rings& rings,
 }
 
 static bool generate_known_indexes(index_list& out, const key_rings& rings,
-    const secret_keys_map& secret_keys)
+    const secret_keys_map& secret_keys) noexcept
 {
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
     BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    const auto empty = [](const compressed_list& ring)
+    const auto empty = [](const compressed_list& ring) noexcept
     {
         return ring.empty();
     };
@@ -134,14 +135,14 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
 }
 
 static ec_point calculate_R(const ec_scalar& s, const ec_scalar& e,
-    const ec_point& P)
+    const ec_point& P) noexcept
 {
     return s * ec_point::generator + e * P;
 }
 
 static ec_point calculate_last_R_signing(const compressed_list& ring,
     uint32_t i, const hash_digest& digest, const ring_signature& signature,
-    const uint32_t known_key_index, const secret_list& salts)
+    const uint32_t known_key_index, const secret_list& salts) noexcept
 {
     auto R_i_j = salts[i] * ec_point::generator;
     if (!R_i_j)
@@ -170,7 +171,7 @@ static ec_point calculate_last_R_signing(const compressed_list& ring,
 
 static bool calculate_e0(ring_signature& out, const key_rings& rings,
     const hash_digest& digest, const secret_list& salts,
-    const index_list& known_key_indexes)
+    const index_list& known_key_indexes) noexcept
 {
     data_chunk e0_data;
     e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
@@ -202,7 +203,7 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
 static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
     const ring_signature& signature, const compressed_list& ring,
     const hash_digest& digest, const uint32_t i,
-    const uint32_t known_key_index)
+    const uint32_t known_key_index) noexcept
 {
     BC_ASSERT(signature.proofs[i].size() > known_key_index);
     BC_ASSERT(ring.size() > known_key_index);
@@ -229,7 +230,7 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
 
 static bool join_rings(ring_signature& out, const key_rings& rings,
     const hash_digest& digest, const secret_list& salts,
-    const index_list& known_key_indexes, secret_keys_map& secret_keys)
+    const index_list& known_key_indexes, secret_keys_map& secret_keys) noexcept
 {
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
@@ -269,7 +270,7 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
 
 static ec_point calculate_last_R_verify(const compressed_list& ring,
     ec_scalar e_i_j, uint32_t i, const hash_digest& digest,
-    const ring_signature& signature)
+    const ring_signature& signature) noexcept
 {
     ec_point R_i_j;
     BC_ASSERT(signature.proofs[i].size() == ring.size());
@@ -299,9 +300,9 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
 // API
 // ----------------------------------------------------------------------------
 
-hash_digest digest(const data_slice& message, const key_rings& rings)
+hash_digest digest(const data_slice& message, const key_rings& rings) noexcept
 {
-    const auto sum = [](size_t total, const compressed_list& ring)
+    const auto sum = [](size_t total, const compressed_list& ring) noexcept
     {
         return total + ring.size() * ec_compressed_size;
     };
@@ -321,7 +322,7 @@ hash_digest digest(const data_slice& message, const key_rings& rings)
 
 bool sign(ring_signature& out, const secret_list& secrets,
     const key_rings& rings, const hash_digest& digest,
-    const secret_list& salts)
+    const secret_list& salts) noexcept
 {
     // Guard against overflow.
     if (rings.size() >= max_uint32)
@@ -349,7 +350,7 @@ bool sign(ring_signature& out, const secret_list& secrets,
 // which we use to recalculate e0.
 // If the values match then we have a valid ring signature.
 bool verify(const key_rings& rings, const hash_digest& digest,
-    const ring_signature& signature)
+    const ring_signature& signature) noexcept
 {
     // Guard against overflow.
     if (rings.size() >= max_uint32 || signature.proofs.size() != rings.size())

@@ -31,39 +31,39 @@ secp256k1_verification verification;
 
 // Static helper for use with std::call_once.
 void secp256k1_initializer::set_context(secp256k1_context** context,
-    int flags)
+    int flags) noexcept
 {
     *context = secp256k1_context_create(flags);
 }
 
 // Protected base class constructor (must be derived).
-secp256k1_initializer::secp256k1_initializer(int flags)
+secp256k1_initializer::secp256k1_initializer(int flags) noexcept
   : flags_(flags), context_(nullptr)
 {
 }
 
 // Clean up the context on destruct.
-secp256k1_initializer::~secp256k1_initializer()
+secp256k1_initializer::~secp256k1_initializer() noexcept
 {
     if (!is_null(context_))
         secp256k1_context_destroy(context_);
 }
 
 // Get the curve context and initialize on first use.
-secp256k1_context* secp256k1_initializer::context()
+secp256k1_context* secp256k1_initializer::context() noexcept
 {
     std::call_once(mutex_, set_context, &context_, flags_);
     return context_;
 }
 
 // Concrete type for signing init.
-secp256k1_signing::secp256k1_signing()
+secp256k1_signing::secp256k1_signing() noexcept
   : secp256k1_initializer(SECP256K1_CONTEXT_SIGN)
 {
 }
 
 // Concrete type for verification init.
-secp256k1_verification::secp256k1_verification()
+secp256k1_verification::secp256k1_verification() noexcept
   : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
 {
 }

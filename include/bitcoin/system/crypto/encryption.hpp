@@ -35,10 +35,10 @@ constexpr uint8_t aes256_block_size = 16;
 typedef data_array<aes256_block_size> aes_block;
 
 /// Perform aes256 encryption on the specified data block.
-BC_API void aes256_encrypt(const aes_secret& key, aes_block& block);
+BC_API void aes256_encrypt(const aes_secret& key, aes_block& block) noexcept;
 
 /// Perform aes256 decryption on the specified data block.
-BC_API void aes256_decrypt(const aes_secret& key, aes_block& block);
+BC_API void aes256_decrypt(const aes_secret& key, aes_block& block) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

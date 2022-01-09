@@ -39,7 +39,7 @@ static constexpr uint8_t uncompressed = 0x04;
 static constexpr auto maximum_recovery_id = 3;
 static constexpr auto ec_success = 1;
 
-constexpr int to_flags(bool compressed)
+constexpr int to_flags(bool compressed) noexcept
 {
     return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 }
@@ -49,7 +49,7 @@ constexpr int to_flags(bool compressed)
 // These allow strong typing of private keys without redundant code.
 
 bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
-    const data_slice& point)
+    const data_slice& point) noexcept
 {
     // secp256k1_ec_pubkey_parse supports compressed (33 bytes, header byte 0x02
     // or 0x03), uncompressed (65 bytes, header byte 0x04), or hybrid (65 bytes,
@@ -60,7 +60,7 @@ bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
 
 template <size_t Size>
 bool serialize(const secp256k1_context* context, data_array<Size>& out,
-    const secp256k1_pubkey point)
+    const secp256k1_pubkey point) noexcept
 {
     auto size = Size;
     const auto flags = to_flags(Size == ec_compressed_size);
@@ -71,7 +71,7 @@ bool serialize(const secp256k1_context* context, data_array<Size>& out,
 // parse, add, serialize
 template <size_t Size>
 bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
-    const ec_secret& secret)
+    const ec_secret& secret) noexcept
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -82,7 +82,7 @@ bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
 // parse, multiply, serialize
 template <size_t Size>
 bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
-    const ec_secret& secret)
+    const ec_secret& secret) noexcept
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -92,7 +92,8 @@ bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
 
 // parse, negate, serialize
 template <size_t Size>
-bool ec_negate(const secp256k1_context* context, data_array<Size>& in_out)
+bool ec_negate(const secp256k1_context* context,
+    data_array<Size>& in_out) noexcept
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -103,7 +104,7 @@ bool ec_negate(const secp256k1_context* context, data_array<Size>& in_out)
 // create, serialize (secrets are normal)
 template <size_t Size>
 bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
-    const ec_secret& secret)
+    const ec_secret& secret) noexcept
 {
     secp256k1_pubkey pubkey;
     return secp256k1_ec_pubkey_create(context, &pubkey, secret.data()) ==
@@ -114,7 +115,7 @@ bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
 // parse, recover, serialize
 template <size_t Size>
 bool recover_public(const secp256k1_context* context, data_array<Size>& out,
-    const recoverable_signature& recoverable, const hash_digest& hash)
+    const recoverable_signature& recoverable, const hash_digest& hash) noexcept
 {
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
@@ -129,7 +130,7 @@ bool recover_public(const secp256k1_context* context, data_array<Size>& out,
 // parsed - normalize, verify
 bool verify_signature(const secp256k1_context* context,
     const secp256k1_pubkey& point, const hash_digest& hash,
-    const ec_signature& signature)
+    const ec_signature& signature) noexcept
 {
     const auto parsed = reinterpret_cast<const secp256k1_ecdsa_signature*>(
         signature.data());
@@ -147,39 +148,39 @@ bool verify_signature(const secp256k1_context* context,
 // Add EC values
 // ----------------------------------------------------------------------------
 
-bool ec_add(ec_compressed& point, const ec_secret& scalar)
+bool ec_add(ec_compressed& point, const ec_secret& scalar) noexcept
 {
     const auto context = verification.context();
     return ec_add(context, point, scalar);
 }
 
-bool ec_add(ec_uncompressed& point, const ec_secret& scalar)
+bool ec_add(ec_uncompressed& point, const ec_secret& scalar) noexcept
 {
     const auto context = verification.context();
     return ec_add(context, point, scalar);
 }
 
 // secrets are normal
-bool ec_add(ec_secret& left, const ec_secret& right)
+bool ec_add(ec_secret& left, const ec_secret& right) noexcept
 {
     const auto context = verification.context();
     return secp256k1_ec_seckey_tweak_add(context, left.data(),
         right.data()) == 1;
 }
 
-bool ec_add(ec_compressed& left, const ec_compressed& right)
+bool ec_add(ec_compressed& left, const ec_compressed& right) noexcept
 {
     return ec_sum(left, { left, right });
 }
 
-bool ec_add(ec_compressed& left, const ec_uncompressed& right)
+bool ec_add(ec_compressed& left, const ec_uncompressed& right) noexcept
 {
     ec_compressed out;
     return compress(out, right) && ec_add(left, out);
 }
 
 // parse, combine, serialize
-bool ec_sum(ec_compressed& out, const compressed_list& points)
+bool ec_sum(ec_compressed& out, const compressed_list& points) noexcept
 {
     if (points.empty())
         return false;
@@ -204,20 +205,20 @@ bool ec_sum(ec_compressed& out, const compressed_list& points)
 // Multiply EC values
 // ----------------------------------------------------------------------------
 
-bool ec_multiply(ec_compressed& point, const ec_secret& scalar)
+bool ec_multiply(ec_compressed& point, const ec_secret& scalar) noexcept
 {
     const auto context = verification.context();
     return ec_multiply(context, point, scalar);
 }
 
-bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar)
+bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar) noexcept
 {
     const auto context = verification.context();
     return ec_multiply(context, point, scalar);
 }
 
 // secrets are normal
-bool ec_multiply(ec_secret& left, const ec_secret& right)
+bool ec_multiply(ec_secret& left, const ec_secret& right) noexcept
 {
     const auto context = verification.context();
     return secp256k1_ec_seckey_tweak_mul(context, left.data(),
@@ -228,19 +229,19 @@ bool ec_multiply(ec_secret& left, const ec_secret& right)
 // ----------------------------------------------------------------------------
 
 // secrets are normal
-bool ec_negate(ec_secret& scalar)
+bool ec_negate(ec_secret& scalar) noexcept
 {
     const auto context = verification.context();
     return secp256k1_ec_seckey_negate(context, scalar.data()) == ec_success;
 }
 
-bool ec_negate(ec_compressed& point)
+bool ec_negate(ec_compressed& point) noexcept
 {
     const auto context = verification.context();
     return ec_negate(context, point);
 }
 
-bool ec_negate(ec_uncompressed& point)
+bool ec_negate(ec_uncompressed& point) noexcept
 {
     const auto context = verification.context();
     return ec_negate(context, point);
@@ -249,27 +250,27 @@ bool ec_negate(ec_uncompressed& point)
 // Convert keys
 // ----------------------------------------------------------------------------
 
-bool compress(ec_compressed& out, const ec_uncompressed& point)
+bool compress(ec_compressed& out, const ec_uncompressed& point) noexcept
 {
     secp256k1_pubkey pubkey;
     const auto context = verification.context();
     return parse(context, pubkey, point) && serialize(context, out, pubkey);
 }
 
-bool decompress(ec_uncompressed& out, const ec_compressed& point)
+bool decompress(ec_uncompressed& out, const ec_compressed& point) noexcept
 {
     secp256k1_pubkey pubkey;
     const auto context = verification.context();
     return parse(context, pubkey, point) && serialize(context, out, pubkey);
 }
 
-bool secret_to_public(ec_compressed& out, const ec_secret& secret)
+bool secret_to_public(ec_compressed& out, const ec_secret& secret) noexcept
 {
     const auto context = signing.context();
     return secret_to_public(context, out, secret);
 }
 
-bool secret_to_public(ec_uncompressed& out, const ec_secret& secret)
+bool secret_to_public(ec_uncompressed& out, const ec_secret& secret) noexcept
 {
     const auto context = signing.context();
     return secret_to_public(context, out, secret);
@@ -278,13 +279,13 @@ bool secret_to_public(ec_uncompressed& out, const ec_secret& secret)
 // Verify keys
 // ----------------------------------------------------------------------------
 
-bool verify(const ec_secret& secret)
+bool verify(const ec_secret& secret) noexcept
 {
     const auto context = verification.context();
     return secp256k1_ec_seckey_verify(context, secret.data()) == ec_success;
 }
 
-bool verify(const data_slice& point)
+bool verify(const data_slice& point) noexcept
 {
     secp256k1_pubkey pubkey;
     const auto context = verification.context();
@@ -294,12 +295,12 @@ bool verify(const data_slice& point)
 // Detect public keys
 // ----------------------------------------------------------------------------
 
-bool is_even_key(const ec_compressed& point)
+bool is_even_key(const ec_compressed& point) noexcept
 {
     return point.front() == ec_even_sign;
 }
 
-bool is_compressed_key(const data_slice& point)
+bool is_compressed_key(const data_slice& point) noexcept
 {
     const auto size = point.size();
     if (size != ec_compressed_size)
@@ -309,7 +310,7 @@ bool is_compressed_key(const data_slice& point)
     return first == compressed_even || first == compressed_odd;
 }
 
-bool is_uncompressed_key(const data_slice& point)
+bool is_uncompressed_key(const data_slice& point) noexcept
 {
     const auto size = point.size();
     if (size != ec_uncompressed_size)
@@ -319,11 +320,11 @@ bool is_uncompressed_key(const data_slice& point)
     return first == uncompressed;
 }
 
-bool is_public_key(const data_slice& point)
+bool is_public_key(const data_slice& point) noexcept
 {
     return is_compressed_key(point) || is_uncompressed_key(point);
 }
-bool is_endorsement(const endorsement& endorsement)
+bool is_endorsement(const endorsement& endorsement) noexcept
 {
     const auto size = endorsement.size();
     return size >= min_endorsement_size && size <= max_endorsement_size;
@@ -333,7 +334,7 @@ bool is_endorsement(const endorsement& endorsement)
 // ----------------------------------------------------------------------------
 
 bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
-    const endorsement& endorsement)
+    const endorsement& endorsement) noexcept
 {
     if (endorsement.empty())
         return false;
@@ -345,7 +346,7 @@ bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
 
 // BIP66 requires strict DER signature encoding.
 bool parse_signature(ec_signature& out, const data_slice& der_signature,
-    bool strict)
+    bool strict) noexcept
 {
     if (der_signature.empty())
         return false;
@@ -361,7 +362,8 @@ bool parse_signature(ec_signature& out, const data_slice& der_signature,
         der_signature.data(), der_signature.size()) == ec_success;
 }
 
-bool encode_signature(der_signature& out, const ec_signature& signature)
+bool encode_signature(der_signature& out,
+    const ec_signature& signature) noexcept
 {
     const auto sign = reinterpret_cast<const secp256k1_ecdsa_signature*>(
         signature.data());
@@ -382,7 +384,8 @@ bool encode_signature(der_signature& out, const ec_signature& signature)
 // ----------------------------------------------------------------------------
 
 // create (serialize???) (secrets are normal)
-bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
+bool sign(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash) noexcept
 {
     const auto context = signing.context();
     const auto signature = reinterpret_cast<secp256k1_ecdsa_signature*>(
@@ -394,7 +397,7 @@ bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
 
 // parse<>, verify<>
 bool verify_signature(const data_slice& point, const hash_digest& hash,
-    const ec_signature& signature)
+    const ec_signature& signature) noexcept
 {
     secp256k1_pubkey pubkey;
     const auto context = verification.context();
@@ -408,7 +411,7 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
 
 // sign, serialize (secrets are normal)
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
-    const hash_digest& hash)
+    const hash_digest& hash) noexcept
 {
     int recovery_id = 0;
     const auto context = signing.context();
@@ -429,14 +432,14 @@ bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
 }
 
 bool recover_public(ec_compressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash)
+    const recoverable_signature& recoverable, const hash_digest& hash) noexcept
 {
     const auto context = verification.context();
     return recover_public(context, out, recoverable, hash);
 }
 
 bool recover_public(ec_uncompressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash)
+    const recoverable_signature& recoverable, const hash_digest& hash) noexcept
 {
     const auto context = verification.context();
     return recover_public(context, out, recoverable, hash);

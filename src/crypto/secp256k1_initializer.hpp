@@ -35,7 +35,7 @@ namespace system {
 class BC_API secp256k1_initializer
 {
 private:
-    static void set_context(secp256k1_context** context, int flags);
+    static void set_context(secp256k1_context** context, int flags) noexcept;
 
 protected:
     int flags_;
@@ -44,18 +44,18 @@ protected:
      * Construct a signing context initializer of the specified context.
      * @param[in]  flags  { SECP256K1_CONTEXT_SIGN, SECP256K1_CONTEXT_VERIFY }
      */
-    secp256k1_initializer(int flags);
+    secp256k1_initializer(int flags) noexcept;
 
 public:
     /**
      * Free the context if initialized.
      */
-    ~secp256k1_initializer();
+    ~secp256k1_initializer() noexcept;
 
     /**
      * Call to obtain the secp256k1 context, initialized on first call.
      */
-    secp256k1_context* context();
+    secp256k1_context* context() noexcept;
 
 private:
     std::once_flag mutex_;
@@ -72,7 +72,7 @@ public:
     /**
      * Construct a signing context initializer.
      */
-    secp256k1_signing();
+    secp256k1_signing() noexcept;
 };
 
 /**
@@ -85,7 +85,7 @@ public:
     /**
      * Construct a verification context initializer.
      */
-    secp256k1_verification();
+    secp256k1_verification() noexcept;
 };
 
 /**

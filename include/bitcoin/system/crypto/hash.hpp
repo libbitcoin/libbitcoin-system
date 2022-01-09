@@ -112,83 +112,84 @@ constexpr long_hash null_long_hash
 };
 
 /// Hash conversions of corresponding integers.
-BC_API mini_hash to_hash(const uint48_t& value);
-BC_API quarter_hash to_hash(const uint64_t& value);
-BC_API half_hash to_hash(const uint128_t& value);
-BC_API short_hash to_hash(const uint160_t& value);
-BC_API hash_digest to_hash(const uint256_t& value);
-BC_API long_hash to_hash(const uint512_t& value);
+BC_API mini_hash to_hash(const uint48_t& value) noexcept;
+BC_API quarter_hash to_hash(const uint64_t& value) noexcept;
+BC_API half_hash to_hash(const uint128_t& value) noexcept;
+BC_API short_hash to_hash(const uint160_t& value) noexcept;
+BC_API hash_digest to_hash(const uint256_t& value) noexcept;
+BC_API long_hash to_hash(const uint512_t& value) noexcept;
 
 /// Integer conversions of corresponding hashes.
-BC_API uint48_t to_uint48(const mini_hash& hash);
-BC_API uint64_t to_uint64(const quarter_hash& hash);
-BC_API uint128_t to_uint128(const half_hash& hash);
-BC_API uint160_t to_uint160(const short_hash& hash);
-BC_API uint256_t to_uint256(const hash_digest& hash);
-BC_API uint512_t to_uint512(const long_hash& hash);
+BC_API uint48_t to_uint48(const mini_hash& hash) noexcept;
+BC_API uint64_t to_uint64(const quarter_hash& hash) noexcept;
+BC_API uint128_t to_uint128(const half_hash& hash) noexcept;
+BC_API uint160_t to_uint160(const short_hash& hash) noexcept;
+BC_API uint256_t to_uint256(const hash_digest& hash) noexcept;
+BC_API uint512_t to_uint512(const long_hash& hash) noexcept;
 
 /// Generate a scrypt hash to fill a byte array.
 /// Memory required (bytes) = 2 * 64 * work * resources.
 template <size_t Size>
 data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism);
+    uint64_t work, uint32_t resources, uint32_t parallelism) noexcept;
 
 /// Generate a scrypt hash.
-BC_API hash_digest scrypt_hash(const data_slice& data);
+BC_API hash_digest scrypt_hash(const data_slice& data) noexcept;
 
 /// Generate a bitcoin hash.
-BC_API hash_digest bitcoin_hash(const data_slice& data);
+BC_API hash_digest bitcoin_hash(const data_slice& data) noexcept;
 
 /// Generate a bitcoin hash of first + second concatenation.
 /// This hash function is used in merkle root generation.
 BC_API hash_digest bitcoin_hash(const data_slice& first,
-    const data_slice& second);
+    const data_slice& second) noexcept;
 
 /// Generate a bitcoin short hash.
-BC_API short_hash bitcoin_short_hash(const data_slice& data);
+BC_API short_hash bitcoin_short_hash(const data_slice& data) noexcept;
 
 /// Generate a ripemd160 hash.
-BC_API short_hash ripemd160_hash(const data_slice& data);
-BC_API data_chunk ripemd160_hash_chunk(const data_slice& data);
+BC_API short_hash ripemd160_hash(const data_slice& data) noexcept;
+BC_API data_chunk ripemd160_hash_chunk(const data_slice& data) noexcept;
 
 /// Generate a sha1 hash.
-BC_API short_hash sha1_hash(const data_slice& data);
-BC_API data_chunk sha1_hash_chunk(const data_slice& data);
+BC_API short_hash sha1_hash(const data_slice& data) noexcept;
+BC_API data_chunk sha1_hash_chunk(const data_slice& data) noexcept;
 
 /// Generate a sha256 hash.
-BC_API hash_digest sha256_hash(const data_slice& data);
-BC_API data_chunk sha256_hash_chunk(const data_slice& data);
+BC_API hash_digest sha256_hash(const data_slice& data) noexcept;
+BC_API data_chunk sha256_hash_chunk(const data_slice& data) noexcept;
 
 /// Generate a sha256 hash of first + second concatenation.
 /// This hash function is used in electrum seed stretching.
 BC_API hash_digest sha256_hash(const data_slice& first,
-    const data_slice& second);
+    const data_slice& second) noexcept;
 
 // Generate a hmac sha256 hash.
 BC_API hash_digest hmac_sha256_hash(const data_slice& data,
-    const data_slice& key);
+    const data_slice& key) noexcept;
 
 /// Generate a pbkdf2 hmac sha256 hash.
 BC_API data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length);
+    const data_slice& salt, size_t iterations, size_t length) noexcept;
 
 /// Generate a sha512 hash.
-BC_API long_hash sha512_hash(const data_slice& data);
+BC_API long_hash sha512_hash(const data_slice& data) noexcept;
 
 /// Generate a hmac sha512 hash.
 BC_API long_hash hmac_sha512_hash(const data_slice& data,
-    const data_slice& key);
+    const data_slice& key) noexcept;
 
 /// Generate a pkcs5 pbkdf2 hmac sha512 hash.
 BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations);
+    const data_slice& salt, size_t iterations) noexcept;
 
 /// Generate a scrypt hash of specified length.
 BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism, size_t length);
+    uint64_t work, uint32_t resources, uint32_t parallelism,
+    size_t length) noexcept;
 
 /// DJB2 hash key algorithm by Dan Bernstein.
-BC_API size_t djb2_hash(const data_slice& data);
+BC_API size_t djb2_hash(const data_slice& data) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
@@ -202,7 +203,7 @@ namespace std
 template <size_t Size>
 struct hash<bc::system::data_array<Size>>
 {
-    size_t operator()(const bc::system::data_array<Size>& data) const
+    size_t operator()(const bc::system::data_array<Size>& data) const noexcept
     {
         return bc::system::djb2_hash(data);
     }
@@ -214,13 +215,13 @@ namespace boost
 template <size_t Size>
 struct hash<bc::system::data_array<Size>>
 {
-    size_t operator()(const bc::system::data_array<Size>& data) const
+    size_t operator()(const bc::system::data_array<Size>& data) const  noexcept
     {
         return bc::system::djb2_hash(data);
     }
 };
 } // namespace boost
 
-#include <bitcoin/system/impl/math/hash.ipp>
+#include <bitcoin/system/impl/crypto/hash.ipp>
 
 #endif

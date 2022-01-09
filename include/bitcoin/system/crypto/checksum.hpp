@@ -42,24 +42,24 @@ static constexpr size_t checksum_default_size = sizeof(uint32_t);
 /// Append the bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size, size_t Checksum = checksum_default_size>
-data_array<Size> insert_checksum(const data_loaf& slices);
+data_array<Size> insert_checksum(const data_loaf& slices) noexcept;
 
 /// Append bitcoin checksum of preceding data to end of existing Size array.
 template <size_t Size, size_t Checksum = checksum_default_size>
-void insert_checksum(data_array<Size>& data);
+void insert_checksum(data_array<Size>& data) noexcept;
 
 /// Verify the last bytes are a bitcoin checksum of the preceding bytes.
 template <size_t Size, size_t Checksum = checksum_default_size>
-bool verify_checksum(const data_array<Size>& data);
+bool verify_checksum(const data_array<Size>& data) noexcept;
 
 /// Append slices and a four byte bitcoin checksum.
-BC_API data_chunk append_checksum(const data_loaf& slices);
+BC_API data_chunk append_checksum(const data_loaf& slices) noexcept;
 
 /// Append a four byte bitcoin checksum of data to itself.
-BC_API void append_checksum(data_chunk& data);
+BC_API void append_checksum(data_chunk& data) noexcept;
 
 /// Verify the last four bytes are a bitcoin checksum of the preceding bytes.
-BC_API bool verify_checksum(const data_slice& data);
+BC_API bool verify_checksum(const data_slice& data) noexcept;
 
 // bech32 checksum, used by witness_address.
 // ----------------------------------------------------------------------------
@@ -79,14 +79,14 @@ BC_API bool verify_checksum(const data_slice& data);
 /// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
 /// zero versions select bech32m (vs. bech32), resulting in distinct checksum.
 BC_API base32_chunk bech32_build_checked(uint8_t version,
-    const data_chunk& program, const std::string& prefix);
+    const data_chunk& program, const std::string& prefix) noexcept;
 
 /// Verify the bech32 checksum and extract witness version and program.
 /// The data parameter may obtained from a witness address using decode_base32.
 /// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
     data_chunk& out_program, const std::string& prefix,
-    const base32_chunk& checked);
+    const base32_chunk& checked) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

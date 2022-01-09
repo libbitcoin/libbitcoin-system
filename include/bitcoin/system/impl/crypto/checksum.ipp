@@ -29,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Size, size_t Checksum>
-data_array<Size> insert_checksum(const data_loaf& slices)
+data_array<Size> insert_checksum(const data_loaf& slices) noexcept
 {
     auto out = build_array<Size>(slices);
     insert_checksum<Size, Checksum>(out);
@@ -37,7 +37,7 @@ data_array<Size> insert_checksum(const data_loaf& slices)
 }
 
 template <size_t Size, size_t Checksum>
-void insert_checksum(data_array<Size>& data)
+void insert_checksum(data_array<Size>& data) noexcept
 {
     static_assert(Checksum <= Size, "insufficient size");
     static_assert(Checksum <= hash_size, "excessive checksum");
@@ -59,7 +59,7 @@ void insert_checksum(data_array<Size>& data)
 }
 
 template <size_t Size, size_t Checksum>
-bool verify_checksum(const data_array<Size>& data)
+bool verify_checksum(const data_array<Size>& data) noexcept
 {
     static_assert(Checksum <= Size, "insufficient size");
     static_assert(Checksum <= hash_size, "excessive checksum");
