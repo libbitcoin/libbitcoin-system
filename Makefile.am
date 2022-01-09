@@ -482,7 +482,8 @@ include_bitcoin_system_impl_HEADERS = \
 
 include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
-    include/bitcoin/system/impl/crypto/checksum.ipp
+    include/bitcoin/system/impl/crypto/checksum.ipp \
+    include/bitcoin/system/impl/crypto/hash.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
@@ -498,7 +499,6 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/addition.ipp \
     include/bitcoin/system/impl/math/bits.ipp \
     include/bitcoin/system/impl/math/division.ipp \
-    include/bitcoin/system/impl/math/hash.ipp \
     include/bitcoin/system/impl/math/limits.ipp \
     include/bitcoin/system/impl/math/power.ipp \
     include/bitcoin/system/impl/math/safe.ipp \

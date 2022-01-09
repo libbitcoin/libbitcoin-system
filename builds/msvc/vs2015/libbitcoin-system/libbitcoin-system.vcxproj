@@ -466,6 +466,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\checksum.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_array.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_reference.ipp" />
@@ -475,7 +476,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bits.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp" />

@@ -1228,6 +1228,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\checksum.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
@@ -1253,9 +1256,6 @@
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp">
-      <Filter>include\bitcoin\system\impl\math</Filter>
-    </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\hash.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp">

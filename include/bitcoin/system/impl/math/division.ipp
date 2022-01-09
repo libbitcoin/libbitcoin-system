@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MATH_IPP
-#define LIBBITCOIN_SYSTEM_MATH_IPP
+#ifndef LIBBITCOIN_SYSTEM_MATH_DIVISION_IPP
+#define LIBBITCOIN_SYSTEM_MATH_DIVISION_IPP
 
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
