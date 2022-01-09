@@ -49,8 +49,6 @@ number::number(int64_t value)
 bool number::set_data(const data_chunk& data, size_t max_size)
 {
     // Bitcoin defined max script number sizes are 4 and 5 bytes.
-    // The negation technique below requires that the value_ sign bit is never
-    // set following conversion from little endian data, so guard here.
     BC_ASSERT_MSG(max_size < sizeof(value_), "invalid number size");
 
     if (data.size() > max_size)
@@ -190,13 +188,13 @@ bool number::operator!=(const number& other) const
 
 number number::operator+(int64_t value) const
 {
-    BC_ASSERT(value_ + value == ceilinged_add(value_, value));
+    BC_ASSERT(!overflows(value_, value));
     return number(value_ + value);
 }
 
 number number::operator-(int64_t value) const
 {
-    BC_ASSERT(value_ - value == floored_subtract(value_, value));
+    BC_ASSERT(!underflows(value_, value));
     return number(value_ - value);
 }
 
@@ -233,14 +231,14 @@ number& number::operator-=(const number& other)
 
 number& number::operator+=(int64_t value)
 {
-    BC_ASSERT(value_ + value == ceilinged_add(value_, value));
+    BC_ASSERT(!overflows(value_, value));
     value_ += value;
     return *this;
 }
 
 number& number::operator-=(int64_t value)
 {
-    BC_ASSERT(value_ - value == floored_subtract(value_, value));
+    BC_ASSERT(!underflows(value_, value));
     value_ -= value;
     return *this;
 }
