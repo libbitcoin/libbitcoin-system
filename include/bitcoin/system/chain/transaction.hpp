@@ -47,165 +47,166 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default transaction is an invalid object.
-    transaction();
+    transaction() noexcept;
 
-    transaction(transaction&& other);
-    transaction(const transaction& other);
+    transaction(transaction&& other) noexcept;
+    transaction(const transaction& other) noexcept;
 
     transaction(uint32_t version, uint32_t locktime, chain::inputs&& inputs,
-        chain::outputs&& outputs);
+        chain::outputs&& outputs) noexcept;
     transaction(uint32_t version, uint32_t locktime,
-        const chain::inputs& inputs, const chain::outputs& outputs);
+        const chain::inputs& inputs, const chain::outputs& outputs) noexcept;
     transaction(uint32_t version, uint32_t locktime, const inputs_ptr& inputs,
-        const outputs_ptr& outputs);
+        const outputs_ptr& outputs) noexcept;
     
-    transaction(const data_slice& data, bool witness);
-    transaction(std::istream&& stream, bool witness);
-    transaction(std::istream& stream, bool witness);
-    transaction(reader&& source, bool witness);
-    transaction(reader& source, bool witness);
+    transaction(const data_slice& data, bool witness) noexcept;
+    transaction(std::istream&& stream, bool witness) noexcept;
+    transaction(std::istream& stream, bool witness) noexcept;
+    transaction(reader&& source, bool witness) noexcept;
+    transaction(reader& source, bool witness) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    transaction& operator=(transaction&& other);
-    transaction& operator=(const transaction& other);
+    transaction& operator=(transaction&& other) noexcept;
+    transaction& operator=(const transaction& other) noexcept;
 
-    bool operator==(const transaction& other) const;
-    bool operator!=(const transaction& other) const;
+    bool operator==(const transaction& other) const noexcept;
+    bool operator!=(const transaction& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness) const;
-    void to_data(std::ostream& stream, bool witness) const;
-    void to_data(writer& sink, bool witness) const;
+    data_chunk to_data(bool witness) const noexcept;
+    void to_data(std::ostream& stream, bool witness) const noexcept;
+    void to_data(writer& sink, bool witness) const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    uint32_t version() const;
-    uint32_t locktime() const;
-    const inputs_ptr inputs() const;
-    const outputs_ptr outputs() const;
+    bool is_valid() const noexcept;
+    uint32_t version() const noexcept;
+    uint32_t locktime() const noexcept;
+    const inputs_ptr inputs() const noexcept;
+    const outputs_ptr outputs() const noexcept;
 
     /// Computed properties.
-    size_t weight() const;
-    uint64_t fee() const;
-    uint64_t claim() const;
-    uint64_t value() const;
-    hash_digest hash(bool witness) const;
-    bool is_coinbase() const;
-    bool is_segregated() const;
-    size_t serialized_size(bool witness) const;
+    size_t weight() const noexcept;
+    uint64_t fee() const noexcept;
+    uint64_t claim() const noexcept;
+    uint64_t value() const noexcept;
+    hash_digest hash(bool witness) const noexcept;
+    bool is_coinbase() const noexcept;
+    bool is_segregated() const noexcept;
+    size_t serialized_size(bool witness) const noexcept;
 
     // Methods.
     // ------------------------------------------------------------------------
 
-    bool is_dusty(uint64_t minimum_output_value) const;
-    size_t signature_operations(bool bip16, bool bip141) const;
-    chain::points points() const;
-    hash_digest output_hash(uint32_t index) const;
-    hash_digest outputs_hash() const;
-    hash_digest points_hash() const;
-    hash_digest sequences_hash() const;
+    bool is_dusty(uint64_t minimum_output_value) const noexcept;
+    size_t signature_operations(bool bip16, bool bip141) const noexcept;
+    chain::points points() const noexcept;
+    hash_digest output_hash(uint32_t index) const noexcept;
+    hash_digest outputs_hash() const noexcept;
+    hash_digest points_hash() const noexcept;
+    hash_digest sequences_hash() const noexcept;
 
     // signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(uint32_t index,
         const script& subscript, uint64_t value, uint8_t flags,
-        script_version version, bool bip143) const;
+        script_version version, bool bip143) const noexcept;
 
     bool check_signature(const ec_signature& signature,
         const data_slice& public_key, const script& subscript,
         uint32_t index, uint64_t value, uint8_t flags, script_version version,
-        bool bip143) const;
+        bool bip143) const noexcept;
 
     bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& prevout_script, uint32_t index, uint64_t value,
-        uint8_t flags, script_version version, bool bip143) const;
+        uint8_t flags, script_version version, bool bip143) const noexcept;
 
     // Guards (for tx pool without compact blocks).
     // ------------------------------------------------------------------------
 
-    code guard() const;
-    code guard(const context& state) const;
+    code guard() const noexcept;
+    code guard(const context& state) const noexcept;
 
     // Validation (consensus checks).
     // ------------------------------------------------------------------------
 
-    code check() const;
-    code accept(const context& state) const;
-    code connect(const context& state) const;
+    code check() const noexcept;
+    code accept(const context& state) const noexcept;
+    code connect(const context& state) const noexcept;
 
 protected:
     transaction(bool segregated, uint32_t version, uint32_t locktime,
-        const inputs_ptr& inputs, const outputs_ptr& outputs, bool valid);
+        const inputs_ptr& inputs, const outputs_ptr& outputs,
+        bool valid) noexcept;
 
     // Guard (context free).
     // ------------------------------------------------------------------------
 
-    ////bool is_coinbase() const;
-    bool is_internal_double_spend() const;
-    bool is_oversized() const;
+    ////bool is_coinbase() const noexcept;
+    bool is_internal_double_spend() const noexcept;
+    bool is_oversized() const noexcept;
 
     // Guard (contextual).
     // ------------------------------------------------------------------------
 
-    ////bool is_segregated() const;
-    bool is_overweight() const;
+    ////bool is_segregated() const noexcept;
+    bool is_overweight() const noexcept;
 
     // prevouts required
-    ////bool is_missing_prevouts() const;
-    bool is_signature_operations_limit(bool bip16, bool bip141) const;
+    ////bool is_missing_prevouts() const noexcept;
+    bool is_signature_operations_limit(bool bip16, bool bip141) const noexcept;
 
     // Check (context free).
     // ------------------------------------------------------------------------
 
-    bool is_empty() const;
-    bool is_null_non_coinbase() const;
-    bool is_invalid_coinbase_size() const;
+    bool is_empty() const noexcept;
+    bool is_null_non_coinbase() const noexcept;
+    bool is_invalid_coinbase_size() const noexcept;
 
     // Accept (contextual).
     // ------------------------------------------------------------------------
 
     bool is_non_final(size_t height, uint32_t timestamp,
-        uint32_t median_time_past, bool bip113) const;
+        uint32_t median_time_past, bool bip113) const noexcept;
 
     // prevouts required
-    bool is_missing_prevouts() const;
-    bool is_overspent() const;
-    bool is_immature(size_t height) const;
-    bool is_locked(size_t height, uint32_t median_time_past) const;
+    bool is_missing_prevouts() const noexcept;
+    bool is_overspent() const noexcept;
+    bool is_immature(size_t height) const noexcept;
+    bool is_locked(size_t height, uint32_t median_time_past) const noexcept;
 
     // prevout confirmation state required
-    bool is_unconfirmed_spend(size_t height) const;
-    bool is_confirmed_double_spend(size_t height) const;
+    bool is_unconfirmed_spend(size_t height) const noexcept;
+    bool is_confirmed_double_spend(size_t height) const noexcept;
 
     // Connect (contextual).
     // ------------------------------------------------------------------------
 
-    code connect(const context& state, uint32_t index) const;
+    code connect(const context& state, uint32_t index) const noexcept;
 
 private:
-    static transaction from_data(reader& source, bool witness);
-    static bool segregated(const chain::inputs& inputs);
-    static bool segregated(const inputs_ptr& inputs);
-    ////static size_t maximum_size(bool coinbase);
+    static transaction from_data(reader& source, bool witness) noexcept;
+    static bool segregated(const chain::inputs& inputs) noexcept;
+    static bool segregated(const inputs_ptr& inputs) noexcept;
+    ////static size_t maximum_size(bool coinbase noexcept;
 
     // signature hash
     void signature_hash_single(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const;
+        const script& subscript, uint8_t flags) const noexcept;
     void signature_hash_none(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const;
+        const script& subscript, uint8_t flags) const noexcept;
     void signature_hash_all(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const;
+        const script& subscript, uint8_t flags) const noexcept;
     hash_digest unversioned_signature_hash(uint32_t index,
-        const script& subscript, uint8_t flags) const;
+        const script& subscript, uint8_t flags) const noexcept;
     hash_digest version_0_signature_hash(uint32_t index,
         const script& subscript, uint64_t value, uint8_t flags,
-        bool bip143) const;
+        bool bip143) const noexcept;
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
@@ -226,7 +227,7 @@ private:
         hash_digest sequences;
     };
 
-    void initialize_hash_cache() const;
+    void initialize_hash_cache() const noexcept;
 
     mutable std::unique_ptr<hash_cache> cache_;
 };

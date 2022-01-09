@@ -46,70 +46,71 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default input is an invalid null point object with an invalid prevout.
-    input();
+    input() noexcept;
 
-    input(input&& other);
-    input(const input& other);
-
-    input(chain::point&& point, chain::script&& script, uint32_t sequence);
-    input(const chain::point& point, const chain::script& script,
-        uint32_t sequence);
-    input(const chain::point::ptr& point, const chain::script::ptr& script,
-        uint32_t sequence);
+    input(input&& other) noexcept;
+    input(const input& other) noexcept;
 
     input(chain::point&& point, chain::script&& script,
-        chain::witness&& witness, uint32_t sequence);
+        uint32_t sequence) noexcept;
     input(const chain::point& point, const chain::script& script,
-        const chain::witness& witness, uint32_t sequence);
+        uint32_t sequence) noexcept;
     input(const chain::point::ptr& point, const chain::script::ptr& script,
-        const chain::witness::ptr& witness, uint32_t sequence);
+        uint32_t sequence) noexcept;
 
-    input(const data_slice& data);
-    input(std::istream&& stream);
-    input(std::istream& stream);
-    input(reader&& source);
-    input(reader& source);
+    input(chain::point&& point, chain::script&& script,
+        chain::witness&& witness, uint32_t sequence) noexcept;
+    input(const chain::point& point, const chain::script& script,
+        const chain::witness& witness, uint32_t sequence) noexcept;
+    input(const chain::point::ptr& point, const chain::script::ptr& script,
+        const chain::witness::ptr& witness, uint32_t sequence) noexcept;
+
+    input(const data_slice& data) noexcept;
+    input(std::istream&& stream) noexcept;
+    input(std::istream& stream) noexcept;
+    input(reader&& source) noexcept;
+    input(reader& source) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    input& operator=(input&& other);
-    input& operator=(const input& other);
+    input& operator=(input&& other) noexcept;
+    input& operator=(const input& other) noexcept;
 
-    bool operator==(const input& other) const;
-    bool operator!=(const input& other) const;
+    bool operator==(const input& other) const noexcept;
+    bool operator!=(const input& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data() const noexcept;
+    void to_data(std::ostream& stream) const noexcept;
+    void to_data(writer& sink) const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    const chain::point& point() const;
-    const chain::script& script() const;
-    const chain::witness& witness() const;
-    const chain::point::ptr point_ptr() const;
-    const chain::script::ptr script_ptr() const;
-    const chain::witness::ptr witness_ptr() const;
-    uint32_t sequence() const;
+    bool is_valid() const noexcept;
+    const chain::point& point() const noexcept;
+    const chain::script& script() const noexcept;
+    const chain::witness& witness() const noexcept;
+    const chain::point::ptr point_ptr() const noexcept;
+    const chain::script::ptr script_ptr() const noexcept;
+    const chain::witness::ptr witness_ptr() const noexcept;
+    uint32_t sequence() const noexcept;
 
     /// Computed properties.
     /// Witness accounts for witness bytes, but are serialized independently.
-    size_t serialized_size(bool witness) const;
+    size_t serialized_size(bool witness) const noexcept;
 
     // Methods.
     // ------------------------------------------------------------------------
 
-    bool is_final() const;
-    bool is_locked(size_t height, uint32_t median_time_past) const;
-    bool reserved_hash(hash_digest& out) const;
-    size_t signature_operations(bool bip16, bool bip141) const;
+    bool is_final() const noexcept;
+    bool is_locked(size_t height, uint32_t median_time_past) const noexcept;
+    bool reserved_hash(hash_digest& out) const noexcept;
+    size_t signature_operations(bool bip16, bool bip141) const noexcept;
 
     /// Public mutable metadata access, copied but not compared for equality.
     mutable chain::prevout::ptr prevout;
@@ -120,11 +121,11 @@ protected:
 
     input(const chain::point::ptr& point, const chain::script::ptr& script,
         const chain::witness::ptr& witness, uint32_t sequence, bool valid,
-        const chain::prevout::ptr& prevout);
+        const chain::prevout::ptr& prevout) noexcept;
 
 private:
-    static input from_data(reader& source);
-    bool embedded_script(chain::script& out) const;
+    static input from_data(reader& source) noexcept;
+    bool embedded_script(chain::script& out) const noexcept;
 
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).

@@ -47,79 +47,79 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default header is an invalid object.
-    header();
+    header() noexcept;
 
-    header(header&& other);
-    header(const header& other);
+    header(header&& other) noexcept;
+    header(const header& other) noexcept;
 
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce) noexcept;
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce) noexcept;
 
-    header(const data_slice& data);
-    header(std::istream&& stream);
-    header(std::istream& stream);
-    header(reader&& source);
-    header(reader& source);
+    header(const data_slice& data) noexcept;
+    header(std::istream&& stream) noexcept;
+    header(std::istream& stream) noexcept;
+    header(reader&& source) noexcept;
+    header(reader& source) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    header& operator=(header&& other);
-    header& operator=(const header& other);
+    header& operator=(header&& other) noexcept;
+    header& operator=(const header& other) noexcept;
 
-    bool operator==(const header& other) const;
-    bool operator!=(const header& other) const;
+    bool operator==(const header& other) const noexcept;
+    bool operator!=(const header& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data() const noexcept;
+    void to_data(std::ostream& stream) const noexcept;
+    void to_data(writer& sink) const noexcept;
 
 
     // Properties.
     // ------------------------------------------------------------------------
     /// Native properties.
-    bool is_valid() const;
-    uint32_t version() const;
-    const hash_digest& previous_block_hash() const;
-    const hash_digest& merkle_root() const;
-    uint32_t timestamp() const;
-    uint32_t bits() const;
-    uint32_t nonce() const;
+    bool is_valid() const noexcept;
+    uint32_t version() const noexcept;
+    const hash_digest& previous_block_hash() const noexcept;
+    const hash_digest& merkle_root() const noexcept;
+    uint32_t timestamp() const noexcept;
+    uint32_t bits() const noexcept;
+    uint32_t nonce() const noexcept;
 
     /// Computed properties.
-    hash_digest hash() const;
-    uint256_t difficulty() const;
-    static size_t serialized_size();
+    hash_digest hash() const noexcept;
+    uint256_t difficulty() const noexcept;
+    static size_t serialized_size() noexcept;
 
     // Validation.
     // ------------------------------------------------------------------------
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
-        bool scrypt=false) const;
+        bool scrypt=false) const noexcept;
 
-    code accept(const chain_state& state) const;
+    code accept(const chain_state& state) const noexcept;
 
 protected:
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, bool valid);
+        uint32_t nonce, bool valid) noexcept;
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, bool valid);
+        uint32_t nonce, bool valid) noexcept;
 
     // Check (context free).
     // ------------------------------------------------------------------------
 
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
-        bool scrypt=false) const;
-    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const;
+        bool scrypt=false) const noexcept;
+    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const noexcept;
 
     // Accept (relative to chain_state).
     // ------------------------------------------------------------------------
@@ -130,8 +130,8 @@ protected:
     // error::incorrect_proof_of_work
 
 private:
-    static header from_data(reader& source);
-    static uint256_t difficulty(uint32_t bits);
+    static header from_data(reader& source) noexcept;
+    static uint256_t difficulty(uint32_t bits) noexcept;
 
     // Header should be stored as shared (adds 16 bytes).
     // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).

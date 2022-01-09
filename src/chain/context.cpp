@@ -27,12 +27,12 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-bool context::is_enabled(chain::forks fork) const
+bool context::is_enabled(chain::forks fork) const noexcept
 {
     return to_bool(fork & forks);
 }
 
-bool context::is_policy(chain::policy police) const
+bool context::is_policy(chain::policy police) const noexcept
 {
     return to_bool(police & policy);
 }

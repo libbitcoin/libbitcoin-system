@@ -36,64 +36,64 @@ const uint32_t point::null_index = no_previous_output;
 // ----------------------------------------------------------------------------
 
 // Invalid default used in signature hashing.
-point::point()
+point::point() noexcept
   : point(null_hash, point::null_index, false)
 {
 }
 
-point::point(point&& other)
+point::point(point&& other) noexcept
   : point(std::move(other.hash_), other.index_, true)
 {
 }
 
-point::point(const point& other)
+point::point(const point& other) noexcept
   : point(other.hash_, other.index_, other.valid_)
 {
 }
 
-point::point(hash_digest&& hash, uint32_t index)
+point::point(hash_digest&& hash, uint32_t index) noexcept
   : point(std::move(hash), index, true)
 {
 }
 
-point::point(const hash_digest& hash, uint32_t index)
+point::point(const hash_digest& hash, uint32_t index) noexcept
   : point(hash, index, true)
 {
 }
 
-point::point(const data_slice& data)
+point::point(const data_slice& data) noexcept
   : point(stream::in::copy(data))
 {
 }
 
-point::point(std::istream&& stream)
+point::point(std::istream&& stream) noexcept
   : point(read::bytes::istream(stream))
 {
 }
 
-point::point(std::istream& stream)
+point::point(std::istream& stream) noexcept
   : point(read::bytes::istream(stream))
 {
 }
 
-point::point(reader&& source)
+point::point(reader&& source) noexcept
   : point(from_data(source))
 {
 }
 
-point::point(reader& source)
+point::point(reader& source) noexcept
   : point(from_data(source))
 {
 }
 
 // protected
-point::point(hash_digest&& hash, uint32_t index, bool valid)
+point::point(hash_digest&& hash, uint32_t index, bool valid) noexcept
   : hash_(std::move(hash)), index_(index), valid_(valid)
 {
 }
 
 // protected
-point::point(const hash_digest& hash, uint32_t index, bool valid)
+point::point(const hash_digest& hash, uint32_t index, bool valid) noexcept
   : hash_(hash), index_(index), valid_(valid)
 {
 }
@@ -101,7 +101,7 @@ point::point(const hash_digest& hash, uint32_t index, bool valid)
 // Operators.
 // ----------------------------------------------------------------------------
 
-point& point::operator=(point&& other)
+point& point::operator=(point&& other) noexcept
 {
     hash_ = std::move(other.hash_);
     index_ = other.index_;
@@ -109,7 +109,7 @@ point& point::operator=(point&& other)
     return *this;
 }
 
-point& point::operator=(const point& other)
+point& point::operator=(const point& other) noexcept
 {
     hash_ = other.hash_;
     index_ = other.index_;
@@ -117,18 +117,18 @@ point& point::operator=(const point& other)
     return *this;
 }
 
-bool point::operator==(const point& other) const
+bool point::operator==(const point& other) const noexcept
 {
     return (hash_ == other.hash_)
         && (index_ == other.index_);
 }
 
-bool point::operator!=(const point& other) const
+bool point::operator!=(const point& other) const noexcept
 {
     return !(*this == other);
 }
 
-bool operator<(const point& left, const point& right)
+bool operator<(const point& left, const point& right) noexcept
 {
     // Arbitrary compare, for uniqueness sorting.
     return left.index() == right.index() ?
@@ -139,7 +139,7 @@ bool operator<(const point& left, const point& right)
 // ----------------------------------------------------------------------------
 
 // static/private
-point point::from_data(reader& source)
+point point::from_data(reader& source) noexcept
 {
     return
     {
@@ -152,7 +152,7 @@ point point::from_data(reader& source)
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk point::to_data() const
+data_chunk point::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
@@ -161,13 +161,13 @@ data_chunk point::to_data() const
     return data;
 }
 
-void point::to_data(std::ostream& stream) const
+void point::to_data(std::ostream& stream) const noexcept
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void point::to_data(writer& sink) const
+void point::to_data(writer& sink) const noexcept
 {
     sink.write_bytes(hash_);
     sink.write_4_bytes_little_endian(index_);
@@ -176,23 +176,23 @@ void point::to_data(writer& sink) const
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool point::is_valid() const
+bool point::is_valid() const noexcept
 {
     return valid_;
 }
 
-const hash_digest& point::hash() const
+const hash_digest& point::hash() const noexcept
 {
     return hash_;
 }
 
-uint32_t point::index() const
+uint32_t point::index() const noexcept
 {
     return index_;
 }
 
 // static
-size_t point::serialized_size()
+size_t point::serialized_size() noexcept
 {
     return hash_size + sizeof(uint32_t);
 }
@@ -200,7 +200,7 @@ size_t point::serialized_size()
 // Validation.
 // ----------------------------------------------------------------------------
 
-bool point::is_null() const
+bool point::is_null() const noexcept
 {
     return (index_ == null_index) && (hash_ == null_hash);
 }

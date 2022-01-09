@@ -52,124 +52,131 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default script is an invalid empty script object.
-    script();
+    script() noexcept;
 
-    script(script&& other);
-    script(const script& other);
+    script(script&& other) noexcept;
+    script(const script& other) noexcept;
 
-    script(operations&& ops);
-    script(const operations& ops);
+    script(operations&& ops) noexcept;
+    script(const operations& ops) noexcept;
 
-    script(const data_slice& data, bool prefix);
-    script(std::istream&& stream, bool prefix);
-    script(std::istream& stream, bool prefix);
-    script(reader&& source, bool prefix);
-    script(reader& source, bool prefix);
+    script(const data_slice& data, bool prefix) noexcept;
+    script(std::istream&& stream, bool prefix) noexcept;
+    script(std::istream& stream, bool prefix) noexcept;
+    script(reader&& source, bool prefix) noexcept;
+    script(reader& source, bool prefix) noexcept;
 
-    script(const std::string& mnemonic);
+    script(const std::string& mnemonic) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    script& operator=(script&& other);
-    script& operator=(const script& other);
+    script& operator=(script&& other) noexcept;
+    script& operator=(const script& other) noexcept;
 
-    bool operator==(const script& other) const;
-    bool operator!=(const script& other) const;
+    bool operator==(const script& other) const noexcept;
+    bool operator!=(const script& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool prefix) const;
-    void to_data(std::ostream& stream, bool prefix) const;
-    void to_data(writer& sink, bool prefix) const;
+    data_chunk to_data(bool prefix) const noexcept;
+    void to_data(std::ostream& stream, bool prefix) const noexcept;
+    void to_data(writer& sink, bool prefix) const noexcept;
 
-    std::string to_string(uint32_t active_forks) const;
+    std::string to_string(uint32_t active_forks) const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    const operations& ops() const;
+    bool is_valid() const noexcept;
+    const operations& ops() const noexcept;
 
     /// Computed properties.
-    hash_digest hash() const;
-    size_t serialized_size(bool prefix) const;
+    hash_digest hash() const noexcept;
+    size_t serialized_size(bool prefix) const noexcept;
 
     // Utilities (static).
     // ------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, forks fork);
+    static bool is_enabled(uint32_t active_forks, forks fork) noexcept;
 
     /// Consensus patterns.
-    static bool is_push_only(const operations& ops);
-    static bool is_relaxed_push(const operations& ops);
-    static bool is_coinbase_pattern(const operations& ops, size_t height);
-    static bool is_commitment_pattern(const operations& ops);
-    static bool is_witness_program_pattern(const operations& ops);
+    static bool is_push_only(const operations& ops) noexcept;
+    static bool is_relaxed_push(const operations& ops) noexcept;
+    static bool is_coinbase_pattern(const operations& ops,
+        size_t height) noexcept;
+    static bool is_commitment_pattern(const operations& ops) noexcept;
+    static bool is_witness_program_pattern(const operations& ops) noexcept;
 
     /// Common output patterns (psh and pwsh are also consensus).
-    static bool is_pay_op_return_pattern(const operations& ops);
-    static bool is_pay_null_data_pattern(const operations& ops);
-    static bool is_pay_multisig_pattern(const operations& ops);
-    static bool is_pay_public_key_pattern(const operations& ops);
-    static bool is_pay_key_hash_pattern(const operations& ops);
-    static bool is_pay_script_hash_pattern(const operations& ops);
-    static bool is_pay_witness_pattern(const operations& ops);
-    static bool is_pay_witness_key_hash_pattern(const operations& ops);
-    static bool is_pay_witness_script_hash_pattern(const operations& ops);
+    static bool is_pay_op_return_pattern(const operations& ops) noexcept;
+    static bool is_pay_null_data_pattern(const operations& ops) noexcept;
+    static bool is_pay_multisig_pattern(const operations& ops) noexcept;
+    static bool is_pay_public_key_pattern(const operations& ops) noexcept;
+    static bool is_pay_key_hash_pattern(const operations& ops) noexcept;
+    static bool is_pay_script_hash_pattern(const operations& ops) noexcept;
+    static bool is_pay_witness_pattern(const operations& ops) noexcept;
+    static bool is_pay_witness_key_hash_pattern(
+        const operations& ops) noexcept;
+    static bool is_pay_witness_script_hash_pattern(
+        const operations& ops) noexcept;
 
     /// Pattern optimizaitons.
-    bool is_pay_to_witness(uint32_t forks) const;
-    bool is_pay_to_script_hash(uint32_t forks) const;
+    bool is_pay_to_witness(uint32_t forks) const noexcept;
+    bool is_pay_to_script_hash(uint32_t forks) const noexcept;
 
     /// Common input patterns (skh is also consensus).
-    static bool is_sign_multisig_pattern(const operations& ops);
-    static bool is_sign_public_key_pattern(const operations& ops);
-    static bool is_sign_key_hash_pattern(const operations& ops);
-    static bool is_sign_script_hash_pattern(const operations& ops);
+    static bool is_sign_multisig_pattern(const operations& ops) noexcept;
+    static bool is_sign_public_key_pattern(const operations& ops) noexcept;
+    static bool is_sign_key_hash_pattern(const operations& ops) noexcept;
+    static bool is_sign_script_hash_pattern(const operations& ops) noexcept;
 
     /// Stack factories.
-    static operations to_pay_null_data_pattern(const data_slice& data);
-    static operations to_pay_public_key_pattern(const data_slice& point);
-    static operations to_pay_key_hash_pattern(const short_hash& hash);
-    static operations to_pay_script_hash_pattern(const short_hash& hash);
+    static operations to_pay_null_data_pattern(
+        const data_slice& data) noexcept;
+    static operations to_pay_public_key_pattern(
+        const data_slice& point) noexcept;
+    static operations to_pay_key_hash_pattern(
+        const short_hash& hash) noexcept;
+    static operations to_pay_script_hash_pattern(
+        const short_hash& hash) noexcept;
     static operations to_pay_multisig_pattern(uint8_t signatures,
-        const compressed_list& points);
+        const compressed_list& points) noexcept;
     static operations to_pay_multisig_pattern(uint8_t signatures,
-        const data_stack& points);
+        const data_stack& points) noexcept;
     static  operations to_pay_witness_pattern(uint8_t version,
-        const data_slice& data);
+        const data_slice& data) noexcept;
     static operations to_pay_witness_key_hash_pattern(
-        const short_hash& hash);
+        const short_hash& hash) noexcept;
     static operations to_pay_witness_script_hash_pattern(
-        const hash_digest& hash);
+        const hash_digest& hash) noexcept;
 
     // Utilities (non-static).
     // ------------------------------------------------------------------------
 
     /// Common pattern detection.
-    const data_chunk& witness_program() const;
-    script_version version() const;
-    script_pattern pattern() const;
-    script_pattern input_pattern() const;
-    script_pattern output_pattern() const;
+    const data_chunk& witness_program() const noexcept;
+    script_version version() const noexcept;
+    script_pattern pattern() const noexcept;
+    script_pattern input_pattern() const noexcept;
+    script_pattern output_pattern() const noexcept;
 
     /// Consensus computations.
-    size_t sigops(bool accurate) const;
-    bool is_oversized() const;
-    bool is_unspendable() const;
+    size_t sigops(bool accurate) const noexcept;
+    bool is_oversized() const noexcept;
+    bool is_unspendable() const noexcept;
 
 protected:
-    script(operations&& ops, bool valid);
-    script(const operations& ops, bool valid);
+    script(operations&& ops, bool valid) noexcept;
+    script(const operations& ops, bool valid) noexcept;
 
 private:
-    static script from_data(reader& source, bool prefix);
-    static script from_string(const std::string& mnemonic);
-    static size_t op_count(reader& source);
+    static script from_data(reader& source, bool prefix) noexcept;
+    static script from_string(const std::string& mnemonic) noexcept;
+    static size_t op_count(reader& source) noexcept;
 
     // Script should be stored as shared.
     operations ops_;

@@ -66,9 +66,9 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
-    ////bool from_string(const std::string& text);
-    ////bool from_string(std::istream& stream);
-    ////bool from_string(reader& source);
+    ////bool from_string(const std::string& text) noexcept;
+    ////bool from_string(std::istream& stream) noexcept;
+    ////bool from_string(reader& source) noexcept;
 
     bool is_valid() const noexcept;
 

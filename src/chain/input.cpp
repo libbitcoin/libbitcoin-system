@@ -40,7 +40,7 @@ namespace chain {
 
 // Default point is null_hash and point::null_index. 
 // Default prevout (metadata) is spent, invalid, max_size_t value. 
-input::input()
+input::input() noexcept
   : input(
       to_shared<chain::point>(),
       to_shared<chain::script>(),
@@ -49,12 +49,12 @@ input::input()
 {
 }
 
-input::input(input&& other)
+input::input(input&& other) noexcept
   : input(other)
 {
 }
 
-input::input(const input& other)
+input::input(const input& other) noexcept
   : input(
       other.point_,
       other.script_,
@@ -65,7 +65,8 @@ input::input(const input& other)
 {
 }
 
-input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
+input::input(chain::point&& point, chain::script&& script,
+    uint32_t sequence) noexcept
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
@@ -75,7 +76,7 @@ input::input(chain::point&& point, chain::script&& script, uint32_t sequence)
 }
 
 input::input(const chain::point& point, const chain::script& script,
-    uint32_t sequence)
+    uint32_t sequence) noexcept
   : input(
       to_shared(point),
       to_shared(script),
@@ -85,7 +86,7 @@ input::input(const chain::point& point, const chain::script& script,
 }
 
 input::input(const chain::point::ptr& point, const chain::script::ptr& script,
-    uint32_t sequence)
+    uint32_t sequence) noexcept
   : input(
       point ? point : to_shared<chain::point>(),
       script ? script : to_shared<chain::script>(),
@@ -95,7 +96,7 @@ input::input(const chain::point::ptr& point, const chain::script::ptr& script,
 }
 
 input::input(chain::point&& point, chain::script&& script,
-    chain::witness&& witness, uint32_t sequence)
+    chain::witness&& witness, uint32_t sequence) noexcept
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
@@ -105,7 +106,7 @@ input::input(chain::point&& point, chain::script&& script,
 }
 
 input::input(const chain::point& point, const chain::script& script,
-    const chain::witness& witness, uint32_t sequence)
+    const chain::witness& witness, uint32_t sequence) noexcept
   : input(
       to_shared(point),
       to_shared(script),
@@ -115,32 +116,32 @@ input::input(const chain::point& point, const chain::script& script,
 }
 
 input::input(const chain::point::ptr& point, const chain::script::ptr& script,
-    const chain::witness::ptr& witness, uint32_t sequence)
+    const chain::witness::ptr& witness, uint32_t sequence) noexcept
   : input(point, script, witness, sequence, true, to_shared<chain::prevout>())
 {
 }
 
-input::input(const data_slice& data)
+input::input(const data_slice& data) noexcept
   : input(stream::in::copy(data))
 {
 }
 
-input::input(std::istream&& stream)
+input::input(std::istream&& stream) noexcept
   : input(read::bytes::istream(stream))
 {
 }
 
-input::input(std::istream& stream)
+input::input(std::istream& stream) noexcept
   : input(read::bytes::istream(stream))
 {
 }
 
-input::input(reader&& source)
+input::input(reader&& source) noexcept
   : input(from_data(source))
 {
 }
 
-input::input(reader& source)
+input::input(reader& source) noexcept
   : input(from_data(source))
 {
 }
@@ -148,7 +149,7 @@ input::input(reader& source)
 // protected
 input::input(const chain::point::ptr& point, const chain::script::ptr& script,
     const chain::witness::ptr& witness, uint32_t sequence, bool valid,
-    const chain::prevout::ptr& prevout)
+    const chain::prevout::ptr& prevout) noexcept
   : point_(point),
     script_(script),
     witness_(witness),
@@ -161,13 +162,13 @@ input::input(const chain::point::ptr& point, const chain::script::ptr& script,
 // Operators.
 // ----------------------------------------------------------------------------
 
-input& input::operator=(input&& other)
+input& input::operator=(input&& other) noexcept
 {
     *this = other;
     return *this;
 }
 
-input& input::operator=(const input& other)
+input& input::operator=(const input& other) noexcept
 {
     point_ = other.point_;
     script_ = other.script_;
@@ -177,7 +178,7 @@ input& input::operator=(const input& other)
     return *this;
 }
 
-bool input::operator==(const input& other) const
+bool input::operator==(const input& other) const noexcept
 {
     return (sequence_ == other.sequence_)
         && (*point_ == *other.point_)
@@ -185,7 +186,7 @@ bool input::operator==(const input& other) const
         && (*witness_ == *other.witness_);
 }
 
-bool input::operator!=(const input& other) const
+bool input::operator!=(const input& other) const noexcept
 {
     return !(*this == other);
 }
@@ -194,7 +195,7 @@ bool input::operator!=(const input& other) const
 // ----------------------------------------------------------------------------
 
 // static/private
-input input::from_data(reader& source)
+input input::from_data(reader& source) noexcept
 {
     // Witness is deserialized by transaction.
     return
@@ -211,7 +212,7 @@ input input::from_data(reader& source)
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk input::to_data() const
+data_chunk input::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(false));
@@ -220,21 +221,21 @@ data_chunk input::to_data() const
     return data;
 }
 
-void input::to_data(std::ostream& stream) const
+void input::to_data(std::ostream& stream) const noexcept
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
 // Witness is serialized by transaction.
-void input::to_data(writer& sink) const
+void input::to_data(writer& sink) const noexcept
 {
     point_->to_data(sink);
     script_->to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 }
 
-size_t input::serialized_size(bool witness) const
+size_t input::serialized_size(bool witness) const noexcept
 {
     // input.serialized_size(witness) provides sizing for witness, however
     // witnesses are serialized by the transaction. This is an ugly hack as a
@@ -249,42 +250,42 @@ size_t input::serialized_size(bool witness) const
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool input::is_valid() const
+bool input::is_valid() const noexcept
 {
     return valid_;
 }
 
-const point& input::point() const
+const point& input::point() const noexcept
 {
     return *point_;
 }
 
-const chain::script& input::script() const
+const chain::script& input::script() const noexcept
 {
     return *script_;
 }
 
-const chain::witness& input::witness() const
+const chain::witness& input::witness() const noexcept
 {
     return *witness_;
 }
 
-const point::ptr input::point_ptr() const
+const point::ptr input::point_ptr() const noexcept
 {
     return point_;
 }
 
-const chain::script::ptr input::script_ptr() const
+const chain::script::ptr input::script_ptr() const noexcept
 {
     return script_;
 }
 
-const chain::witness::ptr input::witness_ptr() const
+const chain::witness::ptr input::witness_ptr() const noexcept
 {
     return witness_;
 }
 
-uint32_t input::sequence() const
+uint32_t input::sequence() const noexcept
 {
     return sequence_;
 }
@@ -292,12 +293,12 @@ uint32_t input::sequence() const
 // Methods.
 // ----------------------------------------------------------------------------
 
-bool input::is_final() const
+bool input::is_final() const noexcept
 {
     return sequence_ == max_input_sequence;
 }
 
-bool input::is_locked(size_t height, uint32_t median_time_past) const
+bool input::is_locked(size_t height, uint32_t median_time_past) const noexcept
 {
     // BIP68: if bit 31 is set then no consensus meaning is applied.
     if (get_right(sequence_, relative_locktime_disabled_bit))
@@ -319,7 +320,7 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const
     return age < blocks;
 }
 
-bool input::reserved_hash(hash_digest& out) const
+bool input::reserved_hash(hash_digest& out) const noexcept
 {
     if (!witness::is_reserved_pattern(witness_->stack()))
         return false;
@@ -329,7 +330,7 @@ bool input::reserved_hash(hash_digest& out) const
 }
 
 // private
-bool input::embedded_script(chain::script& out) const
+bool input::embedded_script(chain::script& out) const noexcept
 {
     const auto& ops = script_->ops();
     const auto& script = prevout->script();
@@ -358,7 +359,7 @@ static_assert(max_script_size <
 // TODO: Create legacy sigops fork flag and pass here, return 0 if false.
 // TODO: this was an unbipped flag day soft fork, prior to BIP16/141.
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
-size_t input::signature_operations(bool bip16, bool bip141) const
+size_t input::signature_operations(bool bip16, bool bip141) const noexcept
 {
     if (bip141 && !prevout->is_valid())
         return max_size_t;

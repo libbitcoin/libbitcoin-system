@@ -45,61 +45,62 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default output is an invalid object (input.prevout relies on this).
-    output();
+    output() noexcept;
 
-    output(output&& other);
-    output(const output& other);
+    output(output&& other) noexcept;
+    output(const output& other) noexcept;
 
-    output(uint64_t value, chain::script&& script);
-    output(uint64_t value, const chain::script& script);
-    output(uint64_t value, const chain::script::ptr& script);
+    output(uint64_t value, chain::script&& script) noexcept;
+    output(uint64_t value, const chain::script& script) noexcept;
+    output(uint64_t value, const chain::script::ptr& script) noexcept;
 
-    output(const data_slice& data);
-    output(std::istream&& stream);
-    output(std::istream& stream);
-    output(reader&& source);
-    output(reader& source);
+    output(const data_slice& data) noexcept;
+    output(std::istream&& stream) noexcept;
+    output(std::istream& stream) noexcept;
+    output(reader&& source) noexcept;
+    output(reader& source) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    output& operator=(output&& other);
-    output& operator=(const output& other);
+    output& operator=(output&& other) noexcept;
+    output& operator=(const output& other) noexcept;
 
-    bool operator==(const output& other) const;
-    bool operator!=(const output& other) const;
+    bool operator==(const output& other) const noexcept;
+    bool operator!=(const output& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data() const noexcept;
+    void to_data(std::ostream& stream) const noexcept;
+    void to_data(writer& sink) const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    uint64_t value() const;
-    const chain::script& script() const;
-    const chain::script::ptr script_ptr() const;
+    bool is_valid() const noexcept;
+    uint64_t value() const noexcept;
+    const chain::script& script() const noexcept;
+    const chain::script::ptr script_ptr() const noexcept;
 
     /// Computed properties.
-    size_t serialized_size() const;
+    size_t serialized_size() const noexcept;
 
     // Methods.
     // ------------------------------------------------------------------------
 
-    bool committed_hash(hash_digest& out) const;
-    size_t signature_operations(bool bip141) const;
-    bool is_dust(uint64_t minimum_output_value) const;
+    bool committed_hash(hash_digest& out) const noexcept;
+    size_t signature_operations(bool bip141) const noexcept;
+    bool is_dust(uint64_t minimum_output_value) const noexcept;
 
 protected:
-    output(uint64_t value, const chain::script::ptr& script, bool valid);
+    output(uint64_t value, const chain::script::ptr& script,
+        bool valid) noexcept;
 
 private:
-    static output from_data(reader& source);
+    static output from_data(reader& source) noexcept;
 
     // Output should be stored as shared (adds 16 bytes).
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).

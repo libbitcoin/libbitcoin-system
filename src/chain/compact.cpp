@@ -43,17 +43,17 @@ BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 // Inlines
 // ----------------------------------------------------------------------------
 
-inline bool is_negated(uint32_t compact)
+inline bool is_negated(uint32_t compact) noexcept
 {
     return to_bool(compact & sign_bit);
 }
 
-inline bool is_nonzero(uint32_t compact)
+inline bool is_nonzero(uint32_t compact) noexcept
 {
     return to_bool(compact & mantissa_max);
 }
 
-inline uint8_t log_256(uint32_t mantissa)
+inline uint8_t log_256(uint32_t mantissa) noexcept
 {
     BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
 
@@ -63,25 +63,25 @@ inline uint8_t log_256(uint32_t mantissa)
         (mantissa > 0x00000000 ? 1 : 0)));
 }
 
-inline bool is_overflow(uint8_t exponent, uint32_t mantissa)
+inline bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
 {
     // Overflow if exponent would shift the mantissa more than 32 bytes.
     return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
 }
 
-inline uint32_t shift_low(uint8_t exponent)
+inline uint32_t shift_low(uint8_t exponent) noexcept
 {
     BC_ASSERT(exponent <= 3);
     return to_bits(3 - exponent);
 }
 
-inline uint32_t shift_high(uint8_t exponent)
+inline uint32_t shift_high(uint8_t exponent) noexcept
 {
     BC_ASSERT(exponent > 3);
     return to_bits(exponent - 3);
 }
 
-inline size_t logical_size(uint256_t value)
+inline size_t logical_size(uint256_t value) noexcept
 {
     auto byte = zero;
 
@@ -94,35 +94,35 @@ inline size_t logical_size(uint256_t value)
 // Constructors
 // ----------------------------------------------------------------------------
 
-compact::compact(uint32_t compact)
+compact::compact(uint32_t compact) noexcept
 {
     overflowed_ = !from_compact(big_, compact);
     normal_ = from_big(big_);
 }
 
-compact::compact(const uint256_t& value)
+compact::compact(const uint256_t& value) noexcept
   : big_(value), overflowed_(false)
 {
     normal_ = from_big(big_);
 }
 
-bool compact::is_overflowed() const
+bool compact::is_overflowed() const noexcept
 {
     return overflowed_;
 }
 
-uint32_t compact::normal() const
+uint32_t compact::normal() const noexcept
 {
     return normal_;
 }
 
-compact::operator const uint256_t&() const
+compact::operator const uint256_t&() const noexcept
 {
     return big_;
 }
 
 // Returns false on overflow, negatives are converted to zero.
-bool compact::from_compact(uint256_t& out, uint32_t compact)
+bool compact::from_compact(uint256_t& out, uint32_t compact) noexcept
 {
     //*************************************************************************
     // CONSENSUS: The sign bit is not honored and it instead produces zero.
@@ -158,7 +158,7 @@ bool compact::from_compact(uint256_t& out, uint32_t compact)
     return true;
 }
 
-uint32_t compact::from_big(const uint256_t& big)
+uint32_t compact::from_big(const uint256_t& big) noexcept
 {
     // This value is limited to 32, so exponent cannot overflow.
     auto exponent = static_cast<uint8_t>(logical_size(big));

@@ -45,68 +45,68 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default witness is an invalid empty stack object.
-    witness();
+    witness() noexcept;
 
-    witness(witness&& other);
-    witness(const witness& other);
+    witness(witness&& other) noexcept;
+    witness(const witness& other) noexcept;
 
-    witness(chunk_ptrs&& stack);
-    witness(const chunk_ptrs& stack);
+    witness(chunk_ptrs&& stack) noexcept;
+    witness(const chunk_ptrs& stack) noexcept;
 
-    witness(const data_slice& data, bool prefix);
-    witness(std::istream&& stream, bool prefix);
-    witness(std::istream& stream, bool prefix);
-    witness(reader&& source, bool prefix);
-    witness(reader& source, bool prefix);
+    witness(const data_slice& data, bool prefix) noexcept;
+    witness(std::istream&& stream, bool prefix) noexcept;
+    witness(std::istream& stream, bool prefix) noexcept;
+    witness(reader&& source, bool prefix) noexcept;
+    witness(reader& source, bool prefix) noexcept;
 
-    witness(const std::string& mnemonic);
+    witness(const std::string& mnemonic) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    witness& operator=(witness&& other);
-    witness& operator=(const witness& other);
+    witness& operator=(witness&& other) noexcept;
+    witness& operator=(const witness& other) noexcept;
 
-    bool operator==(const witness& other) const;
-    bool operator!=(const witness& other) const;
+    bool operator==(const witness& other) const noexcept;
+    bool operator!=(const witness& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool prefix) const;
-    void to_data(std::ostream& stream, bool prefix) const;
-    void to_data(writer& sink, bool prefix) const;
+    data_chunk to_data(bool prefix) const noexcept;
+    void to_data(std::ostream& stream, bool prefix) const noexcept;
+    void to_data(writer& sink, bool prefix) const noexcept;
 
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    const chunk_ptrs& stack() const;
+    bool is_valid() const noexcept;
+    const chunk_ptrs& stack() const noexcept;
 
     /// Computed properties.
-    size_t serialized_size(bool prefix) const;
+    size_t serialized_size(bool prefix) const noexcept;
 
     // Utilities.
     // ------------------------------------------------------------------------
 
-    static bool is_push_size(const chunk_ptrs& stack);
-    static bool is_reserved_pattern(const chunk_ptrs& stack);
+    static bool is_push_size(const chunk_ptrs& stack) noexcept;
+    static bool is_reserved_pattern(const chunk_ptrs& stack) noexcept;
 
     bool extract_sigop_script(script& out_script,
-        const script& program_script) const;
+        const script& program_script) const noexcept;
     bool extract_script(script& out_script, chunk_ptrs& out_stack,
-        const script& program_script) const;
+        const script& program_script) const noexcept;
 
 private:
-    static witness from_data(reader& source, bool prefix);
-    static witness from_string(const std::string& mnemonic);
-    size_t serialized_size() const;
+    static witness from_data(reader& source, bool prefix) noexcept;
+    static witness from_string(const std::string& mnemonic) noexcept;
+    size_t serialized_size() const noexcept;
 
-    witness(chunk_ptrs&& stack, bool valid);
-    witness(const chunk_ptrs& stack, bool valid);
+    witness(chunk_ptrs&& stack, bool valid) noexcept;
+    witness(const chunk_ptrs& stack, bool valid) noexcept;
 
     // Witness should be stored as shared.
     chunk_ptrs stack_;

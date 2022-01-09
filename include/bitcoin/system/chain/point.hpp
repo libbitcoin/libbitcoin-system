@@ -46,54 +46,54 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default point is an invalid null point (null_hash/null_index) object.
-    point();
+    point() noexcept;
 
-    point(point&& other);
-    point(const point& other);
+    point(point&& other) noexcept;
+    point(const point& other) noexcept;
 
-    point(hash_digest&& hash, uint32_t index);
-    point(const hash_digest& hash, uint32_t index);
+    point(hash_digest&& hash, uint32_t index) noexcept;
+    point(const hash_digest& hash, uint32_t index) noexcept;
 
-    point(const data_slice& data);
-    point(std::istream&& stream);
-    point(std::istream& stream);
-    point(reader&& source);
-    point(reader& source);
+    point(const data_slice& data) noexcept;
+    point(std::istream&& stream) noexcept;
+    point(std::istream& stream) noexcept;
+    point(reader&& source) noexcept;
+    point(reader& source) noexcept;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    point& operator=(point&& other);
-    point& operator=(const point& other);
+    point& operator=(point&& other) noexcept;
+    point& operator=(const point& other) noexcept;
 
-    bool operator==(const point& other) const;
-    bool operator!=(const point& other) const;
+    bool operator==(const point& other) const noexcept;
+    bool operator!=(const point& other) const noexcept;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const;
-    void to_data(std::ostream& stream) const;
-    void to_data(writer& sink) const;
+    data_chunk to_data() const noexcept;
+    void to_data(std::ostream& stream) const noexcept;
+    void to_data(writer& sink) const noexcept;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const;
-    const hash_digest& hash() const;
-    uint32_t index() const;
+    bool is_valid() const noexcept;
+    const hash_digest& hash() const noexcept;
+    uint32_t index() const noexcept;
 
     /// Computed properties.
-    bool is_null() const;
-    static size_t serialized_size();
+    bool is_null() const noexcept;
+    static size_t serialized_size() noexcept;
 
 protected:
-    point(hash_digest&& hash, uint32_t index, bool valid);
-    point(const hash_digest& hash, uint32_t index, bool valid);
+    point(hash_digest&& hash, uint32_t index, bool valid) noexcept;
+    point(const hash_digest& hash, uint32_t index, bool valid) noexcept;
 
 private:
-    static point from_data(reader& source);
+    static point from_data(reader& source) noexcept;
 
     // The index is consensus-serialized as a fixed 4 bytes, however it is
     // effectively bound to 2^17 by the block byte size limit.
@@ -106,7 +106,7 @@ private:
 };
 
 /// Arbitrary compare, for uniqueness sorting.
-bool operator<(const point& left, const point& right);
+bool operator<(const point& left, const point& right) noexcept;
 
 typedef std::vector<point> points;
 

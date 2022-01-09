@@ -40,12 +40,12 @@ using wall_clock = std::chrono::system_clock;
 // Constructors.
 // ----------------------------------------------------------------------------
 
-header::header()
+header::header() noexcept
   : header(0, {}, {}, 0, 0, 0, false)
 {
 }
 
-header::header(header&& other)
+header::header(header&& other) noexcept
 : header(
     other.version_,
     std::move(other.previous_block_hash_),
@@ -57,7 +57,7 @@ header::header(header&& other)
 {
 }
 
-header::header(const header& other)
+header::header(const header& other) noexcept
 : header(
     other.version_,
     other.previous_block_hash_,
@@ -71,7 +71,7 @@ header::header(const header& other)
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce)
+    uint32_t nonce) noexcept
   : header(version, std::move(previous_block_hash), std::move(merkle_root),
       timestamp, bits, nonce, true)
 {
@@ -79,33 +79,33 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce)
+    uint32_t nonce) noexcept
   : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
       true)
 {
 }
 
-header::header(const data_slice& data)
+header::header(const data_slice& data) noexcept
   : header(stream::in::copy(data))
 {
 }
 
-header::header(std::istream&& stream)
+header::header(std::istream&& stream) noexcept
   : header(read::bytes::istream(stream))
 {
 }
 
-header::header(std::istream& stream)
+header::header(std::istream& stream) noexcept
   : header(read::bytes::istream(stream))
 {
 }
 
-header::header(reader&& source)
+header::header(reader&& source) noexcept
   : header(from_data(source))
 {
 }
 
-header::header(reader& source)
+header::header(reader& source) noexcept
   : header(from_data(source))
 {
 }
@@ -113,7 +113,7 @@ header::header(reader& source)
 // protected
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, bool valid)
+    uint32_t nonce, bool valid) noexcept
   : version_(version),
     previous_block_hash_(std::move(previous_block_hash)),
     merkle_root_(std::move(merkle_root)),
@@ -127,7 +127,7 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 // protected
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, bool valid)
+    uint32_t nonce, bool valid) noexcept
   : version_(version),
     previous_block_hash_(previous_block_hash),
     merkle_root_(merkle_root),
@@ -141,7 +141,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 // Operators.
 // ----------------------------------------------------------------------------
 
-header& header::operator=(header&& other)
+header& header::operator=(header&& other) noexcept
 {
     version_ = other.version_;
     previous_block_hash_ = std::move(other.previous_block_hash_);
@@ -153,7 +153,7 @@ header& header::operator=(header&& other)
     return *this;
 }
 
-header& header::operator=(const header& other)
+header& header::operator=(const header& other) noexcept
 {
     version_ = other.version_;
     previous_block_hash_ = other.previous_block_hash_;
@@ -165,7 +165,7 @@ header& header::operator=(const header& other)
     return *this;
 }
 
-bool header::operator==(const header& other) const
+bool header::operator==(const header& other) const noexcept
 {
     return (version_ == other.version_)
         && (previous_block_hash_ == other.previous_block_hash_)
@@ -175,7 +175,7 @@ bool header::operator==(const header& other) const
         && (nonce_ == other.nonce_);
 }
 
-bool header::operator!=(const header& other) const
+bool header::operator!=(const header& other) const noexcept
 {
     return !(*this == other);
 }
@@ -184,7 +184,7 @@ bool header::operator!=(const header& other) const
 // ----------------------------------------------------------------------------
 
 // static/private
-header header::from_data(reader& source)
+header header::from_data(reader& source) noexcept
 {
     return
     {
@@ -201,7 +201,7 @@ header header::from_data(reader& source)
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk header::to_data() const
+data_chunk header::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
@@ -210,13 +210,13 @@ data_chunk header::to_data() const
     return data;
 }
 
-void header::to_data(std::ostream& stream) const
+void header::to_data(std::ostream& stream) const noexcept
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void header::to_data(writer& sink) const
+void header::to_data(writer& sink) const noexcept
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_bytes(previous_block_hash_);
@@ -229,43 +229,43 @@ void header::to_data(writer& sink) const
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool header::is_valid() const
+bool header::is_valid() const noexcept
 {
     return valid_;
 }
 
-uint32_t header::version() const
+uint32_t header::version() const noexcept
 {
     return version_;
 }
 
-const hash_digest& header::previous_block_hash() const
+const hash_digest& header::previous_block_hash() const noexcept
 {
     return previous_block_hash_;
 }
 
-const hash_digest& header::merkle_root() const
+const hash_digest& header::merkle_root() const noexcept
 {
     return merkle_root_;
 }
 
-uint32_t header::timestamp() const
+uint32_t header::timestamp() const noexcept
 {
     return timestamp_;
 }
 
-uint32_t header::bits() const
+uint32_t header::bits() const noexcept
 {
     return bits_;
 }
 
-uint32_t header::nonce() const
+uint32_t header::nonce() const noexcept
 {
     return nonce_;
 }
 
 // computed
-hash_digest header::hash() const
+hash_digest header::hash() const noexcept
 {
     hash_digest sha256;
     hash::sha256::copy sink(sha256);
@@ -275,7 +275,7 @@ hash_digest header::hash() const
 }
 
 // static/private
-uint256_t header::difficulty(uint32_t bits)
+uint256_t header::difficulty(uint32_t bits) noexcept
 {
     const auto header_bits = compact(bits);
 
@@ -300,13 +300,13 @@ uint256_t header::difficulty(uint32_t bits)
 }
 
 // computed
-uint256_t header::difficulty() const
+uint256_t header::difficulty() const noexcept
 {
     return difficulty(bits_);
 }
 
 // static
-size_t header::serialized_size()
+size_t header::serialized_size() noexcept
 {
     return sizeof(version_)
         + hash_size
@@ -320,7 +320,7 @@ size_t header::serialized_size()
 // ----------------------------------------------------------------------------
 
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
-    bool scrypt) const
+    bool scrypt) const noexcept
 {
     const auto bits = compact(bits_);
     static const uint256_t pow_limit(compact{ proof_of_work_limit });
@@ -342,7 +342,8 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 // ****************************************************************************
 /// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
 // ****************************************************************************
-bool header::is_invalid_timestamp(uint32_t timestamp_limit_seconds) const
+bool header::is_invalid_timestamp(
+    uint32_t timestamp_limit_seconds) const noexcept
 {
     using namespace std::chrono;
     static const auto two_hours = seconds(timestamp_limit_seconds);
@@ -355,7 +356,7 @@ bool header::is_invalid_timestamp(uint32_t timestamp_limit_seconds) const
 // ----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit, bool scrypt) const
+    uint32_t proof_of_work_limit, bool scrypt) const noexcept
 {
     if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
@@ -366,7 +367,7 @@ code header::check(uint32_t timestamp_limit_seconds,
     return error::success;
 }
 
-code header::accept(const chain_state& state) const
+code header::accept(const chain_state& state) const noexcept
 {
     if (state.is_checkpoint_conflict(hash()))
         return error::checkpoints_failed;

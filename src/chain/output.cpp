@@ -39,63 +39,64 @@ const uint64_t output::not_found = sighash_null_value;
 
 // Invalid default used in signature hashing (validity ignored).
 // Invalidity is also used to determine that a prevout is not found.
-output::output()
+output::output() noexcept
   : output(output::not_found, to_shared<chain::script>(), false)
 {
 }
 
-output::output(output&& other)
+output::output(output&& other) noexcept
   : output(other)
 {
 }
 
-output::output(const output& other)
+output::output(const output& other) noexcept
   : output(other.value_, other.script_, other.valid_)
 {
 }
 
-output::output(uint64_t value, chain::script&& script)
+output::output(uint64_t value, chain::script&& script) noexcept
   : output(value, to_shared(std::move(script)), true)
 {
 }
 
-output::output(uint64_t value, const chain::script& script)
+output::output(uint64_t value, const chain::script& script) noexcept
   : output(value, to_shared(script), true)
 {
 }
 
-output::output(uint64_t value, const chain::script::ptr& script)
+output::output(uint64_t value, const chain::script::ptr& script) noexcept
   : output(value, script ? script : to_shared<chain::script>(), true)
 {
 }
 
-output::output(const data_slice& data)
+output::output(const data_slice& data) noexcept
   : output(stream::in::copy(data))
 {
 }
 
-output::output(std::istream&& stream)
+output::output(std::istream&& stream) noexcept
   : output(read::bytes::istream(stream))
 {
 }
 
-output::output(std::istream& stream)
+output::output(std::istream& stream) noexcept
   : output(read::bytes::istream(stream))
 {
 }
 
-output::output(reader&& source)
+output::output(reader&& source) noexcept
   : output(from_data(source))
 {
 }
 
-output::output(reader& source)
+output::output(reader& source) noexcept
   : output(from_data(source))
 {
 }
 
 // protected
-output::output(uint64_t value, const chain::script::ptr& script, bool valid)
+output::output(uint64_t value, const chain::script::ptr& script,
+    bool valid) noexcept
   : value_(value), script_(script), valid_(valid)
 {
 }
@@ -103,13 +104,13 @@ output::output(uint64_t value, const chain::script::ptr& script, bool valid)
 // Operators.
 // ----------------------------------------------------------------------------
 
-output& output::operator=(output&& other)
+output& output::operator=(output&& other) noexcept
 {
     *this = other;
     return *this;
 }
 
-output& output::operator=(const output& other)
+output& output::operator=(const output& other) noexcept
 {
     value_ = other.value_;
     script_ = other.script_;
@@ -117,13 +118,13 @@ output& output::operator=(const output& other)
     return *this;
 }
 
-bool output::operator==(const output& other) const
+bool output::operator==(const output& other) const noexcept
 {
     return (value_ == other.value_)
         && (*script_ == *other.script_);
 }
 
-bool output::operator!=(const output& other) const
+bool output::operator!=(const output& other) const noexcept
 {
     return !(*this == other);
 }
@@ -132,7 +133,7 @@ bool output::operator!=(const output& other) const
 // ----------------------------------------------------------------------------
 
 // static/private
-output output::from_data(reader& source)
+output output::from_data(reader& source) noexcept
 {
     return
     {
@@ -145,7 +146,7 @@ output output::from_data(reader& source)
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk output::to_data() const
+data_chunk output::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
@@ -154,19 +155,19 @@ data_chunk output::to_data() const
     return data;
 }
 
-void output::to_data(std::ostream& stream) const
+void output::to_data(std::ostream& stream) const noexcept
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void output::to_data(writer& sink) const
+void output::to_data(writer& sink) const noexcept
 {
     sink.write_8_bytes_little_endian(value_);
     script_->to_data(sink, true);
 }
 
-size_t output::serialized_size() const
+size_t output::serialized_size() const noexcept
 {
     return sizeof(value_) + script_->serialized_size(true);
 }
@@ -174,22 +175,22 @@ size_t output::serialized_size() const
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool output::is_valid() const
+bool output::is_valid() const noexcept
 {
     return valid_;
 }
 
-uint64_t output::value() const
+uint64_t output::value() const noexcept
 {
     return value_;
 }
 
-const chain::script& output::script() const
+const chain::script& output::script() const noexcept
 {
     return *script_;
 }
 
-const chain::script::ptr output::script_ptr() const
+const chain::script::ptr output::script_ptr() const noexcept
 {
     return script_;
 }
@@ -197,7 +198,7 @@ const chain::script::ptr output::script_ptr() const
 // Methods.
 // ----------------------------------------------------------------------------
 
-bool output::committed_hash(hash_digest& out) const
+bool output::committed_hash(hash_digest& out) const noexcept
 {
     const auto& ops = script_->ops();
     if (!script::is_commitment_pattern(ops))
@@ -213,7 +214,7 @@ bool output::committed_hash(hash_digest& out) const
 static_assert(max_script_size < max_size_t / multisig_default_sigops / 
     heavy_sigops_factor, "output sigop overflow guard");
 
-size_t output::signature_operations(bool bip141) const
+size_t output::signature_operations(bool bip141) const noexcept
 {
     // Penalize quadratic signature operations (bip141).
     const auto factor = bip141 ? heavy_sigops_factor : one;
@@ -222,7 +223,7 @@ size_t output::signature_operations(bool bip141) const
     return script_->sigops(false) * factor;
 }
 
-bool output::is_dust(uint64_t minimum_value) const
+bool output::is_dust(uint64_t minimum_value) const noexcept
 {
     // If provably unspendable it does not expand the unspent output set. Dust
     // is all about prunability. Miners can be expected take the largest fee

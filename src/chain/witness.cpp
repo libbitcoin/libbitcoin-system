@@ -46,69 +46,69 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // Constructors.
 // ----------------------------------------------------------------------------
 
-witness::witness()
+witness::witness() noexcept
   : witness(chunk_ptrs{}, false)
 {
 }
 
-witness::witness(witness&& other)
+witness::witness(witness&& other) noexcept
   : witness(std::move(other.stack_), other.valid_)
 {
 }
 
-witness::witness(const witness& other)
+witness::witness(const witness& other) noexcept
   : witness(other.stack_, other.valid_)
 {
 }
 
-witness::witness(chunk_ptrs&& stack)
+witness::witness(chunk_ptrs&& stack) noexcept
   : witness(std::move(stack), true)
 {
 }
 
-witness::witness(const chunk_ptrs& stack)
+witness::witness(const chunk_ptrs& stack) noexcept
   : witness(stack, true)
 {
 }
 
-witness::witness(const data_slice& data, bool prefix)
+witness::witness(const data_slice& data, bool prefix) noexcept
   : witness(stream::in::copy(data), prefix)
 {
 }
 
-witness::witness(std::istream&& stream, bool prefix)
+witness::witness(std::istream&& stream, bool prefix) noexcept
   : witness(read::bytes::istream(stream), prefix)
 {
 }
 
-witness::witness(std::istream& stream, bool prefix)
+witness::witness(std::istream& stream, bool prefix) noexcept
   : witness(read::bytes::istream(stream), prefix)
 {
 }
 
-witness::witness(reader&& source, bool prefix)
+witness::witness(reader&& source, bool prefix) noexcept
   : witness(from_data(source, prefix))
 {
 }
 
-witness::witness(reader& source, bool prefix)
+witness::witness(reader& source, bool prefix) noexcept
   : witness(from_data(source, prefix))
 {
 }
 
-witness::witness(const std::string& mnemonic)
+witness::witness(const std::string& mnemonic) noexcept
   : witness(from_string(mnemonic))
 {
 }
 
 // protected
-witness::witness(chunk_ptrs&& stack, bool valid)
+witness::witness(chunk_ptrs&& stack, bool valid) noexcept
   : stack_(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
-witness::witness(const chunk_ptrs& stack, bool valid)
+witness::witness(const chunk_ptrs& stack, bool valid) noexcept
   : stack_(stack), valid_(valid)
 {
 }
@@ -116,27 +116,27 @@ witness::witness(const chunk_ptrs& stack, bool valid)
 // Operators.
 // ----------------------------------------------------------------------------
 
-witness& witness::operator=(witness&& other)
+witness& witness::operator=(witness&& other) noexcept
 {
     stack_ = std::move(other.stack_);
     valid_ = other.valid_;
     return *this;
 }
 
-witness& witness::operator=(const witness& other)
+witness& witness::operator=(const witness& other) noexcept
 {
     stack_ = other.stack_;
     valid_ = other.valid_;
     return *this;
 }
 
-bool witness::operator==(const witness& other) const
+bool witness::operator==(const witness& other) const noexcept
 {
     // TODO: after changing to vector(data_ptr) compare membership, not ptrs.
     return (stack_ == other.stack_);
 }
 
-bool witness::operator!=(const witness& other) const
+bool witness::operator!=(const witness& other) const noexcept
 {
     return !(*this == other);
 }
@@ -144,14 +144,14 @@ bool witness::operator!=(const witness& other) const
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-static data_chunk read_element(reader& source)
+static data_chunk read_element(reader& source) noexcept
 {
     // Each witness encoded as variable integer prefixed byte array (bip144).
     return source.read_bytes(source.read_size(max_block_weight));
 }
 
 // static/private
-witness witness::from_data(reader& source, bool prefix)
+witness witness::from_data(reader& source, bool prefix) noexcept
 {
     chunk_ptrs stack;
 
@@ -173,19 +173,19 @@ witness witness::from_data(reader& source, bool prefix)
     return { stack, source };
 }
 
-inline bool is_push_token(const std::string& token)
+inline bool is_push_token(const std::string& token) noexcept
 {
     return token.size() > one && token.front() == '[' && token.back() == ']';
 }
 
-inline std::string remove_token_delimiters(const std::string& token)
+inline std::string remove_token_delimiters(const std::string& token) noexcept
 {
     BC_ASSERT(token.size() > one);
     return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
 // static/private
-witness witness::from_string(const std::string& mnemonic)
+witness witness::from_string(const std::string& mnemonic) noexcept
 {
     // There is always one data element per non-empty string token.
     auto tokens = split(mnemonic);
@@ -215,7 +215,7 @@ witness witness::from_string(const std::string& mnemonic)
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk witness::to_data(bool prefix) const
+data_chunk witness::to_data(bool prefix) const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(prefix));
@@ -224,13 +224,13 @@ data_chunk witness::to_data(bool prefix) const
     return data;
 }
 
-void witness::to_data(std::ostream& stream, bool prefix) const
+void witness::to_data(std::ostream& stream, bool prefix) const noexcept
 {
     write::bytes::ostream out(stream);
     to_data(out, prefix);
 }
 
-void witness::to_data(writer& sink, bool prefix) const
+void witness::to_data(writer& sink, bool prefix) const noexcept
 {
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
@@ -244,7 +244,7 @@ void witness::to_data(writer& sink, bool prefix) const
     }
 }
 
-std::string witness::to_string() const
+std::string witness::to_string() const noexcept
 {
     if (!valid_)
         return "(?)";
@@ -260,20 +260,20 @@ std::string witness::to_string() const
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool witness::is_valid() const
+bool witness::is_valid() const noexcept
 {
     return valid_;
 }
 
-const chunk_ptrs& witness::stack() const
+const chunk_ptrs& witness::stack() const noexcept
 {
     return stack_;
 }
 
 // private
-size_t witness::serialized_size() const
+size_t witness::serialized_size() const noexcept
 {
-    const auto sum = [](size_t total, const chunk_ptr& element)
+    const auto sum = [](size_t total, const chunk_ptr& element) noexcept
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
         const auto size = element->size();
@@ -283,7 +283,7 @@ size_t witness::serialized_size() const
     return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
-size_t witness::serialized_size(bool prefix) const
+size_t witness::serialized_size(bool prefix) const noexcept
 {
     // Witness prefix is an element count, not a byte length (unlike script).
     return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
@@ -293,9 +293,9 @@ size_t witness::serialized_size(bool prefix) const
 // ----------------------------------------------------------------------------
 
 // static
-bool witness::is_push_size(const chunk_ptrs& stack)
+bool witness::is_push_size(const chunk_ptrs& stack) noexcept
 {
-    const auto push_size = [](const chunk_ptr& element)
+    const auto push_size = [](const chunk_ptr& element) noexcept
     {
         return element->size() <= max_push_data_size;
     };
@@ -305,14 +305,14 @@ bool witness::is_push_size(const chunk_ptrs& stack)
 
 // static
 // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-bool witness::is_reserved_pattern(const chunk_ptrs& stack)
+bool witness::is_reserved_pattern(const chunk_ptrs& stack) noexcept
 {
     return stack.size() == 1 &&
         stack[0]->size() == hash_size;
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operations to_pay_key_hash(data_chunk&& program)
+inline operations to_pay_key_hash(data_chunk&& program) noexcept
 {
     BC_ASSERT(program.size() == short_hash_size);
 
@@ -328,7 +328,7 @@ inline operations to_pay_key_hash(data_chunk&& program)
 
 // The return script is only useful only for sigop counting.
 bool witness::extract_sigop_script(script& out_script,
-    const script& program_script) const
+    const script& program_script) const noexcept
 {
     // Caller may recycle script parameter.
     out_script = {};
@@ -370,7 +370,7 @@ bool witness::extract_sigop_script(script& out_script,
 
 // Extract script and initial execution stack.
 bool witness::extract_script(script& out_script,
-    chunk_ptrs& out_stack, const script& program_script) const
+    chunk_ptrs& out_stack, const script& program_script) const noexcept
 {
     auto program = program_script.witness_program();
     out_stack = stack_;
