@@ -27,7 +27,6 @@
 
 #include <string.h>
 #include <stdint.h>
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 static uint64_t be64dec(const void* pp)
 {
@@ -173,7 +172,9 @@ void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH])
 {
     SHA512Pad(context);
     be64enc_vect(digest, context->state, SHA512_DIGEST_LENGTH);
-    zeroize((void*)context, sizeof *context);
+
+    /* This is unnecessary, as the context is not reusable. */
+    /* zeroize((void*)context, sizeof *context); */
 }
 
 /* Local */
@@ -295,8 +296,9 @@ void SHA512Transform(uint64_t state[SHA512_STATE_LENGTH],
         state[i] += S[i];
     }
 
-    zeroize((void*)W, sizeof W);
-    zeroize((void*)S, sizeof S);
-    zeroize((void*)&t0, sizeof t0);
-    zeroize((void*)&t1, sizeof t1);
+    /* This is unnecessary, as these are locals going out of scope. */
+    /* zeroize((void*)W, sizeof W); */
+    /* zeroize((void*)S, sizeof S); */
+    /* zeroize((void*)&t0, sizeof t0); */
+    /* zeroize((void*)&t1, sizeof t1); */
 }

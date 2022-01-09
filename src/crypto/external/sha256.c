@@ -27,7 +27,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 static uint32_t be32dec(const void* pp)
 {
@@ -163,7 +162,9 @@ void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256Pad(context);
     be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
-    zeroize((void*)context, sizeof *context);
+
+    /* This is unnecessary, as the context is not reusable. */
+    /* zeroize((void*)context, sizeof *context); */
 }
 
 /* Local */

@@ -31,7 +31,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 static inline void be32enc(void* pp, uint32_t x)
 {
@@ -60,30 +59,34 @@ void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
     HMACSHA256Init(&PShctx, passphrase, passphrase_length);
     HMACSHA256Update(&PShctx, salt, salt_length);
 
-    for (i = 0; i * 32 < dk_length; i++) {
+    for (i = 0; i * 32 < dk_length; i++)
+    {
         be32enc(ivec, (uint32_t)(i + 1));
         memcpy(&hctx, &PShctx, sizeof(HMACSHA256CTX));
         HMACSHA256Update(&hctx, ivec, 4);
         HMACSHA256Final(&hctx, U);
-
         memcpy(T, U, 32);
-        /* LCOV_EXCL_START */
-        for (j = 2; j <= c; j++) {
+
+        for (j = 2; j <= c; j++)
+        {
             HMACSHA256Init(&hctx, passphrase, passphrase_length);
             HMACSHA256Update(&hctx, U, 32);
             HMACSHA256Final(&hctx, U);
 
-            for (k = 0; k < 32; k++) {
+            for (k = 0; k < 32; k++)
+            {
                 T[k] ^= U[k];
             }
         }
-        /* LCOV_EXCL_STOP */
 
         clen = dk_length - i * 32;
-        if (clen > 32) {
+        if (clen > 32)
+        {
             clen = 32;
         }
         memcpy(&buf[i * 32], T, clen);
     }
-    zeroize(&PShctx, sizeof PShctx);
+
+    /* This is unnecessary, as the local is going out of scope. */
+    /* zeroize(&PShctx, sizeof PShctx); */
 }

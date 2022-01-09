@@ -48,7 +48,8 @@ void HMACSHA256Final(HMACSHA256CTX* context,
     SHA256Update(&context->octx, hash, HMACSHA256_DIGEST_LENGTH);
     SHA256Final(&context->octx, digest);
 
-    zeroize((void*)hash, sizeof hash);
+    /* This is unnecessary, as the context is not reusable. */
+    /* zeroize((void*)hash, sizeof hash); */
 }
 
 void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key, 
@@ -81,7 +82,9 @@ void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
         pad[i] ^= key[i];
 
     SHA256Update(&context->octx, pad, SHA256_BLOCK_LENGTH);
-    zeroize((void*)key_hash, sizeof key_hash);
+
+    /* This is unnecessary, as the local is going out of scope. */
+    /* zeroize((void*)key_hash, sizeof key_hash); */
 }
 
 void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,

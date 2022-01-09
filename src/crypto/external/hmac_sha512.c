@@ -28,7 +28,6 @@
 #include <stdint.h>
 #include <string.h>
 #include "../../../include/bitcoin/system/crypto/external/sha512.h"
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
 void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
     size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH])
@@ -48,7 +47,8 @@ void HMACSHA512Final(HMACSHA512CTX* context,
     SHA512Update(&context->octx, hash, HMACSHA512_DIGEST_LENGTH);
     SHA512Final(&context->octx, digest);
 
-    zeroize((void*)hash, sizeof hash);
+    /* This is unnecessary, as the context is not reusable. */
+    /* zeroize((void*)hash, sizeof hash); */
 }
 
 void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key, 
@@ -70,7 +70,7 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
     SHA512Init(&context->ictx);
     fill(pad, SHA512_BLOCK_LENGTH, 0x36);
 
-    for (i = 0; i < key_length; i++) 
+    for (i = 0; i < key_length; i++)
         pad[i] ^= key[i];
 
     SHA512Update(&context->ictx, pad, SHA512_BLOCK_LENGTH);
@@ -81,7 +81,9 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
         pad[i] ^= key[i];
 
     SHA512Update(&context->octx, pad, SHA512_BLOCK_LENGTH);
-    zeroize((void*)key_hash, sizeof key_hash);
+
+    /* This is unnecessary, as the local is going out of scope. */
+    /* zeroize((void*)key_hash, sizeof key_hash); */
 }
 
 void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
