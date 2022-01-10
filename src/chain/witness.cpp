@@ -409,10 +409,11 @@ bool witness::extract_script(script& out_script,
 
                     // Input script is popped from the stack (bip141).
                     out_script = { *pop(out_stack), false };
+                    const auto hash = out_script.hash();
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),
-                        out_script.hash().begin());
+                        hash.begin());
                 }
 
                 // The witness extraction is invalid for v0.
