@@ -33,22 +33,22 @@ namespace system {
 class BC_API settings
 {
 public:
-    settings();
-    settings(chain::selection context);
+    settings() noexcept;
+    settings(chain::selection context) noexcept;
 
     // Utilities.
     // ------------------------------------------------------------------------
-    uint64_t bitcoin_to_satoshi(uint64_t value) const;
+    uint64_t bitcoin_to_satoshi(uint64_t value) const noexcept;
 
     // Computed properties.
     // -------------------------------------------------------------------------
 
-    uint64_t max_money() const;
-    uint64_t initial_subsidy() const;
-    uint32_t minimum_timespan() const;
-    uint32_t maximum_timespan() const;
-    size_t retargeting_interval() const;
-    uint256_t work_limit() const;
+    uint64_t max_money() const noexcept;
+    uint64_t initial_subsidy() const noexcept;
+    uint32_t minimum_timespan() const noexcept;
+    uint32_t maximum_timespan() const noexcept;
+    size_t retargeting_interval() const noexcept;
+    uint256_t work_limit() const noexcept;
 
     // Consensus settings.
     // -------------------------------------------------------------------------

@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 
 // Common default values (no settings context).
-settings::settings()
+settings::settings() noexcept
   : retargeting_factor(4),
     retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
     block_spacing_seconds(10 * 60),
@@ -47,7 +47,7 @@ settings::settings()
 {
 }
 
-settings::settings(chain::selection context)
+settings::settings(chain::selection context) noexcept
   : settings()
 {
     switch (context)
@@ -248,7 +248,7 @@ settings::settings(chain::selection context)
 // TODO: optimize to prevent recomputation.
 
 // The true maximum amount of money as of bip42.
-uint64_t settings::max_money() const
+uint64_t settings::max_money() const noexcept
 {
     //*************************************************************************
     // CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
@@ -269,39 +269,39 @@ uint64_t settings::max_money() const
 }
 
 // Utility.
-uint64_t settings::bitcoin_to_satoshi(uint64_t value) const
+uint64_t settings::bitcoin_to_satoshi(uint64_t value) const noexcept
 {
     return safe_multiply(value, chain::satoshi_per_bitcoin);
 }
 
 // The initial block subsidy in satoshis.
-uint64_t settings::initial_subsidy() const
+uint64_t settings::initial_subsidy() const noexcept
 {
     return bitcoin_to_satoshi(initial_subsidy_bitcoin);
 }
 
 // The lower bound for the retargeting timespan.
-uint32_t settings::minimum_timespan() const
+uint32_t settings::minimum_timespan() const noexcept
 {
     return chain::chain_state::minimum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
 
 // The upper bound for the retargeting timespan.
-uint32_t settings::maximum_timespan() const
+uint32_t settings::maximum_timespan() const noexcept
 {
     return chain::chain_state::maximum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
 
 // The target number of blocks for 2 weeks of work (2016 blocks).
-size_t settings::retargeting_interval() const
+size_t settings::retargeting_interval() const noexcept
 {
     return chain::chain_state::retargeting_interval(retargeting_interval_seconds,
         block_spacing_seconds);
 }
 
-uint256_t settings::work_limit() const
+uint256_t settings::work_limit() const noexcept
 {
     return { chain::compact(proof_of_work_limit) };
 }
