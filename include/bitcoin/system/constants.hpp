@@ -164,7 +164,7 @@ constexpr uint8_t varint_four_bytes = 0xfe;
 constexpr uint8_t varint_eight_bytes = 0xff;
 
 /// Determine the bitcoin variable-serialized size of a given value.
-constexpr size_t variable_size(uint64_t value)
+constexpr size_t variable_size(uint64_t value) noexcept
 {
     // C++11: single return required for constexpr.
     return (value < varint_two_bytes) ? sizeof(uint8_t) :

@@ -42,37 +42,37 @@ class BC_API number
 {
 public:
     /// Construct with zero value.
-    number();
+    number() noexcept;
 
     /// Construct with specified value.
-    explicit number(int64_t value);
+    explicit number(int64_t value) noexcept;
 
     /// Replace the value derived from a little-endian byte vector.
-    bool set_data(const data_chunk& data, size_t max_size);
+    bool set_data(const data_chunk& data, size_t max_size) noexcept;
 
     // Properties
     // ------------------------------------------------------------------------
 
     /// Return the value as a byte vector with LSB first ordering.
-    data_chunk data() const;
+    data_chunk data() const noexcept;
 
     /// Return the value bounded by the limits of int32.
-    int32_t int32() const;
+    int32_t int32() const noexcept;
 
     /// Return the unbounded value.
-    int64_t int64() const;
+    int64_t int64() const noexcept;
 
     // Stack Helpers
     // ------------------------------------------------------------------------
 
     /// Return value as stack boolean (nonzero is true).
-    bool is_true() const;
+    bool is_true() const noexcept;
 
     /// Return value as stack boolean (zero is false).
-    bool is_false() const;
+    bool is_false() const noexcept;
 
     /// Return true if the value is negative.
-    bool is_negative() const;
+    bool is_negative() const noexcept;
 
     // Operators
     // ------------------------------------------------------------------------
@@ -82,31 +82,31 @@ public:
     // all operators, specifically [-, +, +=, -=].
     //*************************************************************************
 
-    bool operator>(int64_t value) const;
-    bool operator<(int64_t value) const;
-    bool operator>=(int64_t value) const;
-    bool operator<=(int64_t value) const;
-    bool operator==(int64_t value) const;
-    bool operator!=(int64_t value) const;
+    bool operator>(int64_t value) const noexcept;
+    bool operator<(int64_t value) const noexcept;
+    bool operator>=(int64_t value) const noexcept;
+    bool operator<=(int64_t value) const noexcept;
+    bool operator==(int64_t value) const noexcept;
+    bool operator!=(int64_t value) const noexcept;
 
-    bool operator>(const number& other) const;
-    bool operator<(const number& other) const;
-    bool operator>=(const number& other) const;
-    bool operator<=(const number& other) const;
-    bool operator==(const number& other) const;
-    bool operator!=(const number& other) const;
+    bool operator>(const number& other) const noexcept;
+    bool operator<(const number& other) const noexcept;
+    bool operator>=(const number& other) const noexcept;
+    bool operator<=(const number& other) const noexcept;
+    bool operator==(const number& other) const noexcept;
+    bool operator!=(const number& other) const noexcept;
 
-    number operator+() const;
-    number operator-() const;
-    number operator+(int64_t value) const;
-    number operator-(int64_t value) const;
-    number operator+(const number& other) const;
-    number operator-(const number& other) const;
+    number operator+() const noexcept;
+    number operator-() const noexcept;
+    number operator+(int64_t value) const noexcept;
+    number operator-(int64_t value) const noexcept;
+    number operator+(const number& other) const noexcept;
+    number operator-(const number& other) const noexcept;
 
-    number& operator+=(int64_t value);
-    number& operator-=(int64_t value);
-    number& operator+=(const number& other);
-    number& operator-=(const number& other);
+    number& operator+=(int64_t value) noexcept;
+    number& operator-=(int64_t value) noexcept;
+    number& operator+=(const number& other) noexcept;
+    number& operator-=(const number& other) noexcept;
 
 private:
     int64_t value_;

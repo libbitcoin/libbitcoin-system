@@ -43,7 +43,7 @@ struct is_error_condition_enum<cat##_condition_t> \
 }; \
 template<> struct hash<cat##_t> \
 { \
-    size_t operator()(const cat##_t& value) const \
+    size_t operator()(const cat##_t& value) const noexcept \
     { \
         return std::hash<uint8_t>()(static_cast<uint8_t>(value)); \
     } \

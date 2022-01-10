@@ -62,13 +62,13 @@ constexpr Integer twos_complement(Integer value) noexcept
 // bit
 
 template <typename Value, if_integer<Value>>
-constexpr Value bit_all()
+constexpr Value bit_all() noexcept
 {
     return ones_complement<Value>(0);
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value bit_hi()
+constexpr Value bit_hi() noexcept
 {
     // sub1 for size-to-index translation.
     // a << b is undefined for negative a, but shift into a negative is valid.
@@ -79,13 +79,13 @@ constexpr Value bit_hi()
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value bit_lo()
+constexpr Value bit_lo() noexcept
 {
     return to_int<Value>(true) << zero;
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value bit_left(size_t offset)
+constexpr Value bit_left(size_t offset) noexcept
 {
     // a >> b is implementation-dependent for negative a:
     // "or negative a, the value of a >> b is implementation-defined (in most
@@ -97,7 +97,7 @@ constexpr Value bit_left(size_t offset)
 
 // undefined if offset >= width<Value>()
 template <typename Value, if_integer<Value>>
-constexpr Value bit_right(size_t offset)
+constexpr Value bit_right(size_t offset) noexcept
 {
     // a << b is undefined for negative a, but shift into a negative is valid:
     // "For signed and non-negative a, if a**b is representable in the unsigned
@@ -110,13 +110,13 @@ constexpr Value bit_right(size_t offset)
 // get
 
 template <typename Value, if_integer<Value>>
-constexpr bool get_right(Value value, size_t offset)
+constexpr bool get_right(Value value, size_t offset) noexcept
 {
     return to_bool(value & bit_right<Value>(offset));
 }
 
 template <typename Value, if_integer<Value>>
-constexpr bool get_left(Value value, size_t offset)
+constexpr bool get_left(Value value, size_t offset) noexcept
 {
     return to_bool(value & bit_left<Value>(offset));
 }
@@ -124,7 +124,8 @@ constexpr bool get_left(Value value, size_t offset)
 // set
 
 template <typename Value, if_integer<Value>>
-constexpr Value set_left(const Value& target, size_t offset, bool state)
+constexpr Value set_left(const Value& target, size_t offset,
+    bool state) noexcept
 {
     // C++14: local variables allowed in constexpr.
     return state ? target | bit_left<Value>(offset) :
@@ -133,7 +134,8 @@ constexpr Value set_left(const Value& target, size_t offset, bool state)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_integer<Value>>
-inline void set_left_into(Value& target, size_t offset, bool state)
+inline void set_left_into(Value& target, size_t offset,
+    bool state) noexcept
 {
     // C++14: local variables allowed in constexpr.
     state ? target |= bit_left<Value>(offset) :
@@ -141,7 +143,8 @@ inline void set_left_into(Value& target, size_t offset, bool state)
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value set_right(const Value& target, size_t offset, bool state)
+constexpr Value set_right(const Value& target, size_t offset,
+    bool state) noexcept
 {
     // C++14: local variables allowed in constexpr.
     return state ? target | bit_right<Value>(offset) :
@@ -150,7 +153,8 @@ constexpr Value set_right(const Value& target, size_t offset, bool state)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_integer<Value>>
-inline void set_right_into(Value& target, size_t offset, bool state)
+inline void set_right_into(Value& target, size_t offset,
+    bool state) noexcept
 {
     // C++14: local variables allowed in constexpr.
     state ? target |= bit_right<Value>(offset) :
@@ -165,39 +169,39 @@ inline void set_right_into(Value& target, size_t offset, bool state)
 // mask
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_left(size_t bits)
+constexpr Value mask_left(size_t bits) noexcept
 {
     return bit_all<Value>() >> bits;
 }
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_left(const Value& value, size_t bits)
+constexpr Value mask_left(const Value& value, size_t bits) noexcept
 {
     return value & mask_left<Value>(bits);
 }
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void mask_left_into(Value& value, size_t bits)
+inline void mask_left_into(Value& value, size_t bits) noexcept
 {
     value &= mask_left<Value>(bits);
 }
 
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_right(size_t bits)
+constexpr Value mask_right(size_t bits) noexcept
 {
     return bit_all<Value>() << bits;
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value mask_right(const Value& value, size_t bits)
+constexpr Value mask_right(const Value& value, size_t bits) noexcept
 {
     return value & mask_right<Value>(bits);
 }
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void mask_right_into(Value& value, size_t bits)
+inline void mask_right_into(Value& value, size_t bits) noexcept
 {
     value &= mask_right<Value>(bits);
 }
@@ -211,39 +215,39 @@ inline void mask_right_into(Value& value, size_t bits)
 // This is an implementation limitation and could otherwise be supported.
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value unmask_left(size_t bits)
+constexpr Value unmask_left(size_t bits) noexcept
 {
     return ones_complement(bit_all<Value>() >> bits);
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value unmask_left(const Value& value, size_t bits)
+constexpr Value unmask_left(const Value& value, size_t bits) noexcept
 {
     return value | unmask_left<Value>(bits);
 }
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void unmask_left_into(Value& value, size_t bits)
+inline void unmask_left_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_left<Value>(bits);
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value unmask_right(size_t bits)
+constexpr Value unmask_right(size_t bits) noexcept
 {
     return ones_complement(bit_all<Value>() << bits);
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value unmask_right(const Value& value, size_t bits)
+constexpr Value unmask_right(const Value& value, size_t bits) noexcept
 {
     return value | unmask_right<Value>(bits);
 }
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void unmask_right_into(Value& value, size_t bits)
+inline void unmask_right_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_right<Value>(bits);
 }
@@ -254,7 +258,7 @@ inline void unmask_right_into(Value& value, size_t bits)
 // C++20: std::rotl/rotr can replace rotate_left/rotate_right.
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value rotate_left(const Value& value, size_t shift)
+constexpr Value rotate_left(const Value& value, size_t shift) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -264,7 +268,7 @@ constexpr Value rotate_left(const Value& value, size_t shift)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void rotate_left_into(Value& value, size_t shift)
+inline void rotate_left_into(Value& value, size_t shift) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -273,7 +277,7 @@ inline void rotate_left_into(Value& value, size_t shift)
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value rotate_right(const Value& value, size_t shift)
+constexpr Value rotate_right(const Value& value, size_t shift) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -283,7 +287,7 @@ constexpr Value rotate_right(const Value& value, size_t shift)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void rotate_right_into(Value& value, size_t shift)
+inline void rotate_right_into(Value& value, size_t shift) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -302,7 +306,8 @@ inline void rotate_right_into(Value& value, size_t shift)
 // These are both default behaviors of different compilers.
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
+constexpr Value shift_left(const Value& value, size_t shift,
+    bool overflow) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -312,7 +317,8 @@ constexpr Value shift_left(const Value& value, size_t shift, bool overflow)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void shift_left_into(Value& value, size_t shift, bool overflow)
+inline void shift_left_into(Value& value, size_t shift,
+    bool overflow) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -321,7 +327,8 @@ inline void shift_left_into(Value& value, size_t shift, bool overflow)
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-constexpr Value shift_right(const Value& value, size_t shift, bool overflow)
+constexpr Value shift_right(const Value& value, size_t shift,
+    bool overflow) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();
@@ -331,7 +338,8 @@ constexpr Value shift_right(const Value& value, size_t shift, bool overflow)
 
 // constexpr reference assignment not allowed.
 template <typename Value, if_unsigned_integer<Value>>
-inline void shift_right_into(Value& value, size_t shift, bool overflow)
+inline void shift_right_into(Value& value, size_t shift,
+    bool overflow) noexcept
 {
     // C++14: local variables allowed in constexpr.
     ////constexpr auto bits = width<Value>();

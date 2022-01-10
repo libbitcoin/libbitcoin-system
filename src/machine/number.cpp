@@ -32,12 +32,12 @@ namespace machine {
 
 using namespace system::chain;
 
-number::number()
+number::number() noexcept
   : number(numbers::positive_0)
 {
 }
 
-number::number(int64_t value)
+number::number(int64_t value) noexcept
   : value_(value)
 {
 }
@@ -46,7 +46,7 @@ number::number(int64_t value)
 // ----------------------------------------------------------------------------
 
 // The data is interpreted as little-endian.
-bool number::set_data(const data_chunk& data, size_t max_size)
+bool number::set_data(const data_chunk& data, size_t max_size) noexcept
 {
     // Bitcoin defined max script number sizes are 4 and 5 bytes.
     BC_ASSERT_MSG(max_size < sizeof(value_), "invalid number size");
@@ -71,7 +71,7 @@ bool number::set_data(const data_chunk& data, size_t max_size)
 }
 
 // The result is little-endian, with negative sign bit.
-data_chunk number::data() const
+data_chunk number::data() const noexcept
 {
     if (is_false())
         return {};
@@ -95,12 +95,12 @@ data_chunk number::data() const
     return data;
 }
 
-int32_t number::int32() const
+int32_t number::int32() const noexcept
 {
     return limit<int32_t>(value_);
 }
 
-int64_t number::int64() const
+int64_t number::int64() const noexcept
 {
     return value_;
 }
@@ -108,17 +108,17 @@ int64_t number::int64() const
 // Stack Helpers
 // ----------------------------------------------------------------------------
 
-bool number::is_true() const
+bool number::is_true() const noexcept
 {
     return !is_zero(value_);
 }
 
-bool number::is_false() const
+bool number::is_false() const noexcept
 {
     return is_zero(value_);
 }
 
-bool number::is_negative() const
+bool number::is_negative() const noexcept
 {
     return system::is_negative(value_);
 }
@@ -126,117 +126,117 @@ bool number::is_negative() const
 // Operators
 // ----------------------------------------------------------------------------
 
-bool number::operator>(int64_t value) const
+bool number::operator>(int64_t value) const noexcept
 {
     return value_ > value;
 }
 
-bool number::operator<(int64_t value) const
+bool number::operator<(int64_t value) const noexcept
 {
     return value_ < value;
 }
 
-bool number::operator>=(int64_t value) const
+bool number::operator>=(int64_t value) const noexcept
 {
     return value_ >= value;
 }
 
-bool number::operator<=(int64_t value) const
+bool number::operator<=(int64_t value) const noexcept
 {
     return value_ <= value;
 }
 
-bool number::operator==(int64_t value) const
+bool number::operator==(int64_t value) const noexcept
 {
     return value_ == value;
 }
 
-bool number::operator!=(int64_t value) const
+bool number::operator!=(int64_t value) const noexcept
 {
     return value_ != value;
 }
 
-bool number::operator>(const number& other) const
+bool number::operator>(const number& other) const noexcept
 {
     return operator>(other.value_);
 }
 
-bool number::operator<(const number& other) const
+bool number::operator<(const number& other) const noexcept
 {
     return operator<(other.value_);
 }
 
-bool number::operator>=(const number& other) const
+bool number::operator>=(const number& other) const noexcept
 {
     return operator>=(other.value_);
 }
 
-bool number::operator<=(const number& other) const
+bool number::operator<=(const number& other) const noexcept
 {
     return operator<=(other.value_);
 }
 
-bool number::operator==(const number& other) const
+bool number::operator==(const number& other) const noexcept
 {
     return operator==(other.value_);
 }
 
-bool number::operator!=(const number& other) const
+bool number::operator!=(const number& other) const noexcept
 {
     return operator!=(other.value_);
 }
 
-number number::operator+(int64_t value) const
+number number::operator+(int64_t value) const noexcept
 {
     BC_ASSERT(!overflows(value_, value));
     return number(value_ + value);
 }
 
-number number::operator-(int64_t value) const
+number number::operator-(int64_t value) const noexcept
 {
     BC_ASSERT(!underflows(value_, value));
     return number(value_ - value);
 }
 
-number number::operator+(const number& other) const
+number number::operator+(const number& other) const noexcept
 {
     return operator+(other.value_);
 }
 
-number number::operator-(const number& other) const
+number number::operator-(const number& other) const noexcept
 {
     return operator-(other.value_);
 }
 
-number number::operator+() const
+number number::operator+() const noexcept
 {
     return *this;
 }
 
-number number::operator-() const
+number number::operator-() const noexcept
 {
     BC_ASSERT_MSG(value_ != min_int64, "out of range");
     return number(-value_);
 }
 
-number& number::operator+=(const number& other)
+number& number::operator+=(const number& other) noexcept
 {
     return operator+=(other.value_);
 }
 
-number& number::operator-=(const number& other)
+number& number::operator-=(const number& other) noexcept
 {
     return operator-=(other.value_);
 }
 
-number& number::operator+=(int64_t value)
+number& number::operator+=(int64_t value) noexcept
 {
     BC_ASSERT(!overflows(value_, value));
     value_ += value;
     return *this;
 }
 
-number& number::operator-=(int64_t value)
+number& number::operator-=(int64_t value) noexcept
 {
     BC_ASSERT(!underflows(value_, value));
     value_ -= value;

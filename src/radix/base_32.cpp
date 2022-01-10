@@ -58,7 +58,7 @@ constexpr uint8_t decode[] =
 
 // encode
 
-std::string encode_base32(const base32_chunk& data)
+std::string encode_base32(const base32_chunk& data) noexcept
 {
     std::string out;
     out.reserve(data.size());
@@ -70,14 +70,14 @@ std::string encode_base32(const base32_chunk& data)
     return out;
 }
 
-std::string encode_base32(const data_chunk& data)
+std::string encode_base32(const data_chunk& data) noexcept
 {
     return encode_base32(base32_unpack(data));
 }
 
 // decode
 
-bool decode_base32(base32_chunk& out, const std::string& in)
+bool decode_base32(base32_chunk& out, const std::string& in) noexcept
 {
     if (has_mixed_ascii_case(in))
         return false;
@@ -99,7 +99,7 @@ bool decode_base32(base32_chunk& out, const std::string& in)
     return true;
 }
 
-bool decode_base32(data_chunk& out, const std::string& in)
+bool decode_base32(data_chunk& out, const std::string& in) noexcept
 {
     base32_chunk expanded;
     if (!decode_base32(expanded, in))
@@ -111,7 +111,7 @@ bool decode_base32(data_chunk& out, const std::string& in)
 
 // pack/unpack
 
-data_chunk base32_pack(const base32_chunk& unpacked)
+data_chunk base32_pack(const base32_chunk& unpacked) noexcept
 {
     data_chunk packed;
     write::bits::data sink(packed);
@@ -139,7 +139,7 @@ data_chunk base32_pack(const base32_chunk& unpacked)
     return packed;
 }
 
-base32_chunk base32_unpack(const data_chunk& packed)
+base32_chunk base32_unpack(const data_chunk& packed) noexcept
 {
     base32_chunk unpacked;
     read::bits::copy source(packed);

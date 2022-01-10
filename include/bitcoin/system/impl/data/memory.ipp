@@ -30,7 +30,7 @@ namespace system {
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    std::vector<Type>&& values)
+    std::vector<Type>&& values) noexcept
 {
     auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
         values.size());
@@ -47,7 +47,7 @@ std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
 /// Create shared pointer to vector of const shared ptr from the copied vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    const std::vector<Type>& values)
+    const std::vector<Type>& values) noexcept
 {
     auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
         values.size());

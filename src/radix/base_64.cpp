@@ -41,7 +41,7 @@ const static char pad = '=';
 const static char table[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-std::string encode_base64(const data_slice& unencoded)
+std::string encode_base64(const data_slice& unencoded) noexcept
 {
     std::string encoded;
     const auto size = unencoded.size();
@@ -88,7 +88,7 @@ std::string encode_base64(const data_slice& unencoded)
     return encoded;
 }
 
-bool decode_base64(data_chunk& out, const std::string& in)
+bool decode_base64(data_chunk& out, const std::string& in) noexcept
 {
     const static uint32_t mask = 0x000000ff;
 

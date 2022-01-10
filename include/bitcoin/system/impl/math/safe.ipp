@@ -32,7 +32,7 @@ namespace system {
 
 // TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_multiply(Integer left, Integer right)
+Integer safe_multiply(Integer left, Integer right) noexcept(false)
 {
     if (is_zero(left) || is_zero(right))
         return 0;
@@ -45,7 +45,7 @@ Integer safe_multiply(Integer left, Integer right)
 
 // TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_add(Integer left, Integer right)
+Integer safe_add(Integer left, Integer right) noexcept(false)
 {
     if (left > (std::numeric_limits<Integer>::max() - right))
         throw overflow_exception("safe addition overflow");
@@ -55,7 +55,7 @@ Integer safe_add(Integer left, Integer right)
 
 // TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_subtract(Integer left, Integer right)
+Integer safe_subtract(Integer left, Integer right) noexcept(false)
 {
     if (left < (std::numeric_limits<Integer>::min() + right))
         throw underflow_exception("safe subtraction underflow");
@@ -65,7 +65,7 @@ Integer safe_subtract(Integer left, Integer right)
 
 // TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
-void safe_increment(Integer& value)
+void safe_increment(Integer& value) noexcept(false)
 {
     value = safe_add(value, one);
 }
@@ -78,7 +78,7 @@ void safe_decrement(Integer& value)
 }
 
 template <typename To, typename From, if_integer<To>, if_integer<From>>
-To safe_cast(From value)
+To safe_cast(From value) noexcept(false)
 {
     if (is_lesser(value, std::numeric_limits<To>::min()))
         throw range_exception("safe cast below minimum range");

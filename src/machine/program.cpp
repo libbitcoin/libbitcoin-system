@@ -44,7 +44,7 @@ static const transaction default_transaction{};
 // Constructors.
 // ----------------------------------------------------------------------------
 
-program::program()
+program::program() noexcept
   : script_(to_shared<script>()),
     transaction_(default_transaction),
     input_index_(0),
@@ -57,7 +57,7 @@ program::program()
 {
 }
 
-program::program(const script::ptr& script)
+program::program(const script::ptr& script) noexcept
   : script_(script),
     transaction_(default_transaction),
     input_index_(0),
@@ -71,7 +71,7 @@ program::program(const script::ptr& script)
 }
 
 program::program(const script::ptr& script, const chain::transaction& tx,
-    uint32_t index, uint32_t forks)
+    uint32_t index, uint32_t forks) noexcept
   : script_(script),
     transaction_(tx),
     input_index_(index),
@@ -89,7 +89,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
 // Condition, alternate, jump and operation_count are not copied.
 program::program(const script::ptr& script, const chain::transaction& tx,
     uint32_t index, uint32_t forks, chunk_ptrs&& stack, uint64_t value,
-    script_version version)
+    script_version version) noexcept
   : script_(script),
     transaction_(tx),
     input_index_(index),
@@ -107,7 +107,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
 
 
 // Condition, alternate, jump and operation_count are not copied.
-program::program(const script::ptr& script, const program& other)
+program::program(const script::ptr& script, const program& other) noexcept
   : script_(script),
     transaction_(other.transaction_),
     input_index_(other.input_index_),
@@ -122,7 +122,7 @@ program::program(const script::ptr& script, const program& other)
 }
 
 // Condition, alternate, jump and operation_count are not moved.
-program::program(const script::ptr& script, program&& other, bool)
+program::program(const script::ptr& script, program&& other, bool) noexcept
   : script_(script),
     transaction_(other.transaction_),
     input_index_(other.input_index_),
@@ -140,7 +140,7 @@ program::program(const script::ptr& script, program&& other, bool)
 // ----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
-bool program::is_invalid() const
+bool program::is_invalid() const noexcept
 {
     const auto bip141 = is_enabled(forks::bip141_rule);
     ////const auto nops_rule = is_enabled(forks::nops_rule);
@@ -152,7 +152,7 @@ bool program::is_invalid() const
         (bip141 && !chain::witness::is_push_size(primary_));
 }
 
-bool program::is_enabled(chain::forks rule) const
+bool program::is_enabled(chain::forks rule) const noexcept
 {
     return to_bool(forks() & rule);
 }
@@ -160,30 +160,30 @@ bool program::is_enabled(chain::forks rule) const
 // Constant registers.
 // ----------------------------------------------------------------------------
 
-uint32_t program::forks() const
+uint32_t program::forks() const noexcept
 {
     return forks_;
 }
 
-uint64_t program::value() const
+uint64_t program::value() const noexcept
 {
     return value_;
 }
 
 // This must be guarded (intended for interpreter internal use).
-const input& program::input() const
+const input& program::input() const noexcept
 {
     // This is guarded by is_invalid().
     BC_ASSERT(input_index_ < transaction().inputs()->size());
     return *(*transaction_.inputs())[input_index_];
 }
 
-const chain::transaction& program::transaction() const
+const chain::transaction& program::transaction() const noexcept
 {
     return transaction_;
 }
 
-script_version program::version() const
+script_version program::version() const noexcept
 {
     return version_;
 }
@@ -191,17 +191,17 @@ script_version program::version() const
 // Program registers.
 // ----------------------------------------------------------------------------
 
-program::op_iterator program::begin() const
+program::op_iterator program::begin() const noexcept
 {
     return script_->ops().begin();
 }
 
-program::op_iterator program::jump() const
+program::op_iterator program::jump() const noexcept
 {
     return jump_;
 }
 
-program::op_iterator program::end() const
+program::op_iterator program::end() const noexcept
 {
     return script_->ops().end();
 }
@@ -209,7 +209,7 @@ program::op_iterator program::end() const
 // Instructions.
 // ----------------------------------------------------------------------------
 
-inline bool operation_overflow(size_t count)
+inline bool operation_overflow(size_t count) noexcept
 {
     // ************************************************************************
     // CONSENSUS:
@@ -222,7 +222,7 @@ inline bool operation_overflow(size_t count)
 }
 
 // This is guarded by script size.
-bool program::increment_op_count(const operation& op)
+bool program::increment_op_count(const operation& op) noexcept
 {
     // Addition is safe due to script size constraint.
     BC_ASSERT(max_size_t - one >= operation_count_);
@@ -234,7 +234,7 @@ bool program::increment_op_count(const operation& op)
 }
 
 // This is guarded by script size.
-bool program::increment_op_count(int32_t public_keys)
+bool program::increment_op_count(int32_t public_keys) noexcept
 {
     static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
 
@@ -249,7 +249,7 @@ bool program::increment_op_count(int32_t public_keys)
     return !operation_overflow(operation_count_);
 }
 
-bool program::register_jump(const operation& op)
+bool program::register_jump(const operation& op) noexcept
 {
     if (script_->ops().empty())
         return false;
@@ -275,29 +275,29 @@ bool program::register_jump(const operation& op)
 // ----------------------------------------------------------------------------
 
 // push
-void program::push(bool value)
+void program::push(bool value) noexcept
 {
     push_move(value ? value_type{ numbers::positive_1 } : value_type{});
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void program::push_move(value_type&& item)
+void program::push_move(value_type&& item) noexcept
 {
     push_ref(to_shared<value_type>(std::move(item)));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void program::push_copy(const value_type& item)
+void program::push_copy(const value_type& item) noexcept
 {
     push_ref(to_shared<value_type>(item));
 }
 
-void program::push_ref(ptr_type&& item)
+void program::push_ref(ptr_type&& item) noexcept
 {
     primary_.push_back(std::move(item));
 }
 
-void program::push_ref(const ptr_type& item)
+void program::push_ref(const ptr_type& item) noexcept
 {
     primary_.push_back(item);
 }
@@ -306,13 +306,13 @@ void program::push_ref(const ptr_type& item)
 // ----------------------------------------------------------------------------
 
 // This must be guarded.
-program::value_type program::pop()
+program::value_type program::pop() noexcept
 {
     return *pop_ref();
 }
 
 // This must be guarded.
-program::ptr_type program::pop_ref()
+program::ptr_type program::pop_ref() noexcept
 {
     BC_ASSERT(!empty());
     const auto value = primary_.back();
@@ -320,7 +320,7 @@ program::ptr_type program::pop_ref()
     return value;
 }
 
-bool program::pop(int32_t& out_value)
+bool program::pop(int32_t& out_value) noexcept
 {
     number value;
     if (!pop(value))
@@ -330,25 +330,25 @@ bool program::pop(int32_t& out_value)
     return true;
 }
 
-bool program::pop(number& out_number, size_t maxiumum_size)
+bool program::pop(number& out_number, size_t maxiumum_size) noexcept
 {
     return !empty() && out_number.set_data(*pop_ref(), maxiumum_size);
 }
 
-bool program::pop_binary(number& first, number& second)
+bool program::pop_binary(number& first, number& second) noexcept
 {
     // The right hand side number is at the top of the stack.
     return pop(first) && pop(second);
 }
 
-bool program::pop_ternary(number& first, number& second, number& third)
+bool program::pop_ternary(number& first, number& second, number& third) noexcept
 {
     // The upper bound is at stack top, lower bound next, value next.
     return pop(first) && pop(second) && pop(third);
 }
 
 // Determines if popped value is valid post-pop stack index and returns index.
-bool program::pop_position(stack_iterator& out_position)
+bool program::pop_position(stack_iterator& out_position) noexcept
 {
     int32_t signed_index;
     if (!pop(signed_index))
@@ -369,7 +369,7 @@ bool program::pop_position(stack_iterator& out_position)
 }
 
 // pop1/pop2/.../pop[count]
-bool program::pop(chunk_ptrs& section, int32_t signed_count)
+bool program::pop(chunk_ptrs& section, int32_t signed_count) noexcept
 {
     if (is_negative(signed_count))
         return false;
@@ -390,13 +390,13 @@ bool program::pop(chunk_ptrs& section, int32_t signed_count)
 // ----------------------------------------------------------------------------
 
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
-void program::duplicate(size_t index)
+void program::duplicate(size_t index) noexcept
 {
     push_ref(item(index));
 }
 
 // pop1/pop2/push1/push2
-void program::swap(size_t left, size_t right)
+void program::swap(size_t left, size_t right) noexcept
 {
     // position(index) is const, but must have non-const iterators here.
     std::swap(
@@ -405,13 +405,14 @@ void program::swap(size_t left, size_t right)
 }
 
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
-void program::erase(const stack_iterator& position)
+void program::erase(const stack_iterator& position) noexcept
 {
     primary_.erase(position);
 }
 
 // pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
-void program::erase(const stack_iterator& first, const stack_iterator& last)
+void program::erase(const stack_iterator& first,
+    const stack_iterator& last) noexcept
 {
     primary_.erase(first, last);
 }
@@ -427,19 +428,19 @@ void program::erase(const stack_iterator& first, const stack_iterator& last)
 // [00 80 00 00 00] : true
 
 // private
-bool program::stack_to_bool(bool clean) const
+bool program::stack_to_bool(bool clean) const noexcept
 {
     const auto& top = primary_.back();
 
     if (top->empty() || (clean && primary_.size() != one))
         return false;
 
-    auto not_zero = [](uint8_t value)
+    auto not_zero = [](uint8_t value) noexcept
     {
         return value != numbers::positive_0;
     };
 
-    auto non_zero = [](uint8_t value) 
+    auto non_zero = [](uint8_t value)  noexcept
     {
         return (value & ~numbers::negative_sign) != numbers::positive_0;
     };
@@ -448,48 +449,48 @@ bool program::stack_to_bool(bool clean) const
         std::any_of(top->begin(), std::prev(top->end()), not_zero);
 }
 
-size_t program::size() const
+size_t program::size() const noexcept
 {
     return primary_.size();
 }
 
-bool program::empty() const
+bool program::empty() const noexcept
 {
     return primary_.empty();
 }
 
 // This must be guarded (intended for interpreter internal use).
-bool program::stack_true(bool clean) const
+bool program::stack_true(bool clean) const noexcept
 {
     BC_ASSERT(!empty());
     return stack_to_bool(clean);
 }
 
 // This is safe to call when empty (intended for completion handlers).
-bool program::stack_result(bool clean) const
+bool program::stack_result(bool clean) const noexcept
 {
     return !empty() && stack_true(clean);
 }
 
-bool program::is_stack_overflow() const
+bool program::is_stack_overflow() const noexcept
 {
     // bit.ly/2cowHlP
     // Addition is safe due to script size metadata.
     return size() + alternate_.size() > max_stack_size;
 }
 
-bool program::if_(const operation& op) const
+bool program::if_(const operation& op) const noexcept
 {
     return op.is_conditional() || succeeded();
 }
 
-bool program::top(number& out_number, size_t maxiumum_size) const
+bool program::top(number& out_number, size_t maxiumum_size) const noexcept
 {
     return !empty() && out_number.set_data(*item(zero), maxiumum_size);
 }
 
 // This must be guarded.
-program::stack_iterator program::position(size_t index) const
+program::stack_iterator program::position(size_t index) const noexcept
 {
     BC_ASSERT(index < size());
 
@@ -498,7 +499,7 @@ program::stack_iterator program::position(size_t index) const
 }
 
 // This must be guarded.
-program::ptr_type program::item(size_t index) const
+program::ptr_type program::item(size_t index) const noexcept
 {
     // Stack index is zero-based (zero is top).
     return *position(index);
@@ -507,18 +508,18 @@ program::ptr_type program::item(size_t index) const
 // Alternate stack.
 // ----------------------------------------------------------------------------
 
-bool program::empty_alternate() const
+bool program::empty_alternate() const noexcept
 {
     return alternate_.empty();
 }
 
-void program::push_alternate(ptr_type&& value)
+void program::push_alternate(ptr_type&& value) noexcept
 {
     alternate_.push_back(std::move(value));
 }
 
 // This must be guarded.
-program::ptr_type program::pop_alternate()
+program::ptr_type program::pop_alternate() noexcept
 {
     BC_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
@@ -529,14 +530,14 @@ program::ptr_type program::pop_alternate()
 // Conditional stack.
 // ----------------------------------------------------------------------------
 
-void program::open(bool value)
+void program::open(bool value) noexcept
 {
     negative_count_ += (value ? 0 : 1);
     condition_.push_back(value);
 }
 
 // This must be guarded.
-void program::negate()
+void program::negate() noexcept
 {
     BC_ASSERT(!closed());
     const auto value = condition_.back();
@@ -548,7 +549,7 @@ void program::negate()
 }
 
 // This must be guarded.
-void program::close()
+void program::close() noexcept
 {
     BC_ASSERT(!closed());
     const auto value = condition_.back();
@@ -559,12 +560,12 @@ void program::close()
     ////condition_.pop_back();
 }
 
-bool program::closed() const
+bool program::closed() const noexcept
 {
     return condition_.empty();
 }
 
-bool program::succeeded() const
+bool program::succeeded() const noexcept
 {
     return is_zero(negative_count_);
 
@@ -580,7 +581,7 @@ bool program::succeeded() const
 // CONSENSUS: Witness v0 scripts are not stripped (bip143/v0).
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script::ptr program::subscript() const
+chain::script::ptr program::subscript() const noexcept
 {
     if (jump() == begin())
         return script_;
@@ -597,7 +598,8 @@ chain::script::ptr program::subscript() const
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script::ptr program::subscript(const chunk_ptrs& endorsements) const
+chain::script::ptr program::subscript(
+    const chunk_ptrs& endorsements) const noexcept
 {
     const auto sub = subscript();
 
@@ -624,7 +626,7 @@ chain::script::ptr program::subscript(const chunk_ptrs& endorsements) const
 
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
-    hash_digest& hash, const chunk_ptr& endorsement) const
+    hash_digest& hash, const chunk_ptr& endorsement) const noexcept
 {
     uint8_t flags;
     data_slice distinguished;
@@ -644,7 +646,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
     hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
-    const script& subscript) const
+    const script& subscript) const noexcept
 {
     uint8_t flags;
     data_slice distinguished;
@@ -667,7 +669,8 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
-chain::operations program::create_delete_ops(const chunk_ptrs& endorsements)
+chain::operations program::create_delete_ops(
+    const chunk_ptrs& endorsements) noexcept
 {
     constexpr auto non_mininal = false;
 
@@ -681,7 +684,8 @@ chain::operations program::create_delete_ops(const chunk_ptrs& endorsements)
     return strip;
 }
 
-hash_digest program::signature_hash(const script& subscript, uint8_t flags) const
+hash_digest program::signature_hash(const script& subscript,
+    uint8_t flags) const noexcept
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
     const auto bip143 = is_enabled(forks::bip143_rule);
@@ -694,7 +698,7 @@ hash_digest program::signature_hash(const script& subscript, uint8_t flags) cons
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
 hash_digest program::signature_hash(hash_cache& cache, const script& subscript,
-    uint8_t flags) const
+    uint8_t flags) const noexcept
 {
     const auto it = cache.find(flags);
     if (it != cache.end())

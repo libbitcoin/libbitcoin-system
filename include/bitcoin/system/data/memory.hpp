@@ -40,28 +40,28 @@ namespace system {
 
 /// Create empty shared pointer to const.
 template <typename Type>
-inline std::shared_ptr<Type> to_shared()
+inline std::shared_ptr<Type> to_shared() noexcept
 {
     return std::make_shared<Type>();
 }
 
 /// Create shared pointer to const from the instance pointer.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(Type* value)
+inline std::shared_ptr<const Type> to_shared(Type* value) noexcept
 {
     return std::shared_ptr<const Type>(value);
 }
 
 /// Create shared pointer to const from the moved instance.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(Type&& value)
+inline std::shared_ptr<const Type> to_shared(Type&& value) noexcept
 {
     return std::make_shared<const Type>(std::forward<Type>(value));
 }
 
 /// Create shared pointer to const from the copied instance.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(const Type& value)
+inline std::shared_ptr<const Type> to_shared(const Type& value) noexcept
 {
     return std::make_shared<const Type>(value);
 }
@@ -69,12 +69,12 @@ inline std::shared_ptr<const Type> to_shared(const Type& value)
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    std::vector<Type>&& values);
+    std::vector<Type>&& values) noexcept;
 
 /// Create shared pointer to vector of const shared ptr from the copied vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    const std::vector<Type>& values);
+    const std::vector<Type>& values) noexcept;
 
 // bit.ly/3vdbF17
 // Convert value initialization into default initialization.

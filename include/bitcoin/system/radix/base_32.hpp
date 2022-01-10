@@ -66,34 +66,34 @@ typedef std::vector<uint5_t> base32_chunk;
 /**
 * Convert bytes to a base32 string.
 */
-BC_API std::string encode_base32(const data_chunk& data);
+BC_API std::string encode_base32(const data_chunk& data) noexcept;
 
 /**
  * Convert a base32 string to bytes.
  * False if mixed case or any character is not from the base32 character set.
  */
-BC_API bool decode_base32(data_chunk& out, const std::string& in);
+BC_API bool decode_base32(data_chunk& out, const std::string& in) noexcept;
 
 /**
 * Convert base32 data to a base32 string.
 */
-BC_API std::string encode_base32(const base32_chunk& data);
+BC_API std::string encode_base32(const base32_chunk& data) noexcept;
 
 /**
  * Convert a base32 string to base32 data.
  * False if mixed case or any character is not from the base32 character set.
  */
-BC_API bool decode_base32(base32_chunk& out, const std::string& in);
+BC_API bool decode_base32(base32_chunk& out, const std::string& in) noexcept;
 
 /**
  * Pack any vector of 5 bit bytes to vector of 8 bit bytes.
  */
-BC_API data_chunk base32_pack(const base32_chunk& unpacked);
+BC_API data_chunk base32_pack(const base32_chunk& unpacked) noexcept;
 
 /**
  * Unpack any vector of 8 bit bytes to a vector of 5 bit bytes.
  */
-BC_API base32_chunk base32_unpack(const data_chunk& packed);
+BC_API base32_chunk base32_unpack(const data_chunk& packed) noexcept;
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

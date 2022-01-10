@@ -38,13 +38,13 @@ using namespace system::chain;
 // Operations (shared).
 // ----------------------------------------------------------------------------
 
-interpreter::result interpreter::op_unevaluated(opcode code)
+interpreter::result interpreter::op_unevaluated(opcode code) noexcept
 {
     return operation::is_invalid(code) ? error::op_invalid : error::op_reserved;
 }
 
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
-interpreter::result interpreter::op_nop(program& program, opcode /*code*/)
+interpreter::result interpreter::op_nop(program& program, opcode) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return error::op_success;
@@ -56,14 +56,14 @@ interpreter::result interpreter::op_nop(program& program, opcode /*code*/)
 }
 
 interpreter::result interpreter::op_push_number(program& program,
-    uint8_t value)
+    uint8_t value) noexcept
 {
     program.push_move({ value });
     return error::op_success;
 }
 
 interpreter::result interpreter::op_push_size(program& program,
-    const operation& op)
+    const operation& op) noexcept
 {
     static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
@@ -75,7 +75,7 @@ interpreter::result interpreter::op_push_size(program& program,
 }
 
 interpreter::result interpreter::op_push_data(program& program,
-    chunk_ptr&& data, uint32_t size_limit)
+    chunk_ptr&& data, uint32_t size_limit) noexcept
 {
     if (data->size() > size_limit)
         return error::op_push_data;
@@ -88,12 +88,12 @@ interpreter::result interpreter::op_push_data(program& program,
 // ----------------------------------------------------------------------------
 // All index parameters are zero-based and relative to stack top.
 
-interpreter::result interpreter::op_nop(opcode)
+interpreter::result interpreter::op_nop(opcode) noexcept
 {
     return error::op_success;
 }
 
-interpreter::result interpreter::op_ver(program& program)
+interpreter::result interpreter::op_ver(program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
@@ -101,7 +101,7 @@ interpreter::result interpreter::op_ver(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_if(program& program)
+interpreter::result interpreter::op_if(program& program) noexcept
 {
     auto value = false;
 
@@ -118,7 +118,7 @@ interpreter::result interpreter::op_if(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_notif(program& program)
+interpreter::result interpreter::op_notif(program& program) noexcept
 {
     auto value = false;
 
@@ -135,7 +135,7 @@ interpreter::result interpreter::op_notif(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_verif(program& program)
+interpreter::result interpreter::op_verif(program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
@@ -143,7 +143,7 @@ interpreter::result interpreter::op_verif(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_vernotif(program& program)
+interpreter::result interpreter::op_vernotif(program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
@@ -151,7 +151,7 @@ interpreter::result interpreter::op_vernotif(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_else(program& program)
+interpreter::result interpreter::op_else(program& program) noexcept
 {
     if (program.closed())
         return error::op_else;
@@ -160,7 +160,7 @@ interpreter::result interpreter::op_else(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_endif(program& program)
+interpreter::result interpreter::op_endif(program& program) noexcept
 {
     if (program.closed())
         return error::op_endif;
@@ -169,7 +169,7 @@ interpreter::result interpreter::op_endif(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_verify(program& program)
+interpreter::result interpreter::op_verify(program& program) noexcept
 {
     if (program.empty())
         return error::op_verify1;
@@ -181,7 +181,7 @@ interpreter::result interpreter::op_verify(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_return(program& program)
+interpreter::result interpreter::op_return(program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_return);
@@ -189,7 +189,7 @@ interpreter::result interpreter::op_return(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_to_alt_stack(program& program)
+interpreter::result interpreter::op_to_alt_stack(program& program) noexcept
 {
     if (program.empty())
         return error::op_to_alt_stack;
@@ -198,7 +198,7 @@ interpreter::result interpreter::op_to_alt_stack(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_from_alt_stack(program& program)
+interpreter::result interpreter::op_from_alt_stack(program& program) noexcept
 {
     if (program.empty_alternate())
         return error::op_from_alt_stack;
@@ -207,7 +207,7 @@ interpreter::result interpreter::op_from_alt_stack(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_drop2(program& program)
+interpreter::result interpreter::op_drop2(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_drop2;
@@ -217,7 +217,7 @@ interpreter::result interpreter::op_drop2(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup2(program& program)
+interpreter::result interpreter::op_dup2(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_dup2;
@@ -230,7 +230,7 @@ interpreter::result interpreter::op_dup2(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup3(program& program)
+interpreter::result interpreter::op_dup3(program& program) noexcept
 {
     if (program.size() < 3)
         return error::op_dup3;
@@ -245,7 +245,7 @@ interpreter::result interpreter::op_dup3(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_over2(program& program)
+interpreter::result interpreter::op_over2(program& program) noexcept
 {
     if (program.size() < 4)
         return error::op_over2;
@@ -258,7 +258,7 @@ interpreter::result interpreter::op_over2(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_rot2(program& program)
+interpreter::result interpreter::op_rot2(program& program) noexcept
 {
     if (program.size() < 6)
         return error::op_rot2;
@@ -275,7 +275,7 @@ interpreter::result interpreter::op_rot2(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_swap2(program& program)
+interpreter::result interpreter::op_swap2(program& program) noexcept
 {
     if (program.size() < 4)
         return error::op_swap2;
@@ -285,7 +285,7 @@ interpreter::result interpreter::op_swap2(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_if_dup(program& program)
+interpreter::result interpreter::op_if_dup(program& program) noexcept
 {
     if (program.empty())
         return error::op_if_dup;
@@ -296,13 +296,13 @@ interpreter::result interpreter::op_if_dup(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_depth(program& program)
+interpreter::result interpreter::op_depth(program& program) noexcept
 {
     program.push_move(number(program.size()).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_drop(program& program)
+interpreter::result interpreter::op_drop(program& program) noexcept
 {
     if (program.empty())
         return error::op_drop;
@@ -311,7 +311,7 @@ interpreter::result interpreter::op_drop(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup(program& program)
+interpreter::result interpreter::op_dup(program& program) noexcept
 {
     if (program.empty())
         return error::op_dup;
@@ -320,7 +320,7 @@ interpreter::result interpreter::op_dup(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_nip(program& program)
+interpreter::result interpreter::op_nip(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_nip;
@@ -329,7 +329,7 @@ interpreter::result interpreter::op_nip(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_over(program& program)
+interpreter::result interpreter::op_over(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_over;
@@ -338,7 +338,7 @@ interpreter::result interpreter::op_over(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_pick(program& program)
+interpreter::result interpreter::op_pick(program& program) noexcept
 {
     program::stack_iterator position;
     if (!program.pop_position(position))
@@ -348,7 +348,7 @@ interpreter::result interpreter::op_pick(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_roll(program& program)
+interpreter::result interpreter::op_roll(program& program) noexcept
 {
     program::stack_iterator position;
     if (!program.pop_position(position))
@@ -360,7 +360,7 @@ interpreter::result interpreter::op_roll(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_rot(program& program)
+interpreter::result interpreter::op_rot(program& program) noexcept
 {
     if (program.size() < 3)
         return error::op_rot;
@@ -370,7 +370,7 @@ interpreter::result interpreter::op_rot(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_swap(program& program)
+interpreter::result interpreter::op_swap(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_swap;
@@ -379,7 +379,7 @@ interpreter::result interpreter::op_swap(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_tuck(program& program)
+interpreter::result interpreter::op_tuck(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_tuck;
@@ -392,7 +392,7 @@ interpreter::result interpreter::op_tuck(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_cat(program& program)
+interpreter::result interpreter::op_cat(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
@@ -400,7 +400,7 @@ interpreter::result interpreter::op_cat(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_substr(program& program)
+interpreter::result interpreter::op_substr(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
@@ -408,7 +408,7 @@ interpreter::result interpreter::op_substr(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_left(program& program)
+interpreter::result interpreter::op_left(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_left);
@@ -416,7 +416,7 @@ interpreter::result interpreter::op_left(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_right(program& program)
+interpreter::result interpreter::op_right(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_right);
@@ -424,7 +424,7 @@ interpreter::result interpreter::op_right(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_size(program& program)
+interpreter::result interpreter::op_size(program& program) noexcept
 {
     if (program.empty())
         return error::op_size;
@@ -436,7 +436,7 @@ interpreter::result interpreter::op_size(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_invert(program& program)
+interpreter::result interpreter::op_invert(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
@@ -444,7 +444,7 @@ interpreter::result interpreter::op_invert(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_and(program& program)
+interpreter::result interpreter::op_and(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_and);
@@ -452,7 +452,7 @@ interpreter::result interpreter::op_and(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_or(program& program)
+interpreter::result interpreter::op_or(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_or);
@@ -460,7 +460,7 @@ interpreter::result interpreter::op_or(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_xor(program& program)
+interpreter::result interpreter::op_xor(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
@@ -468,7 +468,7 @@ interpreter::result interpreter::op_xor(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_equal(program& program)
+interpreter::result interpreter::op_equal(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_equal;
@@ -477,7 +477,7 @@ interpreter::result interpreter::op_equal(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_equal_verify(program& program)
+interpreter::result interpreter::op_equal_verify(program& program) noexcept
 {
     if (program.size() < 2)
         return error::op_equal_verify1;
@@ -486,7 +486,7 @@ interpreter::result interpreter::op_equal_verify(program& program)
         error::op_equal_verify2;
 }
 
-interpreter::result interpreter::op_add1(program& program)
+interpreter::result interpreter::op_add1(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -497,7 +497,7 @@ interpreter::result interpreter::op_add1(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sub1(program& program)
+interpreter::result interpreter::op_sub1(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -508,7 +508,7 @@ interpreter::result interpreter::op_sub1(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul2(program& program)
+interpreter::result interpreter::op_mul2(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
@@ -516,7 +516,7 @@ interpreter::result interpreter::op_mul2(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div2(program& program)
+interpreter::result interpreter::op_div2(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
@@ -524,7 +524,7 @@ interpreter::result interpreter::op_div2(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_negate(program& program)
+interpreter::result interpreter::op_negate(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -535,7 +535,7 @@ interpreter::result interpreter::op_negate(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_abs(program& program)
+interpreter::result interpreter::op_abs(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -548,7 +548,7 @@ interpreter::result interpreter::op_abs(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_not(program& program)
+interpreter::result interpreter::op_not(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -558,7 +558,7 @@ interpreter::result interpreter::op_not(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_nonzero(program& program)
+interpreter::result interpreter::op_nonzero(program& program) noexcept
 {
     number number;
     if (!program.pop(number))
@@ -568,7 +568,7 @@ interpreter::result interpreter::op_nonzero(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_add(program& program)
+interpreter::result interpreter::op_add(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -579,7 +579,7 @@ interpreter::result interpreter::op_add(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sub(program& program)
+interpreter::result interpreter::op_sub(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -590,7 +590,7 @@ interpreter::result interpreter::op_sub(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul(program& program)
+interpreter::result interpreter::op_mul(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
@@ -598,7 +598,7 @@ interpreter::result interpreter::op_mul(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div(program& program)
+interpreter::result interpreter::op_div(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div);
@@ -606,7 +606,7 @@ interpreter::result interpreter::op_div(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_mod(program& program)
+interpreter::result interpreter::op_mod(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
@@ -614,7 +614,7 @@ interpreter::result interpreter::op_mod(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_lshift(program& program)
+interpreter::result interpreter::op_lshift(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
@@ -622,7 +622,7 @@ interpreter::result interpreter::op_lshift(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_rshift(program& program)
+interpreter::result interpreter::op_rshift(program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
@@ -630,7 +630,7 @@ interpreter::result interpreter::op_rshift(program& program)
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_bool_and(program& program)
+interpreter::result interpreter::op_bool_and(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -640,7 +640,7 @@ interpreter::result interpreter::op_bool_and(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_bool_or(program& program)
+interpreter::result interpreter::op_bool_or(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -650,7 +650,7 @@ interpreter::result interpreter::op_bool_or(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_num_equal(program& program)
+interpreter::result interpreter::op_num_equal(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -660,7 +660,7 @@ interpreter::result interpreter::op_num_equal(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_num_equal_verify(program& program)
+interpreter::result interpreter::op_num_equal_verify(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -670,7 +670,7 @@ interpreter::result interpreter::op_num_equal_verify(program& program)
         error::op_num_equal_verify2;
 }
 
-interpreter::result interpreter::op_num_not_equal(program& program)
+interpreter::result interpreter::op_num_not_equal(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -680,7 +680,7 @@ interpreter::result interpreter::op_num_not_equal(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_less_than(program& program)
+interpreter::result interpreter::op_less_than(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -690,7 +690,7 @@ interpreter::result interpreter::op_less_than(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_greater_than(program& program)
+interpreter::result interpreter::op_greater_than(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -700,7 +700,7 @@ interpreter::result interpreter::op_greater_than(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_less_than_or_equal(program& program)
+interpreter::result interpreter::op_less_than_or_equal(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -711,7 +711,7 @@ interpreter::result interpreter::op_less_than_or_equal(program& program)
 }
 
 interpreter::result interpreter::op_greater_than_or_equal(
-    program& program)
+    program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -721,7 +721,7 @@ interpreter::result interpreter::op_greater_than_or_equal(
     return error::op_success;
 }
 
-interpreter::result interpreter::op_min(program& program)
+interpreter::result interpreter::op_min(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -735,7 +735,7 @@ interpreter::result interpreter::op_min(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_max(program& program)
+interpreter::result interpreter::op_max(program& program) noexcept
 {
     number first, second;
     if (!program.pop_binary(first, second))
@@ -749,7 +749,7 @@ interpreter::result interpreter::op_max(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_within(program& program)
+interpreter::result interpreter::op_within(program& program) noexcept
 {
     number first, second, third;
     if (!program.pop_ternary(first, second, third))
@@ -759,7 +759,7 @@ interpreter::result interpreter::op_within(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_ripemd160(program& program)
+interpreter::result interpreter::op_ripemd160(program& program) noexcept
 {
     if (program.empty())
         return error::op_ripemd160;
@@ -768,7 +768,7 @@ interpreter::result interpreter::op_ripemd160(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sha1(program& program)
+interpreter::result interpreter::op_sha1(program& program) noexcept
 {
     if (program.empty())
         return error::op_sha1;
@@ -777,7 +777,7 @@ interpreter::result interpreter::op_sha1(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sha256(program& program)
+interpreter::result interpreter::op_sha256(program& program) noexcept
 {
     if (program.empty())
         return error::op_sha256;
@@ -786,7 +786,7 @@ interpreter::result interpreter::op_sha256(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_hash160(program& program)
+interpreter::result interpreter::op_hash160(program& program) noexcept
 {
     if (program.empty())
         return error::op_hash160;
@@ -795,7 +795,7 @@ interpreter::result interpreter::op_hash160(program& program)
     return error::op_success;
 }
 
-interpreter::result interpreter::op_hash256(program& program)
+interpreter::result interpreter::op_hash256(program& program) noexcept
 {
     if (program.empty())
         return error::op_hash256;
@@ -805,7 +805,7 @@ interpreter::result interpreter::op_hash256(program& program)
 }
 
 interpreter::result interpreter::op_codeseparator(program& program,
-    const operation& op)
+    const operation& op) noexcept
 {
     return program.register_jump(op) ? error::op_success :
         error::op_code_separator;
@@ -814,7 +814,7 @@ interpreter::result interpreter::op_codeseparator(program& program,
 // In signing mode, prepare_signature converts key from a private key to
 // a public key and generates the signature from key and hash. The signature is
 // then verified against the key and hash as if obtained from the script.
-interpreter::result interpreter::op_check_sig_verify(program& program)
+interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
 {
     if (program.empty())
         return error::op_check_sig_verify1;
@@ -847,7 +847,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program)
         error::op_success : error::op_check_sig_verify5;
 }
 
-interpreter::result interpreter::op_check_sig(program& program)
+interpreter::result interpreter::op_check_sig(program& program) noexcept
 {
     auto verify = op_check_sig_verify(program);
     auto bip66 = program.is_enabled(forks::bip66_rule);
@@ -861,7 +861,7 @@ interpreter::result interpreter::op_check_sig(program& program)
 }
 
 interpreter::result interpreter::op_check_multisig_verify(
-    program& program)
+    program& program) noexcept
 {
     auto bip147 = program.is_enabled(forks::bip147_rule);
 
@@ -931,7 +931,7 @@ interpreter::result interpreter::op_check_multisig_verify(
         error::op_success;
 }
 
-interpreter::result interpreter::op_check_multisig(program& program)
+interpreter::result interpreter::op_check_multisig(program& program) noexcept
 {
     auto verify = op_check_multisig_verify(program);
     auto bip66 = program.is_enabled(forks::bip66_rule);
@@ -945,7 +945,7 @@ interpreter::result interpreter::op_check_multisig(program& program)
 }
 
 interpreter::result interpreter::op_check_locktime_verify(
-    program& program)
+    program& program) noexcept
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!program.is_enabled(forks::bip65_rule))
@@ -979,7 +979,7 @@ interpreter::result interpreter::op_check_locktime_verify(
 }
 
 interpreter::result interpreter::op_check_sequence_verify(
-    program& program)
+    program& program) noexcept
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
     if (!program.is_enabled(forks::bip112_rule))
@@ -1025,7 +1025,7 @@ interpreter::result interpreter::op_check_sequence_verify(
 // private:
 // It is expected that the compiler will produce a very efficient jump table.
 interpreter::result interpreter::run_op(const operation& op,
-    program& program)
+    program& program) noexcept
 {
     const auto code = op.code();
 
@@ -1327,7 +1327,7 @@ interpreter::result interpreter::run_op(const operation& op,
     }
 }
 
-code interpreter::run(program& program)
+code interpreter::run(program& program) noexcept
 {
     result ec;
 
