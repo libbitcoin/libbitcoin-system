@@ -49,44 +49,44 @@ const uint32_t hd_public::testnet = 0x043587cf;
 // hd_public
 // ----------------------------------------------------------------------------
 
-hd_public::hd_public()
+hd_public::hd_public() noexcept
   : valid_(false), chain_(null_hash), lineage_({0, 0, 0, 0}),
     point_(null_ec_compressed)
 {
 }
 
-hd_public::hd_public(const hd_public& other)
+hd_public::hd_public(const hd_public& other) noexcept
   : valid_(other.valid_), chain_(other.chain_), lineage_(other.lineage_),
     point_(other.point_)
 {
 }
 
 // This cannot validate the version.
-hd_public::hd_public(const hd_key& public_key)
+hd_public::hd_public(const hd_key& public_key) noexcept
   : hd_public(from_key(public_key))
 {
 }
 
 // This cannot validate the version.
-hd_public::hd_public(const std::string& encoded)
+hd_public::hd_public(const std::string& encoded) noexcept
   : hd_public(from_string(encoded))
 {
 }
 
 // This validates the version.
-hd_public::hd_public(const hd_key& public_key, uint32_t prefix)
+hd_public::hd_public(const hd_key& public_key, uint32_t prefix) noexcept
   : hd_public(from_key(public_key, prefix))
 {
 }
 
 // This validates the version.
-hd_public::hd_public(const std::string& encoded, uint32_t prefix)
+hd_public::hd_public(const std::string& encoded, uint32_t prefix) noexcept
   : hd_public(from_string(encoded, prefix))
 {
 }
 
 hd_public::hd_public(const ec_compressed& point,
-    const hd_chain_code& chain_code, const hd_lineage& lineage)
+    const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept
   : valid_(true), point_(point), chain_(chain_code), lineage_(lineage)
 {
 }
@@ -95,19 +95,19 @@ hd_public::hd_public(const ec_compressed& point,
 // ----------------------------------------------------------------------------
 
 hd_public hd_public::from_secret(const ec_secret& secret,
-    const hd_chain_code& chain_code, const hd_lineage& lineage)
+    const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept
 {
     ec_compressed point;
     return secret_to_public(point, secret) ?
         hd_public(point, chain_code, lineage) : hd_public{};
 }
 
-hd_public hd_public::from_key(const hd_key& key)
+hd_public hd_public::from_key(const hd_key& key) noexcept
 {
     return from_key(key, from_big_endian<uint32_t>(key));
 }
 
-hd_public hd_public::from_string(const std::string& encoded)
+hd_public hd_public::from_string(const std::string& encoded) noexcept
 {
     hd_key key;
     if (!decode_base58(key, encoded))
@@ -116,7 +116,7 @@ hd_public hd_public::from_string(const std::string& encoded)
     return hd_public(from_key(key));
 }
 
-hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
+hd_public hd_public::from_key(const hd_key& key, uint32_t prefix) noexcept
 {
     read::bytes::copy source(key);
 
@@ -145,7 +145,7 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
 }
 
 hd_public hd_public::from_string(const std::string& encoded,
-    uint32_t prefix)
+    uint32_t prefix) noexcept
 {
     hd_key key;
     if (!decode_base58(key, encoded))
@@ -157,12 +157,12 @@ hd_public hd_public::from_string(const std::string& encoded,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-hd_public::operator bool() const
+hd_public::operator bool() const noexcept
 {
     return valid_;
 }
 
-hd_public::operator const ec_compressed&() const
+hd_public::operator const ec_compressed&() const noexcept
 {
     return point_;
 }
@@ -170,7 +170,7 @@ hd_public::operator const ec_compressed&() const
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string hd_public::encoded() const
+std::string hd_public::encoded() const noexcept
 {
     return encode_base58(to_hd_key());
 }
@@ -178,17 +178,17 @@ std::string hd_public::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const hd_chain_code& hd_public::chain_code() const
+const hd_chain_code& hd_public::chain_code() const noexcept
 {
     return chain_;
 }
 
-const hd_lineage& hd_public::lineage() const
+const hd_lineage& hd_public::lineage() const noexcept
 {
     return lineage_;
 }
 
-const ec_compressed& hd_public::point() const
+const ec_compressed& hd_public::point() const noexcept
 {
     return point_;
 }
@@ -199,7 +199,7 @@ const ec_compressed& hd_public::point() const
 // HD keys do not carry a payment address prefix (just like WIF).
 // So we are currently not converting to ec_public or ec_private.
 
-hd_key hd_public::to_hd_key() const
+hd_key hd_public::to_hd_key() const noexcept
 {
     return insert_checksum<hd_key_size>(
     {
@@ -212,7 +212,7 @@ hd_key hd_public::to_hd_key() const
     });
 }
 
-hd_public hd_public::derive_public(uint32_t index) const
+hd_public hd_public::derive_public(uint32_t index) const noexcept
 {
     if (index >= hd_first_hardened_key)
         return {};
@@ -242,7 +242,7 @@ hd_public hd_public::derive_public(uint32_t index) const
 // Helpers.
 // ----------------------------------------------------------------------------
 
-uint32_t hd_public::fingerprint() const
+uint32_t hd_public::fingerprint() const noexcept
 {
     return from_big_endian<uint32_t>(bitcoin_short_hash(point_));
 }
@@ -250,7 +250,7 @@ uint32_t hd_public::fingerprint() const
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_public& hd_public::operator=(const hd_public& other)
+hd_public& hd_public::operator=(const hd_public& other) noexcept
 {
     valid_ = other.valid_;
     chain_ = other.chain_;
@@ -259,18 +259,18 @@ hd_public& hd_public::operator=(const hd_public& other)
     return *this;
 }
 
-bool hd_public::operator<(const hd_public& other) const
+bool hd_public::operator<(const hd_public& other) const noexcept
 {
     return encoded() < other.encoded();
 }
 
-bool hd_public::operator==(const hd_public& other) const
+bool hd_public::operator==(const hd_public& other) const noexcept
 {
     return valid_ == other.valid_ && chain_ == other.chain_ &&
         lineage_ == other.lineage_ && point_ == other.point_;
 }
 
-bool hd_public::operator!=(const hd_public& other) const
+bool hd_public::operator!=(const hd_public& other) const noexcept
 {
     return !(*this == other);
 }
@@ -287,7 +287,7 @@ std::istream& operator>>(std::istream& in, hd_public& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const hd_public& of)
+std::ostream& operator<<(std::ostream& out, const hd_public& of) noexcept
 {
     out << of.encoded();
     return out;
@@ -296,14 +296,14 @@ std::ostream& operator<<(std::ostream& out, const hd_public& of)
 // hd_lineage
 // ----------------------------------------------------------------------------
 
-bool hd_lineage::operator==(const hd_lineage& other) const
+bool hd_lineage::operator==(const hd_lineage& other) const noexcept
 {
     return prefixes == other.prefixes && depth == other.depth &&
         parent_fingerprint == other.parent_fingerprint &&
         child_number == other.child_number;
 }
 
-bool hd_lineage::operator!=(const hd_lineage& other) const
+bool hd_lineage::operator!=(const hd_lineage& other) const noexcept
 {
     return !(*this == other);
 }

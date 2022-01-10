@@ -31,7 +31,7 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 void points_value::greedy(points_value& out, const points_value& unspent,
-    uint64_t minimum_value)
+    uint64_t minimum_value) noexcept
 {
     out.points.clear();
 
@@ -49,20 +49,23 @@ void points_value::greedy(points_value& out, const points_value& unspent,
     // Copy the points list for safe manipulation.
     auto points = unspent.points;
 
-    const auto below = [minimum_value](const point_value& point)
-    {
-        return point.value() < minimum_value;
-    };
+    const auto below = [minimum_value](
+        const point_value& point) noexcept
+        {
+            return point.value() < minimum_value;
+        };
 
-    const auto lesser = [](const point_value& left, const point_value& right)
-    {
-        return left.value() < right.value();
-    };
+    const auto lesser = [](const point_value& left,
+        const point_value& right) noexcept
+        {
+            return left.value() < right.value();
+        };
 
-    const auto greater = [](const point_value& left, const point_value& right)
-    {
-        return left.value() > right.value();
-    };
+    const auto greater = [](const point_value& left,
+        const point_value& right) noexcept
+        {
+            return left.value() > right.value();
+        };
 
     // Reorder list between values that exceed minimum and those that do not.
     const auto sufficient = std::partition(points.begin(), points.end(), below);
@@ -90,7 +93,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
 }
 
 void points_value::individual(points_value& out, const points_value& unspent,
-    uint64_t minimum_value)
+    uint64_t minimum_value) noexcept
 {
     out.points.clear();
     out.points.reserve(unspent.points.size());
@@ -102,17 +105,18 @@ void points_value::individual(points_value& out, const points_value& unspent,
 
     out.points.shrink_to_fit();
 
-    const auto lesser = [](const point_value& left, const point_value& right)
-    {
-        return left.value() < right.value();
-    };
+    const auto lesser = [](const point_value& left,
+        const point_value& right) noexcept
+        {
+            return left.value() < right.value();
+        };
 
     // Return in ascending order by value.
     std::sort(out.points.begin(), out.points.end(), lesser);
 }
 
 void points_value::select(points_value& out, const points_value& unspent,
-    uint64_t minimum_value, selection option)
+    uint64_t minimum_value, selection option) noexcept
 {
     switch (option)
     {
@@ -130,9 +134,9 @@ void points_value::select(points_value& out, const points_value& unspent,
 // ----------------------------------------------------------------------------
 
 // Overflow returns max_uint64.
-uint64_t points_value::value() const
+uint64_t points_value::value() const noexcept
 {
-    const auto sum = [](uint64_t total, const point_value& point)
+    const auto sum = [](uint64_t total, const point_value& point) noexcept
     {
         return ceilinged_add(total, point.value());
     };

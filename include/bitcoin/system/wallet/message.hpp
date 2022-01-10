@@ -38,7 +38,7 @@ typedef data_array<message_signature_size> message_signature;
 /**
  * Hashes a messages in preparation for signing.
  */
-BC_API hash_digest hash_message(const data_slice& message);
+BC_API hash_digest hash_message(const data_slice& message) noexcept;
 
 /**
  * Signs a message using deterministic signature.
@@ -47,7 +47,7 @@ BC_API hash_digest hash_message(const data_slice& message);
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature,
-    const data_slice& message, const ec_private& secret);
+    const data_slice& message, const ec_private& secret) noexcept;
 
 /**
  * Signs a message using deterministic signature.
@@ -56,7 +56,7 @@ BC_API bool sign_message(message_signature& out_signature,
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature,
-    const data_slice& message, const std::string& wif);
+    const data_slice& message, const std::string& wif) noexcept;
 
 /**
  * Signs a message using deterministic signature.
@@ -67,7 +67,8 @@ BC_API bool sign_message(message_signature& out_signature,
  * @return true if signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature,
-    const data_slice& message, const ec_secret& secret, bool compressed=true);
+    const data_slice& message, const ec_secret& secret,
+    bool compressed=true) noexcept;
 
 /**
  * Verifies a message.
@@ -78,15 +79,16 @@ BC_API bool sign_message(message_signature& out_signature,
  * any errors in the signature encoding.
  */
 BC_API bool verify_message(const data_slice& message,
-    const payment_address& address, const message_signature& signature);
+    const payment_address& address,
+    const message_signature& signature) noexcept;
 
 /// Exposed primarily for independent testability.
 BC_API bool recovery_id_to_magic(uint8_t& out_magic, uint8_t recovery_id,
-    bool compressed);
+    bool compressed) noexcept;
 
 /// Exposed primarily for independent testability.
 BC_API bool magic_to_recovery_id(uint8_t& out_recovery_id,
-    bool& out_compressed, uint8_t magic);
+    bool& out_compressed, uint8_t magic) noexcept;
 
 } // namespace wallet
 } // namespace system

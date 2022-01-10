@@ -35,18 +35,18 @@ class parse_encrypted_token
   : public parse_encrypted_prefix<8u>
 {
 public:
-    static data_array<prefix_size> prefix_factory(bool lot_sequence);
+    static data_array<prefix_size> prefix_factory(bool lot_sequence) noexcept;
 
-    explicit parse_encrypted_token(const encrypted_token& value);
+    explicit parse_encrypted_token(const encrypted_token& value) noexcept;
 
-    bool lot_sequence() const;
-    hash_digest data() const;
-    ek_entropy entropy() const;
-    one_byte sign() const;
+    bool lot_sequence() const noexcept;
+    hash_digest data() const noexcept;
+    ek_entropy entropy() const noexcept;
+    one_byte sign() const noexcept;
 
 private:
-    bool verify_context() const;
-    bool verify_magic() const;
+    bool verify_context() const noexcept;
+    bool verify_magic() const noexcept;
 
     static constexpr uint8_t lot_context_ = 0x51;
     static constexpr uint8_t default_context_ = 0x53;

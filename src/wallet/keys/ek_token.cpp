@@ -30,22 +30,22 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-ek_token::ek_token()
+ek_token::ek_token() noexcept
   : valid_(false), token_()
 {
 }
 
-ek_token::ek_token(const std::string& encoded)
+ek_token::ek_token(const std::string& encoded) noexcept
   : ek_token(from_string(encoded))
 {
 }
 
-ek_token::ek_token(const ek_token& other)
+ek_token::ek_token(const ek_token& other) noexcept
   : valid_(other.valid_), token_(other.token_)
 {
 }
 
-ek_token::ek_token(const encrypted_token& value)
+ek_token::ek_token(const encrypted_token& value) noexcept
   : valid_(true), token_(value)
 {
 }
@@ -53,7 +53,7 @@ ek_token::ek_token(const encrypted_token& value)
 // Factories.
 // ----------------------------------------------------------------------------
 
-ek_token ek_token::from_string(const std::string& encoded)
+ek_token ek_token::from_string(const std::string& encoded) noexcept
 {
     // TODO: incorporate existing parser here, setting new members.
 
@@ -65,12 +65,12 @@ ek_token ek_token::from_string(const std::string& encoded)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_token::operator bool() const
+ek_token::operator bool() const noexcept
 {
     return valid_;
 }
 
-ek_token::operator const encrypted_token&() const
+ek_token::operator const encrypted_token&() const noexcept
 {
     return token_;
 }
@@ -78,7 +78,7 @@ ek_token::operator const encrypted_token&() const
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string ek_token::encoded() const
+std::string ek_token::encoded() const noexcept
 {
     return encode_base58(token_);
 }
@@ -86,7 +86,7 @@ std::string ek_token::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const encrypted_token& ek_token::token() const
+const encrypted_token& ek_token::token() const noexcept
 {
     return token_;
 }
@@ -94,24 +94,24 @@ const encrypted_token& ek_token::token() const
 // Operators.
 // ----------------------------------------------------------------------------
 
-ek_token& ek_token::operator=(const ek_token& other)
+ek_token& ek_token::operator=(const ek_token& other) noexcept
 {
     valid_ = other.valid_;
     token_ = other.token_;
     return *this;
 }
 
-bool ek_token::operator<(const ek_token& other) const
+bool ek_token::operator<(const ek_token& other) const noexcept
 {
     return encoded() < other.encoded();
 }
 
-bool ek_token::operator==(const ek_token& other) const
+bool ek_token::operator==(const ek_token& other) const noexcept
 {
     return valid_ == other.valid_ && token_ == other.token_;
 }
 
-bool ek_token::operator!=(const ek_token& other) const
+bool ek_token::operator!=(const ek_token& other) const noexcept
 {
     return !(*this == other);
 }
@@ -128,7 +128,7 @@ std::istream& operator>>(std::istream& in, ek_token& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ek_token& of)
+std::ostream& operator<<(std::ostream& out, const ek_token& of) noexcept
 {
     out << of.encoded();
     return out;

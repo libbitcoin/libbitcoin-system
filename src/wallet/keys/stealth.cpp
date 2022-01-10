@@ -31,13 +31,13 @@ namespace system {
 
 using namespace system::chain;
 
-bool is_stealth_script(const script& script)
+bool is_stealth_script(const script& script) noexcept
 {
     return script::is_pay_null_data_pattern(script.ops()) &&
         (script.ops()[1].data().size() >= hash_size);
 }
 
-bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
+bool to_stealth_prefix(uint32_t& out_prefix, const script& script) noexcept
 {
     if (!is_stealth_script(script))
         return false;
@@ -52,7 +52,8 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 
 // TODO: this can be implemented using libsecp256k1 without iteration.
 // The public key must have a sign value of 0x02 (i.e. must be even y-valued).
-bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
+bool create_ephemeral_key(ec_secret& out_secret,
+    const data_chunk& seed) noexcept
 {
     auto nonced_seed = splice({ 0x00 }, seed);
     ec_compressed point;
@@ -74,7 +75,7 @@ bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
 bool create_stealth_data(script& out_null_data, ec_secret& out_secret,
-    const binary& filter, const data_chunk& seed)
+    const binary& filter, const data_chunk& seed) noexcept
 {
     // Create a valid ephemeral key pair using the seed and then the script.
     return create_ephemeral_key(out_secret, seed) &&
@@ -83,7 +84,7 @@ bool create_stealth_data(script& out_null_data, ec_secret& out_secret,
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
 bool create_stealth_script(script& out_null_data, const ec_secret& secret,
-    const binary& filter, const data_chunk& seed)
+    const binary& filter, const data_chunk& seed) noexcept
 {
     // [ephemeral-public-key-hash:32][pad:0-44][nonce:4]
     static constexpr size_t max_pad = max_null_data_size - hash_size -
@@ -138,7 +139,7 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
 }
 
 bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
-    const script& script)
+    const script& script) noexcept
 {
     if (!is_stealth_script(script))
         return false;
@@ -155,7 +156,7 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
 }
 
 bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
-    const script& script)
+    const script& script) noexcept
 {
     if (!is_stealth_script(script))
         return false;
@@ -166,7 +167,7 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
 }
 
 bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
-    const ec_compressed& point)
+    const ec_compressed& point) noexcept
 {
     auto copy = point;
     if (!ec_multiply(copy, secret))
@@ -178,7 +179,7 @@ bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
 
 bool uncover_stealth(ec_compressed& out_stealth,
     const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ophemeral,
-    const ec_compressed& spend)
+    const ec_compressed& spend) noexcept
 {
     ec_secret shared;
     if (!shared_secret(shared, scan_or_ophemeral, ephemeral_or_scan))
@@ -194,7 +195,7 @@ bool uncover_stealth(ec_compressed& out_stealth,
 
 bool uncover_stealth(ec_secret& out_stealth,
     const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
-    const ec_secret& spend)
+    const ec_secret& spend) noexcept
 {
     ec_secret shared;
     if (!shared_secret(shared, scan_or_ephemeral, ephemeral_or_scan))

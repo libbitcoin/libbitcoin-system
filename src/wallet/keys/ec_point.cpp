@@ -34,7 +34,7 @@ const uint8_t ec_point::uncompressed = 0x04;
 const ec_point ec_point::generator{ ec_compressed_generator };
 
 // private
-bool ec_point::is_valid() const
+bool ec_point::is_valid() const noexcept
 {
     return point_.front() != invalid;
 }
@@ -42,27 +42,27 @@ bool ec_point::is_valid() const
 // construction
 // ----------------------------------------------------------------------------
 
-ec_point::ec_point()
+ec_point::ec_point() noexcept
   : point_(null_ec_compressed)
 {
 }
 
-ec_point::ec_point(ec_point&& point)
+ec_point::ec_point(ec_point&& point) noexcept
   : point_(std::move(point.point_))
 {
 }
 
-ec_point::ec_point(const ec_point& point)
+ec_point::ec_point(const ec_point& point) noexcept
   : point_(point.point_)
 {
 }
 
-ec_point::ec_point(ec_compressed&& compressed)
+ec_point::ec_point(ec_compressed&& compressed) noexcept
   : point_(std::move(compressed))
 {
 }
 
-ec_point::ec_point(const ec_compressed& compressed)
+ec_point::ec_point(const ec_compressed& compressed) noexcept
   : point_(compressed)
 {
 }
@@ -70,7 +70,7 @@ ec_point::ec_point(const ec_compressed& compressed)
 // assignment operators
 // ----------------------------------------------------------------------------
 
-ec_point& ec_point::operator=(ec_point&& point)
+ec_point& ec_point::operator=(ec_point&& point) noexcept
 {
     if (&point == this)
         return *this;
@@ -79,7 +79,7 @@ ec_point& ec_point::operator=(ec_point&& point)
     return *this;
 }
 
-ec_point& ec_point::operator=(const ec_point& point)
+ec_point& ec_point::operator=(const ec_point& point) noexcept
 {
     if (&point == this)
         return *this;
@@ -88,13 +88,13 @@ ec_point& ec_point::operator=(const ec_point& point)
     return *this;
 }
 
-ec_point& ec_point::operator=(ec_compressed&& compressed)
+ec_point& ec_point::operator=(ec_compressed&& compressed) noexcept
 {
     point_ = std::move(compressed);
     return *this;
 }
 
-ec_point& ec_point::operator=(const ec_compressed& compressed)
+ec_point& ec_point::operator=(const ec_compressed& compressed) noexcept
 {
     point_ = compressed;
     return *this;
@@ -103,7 +103,7 @@ ec_point& ec_point::operator=(const ec_compressed& compressed)
 // arithmetic assignment operators
 // ----------------------------------------------------------------------------
 
-ec_point& ec_point::operator+=(const ec_point& point)
+ec_point& ec_point::operator+=(const ec_point& point) noexcept
 {
     if (!is_valid())
         return *this;
@@ -112,7 +112,7 @@ ec_point& ec_point::operator+=(const ec_point& point)
     return *this;
 }
 
-ec_point& ec_point::operator-=(const ec_point& point)
+ec_point& ec_point::operator-=(const ec_point& point) noexcept
 {
     if (!is_valid())
         return *this;
@@ -121,7 +121,7 @@ ec_point& ec_point::operator-=(const ec_point& point)
     return *this;
 }
 
-ec_point& ec_point::operator*=(const ec_scalar& point)
+ec_point& ec_point::operator*=(const ec_scalar& point) noexcept
 {
     if (!is_valid())
         return *this;
@@ -133,7 +133,7 @@ ec_point& ec_point::operator*=(const ec_scalar& point)
 // unary operators (const)
 // ----------------------------------------------------------------------------
 
-ec_point ec_point::operator-() const
+ec_point ec_point::operator-() const noexcept
 {
     if (!is_valid())
         return {};
@@ -148,7 +148,7 @@ ec_point ec_point::operator-() const
 // binary math operators (const)
 // ----------------------------------------------------------------------------
 
-ec_point operator+(const ec_point& left, const ec_point& right)
+ec_point operator+(const ec_point& left, const ec_point& right) noexcept
 {
     if (!left || !right)
         return {};
@@ -160,7 +160,7 @@ ec_point operator+(const ec_point& left, const ec_point& right)
     return ec_point{ out };
 }
 
-ec_point operator-(const ec_point& left, const ec_point& right)
+ec_point operator-(const ec_point& left, const ec_point& right) noexcept
 {
     if (!left || !right)
         return {};
@@ -168,7 +168,7 @@ ec_point operator-(const ec_point& left, const ec_point& right)
     return left + -right;
 }
 
-ec_point operator*(const ec_point& left, const ec_scalar& right)
+ec_point operator*(const ec_point& left, const ec_scalar& right) noexcept
 {
     if (!left || !right)
         return {};
@@ -180,7 +180,7 @@ ec_point operator*(const ec_point& left, const ec_scalar& right)
     return ec_point{ out };
 }
 
-ec_point operator*(const ec_scalar& left, const ec_point& right)
+ec_point operator*(const ec_scalar& left, const ec_point& right) noexcept
 {
     return right * left;
 }
@@ -188,12 +188,12 @@ ec_point operator*(const ec_scalar& left, const ec_point& right)
 // comparison operators (const)
 // ----------------------------------------------------------------------------
 
-bool operator==(const ec_point& left, const ec_point& right)
+bool operator==(const ec_point& left, const ec_point& right) noexcept
 {
     return left.point() == right.point();
 }
 
-bool operator!=(const ec_point& left, const ec_point& right)
+bool operator!=(const ec_point& left, const ec_point& right) noexcept
 {
     return !(left == right);
 }
@@ -201,12 +201,12 @@ bool operator!=(const ec_point& left, const ec_point& right)
 // cast operators
 // ----------------------------------------------------------------------------
 
-ec_point::operator bool() const
+ec_point::operator bool() const noexcept
 {
     return is_valid();
 }
 
-ec_point::operator const ec_compressed&() const
+ec_point::operator const ec_compressed&() const noexcept
 {
     return point_;
 }
@@ -214,7 +214,7 @@ ec_point::operator const ec_compressed&() const
 // properties
 // ----------------------------------------------------------------------------
 
-const ec_compressed& ec_point::point() const
+const ec_compressed& ec_point::point() const noexcept
 {
     return point_;
 }

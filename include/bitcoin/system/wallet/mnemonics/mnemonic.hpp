@@ -59,31 +59,34 @@ public:
     /// If 'none' is specified all dictionaries are searched.
     /// If 'none' is specified and contained by both en and fr, returns en.
     static language contained_by(const string_list& words,
-        language identifier=language::none);
+        language identifier=language::none) noexcept;
 
     /// Valid dictionaries (en, es, it, fr, cs, pt, ja, ko, zh_Hans, zh_Hant).
-    static bool is_valid_dictionary(language identifier);
+    static bool is_valid_dictionary(language identifier) noexcept;
 
     /// Valid entropy values (16, 20, 24, 28, or 32 bytes).
-    static bool is_valid_entropy_size(size_t size);
+    static bool is_valid_entropy_size(size_t size) noexcept;
 
     /// Valid word counts (12, 15, 18, 21, or 24 words).
-    static bool is_valid_word_count(size_t count);
+    static bool is_valid_word_count(size_t count) noexcept;
 
-    mnemonic();
-    ////mnemonic(const mnemonic& other);
+    mnemonic() noexcept;
+    ////mnemonic(const mnemonic& other) noexcept;
 
     /// wiki.trezor.io/recovery_seed
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).
     /// Validity and should be checked after construction.
-    mnemonic(const std::string& sentence, language identifier=language::none);
-    mnemonic(const string_list& words, language identifier=language::none);
-    mnemonic(const data_chunk& entropy, language identifier=language::en);
+    mnemonic(const std::string& sentence,
+        language identifier=language::none) noexcept;
+    mnemonic(const string_list& words,
+        language identifier=language::none) noexcept;
+    mnemonic(const data_chunk& entropy,
+        language identifier=language::en) noexcept;
 
     /// wiki.trezor.io/recovery_seed
     /// Derive the "master binary seed" from the "recovery seed" and passphrase.
     /// Returns null result with non-ascii passphrase and WITH_ICU undefind.
-    long_hash to_seed(const std::string& passphrase="") const;
+    long_hash to_seed(const std::string& passphrase="") const noexcept;
 
     /// wiki.trezor.io/account_private_key
     /// Derive the "account private key" from the "master binary seed".
@@ -92,45 +95,48 @@ public:
     /// The "master binary seed" cannot be obtained from the key.
     /// Returns invalid result with non-ascii passphrase and WITH_ICU undefind.
     hd_private to_key(const std::string& passphrase="",
-        const context& context=btc_mainnet_p2kh) const;
+        const context& context=btc_mainnet_p2kh) const noexcept;
 
 protected:
     // Constructors.
     mnemonic(const data_chunk& entropy, const string_list& words,
-        language identifier);
+        language identifier) noexcept;
 
     /// Derive the checksum byte from entropy, stored in high order bits.
-    static uint8_t checksum_byte(const data_slice& entropy);
+    static uint8_t checksum_byte(const data_slice& entropy) noexcept;
 
     /// Map entropy to checksum bit count (4, 5, 6, 7, or 8 bits).
-    static size_t checksum_bits(const data_slice& entropy);
+    static size_t checksum_bits(const data_slice& entropy) noexcept;
 
     /// Map words to checksum bit count (4, 5, 6, 7, or 8 bits).
-    static size_t checksum_bits(const string_list& words);
+    static size_t checksum_bits(const string_list& words) noexcept;
 
     /// Map entropy to entropy bit count (128, 160, 192, 224, or 256 bits).
-    static size_t entropy_bits(const data_slice& entropy);
+    static size_t entropy_bits(const data_slice& entropy) noexcept;
 
     /// Map words to entropy bit count (128, 160, 192, 224, or 256 bits).
-    static size_t entropy_bits(const string_list& words);
+    static size_t entropy_bits(const string_list& words) noexcept;
 
     /// Map words to entropy size (16, 20, 24, 28, or 32 bytes).
-    static size_t entropy_size(const string_list& words);
+    static size_t entropy_size(const string_list& words) noexcept;
 
     /// Map entropy size to word count (12, 15, 18, 21, or 24 words).
-    static size_t word_count(const data_slice& entropy);
+    static size_t word_count(const data_slice& entropy) noexcept;
 
     static bool is_ambiguous(const string_list& words, language requested,
-        language derived);
+        language derived) noexcept;
 
-    static string_list encoder(const data_chunk& entropy, language identifier);
-    static data_chunk decoder(const string_list& words, language identifier);
+    static string_list encoder(const data_chunk& entropy,
+        language identifier) noexcept;
+    static data_chunk decoder(const string_list& words,
+        language identifier) noexcept;
     static long_hash seeder(const string_list& words,
-        const std::string& passphrase);
+        const std::string& passphrase) noexcept;
 
-    static mnemonic from_words(const string_list& words, language identifier);
+    static mnemonic from_words(const string_list& words,
+        language identifier) noexcept;
     static mnemonic from_entropy(const data_chunk& entropy,
-        language identifier);
+        language identifier) noexcept;
 
 private:
     // All Electrum v1 dictionaries, from <dictionaries/mnemonic.cpp>.

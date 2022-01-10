@@ -37,26 +37,26 @@ namespace wallet {
 
 /// Helper class for managing decoding overflow bug.
 /// github.com/spesmilo/electrum/issues/3149
-/// =======================================================================
+/// ===========================================================================
 
-class v1_decoding
+class BC_API v1_decoding
 {
 public:
     typedef std::vector<bool> overflow;
 
-    v1_decoding();
-    v1_decoding(const data_chunk& entropy);
-    v1_decoding(const data_chunk& entropy, const overflow& overflows);
-    const data_chunk& entropy() const;
-    const overflow& overflows() const;
-    data_chunk seed_entropy() const;
+    v1_decoding() noexcept;
+    v1_decoding(const data_chunk& entropy) noexcept;
+    v1_decoding(const data_chunk& entropy, const overflow& overflows) noexcept;
+    const data_chunk& entropy() const noexcept;
+    const overflow& overflows() const noexcept;
+    data_chunk seed_entropy() const noexcept;
 
 private:
     data_chunk entropy_;
     overflow overflows_;
 };
 
-/// =======================================================================
+/// ===========================================================================
 
 /// A wallet mnemonic, as defined by the first Electrum implementation.
 /// Converts menemonic to entropy.
@@ -86,38 +86,44 @@ public:
     /// The dictionary, limited by identifier, that contains all words.
     /// If 'none' is specified all dictionaries are searched.
     static language contained_by(const string_list& words,
-        language identifier=language::none);
+        language identifier=language::none) noexcept;
 
     /// Valid dictionaries (en, pt).
-    static bool is_valid_dictionary(language identifier);
+    static bool is_valid_dictionary(language identifier) noexcept;
 
     /// Valid entropy values (16 or 32 bytes).
-    static bool is_valid_entropy_size(size_t size);
+    static bool is_valid_entropy_size(size_t size) noexcept;
 
     /// Valid word counts (12 or 24 words).
-    static bool is_valid_word_count(size_t count);
+    static bool is_valid_word_count(size_t count) noexcept;
 
-    electrum_v1();
-    electrum_v1(const electrum_v1& other);
+    electrum_v1() noexcept;
+    electrum_v1(const electrum_v1& other) noexcept;
 
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).
     /// Validity should be checked after construction.
-    electrum_v1(const std::string& sentence, language identifier=language::none);
-    electrum_v1(const string_list& words, language identifier=language::none);
-    electrum_v1(const data_chunk& entropy, language identifier=language::en);
-    electrum_v1(const minimum_entropy& entropy, language identifier=language::en);
-    electrum_v1(const maximum_entropy& entropy, language identifier=language::en);
+    electrum_v1(const std::string& sentence,
+        language identifier=language::none) noexcept;
+    electrum_v1(const string_list& words,
+        language identifier=language::none) noexcept;
+    electrum_v1(const data_chunk& entropy,
+        language identifier=language::en) noexcept;
+    electrum_v1(const minimum_entropy& entropy,
+        language identifier=language::en) noexcept;
+    electrum_v1(const maximum_entropy& entropy,
+        language identifier=language::en) noexcept;
 
     /// Derive the "wallet seed"/"master private key" from mnemonic entropy.
     /// ec_private.secret() is the "wallet seed"/"master private key".
     /// ec_private.to_public().point() is the compressed "master public key".
     /// Context sets the version byte for derived payment addresses.
-    ec_private to_seed(const context& context=btc_mainnet_p2kh) const;
+    ec_private to_seed(const context& context=btc_mainnet_p2kh) const noexcept;
 
     /// Derive the wallet "master public key" from entropy.
     /// ec_public.point() is the compressed "master public key".
     /// Context sets the version byte for derived payment addresses.
-    ec_public to_public_key(const context& context=btc_mainnet_p2kh) const;
+    ec_public to_public_key(
+        const context& context=btc_mainnet_p2kh) const noexcept;
 
     /// True if the mnemonic words were incorrectly generated.
     /// An overflow does not affect the validity of the object.
@@ -125,13 +131,13 @@ public:
     /// valid by Electrum (for reasons of backward compatibility). This can only
     /// result from manually-generated menmonics, which were inadvertently
     /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
-    bool overflow() const;
+    bool overflow() const noexcept;
 
     /// Assignment.
-    electrum_v1& operator=(electrum_v1 other);
+    electrum_v1& operator=(electrum_v1 other) noexcept;
 
     /// Swap implementation required to properly handle derived class assign.
-    friend void swap(electrum_v1& left, electrum_v1& right);
+    friend void swap(electrum_v1& left, electrum_v1& right) noexcept;
 
 protected:
     /// Helpers for managing decoding overflow state.
@@ -143,40 +149,42 @@ protected:
     /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
     /// populated to the length [word-count / word_multiple] if the instance is
     /// word-initialized and valid, otherwise the value is empty.
-    const v1_decoding::overflow& overflows() const;
+    const v1_decoding::overflow& overflows() const noexcept;
 
     /// This is the denormalized entropy, used for seeding.
     /// The base16 entropy encoding is converted to data with overflows.
-    data_chunk seed_entropy() const;
+    data_chunk seed_entropy() const noexcept;
 
     /// =======================================================================
 
     /// Constructors.
     electrum_v1(const data_chunk& entropy, const string_list& words,
-        language identifier);
+        language identifier) noexcept;
     electrum_v1(const v1_decoding& decoding, const string_list& words,
-        language identifier);
+        language identifier) noexcept;
 
     /// Map entropy to entropy bit count (128 or 256 bits).
-    static size_t entropy_bits(const data_slice& entropy);
+    static size_t entropy_bits(const data_slice& entropy) noexcept;
 
     /// Map words to entropy bit count (128 or 256 bits).
-    static size_t entropy_bits(const string_list& words);
+    static size_t entropy_bits(const string_list& words) noexcept;
 
     /// Map words to entropy size (16 or 32 bytes).
-    static size_t entropy_size(const string_list& words);
+    static size_t entropy_size(const string_list& words) noexcept;
 
     /// Map entropy size to word count (12 or 24 words).
-    static size_t word_count(const data_slice& entropy);
+    static size_t word_count(const data_slice& entropy) noexcept;
 
-    static v1_decoding decoder(const string_list& words, language identifier);
-    static string_list encoder(const data_chunk& entropy, language identifier);
-    static ec_secret strecher(const data_chunk& seed_entropy);
+    static v1_decoding decoder(const string_list& words,
+        language identifier) noexcept;
+    static string_list encoder(const data_chunk& entropy,
+        language identifier) noexcept;
+    static ec_secret strecher(const data_chunk& seed_entropy) noexcept;
 
     static electrum_v1 from_words(const string_list& words,
-        language identifier);
+        language identifier) noexcept;
     static electrum_v1 from_entropy(const data_chunk& entropy,
-        language identifier);
+        language identifier) noexcept;
 
 private:
     // All Electrum v1 dictionaries, from <dictionaries/electrum_v1.cpp>.

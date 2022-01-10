@@ -25,7 +25,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-static bool check_minikey(const std::string& minikey)
+static bool check_minikey(const std::string& minikey) noexcept
 {
     // Legacy minikeys are 22 chars long.
     const auto size = minikey.size();
@@ -33,7 +33,7 @@ static bool check_minikey(const std::string& minikey)
     return valid && sha256_hash(minikey + "?").front() == 0x00;
 }
 
-bool minikey_to_secret(ec_secret& out_secret, const std::string& key)
+bool minikey_to_secret(ec_secret& out_secret, const std::string& key) noexcept
 {
     if (!check_minikey(key))
         return false;

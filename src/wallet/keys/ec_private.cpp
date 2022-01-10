@@ -45,43 +45,43 @@ const uint8_t ec_private::testnet_wif = 0xef;
 const uint8_t ec_private::testnet_p2kh = 0x6f;
 const uint16_t ec_private::testnet = to_versions(testnet_p2kh, testnet_wif);
 
-ec_private::ec_private()
+ec_private::ec_private() noexcept
   : ec_private(ec_scalar{})
 {
 }
 
-ec_private::ec_private(const ec_scalar& scalar, uint8_t address)
+ec_private::ec_private(const ec_scalar& scalar, uint8_t address) noexcept
   : ec_scalar(scalar), compress_(true), versions_(address)
 {
 }
 
-ec_private::ec_private(const ec_private& other)
+ec_private::ec_private(const ec_private& other) noexcept
   : ec_scalar(other), compress_(other.compress_), versions_(other.versions_)
 {
 }
 
-ec_private::ec_private(const data_chunk& entropy, uint8_t address)
+ec_private::ec_private(const data_chunk& entropy, uint8_t address) noexcept
   : ec_private(from_entropy(entropy, address))
 {
 }
 
-ec_private::ec_private(const std::string& wif, uint8_t address)
+ec_private::ec_private(const std::string& wif, uint8_t address) noexcept
   : ec_private(from_string(wif, address))
 {
 }
 
-ec_private::ec_private(const wif_compressed& wif, uint8_t address)
+ec_private::ec_private(const wif_compressed& wif, uint8_t address) noexcept
   : ec_private(from_compressed(wif, address))
 {
 }
 
-ec_private::ec_private(const wif_uncompressed& wif, uint8_t address)
+ec_private::ec_private(const wif_uncompressed& wif, uint8_t address) noexcept
   : ec_private(from_uncompressed(wif, address))
 {
 }
 
 ec_private::ec_private(const ec_secret& secret, uint16_t versions,
-    bool compress)
+    bool compress) noexcept
   : ec_scalar(secret), compress_(compress), versions_(versions)
 {
 }
@@ -89,7 +89,7 @@ ec_private::ec_private(const ec_secret& secret, uint16_t versions,
 // Validators.
 // ----------------------------------------------------------------------------
 
-bool ec_private::is_wif(const data_slice& decoded)
+bool ec_private::is_wif(const data_slice& decoded) noexcept
 {
     const auto size = decoded.size();
     if (size != wif_compressed_size && size != wif_uncompressed_size)
@@ -106,7 +106,7 @@ bool ec_private::is_wif(const data_slice& decoded)
 // ----------------------------------------------------------------------------
 
 ec_private ec_private::from_string(const std::string& wif,
-    uint8_t address)
+    uint8_t address) noexcept
 {
     data_chunk decoded;
     if (!decode_base58(decoded, wif) || !is_wif(decoded))
@@ -119,7 +119,7 @@ ec_private ec_private::from_string(const std::string& wif,
 }
 
 ec_private ec_private::from_compressed(const wif_compressed& wif,
-    uint8_t address)
+    uint8_t address) noexcept
 {
     if (!is_wif(wif))
         return {};
@@ -130,7 +130,7 @@ ec_private ec_private::from_compressed(const wif_compressed& wif,
 }
 
 ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
-    uint8_t address)
+    uint8_t address) noexcept
 {
     if (!is_wif(wif))
         return {};
@@ -141,7 +141,7 @@ ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
 }
 
 ec_private ec_private::from_entropy(const data_chunk& entropy,
-    uint8_t version)
+    uint8_t version) noexcept
 {
     // This technique ensures consistent secrets with BIP32 from a given seed.
     const hd_private key(entropy);
@@ -157,7 +157,7 @@ ec_private ec_private::from_entropy(const data_chunk& entropy,
 // ----------------------------------------------------------------------------
 
 // Conversion to WIF loses payment address version info.
-std::string ec_private::encoded() const
+std::string ec_private::encoded() const noexcept
 {
     const auto prefix = to_array(wif_version());
 
@@ -180,22 +180,22 @@ std::string ec_private::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-uint16_t ec_private::versions() const
+uint16_t ec_private::versions() const noexcept
 {
     return versions_;
 }
 
-uint8_t ec_private::payment_version() const
+uint8_t ec_private::payment_version() const noexcept
 {
     return to_address_version(versions_);
 }
 
-uint8_t ec_private::wif_version() const
+uint8_t ec_private::wif_version() const noexcept
 {
     return to_wif_version(versions_);
 }
 
-bool ec_private::compressed() const
+bool ec_private::compressed() const noexcept
 {
     return compress_;
 }
@@ -205,7 +205,7 @@ bool ec_private::compressed() const
 
 // Conversion to ec_public loses all version information.
 // In the case of failure the key is always compressed (ec_compressed_null).
-ec_public ec_private::to_public() const
+ec_public ec_private::to_public() const noexcept
 {
     if (!(*this))
         return {};
@@ -217,7 +217,7 @@ ec_public ec_private::to_public() const
     return { point, compressed() };
 }
 
-payment_address ec_private::to_payment_address() const
+payment_address ec_private::to_payment_address() const noexcept
 {
     return { *this };
 }
@@ -225,25 +225,25 @@ payment_address ec_private::to_payment_address() const
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_private& ec_private::operator=(ec_private other)
+ec_private& ec_private::operator=(ec_private other) noexcept
 {
     swap(*this, other);
     return *this;
 }
 
-bool ec_private::operator<(const ec_private& other) const
+bool ec_private::operator<(const ec_private& other) const noexcept
 {
     return encoded() < other.encoded();
 }
 
-bool ec_private::operator==(const ec_private& other) const
+bool ec_private::operator==(const ec_private& other) const noexcept
 {
     return
         compress_ == other.compress_ && versions_ == other.versions_ &&
         secret() == other.secret();
 }
 
-bool ec_private::operator!=(const ec_private& other) const
+bool ec_private::operator!=(const ec_private& other) const noexcept
 {
     return !(*this == other);
 }
@@ -260,14 +260,14 @@ std::istream& operator>>(std::istream& in, ec_private& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ec_private& of)
+std::ostream& operator<<(std::ostream& out, const ec_private& of) noexcept
 {
     out << of.encoded();
     return out;
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(ec_private& left, ec_private& right)
+void swap(ec_private& left, ec_private& right) noexcept
 {
     using std::swap;
 

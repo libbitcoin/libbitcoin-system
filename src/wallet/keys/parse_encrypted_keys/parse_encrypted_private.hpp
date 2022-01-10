@@ -35,18 +35,18 @@ class parse_encrypted_private
 {
 public:
     static data_array<prefix_size> prefix_factory(uint8_t address,
-        bool multiplied);
+        bool multiplied) noexcept;
 
-    explicit parse_encrypted_private(const encrypted_private& key);
+    explicit parse_encrypted_private(const encrypted_private& key) noexcept;
 
-    bool multiplied() const;
-    uint8_t address_version() const;
+    bool multiplied() const noexcept;
+    uint8_t address_version() const noexcept;
 
-    quarter_hash data1() const;
-    half_hash data2() const;
+    quarter_hash data1() const noexcept;
+    half_hash data2() const noexcept;
 
 private:
-    bool verify_magic() const;
+    bool verify_magic() const noexcept;
 
     static constexpr uint8_t default_context_ = 0x42;
     static constexpr uint8_t multiplied_context_ = 0x43;

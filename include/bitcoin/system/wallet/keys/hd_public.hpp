@@ -50,8 +50,8 @@ struct BC_API hd_lineage
     uint32_t parent_fingerprint;
     uint32_t child_number;
 
-    bool operator==(const hd_lineage& other) const;
-    bool operator!=(const hd_lineage& other) const;
+    bool operator==(const hd_lineage& other) const noexcept;
+    bool operator!=(const hd_lineage& other) const noexcept;
 };
 
 class hd_private;
@@ -63,50 +63,51 @@ public:
     static const uint32_t mainnet;
     static const uint32_t testnet;
 
-    static uint32_t to_prefix(uint64_t prefixes)
+    static uint32_t to_prefix(uint64_t prefixes) noexcept
     {
         return prefixes & 0x00000000ffffffff;
     }
 
     /// Constructors.
-    hd_public();
-    hd_public(const hd_public& other);
-    hd_public(const hd_key& public_key);
-    hd_public(const hd_key& public_key, uint32_t prefix);
-    hd_public(const std::string& encoded);
-    hd_public(const std::string& encoded, uint32_t prefix);
+    hd_public() noexcept;
+    hd_public(const hd_public& other) noexcept;
+    hd_public(const hd_key& public_key) noexcept;
+    hd_public(const hd_key& public_key, uint32_t prefix) noexcept;
+    hd_public(const std::string& encoded) noexcept;
+    hd_public(const std::string& encoded, uint32_t prefix) noexcept;
 
     /// Operators.
-    bool operator<(const hd_public& other) const;
-    bool operator==(const hd_public& other) const;
-    bool operator!=(const hd_public& other) const;
-    hd_public& operator=(const hd_public& other);
+    bool operator<(const hd_public& other) const noexcept;
+    bool operator==(const hd_public& other) const noexcept;
+    bool operator!=(const hd_public& other) const noexcept;
+    hd_public& operator=(const hd_public& other) noexcept;
     friend std::istream& operator>>(std::istream& in, hd_public& to);
-    friend std::ostream& operator<<(std::ostream& out, const hd_public& of);
+    friend std::ostream& operator<<(std::ostream& out,
+        const hd_public& of) noexcept;
 
     /// Cast operators.
-    operator bool() const;
-    operator const ec_compressed&() const;
+    operator bool() const noexcept;
+    operator const ec_compressed&() const noexcept;
 
     /// Serializer.
-    std::string encoded() const;
+    std::string encoded() const noexcept;
 
     /// Accessors.
-    const hd_chain_code& chain_code() const;
-    const hd_lineage& lineage() const;
-    const ec_compressed& point() const;
+    const hd_chain_code& chain_code() const noexcept;
+    const hd_lineage& lineage() const noexcept;
+    const ec_compressed& point() const noexcept;
 
     /// Methods.
-    hd_key to_hd_key() const;
-    hd_public derive_public(uint32_t index) const;
+    hd_key to_hd_key() const noexcept;
+    hd_public derive_public(uint32_t index) const noexcept;
 
 protected:
     /// Factories.
     static hd_public from_secret(const ec_secret& secret,
-        const hd_chain_code& chain_code, const hd_lineage& lineage);
+        const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept;
 
     /// Helpers.
-    uint32_t fingerprint() const;
+    uint32_t fingerprint() const noexcept;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.
@@ -116,13 +117,15 @@ protected:
     ec_compressed point_;
 
 private:
-    static hd_public from_key(const hd_key& public_key);
-    static hd_public from_string(const std::string& encoded);
-    static hd_public from_key(const hd_key& public_key, uint32_t prefix);
-    static hd_public from_string(const std::string& encoded, uint32_t prefix);
+    static hd_public from_key(const hd_key& public_key) noexcept;
+    static hd_public from_string(const std::string& encoded) noexcept;
+    static hd_public from_key(const hd_key& public_key,
+        uint32_t prefix) noexcept;
+    static hd_public from_string(const std::string& encoded,
+        uint32_t prefix) noexcept;
 
     hd_public(const ec_compressed& point,
-        const hd_chain_code& chain_code, const hd_lineage& lineage);
+        const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept;
 };
 
 } // namespace wallet

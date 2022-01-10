@@ -30,27 +30,27 @@ namespace wallet {
 // Constructors.
 //-------------------------------------------------------------------------
 
-point_value::point_value()
+point_value::point_value() noexcept
   : point(), value_(0)
 {
 }
 
-point_value::point_value(point_value&& other)
+point_value::point_value(point_value&& other) noexcept
   : value_(other.value_), point(std::move(other))
 {
 }
 
-point_value::point_value(const point_value& other)
+point_value::point_value(const point_value& other) noexcept
   : point(other), value_(other.value_)
 {
 }
 
-point_value::point_value(point&& instance, uint64_t value)
+point_value::point_value(point&& instance, uint64_t value) noexcept
   : point(std::move(instance)), value_(value)
 {
 }
 
-point_value::point_value(const point& instance, uint64_t value)
+point_value::point_value(const point& instance, uint64_t value) noexcept
   : point(instance), value_(value)
 {
 }
@@ -59,25 +59,25 @@ point_value::point_value(const point& instance, uint64_t value)
 //-------------------------------------------------------------------------
 
 // Copy and swap idiom, see: stackoverflow.com/a/3279550/1172329
-point_value& point_value::operator=(point_value other)
+point_value& point_value::operator=(point_value other) noexcept
 {
     swap(*this, other);
     return *this;
 }
 
-bool point_value::operator==(const point_value& other) const
+bool point_value::operator==(const point_value& other) const noexcept
 {
     return static_cast<point>(*this) == static_cast<point>(other) &&
         (value_ == other.value_);
 }
 
-bool point_value::operator!=(const point_value& other) const
+bool point_value::operator!=(const point_value& other) const noexcept
 {
     return !(*this == other);
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(point_value& left, point_value& right)
+void swap(point_value& left, point_value& right) noexcept
 {
     using std::swap;
     using namespace chain;
@@ -90,12 +90,12 @@ void swap(point_value& left, point_value& right)
 // Properties (accessors).
 //-------------------------------------------------------------------------
 
-uint64_t point_value::value() const
+uint64_t point_value::value() const noexcept
 {
     return value_;
 }
 
-void point_value::set_value(uint64_t value)
+void point_value::set_value(uint64_t value) noexcept
 {
     value_ = value;
 }

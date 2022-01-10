@@ -30,22 +30,22 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-ek_public::ek_public()
+ek_public::ek_public() noexcept
   : valid_(false), public_()
 {
 }
 
-ek_public::ek_public(const std::string& encoded)
+ek_public::ek_public(const std::string& encoded) noexcept
   : ek_public(from_string(encoded))
 {
 }
 
-ek_public::ek_public(const ek_public& other)
+ek_public::ek_public(const ek_public& other) noexcept
   : valid_(other.valid_), public_(other.public_)
 {
 }
 
-ek_public::ek_public(const encrypted_public& value)
+ek_public::ek_public(const encrypted_public& value) noexcept
   : valid_(true), public_(value)
 {
 }
@@ -53,7 +53,7 @@ ek_public::ek_public(const encrypted_public& value)
 // Factories.
 // ----------------------------------------------------------------------------
 
-ek_public ek_public::from_string(const std::string& encoded)
+ek_public ek_public::from_string(const std::string& encoded) noexcept
 {
     // TODO: incorporate existing parser here, setting new members.
 
@@ -65,12 +65,12 @@ ek_public ek_public::from_string(const std::string& encoded)
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_public::operator bool() const
+ek_public::operator bool() const noexcept
 {
     return valid_;
 }
 
-ek_public::operator const encrypted_public&() const
+ek_public::operator const encrypted_public&() const noexcept
 {
     return public_;
 }
@@ -78,7 +78,7 @@ ek_public::operator const encrypted_public&() const
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string ek_public::encoded() const
+std::string ek_public::encoded() const noexcept
 {
     return encode_base58(public_);
 }
@@ -86,7 +86,7 @@ std::string ek_public::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const encrypted_public& ek_public::public_key() const
+const encrypted_public& ek_public::public_key() const noexcept
 {
     return public_;
 }
@@ -94,24 +94,24 @@ const encrypted_public& ek_public::public_key() const
 // Operators.
 // ----------------------------------------------------------------------------
 
-ek_public& ek_public::operator=(const ek_public& other)
+ek_public& ek_public::operator=(const ek_public& other) noexcept
 {
     valid_ = other.valid_;
     public_ = other.public_;
     return *this;
 }
 
-bool ek_public::operator<(const ek_public& other) const
+bool ek_public::operator<(const ek_public& other) const noexcept
 {
     return encoded() < other.encoded();
 }
 
-bool ek_public::operator==(const ek_public& other) const
+bool ek_public::operator==(const ek_public& other) const noexcept
 {
     return valid_ == other.valid_ && public_ == other.public_;
 }
 
-bool ek_public::operator!=(const ek_public& other) const
+bool ek_public::operator!=(const ek_public& other) const noexcept
 {
     return !(*this == other);
 }
@@ -128,7 +128,7 @@ std::istream& operator>>(std::istream& in, ek_public& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ek_public& of)
+std::ostream& operator<<(std::ostream& out, const ek_public& of) noexcept
 {
     out << of.encoded();
     return out;

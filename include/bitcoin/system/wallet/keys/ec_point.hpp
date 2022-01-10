@@ -41,42 +41,42 @@ public:
     static const ec_point generator;
 
     /// Constructors.
-    ec_point();
-    ec_point(ec_point&& point);
-    ec_point(const ec_point& point);
-    ec_point(ec_compressed&& compressed);
-    ec_point(const ec_compressed& compressed);
+    ec_point() noexcept;
+    ec_point(ec_point&& point) noexcept;
+    ec_point(const ec_point& point) noexcept;
+    ec_point(ec_compressed&& compressed) noexcept;
+    ec_point(const ec_compressed& compressed) noexcept;
 
     /// Operators.
-    ec_point& operator=(ec_point&& point);
-    ec_point& operator=(const ec_point& point);
-    ec_point& operator=(ec_compressed&& compressed);
-    ec_point& operator=(const ec_compressed& compressed);
-    ec_point& operator+=(const ec_point& point);
-    ec_point& operator-=(const ec_point& point);
-    ec_point& operator*=(const ec_scalar& scalar);
-    ec_point operator-() const;
+    ec_point& operator=(ec_point&& point) noexcept;
+    ec_point& operator=(const ec_point& point) noexcept;
+    ec_point& operator=(ec_compressed&& compressed) noexcept;
+    ec_point& operator=(const ec_compressed& compressed) noexcept;
+    ec_point& operator+=(const ec_point& point) noexcept;
+    ec_point& operator-=(const ec_point& point) noexcept;
+    ec_point& operator*=(const ec_scalar& scalar) noexcept;
+    ec_point operator-() const noexcept;
 
     /// Cast operators.
-    operator bool() const;
-    operator const ec_compressed&() const;
+    operator bool() const noexcept;
+    operator const ec_compressed&() const noexcept;
 
     /// Accessors.
-    const ec_compressed& point() const;
+    const ec_compressed& point() const noexcept;
 
 private:
-    bool is_valid() const;
+    bool is_valid() const noexcept;
 
     // This should be const, apart from the need to implement assignment.
     ec_compressed point_;
 };
 
-bool operator==(const ec_point& left, const ec_point& right);
-bool operator!=(const ec_point& left, const ec_point& right);
-ec_point operator+(const ec_point& left, const ec_point& right);
-ec_point operator-(const ec_point& left, const ec_point& right);
-ec_point operator*(const ec_point& left, const ec_scalar& right);
-ec_point operator*(const ec_scalar& left, const ec_point& right);
+bool operator==(const ec_point& left, const ec_point& right) noexcept;
+bool operator!=(const ec_point& left, const ec_point& right) noexcept;
+ec_point operator+(const ec_point& left, const ec_point& right) noexcept;
+ec_point operator-(const ec_point& left, const ec_point& right) noexcept;
+ec_point operator*(const ec_point& left, const ec_scalar& right) noexcept;
+ec_point operator*(const ec_scalar& left, const ec_point& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

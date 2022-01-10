@@ -239,13 +239,13 @@ struct BC_API context
     /// WIF (legacy private key) version byte.
     uint8_t wif_prefix;
 
-    uint64_t hd_prefixes() const
+    uint64_t hd_prefixes() const noexcept
     {
         // TODO: inconsistent order: private, public
         return hd_private::to_prefixes(hd_prefix.xprv, hd_prefix.xpub);
     }
 
-    uint16_t versions() const
+    uint16_t versions() const noexcept
     {
         // TODO: inconsistency order: public, private
         return ec_private::to_versions(address_version, wif_prefix);

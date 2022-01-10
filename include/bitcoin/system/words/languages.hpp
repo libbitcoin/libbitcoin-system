@@ -38,65 +38,67 @@ public:
     // ------------------------------------------------------------------------
 
     /// The language id of the language name, language::none if not found.
-    static language from_name(const std::string& name);
+    static language from_name(const std::string& name) noexcept;
 
     /// The name of the specified language, empty string if not found.
-    static std::string to_name(language identifier);
+    static std::string to_name(language identifier) noexcept;
 
     /// The mnemonic delimiter for the given language.
-    static std::string to_delimiter(language identifier);
+    static std::string to_delimiter(language identifier) noexcept;
 
     /// All languages except reference::ja are joined by an ASCII space.
-    static std::string join(const string_list& words, language identifier);
+    static std::string join(const string_list& words,
+        language identifier) noexcept;
 
     /// There is no trimming or token compression for reference::ja.
     /// All other languages are split and trimmed on ASCII whitespace.
-    static string_list split(const std::string& sentence, language identifier);
+    static string_list split(const std::string& sentence,
+        language identifier) noexcept;
 
     // constructors
     // ------------------------------------------------------------------------
 
     /// Class is not constructable but this is exposed for derived assignment.
-    languages(const languages& other);
+    languages(const languages& other) noexcept;
 
     // public methods
     // ------------------------------------------------------------------------
 
     /// The entropy of the mnemonic (not to be confused with the seed).
-    const data_chunk& entropy() const;
+    const data_chunk& entropy() const noexcept;
 
     /// The dictionary language of the mnemonic.
-    language lingo() const;
+    language lingo() const noexcept;
 
     /// The mnemonic sentence, Japanese joined by an ideographic space.
-    std::string sentence() const;
+    std::string sentence() const noexcept;
 
     /// The individual words of the mnemonic.
-    const string_list& words() const;
+    const string_list& words() const noexcept;
 
     // operators
     // ------------------------------------------------------------------------
 
     /// True if the object is a valid mnemonic.
-    operator bool() const;
+    operator bool() const noexcept;
 
     /// Lexical compares of mnemonic sentences.
-    bool operator<(const languages& other) const;
-    bool operator==(const languages& other) const;
-    bool operator!=(const languages& other) const;
+    bool operator<(const languages& other) const noexcept;
+    bool operator==(const languages& other) const noexcept;
+    bool operator!=(const languages& other) const noexcept;
 
     /// Assignment.
-    languages& operator=(const languages& other);
+    languages& operator=(const languages& other) noexcept;
 
 protected:
-    languages();
+    languages() noexcept;
     languages(const data_chunk& entropy, const string_list& words,
-        language identifier);
+        language identifier) noexcept;
 
     // Normalizes ascii whitespace and attempts nfkd and case lowering.
     // Both nfkd and case lowering are skipped if WITH_ICU undefined.
     // This is only used to improve the chance of wordlist matching.
-    static string_list try_normalize(const string_list& words);
+    static string_list try_normalize(const string_list& words) noexcept;
 
     // These should be const, apart from the need to implement assignment.
     data_chunk entropy_;
@@ -105,7 +107,7 @@ protected:
 };
 
 template <class Type, if_base_of<languages, Type> = true>
-std::istream& operator>>(std::istream& in, Type& out)
+std::istream& operator>>(std::istream& in, Type& out) noexcept
 {
     std::istreambuf_iterator<char> begin(in), end;
     const auto value = std::string(begin, end);
@@ -118,7 +120,7 @@ std::istream& operator>>(std::istream& in, Type& out)
 }
 
 template <class Type, if_base_of<languages, Type> = true>
-std::ostream& operator<<(std::ostream& out, const Type& in)
+std::ostream& operator<<(std::ostream& out, const Type& in) noexcept
 {
     out << in.sentence();
     return out;

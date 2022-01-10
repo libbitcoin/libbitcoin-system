@@ -39,13 +39,14 @@ parse_encrypted_public::magic_
 };
 
 data_array<parse_encrypted_public::prefix_size>
-parse_encrypted_public::prefix_factory(uint8_t address)
+parse_encrypted_public::prefix_factory(uint8_t address) noexcept
 {
     const auto context = default_context_ + address;
     return splice(magic_, to_array(context));
 }
 
-parse_encrypted_public::parse_encrypted_public(const encrypted_public& key)
+parse_encrypted_public::parse_encrypted_public(
+    const encrypted_public& key) noexcept
   : parse_encrypted_key<prefix_size>(
         slice<0, 5>(key),
         slice<5, 6>(key),
@@ -57,22 +58,22 @@ parse_encrypted_public::parse_encrypted_public(const encrypted_public& key)
     valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_encrypted_public::address_version() const
+uint8_t parse_encrypted_public::address_version() const noexcept
 {
     return context() - default_context_;
 }
 
-hash_digest parse_encrypted_public::data() const
+hash_digest parse_encrypted_public::data() const noexcept
 {
     return data_;
 }
 
-one_byte parse_encrypted_public::sign() const
+one_byte parse_encrypted_public::sign() const noexcept
 {
     return sign_;
 }
 
-bool parse_encrypted_public::verify_magic() const
+bool parse_encrypted_public::verify_magic() const noexcept
 {
     return slice<zero, magic_size>(prefix()) == magic_;
 }

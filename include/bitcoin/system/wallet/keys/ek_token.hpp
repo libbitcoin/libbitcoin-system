@@ -35,32 +35,33 @@ class BC_API ek_token
 {
 public:
     /// Constructors.
-    ek_token();
-    ek_token(const std::string& encoded);
-    ek_token(const encrypted_token& key);
-    ek_token(const ek_token& other);
+    ek_token() noexcept;
+    ek_token(const std::string& encoded) noexcept;
+    ek_token(const encrypted_token& key) noexcept;
+    ek_token(const ek_token& other) noexcept;
 
     /// Operators.
-    bool operator<(const ek_token& other) const;
-    bool operator==(const ek_token& other) const;
-    bool operator!=(const ek_token& other) const;
-    ek_token& operator=(const ek_token& other);
+    bool operator<(const ek_token& other) const noexcept;
+    bool operator==(const ek_token& other) const noexcept;
+    bool operator!=(const ek_token& other) const noexcept;
+    ek_token& operator=(const ek_token& other) noexcept;
     friend std::istream& operator>>(std::istream& in, ek_token& to);
-    friend std::ostream& operator<<(std::ostream& out, const ek_token& of);
+    friend std::ostream& operator<<(std::ostream& out,
+        const ek_token& of) noexcept;
 
     /// Cast operators.
-    operator bool() const;
-    operator const encrypted_token&() const;
+    operator bool() const noexcept;
+    operator const encrypted_token&() const noexcept;
 
     /// Serializer.
-    std::string encoded() const;
+    std::string encoded() const noexcept;
 
     /// Accessors.
-    const encrypted_token& token() const;
+    const encrypted_token& token() const noexcept;
 
 private:
     /// Factories.
-    static ek_token from_string(const std::string& encoded);
+    static ek_token from_string(const std::string& encoded) noexcept;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.

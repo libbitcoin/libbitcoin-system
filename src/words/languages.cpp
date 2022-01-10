@@ -54,10 +54,10 @@ static const language_map map
 // static methods
 // ----------------------------------------------------------------------------
 
-language languages::from_name(const std::string& name)
+language languages::from_name(const std::string& name) noexcept
 {
     const auto it = std::find_if(map.begin(), map.end(),
-        [&](const language_map::value_type& pair)
+        [&](const language_map::value_type& pair) noexcept
         {
             return pair.second == name;
         });
@@ -65,10 +65,10 @@ language languages::from_name(const std::string& name)
     return it != map.end() ? it->first : language::none;
 }
 
-std::string languages::to_name(language identifier)
+std::string languages::to_name(language identifier) noexcept
 {
     const auto it = std::find_if(map.begin(), map.end(),
-        [&](const language_map::value_type& pair)
+        [&](const language_map::value_type& pair) noexcept
         {
             return pair.first == identifier;
         });
@@ -76,32 +76,33 @@ std::string languages::to_name(language identifier)
     return it != map.end() ? it->second : "";
 }
 
-std::string languages::to_delimiter(language identifier)
+std::string languages::to_delimiter(language identifier) noexcept
 {
     return identifier == language::ja ? ideographic_space : ascii_space;
 }
 
-std::string languages::join(const string_list& words, language identifier)
+std::string languages::join(const string_list& words,
+    language identifier) noexcept
 {
     // Language is specialized for joining in japanese.
     return system::join(words, to_delimiter(identifier));
 }
 
-string_list languages::split(const std::string& sentence, language)
+string_list languages::split(const std::string& sentence, language) noexcept
 {
     // Language is not currently specialized for splitting.
     return system::split(sentence, unicode_separators, unicode_whitespace);
 }
 
 // protected
-string_list languages::try_normalize(const string_list& words)
+string_list languages::try_normalize(const string_list& words) noexcept
 {
     string_list normal(words.size());
 
     // This is only used for dictionary matching.
     // All dictionaries are confirmed via test cases to be lower/nfkd.
     std::transform(words.begin(), words.end(), normal.begin(),
-        [](const std::string& word)
+        [](const std::string& word) noexcept
         {
             auto token = ascii_to_lower(trim_copy(word, unicode_whitespace));
             to_compatibility_decomposition(token);
@@ -116,12 +117,12 @@ string_list languages::try_normalize(const string_list& words)
 // ----------------------------------------------------------------------------
 
 // protected
-languages::languages()
+languages::languages() noexcept
   : entropy_(), words_(), identifier_(language::none)
 {
 }
 
-languages::languages(const languages& other)
+languages::languages(const languages& other) noexcept
   : entropy_(other.entropy_), words_(other.words_),
     identifier_(other.identifier_)
 {
@@ -129,7 +130,7 @@ languages::languages(const languages& other)
 
 // protected
 languages::languages(const data_chunk& entropy, const string_list& words,
-    language identifier)
+    language identifier) noexcept
   : entropy_(entropy), words_(words), identifier_(identifier)
 {
 }
@@ -137,22 +138,22 @@ languages::languages(const data_chunk& entropy, const string_list& words,
 // public methods
 // ----------------------------------------------------------------------------
 
-const data_chunk& languages::entropy() const
+const data_chunk& languages::entropy() const noexcept
 {
     return entropy_;
 }
 
-language languages::lingo() const
+language languages::lingo() const noexcept
 {
     return identifier_;
 }
 
-std::string languages::sentence() const
+std::string languages::sentence() const noexcept
 {
     return join(words(), lingo());
 }
 
-const string_list& languages::words() const
+const string_list& languages::words() const noexcept
 {
     return words_;
 }
@@ -160,12 +161,12 @@ const string_list& languages::words() const
 // operators
 // ----------------------------------------------------------------------------
 
-languages::operator bool() const
+languages::operator bool() const noexcept
 {
     return !entropy_.empty();
 }
 
-languages& languages::operator=(const languages& other)
+languages& languages::operator=(const languages& other) noexcept
 {
     entropy_ = other.entropy_;
     words_ = other.words_;
@@ -173,12 +174,12 @@ languages& languages::operator=(const languages& other)
     return *this;
 }
 
-bool languages::operator<(const languages& other) const
+bool languages::operator<(const languages& other) const noexcept
 {
     return sentence() < other.sentence();
 }
 
-bool languages::operator==(const languages& other) const
+bool languages::operator==(const languages& other) const noexcept
 {
     // Words and entropy are equivalent except in the case of electrum_v1
     // overflows. Comparing here prevents the need for electrum_v1 override.
@@ -186,7 +187,7 @@ bool languages::operator==(const languages& other) const
         words_ == other.words_;
 }
 
-bool languages::operator!=(const languages& other) const
+bool languages::operator!=(const languages& other) const noexcept
 {
     return !(*this == other);
 }

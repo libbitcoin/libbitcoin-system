@@ -36,15 +36,16 @@ class parse_encrypted_key
 {
 public:
     parse_encrypted_key(const data_array<PrefixSize>& prefix,
-        const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
+        const one_byte& flags, const ek_salt& salt,
+        const ek_entropy& entropy) noexcept;
 
-    bool compressed() const;
-    bool lot_sequence() const;
-    data_chunk owner_salt() const;
+    bool compressed() const noexcept;
+    bool lot_sequence() const noexcept;
+    data_chunk owner_salt() const noexcept;
 
-    uint8_t flags() const;
-    ek_salt salt() const;
-    ek_entropy entropy() const;
+    uint8_t flags() const noexcept;
+    ek_salt salt() const noexcept;
+    ek_entropy entropy() const noexcept;
 
 private:
     const one_byte flags_;

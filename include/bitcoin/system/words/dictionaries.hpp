@@ -45,43 +45,43 @@ public:
     typedef std::array<dictionary<Size>, Count> list;
 
     /// The number of dictionaries.
-    static constexpr size_t count() { return Count; };
+    static constexpr size_t count() noexcept { return Count; };
 
     /// The number of words in each dictionary (all are the same size).
-    static constexpr size_t size() { return Size; };
+    static constexpr size_t size() noexcept { return Size; };
 
     /// Constructor.
-    dictionaries(const list& dictionaries);
+    dictionaries(const list& dictionaries) noexcept;
 
     /// True if the specified dictionary exists.
-    bool exists(language identifier) const;
+    bool exists(language identifier) const noexcept;
 
     /// The language id of the dictionary name, language::none if not contained.
-    language to_identifier(const std::string& name) const;
+    language to_identifier(const std::string& name) const noexcept;
 
     /// The name of the specified dictionary, empty string if not contained.
-    std::string to_name(language identifier) const;
+    std::string to_name(language identifier) const noexcept;
 
     /// Search.
 
     /// The word corresponding to the index in the specified language.
     /// Empty string if language does not exist.
-    std::string at(size_t index, language identifier) const;
+    std::string at(size_t index, language identifier) const noexcept;
 
     /// Empty string for any index > Size.
     /// The word corresponding to each index in the specified language.
     /// The words are returned in the same order as the indexes list.
     /// Empty list if language does not exist.
-    string_list at(const search& indexes, language identifier) const;
+    string_list at(const search& indexes, language identifier) const noexcept;
 
     /// -1 if word is not found in the specified language.
-    int32_t index(const std::string& word, language identifier) const;
+    int32_t index(const std::string& word, language identifier) const noexcept;
 
     /// -1 for any word that is not found in the specified language.
     /// The word index for each word that is found in the specified language.
     /// The word indexes are returned in the same order as the words list.
     /// Empty list if language does not exist.
-    result index(const string_list& words, language identifier) const;
+    result index(const string_list& words, language identifier) const noexcept;
 
     /// The language that contains the specified word, or language::none.
     /// If language::none is specified all dictionaries are searched.
@@ -89,7 +89,7 @@ public:
     /// Dictionary order is not preserved in the case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const std::string& word,
-        language identifier=language::none) const;
+        language identifier=language::none) const noexcept;
 
     /// The language that contains all specified words, or language::none.
     /// If language::none is specified all dictionaries are searched.
@@ -97,12 +97,14 @@ public:
     /// Dictionary order is not preserved in the case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const string_list& words,
-        language identifier=language::none) const;
+        language identifier=language::none) const noexcept;
 
 private:
     // Obtain an iterator to the specified dictionary.
-    typename list::const_iterator to_dictionary(language identifier) const;
-    typename list::const_iterator to_dictionary(const std::string& name) const;
+    typename list::const_iterator to_dictionary(
+        language identifier) const noexcept;
+    typename list::const_iterator to_dictionary(
+        const std::string& name) const noexcept;
 
     // This dictionary collection creates only one word of state for each
     // dictionary reference, each which creates only one word of state for the

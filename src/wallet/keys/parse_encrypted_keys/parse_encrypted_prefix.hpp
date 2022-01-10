@@ -40,16 +40,16 @@ template<uint8_t Size>
 class parse_encrypted_prefix
 {
 public:
-    bool valid() const;
+    bool valid() const noexcept;
 
     static constexpr uint8_t prefix_size = Size;
 
 protected:
-    explicit parse_encrypted_prefix(const data_array<Size>& value);
+    explicit parse_encrypted_prefix(const data_array<Size>& value) noexcept;
 
-    uint8_t context() const;
-    data_array<Size> prefix() const;
-    void valid(bool value);
+    uint8_t context() const noexcept;
+    data_array<Size> prefix() const noexcept;
+    void valid(bool value) noexcept;
 
     static constexpr auto magic_size = sub1(Size);
 

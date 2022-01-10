@@ -45,36 +45,36 @@ public:
     static_assert(Size <= static_cast<size_t>(max_int32), "dictionary");
 
     /// The number of words in the dictionary.
-    static constexpr size_t size() { return Size; };
+    static constexpr size_t size() noexcept { return Size; };
 
     /// Constructor.
-    dictionary(language identifier, const words& words);
+    dictionary(language identifier, const words& words) noexcept;
 
     /// The language identifier of the dictionary.
-    language identifier() const;
+    language identifier() const noexcept;
 
     /// The language name of the dictionary.
-    std::string name() const;
+    std::string name() const noexcept;
 
     /// Search.
 
     /// Empty string if index > Size.
-    std::string at(size_t index) const;
+    std::string at(size_t index) const noexcept;
 
     /// Empty string for any index > Size.
-    string_list at(const search& indexes) const;
+    string_list at(const search& indexes) const noexcept;
 
     /// -1 if word is not found.
-    int32_t index(const std::string& word) const;
+    int32_t index(const std::string& word) const noexcept;
 
     /// -1 for any word that is not found.
-    result index(const string_list& words) const;
+    result index(const string_list& words) const noexcept;
 
     /// True if the word is in the dictionary.
-    bool contains(const std::string& word) const;
+    bool contains(const std::string& word) const noexcept;
 
     /// True if all words are in the dictionary.
-    bool contains(const string_list& words) const;
+    bool contains(const string_list& words) const noexcept;
 
 private:
     // This dictionary creates only this one word of state.

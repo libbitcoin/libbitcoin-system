@@ -32,9 +32,11 @@ namespace system {
 
 /// Dependencies, including boost and qrencode sources may throw.
 /// We try to avoid the use of external API calls that throw.
-/// If an external API throws for non-exceptional results, we catch and squash.
+/// If an external API is documented to throw for non-exceptional results, we
+/// catch and squash. If an external API throws unepxectedly, our pervasize use
+/// of noexcept will cause a call to std::terminate.
 
-/// We throw for iostream read/write failures, given the nature of streams.
+/// We throw for istream >> read failures, given the nature of streams.
 
 /// We throw for division by zero and other basic math parameterization errors
 /// because the functions are public and are otherwise unguarded. When calling
@@ -42,8 +44,9 @@ namespace system {
 /// This behavior is no different than when using c++ math operators directly.
 
 /// We do not generally catch or throw for out of memory conditions as they are
-/// pervasive and it would be impractical to attempt to inject an allocator into
-/// all possible external API memory allocations.
+/// pervasive and it would be impractical to attempt to inject an allocator for
+/// all possible external API memory allocations. Long term objective: inject
+/// all allocation.
 
 /// UTF8 Everywhere initialization failure.
 using runtime_exception = std::runtime_error;

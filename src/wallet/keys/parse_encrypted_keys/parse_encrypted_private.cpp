@@ -37,14 +37,16 @@ parse_encrypted_private::magic_
 };
 
 data_array<parse_encrypted_private::prefix_size>
-parse_encrypted_private::prefix_factory(uint8_t address, bool multiplied)
+parse_encrypted_private::prefix_factory(uint8_t address,
+    bool multiplied) noexcept
 {
     const auto base = multiplied ? multiplied_context_ : default_context_;
     const auto context = base + address;
     return splice(magic_, to_array(context));
 }
 
-parse_encrypted_private::parse_encrypted_private(const encrypted_private& key)
+parse_encrypted_private::parse_encrypted_private(
+    const encrypted_private& key) noexcept
     : parse_encrypted_key<prefix_size>(
         slice<0, 2>(key),
         slice<2, 3>(key),
@@ -56,29 +58,29 @@ parse_encrypted_private::parse_encrypted_private(const encrypted_private& key)
     valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_encrypted_private::address_version() const
+uint8_t parse_encrypted_private::address_version() const noexcept
 {
     const auto base = multiplied() ? multiplied_context_ : default_context_;
     return context() - base;
 }
 
-quarter_hash parse_encrypted_private::data1() const
+quarter_hash parse_encrypted_private::data1() const noexcept
 {
     return data1_;
 }
 
-half_hash parse_encrypted_private::data2() const
+half_hash parse_encrypted_private::data2() const noexcept
 {
     return data2_;
 }
 
-bool parse_encrypted_private::multiplied() const
+bool parse_encrypted_private::multiplied() const noexcept
 {
     // This is a double negative (multiplied = not not multiplied).
     return is_zero(flags() & ek_flag::ec_non_multiplied);
 }
 
-bool parse_encrypted_private::verify_magic() const
+bool parse_encrypted_private::verify_magic() const noexcept
 {
     return slice<zero, magic_size>(prefix()) == magic_;
 }

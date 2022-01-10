@@ -44,46 +44,50 @@ public:
     static const uint8_t testnet_p2kh;
 
     /// Constructors.
-    ec_public();
-    ec_public(const ec_public& other);
-    ec_public(const ec_point& point);
-    ec_public(const ec_private& secret);
-    ec_public(const data_chunk& decoded);
-    ec_public(const std::string& base16);
-    ec_public(const ec_compressed& compressed, bool compress=true);
-    ec_public(const ec_uncompressed& uncompressed, bool compress=false);
+    ec_public() noexcept;
+    ec_public(const ec_public& other) noexcept;
+    ec_public(const ec_point& point) noexcept;
+    ec_public(const ec_private& secret) noexcept;
+    ec_public(const data_chunk& decoded) noexcept;
+    ec_public(const std::string& base16) noexcept;
+    ec_public(const ec_compressed& compressed, bool compress=true) noexcept;
+    ec_public(const ec_uncompressed& uncompressed,
+        bool compress=false) noexcept;
 
     /// Operators.
-    ec_public& operator=(ec_public other);
-    bool operator<(const ec_public& other) const;
-    bool operator==(const ec_public& other) const;
-    bool operator!=(const ec_public& other) const;
+    ec_public& operator=(ec_public other) noexcept;
+    bool operator<(const ec_public& other) const noexcept;
+    bool operator==(const ec_public& other) const noexcept;
+    bool operator!=(const ec_public& other) const noexcept;
     friend std::istream& operator>>(std::istream& in, ec_public& to);
-    friend std::ostream& operator<<(std::ostream& out, const ec_public& of);
+    friend std::ostream& operator<<(std::ostream& out,
+        const ec_public& of) noexcept;
 
     // Swap implementation required to properly handle base class.
-    friend void swap(ec_public& left, ec_public& right);
+    friend void swap(ec_public& left, ec_public& right) noexcept;
 
     /// Serializer.
-    std::string encoded() const;
+    std::string encoded() const noexcept;
 
     /// Accessors.
-    bool compressed() const;
+    bool compressed() const noexcept;
 
     /// Methods.
-    bool to_data(data_chunk& out) const;
-    bool to_uncompressed(ec_uncompressed& out) const;
-    payment_address to_payment_address(uint8_t version=mainnet_p2kh) const;
+    bool to_data(data_chunk& out) const noexcept;
+    bool to_uncompressed(ec_uncompressed& out) const noexcept;
+    payment_address to_payment_address(
+        uint8_t version=mainnet_p2kh) const noexcept;
 
 private:
     /// Validators.
-    static bool is_point(const data_slice& decoded);
+    static bool is_point(const data_slice& decoded) noexcept;
 
     /// Factories.
-    static ec_public from_data(const data_chunk& decoded);
-    static ec_public from_private(const ec_private& secret);
-    static ec_public from_string(const std::string& base16);
-    static ec_public from_point(const ec_uncompressed& point, bool compress);
+    static ec_public from_data(const data_chunk& decoded) noexcept;
+    static ec_public from_private(const ec_private& secret) noexcept;
+    static ec_public from_string(const std::string& base16) noexcept;
+    static ec_public from_point(const ec_uncompressed& point,
+        bool compress) noexcept;
 
     /// Members.
     /// This should be const, apart from the need to implement assignment.
