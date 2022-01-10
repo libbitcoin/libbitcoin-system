@@ -26,35 +26,33 @@
 namespace libbitcoin {
 namespace system {
 
-BC_API bool is_base58(const char ch);
-BC_API bool is_base58(const std::string& text);
+BC_API bool is_base58(const char ch) noexcept;
+BC_API bool is_base58(const std::string& text) noexcept;
 
 /**
  * Converts a base58 string to a number of bytes.
  * @return false if the input is malformed, or the wrong length.
  */
 template <size_t Size>
-bool decode_base58(data_array<Size>& out, const std::string& in);
+bool decode_base58(data_array<Size>& out, const std::string& in) noexcept;
 
 /**
  * Converts a base58 string literal to a data array.
- * TODO: en.cppreference.com/w/cpp/language/user_literal
- * TODO: determine if the sizing function is always accurate.
  */
 template <size_t Size>
-data_array<Size * 733 / 1000> base58_literal(const char(&string)[Size]);
+data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) noexcept;
 
 /**
  * Encode data as base58.
  * @return the base58 encoded string.
  */
-BC_API std::string encode_base58(const data_slice& unencoded);
+BC_API std::string encode_base58(const data_slice& unencoded) noexcept;
 
 /**
  * Attempt to decode base58 data.
  * @return false if the input contains non-base58 characters.
  */
-BC_API bool decode_base58(data_chunk& out, const std::string& in);
+BC_API bool decode_base58(data_chunk& out, const std::string& in) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

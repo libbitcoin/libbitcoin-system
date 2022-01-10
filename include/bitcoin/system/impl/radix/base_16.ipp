@@ -28,44 +28,78 @@
 namespace libbitcoin {
 namespace system {
 
-template <size_t Size>
-bool decode_base16(data_array<Size>& out, const std::string& in)
+inline bool is_between(uint8_t value, uint8_t low, uint8_t high) noexcept
 {
-    data_chunk data;
-    data.reserve(Size);
-    if (decode_base16(data, in) && data.size() == Size)
-    {
-        // TODO: avoid this copy.
-        std::copy(data.begin(), data.end(), out.begin());
-        return true;
-    }
+    return low <= value && value <= high;
+}
 
-    return false;
+inline uint8_t from_base16_characters(char high, char low) noexcept
+{
+    const auto from_base16_digit = [](char character) noexcept
+    {
+        if (is_between(character, 'A', 'F'))
+            return character - 'A' + '\xA';
+
+        if (is_between(character, 'a', 'f'))
+            return character - 'a' + '\xa';
+
+        return character - '0' + '\x0';
+    };
+
+    return (from_base16_digit(high) << to_half(byte_bits)) |
+        from_base16_digit(low);
 }
 
 template <size_t Size>
-bool decode_hash(data_array<Size>& out, const std::string& in)
+bool decode_base16(data_array<Size>& out, const std::string& in) noexcept
 {
-    data_chunk data;
-    data.reserve(Size);
-    if (decode_base16(data, in.data()) && data.size() == Size)
+    if (in.size() != Size * octet_width)
+        return false;
+
+    if (!std::all_of(in.begin(), in.end(), is_base16))
+        return false;
+
+    auto data = out.begin();
+
+    for (auto digit = in.begin(); digit != in.end();)
     {
-        // TODO: avoid this copy.
-        std::reverse_copy(data.begin(), data.end(), out.begin());
-        return true;
+        const auto hi = *digit++;
+        const auto lo = *digit++;
+        *data++ = from_base16_characters(hi, lo);
     }
 
-    return false;
+    return true;
+}
+
+template <size_t Size>
+bool decode_hash(data_array<Size>& out, const std::string& in) noexcept
+{
+    if (in.size() != Size * octet_width)
+        return false;
+
+    if (!std::all_of(in.begin(), in.end(), is_base16))
+        return false;
+
+    auto data = out.begin();
+
+    for (auto digit = in.rbegin(); digit != in.rend();)
+    {
+        const auto lo = *digit++;
+        const auto hi = *digit++;
+        *data++ = from_base16_characters(hi, lo);
+    }
+
+    return true;
 }
 
 template <size_t Size, if_odd<Size>>
-std::string base16_string(const char(&string)[Size])
+std::string base16_string(const char(&string)[Size]) noexcept
 {
     return to_string(base16_chunk(string));
 }
 
 template <size_t Size, if_odd<Size>>
-data_chunk base16_chunk(const char(&string)[Size])
+data_chunk base16_chunk(const char(&string)[Size]) noexcept
 {
     data_chunk out;
     decode_base16(out, string);
@@ -73,7 +107,7 @@ data_chunk base16_chunk(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
+data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size]) noexcept
 {
     data_array<to_half(sub1(Size))> out;
     if (!decode_base16(out, string))
@@ -83,27 +117,13 @@ data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size])
 }
 
 template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size])
+data_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size]) noexcept
 {
     data_array<to_half(sub1(Size))> out;
     if (!decode_hash(out, string))
         out.fill(0);
 
     return out;
-}
-
-// DEPRECATED: use base16_array (renamed).
-template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> base16_literal(const char(&string)[Size])
-{
-    return base16_array(string);
-}
-
-// DEPRECATED: use base16_hash (renamed).
-template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> hash_literal(const char(&string)[Size])
-{
-    return base16_hash(string);
 }
 
 } // namespace system

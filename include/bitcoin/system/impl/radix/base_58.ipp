@@ -19,36 +19,33 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_58_IPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_58_IPP
 
+#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// For support of template implementation only, do not call directly.
-BC_API bool decode_base58_private(uint8_t* out, size_t out_size,
-    const char in[]);
-
 template <size_t Size>
-bool decode_base58(data_array<Size>& out, const std::string& in)
+bool decode_base58(data_array<Size>& out, const std::string& in) noexcept
 {
-    data_array<Size> result;
-    if (!decode_base58_private(result.data(), result.size(), in.data()))
+    data_chunk data;
+    if (!decode_base58(data, in) || (data.size() != Size))
         return false;
 
-    out = result;
+    std::copy(data.begin(), data.end(), out.begin());
     return true;
 }
 
 // TODO: determine if the sizing function is always accurate.
 template <size_t Size>
-data_array<Size * 733 / 1000> base58_literal(const char(&string)[Size])
+data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) noexcept
 {
     // log(58) / log(256), rounded up.
     data_array<Size * 733 / 1000> out;
-    BC_DEBUG_ONLY(const auto success =)
-    decode_base58_private(out.data(), out.size(), string);
-    BC_ASSERT(success);
+    if (!decode_base58(out, string))
+        out.fill(0);
+
     return out;
 }
 

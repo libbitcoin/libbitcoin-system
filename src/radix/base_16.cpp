@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
+#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 
@@ -35,36 +36,14 @@
 namespace libbitcoin {
 namespace system {
 
-inline bool is_between(uint8_t value, uint8_t low, uint8_t high)
-{
-    return low <= value && value <= high;
-}
-
-inline uint8_t from_base16_characters(char high, char low)
-{
-    const auto from_base16_digit = [](char character)
-    {
-        if (is_between(character, 'A', 'F'))
-            return character - 'A' + '\xA';
-
-        if (is_between(character, 'a', 'f'))
-            return character - 'a' + '\xa';
-
-        return character - '0' + '\x0';
-    };
-
-    return (from_base16_digit(high) << to_half(byte_bits)) |
-        from_base16_digit(low);
-}
-
-inline char to_base16_character(char digit)
+inline char to_base16_character(char digit) noexcept
 {
     return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
 }
 
 // The C standard library function 'isxdigit' depends on the current locale,
 // and does not necessarily match the base16 encoding.
-bool is_base16(char character)
+bool is_base16(char character) noexcept
 {
     return
         (is_between(character, '0', '9')) ||
@@ -73,12 +52,12 @@ bool is_base16(char character)
 }
 
 // Undefined (but safe) behavior if characters are not base16. 
-uint8_t encode_octet(const char(&string)[add1(octet_width)])
+uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept
 {
     return from_base16_characters(string[0], string[1]);
 }
 
-std::string encode_base16(const data_slice& data)
+std::string encode_base16(const data_slice& data) noexcept
 {
     std::string out;
     out.resize(data.size() * octet_width);
@@ -93,16 +72,22 @@ std::string encode_base16(const data_slice& data)
     return out;
 }
 
-std::string encode_hash(const data_slice& hash)
+std::string encode_hash(const data_slice& hash) noexcept
 {
-    data_chunk data(hash.size());
+    std::string out;
+    out.resize(hash.size() * octet_width);
+    auto digit = out.begin();
 
-    // TODO: avoid this copy.
-    std::reverse_copy(hash.begin(), hash.end(), data.begin());
-    return encode_base16(data);
+    for (const auto byte: boost::adaptors::reverse(hash))
+    {
+        *digit++ = to_base16_character(byte >> to_half(byte_bits));
+        *digit++ = to_base16_character(byte & 0x0f);
+    }
+
+    return out;
 }
 
-bool decode_base16(data_chunk& out, const std::string& in)
+bool decode_base16(data_chunk& out, const std::string& in) noexcept
 {
     if (is_odd(in.size()))
         return false;
@@ -110,7 +95,7 @@ bool decode_base16(data_chunk& out, const std::string& in)
     if (!std::all_of(in.begin(), in.end(), is_base16))
         return false;
 
-    out.resize(to_half(in.size()));
+    out.resize(in.size() / octet_width);
     auto data = out.begin();
 
     for (auto digit = in.begin(); digit != in.end();)
