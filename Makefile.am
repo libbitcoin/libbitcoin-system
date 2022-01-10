@@ -476,10 +476,6 @@ include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/script_error_t.hpp \
     include/bitcoin/system/error/transaction_error_t.hpp
 
-include_bitcoin_system_impldir = ${includedir}/bitcoin/system/impl
-include_bitcoin_system_impl_HEADERS = \
-    include/bitcoin/system/impl/property_tree.ipp
-
 include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
     include/bitcoin/system/impl/crypto/checksum.ipp \

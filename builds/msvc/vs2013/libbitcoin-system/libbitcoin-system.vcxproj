@@ -483,7 +483,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\property_tree.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\deserialize.ipp" />

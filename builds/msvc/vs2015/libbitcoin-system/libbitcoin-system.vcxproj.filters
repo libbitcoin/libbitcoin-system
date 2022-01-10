@@ -1270,9 +1270,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\property_tree.ipp">
-      <Filter>include\bitcoin\system\impl</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp">
       <Filter>include\bitcoin\system\impl\radix</Filter>
     </None>
