@@ -368,11 +368,13 @@ bool script::is_commitment_pattern(const operations& ops) noexcept
 {
     static const auto header = to_big_endian(witness_head);
 
+    // C++14: remove && ops[1].data().size() >= header.size() guard.
     // Bytes after commitment are optional with no consensus meaning (bip141).
     // Commitment is not executable so invalid trailing operations are allowed.
     return ops.size() > 1
         && ops[0].code() == opcode::op_return
         && ops[1].code() == opcode::push_size_36
+        && ops[1].data().size() >= header.size()
         && std::equal(header.begin(), header.end(), ops[1].data().begin());
 }
 
