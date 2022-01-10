@@ -36,7 +36,7 @@ namespace wallet {
 
 // External (embedded) qrencode library types.
 static QRecLevel recovery_level_to_qr_recovery_level(
-    qr_code::recovery_level level)
+    qr_code::recovery_level level) noexcept
 {
     switch (level)
     {
@@ -52,7 +52,8 @@ static QRecLevel recovery_level_to_qr_recovery_level(
 }
 
 // External (embedded) qrencode library types.
-static QRencodeMode encode_mode_to_qr_encode_mode(qr_code::encode_mode mode)
+static QRencodeMode encode_mode_to_qr_encode_mode(
+    qr_code::encode_mode mode) noexcept
 {
     switch (mode)
     {
@@ -81,7 +82,7 @@ static QRencodeMode encode_mode_to_qr_encode_mode(qr_code::encode_mode mode)
 uint8_t qr_code::maximum_version = QRSPEC_VERSION_MAX;
 
 // Free qrcode->data allocated memory and return specified result.
-static bool safe_free_and_return(QRcode* qrcode, bool result)
+static bool safe_free_and_return(QRcode* qrcode, bool result) noexcept
 {
     if (qrcode != nullptr)
     {
@@ -96,7 +97,7 @@ static bool safe_free_and_return(QRcode* qrcode, bool result)
 // TODO: create independent method to perform scaling and margining.
 bool qr_code::encode(std::ostream& out, const std::string& value,
     uint8_t version, uint16_t scale, uint16_t margin, recovery_level level,
-    encode_mode mode, bool case_sensitive)
+    encode_mode mode, bool case_sensitive) noexcept
 {
     // Guard integer conversion, encode would return null pointer.
     if (version > maximum_version)
@@ -150,7 +151,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 // So the dimensions cannot be derived from the result, caller must retain.
 // pixel_width = 2 * margin + scale * coded_width.
 data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
-    uint16_t scale, uint16_t margin)
+    uint16_t scale, uint16_t margin) noexcept
 {
     // Pixel is the least significant bit of a qrencode byte.
     constexpr auto pixel_mask = uint8_t{ 0x01 };

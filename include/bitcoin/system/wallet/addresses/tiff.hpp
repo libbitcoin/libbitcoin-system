@@ -42,7 +42,7 @@ public:
     /// False if width parameter is inconsistent with data size.
     /// Each row is padded to a whole byte, all rows are the same length.
     static bool to_image(std::ostream& out, const data_chunk& data,
-        uint16_t width);
+        uint16_t width) noexcept;
 };
 
 } // namespace system

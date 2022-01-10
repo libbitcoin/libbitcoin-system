@@ -53,12 +53,13 @@ public:
     static bool encode(std::ostream& out, const std::string& value,
         uint8_t version=0, uint16_t scale=8, uint16_t margin=2,
         recovery_level level=recovery_level::low,
-        encode_mode mode=encode_mode::eight_bit, bool case_sensitive=true);
+        encode_mode mode=encode_mode::eight_bit,
+        bool case_sensitive=true) noexcept;
 
 protected:
     /// Convert QR encoded data stream to bit stream with margin and scaling.
     static data_chunk to_pixels(const data_chunk& coded, uint32_t width_coded,
-        uint16_t scale=8, uint16_t margin=2);
+        uint16_t scale=8, uint16_t margin=2) noexcept;
 };
 
 } // namespace wallet

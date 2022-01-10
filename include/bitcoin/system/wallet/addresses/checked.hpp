@@ -49,34 +49,34 @@ public:
 
     /// Constructors.
 
-    checked();
-    checked(checked&& other);
-    checked(const checked& other);
-    checked(value_type&& value);
-    checked(const value_type& value);
+    checked() noexcept;
+    checked(checked&& other) noexcept;
+    checked(const checked& other) noexcept;
+    checked(value_type&& value) noexcept;
+    checked(const value_type& value) noexcept;
 
     /// Validity is guaranteed from this construction.
-    checked(const prefix_type& prefix, const payload_type& payload);
+    checked(const prefix_type& prefix, const payload_type& payload) noexcept;
 
     /// Operators.
 
-    checked& operator=(checked&& other);
-    checked& operator=(const checked& other);
+    checked& operator=(checked&& other) noexcept;
+    checked& operator=(const checked& other) noexcept;
 
-    operator bool() const;
-    operator data_chunk() const;
-    operator const value_type&() const;
+    operator bool() const noexcept;
+    operator data_chunk() const noexcept;
+    operator const value_type&() const noexcept;
 
     /// Properties.
 
-    prefix_type prefix() const;
-    payload_type payload() const;
-    checksum_type checksum() const;
-    const value_type& value() const;
+    prefix_type prefix() const noexcept;
+    payload_type payload() const noexcept;
+    checksum_type checksum() const noexcept;
+    const value_type& value() const noexcept;
 
 private:
     static checked from_payload(const prefix_type& version,
-        const payload_type& payload);
+        const payload_type& payload) noexcept;
 
     value_type value_;
 };
@@ -87,7 +87,7 @@ template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 bool operator==(
     const checked<Prefix, Payload, Checksum>& left,
-    const checked<Prefix, Payload, Checksum>& right)
+    const checked<Prefix, Payload, Checksum>& right) noexcept
 {
     return left.value() == right.value();
 }
@@ -96,7 +96,7 @@ template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 bool operator!=(
     const checked<Prefix, Payload, Checksum>& left,
-    const checked<Prefix, Payload, Checksum>& right)
+    const checked<Prefix, Payload, Checksum>& right) noexcept
 {
     return !(left == right);
 }

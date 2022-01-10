@@ -38,26 +38,28 @@ public:
     /// Constructors.
     /// Generate a send address from the stealth address.
     stealth_sender(const stealth_address& address, const data_chunk& seed,
-        const binary& filter, uint8_t version=payment_address::mainnet_p2kh);
+        const binary& filter,
+        uint8_t version=payment_address::mainnet_p2kh) noexcept;
 
     /// Generate a send address from the stealth address.
     stealth_sender(const ec_secret& ephemeral_private,
         const stealth_address& address, const data_chunk& seed,
-        const binary& filter, uint8_t version=payment_address::mainnet_p2kh);
+        const binary& filter,
+        uint8_t version=payment_address::mainnet_p2kh) noexcept;
 
     /// Caller must test after construct.
-    operator bool() const;
+    operator bool() const noexcept;
 
     /// Attach this script to the output before the send output.
-    const chain::script& stealth_script() const;
+    const chain::script& stealth_script() const noexcept;
 
     /// The bitcoin payment address to which the payment will be made.
-    const wallet::payment_address& payment_address() const;
+    const wallet::payment_address& payment_address() const noexcept;
 
 private:
     void initialize(const ec_secret& ephemeral_private,
         const stealth_address& address, const data_chunk& seed,
-        const binary& filter);
+        const binary& filter) noexcept;
 
     const uint8_t version_;
     chain::script script_;
