@@ -87,7 +87,7 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 {
     std::array<To, Size> out;
     std::transform(std::begin(source), std::end(source), std::begin(out),
-        [](const From& element)
+        [](const From& element) noexcept
         {
             return element;
         });
@@ -101,7 +101,7 @@ bool contains(const Collection& list,
     const typename Collection::value_type& element) noexcept
 {
     return std::any_of(std::begin(list), std::end(list),
-        [&element](const typename Collection::value_type& value)
+        [&element](const typename Collection::value_type& value) noexcept
         {
             return value == element;
         });
@@ -117,7 +117,7 @@ bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
 
     return std::equal(left.begin(), left.end(), right.begin(),
         [](const std::shared_ptr<const Element>& first,
-           const std::shared_ptr<const Element>& second)
+           const std::shared_ptr<const Element>& second) noexcept
         {
             return (first && second && (*first == *second)) ||
                 (!first && !second);
@@ -143,7 +143,7 @@ find_pair_position(const Collection& list,
     const typename Collection::value_type::first_type& key) noexcept
 {
     const auto position = std::find_if(std::begin(list), std::end(list),
-        [&key](const typename Collection::value_type& pair)
+        [&key](const typename Collection::value_type& pair) noexcept
         {
             return pair.first == key;
         });
