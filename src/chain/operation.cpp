@@ -354,7 +354,6 @@ operation operation::from_string(const std::string& mnemonic) noexcept
     return { code, to_shared(std::move(chunk)), underflow };
 }
 
-
 // Serialization.
 // ----------------------------------------------------------------------------
 
