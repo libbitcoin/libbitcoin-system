@@ -32,6 +32,9 @@ namespace system {
 /// Byte storage types.
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
+typedef std::shared_ptr<const data_chunk> chunk_ptr;
+typedef std::vector<chunk_ptr> chunk_ptrs;
+typedef std::shared_ptr<const chunk_ptrs> chunks_ptr;
 
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) noexcept;

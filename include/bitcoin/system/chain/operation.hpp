@@ -34,10 +34,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-typedef std::shared_ptr<const data_chunk> chunk_ptr;
-typedef std::vector<chunk_ptr> chunk_ptrs;
-typedef std::shared_ptr<const chunk_ptrs> chunks_ptr;
-
 class BC_API operation
 {
 public:

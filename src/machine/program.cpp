@@ -44,32 +44,6 @@ static const transaction default_transaction{};
 // Constructors.
 // ----------------------------------------------------------------------------
 
-program::program() noexcept
-  : script_(to_shared<script>()),
-    transaction_(default_transaction),
-    input_index_(0),
-    forks_(0),
-    value_(0),
-    version_(script_version::unversioned),
-    negative_count_(0),
-    operation_count_(0),
-    jump_(script_->ops().begin())
-{
-}
-
-program::program(const script::ptr& script) noexcept
-  : script_(script),
-    transaction_(default_transaction),
-    input_index_(0),
-    forks_(0),
-    value_(0),
-    version_(script_version::unversioned),
-    negative_count_(0),
-    operation_count_(0),
-    jump_(script_->ops().begin())
-{
-}
-
 program::program(const script::ptr& script, const chain::transaction& tx,
     uint32_t index, uint32_t forks) noexcept
   : script_(script),
@@ -79,11 +53,38 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     value_(max_uint64),
     version_(script_version::unversioned),
     negative_count_(0),
-    operation_count_(0),
-    jump_(script_->ops().begin())
+    operation_count_(0)
 {
     // This is guarded by is_invalid, and in the interpreter.
     BC_ASSERT(index < transaction_.inputs()->size());
+}
+
+// Reuse copied program stack .
+program::program(const script::ptr& script, const program& other) noexcept
+  : script_(script),
+    transaction_(other.transaction_),
+    input_index_(other.input_index_),
+    forks_(other.forks_),
+    value_(other.value_),
+    version_(other.version_),
+    negative_count_(0),
+    operation_count_(0),
+    primary_(other.primary_)
+{
+}
+
+// Reuse moved program stack.
+program::program(const script::ptr& script, program&& other) noexcept
+  : script_(script),
+    transaction_(other.transaction_),
+    input_index_(other.input_index_),
+    forks_(other.forks_),
+    value_(other.value_),
+    version_(other.version_),
+    negative_count_(0),
+    operation_count_(0),
+    primary_(std::move(other.primary_))
+{
 }
 
 // Condition, alternate, jump and operation_count are not copied.
@@ -98,42 +99,10 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     version_(version),
     negative_count_(0),
     operation_count_(0),
-    jump_(script_->ops().begin()),
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
     BC_ASSERT(index < tx.inputs()->size());
-}
-
-
-// Condition, alternate, jump and operation_count are not copied.
-program::program(const script::ptr& script, const program& other) noexcept
-  : script_(script),
-    transaction_(other.transaction_),
-    input_index_(other.input_index_),
-    forks_(other.forks_),
-    value_(other.value_),
-    version_(script_version::unversioned),
-    negative_count_(0),
-    operation_count_(0),
-    jump_(script_->ops().begin()),
-    primary_(other.primary_)
-{
-}
-
-// Condition, alternate, jump and operation_count are not moved.
-program::program(const script::ptr& script, program&& other, bool) noexcept
-  : script_(script),
-    transaction_(other.transaction_),
-    input_index_(other.input_index_),
-    forks_(other.forks_),
-    value_(other.value_),
-    version_(script_version::unversioned),
-    negative_count_(0),
-    operation_count_(0),
-    jump_(script_->ops().begin()),
-    primary_(std::move(other.primary_))
-{
 }
 
 // Utilities.
@@ -154,21 +123,11 @@ bool program::is_invalid() const noexcept
 
 bool program::is_enabled(chain::forks rule) const noexcept
 {
-    return to_bool(forks() & rule);
+    return to_bool(forks_ & rule);
 }
 
 // Constant registers.
 // ----------------------------------------------------------------------------
-
-uint32_t program::forks() const noexcept
-{
-    return forks_;
-}
-
-uint64_t program::value() const noexcept
-{
-    return value_;
-}
 
 // This must be guarded (intended for interpreter internal use).
 const input& program::input() const noexcept
@@ -183,22 +142,12 @@ const chain::transaction& program::transaction() const noexcept
     return transaction_;
 }
 
-script_version program::version() const noexcept
-{
-    return version_;
-}
-
 // Program registers.
 // ----------------------------------------------------------------------------
 
 program::op_iterator program::begin() const noexcept
 {
     return script_->ops().begin();
-}
-
-program::op_iterator program::jump() const noexcept
-{
-    return jump_;
 }
 
 program::op_iterator program::end() const noexcept
@@ -249,55 +198,33 @@ bool program::increment_op_count(int32_t public_keys) noexcept
     return !operation_overflow(operation_count_);
 }
 
-bool program::register_jump(const operation& op) noexcept
-{
-    if (script_->ops().empty())
-        return false;
-
-    // This avoids std::find_if using equality operator override.
-    const auto finder = [&op](const operation& operation)
-    {
-        return &operation == &op;
-    };
-
-    // This is not efficient (linear) but rarely used.
-    jump_ = std::find_if(script_->ops().begin(), script_->ops().end(), finder);
-
-    // This is not reachable if op is an element of script_.
-    if (jump_ == script_->ops().end())
-        return false;
-
-    std::advance(jump_, one);
-    return true;
-}
-
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
 // push
 void program::push(bool value) noexcept
 {
-    push_move(value ? value_type{ numbers::positive_1 } : value_type{});
+    push_move(value ? data_chunk{ numbers::positive_1 } : data_chunk{});
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void program::push_move(value_type&& item) noexcept
+void program::push_move(data_chunk&& item) noexcept
 {
-    push_ref(to_shared<value_type>(std::move(item)));
+    push_ref(to_shared<data_chunk>(std::move(item)));
 }
 
 // Be explicit about the intent to move or copy, to get compiler help.
-void program::push_copy(const value_type& item) noexcept
+void program::push_copy(const data_chunk& item) noexcept
 {
-    push_ref(to_shared<value_type>(item));
+    push_ref(to_shared<data_chunk>(item));
 }
 
-void program::push_ref(ptr_type&& item) noexcept
+void program::push_ref(chunk_ptr&& item) noexcept
 {
     primary_.push_back(std::move(item));
 }
 
-void program::push_ref(const ptr_type& item) noexcept
+void program::push_ref(const chunk_ptr& item) noexcept
 {
     primary_.push_back(item);
 }
@@ -306,13 +233,13 @@ void program::push_ref(const ptr_type& item) noexcept
 // ----------------------------------------------------------------------------
 
 // This must be guarded.
-program::value_type program::pop() noexcept
+data_chunk program::pop() noexcept
 {
     return *pop_ref();
 }
 
 // This must be guarded.
-program::ptr_type program::pop_ref() noexcept
+chunk_ptr program::pop_ref() noexcept
 {
     BC_ASSERT(!empty());
     const auto value = primary_.back();
@@ -499,7 +426,7 @@ program::stack_iterator program::position(size_t index) const noexcept
 }
 
 // This must be guarded.
-program::ptr_type program::item(size_t index) const noexcept
+chunk_ptr program::item(size_t index) const noexcept
 {
     // Stack index is zero-based (zero is top).
     return *position(index);
@@ -513,13 +440,13 @@ bool program::empty_alternate() const noexcept
     return alternate_.empty();
 }
 
-void program::push_alternate(ptr_type&& value) noexcept
+void program::push_alternate(chunk_ptr&& value) noexcept
 {
     alternate_.push_back(std::move(value));
 }
 
 // This must be guarded.
-program::ptr_type program::pop_alternate() noexcept
+chunk_ptr program::pop_alternate() noexcept
 {
     BC_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
@@ -570,26 +497,39 @@ bool program::succeeded() const noexcept
     return is_zero(negative_count_);
 
     // Optimized above to avoid succeeded loop.
-    ////const auto is_true = [](bool value) { return value; };
+    ////const auto is_true = [](bool value) noexcept { return value; };
     ////return std::all_of(condition_.begin(), condition_.end(), true);
 }
 
 // Subscript.
 // ----------------------------------------------------------------------------
 
-// ****************************************************************************
-// CONSENSUS: Witness v0 scripts are not stripped (bip143/v0).
-// Subscripts are not evaluated, they are limited to signature hash creation.
-// ****************************************************************************
-chain::script::ptr program::subscript() const noexcept
+// Subscripts are referenced by script.offset mutable metadata. This allows for
+// efficient subscripting with no copying. However, execution of any one given
+// script instance is not safe for concurrent execution (unnecessary scenario).
+bool program::set_subscript(const operation& op) noexcept
 {
-    if (jump() == begin())
-        return script_;
+    if (script_->ops().empty())
+        return false;
 
-    // TODO: Construct script on operations shared pointer and offset parameter.
-    // TODO: if offset provided, all iteration starts at offset point. This
-    // TODO: prevents wasted copying ops in the case of a jump without mutate.
-    return to_shared<script>(new script{ operations{ jump(), end() } });
+    const auto stop = script_->ops().end();
+
+    // This avoids std::find_if using equality operator override.
+    const auto finder = [&op](const operation& operation) noexcept
+    {
+        return &operation == &op;
+    };
+
+    // This is not efficient (linear) but rarely used.
+    script_->offset = std::find_if(script_->ops().begin(), stop, finder);
+
+    // This is not reachable if op is an element of script_.
+    if (script_->offset == stop)
+        return false;
+
+    // Advance the offset to the op following the found code separator.
+    std::advance(script_->offset, one);
+    return true;
 }
 
 // ****************************************************************************
@@ -598,30 +538,23 @@ chain::script::ptr program::subscript() const noexcept
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-chain::script::ptr program::subscript(
-    const chunk_ptrs& endorsements) const noexcept
+script::ptr program::subscript(const chunk_ptrs& endorsements) const noexcept
 {
-    const auto sub = subscript();
-
+    // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
-    // The bip141 fork sets the version property, so this is a distinct check.
-    if (is_enabled(forks::bip143_rule))
-        return sub;
-
-    // TODO: Construct opcode with shared pointer to data, and stack with
-    // TODO: shared pointers to opcode data values. This eliminates both the
-    // TODO: stack copy of script data elements and copy here into operations.
-    // TODO: the endorsement delete would then just reduce the reference count.
+    if (is_enabled(forks::bip143_rule) && version_ == script_version::zero)
+        return script_;
 
     // Transform endorsements into the set of operators, and op_codeseparator.
-    const auto strip = create_delete_ops(endorsements);
+    const auto strip = create_strip_ops(endorsements);
+    const auto stop = script_->ops().end();
 
-    // If no intersection, nothing to strip.
-    if (!intersecting(sub->ops(), strip))
-        return sub;
+    // If none of the strip ops are found, return the subscript.
+    if (!intersecting(script_->offset, stop, strip))
+        return script_;
 
-    // Create a new script from stripped copy of operations.
-    return to_shared<script>(new script{ difference(sub->ops(), strip) });
+    // Create new script from stripped copy of subscript operations.
+    return to_shared(new script{ difference(script_->offset, stop, strip) });
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
@@ -646,7 +579,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
     hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
-    const script& subscript) const noexcept
+    const script& sub) const noexcept
 {
     uint8_t flags;
     data_slice distinguished;
@@ -656,7 +589,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    hash = signature_hash(cache, subscript, flags);
+    hash = signature_hash(cache, sub, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
@@ -669,7 +602,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
-chain::operations program::create_delete_ops(
+chain::operations program::create_strip_ops(
     const chunk_ptrs& endorsements) noexcept
 {
     constexpr auto non_mininal = false;
@@ -684,30 +617,25 @@ chain::operations program::create_delete_ops(
     return strip;
 }
 
-hash_digest program::signature_hash(const script& subscript,
+hash_digest program::signature_hash(const script& sub,
     uint8_t flags) const noexcept
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
     const auto bip143 = is_enabled(forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(input_index_, subscript, value_, flags,
+    return transaction_.signature_hash(input_index_, sub, value_, flags,
         version_, bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
-hash_digest program::signature_hash(hash_cache& cache, const script& subscript,
+const hash_digest& program::signature_hash(hash_cache& cache, const script& sub,
     uint8_t flags) const noexcept
 {
     const auto it = cache.find(flags);
-    if (it != cache.end())
-        return it->second;
-
-    // TODO: change to pointer cache with general conversion of push data.
-    auto hash = signature_hash(subscript, flags);
-    cache[flags] = hash;
-    return hash;
+    return it != cache.end() ? it->second :
+        cache.emplace(flags, signature_hash(sub, flags)).first->second;
 }
 
 } // namespace machine

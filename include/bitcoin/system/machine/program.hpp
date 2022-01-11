@@ -36,21 +36,9 @@ namespace machine {
 class BC_API program
 {
 public:
-    typedef chain::chunk_ptrs::value_type ptr_type;
-    typedef chain::chunk_ptrs::value_type::element_type value_type;
     typedef chain::operations::const_iterator op_iterator;
-    typedef chain::chunk_ptrs::const_iterator stack_iterator;
+    typedef chunk_ptrs::const_iterator stack_iterator;
     typedef std::map<uint8_t, hash_digest> hash_cache;
-
-    /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input metadata.
-    /// This can only run individual operations via run(op, program).
-    program() noexcept;
-
-    /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input metadata.
-    /// This can run ops via run(op, program) or the script via run(program).
-    program(const chain::script::ptr& script) noexcept;
 
     /// Create an instance with empty stacks, value unused/max (input run).
     program(const chain::script::ptr& script,
@@ -60,57 +48,51 @@ public:
     /// Create an instance with initialized stack (witness run, v0 by default).
     program(const chain::script::ptr& script,
         const chain::transaction& transaction,
-        uint32_t index, uint32_t forks, chain::chunk_ptrs&& stack, uint64_t value,
+        uint32_t index, uint32_t forks, chunk_ptrs&& stack, uint64_t value,
         chain::script_version version=chain::script_version::zero) noexcept;
 
     /// Create using copied tx, input, forks, value, stack (prevout run).
     program(const chain::script::ptr& script, const program& other) noexcept;
 
     /// Create using copied tx, input, forks, value and moved stack (p2sh run).
-    program(const chain::script::ptr& script, program&& other,
-        bool move) noexcept;
+    program(const chain::script::ptr& script, program&& other) noexcept;
 
     /// Utilities.
     bool is_invalid() const noexcept;
     bool is_enabled(chain::forks rule) const noexcept;
 
     /// Constant registers.
-    uint32_t forks() const noexcept;
-    uint64_t value() const noexcept;
     const chain::input& input() const noexcept;
     const chain::transaction& transaction() const noexcept;
-    chain::script_version version() const noexcept;
 
     /// Program registers.
     op_iterator begin() const noexcept;
-    op_iterator jump() const noexcept;
     op_iterator end() const noexcept;
 
-    /// Instructions.
+    /// Count registers.
     bool increment_op_count(const chain::operation& op) noexcept;
     bool increment_op_count(int32_t public_keys) noexcept;
-    bool register_jump(const chain::operation& op) noexcept;
 
     // Primary stack.
     // ------------------------------------------------------------------------
 
     /// Primary push.
     void push(bool value) noexcept;
-    void push_move(value_type&& item) noexcept;
-    void push_copy(const value_type& item) noexcept;
-    void push_ref(ptr_type&& item) noexcept;
-    void push_ref(const ptr_type& item) noexcept;
+    void push_move(data_chunk&& item) noexcept;
+    void push_copy(const data_chunk& item) noexcept;
+    void push_ref(chunk_ptr&& item) noexcept;
+    void push_ref(const chunk_ptr& item) noexcept;
 
     /// Primary pop.
-    value_type pop() noexcept;
-    ptr_type pop_ref() noexcept;
+    data_chunk pop() noexcept;
+    chunk_ptr pop_ref() noexcept;
     bool pop(int32_t& out_value) noexcept;
     bool pop(number& out_number,
         size_t maxiumum_size=chain::max_number_size) noexcept;
     bool pop_binary(number& first, number& second) noexcept;
     bool pop_ternary(number& first, number& second, number& third) noexcept;
     bool pop_position(stack_iterator& out_position) noexcept;
-    bool pop(chain::chunk_ptrs& section, int32_t signed_count) noexcept;
+    bool pop(chunk_ptrs& section, int32_t signed_count) noexcept;
 
     /// Primary push/pop optimizations (active).
     void duplicate(size_t index) noexcept;
@@ -128,14 +110,14 @@ public:
     bool top(number& out_number,
         size_t maxiumum_size=chain::max_number_size) const noexcept;
     stack_iterator position(size_t index) const noexcept;
-    ptr_type item(size_t index) const noexcept;
+    chunk_ptr item(size_t index) const noexcept;
 
     // Alternate stack.
     // ------------------------------------------------------------------------
 
     bool empty_alternate() const noexcept;
-    void push_alternate(ptr_type&& value) noexcept;
-    ptr_type pop_alternate() noexcept;
+    void push_alternate(chunk_ptr&& value) noexcept;
+    chunk_ptr pop_alternate() noexcept;
 
     // Conditional stack.
     // ------------------------------------------------------------------------
@@ -149,31 +131,30 @@ public:
     // Signature validation.
     // ------------------------------------------------------------------------
 
-    /// Returns the subscript indicated by the last registered jump operation.
-    chain::script::ptr subscript() const noexcept;
+    /// Set subscript position to next op.
+    bool set_subscript(const chain::operation& op) noexcept;
 
     /// Parameterized overload strips opcodes from returned subscript.
-    chain::script::ptr subscript(
-        const chain::chunk_ptrs& endorsements) const noexcept;
+    chain::script::ptr subscript(const chunk_ptrs& endorsements) const noexcept;
 
     bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_digest& hash, const chain::chunk_ptr& endorsement) const noexcept;
+        hash_digest& hash, const chunk_ptr& endorsement) const noexcept;
 
     bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_digest& hash, hash_cache& cache, const chain::chunk_ptr& endorsement,
-        const chain::script& subscript) const noexcept;
+        hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
+        const chain::script& sub) const noexcept;
 
 private:
     // A space-efficient dynamic bitset (specialized by c++ std lib).
     typedef std::vector<bool> bool_stack;
 
-    static chain::operations create_delete_ops(
-        const chain::chunk_ptrs& endorsements) noexcept;
+    static chain::operations create_strip_ops(
+        const chunk_ptrs& endorsements) noexcept;
 
-    hash_digest signature_hash(const chain::script& subscript,
+    hash_digest signature_hash(const chain::script& sub,
         uint8_t flags) const noexcept;
-    hash_digest signature_hash(hash_cache& cache, const chain::script& subscript,
-        uint8_t flags) const noexcept;
+    const hash_digest& signature_hash(hash_cache& cache,
+        const chain::script& sub, uint8_t flags) const noexcept;
 
     bool stack_to_bool(bool clean) const noexcept;
 
@@ -186,9 +167,8 @@ private:
 
     size_t negative_count_;
     size_t operation_count_;
-    op_iterator jump_;
-    chain::chunk_ptrs primary_;
-    chain::chunk_ptrs alternate_;
+    chunk_ptrs primary_;
+    chunk_ptrs alternate_;
     bool_stack condition_;
 };
 

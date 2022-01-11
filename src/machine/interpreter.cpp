@@ -807,7 +807,7 @@ interpreter::result interpreter::op_hash256(program& program) noexcept
 interpreter::result interpreter::op_codeseparator(program& program,
     const operation& op) noexcept
 {
-    return program.register_jump(op) ? error::op_success :
+    return program.set_subscript(op) ? error::op_success :
         error::op_code_separator;
 }
 
@@ -901,7 +901,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     program::hash_cache cache;
 
     // Subscript is the same for all signatures.
-    const auto subscript = program.subscript(endorsements);
+    const auto sub = program.subscript(endorsements);
     auto it = endorsements.begin();
 
     // Keys may be empty, endorsements is an ordered subset of corresponding
@@ -918,7 +918,7 @@ interpreter::result interpreter::op_check_multisig_verify(
         {
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
-            if (!program.prepare(signature, *key, hash, cache, *it, *subscript))
+            if (!program.prepare(signature, *key, hash, cache, *it, *sub))
                 return error::op_check_multisig_verify_parse;
 
             // TODO: for signing mode - make key mutable and return above.

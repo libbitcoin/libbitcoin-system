@@ -42,7 +42,7 @@ public:
     static result op_push_number(program& program, uint8_t value) noexcept;
     static result op_push_size(program& program,
         const chain::operation& op) noexcept;
-    static result op_push_data(program& program, chain::chunk_ptr&& data,
+    static result op_push_data(program& program, chunk_ptr&& data,
         uint32_t size_limit) noexcept;
 
     // Operations (not shared).
