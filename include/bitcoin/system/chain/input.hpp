@@ -112,9 +112,6 @@ public:
     bool reserved_hash(hash_digest& out) const noexcept;
     size_t signature_operations(bool bip16, bool bip141) const noexcept;
 
-    /// Public mutable metadata access, copied but not compared for equality.
-    mutable chain::prevout::ptr prevout;
-
 protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
@@ -135,6 +132,10 @@ private:
     chain::witness::ptr witness_;
     uint32_t sequence_;
     bool valid_;
+
+public:
+    /// Public mutable metadata access, copied but not compared for equality.
+    mutable chain::prevout::ptr prevout;
 };
 
 typedef std::vector<input> inputs;

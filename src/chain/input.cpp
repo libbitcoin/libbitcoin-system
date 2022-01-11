@@ -175,6 +175,7 @@ input& input::operator=(const input& other) noexcept
     witness_ = other.witness_;
     sequence_ = other.sequence_;
     valid_ = other.valid_;
+    prevout = other.prevout;
     return *this;
 }
 
