@@ -261,12 +261,23 @@ Collection distinct_copy(const Collection& list) noexcept
     return copy;
 }
 
-// C++17: Parallel policy for std::find_first_of.
+// Collection requires size, reserve and shrink_to_fit methods (vector).
 template <typename Collection>
-bool intersecting(const Collection& left, const Collection& right) noexcept
+Collection difference(
+    const typename Collection::const_iterator& first_minuend,
+    const typename Collection::const_iterator& end_minuend,
+    const Collection& subtrahend) noexcept
 {
-    return std::find_first_of(std::begin(left), std::end(left),
-        std::begin(right), std::end(right)) != std::end(left);
+    Collection copy;
+    copy.reserve(std::distance(first_minuend, end_minuend));
+
+    // Linear copy since creating a copy, more efficient than multiple erases.
+    for (auto min = first_minuend; min != end_minuend; ++min)
+        if (!contains(subtrahend, *min))
+            copy.push_back(*min);
+
+    copy.shrink_to_fit();
+    return copy;
 }
 
 // Collection requires size, reserve and shrink_to_fit methods (vector).
@@ -274,18 +285,24 @@ template <typename Collection>
 Collection difference(const Collection& minuend,
     const Collection& subtrahend) noexcept
 {
-    Collection copy;
+    return difference(minuend.begin(), minuend.end(), subtrahend);
+}
 
-    // C++17: std::size.
-    copy.reserve(minuend.size());
+template <typename Collection>
+bool intersecting(const Collection& left, const Collection& right) noexcept
+{
+    return intersecting(left.begin(), left.end(), right);
+}
 
-    // Linear copy since creating a copy, more efficient than multiple erases.
-    for (const auto& min: minuend)
-        if (!contains(subtrahend, min))
-            copy.push_back(min);
-
-    copy.shrink_to_fit();
-    return copy;
+// C++17: Parallel policy for std::find_first_of.
+template <typename Collection>
+bool intersecting(
+    const typename Collection::const_iterator& first_left,
+    const typename Collection::const_iterator& end_left,
+    const Collection& right) noexcept
+{
+    return std::find_first_of(first_left, end_left, std::begin(right),
+        std::end(right)) != end_left;
 }
 
 // C++17: Parallel policy for std::reverse.

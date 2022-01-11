@@ -108,10 +108,20 @@ Collection distinct_copy(const Collection& list) noexcept;
 template <typename Collection>
 Collection difference(const Collection& minuend,
     const Collection& subtrahend) noexcept;
+template <typename Collection>
+Collection difference(
+    const typename Collection::const_iterator& first_minuend,
+    const typename Collection::const_iterator& end_minuend,
+    const Collection& subtrahend) noexcept;
 
 /// Determing if the sets have an intersection.
 template <typename Collection>
 bool intersecting(const Collection& left, const Collection& right) noexcept;
+template <typename Collection>
+bool intersecting(
+    const typename Collection::const_iterator& first_left,
+    const typename Collection::const_iterator& end_left,
+    const Collection& right) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
