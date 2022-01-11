@@ -113,18 +113,18 @@ public:
     hash_digest sequences_hash() const noexcept;
 
     // signature_hash exposed for op_check_multisig caching.
-    hash_digest signature_hash(uint32_t index,
-        const script& subscript, uint64_t value, uint8_t flags,
-        script_version version, bool bip143) const noexcept;
+    hash_digest signature_hash(uint32_t index, const script& sub,
+        uint64_t value, uint8_t flags, script_version version,
+        bool bip143) const noexcept;
 
     bool check_signature(const ec_signature& signature,
-        const data_slice& public_key, const script& subscript,
-        uint32_t index, uint64_t value, uint8_t flags, script_version version,
+        const data_slice& public_key, const script& sub, uint32_t index,
+        uint64_t value, uint8_t flags, script_version version,
         bool bip143) const noexcept;
 
     bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& prevout_script, uint32_t index, uint64_t value,
-        uint8_t flags, script_version version, bool bip143) const noexcept;
+        const script& sub, uint32_t index, uint64_t value, uint8_t flags,
+        script_version version, bool bip143) const noexcept;
 
     // Guards (for tx pool without compact blocks).
     // ------------------------------------------------------------------------
@@ -193,20 +193,19 @@ private:
     static transaction from_data(reader& source, bool witness) noexcept;
     static bool segregated(const chain::inputs& inputs) noexcept;
     static bool segregated(const inputs_ptr& inputs) noexcept;
-    ////static size_t maximum_size(bool coinbase noexcept;
+    ////static size_t maximum_size(bool coinbase) noexcept;
 
     // signature hash
-    void signature_hash_single(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const noexcept;
-    void signature_hash_none(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const noexcept;
-    void signature_hash_all(writer& sink, uint32_t index,
-        const script& subscript, uint8_t flags) const noexcept;
-    hash_digest unversioned_signature_hash(uint32_t index,
-        const script& subscript, uint8_t flags) const noexcept;
-    hash_digest version_0_signature_hash(uint32_t index,
-        const script& subscript, uint64_t value, uint8_t flags,
-        bool bip143) const noexcept;
+    void signature_hash_single(writer& sink, uint32_t index, const script& sub,
+        uint8_t flags) const noexcept;
+    void signature_hash_none(writer& sink, uint32_t index, const script& sub,
+        uint8_t flags) const noexcept;
+    void signature_hash_all(writer& sink, uint32_t index, const script& sub,
+        uint8_t flags) const noexcept;
+    hash_digest unversioned_signature_hash(uint32_t index, const script& sub,
+        uint8_t flags) const noexcept;
+    hash_digest version_0_signature_hash(uint32_t index, const script& sub,
+        uint64_t value, uint8_t flags, bool bip143) const noexcept;
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
@@ -217,18 +216,17 @@ private:
     bool segregated_;
     bool valid_;
 
-    // Witness transaction signature caching.
-    // ------------------------------------------------------------------------
-
-    struct hash_cache
+private:
+    typedef struct
     {
         hash_digest outputs;
         hash_digest points;
         hash_digest sequences;
-    };
+    } hash_cache;
 
     void initialize_hash_cache() const noexcept;
 
+    // Witness transaction signature caching.
     mutable std::unique_ptr<hash_cache> cache_;
 };
 

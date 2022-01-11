@@ -489,7 +489,7 @@ inline coverage mask_sighash(uint8_t flags) noexcept
 }
 
 void transaction::signature_hash_single(writer& sink, uint32_t index,
-    const script& subscript, uint8_t flags) const noexcept
+    const script& sub, uint8_t flags) const noexcept
 {
     const auto write_inputs = [&](writer& sink) noexcept
     {
@@ -508,7 +508,7 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
         }
 
         self->point().to_data(sink);
-        subscript.to_data(sink, prefixed);
+        sub.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
         for (++input; !anyone && input != inputs.end(); ++input)
@@ -538,7 +538,7 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
 }
 
 void transaction::signature_hash_none(writer& sink, uint32_t index,
-    const script& subscript, uint8_t flags) const noexcept
+    const script& sub, uint8_t flags) const noexcept
 {
     const auto write_inputs = [&](writer& sink) noexcept
     {
@@ -557,7 +557,7 @@ void transaction::signature_hash_none(writer& sink, uint32_t index,
         }
 
         self->point().to_data(sink);
-        subscript.to_data(sink, prefixed);
+        sub.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
         for (++input; !anyone && input != inputs.end(); ++input)
@@ -576,7 +576,7 @@ void transaction::signature_hash_none(writer& sink, uint32_t index,
 }
 
 void transaction::signature_hash_all(writer& sink, uint32_t index,
-    const script& subscript, uint8_t flags) const noexcept
+    const script& sub, uint8_t flags) const noexcept
 {
     const auto write_inputs = [&](writer& sink) noexcept
     {
@@ -595,7 +595,7 @@ void transaction::signature_hash_all(writer& sink, uint32_t index,
         }
 
         self->point().to_data(sink);
-        subscript.to_data(sink, prefixed);
+        sub.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian(self->sequence());
 
         for (++input; !anyone && input != inputs.end(); ++input)
@@ -622,7 +622,7 @@ void transaction::signature_hash_all(writer& sink, uint32_t index,
 
 // private
 hash_digest transaction::unversioned_signature_hash(uint32_t index,
-    const script& subscript, uint8_t flags) const noexcept
+    const script& sub, uint8_t flags) const noexcept
 {
     // Set options.
     const auto flag = mask_sighash(flags);
@@ -640,14 +640,14 @@ hash_digest transaction::unversioned_signature_hash(uint32_t index,
     switch (flag)
     {
         case coverage::hash_single:
-            signature_hash_single(sink, index, subscript, flags);
+            signature_hash_single(sink, index, sub, flags);
             break;
         case coverage::hash_none:
-            signature_hash_none(sink, index, subscript, flags);
+            signature_hash_none(sink, index, sub, flags);
             break;
         default:
         case coverage::hash_all:
-            signature_hash_all(sink, index, subscript, flags);
+            signature_hash_all(sink, index, sub, flags);
     }
 
     sink.flush();
@@ -674,12 +674,12 @@ void transaction::initialize_hash_cache() const noexcept
 
 // private
 hash_digest transaction::version_0_signature_hash(uint32_t index,
-    const script& subscript, uint64_t value, uint8_t flags,
+    const script& sub, uint64_t value, uint8_t flags,
     bool bip143) const noexcept
 {
     // bip143/v0: the way of serialization is changed.
     if (!bip143)
-        return unversioned_signature_hash(index, subscript, flags);
+        return unversioned_signature_hash(index, sub, flags);
 
     // Set options.
     const auto anyone = to_bool(flags & coverage::anyone_can_pay);
@@ -711,7 +711,7 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
         sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
     input->point().to_data(sink);
-    subscript.to_data(sink, prefixed);
+    sub.to_data(sink, prefixed);
     sink.write_little_endian(value);
     sink.write_little_endian(input->sequence());
 
@@ -738,9 +738,9 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
 // bytes in the signature hash preimage serialization.
 // ****************************************************************************
 
-hash_digest transaction::signature_hash(uint32_t index,
-    const script& subscript, uint64_t value, uint8_t flags,
-    script_version version, bool bip143) const noexcept
+hash_digest transaction::signature_hash(uint32_t index, const script& sub,
+    uint64_t value, uint8_t flags, script_version version,
+    bool bip143) const noexcept
 {
     // There is no rational interpretation of a signature hash for a coinbase.
     BC_ASSERT(!is_coinbase());
@@ -752,10 +752,9 @@ hash_digest transaction::signature_hash(uint32_t index,
     switch (version)
     {
         case script_version::unversioned:
-            return unversioned_signature_hash(index, subscript, flags);
+            return unversioned_signature_hash(index, sub, flags);
         case script_version::zero:
-            return version_0_signature_hash(index, subscript, value, flags,
-                bip143);
+            return version_0_signature_hash(index, sub, value, flags, bip143);
         case script_version::reserved:
         default:
             return {};
@@ -763,28 +762,28 @@ hash_digest transaction::signature_hash(uint32_t index,
 }
 
 bool transaction::check_signature(const ec_signature& signature,
-    const data_slice& public_key, const script& subscript, uint32_t index,
+    const data_slice& public_key, const script& sub, uint32_t index,
     uint64_t value, uint8_t flags, script_version version,
     bool bip143) const noexcept
 {
     if (signature.empty() || public_key.empty())
         return false;
 
-    const auto sighash = signature_hash(index, subscript, value, flags,
-        version, bip143);
+    const auto sighash = signature_hash(index, sub, value, flags, version,
+        bip143);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
 }
 
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
-    const script& prevout_script, uint32_t index, uint64_t value, uint8_t flags,
+    const script& sub, uint32_t index, uint64_t value, uint8_t flags,
     script_version version, bool bip143) const noexcept
 {
     out.reserve(max_endorsement_size);
 
-    const auto sighash = signature_hash(index, prevout_script, value, flags,
-        version, bip143);
+    const auto sighash = signature_hash(index, sub, value, flags, version,
+        bip143);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;
@@ -1236,7 +1235,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         // Embedded script must be at the top of the stack (bip16).
         script embedded_script(input.pop(), false);
 
-        program embedded(to_shared<script>(embedded_script), std::move(input), true);
+        program embedded(to_shared<script>(embedded_script), std::move(input));
         if ((ec = interpreter::run(embedded)))
             return ec;
 
