@@ -367,7 +367,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
 std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
 {
-    const auto replace_all = [](std::string text, char from, char to)
+    const auto replace_all = [](std::string text, char from, char to) noexcept
     {
         for (auto position = text.find(from); position != std::string::npos;
             position = text.find(from, position + sizeof(char)))

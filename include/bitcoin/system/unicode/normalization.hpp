@@ -26,35 +26,35 @@ namespace libbitcoin {
 namespace system {
 
 /// Change case of text, complies with section 3.13 of Unicode Standard.
-BC_API bool to_lower(std::string& value);
-BC_API bool to_upper(std::string& value);
+BC_API bool to_lower(std::string& value) noexcept;
+BC_API bool to_upper(std::string& value) noexcept;
 
 /// Convert text to Unicode normal form (Unicode Standard).
 /// Failure indicated by empty string return for non-empty value.
-BC_API bool to_canonical_composition(std::string& value);
-BC_API bool to_canonical_decomposition(std::string& value);
-BC_API bool to_compatibility_composition(std::string& value);
-BC_API bool to_compatibility_decomposition(std::string& value);
+BC_API bool to_canonical_composition(std::string& value) noexcept;
+BC_API bool to_canonical_decomposition(std::string& value) noexcept;
+BC_API bool to_compatibility_composition(std::string& value) noexcept;
+BC_API bool to_compatibility_decomposition(std::string& value) noexcept;
 
 /// Character tests.
-BC_API bool is_unicode(char32_t point);
-BC_API bool is_separator(char32_t point);
-BC_API bool is_whitespace(char32_t point);
-BC_API bool is_combining(char32_t point);
-BC_API bool is_diacritic(char32_t point);
-BC_API bool is_chinese_japanese_or_korean(char32_t point);
+BC_API bool is_unicode(char32_t point) noexcept;
+BC_API bool is_separator(char32_t point) noexcept;
+BC_API bool is_whitespace(char32_t point) noexcept;
+BC_API bool is_combining(char32_t point) noexcept;
+BC_API bool is_diacritic(char32_t point) noexcept;
+BC_API bool is_chinese_japanese_or_korean(char32_t point) noexcept;
 
 /// True if text contains whitespace.
-BC_API bool has_whitespace(const std::string& value);
+BC_API bool has_whitespace(const std::string& value) noexcept;
 
 /// Remove combining class characters.
-BC_API std::string to_non_combining_form(const std::string& value);
+BC_API std::string to_non_combining_form(const std::string& value) noexcept;
 
 /// Remove diacritic characters.
-BC_API std::string to_non_diacritic_form(const std::string& value);
+BC_API std::string to_non_diacritic_form(const std::string& value) noexcept;
 
 /// Compress ascii whitespace and remove ascii spaces between cjk characters.
-BC_API std::string to_compressed_form(const std::string& value);
+BC_API std::string to_compressed_form(const std::string& value) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

@@ -229,7 +229,7 @@ bool bitcoin_uri::set_fragment(const std::string& /* fragment */) noexcept
 bool bitcoin_uri::set_parameter(const std::string& key,
     const std::string& value) noexcept
 {
-    const auto required = [](const std::string& key)
+    const auto required = [](const std::string& key) noexcept
     {
         return key.substr(0, parameter_req_length) == parameter_req_;
     };

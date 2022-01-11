@@ -26,29 +26,29 @@ namespace libbitcoin {
 namespace system {
 
 /// Character tests.
-BC_API bool is_ascii_character(char32_t point);
-BC_API bool is_ascii_number(char32_t point);
-BC_API bool is_ascii_separator(char32_t point);
-BC_API bool is_ascii_whitespace(char32_t point);
+BC_API bool is_ascii_character(char32_t point) noexcept;
+BC_API bool is_ascii_number(char32_t point) noexcept;
+BC_API bool is_ascii_separator(char32_t point) noexcept;
+BC_API bool is_ascii_whitespace(char32_t point) noexcept;
 
 /// Convert each ASCII letter in text to lower case.
-BC_API std::string ascii_to_lower(const std::string& text);
+BC_API std::string ascii_to_lower(const std::string& text) noexcept;
 
 /// Convert each ASCII letter in text to upper case.
-BC_API std::string ascii_to_upper(const std::string& text);
+BC_API std::string ascii_to_upper(const std::string& text) noexcept;
 
 /// True if text contains ASCII whitespace.
-BC_API bool has_ascii_whitespace(const std::string& text);
+BC_API bool has_ascii_whitespace(const std::string& text) noexcept;
 
 /// True if text has upper and lower ASCII case letters.
-BC_API bool has_mixed_ascii_case(const std::string& text);
+BC_API bool has_mixed_ascii_case(const std::string& text) noexcept;
 
 /// True if all characters are in the ASCII subset of UTF8 [<128].
-BC_API bool is_ascii(const std::string& text);
+BC_API bool is_ascii(const std::string& text) noexcept;
 
 /// True if all characters are in the ASCII subset '0'..'9' with a leading '-'
 /// character if specified. Leaving zeroes allowed, including after negative.
-BC_API bool is_ascii_numeric(const std::string& text);
+BC_API bool is_ascii_numeric(const std::string& text) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

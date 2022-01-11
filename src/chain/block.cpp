@@ -227,7 +227,7 @@ hash_list block::transaction_hashes(bool witness) const noexcept
     hash_list out(no_fill_hash_allocator);
     out.resize(txs_->size());
 
-    const auto hash = [witness](const transaction::ptr& tx)
+    const auto hash = [witness](const transaction::ptr& tx) noexcept
     {
         return tx->hash(witness);
     };

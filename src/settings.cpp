@@ -253,7 +253,7 @@ uint64_t settings::max_money() const noexcept
     //*************************************************************************
     // CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
     //*************************************************************************
-    const std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy)
+    std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) noexcept
     {
         return is_zero(subsidy) ? 0 : safe_add(subsidy, total(subsidy >> 1));
     };

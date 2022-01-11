@@ -43,21 +43,21 @@ namespace system {
 typedef std::vector<std::wstring> wstring_list;
 typedef std::vector<std::u32string> u32string_list;
 
-BC_API std::string to_utf8(char32_t point);
+BC_API std::string to_utf8(char32_t point) noexcept;
 
-BC_API std::string to_utf8(const std::wstring& text);
-BC_API std::string to_utf8(const std::u32string& text);
-BC_API std::wstring to_utf16(const std::string& text);
-BC_API std::wstring to_utf16(const std::u32string& text);
-BC_API std::u32string to_utf32(const std::string& text);
-BC_API std::u32string to_utf32(const std::wstring& text);
+BC_API std::string to_utf8(const std::wstring& text) noexcept;
+BC_API std::string to_utf8(const std::u32string& text) noexcept;
+BC_API std::wstring to_utf16(const std::string& text) noexcept;
+BC_API std::wstring to_utf16(const std::u32string& text) noexcept;
+BC_API std::u32string to_utf32(const std::string& text) noexcept;
+BC_API std::u32string to_utf32(const std::wstring& text) noexcept;
 
-BC_API string_list to_utf8(const wstring_list& text);
-BC_API string_list to_utf8(const u32string_list& text);
-BC_API wstring_list to_utf16(const string_list& text);
-BC_API wstring_list to_utf16(const u32string_list& text);
-BC_API u32string_list to_utf32(const string_list& text);
-BC_API u32string_list to_utf32(const wstring_list& text);
+BC_API string_list to_utf8(const wstring_list& text) noexcept;
+BC_API string_list to_utf8(const u32string_list& text) noexcept;
+BC_API wstring_list to_utf16(const string_list& text) noexcept;
+BC_API wstring_list to_utf16(const u32string_list& text) noexcept;
+BC_API u32string_list to_utf32(const string_list& text) noexcept;
+BC_API u32string_list to_utf32(const wstring_list& text) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

@@ -114,7 +114,7 @@ std::ostream& props::write(std::ostream& stream, format format, size_t depth,
     const auto start = flat ? "" : (is_zero(depth) ? "" : end);
 
     // Keep simple values on same line.
-    const auto is_simple = [&]()
+    const auto is_simple = [&]() noexcept
     {
         return type_ != type::array_ && type_ != type::object_;
     };

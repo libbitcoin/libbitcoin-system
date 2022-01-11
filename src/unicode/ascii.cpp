@@ -30,34 +30,34 @@ namespace system {
 
 // char32_t functions.
 
-bool is_ascii_character(char32_t character)
+bool is_ascii_character(char32_t character) noexcept
 {
     return is_zero(character & 0xffffff80);
 }
 
-bool is_ascii_number(char32_t point)
+bool is_ascii_number(char32_t point) noexcept
 {
     return '0' <= point && point <= '9';
 }
 
-bool is_ascii_separator(char32_t point)
+bool is_ascii_separator(char32_t point) noexcept
 {
     return is_ascii_character(point) && is_separator(point);
 }
 
-bool is_ascii_whitespace(char32_t point)
+bool is_ascii_whitespace(char32_t point) noexcept
 {
     return is_ascii_character(point) && is_whitespace(point);
 }
 
 // string functions.
 
-bool is_ascii(const std::string& text)
+bool is_ascii(const std::string& text) noexcept
 {
     return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
 
-bool is_ascii_numeric(const std::string& text)
+bool is_ascii_numeric(const std::string& text) noexcept
 {
     if (text.empty())
         return true;
@@ -67,11 +67,11 @@ bool is_ascii_numeric(const std::string& text)
     return std::all_of(start, text.end(), is_ascii_number);
 }
 
-std::string ascii_to_lower(const std::string& text)
+std::string ascii_to_lower(const std::string& text) noexcept
 {
     auto copy = text;
 
-    const auto to_lower = [](char value)
+    const auto to_lower = [](char value) noexcept
     {
         return 'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value;
     };
@@ -80,11 +80,11 @@ std::string ascii_to_lower(const std::string& text)
     return copy;
 }
 
-std::string ascii_to_upper(const std::string& text)
+std::string ascii_to_upper(const std::string& text) noexcept
 {
     auto copy = text;
 
-    const auto to_upper = [](char value)
+    const auto to_upper = [](char value) noexcept
     {
         return 'a' <= value && value <= 'z' ? value + ('A' - 'a') : value;
     };
@@ -93,20 +93,20 @@ std::string ascii_to_upper(const std::string& text)
     return copy;
 }
 
-bool has_ascii_whitespace(const std::string& text)
+bool has_ascii_whitespace(const std::string& text) noexcept
 {
-    return std::any_of(text.begin(), text.end(), [](char character)
+    return std::any_of(text.begin(), text.end(), [](char character) noexcept
     {
         return is_ascii_whitespace(character);
     });
 }
 
-bool has_mixed_ascii_case(const std::string& text)
+bool has_mixed_ascii_case(const std::string& text) noexcept
 {
     auto lower = false;
     auto upper = false;
     
-    const auto set_lower_and_upper = [&](char character)
+    const auto set_lower_and_upper = [&](char character) noexcept
     {
         lower |= ('a' <= character && character <= 'z');
         upper |= ('A' <= character && character <= 'Z');
