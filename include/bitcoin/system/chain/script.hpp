@@ -181,6 +181,10 @@ private:
     // Script should be stored as shared.
     operations ops_;
     bool valid_;
+
+public:
+    /// Public mutable metadata access, not copied or compared for equality.
+    mutable operations::const_iterator offset;
 };
 
 typedef std::vector<script> scripts;

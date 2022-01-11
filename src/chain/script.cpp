@@ -63,7 +63,7 @@ script::script() noexcept
 }
 
 script::script(script&& other) noexcept
-  : script(other)
+  : script(std::move(other.ops_), other.valid_)
 {
 }
 
@@ -114,13 +114,13 @@ script::script(const std::string& mnemonic) noexcept
 
 // protected
 script::script(operations&& ops, bool valid) noexcept
-  : ops_(std::move(ops)), valid_(valid)
+  : ops_(std::move(ops)), valid_(valid), offset(ops_.begin())
 {
 }
 
 // protected
 script::script(const operations& ops, bool valid) noexcept
-  : ops_(ops), valid_(valid)
+  : ops_(ops), valid_(valid), offset(ops_.begin())
 {
 }
 
@@ -131,6 +131,7 @@ script& script::operator=(script&& other) noexcept
 {
     ops_ = std::move(other.ops_);
     valid_ = other.valid_;
+    offset = ops_.begin();
     return *this;
 }
 
@@ -138,6 +139,7 @@ script& script::operator=(const script& other) noexcept
 {
     ops_ = other.ops_;
     valid_ = other.valid_;
+    offset = ops_.begin();
     return *this;
 }
 
@@ -245,13 +247,18 @@ void script::to_data(std::ostream& stream, bool prefix) const noexcept
     to_data(out, prefix);
 }
 
+// see also: subscript.to_data().
 void script::to_data(writer& sink, bool prefix) const noexcept
 {
     if (prefix)
         sink.write_variable(serialized_size(false));
 
-    for (const auto& op: ops())
-        op.to_data(sink);
+    const auto stop = ops().end();
+
+    // Data serialization is affected by offset metadata.
+    ////for (const auto& op: ops())
+    for (auto op = offset; op != stop; ++op)
+        op->to_data(sink);
 }
 
 std::string script::to_string(uint32_t active_forks) const noexcept
@@ -296,12 +303,14 @@ hash_digest script::hash() const noexcept
 
 size_t script::serialized_size(bool prefix) const noexcept
 {
-    const auto op_size = [](size_t total, const operation& op)
+    const auto op_size = [](size_t total, const operation& op) noexcept
     {
         return total + op.serialized_size();
     };
 
-    auto size = std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
+    // Data serialization is affected by offset metadata.
+    ////auto size = std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
+    auto size = std::accumulate(offset, ops_.end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);
@@ -314,7 +323,7 @@ size_t script::serialized_size(bool prefix) const noexcept
 
 bool script::is_push_only(const operations& ops) noexcept
 {
-    const auto push = [](const operation& op)
+    const auto push = [](const operation& op) noexcept
     {
         return op.is_push();
     };
@@ -327,7 +336,7 @@ bool script::is_push_only(const operations& ops) noexcept
 //*****************************************************************************
 bool script::is_relaxed_push(const operations& ops) noexcept
 {
-    const auto push = [&](const operation& op)
+    const auto push = [&](const operation& op) noexcept
     {
         return op.is_relaxed_push();
     };
@@ -509,7 +518,7 @@ bool script::is_pay_witness_script_hash_pattern(const operations& ops) noexcept
 // Limiting to push_size_0 eliminates pattern ambiguity with little downside.
 bool script::is_sign_multisig_pattern(const operations& ops) noexcept
 {
-    const auto endorsement = [](const operation& op)
+    const auto endorsement = [](const operation& op) noexcept
     {
         return is_endorsement(op.data());
     };
