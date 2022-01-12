@@ -578,18 +578,17 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
-    hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
+    hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
     const script& sub) const noexcept
 {
-    uint8_t flags;
     data_slice distinguished;
 
     // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(flags, distinguished, *endorsement))
+    if (!parse_endorsement(flags, distinguished, endorsement))
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    hash = signature_hash(cache, sub, flags);
+    signature_hash(cache, sub, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
@@ -630,12 +629,11 @@ hash_digest program::signature_hash(const script& sub,
 
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
-const hash_digest& program::signature_hash(hash_cache& cache, const script& sub,
+void program::signature_hash(hash_cache& cache, const script& sub,
     uint8_t flags) const noexcept
 {
-    const auto it = cache.find(flags);
-    return it != cache.end() ? it->second :
-        cache.emplace(flags, signature_hash(sub, flags)).first->second;
+    if (cache.find(flags) == cache.end())
+        cache.emplace(flags, signature_hash(sub, flags));
 }
 
 } // namespace machine

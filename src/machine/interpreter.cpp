@@ -834,16 +834,16 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
         return error::op_check_sig_verify4;
 
     hash_digest hash;
-    ec_signature signature;
+    ec_signature sig;
 
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
-    if (!program.prepare(signature, *key, hash, endorsement))
+    if (!program.prepare(sig, *key, hash, endorsement))
         return error::op_check_sig_verify_parse;
 
     // TODO: for signing mode - make key mutable and return above.
-    return system::verify_signature(*key, hash, signature) ?
+    return system::verify_signature(*key, hash, sig) ?
         error::op_success : error::op_check_sig_verify5;
 }
 
@@ -895,14 +895,13 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (!program.pop().empty() && bip147)
         return error::op_check_multisig_verify8;
 
-    hash_digest hash;
-    ec_signature signature;
-    data_slice distinguished;
+    uint8_t flags;
+    ec_signature sig;
     program::hash_cache cache;
 
     // Subscript is the same for all signatures.
     const auto sub = program.subscript(endorsements);
-    auto it = endorsements.begin();
+    auto endorsement = endorsements.begin();
 
     // Keys may be empty, endorsements is an ordered subset of corresponding
     // keys, all endorsements must be verified against a key. Under bip66,
@@ -910,25 +909,25 @@ interpreter::result interpreter::op_check_multisig_verify(
     for (const auto& key: keys)
     {
         // All signatures are valid (empty does not increment the iterator).
-        if (it == endorsements.end())
+        if (endorsement == endorsements.end())
             break;
 
         // error::op_check_multisig_verify_parse causes op_check_multisig fail.
-        if (!(*it)->empty())
+        if (!(*endorsement)->empty())
         {
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
-            if (!program.prepare(signature, *key, hash, cache, *it, *sub))
+            if (!program.prepare(sig, *key, cache, flags, **endorsement, *sub))
                 return error::op_check_multisig_verify_parse;
 
             // TODO: for signing mode - make key mutable and return above.
-            if (system::verify_signature(*key, hash, signature))
-                ++it;
+            if (system::verify_signature(*key, cache.at(flags), sig))
+                ++endorsement;
         }
     }
 
-    return it != endorsements.end() ?  error::op_check_multisig_verify9 :
-        error::op_success;
+    return endorsement != endorsements.end() ?
+        error::op_check_multisig_verify9 : error::op_success;
 }
 
 interpreter::result interpreter::op_check_multisig(program& program) noexcept

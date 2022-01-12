@@ -141,7 +141,7 @@ public:
         hash_digest& hash, const chunk_ptr& endorsement) const noexcept;
 
     bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_digest& hash, hash_cache& cache, const chunk_ptr& endorsement,
+        hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
         const chain::script& sub) const noexcept;
 
 private:
@@ -153,8 +153,8 @@ private:
 
     hash_digest signature_hash(const chain::script& sub,
         uint8_t flags) const noexcept;
-    const hash_digest& signature_hash(hash_cache& cache,
-        const chain::script& sub, uint8_t flags) const noexcept;
+    void signature_hash(hash_cache& cache, const chain::script& sub,
+        uint8_t flags) const noexcept;
 
     bool stack_to_bool(bool clean) const noexcept;
 
