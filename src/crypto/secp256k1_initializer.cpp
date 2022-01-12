@@ -18,28 +18,22 @@
  */
 #include "secp256k1_initializer.hpp"
 
-#include <mutex>
 #include <secp256k1.h>
 #include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// We do not share contexts because they may or may not both be required.
-secp256k1_signing signing;
-secp256k1_verification verification;
-
-// Static helper for use with std::call_once.
-void secp256k1_initializer::set_context(secp256k1_context** context,
-    int flags) noexcept
-{
-    *context = secp256k1_context_create(flags);
-}
-
 // Protected base class constructor (must be derived).
 secp256k1_initializer::secp256k1_initializer(int flags) noexcept
-  : flags_(flags), context_(nullptr)
+  : context_(secp256k1_context_create(flags))
 {
+}
+
+// Get the initialized context.
+secp256k1_context* secp256k1_initializer::context() noexcept
+{
+    return context_;
 }
 
 // Clean up the context on destruct.
@@ -47,13 +41,6 @@ secp256k1_initializer::~secp256k1_initializer() noexcept
 {
     if (!is_null(context_))
         secp256k1_context_destroy(context_);
-}
-
-// Get the curve context and initialize on first use.
-secp256k1_context* secp256k1_initializer::context() noexcept
-{
-    std::call_once(mutex_, set_context, &context_, flags_);
-    return context_;
 }
 
 // Concrete type for signing init.

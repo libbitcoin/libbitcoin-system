@@ -19,85 +19,58 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_INITIALIZER_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_INITIALIZER_HPP
 
-#include <mutex>
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/**
- * Virtual base class for secp256k1 context management.
- * This class holds no static state but will only initialize its state once for
- * the given mutex. This can be assigned to a static or otherwise. It lazily
- * inits the context once and destroys the context on destruct as necessary.
- */
+/// Base class for secp256k1 singleton context management.
 class BC_API secp256k1_initializer
 {
-private:
-    static void set_context(secp256k1_context** context, int flags) noexcept;
-
-protected:
-    int flags_;
-
-    /**
-     * Construct a signing context initializer of the specified context.
-     * @param[in]  flags  { SECP256K1_CONTEXT_SIGN, SECP256K1_CONTEXT_VERIFY }
-     */
-    secp256k1_initializer(int flags) noexcept;
-
 public:
-    /**
-     * Free the context if initialized.
-     */
-    ~secp256k1_initializer() noexcept;
+    /// Free the context if successfully initialized.
+    virtual ~secp256k1_initializer() noexcept;
 
-    /**
-     * Call to obtain the secp256k1 context, initialized on first call.
-     */
+    /// Call to obtain the secp256k1 context, initialized on construct.
     secp256k1_context* context() noexcept;
 
+protected:
+    secp256k1_initializer(int flags) noexcept;
+
 private:
-    std::once_flag mutex_;
     secp256k1_context* context_;
 };
 
-/**
- * Create and hold this class to initialize signing context on first use.
- */
+/// A signing context singleton initializer.
 class BC_API secp256k1_signing
   : public secp256k1_initializer
 {
 public:
-    /**
-     * Construct a signing context initializer.
-     */
+    static secp256k1_signing& get() noexcept
+    {
+        static secp256k1_signing instance;
+        return instance;
+    }
+
+protected:
     secp256k1_signing() noexcept;
 };
 
-/**
- * Create and hold this class to initialize verification context on first use.
- */
+/// A verification context singleton initializer.
 class BC_API secp256k1_verification
   : public secp256k1_initializer
 {
 public:
-    /**
-     * Construct a verification context initializer.
-     */
+    static secp256k1_verification& get() noexcept
+    {
+        static secp256k1_verification instance;
+        return instance;
+    }
+
+protected:
     secp256k1_verification() noexcept;
 };
-
-/**
- * Use bc::system::signing.context() to obtain the secp256k1 signing context.
- */
-extern secp256k1_signing signing;
-
-/**
- * Use bc::system::verification.context() to obtain the secp256k1 verification
- * context.
- */
-extern secp256k1_verification verification;
 
 } // namespace system
 } // namespace libbitcoin
