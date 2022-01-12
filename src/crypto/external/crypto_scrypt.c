@@ -45,7 +45,7 @@ static inline uint32_t le32dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
     return ((uint32_t)(p[0]) + ((uint32_t)(p[1]) << 8) +
-            ((uint32_t)(p[2]) << 16) + ((uint32_t)(p[3]) << 24));
+           ((uint32_t)(p[2]) << 16) + ((uint32_t)(p[3]) << 24));
 }
 
 static inline void le32enc(void* pp, uint32_t x)
@@ -62,9 +62,9 @@ static inline uint64_t le64dec(const void* pp)
     const uint8_t* p = (uint8_t const*)pp;
 
     return ((uint64_t)(p[0]) + ((uint64_t)(p[1]) << 8) +
-            ((uint64_t)(p[2]) << 16) + ((uint64_t)(p[3]) << 24) +
-            ((uint64_t)(p[4]) << 32) + ((uint64_t)(p[5]) << 40) +
-            ((uint64_t)(p[6]) << 48) + ((uint64_t)(p[7]) << 56));
+           ((uint64_t)(p[2]) << 16) + ((uint64_t)(p[3]) << 24) +
+           ((uint64_t)(p[4]) << 32) + ((uint64_t)(p[5]) << 40) +
+           ((uint64_t)(p[6]) << 48) + ((uint64_t)(p[7]) << 56));
 }
 
 
@@ -101,7 +101,9 @@ static void salsa20_8(uint8_t B[64])
     /* Compute x = doubleround^4(B32). */
     for (i = 0; i < 16; i++)
         x[i] = B32[i];
-    for (i = 0; i < 8; i += 2) {
+
+    for (i = 0; i < 8; i += 2)
+    {
 #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
         /* Operate on columns. */
         x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
@@ -154,7 +156,8 @@ static void blockmix_salsa8(uint8_t* B, uint8_t* Y, size_t r)
     blkcpy(X, &B[(2 * r - 1) * 64], 64);
 
     /* 2: for i = 0 to 2r - 1 do */
-    for (i = 0; i < 2 * r; i++) {
+    for (i = 0; i < 2 * r; i++)
+    {
         /* 3: X <-- H(X \xor B_i) */
         blkxor(X, &B[i * 64], 64);
         salsa20_8(X);
@@ -164,8 +167,10 @@ static void blockmix_salsa8(uint8_t* B, uint8_t* Y, size_t r)
     }
 
     /* 6: B' <-- (Y_0, Y_2 ... Y_{2r-2}, Y_1, Y_3 ... Y_{2r-1}) */
+
     for (i = 0; i < r; i++)
         blkcpy(&B[i * 64], &Y[(i * 2) * 64], 64);
+
     for (i = 0; i < r; i++)
         blkcpy(&B[(i + r) * 64], &Y[(i * 2 + 1) * 64], 64);
 }
@@ -177,7 +182,6 @@ static void blockmix_salsa8(uint8_t* B, uint8_t* Y, size_t r)
 static uint64_t integerify(uint8_t* B, size_t r)
 {
     uint8_t* X = &B[(2 * r - 1) * 64];
-
     return (le64dec(X));
 }
 
@@ -199,7 +203,8 @@ static void smix(uint8_t* B, size_t r,
     blkcpy(X, B, 128 * r);
 
     /* 2: for i = 0 to N - 1 do */
-    for (i = 0; i < N; i++) {
+    for (i = 0; i < N; i++)
+    {
         /* 3: V_i <-- X */
         blkcpy(&V[i * (128 * r)], X, 128 * r);
 
@@ -208,7 +213,8 @@ static void smix(uint8_t* B, size_t r,
     }
 
     /* 6: for i = 0 to N - 1 do */
-    for (i = 0; i < N; i++) {
+    for (i = 0; i < N; i++)
+    {
         /* 7: j <-- Integerify(X) mod N */
         j = integerify(X, r) & (N - 1);
 
@@ -241,24 +247,31 @@ int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
 
     /* Sanity-check parameters. */
 #if SIZE_MAX > UINT32_MAX
-    if (buf_length > (((uint64_t)(1) << 32) - 1) * 32) {
+    if (buf_length > (((uint64_t)(1) << 32) - 1) * 32)
+    {
         errno = EFBIG;
         goto err0;
     }
 #endif
-    if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30)) {
+
+    if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30))
+    {
         errno = EFBIG;
         goto err0;
     }
-    if (((N & (N - 1)) != 0) || (N == 0)) {
+
+    if (((N & (N - 1)) != 0) || (N == 0))
+    {
         errno = EINVAL;
         goto err0;
     }
+
     if ((r > SIZE_MAX / 128 / p) ||
 #if SIZE_MAX / 256 <= UINT32_MAX
         (r > SIZE_MAX / 256) ||
 #endif
-        (N > SIZE_MAX / 128 / r)) {
+        (N > SIZE_MAX / 128 / r))
+    {
         errno = ENOMEM;
         goto err0;
     }
@@ -276,7 +289,8 @@ int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
         salt, salt_length, 1, B, p * 128 * r);
 
     /* 2: for i = 0 to p - 1 do */
-    for (i = 0; i < p; i++) {
+    for (i = 0; i < p; i++)
+    {
         /* 3: B_i <-- MF(B_i, N) */
         smix(&B[i * 128 * r], r, N, V, XY);
     }
