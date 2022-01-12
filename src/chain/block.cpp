@@ -345,9 +345,9 @@ bool block::is_internal_double_spend() const noexcept
     std::set<point> outs;
 
     // Move the points of all non-coinbase transactions into one set.
-    for (const auto& tx: *txs_)
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
-        auto out = tx->points();
+        auto out =(*tx)->points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     }
 
