@@ -32,15 +32,18 @@ static uint32_t be32dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
 
-    return ((uint32_t)(p[3]) + ((uint32_t)(p[2]) << 8) +
-        ((uint32_t)(p[1]) << 16) + ((uint32_t)(p[0]) << 24));
+    return
+        ((uint32_t)(p[3]) +
+        ((uint32_t)(p[2]) << 8) +
+        ((uint32_t)(p[1]) << 16) +
+        ((uint32_t)(p[0]) << 24));
 }
 
 static void be32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t*)pp;
 
-    p[3] = x & 0xff;
+    p[3] = (x) & 0xff;
     p[2] = (x >> 8) & 0xff;
     p[1] = (x >> 16) & 0xff;
     p[0] = (x >> 24) & 0xff;
@@ -49,18 +52,18 @@ static void be32enc(void* pp, uint32_t x)
 static void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
 {
     size_t i;
-    for (i = 0; i < len / 4; i++) 
+    for (i = 0; i < len / sizeof(uint32_t); i++)
     {
-        be32enc(dst + i * 4, src[i]);
+        be32enc(dst + i * sizeof(uint32_t), src[i]);
     }
 }
 
 static void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
 {
     size_t i;
-    for (i = 0; i < len / 4; i++) 
+    for (i = 0; i < len / sizeof(uint32_t); i++)
     {
-        dst[i] = be32dec(src + i * 4);
+        dst[i] = be32dec(src + i * sizeof(uint32_t));
     }
 }
 
@@ -136,35 +139,32 @@ void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
 
     context->count[0] += bitlen[0];
 
-    if (length < 64 - r)
+    if (length < SHA256_BLOCK_LENGTH - r)
     {
-        memcpy(&context->buf[r], input, length);
+        memcpy(&context->buffer[r], input, length);
         return;
     }
 
-    memcpy(&context->buf[r], input, 64 - r);
-    SHA256Transform(context->state, context->buf);
+    memcpy(&context->buffer[r], input, SHA256_BLOCK_LENGTH - r);
+    SHA256Transform(context->state, context->buffer);
 
-    input += 64 - r;
-    length -= 64 - r;
+    input += SHA256_BLOCK_LENGTH - r;
+    length -= SHA256_BLOCK_LENGTH - r;
 
-    while (length >= 64)
+    while (length >= SHA256_BLOCK_LENGTH)
     {
         SHA256Transform(context->state, input);
-        input += 64;
-        length -= 64;
+        input += SHA256_BLOCK_LENGTH;
+        length -= SHA256_BLOCK_LENGTH;
     }
 
-    memcpy(context->buf, input, length);
+    memcpy(context->buffer, input, length);
 }
 
 void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256Pad(context);
     be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
-
-    /* This is unnecessary, as the context is not reusable. */
-    /* zeroize((void*)context, sizeof *context); */
 }
 
 /* Local */
@@ -187,13 +187,13 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     const uint8_t block[SHA256_BLOCK_LENGTH])
 {
     int i;
-    uint32_t W[64];
-    uint32_t S[8];
+    uint32_t W[SHA256_BLOCK_LENGTH];
+    uint32_t S[SHA256_STATE_LENGTH];
     uint32_t t0, t1;
 
     be32dec_vect(W, block, SHA256_BLOCK_LENGTH);
 
-    for (i = 16; i < 64; i++)
+    for (i = 16; i < SHA256_BLOCK_LENGTH; i++)
     {
         W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16];
     }
@@ -265,14 +265,8 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     RNDr(S, W, 62, 0xbef9a3f7);
     RNDr(S, W, 63, 0xc67178f2);
 
-    for (i = 0; i < 8; i++) 
+    for (i = 0; i < SHA256_STATE_LENGTH; i++)
     {
         state[i] += S[i];
     }
-
-    /* This is unnecessary, as these are locals going out of scope. */
-    /* zeroize((void*)W, sizeof W); */
-    /* zeroize((void*)S, sizeof S); */
-    /* zeroize((void*)&t0, sizeof t0); */
-    /* zeroize((void*)&t1, sizeof t1); */
 }

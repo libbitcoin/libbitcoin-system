@@ -43,7 +43,7 @@ typedef struct SHA256CTX
 {
     uint32_t state[SHA256_STATE_LENGTH];
     uint32_t count[SHA256_COUNT_LENGTH];
-    uint8_t buf[SHA256_BLOCK_LENGTH];
+    uint8_t buffer[SHA256_BLOCK_LENGTH];
 } SHA256CTX;
 
 void SHA256(const uint8_t* input, size_t length,
