@@ -26,13 +26,17 @@ const hash_digest valid_digest
     0xff, 0xff, 0x03, 0x00, 0xfc, 0xff, 0x01, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x07, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0xc0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xe7, 0xff
 };
-const ec_secret valid_challenge = base16_array("1f28ee25be3489eb7ae28a294f2b9d99b68be18f184c03ecfea6e7f257b524b3");
+
+////const ec_secret valid_challenge = 
+////    base16_array("1f28ee25be3489eb7ae28a294f2b9d99b68be18f184c03ecfea6e7f257b524b3");
+
 const secret_list valid_secrets
 {
     base16_array("0000000000000000000000000000000000000000000000000000000000000001"),
     base16_array("0000000000000000000000000000000000000000000000000000000000000001"),
     base16_array("0000000000000000000000000000000000000000000000000000000000000001")
 };
+
 const key_rings valid_public_rings
 {
     {
@@ -53,12 +57,14 @@ const key_rings valid_public_rings
         base16_array("02ffff0f0000e0ffff030000f0fffffdffffffff1f00f0ff030000000000000000")
     }
 };
+
 const secret_list valid_salts
 {
     base16_array("4e7fee78574b38fc965938741ce9619cc640c2d45c47982479680910fdebabc6"),
     base16_array("8a96b2847f42449e15784c5caa2edd32a18e3980e6641b83bc669194ac09e5ea"),
     base16_array("0000000000000000000000000000000000000000000000000000000000000001")
 };
+
 const ring_signature::proof_list valid_proofs
 {
     {
@@ -90,6 +96,7 @@ BOOST_AUTO_TEST_CASE(ring_signature__digest__always__valid)
 BOOST_AUTO_TEST_CASE(ring_signature__sign__valid__expected_proofs)
 {
     ring_signature signature;
+    ////signature.challenge = valid_challenge;
     signature.proofs = valid_proofs;
     BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_digest, valid_salts));
 
@@ -111,6 +118,7 @@ BOOST_AUTO_TEST_CASE(ring_signature__sign__valid__expected_proofs)
 BOOST_AUTO_TEST_CASE(ring_signature__verify__valid__round_trip)
 {
     ring_signature signature;
+    ////signature.challenge = valid_challenge;
     signature.proofs = valid_proofs;
     BOOST_REQUIRE(sign(signature, valid_secrets, valid_public_rings, valid_digest, valid_salts));
     BOOST_REQUIRE(verify(valid_public_rings, valid_digest, signature));
@@ -121,18 +129,10 @@ const hash_digest negative_digest
     0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0x01, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x03
 };
-const ec_secret negative_challenge = base16_array("a836477d97b909236d6d964db1c214249de7708a45ce25f1259b4a1056a72c5e");
-const secret_list negative_secrets
-{
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("243adb50939b958ab7f23ea51d8a6192566d209165327a5f5e2b4e3c0e288cdb"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
-};
+
+const ec_secret negative_challenge =
+    base16_array("a836477d97b909236d6d964db1c214249de7708a45ce25f1259b4a1056a72c5e");
+
 const key_rings negative_public_rings
 {
     {
@@ -185,17 +185,7 @@ const key_rings negative_public_rings
         base16_array("02ffffffffffffffffffffffff030000c0ffffffffffff1f00000000fcff000000")
     }
 };
-const secret_list negative_salts
-{
-    base16_array("9af5c0ace6b29c160f2ebd6622a179166e2ac0db780e4ff4ed7f124edb773bee"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("b02fd19f60451740f49f44c5c3debb1339fd2d7c269f424c11982cb079659f80"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
-};
+
 const ring_signature::proof_list negative_proofs
 {
     {
@@ -262,16 +252,10 @@ const hash_digest faulty_digest
     0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xff, 0x01, 0x80, 0x9f,
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00
 };
-const ec_secret faulty_challenge = base16_array("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e");
-const secret_list faulty_secrets
-{
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
-};
+
+const ec_secret faulty_challenge =
+    base16_array("45b5179e0d0d2333028e07ff067a610ecdcd997af8b07ef394142152eb98cf0e");
+
 const key_rings faulty_public_rings
 {
     {
@@ -320,15 +304,7 @@ const key_rings faulty_public_rings
         base16_array("02ffffffff3ffefeffffff030000ffffffffff01f8ffffffffffffffffffffffff")
     }
 };
-const secret_list faulty_salts
-{
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("adf0884a284fd7cc3d5fbc9ac7f11444d191ed755c7efce9de2ed32419c077a8"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140"),
-    base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140")
-};
+
 const ring_signature::proof_list faulty_proofs
 {
     {
