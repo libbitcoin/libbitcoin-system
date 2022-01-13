@@ -20,6 +20,7 @@
 
 #include <secp256k1.h>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -28,17 +29,21 @@ namespace system {
 secp256k1_initializer::secp256k1_initializer(int flags) noexcept
   : context_(secp256k1_context_create(flags))
 {
+    BC_ASSERT(context_ != nullptr);
 }
 
 // Get the initialized context.
 secp256k1_context* secp256k1_initializer::context() noexcept
 {
+    BC_ASSERT(context_ != nullptr);
     return context_;
 }
 
 // Clean up the context on destruct.
 secp256k1_initializer::~secp256k1_initializer() noexcept
 {
+    BC_ASSERT(context_ != nullptr);
+
     if (!is_null(context_))
         secp256k1_context_destroy(context_);
 }
