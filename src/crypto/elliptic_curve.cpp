@@ -44,9 +44,9 @@ constexpr int to_flags(bool compressed) noexcept
     return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 }
 
-// Helper templates
+// Helper functions.
 // ----------------------------------------------------------------------------
-// These allow strong typing of private keys without redundant code.
+// The templates allow strong typing of private keys without redundant code.
 
 bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
     const data_slice& point) noexcept
@@ -56,6 +56,34 @@ bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
     // header byte 0x06 or 0x07) format public keys. These are all consensus.
     return secp256k1_ec_pubkey_parse(context, &out, point.data(), point.size())
         == ec_success;
+}
+
+bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
+    const compressed_list& points) noexcept
+{
+    out.resize(points.size());
+    auto key = out.begin();
+
+    for (const auto& point: points)
+        if (!parse(context, *key++, point))
+            return false;
+
+    return true;
+}
+
+// Create an array of secp256k1_pubkey pointers for secp256k1 call.
+std::vector<const secp256k1_pubkey*> to_pointers(
+    const std::vector<secp256k1_pubkey>& keys)
+{
+    std::vector<const secp256k1_pubkey*> pointers(keys.size());
+
+    std::transform(keys.begin(), keys.end(), pointers.begin(),
+        [](const secp256k1_pubkey& point) noexcept
+        {
+            return &point;
+        });
+
+    return pointers;
 }
 
 template <size_t Size>
@@ -186,19 +214,14 @@ bool ec_sum(ec_compressed& out, const compressed_list& points) noexcept
 
     const auto context = secp256k1_verification::get().context();
 
+    std::vector<secp256k1_pubkey> keys;
+    if (!parse(context, keys, points))
+        return false;
+
     secp256k1_pubkey pubkey;
-    std::vector<secp256k1_pubkey*> keys;
-    keys.reserve(points.size());
-
-    for (const auto& point: points)
-    {
-        keys.push_back(new secp256k1_pubkey);
-        if (!parse(context, *keys.back(), point))
-            return false;
-    }
-
-    return secp256k1_ec_pubkey_combine(context, &pubkey, keys.data(),
-        points.size()) == ec_success && serialize(context, out, pubkey);
+    return secp256k1_ec_pubkey_combine(context, &pubkey,
+        to_pointers(keys).data(), points.size()) == 
+            ec_success && serialize(context, out, pubkey);
 }
 
 // Multiply EC values
