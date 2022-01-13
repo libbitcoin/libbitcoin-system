@@ -71,11 +71,13 @@ static const compressed_list known_keys_in_ring(
     const secret_keys_map& secret_keys, const compressed_list& ring) noexcept
 {
     compressed_list known_ring;
+    known_ring.reserve(ring.size());
 
     for (const auto& key: ring)
         if (secret_keys.find(key) != secret_keys.end())
             known_ring.push_back(key);
 
+    known_ring.shrink_to_fit();
     return known_ring;
 }
 
@@ -84,6 +86,8 @@ static key_rings partition_keys_into_rings(const secret_keys_map& secret_keys,
     const key_rings& rings) noexcept
 {
     key_rings known_keys;
+    known_keys.reserve(rings.size());
+
     for (const auto& ring: rings)
         known_keys.push_back(known_keys_in_ring(secret_keys, ring));
 
