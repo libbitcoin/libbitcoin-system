@@ -43,7 +43,7 @@ static LPVOID get_input_handle()
     return handle;
 }
 
-// This is the factory method to privately instantiate a singleton class.
+// Hack for faulty std::wcin translation of non-ASCII keyboard input.
 void console_streambuf::initialize(size_t size)
 {
     // Set the console to operate in UTF-8 for this process.
@@ -53,7 +53,6 @@ void console_streambuf::initialize(size_t size)
     DWORD console_mode;
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
     {
-        // Hack for faulty std::wcin translation of non-ASCII keyboard input.
         static console_streambuf buffer(*std::wcin.rdbuf(), size);
         std::wcin.rdbuf(&buffer);
     }
