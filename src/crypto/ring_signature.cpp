@@ -40,13 +40,14 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
     uint32_t i, uint32_t j) noexcept
 {
     // e = H(M || R || i || j)
-    data_chunk data(hash_size + R.size() + 2u * sizeof(uint32_t), 0x00);
-    write::bytes::copy out(data);
-    out.write_bytes(R);
-    out.write_bytes(M);
-    out.write_4_bytes_big_endian(i);
-    out.write_4_bytes_big_endian(j);
-    return sha256_hash(data);
+    hash_digest hash;
+    hash::sha256::copy sink(hash);
+    sink.write_bytes(R);
+    sink.write_bytes(M);
+    sink.write_4_bytes_big_endian(i);
+    sink.write_4_bytes_big_endian(j);
+    sink.flush();
+    return hash;
 }
 
 // Take a list of secret keys and generate a mapping from public key -> secret.
@@ -177,8 +178,9 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
     const hash_digest& digest, const secret_list& salts,
     const index_list& known_key_indexes) noexcept
 {
-    data_chunk e0_data;
-    e0_data.reserve(ec_compressed_size * rings.size() + hash_size);
+    hash_digest hash;
+    hash::sha256::copy sink(hash);
+
     BC_ASSERT(known_key_indexes.size() == rings.size());
     BC_ASSERT(out.proofs.size() == rings.size());
     BC_ASSERT(salts.size() == rings.size());
@@ -196,11 +198,13 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
             return false;
 
         // Add this ring to e0
-        extend(e0_data, last_R.point());
+        sink.write_bytes(last_R.point());
     }
 
-    extend(e0_data, digest);
-    out.challenge = sha256_hash(e0_data);
+    sink.write_bytes(digest);
+    sink.flush();
+
+    out.challenge = hash;
     return true;
 }
 
@@ -306,22 +310,17 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
 
 hash_digest digest(const data_slice& message, const key_rings& rings) noexcept
 {
-    const auto sum = [](size_t total, const compressed_list& ring) noexcept
-    {
-        return total + ring.size() * ec_compressed_size;
-    };
+    hash_digest hash;
+    hash::sha256::copy sink(hash);
 
-    const auto size = std::accumulate(rings.begin(), rings.end(),
-        message.size(), sum);
-
-    data_chunk data(message);
-    data.reserve(size);
+    sink.write_bytes(message);
 
     for (const auto& ring: rings)
         for (const auto& key: ring)
-            extend(data, key);
+            sink.write_bytes(key);
 
-    return sha256_hash(data);
+    sink.flush();
+    return hash;
 }
 
 bool sign(ring_signature& out, const secret_list& secrets,
@@ -361,8 +360,8 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         return false;
 
     // Hash data to produce e0 value.
-    hash_digest e0_hash;
-    hash::sha256::copy sink(e0_hash);
+    hash_digest hash;
+    hash::sha256::copy sink(hash);
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {
@@ -387,7 +386,7 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     sink.flush();
 
     // Verification step.
-    return e0_hash == signature.challenge;
+    return hash == signature.challenge;
 }
 
 } // namespace system
