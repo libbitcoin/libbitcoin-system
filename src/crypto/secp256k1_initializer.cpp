@@ -32,13 +32,6 @@ secp256k1_initializer::secp256k1_initializer(int flags) noexcept
     BC_ASSERT(context_ != nullptr);
 }
 
-// Get the initialized context.
-secp256k1_context* secp256k1_initializer::context() noexcept
-{
-    BC_ASSERT(context_ != nullptr);
-    return context_;
-}
-
 // Clean up the context on destruct.
 secp256k1_initializer::~secp256k1_initializer() noexcept
 {
@@ -54,10 +47,24 @@ secp256k1_signing::secp256k1_signing() noexcept
 {
 }
 
+secp256k1_context* secp256k1_signing::context() noexcept
+{
+    static secp256k1_signing instance;
+    static auto context = instance.context_;
+    return context;
+}
+
 // Concrete type for verification init.
 secp256k1_verification::secp256k1_verification() noexcept
   : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
 {
+}
+
+secp256k1_context* secp256k1_verification::context() noexcept
+{
+    static secp256k1_verification instance;
+    static auto context = instance.context_;
+    return context;
 }
 
 } // namespace system

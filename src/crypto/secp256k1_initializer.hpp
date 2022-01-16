@@ -32,13 +32,9 @@ public:
     /// Free the context if successfully initialized.
     virtual ~secp256k1_initializer() noexcept;
 
-    /// Call to obtain the secp256k1 context, initialized on construct.
-    secp256k1_context* context() noexcept;
-
 protected:
     secp256k1_initializer(int flags) noexcept;
 
-private:
     secp256k1_context* context_;
 };
 
@@ -47,11 +43,7 @@ class BC_API secp256k1_signing
   : public secp256k1_initializer
 {
 public:
-    static secp256k1_signing& get() noexcept
-    {
-        static secp256k1_signing instance;
-        return instance;
-    }
+    static secp256k1_context* context() noexcept;
 
 protected:
     secp256k1_signing() noexcept;
@@ -62,11 +54,7 @@ class BC_API secp256k1_verification
   : public secp256k1_initializer
 {
 public:
-    static secp256k1_verification& get() noexcept
-    {
-        static secp256k1_verification instance;
-        return instance;
-    }
+    static secp256k1_context* context() noexcept;
 
 protected:
     secp256k1_verification() noexcept;
