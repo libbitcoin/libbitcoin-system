@@ -28,42 +28,44 @@
 #include <stdint.h>
 #include <string.h>
 
-static uint32_t be32dec(const void* pp)
+inline uint32_t from_big_endian(const void* data)
 {
-    const uint8_t* p = (uint8_t const*)pp;
+    const uint8_t* byte = (uint8_t const*)data;
 
     return
-        ((uint32_t)(p[3]) +
-        ((uint32_t)(p[2]) << 8) +
-        ((uint32_t)(p[1]) << 16) +
-        ((uint32_t)(p[0]) << 24));
+        (((uint32_t)byte[3]) <<  0) |
+        (((uint32_t)byte[2]) <<  8) |
+        (((uint32_t)byte[1]) << 16) |
+        (((uint32_t)byte[0]) << 24);
 }
 
-static void be32enc(void* pp, uint32_t x)
+inline void to_big_endian(void* data, uint32_t value)
 {
-    uint8_t* p = (uint8_t*)pp;
+    uint8_t* byte = (uint8_t*)data;
 
-    p[3] = (x) & 0xff;
-    p[2] = (x >> 8) & 0xff;
-    p[1] = (x >> 16) & 0xff;
-    p[0] = (x >> 24) & 0xff;
+    byte[3] = (value >>  0) & 0xff;
+    byte[2] = (value >>  8) & 0xff;
+    byte[1] = (value >> 16) & 0xff;
+    byte[0] = (value >> 24) & 0xff;
 }
 
-static void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
+static void from_big_endian_vector(uint32_t* to, const uint8_t* from,
+    size_t size)
 {
     size_t i;
-    for (i = 0; i < len / sizeof(uint32_t); i++)
+    for (i = 0; i < size / sizeof(uint32_t); i++)
     {
-        be32enc(dst + i * sizeof(uint32_t), src[i]);
+        to[i] = from_big_endian(from + i * sizeof(uint32_t));
     }
 }
 
-static void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
+static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
+ size_t size)
 {
     size_t i;
-    for (i = 0; i < len / sizeof(uint32_t); i++)
+    for (i = 0; i < size / sizeof(uint32_t); i++)
     {
-        dst[i] = be32dec(src + i * sizeof(uint32_t));
+        to_big_endian(to + i * sizeof(uint32_t), from[i]);
     }
 }
 
@@ -164,41 +166,39 @@ void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
 void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256Pad(context);
-    be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
+    to_big_endian_vector(digest, context->state, SHA256_DIGEST_LENGTH);
 }
-
-/* Local */
 
 void SHA256Pad(SHA256CTX* context)
 {
-    uint8_t len[8];
+    uint8_t len[SHA256_STATE_LENGTH];
     uint32_t r, plen;
 
-    be32enc_vect(len, context->count, 8);
+    to_big_endian_vector(len, context->count, SHA256_STATE_LENGTH);
 
     r = (context->count[1] >> 3) & 0x3f;
     plen = (r < 56) ? (56 - r) : (120 - r);
 
     SHA256Update(context, PAD, plen);
-    SHA256Update(context, len, 8);
+    SHA256Update(context, len, SHA256_STATE_LENGTH);
 }
 
 void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     const uint8_t block[SHA256_BLOCK_LENGTH])
 {
-    int i;
+    uint32_t i;
     uint32_t W[SHA256_BLOCK_LENGTH];
     uint32_t S[SHA256_STATE_LENGTH];
     uint32_t t0, t1;
 
-    be32dec_vect(W, block, SHA256_BLOCK_LENGTH);
+    from_big_endian_vector(W, block, SHA256_BLOCK_LENGTH);
 
     for (i = 16; i < SHA256_BLOCK_LENGTH; i++)
     {
         W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16];
     }
 
-    memcpy(S, state, 32);
+    memcpy(S, state, SHA256_DIGEST_LENGTH);
 
     RNDr(S, W, 0, 0x428a2f98);
     RNDr(S, W, 1, 0x71374491);

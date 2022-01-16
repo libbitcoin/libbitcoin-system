@@ -224,8 +224,12 @@ const transactions_ptr block::transactions() const noexcept
 
 hash_list block::transaction_hashes(bool witness) const noexcept
 {
+    const auto count = txs_->size();
     hash_list out(no_fill_hash_allocator);
-    out.resize(txs_->size());
+
+    // Single allocation, accounts for generate_merkle_root addition.
+    out.reserve(is_odd(count) && !is_one(count) ? add1(count) : count);
+    out.resize(count);
 
     const auto hash = [witness](const transaction::ptr& tx) noexcept
     {
@@ -361,26 +365,16 @@ hash_digest block::generate_merkle_root(bool witness) const noexcept
         return null_hash;
 
     auto merkle = transaction_hashes(witness);
-    if (is_one(merkle.size()))
-        return merkle.front();
-
-    // If number of hashes is odd, duplicate the last hash in the list.
-    if (is_odd(merkle.size()))
-        merkle.push_back(merkle.back());
-
-    // Initial capacity is half of the original list.
-    hash_list buffer;
-    buffer.reserve(to_half(merkle.size()));
 
     // Reduce to a single hash (each iteration divides list size in half).
     while (!is_one(merkle.size()))
     {
-        // Hash each pair of concatenated transaction hashes.
-        for (auto it = merkle.begin(); it != merkle.end(); std::advance(it, 2))
-            buffer.push_back(bitcoin_hash(it[0], it[1]));
+        // If number of hashes is odd, duplicate the last hash in the list.
+        if (is_odd(merkle.size()))
+            merkle.push_back(merkle.back());
 
-        std::swap(merkle, buffer);
-        buffer.clear();
+        // Hash all pairs of tx hashes in place, resizes vector to half.
+        hash_reduce(merkle);
     }
 
     // There is now only one item in the list.

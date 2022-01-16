@@ -32,14 +32,12 @@
 #include <sys/types.h>
 #include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
 
-static inline void be32enc(void* pp, uint32_t x)
+inline void to_big_endian(uint8_t data[sizeof(uint32_t)], uint32_t value)
 {
-    uint8_t* p = (uint8_t*)pp;
-
-    p[3] = x & 0xff;
-    p[2] = (x >> 8) & 0xff;
-    p[1] = (x >> 16) & 0xff;
-    p[0] = (x >> 24) & 0xff;
+    data[3] = (value >> 0) & 0xff;
+    data[2] = (value >> 8) & 0xff;
+    data[1] = (value >> 16) & 0xff;
+    data[0] = (value >> 24) & 0xff;
 }
 
 /**
@@ -61,7 +59,7 @@ void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
 
     for (i = 0; i * 32 < dk_length; i++)
     {
-        be32enc(ivec, (uint32_t)(i + 1));
+        to_big_endian(ivec, (uint32_t)(i + 1));
         memcpy(&hctx, &PShctx, sizeof(HMACSHA256CTX));
         HMACSHA256Update(&hctx, ivec, 4);
         HMACSHA256Final(&hctx, U);
@@ -80,13 +78,12 @@ void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
         }
 
         clen = dk_length - i * 32;
+
         if (clen > 32)
         {
             clen = 32;
         }
+
         memcpy(&buf[i * 32], T, clen);
     }
-
-    /* This is unnecessary, as the local is going out of scope. */
-    /* zeroize(&PShctx, sizeof PShctx); */
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,8 +19,10 @@
 #include "../test.hpp"
 #include "hash.hpp"
 
-// TODO: test:
+BOOST_AUTO_TEST_SUITE(hash_tests)
 
+// TODO: test:
+////
 //// /// Hash conversions of corresponding integers.
 ////BC_API mini_hash to_hash(const uint48_t& value);
 ////BC_API quarter_hash to_hash(const uint64_t& value);
@@ -36,8 +38,6 @@
 ////BC_API uint160_t to_uint160(const short_hash& hash);
 ////BC_API uint256_t to_uint256(const hash_digest& hash);
 ////BC_API uint512_t to_uint512(const long_hash& hash);
-
-BOOST_AUTO_TEST_SUITE(hash_tests)
 
 BOOST_AUTO_TEST_CASE(sha1_hash_test)
 {
@@ -128,6 +128,110 @@ BOOST_AUTO_TEST_CASE(djb2_hash_test)
     // djb2_hash is size_t so cast for consistent test expectation.
     const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
     BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 0xe1669c01);
+}
+
+// hash_reduce
+
+hash_digest to_merkle_root(const hash_list& hashes)
+{
+    if (hashes.empty())
+        return {};
+
+    auto merkle = hashes;
+
+    while (!is_one(merkle.size()))
+    {
+        if (is_odd(merkle.size()))
+            merkle.push_back(merkle.back());
+
+        hash_reduce(merkle);
+    }
+
+    return merkle.front();
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__one_pair__expected)
+{
+    hash_list hashes
+    {
+        hash_digest{ 0 },
+        hash_digest{ 1 }
+    };
+
+    const auto root = bitcoin_hash(hashes[0], hashes[1]);
+
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE_EQUAL(hashes.front(), root);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__two_pair__expected)
+{
+    hash_list hashes
+    {
+        hash_digest{ 0 },
+        hash_digest{ 1 },
+        hash_digest{ 2 },
+        hash_digest{ 3 }
+    };
+
+    const auto root = to_merkle_root(hashes);
+
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE_EQUAL(hashes.front(), root);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__four_pair__expected)
+{
+    hash_list hashes
+    {
+        hash_digest{ 0 },
+        hash_digest{ 1 },
+        hash_digest{ 2 },
+        hash_digest{ 3 },
+        hash_digest{ 4 },
+        hash_digest{ 5 },
+        hash_digest{ 6 },
+        hash_digest{ 7 }
+    };
+
+    const auto root = to_merkle_root(hashes);
+
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE_EQUAL(hashes.front(), root);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__eight_pair__expected)
+{
+    hash_list hashes
+    {
+        hash_digest{ 0 },
+        hash_digest{ 1 },
+        hash_digest{ 2 },
+        hash_digest{ 3 },
+        hash_digest{ 4 },
+        hash_digest{ 5 },
+        hash_digest{ 6 },
+        hash_digest{ 7 },
+        hash_digest{ 8 },
+        hash_digest{ 9 },
+        hash_digest{ 10 },
+        hash_digest{ 11 },
+        hash_digest{ 12 },
+        hash_digest{ 13 },
+        hash_digest{ 14 },
+        hash_digest{ 15 }
+    };
+
+    const auto root = to_merkle_root(hashes);
+
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE(hash_reduce(hashes));
+    BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -144,6 +144,9 @@ BC_API hash_digest bitcoin_hash(const data_slice& data) noexcept;
 BC_API hash_digest bitcoin_hash(const data_slice& first,
     const data_slice& second) noexcept;
 
+/// Reduce a set of bitcoin hashes by bitcoin-hashing pairs in place.
+BC_API bool hash_reduce(std::vector<hash_digest>& hashes) noexcept;
+
 /// Generate a bitcoin short hash.
 BC_API short_hash bitcoin_short_hash(const data_slice& data) noexcept;
 
@@ -163,7 +166,6 @@ BC_API data_chunk sha256_hash_chunk(const data_slice& data) noexcept;
 /// This hash function is used in electrum seed stretching.
 BC_API hash_digest sha256_hash(const data_slice& first,
     const data_slice& second) noexcept;
-
 // Generate a hmac sha256 hash.
 BC_API hash_digest hmac_sha256_hash(const data_slice& data,
     const data_slice& key) noexcept;

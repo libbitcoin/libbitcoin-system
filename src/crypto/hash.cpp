@@ -20,8 +20,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/serial/serial.hpp>
+#include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/external/crypto_scrypt.h>
 #include <bitcoin/system/crypto/external/hmac_sha256.h>
 #include <bitcoin/system/crypto/external/hmac_sha512.h>
@@ -31,6 +31,9 @@
 #include <bitcoin/system/crypto/external/sha1.h>
 #include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/external/sha512.h>
+#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -120,6 +123,23 @@ hash_digest bitcoin_hash(const data_slice& first,
     const data_slice& second) noexcept
 {
     return sha256_hash(sha256_hash(first, second));
+}
+
+bool hash_reduce(std::vector<hash_digest>& hashes) noexcept
+{
+    const auto size = hashes.size();
+
+    // Buffer must be a multiple of 64 (two * hash_size).
+    if (is_odd(size))
+        return false;
+
+    // std::vector<std::array<uint8_t, N>>.data() is size * N contiguous bytes.
+    auto buffer = hashes.front().data();
+
+    // Buffer is transformed in place.
+    intrinsics::double_sha256_64(buffer, buffer, to_half(size));
+    hashes.resize(to_half(size));
+    return true;
 }
 
 short_hash bitcoin_short_hash(const data_slice& data) noexcept
