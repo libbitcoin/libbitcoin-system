@@ -42,6 +42,7 @@
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 #include <bitcoin/system/stream/streamers/sha256_writer.hpp>
+#include <bitcoin/system/stream/streamers/sha256x2_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -125,15 +126,30 @@ namespace hash
 {
     namespace sha256
     {
-        /// A hash writer that writes a hash to a std::ostream.
+        /// A hash writer that writes a sha256 hash to a std::ostream.
         using ostream = sha256_writer<std::ostream>;
 
-        /// A hash writer that copies a hash to a data_slab.
+        /// A hash writer that copies a sha256 hash to a data_slab.
         using copy = make_streamer<copy_sink<data_slab>, sha256_writer>;
 
-        /// A hash writer that inserts a hash into a container.
+        /// A hash writer that inserts a sha256 hash into a container.
         template <typename Container>
         using push = make_streamer<push_sink<Container>, sha256_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
+    }
+
+    namespace sha256x2
+    {
+        /// A hash writer that writes a bitcoin hash to a std::ostream.
+        using ostream = sha256x2_writer<std::ostream>;
+
+        /// A hash writer that copies a bitcoin hash to a data_slab.
+        using copy = make_streamer<copy_sink<data_slab>, sha256x2_writer>;
+
+        /// A hash writer that inserts a bitcoin hash into a container.
+        template <typename Container>
+        using push = make_streamer<push_sink<Container>, sha256x2_writer>;
         using text = push<std::string>;
         using data = push<data_chunk>;
     }

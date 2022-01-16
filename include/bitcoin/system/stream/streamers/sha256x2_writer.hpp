@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_HPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_HPP
+#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -29,15 +29,15 @@
 namespace libbitcoin {
 namespace system {
     
-/// A hash writer that accepts an ostream.
+/// A bitcoin hash writer that accepts an ostream.
 template <typename OStream = std::ostream>
-class sha256_writer
+class sha256x2_writer
   : public byte_writer<OStream>
 {
 public:
     /// Constructors.
-    sha256_writer(OStream& sink) noexcept;
-    ~sha256_writer() noexcept override;
+    sha256x2_writer(OStream& sink) noexcept;
+    ~sha256x2_writer() noexcept override;
 
 protected:
     /// The maximum addressable stream position.
@@ -55,6 +55,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/stream/streamers/sha256_writer.ipp>
+#include <bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp>
 
 #endif
