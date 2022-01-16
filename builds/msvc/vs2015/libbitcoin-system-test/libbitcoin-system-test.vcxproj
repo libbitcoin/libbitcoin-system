@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\intrinsics\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />

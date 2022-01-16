@@ -153,6 +153,12 @@
     <ClCompile Include="..\..\..\..\src\crypto\external\zeroize.c" />
     <ClCompile Include="..\..\..\..\src\crypto\golomb_coding.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\hash.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\intrinsics.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_1_sse4.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_2_shani.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_4_neon.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_4_sse41.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_8_avx2.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1_initializer.cpp" />
@@ -317,6 +323,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\golomb_coding.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\hash.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\intrinsics\intrinsics.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp" />
@@ -390,6 +397,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bytereader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bytewriter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256_writer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256x2_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streams.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\code_points.hpp" />
@@ -491,6 +499,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionary.ipp" />

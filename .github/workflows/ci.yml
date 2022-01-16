@@ -18,96 +18,84 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            cxx: "clang++"
+            link: "dynamic"
+            assert: "debug"
+            coverage: "nocov"
+            boost: "--build-boost"
+            icu: ""
+            cc: "clang"
+            flags: "-Os -fPIE"
             packager: "apt"
             packages: "clang"
-            compiler: "clang"
-            coverage: "false"
-            assert: "--disable-ndebug"
-            cc: "clang"
-            cflags: "-Os -fPIE"
-            cxx: "clang++"
-            cxxflags: "-Os -fPIE"
-            link: "--disable-static"
-            icu: ""
-            boost: "--build-boost"
 
           - os: ubuntu-latest
+            cxx: "clang++"
+            link: "static"
+            assert: "ndebug"
+            coverage: "nocov"
+            boost: "--build-boost"
+            icu: "--build-icu --with-icu"
+            cc: "clang"
+            flags: "-Os -fPIE"
             packager: "apt"
             packages: "clang"
-            compiler: "clang"
-            coverage: "false"
-            assert: ""
-            cc: "clang"
-            cflags: "-Os -fPIE"
-            cxx: "clang++"
-            cxxflags: "-Os -fPIE"
-            link: "--disable-shared"
-            icu: "--build-icu --with-icu"
-            boost: "--build-boost"
 
           - os: ubuntu-latest
-            packager: "apt"
-            packages: "gcc"
-            compiler: "gcc"
-            coverage: "false"
-            assert: ""
-            cc: "gcc"
-            cflags: "-Os -fPIE"
             cxx: "g++"
-            cxxflags: "-Os -fPIE"
-            link: "--disable-static"
+            link: "dynamic"
+            assert: "ndebug"
+            coverage: "nocov"
+            boost: "--build-boost"
             icu: ""
-            boost: "--build-boost"
-
-          - os: ubuntu-latest
+            cc: "gcc"
+            flags: "-Os -fPIE"
             packager: "apt"
             packages: "gcc"
-            compiler: "gcc"
-            coverage: "true"
-            assert: ""
-            cc: "gcc"
-            cflags: "-Og -g --coverage -fPIE"
+
+          - os: ubuntu-latest
             cxx: "g++"
-            cxxflags: "-Og -g --coverage -fPIE"
-            link: "--disable-shared"
-            icu: "--build-icu --with-icu"
+            link: "static"
+            assert: "ndebug"
+            coverage: "cov"
             boost: "--build-boost"
+            icu: "--build-icu --with-icu"
+            cc: "gcc"
+            flags: "-Og -g --coverage -fPIE"
+            packager: "apt"
+            packages: "gcc lcov"
 
           - os: macos-latest
+            cxx: "clang++"
+            link: "dynamic"
+            assert: "ndebug"
+            coverage: "nocov"
+            boost: ""
+            icu: "--with-icu"
+            cc: "clang"
+            flags: "-Os -fPIE"
             packager: "brew"
             packages: "boost icu4c"
-            compiler: "clang"
-            coverage: "false"
-            assert: ""
-            cc: "clang"
-            cflags: "-Os -fPIE"
-            cxx: "clang++"
-            cxxflags: "-Os -fPIE"
-            link: "--disable-static"
-            icu: "--with-icu"
-            boost: ""
 
           - os: macos-latest
+            cxx: "clang++"
+            link: "static"
+            assert: "ndebug"
+            coverage: "nocov"
+            boost: "--build-boost"
+            icu: "--build-icu --with-icu"
+            cc: "clang"
+            flags: "-Os -fPIE"
             packager: "brew"
             packages: ""
-            compiler: "clang"
-            coverage: "false"
-            assert: ""
-            cc: "clang"
-            cflags: "-Os -fPIE"
-            cxx: "clang++"
-            cxxflags: "-Os -fPIE"
-            link: "--disable-shared"
-            icu: "--build-icu --with-icu"
-            boost: "--build-boost"
 
     runs-on: ${{ matrix.os }}
 
     env:
-      CC: ${{ matrix.cc }}
-      CFLAGS: '${{ matrix.cflags }}'
-      CXX: ${{ matrix.cxx }}
-      CXXFLAGS: '${{ matrix.cxxflags }}'
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
       CI_REPOSITORY: '${{ github.repository }}'
 
     steps:
@@ -125,37 +113,39 @@ jobs:
         run: |
           brew install git autoconf automake libtool pkg-config ${{ matrix.packages }}
 
+      - name: Denormalize parameterization
+        run: |
+          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
+            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
+          fi
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
+          else
+            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
+          fi
+
       - name: Execute install.sh
         run: >
           ./install.sh
-          ${{ matrix.link }}
-          ${{ matrix.assert }}
-          ${{ matrix.icu }}
-          ${{ matrix.boost }}
           --build-dir=${{ github.workspace }}/build
           --prefix=${{ github.workspace }}/prefixenv
+          ${{ env.LINKAGE }}
+          ${{ env.ASSERT_NDEBUG }}
+          ${{ matrix.boost }}
+          ${{ matrix.icu }}
 
-      - name: Coveralls Calculation [apt-only]
-        if: ${{ (matrix.packager == 'apt') && (matrix.coverage == 'true') }}
+      - name: Coveralls Calculation
+        if: ${{ matrix.coverage == 'cov' }}
         run: |
-          sudo apt-get install lcov
           lcov --directory . --capture --output-file coverage.info
           lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'true' }}
+        if: ${{ matrix.coverage == 'cov' }}
         uses: coverallsapp/github-action@master
         with:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
-
-      - name: Display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
-        run: |
-          gcc -v
-          clang -v
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
-
-
-
