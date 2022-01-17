@@ -117,24 +117,24 @@ template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
 Integer from_little_endian_unchecked(const Iterator& data) noexcept;
 
-/// Parallel integral conversions.
+/// Vector integral conversions.
 /// ---------------------------------------------------------------------------
 
-template <size_t Count>
-static void from_big_endian(uint32_t to[Count],
-    const uint8_t from[Count * sizeof(uint32_t)]) noexcept;
+template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
+void from_big_endian(Integer to[Count],
+    const uint8_t from[Count * sizeof(Integer)]) noexcept;
 
-template <size_t Count>
-static void from_little_endian(uint32_t to[Count],
-    const uint8_t from[Count * sizeof(uint32_t)]) noexcept;
+template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
+void from_little_endian(Integer to[Count],
+    const uint8_t from[Count * sizeof(Integer)]) noexcept;
 
-template <size_t Count>
-void to_big_endian(uint8_t to[Count * sizeof(uint32_t)],
-    const uint32_t from[Count]) noexcept;
+template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
+void to_big_endian(uint8_t to[Count * sizeof(Integer)],
+    const Integer from[Count]) noexcept;
 
-template <size_t Count>
-void to_little_endian(uint8_t to[Count * sizeof(uint32_t)],
-    const uint32_t from[Count]) noexcept;
+template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
+void to_little_endian(uint8_t to[Count * sizeof(Integer)],
+    const Integer from[Count]) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

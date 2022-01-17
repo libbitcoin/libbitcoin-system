@@ -289,6 +289,7 @@ data_array<Bytes> to_little_endian(const Integer& value) noexcept
 
 // stream <=> integral
 // ----------------------------------------------------------------------------
+// TODO: create to_big/little, from_big/little that iterate over stream.
 
 template <typename Integer, if_integral_integer<Integer>>
 Integer from_big_endian(std::istream& stream) noexcept
@@ -340,84 +341,63 @@ Integer from_little_endian_unchecked(const Iterator& data) noexcept
     return from_little_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
-/// Parallel integral conversions.
+/// Vector integral conversions.
 /// ---------------------------------------------------------------------------
-/// C++17: Parallel policy for std::transform.
 
-template <size_t Count>
-static void from_big_endian(uint32_t to[Count],
-    const uint8_t from[Count * sizeof(uint32_t)]) noexcept
+template <size_t Count, typename Integer, if_integral_integer<Integer>>
+void from_big_endian(Integer to[Count],
+    const uint8_t from[Count * sizeof(Integer)]) noexcept
 {
-    typedef data_array<sizeof(uint32_t)> state_buffer;
-    const auto in = reinterpret_cast<const state_buffer*>(from);
+    typedef data_array<sizeof(Integer)> data;
+    const auto in = reinterpret_cast<const data*>(from);
 
-    std::transform(in, std::next(in, Count), to,
-        [](const state_buffer& value) noexcept
-        {
-            return
-                (((uint32_t)value[0]) << 24) |
-                (((uint32_t)value[1]) << 16) |
-                (((uint32_t)value[2]) << 8) |
-                (((uint32_t)value[3]) << 0);
-        });
+    /// C++17: Parallel policy for std::transform.
+    std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
+    {
+        return from_big_endian<Integer>(value);
+    });
 }
 
-template <size_t Count>
-static void from_little_endian(uint32_t to[Count],
-    const uint8_t from[Count * sizeof(uint32_t)]) noexcept
+template <size_t Count, typename Integer, if_integral_integer<Integer>>
+void from_little_endian(Integer to[Count],
+    const uint8_t from[Count * sizeof(Integer)]) noexcept
 {
-    typedef data_array<sizeof(uint32_t)> state_buffer;
-    const auto in = reinterpret_cast<const state_buffer*>(from);
+    typedef data_array<sizeof(Integer)> data;
+    const auto in = reinterpret_cast<const data*>(from);
 
-    std::transform(in, std::next(in, Count), to,
-        [](const state_buffer& value) noexcept
-        {
-            return
-                (((uint32_t)value[0]) << 0) |
-                (((uint32_t)value[1]) << 8) |
-                (((uint32_t)value[2]) << 16) |
-                (((uint32_t)value[3]) << 24);
-        });
+    /// C++17: Parallel policy for std::transform.
+    std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
+    {
+        return from_little_endian<Integer>(value);
+    });
 }
 
-template <size_t Count>
-void to_big_endian(uint8_t to[Count * sizeof(uint32_t)],
-    const uint32_t from[Count]) noexcept
+template <size_t Count, typename Integer, if_integral_integer<Integer>>
+void to_big_endian(uint8_t to[Count * sizeof(Integer)],
+    const Integer from[Count]) noexcept
 {
-    typedef data_array<sizeof(uint32_t)> state_buffer;
-    const auto out = reinterpret_cast<state_buffer*>(to);
+    typedef data_array<sizeof(Integer)> data;
+    const auto out = reinterpret_cast<data*>(to);
 
-    std::transform(from, std::next(from, Count), out,
-        [](uint32_t value) noexcept
-        {
-            return state_buffer
-            {
-                static_cast<uint8_t>(value >> 24),
-                static_cast<uint8_t>(value >> 16),
-                static_cast<uint8_t>(value >> 8),
-                static_cast<uint8_t>(value >> 0)
-            };
-        });
+    /// C++17: Parallel policy for std::transform.
+    std::transform(from, std::next(from, Count), out, [](Integer value) noexcept
+    {
+        return to_big_endian<Integer>(value);
+    });
 }
 
-template <size_t Count>
-void to_little_endian(uint8_t to[Count * sizeof(uint32_t)],
-    const uint32_t from[Count]) noexcept
+template <size_t Count, typename Integer, if_integral_integer<Integer>>
+void to_little_endian(uint8_t to[Count * sizeof(Integer)],
+    const Integer from[Count]) noexcept
 {
-    typedef data_array<sizeof(uint32_t)> state_buffer;
-    const auto out = reinterpret_cast<state_buffer*>(to);
+    typedef data_array<sizeof(Integer)> data;
+    const auto out = reinterpret_cast<data*>(to);
 
-    std::transform(from, std::next(from, Count), out,
-        [](uint32_t value) noexcept
-        {
-            return state_buffer
-            {
-                static_cast<uint8_t>(value >> 0),
-                static_cast<uint8_t>(value >> 8),
-                static_cast<uint8_t>(value >> 16),
-                static_cast<uint8_t>(value >> 24)
-            };
-        });
+    /// C++17: Parallel policy for std::transform.
+    std::transform(from, std::next(from, Count), out, [](Integer value) noexcept
+    {
+        return to_little_endian<Integer>(value);
+    });
 }
 
 } // namespace system
