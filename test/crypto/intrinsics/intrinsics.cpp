@@ -57,7 +57,7 @@ using namespace bc::system::intrinsics;
 ////}
 
 // satoshi test case
-BOOST_AUTO_TEST_CASE(intrinsics__double_sha256_64__vs_sha256x2__same)
+BOOST_AUTO_TEST_CASE(intrinsics__sha256_paired_double__vs_sha256x2__same)
 {
     for (int i = 0; i <= 32; ++i)
     {
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__double_sha256_64__vs_sha256x2__same)
         }
 
         // in place double hash
-        intrinsics::double_sha256_64(out2, in, i);
+        intrinsics::sha256_paired_double(out2, in, i);
         BOOST_REQUIRE_EQUAL(memcmp(out1, out2, 32 * i), 0);
     }
 }

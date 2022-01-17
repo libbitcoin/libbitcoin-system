@@ -1,9 +1,53 @@
-// Copyright (c) 2017 The Bitcoin Core developers
+//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//; Copyright (c) 2012, Intel Corporation 
+//; 
+//; All rights reserved. 
+//; 
+//; Redistribution and use in source and binary forms, with or without
+//; modification, are permitted provided that the following conditions are
+//; met: 
+//; 
+//; * Redistributions of source code must retain the above copyright
+//;   notice, this list of conditions and the following disclaimer.  
+//; 
+//; * Redistributions in binary form must reproduce the above copyright
+//;   notice, this list of conditions and the following disclaimer in the
+//;   documentation and/or other materials provided with the
+//;   distribution. 
+//; 
+//; * Neither the name of the Intel Corporation nor the names of its
+//;   contributors may be used to endorse or promote products derived from
+//;   this software without specific prior written permission. 
+//; 
+//; 
+//; THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION "AS IS" AND ANY
+//; EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//; PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL INTEL CORPORATION OR
+//; CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//; EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//; PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//; LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//;
+//; This code is described in an Intel White-Paper:
+//; "Fast SHA-256 Implementations on Intel Architecture Processors"
+//;
+//; To find it, surf to https://www.intel.com/p/en_US/embedded
+//; and search for that title.
+//; The paper is expected to be released roughly at the end of April, 2012
+//;
+//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//; This code schedules 1 blocks at a time, with 4 lanes per block
+//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+// Port to inline assembly provided by:
+// Copyright (c) 2017-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-//
-// This is a translation to GCC extended asm syntax from YASM code by Intel
-// (available at the bottom of this file).
 
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
@@ -17,19 +61,19 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
-void inline initialize(uint32_t state[8])
+#if defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
+
+// Iterate over N blocks, four lanes per block.
+void sha256_sse4(uint32_t*, const uint8_t*, size_t) noexcept
 {
-    state[0] = 0x6a09e667ul;
-    state[1] = 0xbb67ae85ul;
-    state[2] = 0x3c6ef372ul;
-    state[3] = 0xa54ff53aul;
-    state[4] = 0x510e527ful;
-    state[5] = 0x9b05688cul;
-    state[6] = 0x1f83d9abul;
-    state[7] = 0x5be0cd19ul;
+    // TODO: define assembly for _MSC_VER.
+    // TODO: this is currently disabled by try_sse4().
 }
 
-void sha256_x1_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
+#elif (defined(__x86_64__) || defined(__amd64__) || defined(__i386__))
+
+// Iterate over N blocks, four lanes per block.
+void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
 {
     static const uint32_t K256 alignas(16) [] =
     {
@@ -986,49 +1030,45 @@ void sha256_x1_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) noexce
    );
 }
 
-void double_sha256_64x1_sse4(uint8_t* out, const uint8_t* in) noexcept
+#else
+
+void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) noexcept
 {
-    uint32_t state[8];
-
-    static const uint8_t padding1[64] =
-    {
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0
-    };
-
-    uint8_t buffer2[64] =
-    {
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
-    };
-
-    initialize(state);
-    sha256_x1_sse4(state, in, 1);
-    sha256_x1_sse4(state, padding1, 1);
-    to_big_endian(buffer2 + 0, state[0]);
-    to_big_endian(buffer2 + 4, state[1]);
-    to_big_endian(buffer2 + 8, state[2]);
-    to_big_endian(buffer2 + 12, state[3]);
-    to_big_endian(buffer2 + 16, state[4]);
-    to_big_endian(buffer2 + 20, state[5]);
-    to_big_endian(buffer2 + 24, state[6]);
-    to_big_endian(buffer2 + 28, state[7]);
-
-    initialize(state);
-    sha256_x1_sse4(state, buffer2, 1);
-    to_big_endian(out + 0, state[0]);
-    to_big_endian(out + 4, state[1]);
-    to_big_endian(out + 8, state[2]);
-    to_big_endian(out + 12, state[3]);
-    to_big_endian(out + 16, state[4]);
-    to_big_endian(out + 20, state[5]);
-    to_big_endian(out + 24, state[6]);
-    to_big_endian(out + 28, state[7]);
+    // have_sse4() is false in this context, so this doesn't ever execute.
 }
+
+#endif
+
+// One block in four lanes.
+void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) noexcept
+{
+    return sha256_sse4(state, block, 1);
+}
+
+////void sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////{
+////    // TODO: four blocks in four lanes. 
+////}
+
+// One block in four lanes, doubled.
+void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+{
+    auto buffer = sha256x2_buffer;
+
+    auto state = sha256_initial;
+    sha256_x1_sse4(state.data(), in);
+    sha256_x1_sse4(state.data(), sha256x2_padding.data());
+    to_big_endian<8>(buffer.data(), state.data());
+
+    state = sha256_initial;
+    sha256_x1_sse4(state.data(), buffer.data());
+    to_big_endian<8>(out, state.data());
+}
+
+////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////{
+////    // TODO: four blocks in four lanes, doubled.
+////}
 
 } // namespace intrinsics
 } // namespace system

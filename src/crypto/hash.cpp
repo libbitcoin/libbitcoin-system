@@ -29,7 +29,7 @@
 #include <bitcoin/system/crypto/external/pkcs5_pbkdf2.h>
 #include <bitcoin/system/crypto/external/ripemd160.h>
 #include <bitcoin/system/crypto/external/sha1.h>
-#include <bitcoin/system/crypto/external/sha256.h>
+////#include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/external/sha512.h>
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -137,7 +137,7 @@ bool hash_reduce(std::vector<hash_digest>& hashes) noexcept
     auto buffer = hashes.front().data();
 
     // Buffer is transformed in place.
-    intrinsics::double_sha256_64(buffer, buffer, to_half(size));
+    intrinsics::sha256_paired_double(buffer, buffer, to_half(size));
     hashes.resize(to_half(size));
     return true;
 }
@@ -156,7 +156,8 @@ short_hash ripemd160_hash(const data_slice& data) noexcept
 
 data_chunk ripemd160_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(short_hash_size);
+    data_chunk hash(no_fill_byte_allocator);
+    hash.resize(short_hash_size);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -170,7 +171,8 @@ short_hash sha1_hash(const data_slice& data) noexcept
 
 data_chunk sha1_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(short_hash_size);
+    data_chunk hash(no_fill_byte_allocator);
+    hash.resize(short_hash_size);
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -178,26 +180,28 @@ data_chunk sha1_hash_chunk(const data_slice& data) noexcept
 hash_digest sha256_hash(const data_slice& data) noexcept
 {
     hash_digest hash;
-    SHA256(data.data(), data.size(), hash.data());
+    intrinsics::sha256(data.data(), data.size(), hash.data());
     return hash;
 }
 
 data_chunk sha256_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(hash_size);
-    SHA256(data.data(), data.size(), hash.data());
+    data_chunk hash(no_fill_byte_allocator);
+    hash.resize(hash_size);
+    intrinsics::sha256(data.data(), data.size(), hash.data());
     return hash;
 }
 
 hash_digest sha256_hash(const data_slice& first,
     const data_slice& second) noexcept
 {
+    using namespace intrinsics;
+
     hash_digest hash;
-    SHA256CTX context;
-    SHA256Init(&context);
-    SHA256Update(&context, first.data(), first.size());
-    SHA256Update(&context, second.data(), second.size());
-    SHA256Final(&context, hash.data());
+    sha256_context context{ sha256_initial };
+    sha256_update(context, first.data(), first.size());
+    sha256_update(context, second.data(), second.size());
+    sha256_finalize(context, hash.data());
     return hash;
 }
 
@@ -212,7 +216,8 @@ hash_digest hmac_sha256_hash(const data_slice& data,
 data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length)noexcept
 {
-    data_chunk hash(length);
+    data_chunk hash(no_fill_byte_allocator);
+    hash.resize(length);
     pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
         salt.size(), iterations, hash.data(), length);
     return hash;
@@ -249,6 +254,7 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism,
     size_t length) noexcept
 {
+    data_chunk hash(no_fill_byte_allocator);
     data_chunk out(length, 0x00);
     crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
         resources, parallelism, out.data(), out.size());

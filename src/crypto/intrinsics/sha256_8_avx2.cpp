@@ -8,11 +8,28 @@
 
 #include <stdint.h>
 #include <immintrin.h>
-#include <bitcoin/system/serial/serial.hpp>
+////#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
+
+inline uint32_t from_little_endian(const uint8_t data[4]) noexcept
+{
+    return
+        (static_cast<uint32_t>(data[0]) << 0) |
+        (static_cast<uint32_t>(data[1]) << 8) |
+        (static_cast<uint32_t>(data[2]) << 16) |
+        (static_cast<uint32_t>(data[3]) << 24);
+}
+
+inline void to_little_endian(uint8_t data[4], uint32_t value) noexcept
+{
+    data[0] = (value >> 0) & 0xff;
+    data[1] = (value >> 8) & 0xff;
+    data[2] = (value >> 16) & 0xff;
+    data[3] = (value >> 24) & 0xff;
+}
 
 __m256i inline K(uint32_t x) noexcept { return _mm256_set1_epi32(x); }
 
@@ -37,7 +54,7 @@ __m256i inline Sigma1(__m256i x) noexcept { return Xor(Or(ShR(x, 6), ShL(x, 26))
 __m256i inline sigma0(__m256i x) noexcept { return Xor(Or(ShR(x, 7), ShL(x, 25)), Or(ShR(x, 18), ShL(x, 14)), ShR(x, 3)); }
 __m256i inline sigma1(__m256i x) noexcept { return Xor(Or(ShR(x, 17), ShL(x, 15)), Or(ShR(x, 19), ShL(x, 13)), ShR(x, 10)); }
 
-/** One round of SHA-256. */
+// One round of SHA-256.
 void inline Round(__m256i a, __m256i b, __m256i c, __m256i& d, __m256i e, __m256i f, __m256i g, __m256i& h, __m256i k) noexcept
 {
     __m256i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
@@ -91,7 +108,30 @@ void inline Write8(uint8_t* out, int offset, __m256i v) noexcept
     to_little_endian(out + 224 + offset, _mm256_extract_epi32(v, 0));
 }
 
-void double_sha256_64x8_avx2(uint8_t* out, const uint8_t* in) noexcept
+void sha256_avx2(uint32_t* state, const uint8_t* data, uint32_t blocks)
+{
+    // TODO: iterate over N blocks, eight lanes per block.
+    // TODO: this is currently disabled in single_sha256.
+}
+
+// One block in eight lanes.
+void sha256_x1_avx2(uint32_t state[8], const uint8_t block[64]) noexcept
+{
+    return sha256_avx2(state, block, 1);
+}
+
+////void sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) noexcept
+////{
+////    // TODO: eight blocks in eight lanes. 
+////}
+
+////void double_sha256_x1_avx2(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+////{
+////    // TODO: one block in eight lanes, doubled.
+////}
+
+// eight blocks in eight lanes, doubled.
+void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) noexcept
 {
     // Transform 1
     __m256i a = K(0x6a09e667ul);

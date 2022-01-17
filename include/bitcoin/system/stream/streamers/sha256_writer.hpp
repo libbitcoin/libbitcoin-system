@@ -49,7 +49,7 @@ protected:
 private:
     void flusher() noexcept;
 
-    SHA256CTX context_;
+    intrinsics::sha256_context context_;
 };
 
 } // namespace system

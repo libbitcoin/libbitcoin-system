@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(hash_tests)
 ////BC_API uint256_t to_uint256(const hash_digest& hash);
 ////BC_API uint512_t to_uint512(const long_hash& hash);
 
-BOOST_AUTO_TEST_CASE(sha1_hash_test)
+BOOST_AUTO_TEST_CASE(hash__sha1_hash__sha1_tests__expected)
 {
     for (const auto& result: sha1_tests)
     {
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(sha1_hash_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(ripemd_hash_test)
+BOOST_AUTO_TEST_CASE(hash__sripemd160_hash__ripemd_tests__expected)
 {
     for (const auto& result: ripemd_tests)
     {
@@ -65,21 +65,21 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash2), "c23e37c6fad06deab545f952992c8f28cb02bbe5");
 }
 
-BOOST_AUTO_TEST_CASE(sha256_hash_test)
+BOOST_AUTO_TEST_CASE(hash__sha256_hash__data__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const auto hash = sha256_hash(chunk);
     BOOST_REQUIRE_EQUAL(encode_base16(hash), "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
 }
 
-BOOST_AUTO_TEST_CASE(sha512_hash_test)
+BOOST_AUTO_TEST_CASE(hash__sha512_hash__data__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const auto long_hash = sha512_hash(chunk);
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876");
 }
 
-BOOST_AUTO_TEST_CASE(hmac_sha256_hash_test)
+BOOST_AUTO_TEST_CASE(hash__hmac_sha256_hash__data_key__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const data_chunk key{ 'k', 'e', 'y' };
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(hmac_sha256_hash_test)
     BOOST_REQUIRE_EQUAL(encode_base16(hash), "5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0");
 }
 
-BOOST_AUTO_TEST_CASE(hmac_sha512_hash_test)
+BOOST_AUTO_TEST_CASE(hash__hmac_sha512_hash__data_key__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const data_chunk key{ 'k', 'e', 'y' };
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(hmac_sha512_hash_test)
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253cb52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58");
 }
 
-BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
+BOOST_AUTO_TEST_CASE(hash__hpkcs5_pbkdf2_hmac_sha512__pkcs5_pbkdf2_hmac_sha512_tests__expected)
 {
     for (const auto& result: pkcs5_pbkdf2_hmac_sha512_tests)
     {
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(pbkdf2_hmac_sha256_test)
+BOOST_AUTO_TEST_CASE(hash__pbkdf2_hmac_sha256_chunk__pbkdf2_hmac_sha256_tests__expected)
 {
     for (const auto& result: pbkdf2_hmac_sha256_tests)
     {
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(pbkdf2_hmac_sha256_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(scrypt_hash_test)
+BOOST_AUTO_TEST_CASE(hash__scrypt_hash__scrypt_hash_tests__expected)
 {
     for (const auto& result: scrypt_hash_tests)
     {
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(scrypt_hash_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(djb2_hash_test)
+BOOST_AUTO_TEST_CASE(hash__djb2_hash__01234567890abcdefghijklmnopqrstuvwxyz__0xe1669c01)
 {
     // djb2_hash is size_t so cast for consistent test expectation.
     const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
@@ -150,7 +150,7 @@ hash_digest to_merkle_root(const hash_list& hashes)
     return merkle.front();
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__one_pair__expected)
+BOOST_AUTO_TEST_CASE(hash__hash_reduce__one_pair__expected)
 {
     hash_list hashes
     {
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__one_pair__expected)
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__two_pair__expected)
+BOOST_AUTO_TEST_CASE(hash__hash_reduce__two_pair__expected)
 {
     hash_list hashes
     {
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__two_pair__expected)
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__four_pair__expected)
+BOOST_AUTO_TEST_CASE(hash__hash_reduce__four_pair__expected)
 {
     hash_list hashes
     {

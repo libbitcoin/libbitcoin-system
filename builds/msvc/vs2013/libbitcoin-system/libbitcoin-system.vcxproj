@@ -157,9 +157,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\golomb_coding.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\intrinsics.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_1_sse4.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_2_shani.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_4_neon.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_4_sse4.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_4_sse41.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_8_avx2.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />

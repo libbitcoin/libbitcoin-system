@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <immintrin.h>
@@ -27,6 +28,7 @@
 #endif // _MSC_VER
 
 #include <iterator>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/define.hpp>
@@ -38,7 +40,7 @@ namespace system {
 namespace intrinsics {
 
 // In msvc intrinsics always compile, however on other platforms this support
-// is unreliable, so we revert to the lowest common interface (assembler).
+// is unreliable, so we revert to the lowest common interface (assembly).
 
 bool xgetbv(uint64_t& value, uint32_t index) noexcept
 {
@@ -103,7 +105,18 @@ bool have_avx2() noexcept
     return enable;
 }
 #endif
-
+#ifdef WITH_NEON
+inline bool try_neon() noexcept
+{
+    // TODO: test for ARM Neon.
+    return false;
+}
+bool have_neon() noexcept
+{
+    static auto enable = try_neon();
+    return enable;
+}
+#endif
 #ifdef WITH_SSE41
 inline bool try_sse41() noexcept
 {
@@ -117,25 +130,30 @@ bool have_sse41() noexcept
     return enable;
 }
 #endif
-
-#ifdef WITH_NEON
-inline bool try_neon() noexcept
+#ifdef WITH_SSE4
+inline bool try_sse4() noexcept
 {
-    // TODO: test for ARM Neon.
+#if defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
+    // sha256_x1_sse4() is not yet defined in this context.
     return false;
+#else
+    uint32_t eax, ebx, ecx, edx;
+    return cpuid_ex(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_right(ecx, cpu1_0::sse4_ecx_bit);
+#endif
 }
-bool have_neon() noexcept
+bool have_sse4() noexcept
 {
-    static auto enable = try_neon();
+    static auto enable = try_sse4();
     return enable;
 }
 #endif
-
 #ifdef WITH_SHANI
 inline bool try_shani() noexcept
 {
     uint32_t eax, ebx, ecx, edx;
     return cpuid_ex(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && (eax >= cpu7_0::leaf)
         && get_right(ecx, cpu1_0::sse4_ecx_bit)
         && cpuid_ex(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_right(ebx, cpu7_0::shani_ebx_bit);
@@ -147,73 +165,112 @@ bool have_shani() noexcept
 }
 #endif
 
-#ifndef WITH_SSE4
-inline bool try_sse4() noexcept
-{
-    uint32_t eax, ebx, ecx, edx;
-    return cpuid_ex(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_right(ecx, cpu1_0::sse4_ecx_bit);
-}
-bool have_sse4() noexcept
-{
-    static auto enable = try_sse4();
-    return enable;
-}
-#endif
-
 #ifdef WITH_AVX2
-////void single_sha256_64x8_avx2(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x8_avx2(uint8_t* output, const uint8_t* input) noexcept;
-#endif
-#ifdef WITH_SSE41
-////void single_sha256_64x4_sse41(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x4_sse41(uint8_t* output, const uint8_t* input) noexcept;
+void sha256_x1_avx2(uint32_t state[8], const uint8_t block[64]) noexcept;
+void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) noexcept;
 #endif
 #ifdef WITH_NEON
-////void single_sha256_64x4_neon(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x4_neon(uint8_t* output, const uint8_t* input) noexcept;
+void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) noexcept;
+////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
+void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
 #endif
-#ifdef WITH_SHANI
-////void single_sha256_64x2_shani(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x1_shani(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x2_shani(uint8_t* output, const uint8_t* input) noexcept;
+#ifdef WITH_SSE41
+void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) noexcept;
+void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
 #endif
 #ifdef WITH_SSE4
-////void single_sha256_64x1_sse4(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x1_sse4(uint8_t* output, const uint8_t* input) noexcept;
-#else
-void single_sha256_64x1_port(uint8_t* output, const uint8_t* input) noexcept;
-void double_sha256_64x1_port(uint8_t* output, const uint8_t* input) noexcept;
+void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) noexcept;
+////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
+void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
+#endif
+#ifdef WITH_SHANI
+void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) noexcept;
+void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept;
+void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
 #endif
 
-// single sha256 64
+// single sha256
 // ----------------------------------------------------------------------------
 
-constexpr size_t hash_size = SHA256_DIGEST_LENGTH;
-constexpr size_t block_size = SHA256_BLOCK_LENGTH;
-
-void single_sha256_64(uint8_t*, const uint8_t*, size_t) noexcept
+// Iterate over contibuous blocks, with hash accumulation in 'state'. This can
+// be used to replace SHA256Transform.
+void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept
 {
-    // TODO: similar to double_sha256_64 implementation.
+#ifdef WITH_SHANI
+    if (have_shani())
+    {
+        sha256_x1_shani(state, block);
+        return;
+    }
+#endif
+////#ifdef WITH_AVX2
+////    if (have_avx2())
+////    {
+////        sha256_x1_avx2(state, block);
+////        return;
+////    }
+////#endif
+////#ifdef WITH_SSE41
+////    if (have_sse41())
+////    {
+////        sha256_x1_sse41(state, block);
+////        return;
+////    }
+////#endif
+#ifdef WITH_NEON
+    if (have_neon())
+    {
+        sha256_x1_neon(state, block);
+        return;
+    }
+#endif
+#ifdef WITH_SSE4
+    if (have_sse4())
+    {
+        sha256_x1_sse4(state, block);
+        return;
+    }
+#endif
+
+    sha256_x1_portable(state, block);
 }
 
-void single_sha256_64x1_port(uint8_t*, const uint8_t*) noexcept
-{
-    // TODO: build on existing implementation.
-    // void SHA256(const uint8_t* in, size_t length, uint8_t digest[]);
-}
-
-// double sha256 64
+// paired double sha256
 // ----------------------------------------------------------------------------
 
-void double_sha256_64(uint8_t* out, const uint8_t* in, size_t blocks) noexcept
+// Multiple blocks are hashed independently into an array of hash values stored
+// into 'out'. This is used to reduce hash sets during merkle tree computation.
+void sha256_paired_double(uint8_t* out, const uint8_t* in,
+    size_t blocks) noexcept
 {
+    constexpr auto block_size = 64;
+
+#ifdef WITH_SHANI
+    if (have_shani())
+    {
+        while (blocks >= 2)
+        {
+            double_sha256_x2_shani(out, in);
+            std::advance(out, hash_size * 2);
+            std::advance(in, block_size * 2);
+            blocks -= 2;
+        }
+
+        while (blocks >= 1)
+        {
+            double_sha256_x1_shani(out, in);
+            std::advance(out, hash_size * 1);
+            std::advance(in, block_size * 1);
+            blocks -= 1;
+        }
+    }
+#endif
 #ifdef WITH_AVX2
-    if (have_avx2() && !have_shani())
+    if (have_avx2())
     {
         while (blocks >= 8)
         {
-            double_sha256_64x8_avx2(out, in);
+            double_sha256_x8_avx2(out, in);
             std::advance(out, hash_size * 8);
             std::advance(in, block_size * 8);
             blocks -= 8;
@@ -221,11 +278,11 @@ void double_sha256_64(uint8_t* out, const uint8_t* in, size_t blocks) noexcept
     }
 #endif
 #ifdef WITH_SSE41
-    if (have_sse41() && !have_shani())
+    if (have_sse41())
     {
         while (blocks >= 4)
         {
-            double_sha256_64x4_sse41(out, in);
+            double_sha256_x4_sse41(out, in);
             std::advance(out, hash_size * 4);
             std::advance(in, block_size * 4);
             blocks -= 4;
@@ -235,29 +292,9 @@ void double_sha256_64(uint8_t* out, const uint8_t* in, size_t blocks) noexcept
 #ifdef WITH_NEON
     if (have_neon())
     {
-        while (blocks >= 4)
-        {
-            double_sha256_64x4_neon(out, in);
-            std::advance(out, hash_size * 4);
-            std::advance(in, block_size * 4);
-            blocks -= 4;
-        }
-    }
-#endif
-#ifdef WITH_SHANI
-    if (have_shani())
-    {
-        while (blocks >= 2)
-        {
-            double_sha256_64x2_shani(out, in);
-            std::advance(out, hash_size * 2);
-            std::advance(in, block_size * 2);
-            blocks -= 2;
-        }
-
         while (blocks >= 1)
         {
-            double_sha256_64x1_shani(out, in);
+            double_sha256_x1_neon(out, in);
             std::advance(out, hash_size * 1);
             std::advance(in, block_size * 1);
             blocks -= 1;
@@ -269,73 +306,79 @@ void double_sha256_64(uint8_t* out, const uint8_t* in, size_t blocks) noexcept
     {
         while (blocks >= 1)
         {
-            double_sha256_64x1_sse4(out, in);
+            double_sha256_x1_sse4(out, in);
             std::advance(out, hash_size * 1);
             std::advance(in, block_size * 1);
             blocks -= 1;
         }
     }
-#else // portable
+#endif
     while (blocks >= 1)
     {
-        double_sha256_64x1_port(out, in);
+        double_sha256_x1_portable(out, in);
         std::advance(out, hash_size * 1);
         std::advance(in, block_size * 1);
         blocks -= 1;
     }
-#endif
 }
 
-void inline initialize(uint32_t state[8])
+const std::array<uint32_t, 8> sha256_initial
 {
-    state[0] = 0x6a09e667ul;
-    state[1] = 0xbb67ae85ul;
-    state[2] = 0x3c6ef372ul;
-    state[3] = 0xa54ff53aul;
-    state[4] = 0x510e527ful;
-    state[5] = 0x9b05688cul;
-    state[6] = 0x1f83d9abul;
-    state[7] = 0x5be0cd19ul;
-}
+    0x6a09e667ul, 0xbb67ae85ul, 0x3c6ef372ul, 0xa54ff53aul,
+    0x510e527ful, 0x9b05688cul, 0x1f83d9abul, 0x5be0cd19ul
+};
 
-static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
-    size_t size)
+const std::array<uint8_t, 64> sha256_padding
 {
-    size_t i;
-    for (i = 0; i < size / sizeof(uint32_t); i++)
-    {
-        to_big_endian(to + i * sizeof(uint32_t), from[i]);
-    }
-}
+    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
-void double_sha256_64x1_port(uint8_t* out, const uint8_t* in) noexcept
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const std::array<uint8_t, 64> sha256x2_padding
 {
-    uint32_t state[8];
+    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
-    static const uint8_t padding1[64] =
-    {
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0
-    };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00
+};
 
-    uint8_t buffer2[64] =
-    {
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
-    };
+const std::array<uint8_t, 64> sha256x2_buffer
+{
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
-    initialize(state);
-    SHA256Transform(state, in);
-    SHA256Transform(state, padding1);
-    to_big_endian_vector(buffer2, state, SHA256_DIGEST_LENGTH);
+    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
+};
 
-    initialize(state);
-    SHA256Transform(state, buffer2);
-    to_big_endian_vector(out, state, SHA256_DIGEST_LENGTH);
+void double_sha256_x1_portable(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+{
+    auto buffer = sha256x2_buffer;
+
+    auto state = sha256_initial;
+    sha256_x1_portable(state.data(), in);
+    sha256_x1_portable(state.data(), sha256x2_padding.data());
+    to_big_endian<8>(buffer.data(), state.data());
+
+    state = sha256_initial;
+    sha256_x1_portable(state.data(), buffer.data());
+    to_big_endian<8>(out, state.data());
 }
 
 } // namespace intrinsics

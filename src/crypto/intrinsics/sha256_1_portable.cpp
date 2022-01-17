@@ -1,4 +1,4 @@
-/* libsodium: hash_sha256.c, v0.4.5 2014/04/16 */
+/* libsodium: hash_sha256_.c, v0.4.5 2014/04/16 */
 /**
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -23,51 +23,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "../../../include/bitcoin/system/crypto/external/sha256.h"
+#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
-#include <stdint.h>
-#include <string.h>
+#include <algorithm>
+#include <cstdint>
+#include <cstddef>
+#include <bitcoin/system/serial/serial.hpp>
 
-inline uint32_t from_big_endian(const void* data)
-{
-    const uint8_t* byte = (uint8_t const*)data;
-
-    return
-        (((uint32_t)byte[3]) <<  0) |
-        (((uint32_t)byte[2]) <<  8) |
-        (((uint32_t)byte[1]) << 16) |
-        (((uint32_t)byte[0]) << 24);
-}
-
-inline void to_big_endian(void* data, uint32_t value)
-{
-    uint8_t* byte = (uint8_t*)data;
-
-    byte[3] = (value >>  0) & 0xff;
-    byte[2] = (value >>  8) & 0xff;
-    byte[1] = (value >> 16) & 0xff;
-    byte[0] = (value >> 24) & 0xff;
-}
-
-static void from_big_endian_vector(uint32_t* to, const uint8_t* from,
-    size_t size)
-{
-    size_t i;
-    for (i = 0; i < size / sizeof(uint32_t); i++)
-    {
-        to[i] = from_big_endian(from + i * sizeof(uint32_t));
-    }
-}
-
-static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
- size_t size)
-{
-    size_t i;
-    for (i = 0; i < size / sizeof(uint32_t); i++)
-    {
-        to_big_endian(to + i * sizeof(uint32_t), from[i]);
-    }
-}
+namespace libbitcoin {
+namespace system {
+namespace intrinsics {
 
 #define Ch(x, y, z)  ((x & (y ^ z)) ^ z)
 #define Maj(x, y, z) ((x & (y | z)) | (y & z))
@@ -94,107 +59,25 @@ static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
 #define Wi(W, i) \
     W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16]
 
-static unsigned char PAD[SHA256_BLOCK_LENGTH] =
-{
-    0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+constexpr size_t hash_size = 32;
+constexpr size_t block_size = 64;
+constexpr size_t state_size = hash_size / sizeof(uint32_t);
 
-void SHA256Pad(SHA256CTX* context);
-void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
-    const uint8_t block[SHA256_BLOCK_LENGTH]);
-
-void SHA256(const uint8_t* input, size_t length,
-    uint8_t digest[SHA256_DIGEST_LENGTH])
+// sha256_context context{ sha256_initial };
+void sha256_initialize(sha256_context& context) noexcept
 {
-    SHA256CTX context;
-    SHA256Init(&context);
-    SHA256Update(&context, input, length);
-    SHA256Final(&context, digest);
+    context.state = sha256_initial;
+    context.count[0] = 0;
+    context.count[1] = 0;
 }
 
-void SHA256Init(SHA256CTX* context)
+void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept
 {
-    context->count[0] = 0;
-    context->count[1] = 0;
-    context->state[0] = 0x6A09E667;
-    context->state[1] = 0xBB67AE85;
-    context->state[2] = 0x3C6EF372;
-    context->state[3] = 0xA54FF53A;
-    context->state[4] = 0x510E527F;
-    context->state[5] = 0x9B05688C;
-    context->state[6] = 0x1F83D9AB;
-    context->state[7] = 0x5BE0CD19;
-}
-
-void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
-{
-    uint32_t bitlen[2];
-    uint32_t r = (context->count[1] >> 3) & 0x3f;
-
-    bitlen[1] = ((uint32_t)length) << 3;
-    bitlen[0] = (uint32_t)(length >> 29);
-
-    if ((context->count[1] += bitlen[1]) < bitlen[1])
-    {
-        context->count[0]++;
-    }
-
-    context->count[0] += bitlen[0];
-
-    if (length < SHA256_BLOCK_LENGTH - r)
-    {
-        memcpy(&context->buffer[r], input, length);
-        return;
-    }
-
-    memcpy(&context->buffer[r], input, SHA256_BLOCK_LENGTH - r);
-    SHA256Transform(context->state, context->buffer);
-
-    input += SHA256_BLOCK_LENGTH - r;
-    length -= SHA256_BLOCK_LENGTH - r;
-
-    while (length >= SHA256_BLOCK_LENGTH)
-    {
-        SHA256Transform(context->state, input);
-        input += SHA256_BLOCK_LENGTH;
-        length -= SHA256_BLOCK_LENGTH;
-    }
-
-    memcpy(context->buffer, input, length);
-}
-
-void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
-{
-    SHA256Pad(context);
-    to_big_endian_vector(digest, context->state, SHA256_DIGEST_LENGTH);
-}
-
-void SHA256Pad(SHA256CTX* context)
-{
-    uint8_t len[SHA256_STATE_LENGTH];
-    uint32_t r, plen;
-
-    to_big_endian_vector(len, context->count, SHA256_STATE_LENGTH);
-
-    r = (context->count[1] >> 3) & 0x3f;
-    plen = (r < 56) ? (56 - r) : (120 - r);
-
-    SHA256Update(context, PAD, plen);
-    SHA256Update(context, len, SHA256_STATE_LENGTH);
-}
-
-void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
-    const uint8_t block[SHA256_BLOCK_LENGTH])
-{
-    uint32_t i;
-    uint32_t W[SHA256_BLOCK_LENGTH];
-    uint32_t S[SHA256_STATE_LENGTH];
     uint32_t t0, t1;
+    uint32_t W[block_size];
+    uint32_t S[state_size];
 
-    from_big_endian_vector(W, block, SHA256_BLOCK_LENGTH);
+    from_big_endian<16>(W, block);
 
     Wi(W, 16);
     Wi(W, 17);
@@ -328,3 +211,71 @@ void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     state[6] += S[6];
     state[7] += S[7];
 }
+
+// This calls single_sha256, which may call any of the instrinsic transforms or
+// may call sha256_x1_portable (above), depending on platform configuration.
+void sha256_update(sha256_context& context, const uint8_t* input,
+    size_t size) noexcept
+{
+    uint32_t bit_length[2];
+    uint32_t r = (context.count[1] >> 3) & 0x3f;
+
+    bit_length[1] = ((uint32_t)size) << 3;
+    bit_length[0] = (uint32_t)(size >> 29);
+
+    if (((context.count[1] += bit_length[1])) < bit_length[1])
+        context.count[0]++;
+
+    context.count[0] += bit_length[0];
+
+    if (size < block_size - r)
+    {
+        std::copy_n(input, size, &context.buffer[r]);
+        return;
+    }
+
+    std::copy_n(input, block_size - r, &context.buffer[r]);
+    sha256_single(context.state.data(), context.buffer);
+
+    input += block_size - r;
+    size -= block_size - r;
+
+    while (size >= block_size)
+    {
+        sha256_single(context.state.data(), input);
+        input += block_size;
+        size -= block_size;
+    }
+
+    std::copy_n(input, size, context.buffer);
+}
+
+void sha256_pad(sha256_context& context) noexcept
+{
+    uint8_t size[8];
+    uint32_t r, psize;
+
+    to_big_endian<2>(size, context.count);
+    r = (context.count[1] >> 3) & 0x3f;
+    psize = (r < 56) ? (56 - r) : (120 - r);
+
+    sha256_update(context, sha256_padding.data(), psize);
+    sha256_update(context, size, 8);
+}
+
+void sha256_finalize(sha256_context& context, uint8_t digest[32]) noexcept
+{
+    sha256_pad(context);
+    to_big_endian<8>(digest, context.state.data());
+}
+
+void sha256(const uint8_t* input, size_t size, uint8_t digest[32]) noexcept
+{
+    sha256_context context{ sha256_initial };
+    sha256_update(context, input, size);
+    sha256_finalize(context, digest);
+}
+
+} // namespace intrinsics
+} // namespace system
+} // namespace libbitcoin

@@ -36,9 +36,10 @@ namespace system {
 
 template <typename OStream>
 sha256_writer<OStream>::sha256_writer(OStream& sink) noexcept
-  : byte_writer<OStream>(sink)
+  : byte_writer<OStream>(sink),
+    context_{ intrinsics::sha256_initial }
 {
-    SHA256Init(&context_);
+    ////intrinsics::sha256_initialize(context_);
 }
 
 template <typename OStream>
@@ -55,7 +56,7 @@ template <typename OStream>
 void sha256_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) noexcept
 {
-    SHA256Update(&context_, data, size);
+    sha256_update(context_, data, size);
 }
 
 template <typename OStream>
@@ -71,7 +72,7 @@ template <typename OStream>
 void sha256_writer<OStream>::flusher() noexcept
 {
     hash_digest hash;
-    SHA256Final(&context_, hash.data());
+    intrinsics::sha256_finalize(context_, hash.data());
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }

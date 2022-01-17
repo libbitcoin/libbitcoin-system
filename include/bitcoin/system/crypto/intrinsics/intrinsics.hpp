@@ -19,8 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_INTRINSICS_INTRINSICS_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_INTRINSICS_INTRINSICS_HPP
 
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/system/crypto/hash.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -51,18 +55,32 @@ namespace xcr0
     constexpr size_t avx_bit = 2;
 }
 
+extern const std::array<uint32_t, 8> sha256_initial;
+extern const std::array<uint8_t, 64> sha256_padding;
+extern const std::array<uint8_t, 64> sha256x2_padding;
+extern const std::array<uint8_t, 64> sha256x2_buffer;
+
 BC_API bool xgetbv(uint64_t& value, uint32_t index) noexcept;
 BC_API bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept;
 
-BC_API void single_sha256_64(uint8_t* out, const uint8_t* in,
-    size_t blocks) noexcept;
-BC_API void double_sha256_64(uint8_t* out, const uint8_t* in,
-    size_t blocks) noexcept;
+typedef struct
+{
+    std::array<uint32_t, 8> state;
+    uint32_t count[2];
+    uint8_t buffer[64];
+} sha256_context;
 
-#if !(defined(__x86_64__) || defined(__amd64__) || defined(__i386__))
-#undef WITH_SSE4
-#endif
+BC_API void sha256_initialize(sha256_context& context) noexcept;
+BC_API void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept;
+BC_API void sha256_update(sha256_context& context, const uint8_t* input, size_t size) noexcept;
+BC_API void sha256_pad(sha256_context& context) noexcept;
+BC_API void sha256_finalize(sha256_context& context, uint8_t digest[32]) noexcept;
+BC_API void sha256(const uint8_t* input, size_t size, uint8_t digest[32]) noexcept;
+
+BC_API void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept;
+BC_API void sha256_paired_double(uint8_t* out, const uint8_t* in, size_t blocks) noexcept;
+BC_API void double_sha256_x1_portable(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
 
 } // namespace intrinsics
 } // namespace system

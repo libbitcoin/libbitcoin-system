@@ -1,10 +1,12 @@
-// Copyright (c) 2018-2020 The Bitcoin Core developers
+/* sha256-x86.c - Intel SHA extensions using C intrinsics  */
+/*   Written and place in public domain by Jeffrey Walton  */
+/*   Based on code from Intel, and by Sean Gulley for      */
+/*   the miTLS project.                                    */
+
+// Modifications by:
+// Copyright (c) 2017-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-//
-// Based on https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c,
-// Written and placed in public domain by Jeffrey Walton.
-// Based on code from Intel, and by Sean Gulley for the miTLS project.
 
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
@@ -102,19 +104,8 @@ void inline Save(uint8_t* out, __m128i s) noexcept
         _mm_shuffle_epi8(s, _mm_load_si128((const __m128i*)flip_mask)));
 }
 
-void inline initialize(uint32_t state[8])
-{
-    state[0] = 0x6a09e667ul;
-    state[1] = 0xbb67ae85ul;
-    state[2] = 0x3c6ef372ul;
-    state[3] = 0xa54ff53aul;
-    state[4] = 0x510e527ful;
-    state[5] = 0x9b05688cul;
-    state[6] = 0x1f83d9abul;
-    state[7] = 0x5be0cd19ul;
-}
-
-void sha256_x2_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
+// Iterate over N blocks, two lanes per block.
+void sha256_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
 {
     __m128i m0, m1, m2, m3, s0, s1, so0, so1;
 
@@ -123,6 +114,7 @@ void sha256_x2_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexc
     s1 = _mm_loadu_si128((const __m128i*)(state + 4));
     Shuffle(s0, s1);
 
+    // One block in two lanes.
     while (blocks--)
     {
         /* Remember old state */
@@ -178,51 +170,34 @@ void sha256_x2_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexc
     _mm_storeu_si128((__m128i*)(state + 4), s1);
 }
 
-void double_sha256_64x1_shani(uint8_t* out, const uint8_t* in) noexcept
+// One block in two lanes.
+void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) noexcept
 {
-    uint32_t state[8];
-
-    static const uint8_t padding1[64] =
-    {
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0
-    };
-
-    uint8_t buffer2[64] =
-    {
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
-    };
-
-    initialize(state);
-    sha256_x2_shani(state, in, 1);
-    sha256_x2_shani(state, padding1, 1);
-    to_big_endian(buffer2 + 0, state[0]);
-    to_big_endian(buffer2 + 4, state[1]);
-    to_big_endian(buffer2 + 8, state[2]);
-    to_big_endian(buffer2 + 12, state[3]);
-    to_big_endian(buffer2 + 16, state[4]);
-    to_big_endian(buffer2 + 20, state[5]);
-    to_big_endian(buffer2 + 24, state[6]);
-    to_big_endian(buffer2 + 28, state[7]);
-
-    initialize(state);
-    sha256_x2_shani(state, buffer2, 1);
-    to_big_endian(out + 0, state[0]);
-    to_big_endian(out + 4, state[1]);
-    to_big_endian(out + 8, state[2]);
-    to_big_endian(out + 12, state[3]);
-    to_big_endian(out + 16, state[4]);
-    to_big_endian(out + 20, state[5]);
-    to_big_endian(out + 24, state[6]);
-    to_big_endian(out + 28, state[7]);
+    return sha256_shani(state, block, 1);
 }
 
-void double_sha256_64x2_shani(uint8_t* out, const uint8_t* in) noexcept
+////void sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept
+////{
+////    // TODO: two blocks in two lanes. 
+////}
+
+// One block in two lanes, doubled.
+void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+{
+    auto buffer = sha256x2_buffer;
+
+    auto state = sha256_initial;
+    sha256_x1_shani(state.data(), in);
+    sha256_x1_shani(state.data(), sha256x2_padding.data());
+    to_big_endian<8>(buffer.data(), state.data());
+
+    state = sha256_initial;
+    sha256_x1_shani(state.data(), buffer.data());
+    to_big_endian<8>(out, state.data());
+}
+
+// Two blocks in two lanes, doubled.
+void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept
 {
     __m128i am0, am1, am2, am3, as0, as1, aso0, aso1;
     __m128i bm0, bm1, bm2, bm3, bs0, bs1, bso0, bso1;
