@@ -39,10 +39,34 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
+namespace cpu1_0
+{
+    constexpr uint32_t leaf = 1;
+    constexpr uint32_t subleaf = 0;
+    constexpr size_t sse4_ecx_bit = 19;
+    constexpr size_t xsave_ecx_bit = 27;
+    constexpr size_t avx_ecx_bit = 28;
+}
+
+namespace cpu7_0
+{
+    constexpr uint32_t leaf = 7;
+    constexpr uint32_t subleaf = 0;
+    constexpr size_t avx2_ebx_bit = 5;
+    constexpr size_t shani_ebx_bit = 29;
+}
+
+namespace xcr0
+{
+    constexpr uint32_t feature = 0;
+    constexpr size_t sse_bit = 1;
+    constexpr size_t avx_bit = 2;
+}
+
 // In msvc intrinsics always compile, however on other platforms this support
 // is unreliable, so we revert to the lowest common interface (assembly).
 
-bool xgetbv(uint64_t& value, uint32_t index) noexcept
+static bool xgetbv(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
     // Compile error: built-in _xgetbv requires target feature xsave.
@@ -60,7 +84,7 @@ bool xgetbv(uint64_t& value, uint32_t index) noexcept
 #endif
 }
 
-bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)

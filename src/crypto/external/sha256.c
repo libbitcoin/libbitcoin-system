@@ -189,10 +189,9 @@ void SHA256Pad(SHA256CTX* context)
 void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     const uint8_t block[SHA256_BLOCK_LENGTH])
 {
-    uint32_t i;
+    uint32_t t0, t1;
     uint32_t W[SHA256_BLOCK_LENGTH];
     uint32_t S[SHA256_STATE_LENGTH];
-    uint32_t t0, t1;
 
     from_big_endian_vector(W, block, SHA256_BLOCK_LENGTH);
 

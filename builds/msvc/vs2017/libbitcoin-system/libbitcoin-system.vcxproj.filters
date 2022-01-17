@@ -348,6 +348,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\intrinsics.cpp">
       <Filter>src\crypto\intrinsics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_1_portable.cpp">
+      <Filter>src\crypto\intrinsics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_2_shani.cpp">
       <Filter>src\crypto\intrinsics</Filter>
     </ClCompile>
@@ -611,9 +614,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\languages.cpp">
       <Filter>src\words</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_1_portable.cpp">
-      <Filter>src\crypto\intrinsics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

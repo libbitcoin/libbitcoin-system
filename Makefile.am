@@ -93,6 +93,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/external/sha512.c \
     src/crypto/external/zeroize.c \
     src/crypto/intrinsics/intrinsics.cpp \
+    src/crypto/intrinsics/sha256_1_portable.cpp \
     src/crypto/intrinsics/sha256_2_shani.cpp \
     src/crypto/intrinsics/sha256_4_neon.cpp \
     src/crypto/intrinsics/sha256_4_sse4.cpp \
