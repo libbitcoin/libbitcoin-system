@@ -341,7 +341,7 @@ Integer from_little_endian_unchecked(const Iterator& data) noexcept
     return from_little_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
-/// Vector integral conversions.
+// data[] <=> integral[]
 /// ---------------------------------------------------------------------------
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>

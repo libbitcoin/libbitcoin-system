@@ -117,7 +117,7 @@ template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
 Integer from_little_endian_unchecked(const Iterator& data) noexcept;
 
-/// Vector integral conversions.
+// data[] -> integral[] (explicit size), integral[] -> data[] (explicit size)
 /// ---------------------------------------------------------------------------
 
 template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
