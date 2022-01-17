@@ -340,6 +340,86 @@ Integer from_little_endian_unchecked(const Iterator& data) noexcept
     return from_little_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
+/// Parallel integral conversions.
+/// ---------------------------------------------------------------------------
+/// C++17: Parallel policy for std::transform.
+
+template <size_t Count>
+static void from_big_endian(uint32_t to[Count],
+    const uint8_t from[Count * sizeof(uint32_t)]) noexcept
+{
+    typedef data_array<sizeof(uint32_t)> state_buffer;
+    const auto in = reinterpret_cast<const state_buffer*>(from);
+
+    std::transform(in, std::next(in, Count), to,
+        [](const state_buffer& value) noexcept
+        {
+            return
+                (((uint32_t)value[0]) << 24) |
+                (((uint32_t)value[1]) << 16) |
+                (((uint32_t)value[2]) << 8) |
+                (((uint32_t)value[3]) << 0);
+        });
+}
+
+template <size_t Count>
+static void from_little_endian(uint32_t to[Count],
+    const uint8_t from[Count * sizeof(uint32_t)]) noexcept
+{
+    typedef data_array<sizeof(uint32_t)> state_buffer;
+    const auto in = reinterpret_cast<const state_buffer*>(from);
+
+    std::transform(in, std::next(in, Count), to,
+        [](const state_buffer& value) noexcept
+        {
+            return
+                (((uint32_t)value[0]) << 0) |
+                (((uint32_t)value[1]) << 8) |
+                (((uint32_t)value[2]) << 16) |
+                (((uint32_t)value[3]) << 24);
+        });
+}
+
+template <size_t Count>
+void to_big_endian(uint8_t to[Count * sizeof(uint32_t)],
+    const uint32_t from[Count]) noexcept
+{
+    typedef data_array<sizeof(uint32_t)> state_buffer;
+    const auto out = reinterpret_cast<state_buffer*>(to);
+
+    std::transform(from, std::next(from, Count), out,
+        [](uint32_t value) noexcept
+        {
+            return state_buffer
+            {
+                static_cast<uint8_t>(value >> 24),
+                static_cast<uint8_t>(value >> 16),
+                static_cast<uint8_t>(value >> 8),
+                static_cast<uint8_t>(value >> 0)
+            };
+        });
+}
+
+template <size_t Count>
+void to_little_endian(uint8_t to[Count * sizeof(uint32_t)],
+    const uint32_t from[Count]) noexcept
+{
+    typedef data_array<sizeof(uint32_t)> state_buffer;
+    const auto out = reinterpret_cast<state_buffer*>(to);
+
+    std::transform(from, std::next(from, Count), out,
+        [](uint32_t value) noexcept
+        {
+            return state_buffer
+            {
+                static_cast<uint8_t>(value >> 0),
+                static_cast<uint8_t>(value >> 8),
+                static_cast<uint8_t>(value >> 16),
+                static_cast<uint8_t>(value >> 24)
+            };
+        });
+}
+
 } // namespace system
 } // namespace libbitcoin
 

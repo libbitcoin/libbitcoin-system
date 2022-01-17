@@ -117,45 +117,24 @@ template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
 Integer from_little_endian_unchecked(const Iterator& data) noexcept;
 
-/// Specialized functions.
+/// Parallel integral conversions.
 /// ---------------------------------------------------------------------------
-/// Slight performance advantage to loop unroll.
 
-inline uint32_t from_big_endian(const uint8_t data[sizeof(uint32_t)]) noexcept
-{
-    return
-        (static_cast<uint32_t>(data[3]) <<  0) |
-        (static_cast<uint32_t>(data[2]) <<  8) |
-        (static_cast<uint32_t>(data[1]) << 16) |
-        (static_cast<uint32_t>(data[0]) << 24);
-}
+template <size_t Count>
+static void from_big_endian(uint32_t to[Count],
+    const uint8_t from[Count * sizeof(uint32_t)]) noexcept;
 
-inline uint32_t from_little_endian(const uint8_t data[sizeof(uint32_t)]) noexcept
-{
-    return
-        (static_cast<uint32_t>(data[0]) <<  0) |
-        (static_cast<uint32_t>(data[1]) <<  8) |
-        (static_cast<uint32_t>(data[2]) << 16) |
-        (static_cast<uint32_t>(data[3]) << 24);
-}
+template <size_t Count>
+static void from_little_endian(uint32_t to[Count],
+    const uint8_t from[Count * sizeof(uint32_t)]) noexcept;
 
-inline void to_big_endian(uint8_t data[sizeof(uint32_t)],
-    uint32_t value) noexcept
-{
-    data[3] = (value >>  0) & 0xff;
-    data[2] = (value >>  8) & 0xff;
-    data[1] = (value >> 16) & 0xff;
-    data[0] = (value >> 24) & 0xff;
-}
+template <size_t Count>
+void to_big_endian(uint8_t to[Count * sizeof(uint32_t)],
+    const uint32_t from[Count]) noexcept;
 
-inline void to_little_endian(uint8_t data[sizeof(uint32_t)],
-    uint32_t value) noexcept
-{
-    data[0] = (value >>  0) & 0xff;
-    data[1] = (value >>  8) & 0xff;
-    data[2] = (value >> 16) & 0xff;
-    data[3] = (value >> 24) & 0xff;
-}
+template <size_t Count>
+void to_little_endian(uint8_t to[Count * sizeof(uint32_t)],
+    const uint32_t from[Count]) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
