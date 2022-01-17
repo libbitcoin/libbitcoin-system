@@ -126,7 +126,6 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix) noexcept
     const auto child = source.read_4_bytes_big_endian();
     const auto chain = source.read_forward<hd_chain_code_size>();
     const auto compressed = source.read_forward<ec_compressed_size>();
-    // const auto point = to_array<ec_compressed_size>(compressed);
 
     // Validate the prefix against the provided value.
     if (actual_prefix != prefix)
