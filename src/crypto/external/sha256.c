@@ -49,7 +49,7 @@ inline void to_big_endian(void* data, uint32_t value)
     byte[0] = (value >> 24) & 0xff;
 }
 
-static void from_big_endian_vector(uint32_t* to, const uint8_t* from,
+inline void from_big_endian_vector(uint32_t* to, const uint8_t* from,
     size_t size)
 {
     size_t i;
@@ -59,7 +59,7 @@ static void from_big_endian_vector(uint32_t* to, const uint8_t* from,
     }
 }
 
-static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
+inline void to_big_endian_vector(uint8_t* to, const uint32_t* from,
  size_t size)
 {
     size_t i;
