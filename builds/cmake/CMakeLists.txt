@@ -116,9 +116,11 @@ endif()
 find_package( Boost 1.76.0 REQUIRED COMPONENTS
     atomic
     chrono
+    container
     date_time
     filesystem
     iostreams
+    json
     locale
     log_setup
     log
@@ -130,9 +132,11 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
 
 set( boost_atomic_LIBS "-lboost_atomic" )
 set( boost_chrono_LIBS "-lboost_chrono" )
+set( boost_container_LIBS "-lboost_container" )
 set( boost_date_time_LIBS "-lboost_date_time" )
 set( boost_filesystem_LIBS "-lboost_filesystem" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
+set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_log_setup_LIBS "-lboost_log_setup" )
 set( boost_log_LIBS "-lboost_log" )
