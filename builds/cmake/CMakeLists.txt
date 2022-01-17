@@ -122,8 +122,6 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
     iostreams
     json
     locale
-    log_setup
-    log
     program_options
     regex
     system
@@ -138,8 +136,6 @@ set( boost_filesystem_LIBS "-lboost_filesystem" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
 set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
-set( boost_log_setup_LIBS "-lboost_log_setup" )
-set( boost_log_LIBS "-lboost_log" )
 set( boost_program_options_LIBS "-lboost_program_options" )
 set( boost_regex_LIBS "-lboost_regex" )
 set( boost_system_LIBS "-lboost_system" )
@@ -244,7 +240,6 @@ if (BUILD_SHARED_LIBS)
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
-        ${Boost_LOG_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -263,7 +258,6 @@ else()
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
-        ${Boost_LOG_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -474,7 +468,6 @@ if (BUILD_SHARED_LIBS)
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
-        ${Boost_LOG_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -491,7 +484,6 @@ else()
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
-        ${Boost_LOG_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
