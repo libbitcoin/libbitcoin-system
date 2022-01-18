@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <string.h>
 
-inline uint32_t from_big_endian(const void* data)
+static uint32_t from_big_endian(const void* data)
 {
     const uint8_t* byte = (uint8_t const*)data;
 
@@ -39,7 +39,7 @@ inline uint32_t from_big_endian(const void* data)
         (((uint32_t)byte[0]) << 24);
 }
 
-inline void to_big_endian(void* data, uint32_t value)
+static void to_big_endian(void* data, uint32_t value)
 {
     uint8_t* byte = (uint8_t*)data;
 
@@ -49,7 +49,7 @@ inline void to_big_endian(void* data, uint32_t value)
     byte[0] = (value >> 24) & 0xff;
 }
 
-inline void from_big_endian_vector(uint32_t* to, const uint8_t* from,
+static void from_big_endian_vector(uint32_t* to, const uint8_t* from,
     size_t size)
 {
     size_t i;
@@ -59,7 +59,7 @@ inline void from_big_endian_vector(uint32_t* to, const uint8_t* from,
     }
 }
 
-inline void to_big_endian_vector(uint8_t* to, const uint32_t* from,
+static void to_big_endian_vector(uint8_t* to, const uint32_t* from,
  size_t size)
 {
     size_t i;
