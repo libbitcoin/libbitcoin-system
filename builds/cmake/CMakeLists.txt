@@ -114,13 +114,11 @@ endif()
 # Find boost
 #------------------------------------------------------------------------------
 find_package( Boost 1.76.0 REQUIRED COMPONENTS
-    atomic
     chrono
     container
     date_time
     filesystem
     iostreams
-    json
     locale
     program_options
     regex
@@ -128,13 +126,11 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
     thread
     unit_test_framework )
 
-set( boost_atomic_LIBS "-lboost_atomic" )
 set( boost_chrono_LIBS "-lboost_chrono" )
 set( boost_container_LIBS "-lboost_container" )
 set( boost_date_time_LIBS "-lboost_date_time" )
 set( boost_filesystem_LIBS "-lboost_filesystem" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
-set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_program_options_LIBS "-lboost_program_options" )
 set( boost_regex_LIBS "-lboost_regex" )
