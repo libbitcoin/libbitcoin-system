@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     const output output(tx0_last_output);
     BOOST_REQUIRE(output.is_valid());
 
-    const transaction instance(version, locktime, { input }, { output });
+    const transaction instance(version, { input }, { output }, locktime);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 
     const inputs inputs{ input };
     const outputs outputs{ output };
-    const transaction instance(version, locktime, inputs, outputs);
+    const transaction instance(version, inputs, outputs, locktime);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
@@ -397,9 +397,9 @@ BOOST_AUTO_TEST_CASE(transaction__fee__empty__zero)
     const transaction instance
     {
         0,
-        0,
         inputs{},
-        {}
+        {},
+        0
     };
 
     // floored_subtract(0, 0)
@@ -411,9 +411,9 @@ BOOST_AUTO_TEST_CASE(transaction__fee__default_input__max_uint64)
     const transaction instance
     {
         0,
-        0,
         inputs{ {} },
-        {}
+        {},
+        0
     };
 
     // floored_subtract(max_uint64, 0)
@@ -425,9 +425,9 @@ BOOST_AUTO_TEST_CASE(transaction__fee__default_output__zero)
     const transaction instance
     {
         0,
-        0,
         inputs{},
-        { {} }
+        { {} },
+        0
     };
 
     // floored_subtract(0, max_uint64)
@@ -450,13 +450,13 @@ BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
     const transaction instance
     {
         0,
-        0,
         { input0, input1 },
         {
             { claim0, script{} },
             { claim1, script{} },
             { claim2, script{} }
-        }
+        },
+        0
     };
 
     // floored_subtract(values, claims)
@@ -476,12 +476,12 @@ BOOST_AUTO_TEST_CASE(transaction__claim__two_outputs__sum)
     const transaction instance
     {
         0,
-        0,
         {},
         {
             { claim0, script{} },
             { claim1, script{} }
-        }
+        },
+        0
     };
 
 
@@ -500,9 +500,9 @@ BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
     transaction instance
     {
         0,
-        0,
         inputs{ {}, {} },
-        {}
+        {},
+        0
     };
 
     // ceilinged_add(max_uint64, max_uint64)
@@ -522,9 +522,9 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
     transaction instance
     {
         0,
-        0,
         { input0, input1 },
-        {}
+        {},
+        0
     };
 
     // ceilinged_add(value0, value1)
@@ -550,11 +550,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__default_point__true)
     const transaction instance
     {
         0,
-        0,
         {
             { {}, script{}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_coinbase());
@@ -565,9 +565,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__default_input__true)
     const transaction instance
     {
         0,
-        0,
         inputs{ {} },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_coinbase());
@@ -578,11 +578,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_input__true)
     const transaction instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_coinbase());
@@ -593,11 +593,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__non_null_input__false)
     const transaction instance
     {
         0,
-        0,
         {
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_coinbase());
@@ -608,12 +608,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__first_null_input__false)
     const transaction instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, {}, 0 },
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_coinbase());
@@ -624,12 +624,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase__null_inputs__false)
     const transaction instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, {}, 0 },
             { { hash_digest{}, point::null_index }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_coinbase());
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true
 // TODO: tests with initialized data
 BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero)
 {
-    const transaction instance{ 0, 0, inputs{}, {} };
+    const transaction instance{ 0, inputs{}, {}, 0 };
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
 }
 
@@ -720,13 +720,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_point_hashes_
     const accessor instance
     {
         0,
-        0,
         {
             {},
             { { tx1_hash, 42 }, {}, 0 },
             { { tx2_hash, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_internal_double_spend());
@@ -737,13 +737,13 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__unique_points__false
     const accessor instance
     {
         0,
-        0,
         {
             {},
             { { tx1_hash, 42 }, {}, 0 },
             { { tx1_hash, 43 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_internal_double_spend());
@@ -754,12 +754,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_points__tr
     const accessor instance
     {
         0,
-        0,
         {
             { { tx1_hash, 42 }, {}, 0 },
             { { tx1_hash, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_internal_double_spend());
@@ -780,9 +780,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_empty__one_input__true)
     const accessor instance
     {
         0,
-        0,
         inputs{ {} },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_empty());
@@ -793,9 +793,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_empty__one_output__true)
     const accessor instance
     {
         0,
-        0,
         inputs{},
-        { {} }
+        { {} },
+        0
     };
 
     BOOST_REQUIRE(instance.is_empty());
@@ -806,9 +806,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_empty__one_input_one_output__false)
     const accessor instance
     {
         0,
-        0,
         inputs{ {} },
-        { {} }
+        { {} },
+        0
     };
 
     BOOST_REQUIRE(!instance.is_empty());
@@ -819,11 +819,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__non_null_input__false)
     const accessor instance
     {
         0,
-        0,
         {
             { { tx1_hash, point::null_index }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_null_non_coinbase());
@@ -834,12 +834,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__non_null_inputs__false)
     const accessor instance
     {
         0,
-        0,
         {
             { { hash_digest{}, 42 }, {}, 0 },
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_null_non_coinbase());
@@ -850,12 +850,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__first_null_input__true)
     const accessor instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, {}, 0 },
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_null_non_coinbase());
@@ -866,12 +866,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__second_null_input__true)
     const accessor instance
     {
         0,
-        0,
         {
             { { hash_digest{}, 42 }, {}, 0 },
             { { hash_digest{}, point::null_index }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_null_non_coinbase());
@@ -882,12 +882,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_null_non_coinbase__null_inputs__true)
     const accessor instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, {}, 0 },
             { { hash_digest{}, point::null_index }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_null_non_coinbase());
@@ -898,11 +898,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_mi
     const accessor instance
     {
         0,
-        0,
         {
             { {}, { data_chunk(sub1(min_coinbase_size), 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE_LT(instance.inputs()->back()->script().serialized_size(false), min_coinbase_size);
@@ -914,11 +914,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_ma
     const accessor instance
     {
         0,
-        0,
         {
             { { hash_digest{}, point::null_index }, { data_chunk(add1(max_coinbase_size), 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE_GT(instance.inputs()->back()->script().serialized_size(false), max_coinbase_size);
@@ -930,11 +930,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_max__fal
     const accessor instance
     {
         0,
-        0,
         {
             { {}, { data_chunk(max_coinbase_size, 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_invalid_coinbase_size());
@@ -945,11 +945,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_min__fal
     const accessor instance
     {
         0,
-        0,
         {
             { {}, { data_chunk(min_coinbase_size, 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_invalid_coinbase_size());
@@ -960,11 +960,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_ma
     const accessor instance
     {
         0,
-        0,
         {
             { {}, { data_chunk(sub1(max_coinbase_size), 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_invalid_coinbase_size());
@@ -975,11 +975,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_mi
     const accessor instance
     {
         0,
-        0,
         {
             { {}, { data_chunk(add1(min_coinbase_size), 0x00), false }, 0 },
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_invalid_coinbase_size());
@@ -996,9 +996,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
     const accessor instance
     {
         0,
-        locktime,
         inputs{},
-        {}
+        {},
+        locktime
     };
 
     BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
@@ -1016,9 +1016,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater
     const accessor instance
     {
         0,
-        locktime,
         inputs{},
-        {}
+        {},
+        locktime
     };
 
     BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
@@ -1035,9 +1035,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_height_less_
     const accessor instance
     {
         0,
-        locktime,
         inputs{},
-        {}
+        {},
+        locktime
     };
 
     BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
@@ -1055,9 +1055,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
     const accessor instance
     {
         0,
-        locktime,
         { { {}, script{}, sequence } },
-        {}
+        {},
+        locktime,
     };
 
     BOOST_REQUIRE(instance.is_non_final(height, time, past, bip113));
@@ -1075,11 +1075,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
     const accessor instance
     {
         0,
-        locktime,
         {
             { {}, script{}, sequence }
         },
-        {}
+        {},
+        locktime
     };
 
     BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
@@ -1096,9 +1096,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
     const accessor instance
     {
         0,
-        0,
         inputs{ {}, {} },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_missing_prevouts());
@@ -1111,9 +1111,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_missing_prevouts());
@@ -1130,9 +1130,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_overspent__output_exceeds_input__true)
     const accessor instance
     {
         0,
-        0,
         {},
-        { { 1, script{} }, { 0, script{} } }
+        { { 1, script{} }, { 0, script{} } },
+        0
     };
 
     BOOST_REQUIRE(instance.is_overspent());
@@ -1152,9 +1152,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_immature(coinbase_maturity));
@@ -1168,9 +1168,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_immature(coinbase_maturity));
@@ -1184,9 +1184,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_immature(coinbase_maturity));
@@ -1200,9 +1200,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
@@ -1216,9 +1216,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
@@ -1230,11 +1230,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
     const accessor instance
     {
         version,
-        0,
         {
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_locked(0, 0));
@@ -1246,11 +1246,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
     const accessor instance
     {
         version,
-        0,
         {
             { { hash_digest{}, 42 }, {}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_locked(0, 0));
@@ -1262,12 +1262,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked_
     const accessor instance
     {
         version,
-        0,
         {
             { {}, script{}, 1 },
             { {}, script{}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_locked(0, 0));
@@ -1279,12 +1279,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
     const accessor instance
     {
         version,
-        0,
         {
             { {}, script{}, 1 },
             { {}, script{}, 0 }
         },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_locked(0, 0));
@@ -1303,9 +1303,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__tru
     const accessor instance
     {
         0,
-        0,
         inputs{ {}, {} },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_confirmed_double_spend(42));
@@ -1318,9 +1318,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__fals
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(!instance.is_confirmed_double_spend(42));
@@ -1333,9 +1333,9 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
     const accessor instance
     {
         0,
-        0,
         { input },
-        {}
+        {},
+        0
     };
 
     BOOST_REQUIRE(instance.is_confirmed_double_spend(42));

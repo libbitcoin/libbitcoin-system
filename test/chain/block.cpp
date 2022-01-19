@@ -38,9 +38,9 @@ static const header expected_header
 
 static const transactions expected_transactions
 {
-    { 1, 48, inputs{ {} }, { {} } },
-    { 2, 32, inputs{ {} }, { {} } },
-    { 4, 16, inputs{ {} }, { {} } }
+    { 1, inputs{ {} }, { {} }, 48 },
+    { 2, inputs{ {} }, { {} }, 32 },
+    { 4, inputs{ {} }, { {} }, 16 }
 };
 
 static const block expected_block{ expected_header, expected_transactions };
@@ -347,8 +347,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__f
     {
         {},
         {
-            { 0, 0, inputs{}, {} },
-            { 0, 0, inputs{}, {} }
+            { 0, inputs{}, {}, 0 },
+            { 0, inputs{}, {}, 0 }
         }
     };
 
@@ -361,8 +361,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
     {
         {},
         {
-            { 0, 0, inputs{}, {} },
-            { 0, 0, inputs{}, {} }
+            { 0, inputs{}, {}, 0 },
+            { 0, inputs{}, {}, 0 }
         }
     };
 
@@ -371,8 +371,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 {
-    const transaction to{ 0, 0, inputs{}, {} };
-    const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
+    const transaction to{ 0, inputs{}, {}, 0 };
+    const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
     const accessor instance
     {
         {},
@@ -387,8 +387,8 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 {
-    const transaction to{ 0, 0, inputs{}, {} };
-    const transaction from{ 0, 0, { { { to.hash(false), 0 }, {}, 0 } }, {} };
+    const transaction to{ 0, inputs{}, {}, 0 };
+    const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
     const accessor instance
     {
         {},
@@ -414,9 +414,9 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
         {},
         {
             {},
-            { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash1, 27 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash2, 42 }, {}, 0 } }, {} }
+            { 0, { { { hash1, 42 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash1, 27 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash2, 42 }, {}, 0 } }, {}, 0 }
         }
     };
 
@@ -430,12 +430,12 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
         {},
         {
             {},
-            { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash2, 27 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash3, 36 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash1, 42 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash2, 27 }, {}, 0 } }, {} },
-            { 0, 0, { { { hash3, 36 }, {}, 0 } }, {} }
+            { 0, { { { hash1, 42 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash2, 27 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash3, 36 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash1, 42 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash2, 27 }, {}, 0 } }, {}, 0 },
+            { 0, { { { hash3, 36 }, {}, 0 } }, {}, 0 }
         }
     };
 

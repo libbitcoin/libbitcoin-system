@@ -156,7 +156,6 @@ transaction_accessor test_tx(const script_test& test)
     const transaction_accessor tx
     {
         test.version,
-        test.locktime,
         inputs
         {
             {
@@ -165,7 +164,8 @@ transaction_accessor test_tx(const script_test& test)
                 test.input_sequence
             }
         },
-        outputs{}
+        outputs{},
+        test.locktime
     };
 
     tx.inputs()->front()->prevout.reset(new prevout{ 0u, out });

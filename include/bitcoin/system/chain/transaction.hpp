@@ -52,12 +52,12 @@ public:
     transaction(transaction&& other) noexcept;
     transaction(const transaction& other) noexcept;
 
-    transaction(uint32_t version, uint32_t locktime, chain::inputs&& inputs,
-        chain::outputs&& outputs) noexcept;
-    transaction(uint32_t version, uint32_t locktime,
-        const chain::inputs& inputs, const chain::outputs& outputs) noexcept;
-    transaction(uint32_t version, uint32_t locktime, const inputs_ptr& inputs,
-        const outputs_ptr& outputs) noexcept;
+    transaction(uint32_t version, chain::inputs&& inputs,
+        chain::outputs&& outputs, uint32_t locktime) noexcept;
+    transaction(uint32_t version, const chain::inputs& inputs,
+        const chain::outputs& outputs, uint32_t locktime) noexcept;
+    transaction(uint32_t version, const inputs_ptr& inputs,
+        const outputs_ptr& outputs, uint32_t locktime) noexcept;
     
     transaction(const data_slice& data, bool witness) noexcept;
     transaction(std::istream&& stream, bool witness) noexcept;
@@ -87,9 +87,9 @@ public:
     /// Native properties.
     bool is_valid() const noexcept;
     uint32_t version() const noexcept;
-    uint32_t locktime() const noexcept;
     const inputs_ptr inputs() const noexcept;
     const outputs_ptr outputs() const noexcept;
+    uint32_t locktime() const noexcept;
 
     /// Computed properties.
     size_t weight() const noexcept;
@@ -140,9 +140,8 @@ public:
     code connect(const context& state) const noexcept;
 
 protected:
-    transaction(bool segregated, uint32_t version, uint32_t locktime,
-        const inputs_ptr& inputs, const outputs_ptr& outputs,
-        bool valid) noexcept;
+    transaction(bool segregated, uint32_t version, const inputs_ptr& inputs,
+        const outputs_ptr& outputs, uint32_t locktime, bool valid) noexcept;
 
     // Guard (context free).
     // ------------------------------------------------------------------------
@@ -210,9 +209,9 @@ private:
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
-    uint32_t locktime_;
     inputs_ptr inputs_;
     outputs_ptr outputs_;
+    uint32_t locktime_;
     bool segregated_;
     bool valid_;
 
