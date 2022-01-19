@@ -119,6 +119,7 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
     date_time
     filesystem
     iostreams
+    json
     locale
     program_options
     regex
@@ -131,6 +132,7 @@ set( boost_container_LIBS "-lboost_container" )
 set( boost_date_time_LIBS "-lboost_date_time" )
 set( boost_filesystem_LIBS "-lboost_filesystem" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
+set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_program_options_LIBS "-lboost_program_options" )
 set( boost_regex_LIBS "-lboost_regex" )
