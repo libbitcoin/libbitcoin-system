@@ -22,9 +22,9 @@
 #include <iostream>
 #include <string>
 
-#include <boost/json.hpp>
+#include <boost/json/src.hpp>
  
- // This file must be manually included when
+// This file must be manually included when
 // using basic_parser to implement a parser.
 #include <boost/json/basic_parser_impl.hpp>
 
@@ -167,17 +167,76 @@ public:
     }
 };
 
+namespace libbitcoin {
+namespace system {
+namespace chain {
+
+struct abc
+{
+    int a;
+    std::string b;
+    bool c;
+};
+
+////template<class Type>
+////void extract(const json::object& object, Type& type, json::string_view key)
+////{
+////    type = json::value_to<Type>(object.at(key));
+////}
+////
+////chain::abc tag_invoke(json::value_to_tag<chain::abc>, const json::value& value)
+////{
+////    chain::abc point;
+////    const auto& object = value.as_object();
+////    extract(object, point.a, "a");
+////    extract(object, point.b, "b");
+////    extract(object, point.c, "c");
+////    return point;
+////}
+
+chain::abc tag_invoke(json::value_to_tag<chain::abc>, const json::value& value)
+{
+    const auto& object = value.as_object();
+    return chain::abc
+    {
+        json::value_to<int>(object.at("a")),
+        json::value_to<std::string>(object.at("b")),
+        json::value_to<bool>(object.at("c"))
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value, const chain::abc& point)
+{
+    value =
+    {
+        { "a" , point.a },
+        { "b", point.b },
+        { "c", point.c }
+    };
+}
+
+} // chain
+} // system
+} // libbitcoin
+
 int bc::system::main(int argc, char* argv[])
 {
-    if (argc != 2)
+    const std::string test_string
     {
-        std::cerr << "Usage: pretty <json>" << std::endl;
-        return EXIT_FAILURE;
-    }
+        "{"
+            "\"pi\": 3.141,"
+            "\"happy\": true,"
+            "\"name\": \"Boost\","
+            "\"nothing\": null,"
+            "\"answer\": {\"everything\": 42},"
+            "\"list\": [1, 0, 2],"
+            "\"object\": {\"currency\": \"USD\", \"value\": 42.99}"
+        "}"
+    };
+
+    const auto text = json::string_view(test_string);
 
     json::error_code ec;
-    const auto text = json::string_view(argv[1]);
-
     null_parser validate;
     auto consumed = validate.write_some(text, ec);
 
@@ -197,7 +256,42 @@ int bc::system::main(int argc, char* argv[])
     }
 
     const auto value = parse.release();
+
+    std::cout << std::endl;
     pretty_print(std::cout, value, "");
+
+    json::value test_value
+    {
+        { "pi", 3.141 },
+        { "happy", true },
+        { "name", "Boost" },
+        { "nothing", nullptr },
+        { "answer", { { "everything", 42 } } },
+        { "list", { 1, 0, 2 } },
+        { "object", { { "currency", "USD" }, { "value", 42.99 } } }
+    };
+
+    std::cout << std::endl;
+    pretty_print(std::cout, test_value, "");
+
+    json::object test_object;
+    test_object["pi"] = 3.141;
+    test_object["happy"] = true;
+    test_object["name"] = "Boost";
+    test_object["nothing"] = nullptr;
+    test_object["answer"].emplace_object()["everything"] = 42;
+    test_object["list"] = { 1, 0, 2 };
+    test_object["object"] = { {"currency", "USD"}, {"value", 42.99} };
+
+    std::cout << std::endl;
+    pretty_print(std::cout, test_object, "");
+
+    unsigned char buffer[4096];
+    json::static_resource memory_resource(buffer);
+    json::parse_options options;
+    options.allow_comments = true;
+    options.allow_trailing_commas = true;
+    json::value jv = json::parse("[1, 2, 3, ] // array ", &memory_resource, options);
 
     return EXIT_SUCCESS;
 }
