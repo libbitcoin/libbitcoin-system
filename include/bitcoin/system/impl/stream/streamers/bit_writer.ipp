@@ -83,7 +83,7 @@ template <typename OStream>
 void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) noexcept
 {
-    // Suboptimal becase shifts each bit and writes single bytes, but simple.
+    // Suboptimal because shifts each bit and writes single bytes, but simple.
     for (size_t byte = 0; byte < size; ++byte)
         write_bits(data[byte], byte_bits);
 }
