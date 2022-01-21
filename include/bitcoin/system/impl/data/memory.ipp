@@ -37,9 +37,9 @@ std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
 
     std::transform(values.begin(), values.end(), out->begin(),
         [](Type& value)
-    {
-        return to_shared(std::move(value));
-    });
+        {
+            return to_shared(std::move(value));
+        });
 
     return out;
 }
@@ -54,9 +54,9 @@ std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
 
     std::transform(values.begin(), values.end(), out->begin(),
         [](const Type& value)
-    {
-        return to_shared(value);
-    });
+        {
+            return to_shared(value);
+        });
 
     return out;
 }
