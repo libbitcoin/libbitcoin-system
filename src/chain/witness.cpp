@@ -132,8 +132,7 @@ witness& witness::operator=(const witness& other) noexcept
 
 bool witness::operator==(const witness& other) const noexcept
 {
-    // TODO: after changing to vector(data_ptr) compare membership, not ptrs.
-    return (stack_ == other.stack_);
+    return equal_points(stack_, other.stack_);
 }
 
 bool witness::operator!=(const witness& other) const noexcept
