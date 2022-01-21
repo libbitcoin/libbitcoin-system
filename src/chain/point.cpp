@@ -21,8 +21,10 @@
 #include <cstdint>
 #include <memory>
 #include <utility>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -203,6 +205,46 @@ size_t point::serialized_size() noexcept
 bool point::is_null() const noexcept
 {
     return (index_ == null_index) && (hash_ == null_hash);
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+point tag_invoke(json::value_to_tag<point>, const json::value& value) noexcept
+{
+    hash_digest hash;
+    if (!decode_hash(hash, value.at("hash").get_string().c_str()))
+        return {};
+
+    return
+    {
+        hash,
+        static_cast<uint32_t>(value.at("index").get_int64())
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const point& point) noexcept
+{
+    value =
+    {
+        { "hash", encode_hash(point.hash()) },
+        { "index", point.index() }
+    };
+}
+
+point::ptr tag_invoke(json::value_to_tag<point::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<point>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const point::ptr& output) noexcept
+{
+    tag_invoke(tag, value, *output);
 }
 
 } // namespace chain

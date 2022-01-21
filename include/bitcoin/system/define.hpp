@@ -116,6 +116,13 @@ namespace bc = libbitcoin;
 // So bracket those includes with an undefine and redefine of this symbol.
 #define BOOST_BIND_NO_PLACEHOLDERS
 
+// These are ADL free functions for use with boost-json.
+#define DECLARE_JSON_VALUE_CONVERTORS(name) \
+name tag_invoke(boost::json::value_to_tag<name>, \
+    const boost::json::value& value) noexcept; \
+void tag_invoke(boost::json::value_from_tag, \
+    boost::json::value& value, const name& instance) noexcept
+
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()

@@ -820,6 +820,35 @@ bool script::is_unspendable() const noexcept
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
 
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+script tag_invoke(json::value_to_tag<script>,
+    const json::value& value) noexcept
+{
+    return script{ std::string(value.get_string().c_str()) };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const script& script) noexcept
+{
+    value = script.to_string(forks::all_rules);
+}
+
+script::ptr tag_invoke(json::value_to_tag<script::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<script>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const script::ptr& script) noexcept
+{
+    tag_invoke(tag, value, *script);
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

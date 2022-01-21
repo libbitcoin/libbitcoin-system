@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -109,6 +110,9 @@ private:
 bool operator<(const point& left, const point& right) noexcept;
 
 typedef std::vector<point> points;
+
+DECLARE_JSON_VALUE_CONVERTORS(point);
+DECLARE_JSON_VALUE_CONVERTORS(point::ptr);
 
 } // namespace chain
 } // namespace system

@@ -22,7 +22,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/json/src.hpp>
+#include <boost/json.hpp>
  
 // This file must be manually included when
 // using basic_parser to implement a parser.
@@ -119,7 +119,6 @@ void pretty_print(std::ostream& os, const json::value& value, std::string indent
         os << "\n";
 }
 
-// The null parser discards all the data
 class null_parser
 {
     struct handler
@@ -171,48 +170,169 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-struct abc
+void parse_point()
 {
-    int a;
-    std::string b;
-    bool c;
-};
+    const auto text_point =
+        "{"
+            "\"hash\": \"0000000000000000000000000000000000000000000000000000000000000000\","
+            "\"index\" : 42"
+        "}";
 
-////template<class Type>
-////void extract(const json::object& object, Type& type, json::string_view key)
-////{
-////    type = json::value_to<Type>(object.at(key));
-////}
-////
-////chain::abc tag_invoke(json::value_to_tag<chain::abc>, const json::value& value)
-////{
-////    chain::abc point;
-////    const auto& object = value.as_object();
-////    extract(object, point.a, "a");
-////    extract(object, point.b, "b");
-////    extract(object, point.c, "c");
-////    return point;
-////}
+    const auto parsed_value = json::parse(text_point);
 
-chain::abc tag_invoke(json::value_to_tag<chain::abc>, const json::value& value)
-{
-    const auto& object = value.as_object();
-    return chain::abc
+    const chain::point const_object
     {
-        json::value_to<int>(object.at("a")),
-        json::value_to<std::string>(object.at("b")),
-        json::value_to<bool>(object.at("c"))
+        null_hash,
+        42
     };
+
+    const auto parsed_to_object = json::value_to<chain::point>(parsed_value);
+    std::cout << json::serialize(parsed_value) << std::endl;
+    assert(parsed_to_object == const_object);
+
+    const auto const_object_to_value = json::value_from(const_object);
+    std::cout << json::serialize(const_object_to_value) << std::endl;
+    assert(parsed_value == const_object_to_value);
 }
 
-void tag_invoke(json::value_from_tag, json::value& value, const chain::abc& point)
+void parse_input()
 {
-    value =
+    const auto text_input =
+        "{ \"point\": "
+            "{"
+                "\"hash\": \"0000000000000000000000000000000000000000000000000000000000000000\","
+                "\"index\" : 42"
+            "},"
+            "\"script\": \"return\","
+            "\"witness\": \"[424242]\","
+            "\"sequence\": 24"
+        "}";
+
+    const auto parsed_value = json::parse(text_input);
+
+    const chain::input const_object
     {
-        { "a" , point.a },
-        { "b", point.b },
-        { "c", point.c }
+        chain::point{ null_hash, 42 },
+        chain::script{ { opcode::op_return } },
+        chain::witness{ "[424242]" },
+        24 
     };
+
+    const auto parsed_to_object = json::value_to<chain::input>(parsed_value);
+    std::cout << json::serialize(parsed_value) << std::endl;
+    assert(parsed_to_object == const_object);
+
+    const auto const_object_to_value = json::value_from(const_object);
+    std::cout << json::serialize(const_object_to_value) << std::endl;
+    assert(parsed_value == const_object_to_value);
+}
+
+void parse_output()
+{
+    const auto text_output =
+        "{"
+            "\"value\": 24,"
+            "\"script\": \"return\""
+        "}";
+
+    const auto parsed_value = json::parse(text_output);
+
+    const chain::output const_object
+    {
+        24,
+        chain::script{ { opcode::op_return } }
+    };
+
+    const auto parsed_to_object = json::value_to<chain::output>(parsed_value);
+    std::cout << json::serialize(parsed_value) << std::endl;
+    assert(parsed_to_object == const_object);
+
+    const auto const_object_to_value = json::value_from(const_object);
+    std::cout << json::serialize(const_object_to_value) << std::endl;
+    assert(parsed_value == const_object_to_value);
+}
+
+void parse_transaction()
+{
+    const auto text_tx =
+        "{"
+            "\"version\": 42,"
+            "\"inputs\": "
+            "["
+                "{ \"point\": "
+                    "{"
+                        "\"hash\": \"0000000000000000000000000000000000000000000000000000000000000000\","
+                        "\"index\" : 24"
+                    "},"
+                    "\"script\": \"return\","
+                    "\"witness\": \"[242424]\","
+                    "\"sequence\": 42"
+                "},"
+                "{ \"point\": "
+                    "{"
+                        "\"hash\": \"0000000000000000000000000000000000000000000000000000000000000001\","
+                        "\"index\" : 42"
+                    "},"
+                    "\"script\": \"return\","
+                    "\"witness\": \"[424242]\","
+                    "\"sequence\": 24"
+                "}"
+            "],"
+            "\"outputs\": "
+            "["
+                "{"
+                    "\"value\": 24,"
+                    "\"script\": \"return\""
+                "},"
+                "{"
+                    "\"value\": 42,"
+                    "\"script\": \"return\""
+                "}"
+            "],"
+            "\"locktime\": 24"
+        "}";
+
+    const auto parsed_value = json::parse(text_tx);
+
+    const chain::transaction const_object
+    {
+        42,
+        chain::inputs
+        {
+            {
+                chain::point{ null_hash, 24 },
+                chain::script{ { opcode::op_return } },
+                chain::witness{ "[242424]" },
+                42
+            },
+            {
+                chain::point{ one_hash, 42 },
+                chain::script{ { opcode::op_return } },
+                chain::witness{ "[424242]" },
+                24
+            }
+        },
+        chain::outputs
+        {
+            {
+                24,
+                chain::script{ { opcode::op_return } }
+            },
+            {
+                42,
+                chain::script{ { opcode::op_return } }
+            }
+        },
+        24
+    };
+
+    const auto parsed_to_object = json::value_to<chain::transaction>(parsed_value);
+    std::cout << json::serialize(parsed_value) << std::endl;
+    assert(parsed_to_object == const_object);
+
+    const auto const_object_to_value = json::value_from(const_object);
+    std::cout << json::serialize(const_object_to_value) << std::endl;
+    assert(parsed_value == const_object_to_value);
 }
 
 } // chain
@@ -221,77 +341,81 @@ void tag_invoke(json::value_from_tag, json::value& value, const chain::abc& poin
 
 int bc::system::main(int argc, char* argv[])
 {
-    const std::string test_string
-    {
-        "{"
-            "\"pi\": 3.141,"
-            "\"happy\": true,"
-            "\"name\": \"Boost\","
-            "\"nothing\": null,"
-            "\"answer\": {\"everything\": 42},"
-            "\"list\": [1, 0, 2],"
-            "\"object\": {\"currency\": \"USD\", \"value\": 42.99}"
-        "}"
-    };
-
-    const auto text = json::string_view(test_string);
-
-    json::error_code ec;
-    null_parser validate;
-    auto consumed = validate.write_some(text, ec);
-
-    if (ec || consumed < text.size())
-    {
-        std::cerr << "Invalid <json> null_parser" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    json::stream_parser parse;
-    consumed = parse.write_some(text, ec);
-
-    if (ec || consumed < text.size())
-    {
-        std::cerr << "Invalid <json> stream_parser" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    const auto value = parse.release();
-
-    std::cout << std::endl;
-    pretty_print(std::cout, value, "");
-
-    json::value test_value
-    {
-        { "pi", 3.141 },
-        { "happy", true },
-        { "name", "Boost" },
-        { "nothing", nullptr },
-        { "answer", { { "everything", 42 } } },
-        { "list", { 1, 0, 2 } },
-        { "object", { { "currency", "USD" }, { "value", 42.99 } } }
-    };
-
-    std::cout << std::endl;
-    pretty_print(std::cout, test_value, "");
-
-    json::object test_object;
-    test_object["pi"] = 3.141;
-    test_object["happy"] = true;
-    test_object["name"] = "Boost";
-    test_object["nothing"] = nullptr;
-    test_object["answer"].emplace_object()["everything"] = 42;
-    test_object["list"] = { 1, 0, 2 };
-    test_object["object"] = { {"currency", "USD"}, {"value", 42.99} };
-
-    std::cout << std::endl;
-    pretty_print(std::cout, test_object, "");
-
-    unsigned char buffer[4096];
-    json::static_resource memory_resource(buffer);
-    json::parse_options options;
-    options.allow_comments = true;
-    options.allow_trailing_commas = true;
-    json::value jv = json::parse("[1, 2, 3, ] // array ", &memory_resource, options);
+    bc::system::chain::parse_point();
+    bc::system::chain::parse_input();
+    bc::system::chain::parse_output();
+    bc::system::chain::parse_transaction();
+    
+    ////const std::string test_string
+    ////{
+    ////    "{"
+    ////        "\"pi\": 3.141,"
+    ////        "\"happy\": true,"
+    ////        "\"name\": \"Boost\","
+    ////        "\"nothing\": null,"
+    ////        "\"answer\": {\"everything\": 42},"
+    ////        "\"list\": [1, 0, 2],"
+    ////        "\"object\": {\"currency\": \"USD\", \"value\": 42.99}"
+    ////    "}"
+    ////};
+    ////
+    ////const auto text = json::string_view(test_string);
+    ////
+    ////json::error_code ec;
+    ////null_parser validate;
+    ////auto consumed = validate.write_some(text, ec);
+    ////
+    ////if (ec || consumed < text.size())
+    ////{
+    ////    std::cerr << "Invalid <json> null_parser" << std::endl;
+    ////    return EXIT_FAILURE;
+    ////}
+    ////
+    ////json::stream_parser parse;
+    ////consumed = parse.write_some(text, ec);
+    ////
+    ////if (ec || consumed < text.size())
+    ////{
+    ////    std::cerr << "Invalid <json> stream_parser" << std::endl;
+    ////    return EXIT_FAILURE;
+    ////}
+    ////
+    ////const auto value = parse.release();
+    ////
+    ////std::cout << std::endl;
+    ////pretty_print(std::cout, value, "");
+    ////
+    ////json::value test_value
+    ////{
+    ////    { "pi", 3.141 },
+    ////    { "happy", true },
+    ////    { "name", "Boost" },
+    ////    { "nothing", nullptr },
+    ////    { "answer", { { "everything", 42 } } },
+    ////    { "list", { 1, 0, 2 } },
+    ////    { "object", { { "currency", "USD" }, { "value", 42.99 } } }
+    ////};
+    ////
+    ////std::cout << std::endl;
+    ////pretty_print(std::cout, test_value, "");
+    ////
+    ////json::object test_object;
+    ////test_object["pi"] = 3.141;
+    ////test_object["happy"] = true;
+    ////test_object["name"] = "Boost";
+    ////test_object["nothing"] = nullptr;
+    ////test_object["answer"].emplace_object()["everything"] = 42;
+    ////test_object["list"] = { 1, 0, 2 };
+    ////test_object["object"] = { { "currency", "USD" }, { "value", 42.99 } };
+    ////
+    ////std::cout << std::endl;
+    ////pretty_print(std::cout, test_object, "");
+    ////
+    ////unsigned char buffer[4096];
+    ////json::static_resource memory_resource(buffer);
+    ////json::parse_options options;
+    ////json::value value = json::parse("[1, 2, 3]", &memory_resource, options);
+    ////pretty_print(std::cout, value, "");
 
     return EXIT_SUCCESS;
 }

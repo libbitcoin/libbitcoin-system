@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
@@ -232,6 +233,9 @@ private:
 typedef std::vector<transaction> transactions;
 typedef std::vector<transaction::ptr> transaction_ptrs;
 typedef std::shared_ptr<transaction_ptrs> transactions_ptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(transaction);
+DECLARE_JSON_VALUE_CONVERTORS(transaction::ptr);
 
 } // namespace chain
 } // namespace system

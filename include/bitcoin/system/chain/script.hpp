@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
@@ -188,6 +189,9 @@ public:
 };
 
 typedef std::vector<script> scripts;
+
+DECLARE_JSON_VALUE_CONVERTORS(script);
+DECLARE_JSON_VALUE_CONVERTORS(script::ptr);
 
 } // namespace chain
 } // namespace system

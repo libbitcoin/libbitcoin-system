@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -105,6 +106,8 @@ std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept;
 std::istream& operator>>(std::istream& input, checkpoint& out) noexcept;
 
 typedef std::vector<checkpoint> checkpoints;
+
+DECLARE_JSON_VALUE_CONVERTORS(checkpoint);
 
 } // namespace chain
 } // namespace system

@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -114,6 +115,9 @@ private:
 };
 
 typedef std::vector<witness> witnesses;
+
+DECLARE_JSON_VALUE_CONVERTORS(witness);
+DECLARE_JSON_VALUE_CONVERTORS(witness::ptr);
 
 } // namespace chain
 } // namespace system

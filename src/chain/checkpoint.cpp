@@ -182,6 +182,35 @@ const hash_digest& checkpoint::hash() const noexcept
     return hash_;
 }
 
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+checkpoint tag_invoke(json::value_to_tag<checkpoint>,
+    const json::value& value) noexcept
+{
+    hash_digest hash;
+    if (!decode_hash(hash, value.at("hash").get_string().c_str()))
+        return {};
+
+    return
+    {
+        hash,
+        static_cast<size_t>(value.at("height").get_int64())
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const checkpoint& checkpoint) noexcept
+{
+    value =
+    {
+        { "hash", encode_hash(checkpoint.hash()) },
+        { "height", checkpoint.height() }
+    };
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

@@ -24,6 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -37,6 +38,8 @@ namespace chain {
 class BC_API operation
 {
 public:
+    typedef std::shared_ptr<const operation> ptr;
+
     // Constructors.
     // ------------------------------------------------------------------------
 
@@ -173,6 +176,9 @@ private:
 };
 
 typedef std::vector<operation> operations;
+
+DECLARE_JSON_VALUE_CONVERTORS(operation);
+DECLARE_JSON_VALUE_CONVERTORS(operation::ptr);
 
 } // namespace chain
 } // namespace system

@@ -878,6 +878,35 @@ bool operation::is_underflow() const noexcept
     return underflow_;
 }
 
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+operation tag_invoke(json::value_to_tag<operation>,
+    const json::value& value) noexcept
+{
+    return operation{ std::string(value.get_string().c_str()) };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const operation& operation) noexcept
+{
+    value = operation.to_string(forks::all_rules);
+}
+
+operation::ptr tag_invoke(json::value_to_tag<operation::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<operation>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const operation::ptr& operation) noexcept
+{
+    tag_invoke(tag, value, *operation);
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

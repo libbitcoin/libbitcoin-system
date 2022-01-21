@@ -432,6 +432,35 @@ bool witness::extract_script(script& out_script,
     }
 }
 
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+witness tag_invoke(json::value_to_tag<witness>,
+    const json::value& value) noexcept
+{
+    return witness{ std::string(value.get_string().c_str()) };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const witness& witness) noexcept
+{
+    value = witness.to_string();
+}
+
+witness::ptr tag_invoke(json::value_to_tag<witness::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<witness>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const witness::ptr& output) noexcept
+{
+    tag_invoke(tag, value, *output);
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

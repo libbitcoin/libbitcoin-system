@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
@@ -176,6 +177,9 @@ private:
 };
 
 typedef std::vector<block> blocks;
+
+DECLARE_JSON_VALUE_CONVERTORS(block);
+DECLARE_JSON_VALUE_CONVERTORS(block::ptr);
 
 } // namespace chain
 } // namespace system

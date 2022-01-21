@@ -24,6 +24,7 @@
 #include <istream>
 #include <memory>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
@@ -141,6 +142,9 @@ public:
 typedef std::vector<input> inputs;
 typedef std::vector<input::ptr> input_ptrs;
 typedef std::shared_ptr<input_ptrs> inputs_ptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(input);
+DECLARE_JSON_VALUE_CONVERTORS(input::ptr);
 
 } // namespace chain
 } // namespace system

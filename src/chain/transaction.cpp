@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <boost/optional.hpp>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -1291,6 +1291,47 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         return error::unexpected_witness;
 
     return error::script_success;
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+transaction tag_invoke(json::value_to_tag<transaction>,
+    const json::value& value) noexcept
+{
+    return
+    {
+        static_cast<uint32_t>(value.at("version").get_int64()),
+        json::value_to<chain::inputs>(value.at("inputs")),
+        json::value_to<chain::outputs>(value.at("outputs")),
+        static_cast<uint32_t>(value.at("locktime").get_int64())
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const transaction& tx) noexcept
+{
+    value =
+    {
+        { "version", tx.version() },
+        { "inputs", *tx.inputs() },
+        { "outputs", *tx.outputs() },
+        { "locktime", tx.locktime() }
+    };
+}
+
+transaction::ptr tag_invoke(json::value_to_tag<transaction::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<transaction>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const transaction::ptr& tx) noexcept
+{
+    tag_invoke(tag, value, *tx);
 }
 
 } // namespace chain

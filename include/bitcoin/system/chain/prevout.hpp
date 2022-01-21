@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 
 #include <memory>
+#include <boost/json.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/output.hpp>
@@ -67,6 +68,9 @@ public:
     // The output is of a coinbase transaction.
     bool coinbase = false;
 };
+
+DECLARE_JSON_VALUE_CONVERTORS(prevout);
+DECLARE_JSON_VALUE_CONVERTORS(prevout::ptr);
 
 } // namespace chain
 } // namespace system

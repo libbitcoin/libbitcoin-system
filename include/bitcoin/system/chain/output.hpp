@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -112,6 +113,9 @@ private:
 typedef std::vector<output> outputs;
 typedef std::vector<output::ptr> output_ptrs;
 typedef std::shared_ptr<output_ptrs> outputs_ptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(output);
+DECLARE_JSON_VALUE_CONVERTORS(output::ptr);
 
 } // namespace chain
 } // namespace system

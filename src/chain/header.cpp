@@ -21,7 +21,7 @@
 #include <chrono>
 #include <cstddef>
 #include <utility>
-#include <boost/thread.hpp>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/constants.hpp>
@@ -382,6 +382,56 @@ code header::accept(const chain_state& state) const noexcept
         return error::incorrect_proof_of_work;
 
     return error::success;
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+header tag_invoke(json::value_to_tag<header>,
+    const json::value& value) noexcept
+{
+    hash_digest previous, merkle_root;
+    if (!decode_hash(previous, value.at("previous").get_string().c_str()) ||
+        !decode_hash(merkle_root, value.at("merkle_root").get_string().c_str()))
+        return {};
+
+    return
+    {
+        static_cast<uint32_t>(value.at("version").get_int64()),
+        previous,
+        merkle_root,
+        static_cast<uint32_t>(value.at("timestamp").get_int64()),
+        static_cast<uint32_t>(value.at("bits").get_int64()),
+        static_cast<uint32_t>(value.at("nonce").get_int64())
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const header& tx) noexcept
+{
+    value =
+    {
+        { "version", tx.version() },
+        { "previous", encode_hash(tx.previous_block_hash()) },
+        { "merkle_root", encode_hash(tx.merkle_root()) },
+        { "timestamp", tx.timestamp() },
+        { "bits", tx.bits() },
+        { "nonce", tx.nonce() }
+    };
+}
+
+header::ptr tag_invoke(json::value_to_tag<header::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<header>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const header::ptr& tx) noexcept
+{
+    tag_invoke(tag, value, *tx);
 }
 
 } // namespace chain

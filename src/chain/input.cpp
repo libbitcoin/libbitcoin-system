@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <boost/json.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
@@ -394,6 +395,46 @@ size_t input::signature_operations(bool bip16, bool bip141) const noexcept
     }
 
     return sigops;
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+input tag_invoke(json::value_to_tag<input>, const json::value& value) noexcept
+{
+    return
+    {
+        json::value_to<chain::point>(value.at("point")),
+        json::value_to<chain::script>(value.at("script")),
+        json::value_to<chain::witness>(value.at("witness")),
+        static_cast<uint32_t>(value.at("sequence").get_int64())
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const input& input) noexcept
+{
+    value =
+    {
+        { "point", input.point() },
+        { "script", input.script() },
+        { "witness", input.witness() },
+        { "sequence", input.sequence() }
+    };
+}
+
+input::ptr tag_invoke(json::value_to_tag<input::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<input>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const input::ptr& input) noexcept
+{
+    tag_invoke(tag, value, *input);
 }
 
 } // namespace chain

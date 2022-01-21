@@ -689,6 +689,43 @@ code block::connect(const context& state) const noexcept
     return connect_transactions(state);
 }
 
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+block tag_invoke(json::value_to_tag<block>,
+    const json::value& value) noexcept
+{
+    return
+    {
+        json::value_to<header>(value.at("header")),
+        json::value_to<chain::transactions>(value.at("transactions"))
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const block& block) noexcept
+{
+    value =
+    {
+        { "header", block.header() },
+        { "transactions", *block.transactions() },
+    };
+}
+
+block::ptr tag_invoke(json::value_to_tag<block::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<block>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const block::ptr& block) noexcept
+{
+    tag_invoke(tag, value, *block);
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

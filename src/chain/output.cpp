@@ -25,6 +25,7 @@
 #include <memory>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -230,6 +231,43 @@ bool output::is_dust(uint64_t minimum_value) const noexcept
     // independent of dust, so this is an attempt to prevent miners from seeing
     // transactions with unprunable outputs.
     return value_ < minimum_value && !script_->is_unspendable();
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+output tag_invoke(json::value_to_tag<output>,
+    const json::value& value) noexcept
+{
+    return
+    {
+        static_cast<uint64_t>(value.at("value").get_int64()),
+        json::value_to<chain::script>(value.at("script"))
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const output& output) noexcept
+{
+    value =
+    {
+        { "value", output.value() },
+        { "script", output.script() },
+    };
+}
+
+output::ptr tag_invoke(json::value_to_tag<output::ptr>,
+    const json::value& value) noexcept
+{
+    return to_shared(tag_invoke(json::value_to_tag<output>{}, value));
+}
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const output::ptr& output) noexcept
+{
+    tag_invoke(tag, value, *output);
 }
 
 } // namespace chain
