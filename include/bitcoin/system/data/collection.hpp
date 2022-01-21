@@ -55,8 +55,9 @@ bool contains(const Collection& list,
 
 /// Determine if a vector of shared pointers to elements have equal elements.
 template <typename Element>
-bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
-    std::vector<std::shared_ptr<const Element>>& right);
+bool equal_points(
+    const std::vector<std::shared_ptr<const Element>>& left,
+    const std::vector<std::shared_ptr<const Element>>& right);
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
@@ -142,7 +143,8 @@ Collection sort_copy(const Collection& list) noexcept;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>
-bool starts_with(const typename Collection::const_iterator& begin,
+bool starts_with(
+    const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept;
 

@@ -108,8 +108,9 @@ bool contains(const Collection& list,
 }
 
 template <typename Element>
-bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
-    std::vector<std::shared_ptr<const Element>>& right)
+bool equal_points(
+    const std::vector<std::shared_ptr<const Element>>& left,
+    const std::vector<std::shared_ptr<const Element>>& right)
 {
     // C++14: a new std::equal overload can replace this guard.
     if (left.size() != right.size())
@@ -122,16 +123,6 @@ bool equal_points(std::vector<std::shared_ptr<const Element>>& left,
             return (first && second && (*first == *second)) ||
                 (!first && !second);
         });
-}
-
-template <typename Collection>
-bool starts_with(const typename Collection::const_iterator& begin,
-    const typename Collection::const_iterator& end,
-    const Collection& value) noexcept
-{
-    // C++17: std::size.
-    return !is_lesser(std::distance(begin, end), value.size()) &&
-        std::equal(value.begin(), value.end(), begin);
 }
 
 // TODO: constrain to std::pair elements.
@@ -349,6 +340,17 @@ Collection sort_copy(const Collection& list) noexcept
     auto copy = list;
     sort(copy);
     return copy;
+}
+
+template <typename Collection>
+bool starts_with(
+    const typename Collection::const_iterator& begin,
+    const typename Collection::const_iterator& end,
+    const Collection& value) noexcept
+{
+    // C++17: std::size.
+    return !is_lesser(std::distance(begin, end), value.size()) &&
+        std::equal(value.begin(), value.end(), begin);
 }
 
 } // namespace system
