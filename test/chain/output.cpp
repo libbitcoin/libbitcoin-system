@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(output_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto output_data = base16_chunk(
@@ -175,5 +176,41 @@ BOOST_AUTO_TEST_CASE(output__signature_operations__bip141_inactive__script_sigop
 }
 
 // is_dust
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(output__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"value\":24,"
+            "\"script\":\"pick roll return\""
+        "}"
+    };
+
+    const chain::output instance
+    {
+        24,
+        chain::script
+        {
+            chain::operations
+            {
+                { opcode::pick },
+                { opcode::roll },
+                { opcode::op_return }
+            }
+        }
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::output>(value) == instance);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

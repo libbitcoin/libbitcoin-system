@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(transaction_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto tx0_inputs = base16_chunk(
@@ -1446,6 +1447,98 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     const auto sighash = test_tx.signature_hash(index, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
+}
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"version\":42,"
+            "\"inputs\":"
+            "["
+                "{"
+                    "\"point\":"
+                    "{"
+                        "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+                        "\"index\":24"
+                    "},"
+                    "\"script\":\"return pick\","
+                    "\"witness\":\"[242424]\","
+                    "\"sequence\":42"
+                "},"
+                "{"
+                    "\"point\":"
+                    "{"
+                        "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+                        "\"index\":42"
+                    "},"
+                    "\"script\":\"return roll\","
+                    "\"witness\":\"[424242]\","
+                    "\"sequence\":24"
+                "}"
+            "],"
+            "\"outputs\":"
+            "["
+                "{"
+                    "\"value\":24,"
+                    "\"script\":\"pick\""
+                "},"
+                "{"
+                    "\"value\":42,"
+                    "\"script\":\"roll\""
+                "}"
+            "],"
+            "\"locktime\":24"
+        "}"
+    };
+
+    const chain::transaction instance
+    {
+        42,
+        chain::inputs
+        {
+            chain::input
+            {
+                chain::point{ null_hash, 24 },
+                chain::script{ { { opcode::op_return }, { opcode::pick } } },
+                chain::witness{ "[242424]" },
+                42
+            },
+            chain::input
+            {
+                chain::point{ one_hash, 42 },
+                chain::script{ { { opcode::op_return }, { opcode::roll } } },
+                chain::witness{ "[424242]" },
+                24
+            }
+        },
+        chain::outputs
+        {
+            chain::output
+            {
+                24,
+                chain::script{ { { opcode::pick } } }
+            },
+            chain::output
+            {
+                42,
+                chain::script{ { { opcode::roll } } }
+            }
+        },
+        24
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::transaction>(value) == instance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

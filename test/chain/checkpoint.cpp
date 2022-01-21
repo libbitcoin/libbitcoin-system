@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(checkpoint_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 BOOST_AUTO_TEST_CASE(checkpoint__constructor_default__always__null_hash_zero)
@@ -163,6 +164,34 @@ BOOST_AUTO_TEST_CASE(checkpoint__equality__different__expected)
     const checkpoint instance2;
     BOOST_REQUIRE(instance1 != instance2);
     BOOST_REQUIRE(!(instance1 == instance2));
+}
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(checkpoint__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+            "\"height\":42"
+        "}"
+    };
+
+    const chain::checkpoint instance
+    {
+        one_hash,
+        42
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::checkpoint>(value) == instance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

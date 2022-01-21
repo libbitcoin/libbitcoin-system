@@ -21,6 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(header_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
@@ -332,6 +333,42 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_greater_than_2_hour
     const auto future = std::chrono::system_clock::to_time_t(now + duration);
     const accessor instance{ {}, hash_digest{}, {}, static_cast<uint32_t>(future), {}, {} };
     BOOST_REQUIRE(instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
+}
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"version\":42,"
+            "\"previous\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+            "\"merkle_root\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+            "\"timestamp\":43,"
+            "\"bits\":44,"
+            "\"nonce\":45"
+        "}"
+    };
+
+    const chain::header instance
+    {
+        42,
+        null_hash,
+        one_hash,
+        43,
+        44,
+        45
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::header>(value) == instance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(point_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto point_hash = base16_hash(
@@ -163,5 +164,33 @@ BOOST_AUTO_TEST_CASE(point__to_data__writer__expected)
 
 // is_null
 // serialized_size
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(point__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+            "\"index\":42"
+        "}"
+    };
+
+    const chain::point instance
+    {
+        one_hash,
+        42
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::point>(value) == instance);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

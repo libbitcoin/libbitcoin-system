@@ -70,6 +70,7 @@
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 using namespace system::machine;
 
@@ -1008,6 +1009,36 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
 
     // missing bip143 (find-and-delete treatment).
     BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule }, 0), error::op_check_sig_verify5);
+}
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__json__conversions__expected)
+{
+    const std::string text
+    {
+        "\"pick roll return\""
+    };
+
+    const chain::script instance
+    {
+        chain::operations
+        {
+            { opcode::pick },
+            { opcode::roll },
+            { opcode::op_return }
+        }
+    };
+
+    const auto value = json::value_from(instance);
+
+    // cannot parse a value, must be an object.
+    ////BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::script>(value) == instance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

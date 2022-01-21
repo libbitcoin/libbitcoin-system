@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(operation_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto op_data = base16_chunk("0900ff11ee22bb33aa44");
@@ -849,5 +850,30 @@ BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify
 ////bool is_minimal_push() const;
 ////bool is_nominal_push() const;
 ////bool is_underflow() const;
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation_json__conversions__expected)
+{
+    const std::string text
+    {
+        "\"return\""
+    };
+
+    const chain::operation instance
+    {
+        opcode::op_return
+    };
+
+    const auto value = json::value_from(instance);
+
+    // cannot parse a value, must be an object.
+    ////BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::operation>(value) == instance);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

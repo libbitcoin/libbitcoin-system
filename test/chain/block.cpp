@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
@@ -553,5 +554,121 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 // is_overspent
 // is_signature_operations_limited
 // is_unspent_coinbase_collision
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"header\":"
+            "{"
+                "\"version\":42,"
+                "\"previous\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+                "\"merkle_root\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+                "\"timestamp\":43,"
+                "\"bits\":44,"
+                "\"nonce\":45"
+            "},"
+            "\"transactions\":"
+            "["
+                "{"
+                    "\"version\":42,"
+                    "\"inputs\":"
+                    "["
+                        "{"
+                            "\"point\":"
+                            "{"
+                                "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+                                "\"index\":24"
+                            "},"
+                            "\"script\":\"return pick\","
+                            "\"witness\":\"[242424]\","
+                            "\"sequence\":42"
+                        "},"
+                        "{"
+                            "\"point\":"
+                            "{"
+                                "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+                                "\"index\":42"
+                            "},"
+                            "\"script\":\"return roll\","
+                            "\"witness\":\"[424242]\","
+                            "\"sequence\":24"
+                        "}"
+                    "],"
+                    "\"outputs\":"
+                    "["
+                        "{"
+                            "\"value\":24,"
+                            "\"script\":\"pick\""
+                        "},"
+                        "{"
+                            "\"value\":42,"
+                            "\"script\":\"roll\""
+                        "}"
+                    "],"
+                    "\"locktime\":24"
+                "}"
+            "]"
+        "}"
+    };
+
+    const chain::block instance
+    {
+        chain::header
+        {
+            42, null_hash, one_hash, 43, 44, 45
+        },
+        chain::transactions
+        {
+            chain::transaction
+            {
+                42,
+                chain::inputs
+                {
+                    chain::input
+                    {
+                        chain::point{ null_hash, 24 },
+                        chain::script{ { { opcode::op_return }, { opcode::pick } } },
+                        chain::witness{ "[242424]" },
+                        42
+                    },
+                    chain::input
+                    {
+                        chain::point{ one_hash, 42 },
+                        chain::script{ { { opcode::op_return }, { opcode::roll } } },
+                        chain::witness{ "[424242]" },
+                        24
+                    }
+                },
+                chain::outputs
+                {
+                    chain::output
+                    {
+                        24,
+                        chain::script{ { { opcode::pick } } }
+                    },
+                    chain::output
+                    {
+                        42,
+                        chain::script{ { { opcode::roll } } }
+                    }
+                },
+                24
+            }
+        }
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::block>(value) == instance);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

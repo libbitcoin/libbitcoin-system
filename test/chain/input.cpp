@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(input_tests)
 
+namespace json = boost::json;
 using namespace system::chain;
 
 static const auto input_data = base16_chunk(
@@ -343,6 +344,50 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_active_missing_prevout_
     const input instance{ {}, script, chain::max_input_sequence };
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), max_size_t);
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), max_size_t);
+}
+
+// json
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__json__conversions__expected)
+{
+    const std::string text
+    {
+        "{"
+            "\"point\":"
+            "{"
+                "\"hash\":\"0000000000000000000000000000000000000000000000000000000000000001\","
+                "\"index\":42"
+            "},"
+            "\"script\":\"pick roll return\","
+            "\"witness\":\"[424242]\","
+            "\"sequence\":24"
+        "}"
+    };
+
+    const chain::input instance
+    {
+        chain::point{ one_hash, 42 },
+        chain::script
+        {
+            chain::operations
+            {
+                { opcode::pick },
+                { opcode::roll },
+                { opcode::op_return }
+            }
+        },
+        chain::witness{ "[424242]" },
+        24
+    };
+
+    const auto value = json::value_from(instance);
+
+    BOOST_REQUIRE(json::parse(text) == value);
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+
+    BOOST_REQUIRE(json::value_from(instance) == value);
+    BOOST_REQUIRE(json::value_to<chain::input>(value) == instance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
