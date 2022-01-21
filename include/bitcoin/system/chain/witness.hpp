@@ -51,6 +51,9 @@ public:
     witness(witness&& other) noexcept;
     witness(const witness& other) noexcept;
 
+    witness(data_stack&& stack) noexcept;
+    witness(const data_stack& stack) noexcept;
+
     witness(chunk_ptrs&& stack) noexcept;
     witness(const chunk_ptrs& stack) noexcept;
 

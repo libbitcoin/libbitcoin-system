@@ -61,6 +61,16 @@ witness::witness(const witness& other) noexcept
 {
 }
 
+witness::witness(data_stack&& stack) noexcept
+  : witness(*to_shareds(std::move(stack)), true)
+{
+}
+
+witness::witness(const data_stack& stack) noexcept
+  : witness(*to_shareds(stack), true)
+{
+}
+
 witness::witness(chunk_ptrs&& stack) noexcept
   : witness(std::move(stack), true)
 {
