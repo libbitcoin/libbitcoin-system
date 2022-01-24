@@ -183,6 +183,10 @@ AX_BOOST_IOSTREAMS
 AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
 AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
 
+AX_BOOST_JSON
+AC_SUBST([boost_json_LIBS], [${BOOST_JSON_LIB}])
+AC_MSG_NOTICE([boost_json_LIBS : ${boost_json_LIBS}])
+
 AX_BOOST_LOCALE
 AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
 AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])

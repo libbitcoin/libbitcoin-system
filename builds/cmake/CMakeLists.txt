@@ -237,6 +237,7 @@ if (BUILD_SHARED_LIBS)
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
+        ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
@@ -255,6 +256,7 @@ else()
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
+        ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
@@ -465,6 +467,7 @@ if (BUILD_SHARED_LIBS)
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
+        ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
@@ -481,6 +484,7 @@ else()
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
+        ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_REGEX_LIBRARY}
