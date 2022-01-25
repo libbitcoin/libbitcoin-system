@@ -83,6 +83,9 @@ AC_DEFUN([AX_BOOST_JSON],
 			AC_DEFINE(HAVE_BOOST_JSON,,[define if the Boost::JSON library is available])
 			BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
 
+			# set ax_lib to compensate for sequential boost m4 declaration collisions
+			ax_lib=''
+
 			if test "x$ax_boost_user_json_lib" = "x"; then
 				for libextension in `ls $BOOSTLIBDIR/libboost_json*.so* $BOOSTLIBDIR/libboost_json*.dylib* $BOOSTLIBDIR/libboost_json*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_json.*\)\.so.*$;\1;' -e 's;^lib\(boost_json.*\)\.dylib.*$;\1;' -e 's;^lib\(boost_json.*\)\.a.*$;\1;'` ; do
 					ax_lib=${libextension}
