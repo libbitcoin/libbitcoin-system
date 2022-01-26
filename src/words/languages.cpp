@@ -19,8 +19,8 @@
 #include <bitcoin/system/words/languages.hpp>
 
 #include <algorithm>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
@@ -31,7 +31,7 @@ namespace words {
 // local definitions
 // ----------------------------------------------------------------------------
 
-typedef std::map<language, const char*> language_map;
+typedef std::unordered_map<language, const char*> language_map;
 
 // All languages, dictionary-independent.
 // Dictionaries are collections of words in one of these languages.

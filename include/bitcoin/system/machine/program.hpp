@@ -21,7 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -38,7 +38,7 @@ class BC_API program
 public:
     typedef chain::operations::const_iterator op_iterator;
     typedef chunk_ptrs::const_iterator stack_iterator;
-    typedef std::map<uint8_t, hash_digest> hash_cache;
+    typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
     /// Create an instance with empty stacks, value unused/max (input run).
     program(const chain::script::ptr& script,
