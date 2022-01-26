@@ -241,4 +241,17 @@ DECLARE_JSON_VALUE_CONVERTORS(transaction::ptr);
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::chain::transaction>
+{
+    size_t operator()(const bc::system::chain::transaction& value) const noexcept
+    {
+        // Witness coinbases will collide (null_hash).
+        return std::hash<bc::system::hash_digest>{}(value.hash(true));
+    }
+};
+} // namespace std
+
 #endif

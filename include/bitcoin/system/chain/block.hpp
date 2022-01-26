@@ -185,4 +185,16 @@ DECLARE_JSON_VALUE_CONVERTORS(block::ptr);
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::chain::block>
+{
+    size_t operator()(const bc::system::chain::block& value) const noexcept
+    {
+        return std::hash<bc::system::hash_digest>{}(value.hash());
+    }
+};
+} // namespace std
+
 #endif

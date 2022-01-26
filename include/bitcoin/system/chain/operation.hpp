@@ -184,4 +184,16 @@ DECLARE_JSON_VALUE_CONVERTORS(operation::ptr);
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::chain::operation>
+{
+    size_t operator()(const bc::system::chain::operation& value) const noexcept
+    {
+        return std::hash<bc::system::data_chunk>{}(value.to_data());
+    }
+};
+} // namespace std
+
 #endif

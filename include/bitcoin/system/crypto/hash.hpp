@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -193,15 +194,30 @@ BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
 /// DJB2 hash key algorithm by Dan Bernstein.
 BC_API size_t djb2_hash(const data_slice& data) noexcept;
 
+/// Combine hash values, such as a pair of djb2_hash outputs.
+inline size_t hash_combine(size_t left, size_t right) noexcept
+{
+    return left ^ shift_left(right, one);
+}
+
 } // namespace system
 } // namespace libbitcoin
 
 // Extend std and boost namespaces with djb2_hash.
 // ----------------------------------------------------------------------------
-// This allows our data_array to be incorporated into std/boost hash tables.
+// This allows data_array/chunk to be incorporated into std/boost hash tables.
 
 namespace std
 {
+template <>
+struct hash<bc::system::data_chunk>
+{
+    size_t operator()(const bc::system::data_chunk& data) const noexcept
+    {
+        return bc::system::djb2_hash(data);
+    }
+};
+
 template <size_t Size>
 struct hash<bc::system::data_array<Size>>
 {
@@ -214,6 +230,15 @@ struct hash<bc::system::data_array<Size>>
 
 namespace boost
 {
+template <>
+struct hash<bc::system::data_chunk>
+{
+    size_t operator()(const bc::system::data_chunk& data) const  noexcept
+    {
+        return bc::system::djb2_hash(data);
+    }
+};
+
 template <size_t Size>
 struct hash<bc::system::data_array<Size>>
 {

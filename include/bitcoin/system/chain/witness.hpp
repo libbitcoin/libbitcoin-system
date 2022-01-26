@@ -126,4 +126,17 @@ DECLARE_JSON_VALUE_CONVERTORS(witness::ptr);
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::chain::witness>
+{
+    size_t operator()(const bc::system::chain::witness& value) const noexcept
+    {
+        // Witness coinbases will collide (null_hash).
+        return std::hash<bc::system::data_chunk>{}(value.to_data(true));
+    }
+};
+} // namespace std
+
 #endif

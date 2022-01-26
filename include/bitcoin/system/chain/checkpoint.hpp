@@ -113,4 +113,17 @@ DECLARE_JSON_VALUE_CONVERTORS(checkpoint);
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::chain::checkpoint>
+{
+    size_t operator()(const bc::system::chain::checkpoint& value) const noexcept
+    {
+        return bc::system::hash_combine(
+            std::hash<bc::system::hash_digest>{}(value.hash()), value.height());
+    }
+};
+} // namespace std
+
 #endif
