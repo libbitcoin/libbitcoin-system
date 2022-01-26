@@ -24,8 +24,8 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
-#include <set>
 #include <type_traits>
+#include <unordered_set>
 #include <utility>
 #include <unordered_map>
 #include <boost/range/adaptor/reversed.hpp>
@@ -346,7 +346,7 @@ bool block::is_internal_double_spend() const noexcept
         return false;
 
     // A set is used to collapse duplicate points.
-    std::set<point> outs;
+    std::unordered_set<point> outs;
 
     // Move the points of all non-coinbase transactions into one set.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
@@ -420,7 +420,7 @@ bool block::is_hash_limit_exceeded() const noexcept
         return false;
 
     // A set is used to collapse duplicates.
-    std::set<hash_digest> hashes;
+    std::unordered_set<hash_digest> hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.insert(txs_->front()->hash(false));
