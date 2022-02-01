@@ -40,4 +40,16 @@ typedef enum class language
 } // namespace system
 } // namespace libbitcoin
 
+namespace std
+{
+template<>
+struct hash<bc::system::language>
+{
+    size_t operator()(const bc::system::language& value) const noexcept
+    {
+        return std::hash<uint8_t>{}(static_cast<uint8_t>(value));
+    }
+};
+} // namespace std
+
 #endif
