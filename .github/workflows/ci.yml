@@ -116,9 +116,9 @@ jobs:
       - name: Denormalize parameterization
         run: |
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-          else
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
             echo "LINKAGE=--disable-static" >> $GITHUB_ENV
