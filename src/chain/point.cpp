@@ -221,7 +221,7 @@ point tag_invoke(json::value_to_tag<point>, const json::value& value) noexcept
     return
     {
         hash,
-        static_cast<uint32_t>(value.at("index").get_int64())
+        value.at("index").to_number<uint32_t>()
     };
 }
 

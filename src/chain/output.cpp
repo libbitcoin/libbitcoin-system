@@ -243,7 +243,7 @@ output tag_invoke(json::value_to_tag<output>,
 {
     return
     {
-        static_cast<uint64_t>(value.at("value").get_int64()),
+        value.at("value").to_number<uint64_t>(),
         json::value_to<chain::script>(value.at("script"))
     };
 }

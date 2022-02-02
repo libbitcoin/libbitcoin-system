@@ -409,7 +409,7 @@ input tag_invoke(json::value_to_tag<input>, const json::value& value) noexcept
         json::value_to<chain::point>(value.at("point")),
         json::value_to<chain::script>(value.at("script")),
         json::value_to<chain::witness>(value.at("witness")),
-        static_cast<uint32_t>(value.at("sequence").get_int64())
+        value.at("sequence").to_number<uint32_t>()
     };
 }
 
