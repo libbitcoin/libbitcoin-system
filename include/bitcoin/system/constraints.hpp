@@ -64,6 +64,12 @@ using if_byte = enable_if_type<!(width<Type>() > byte_bits), bool>;
 template <typename Type>
 using if_bytes = enable_if_type<(width<Type>() > byte_bits), bool>;
 
+template <typename Type>
+using if_const = enable_if_type<std::is_const<Type>::value, bool>;
+
+template <typename Type>
+using if_non_const = enable_if_type<!std::is_const<Type>::value, bool>;
+
 template <typename Base, typename Type>
 using if_base_of = enable_if_type<
     std::is_base_of<Base, Type>::value, bool>;

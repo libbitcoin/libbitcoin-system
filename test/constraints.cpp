@@ -22,8 +22,8 @@
 #include <type_traits>
 #include <vector>
 
-// The msvc++ compiler dislikes std::is_same outside of template arguments.
-// But visual studio intellisense properly evaluations these assertions.
+typedef bool is_non_constant;
+typedef const bool is_constant;
 
 class base : noncopyable {};
 class not_derived {};
@@ -32,6 +32,8 @@ class derived : base {};
 template <typename Type>
 constexpr bool is_true()
 {
+    // The msvc++ compiler dislikes std::is_same outside of template arguments.
+    // But visual studio intellisense properly evaluations these assertions.
     return !std::is_same<Type, std::enable_if<false, bool>>::value;
 }
 
@@ -100,6 +102,12 @@ static_assert(is_true<if_bytes<double>>(), "");
 ////static_assert(!is_true<if_bytes<char>>(), "");
 ////static_assert(!is_true<if_bytes<uint8_t>>(), "");
 ////static_assert(!is_true<if_bytes<base>>(), "");
+
+static_assert(is_true<if_const<is_constant>>(), "");
+////static_assert(!is_true<if_const<is_non_constant>>(), "");
+
+static_assert(is_true<if_non_const<is_non_constant>>(), "");
+////static_assert(!is_true<if_non_const<is_constant>>(), "");
 
 static_assert(is_true<if_base_of<base, base>>(), "");
 static_assert(is_true<if_base_of<base, derived>>(), "");
