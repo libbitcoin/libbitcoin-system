@@ -197,7 +197,7 @@ checkpoint tag_invoke(json::value_to_tag<checkpoint>,
     return
     {
         hash,
-        static_cast<size_t>(value.at("height").get_int64())
+        value.at("height").to_number<size_t>()
     };
 }
 

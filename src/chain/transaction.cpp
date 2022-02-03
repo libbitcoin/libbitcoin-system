@@ -1303,10 +1303,10 @@ transaction tag_invoke(json::value_to_tag<transaction>,
 {
     return
     {
-        static_cast<uint32_t>(value.at("version").get_int64()),
+        value.at("version").to_number<uint32_t>(),
         json::value_to<chain::inputs>(value.at("inputs")),
         json::value_to<chain::outputs>(value.at("outputs")),
-        static_cast<uint32_t>(value.at("locktime").get_int64())
+        value.at("locktime").to_number<uint32_t>()
     };
 }
 

@@ -399,12 +399,12 @@ header tag_invoke(json::value_to_tag<header>,
 
     return
     {
-        static_cast<uint32_t>(value.at("version").get_int64()),
+        value.at("version").to_number<uint32_t>(),
         previous,
         merkle_root,
-        static_cast<uint32_t>(value.at("timestamp").get_int64()),
-        static_cast<uint32_t>(value.at("bits").get_int64()),
-        static_cast<uint32_t>(value.at("nonce").get_int64())
+        value.at("timestamp").to_number<uint32_t>(),
+        value.at("bits").to_number<uint32_t>(),
+        value.at("nonce").to_number<uint32_t>()
     };
 }
 
