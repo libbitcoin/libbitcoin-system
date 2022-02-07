@@ -140,7 +140,7 @@ jobs:
         if: ${{ matrix.coverage == 'cov' }}
         run: |
           lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode" --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
