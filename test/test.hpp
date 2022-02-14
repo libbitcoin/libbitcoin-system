@@ -61,8 +61,10 @@ std::ostream& operator<<(std::ostream& stream,
     boost::unit_test::framework::current_test_case().p_name.get()
 #define SUITE_NAME \
     boost::unit_test::framework::current_auto_test_suite().p_name.get()
+#define TEST_DIRECTORY \
+    test::directory
 #define TEST_PATH \
-    test::directory + "/" + TEST_NAME
+    TEST_DIRECTORY + "/" + TEST_NAME
 
 namespace test {
 
