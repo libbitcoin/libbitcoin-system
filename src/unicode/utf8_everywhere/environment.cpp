@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -39,11 +39,9 @@
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
-
-// TODO: rename the classes in these sources.
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_console_streambuf.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 
 namespace libbitcoin {
 namespace system {

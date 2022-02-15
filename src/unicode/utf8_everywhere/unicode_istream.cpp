@@ -16,30 +16,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_ostream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
 
 #include <cstddef>
 #include <iostream>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-unicode_ostream::unicode_ostream(
+unicode_istream::unicode_istream(
 #ifdef _MSC_VER
-    std::ostream&, std::wostream& wide_stream, size_t size)
+    std::istream&, std::wistream& wide_stream, size_t size)
 #else
-    std::ostream& narrow_stream, std::wostream&, size_t)
+    std::istream& narrow_stream, std::wistream&, size_t)
 #endif
 #ifdef _MSC_VER
-  : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), size))
+  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
 #else
-  : std::ostream(narrow_stream.rdbuf())
+  : std::istream(narrow_stream.rdbuf())
 #endif
 {
 }
 
-unicode_ostream::~unicode_ostream()
+unicode_istream::~unicode_istream()
 {
 #ifdef _MSC_VER
     delete rdbuf();

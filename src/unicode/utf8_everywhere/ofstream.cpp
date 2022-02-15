@@ -16,34 +16,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_istream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/ofstream.hpp>
 
-#include <cstddef>
-#include <iostream>
-#include <bitcoin/system/unicode/utf8_everywhere/utf8_streambuf.hpp>
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-unicode_istream::unicode_istream(
-#ifdef _MSC_VER
-    std::istream&, std::wistream& wide_stream, size_t size)
-#else
-    std::istream& narrow_stream, std::wistream&, size_t)
-#endif
-#ifdef _MSC_VER
-  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
-#else
-  : std::istream(narrow_stream.rdbuf())
-#endif
+    
+// C++17: use std::filesystem.
+// VC++ EXTENSION: "construct with wide-named file".
+ofstream::ofstream(const boost::filesystem::path& path,
+    std::ofstream::openmode mode)
+  : std::ofstream(to_extended_path(path), mode)
 {
-}
-
-unicode_istream::~unicode_istream()
-{
-#ifdef _MSC_VER
-    delete rdbuf();
-#endif
+    // This opens the file.
 }
 
 } // namespace system

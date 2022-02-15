@@ -16,25 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_IFSTREAM_HPP
-#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_IFSTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UNICODE_OSTREAM_HPP
+#define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UNICODE_OSTREAM_HPP
 
-#include <fstream>
-#include <boost/filesystem.hpp>
+#include <cstddef>
+#include <iostream>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Use bc::system::ifstream in place of std::ifstream.
-/// This provides unicode and long path translation for Win32.
-class BC_API ifstream
-  : public std::ifstream
+/**
+ * Class to expose a widening output stream.
+ */
+class BC_API unicode_ostream
+  : public std::ostream
 {
 public:
-    /// This also opens the file.
-    ifstream(const boost::filesystem::path& path,
-        std::ifstream::openmode mode=std::ifstream::in);
+    /**
+     * Construct instance of a conditionally-widening output stream.
+     * @param[in]  narrow_stream  A narrow output stream such as std::cout.
+     * @param[in]  wide_stream    A wide output stream such as std::wcout.
+     * @param[in]  size           The wide buffer size.
+     */
+    unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream,
+        size_t size);
+
+    /**
+     * Delete the unicode_streambuf that wraps wide_stream.
+     */
+    virtual ~unicode_ostream();
 };
 
 } // namespace system
