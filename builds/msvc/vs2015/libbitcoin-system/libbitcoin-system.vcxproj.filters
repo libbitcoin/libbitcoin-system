@@ -459,25 +459,25 @@
     <ClCompile Include="..\..\..\..\src\unicode\normalization.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_console_streambuf.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\console_streambuf.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_environment.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\environment.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_ifstream.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\ifstream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_istream.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\ofstream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_ofstream.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\unicode_istream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_ostream.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\unicode_ostream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\utf8_streambuf.cpp">
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\unicode_streambuf.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\addresses\bitcoin_uri.cpp">
@@ -1055,31 +1055,28 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode.hpp">
       <Filter>include\bitcoin\system\unicode</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_about.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\console_streambuf.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_console_streambuf.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\environment.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_environment.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\ifstream.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\ofstream.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_istream.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_ostream.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_streambuf.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_ifstream.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_istream.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_ofstream.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_ostream.hpp">
-      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_streambuf.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp">
