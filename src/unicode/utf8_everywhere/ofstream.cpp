@@ -31,7 +31,8 @@ ofstream::ofstream(const boost::filesystem::path& path,
     std::ofstream::openmode mode)
   : std::ofstream(to_extended_path(path), mode)
 {
-    // This opens the file.
+    // This opens the stream, and creates file system file if out/app mode.
+    // Stream does not become bad on in invalid path, but a write will fail.
 }
 
 } // namespace system
