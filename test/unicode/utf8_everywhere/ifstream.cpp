@@ -18,10 +18,38 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(utf8_ifstream_tests)
-
-BOOST_AUTO_TEST_CASE(unicode_ifstream__foo__bar)
+struct ifstream_tests_setup_fixture
 {
+    ifstream_tests_setup_fixture()
+    {
+        test::remove(TEST_NAME);
+    }
+
+    ~ifstream_tests_setup_fixture()
+    {
+        test::remove(TEST_NAME);
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(ifstream_tests, ifstream_tests_setup_fixture)
+
+BOOST_AUTO_TEST_CASE(ifstream__construct__valid_path__round_trip)
+{
+    ofstream out(TEST_NAME, std::ofstream::out);
+    BOOST_REQUIRE(!out.bad());
+
+    out << "libbitcoin";
+    out.close();
+    BOOST_REQUIRE(!out.bad());
+
+    ifstream in(TEST_NAME);
+    BOOST_REQUIRE(!in.bad());
+
+    std::string line;
+    BOOST_REQUIRE(std::getline(in, line));
+
+    in.close();
+    BOOST_REQUIRE(!in.bad());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
