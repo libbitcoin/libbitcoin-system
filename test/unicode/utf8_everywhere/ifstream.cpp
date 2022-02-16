@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2021 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -38,7 +38,10 @@ BOOST_AUTO_TEST_CASE(ifstream__construct__valid_path__round_trip)
     ofstream out(TEST_NAME, std::ofstream::out);
     BOOST_REQUIRE(!out.bad());
 
-    out << "libbitcoin";
+    const std::string expected{ "libbitcoin" };
+    out << expected;
+    BOOST_REQUIRE(!out.bad());
+
     out.close();
     BOOST_REQUIRE(!out.bad());
 
@@ -47,6 +50,30 @@ BOOST_AUTO_TEST_CASE(ifstream__construct__valid_path__round_trip)
 
     std::string line;
     BOOST_REQUIRE(std::getline(in, line));
+    BOOST_REQUIRE(!in.bad());
+    BOOST_REQUIRE_EQUAL(line, expected);
+
+    in.close();
+    BOOST_REQUIRE(!in.bad());
+}
+
+BOOST_AUTO_TEST_CASE(ifstream__construct__invalid_path_no_read__good_stream)
+{
+    ifstream in("<<<", std::ifstream::in);
+    BOOST_REQUIRE(!in.bad());
+
+    in.close();
+    BOOST_REQUIRE(!in.bad());
+}
+
+BOOST_AUTO_TEST_CASE(ifstream__construct__invalid_path_read__good_stream)
+{
+    ifstream in("<<<", std::ifstream::in);
+    BOOST_REQUIRE(!in.bad());
+
+    std::string line;
+    BOOST_REQUIRE(!std::getline(in, line));
+    BOOST_REQUIRE(!in.bad());
 
     in.close();
     BOOST_REQUIRE(!in.bad());
