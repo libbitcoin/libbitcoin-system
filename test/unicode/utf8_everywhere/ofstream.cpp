@@ -35,7 +35,7 @@ BOOST_FIXTURE_TEST_SUITE(ofstream_tests, ofstream_tests_setup_fixture)
 
 BOOST_AUTO_TEST_CASE(ofstream__construct__invalid_path_in__not_good_stream)
 {
-    ofstream out("<<<", std::ofstream::in);
+    ofstream out("/", std::ofstream::in);
     BOOST_REQUIRE(!out.good());
     BOOST_REQUIRE(!out.bad());
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(ofstream__construct__invalid_path_in__not_good_stream)
 
 BOOST_AUTO_TEST_CASE(ofstream__construct__invalid_path_write__bad_stream)
 {
-    ofstream out("<<<", std::ofstream::out);
+    ofstream out("/", std::ofstream::out);
     BOOST_REQUIRE(!out.good());
     BOOST_REQUIRE(!out.bad());
 

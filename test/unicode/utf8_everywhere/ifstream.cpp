@@ -35,7 +35,7 @@ BOOST_FIXTURE_TEST_SUITE(ifstream_tests, ifstream_tests_setup_fixture)
 
 BOOST_AUTO_TEST_CASE(ifstream__construct__invalid_path_no_read__not_good_stream)
 {
-    ifstream in("<<<", std::ifstream::in);
+    ifstream in("/", std::ifstream::in);
     BOOST_REQUIRE(!in.good());
     BOOST_REQUIRE(!in.bad());
 
