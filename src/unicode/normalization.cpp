@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <mutex>
 #include <string>
 #ifdef _MSC_VER
     #include <limits>

@@ -24,6 +24,7 @@
 #include <cwchar>
 #include <iostream>
 #include <locale>
+#include <mutex>
 #include <string>
 #include <utility>
 #include <vector>
