@@ -149,3 +149,75 @@ jobs:
         with:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
+
+  verify-sln:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: windows-latest
+            configuration: "StaticRelease"
+            platform: "Win32"
+            version: "vs2017"
+
+          - os: windows-latest
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2017"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize SDK
+        shell: powershell
+        run: |
+          try {
+            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
+
+            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
+            $Args = "/q /norestart /features $FeatureList"
+            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
+
+            $setup.WaitForExit()
+            if ($setup.ExitCode -ne 0) {
+              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
+              exit $setup.ExitCode;
+            }
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+
+      - name: Execute build
+        run: .\build.cmd .. ${{ matrix.platform }} ${{ matrix.configuration }} ${{ matrix.version }}
+
+      - name: Execute tests
+        shell: powershell
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;

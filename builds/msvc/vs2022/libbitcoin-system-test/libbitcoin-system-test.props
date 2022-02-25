@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>Libbitcoin System Test Common Settings</_PropertySheetDisplayName>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+
+  <!-- User Interface -->
+
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(ProjectName).xml" />
+  </ItemGroup>
+
+  <!-- Configuration -->
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- Disable optimization to prevent excessive compilation time in release builds due to large data statements. -->
+      <Optimization>Disabled</Optimization>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <EnablePREfast>false</EnablePREfast>
+      <PreprocessorDefinitions Condition="'$(Option-datagen)' == 'true'">ENABLE_DATAGEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(DefaultLinkage)' == 'dynamic'">BOOST_TEST_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+
+  <!-- Dependencies -->
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)libbitcoin-system.import.props" />
+  </ImportGroup>
+
+  <PropertyGroup Condition="'$(NuGetPackageRoot)' == ''">
+    <NuGetPackageRoot>..\..\..\..\..\.nuget\packages\</NuGetPackageRoot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
+    <Linkage-secp256k1>dynamic</Linkage-secp256k1>
+    <Linkage-libbitcoin-system>dynamic</Linkage-libbitcoin-system>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
+    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-libbitcoin-system>ltcg</Linkage-libbitcoin-system>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
+    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-libbitcoin-system>static</Linkage-libbitcoin-system>
+  </PropertyGroup>
+
+  <!-- Messages -->
+
+  <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
+    <Message Text="Linkage-_system   : $(Linkage-libbitcoin-system)" Importance="high"/>
+    <!--<Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high" Condition="'$(Option-datagen)' == 'true'"/>-->
+  </Target>
+
+</Project>
