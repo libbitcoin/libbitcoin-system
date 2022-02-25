@@ -587,10 +587,10 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__inconsistent)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
     // std::istream::failure
-    // Throws on msvc, not on other platforms.
+    // Throws on msvc(prior to 2022).
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER < 1931)
     BOOST_REQUIRE_THROW(istream.seekg(-2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
@@ -611,10 +611,10 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
     // std::istream::failure
-    // Throws on msvc, not on other platforms.
+    // Throws on msvc prior to 2022.
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER < 1931)
     BOOST_REQUIRE_THROW(istream.seekg(2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), 0);
