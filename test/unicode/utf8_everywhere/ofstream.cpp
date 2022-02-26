@@ -33,27 +33,6 @@ struct ofstream_tests_setup_fixture
 
 BOOST_FIXTURE_TEST_SUITE(ofstream_tests, ofstream_tests_setup_fixture)
 
-BOOST_AUTO_TEST_CASE(ofstream__construct__invalid_path_in__not_good_stream)
-{
-    ofstream out("/", std::ofstream::in);
-    BOOST_REQUIRE(!out.good());
-    BOOST_REQUIRE(!out.bad());
-
-    out.close();
-    BOOST_REQUIRE(!out.good());
-}
-
-BOOST_AUTO_TEST_CASE(ofstream__construct__invalid_path_write__bad_stream)
-{
-    ofstream out("/", std::ofstream::out);
-    BOOST_REQUIRE(!out.good());
-    BOOST_REQUIRE(!out.bad());
-
-    const std::string expected{ "libbitcoin" };
-    out << expected;
-    BOOST_REQUIRE(!out.good());
-}
-
 BOOST_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
 {
     ofstream out(TEST_NAME, std::ofstream::out);
