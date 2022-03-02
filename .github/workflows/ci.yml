@@ -162,7 +162,17 @@ jobs:
             version: "vs2017"
 
           - os: windows-latest
+            configuration: "StaticDebug"
+            platform: "Win32"
+            version: "vs2017"
+
+          - os: windows-latest
             configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2017"
+
+          - os: windows-latest
+            configuration: "StaticDebug"
             platform: "x64"
             version: "vs2017"
 
