@@ -46,10 +46,13 @@ static ptrdiff_t intersection(const electrum_v1::catalog::words& left,
     const electrum_v1::catalog::words& right)
 {
     return std::count_if(left.word.begin(), left.word.end(),
-        [&](const char test[])
+        [&](const char test_left[])
         {
-            return std::find(right.word.begin(), right.word.end(), test) !=
-                right.word.end();
+            return std::find_if(right.word.begin(), right.word.end(),
+                [&](const char test_right[])
+                {
+                    return (std::strcmp(test_left, test_right) == 0);
+                }) != right.word.end();
         });
     }
 
@@ -57,10 +60,13 @@ static bool intersects(const electrum_v1::catalog::words& left,
     const electrum::catalog::words& right)
 {
     return std::any_of(left.word.begin(), left.word.end(),
-        [&](const char test[])
+        [&](const char test_left[])
         {
-            return std::find(right.word.begin(), right.word.end(), test) !=
-                right.word.end();
+            return std::find_if(right.word.begin(), right.word.end(),
+                [&](const char test_right[])
+                {
+                    return (std::strcmp(test_left, test_right) == 0);
+                }) != right.word.end();
         });
 }
 
@@ -68,10 +74,13 @@ static ptrdiff_t intersection(const electrum_v1::catalog::words& left,
     const electrum::catalog::words& right)
 {
     return std::count_if(left.word.begin(), left.word.end(),
-        [&](const char test[])
+        [&](const char test_left[])
         {
-            return std::find(right.word.begin(), right.word.end(), test) !=
-                right.word.end();
+            return std::find_if(right.word.begin(), right.word.end(),
+                [&](const char test_right[])
+                {
+                    return (std::strcmp(test_left, test_right) == 0);
+                }) != right.word.end();
         });
 }
 
