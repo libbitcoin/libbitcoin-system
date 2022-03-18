@@ -39,6 +39,8 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
+// TODO: conditionally exclude constants or change to enumerations.
+
 namespace cpu1_0
 {
     constexpr uint32_t leaf = 1;
@@ -66,6 +68,7 @@ namespace xcr0
 // In msvc intrinsics always compile, however on other platforms this support
 // is unreliable, so we revert to the lowest common interface (assembly).
 
+#if defined(WITH_AVX2)
 static bool xgetbv(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
@@ -83,7 +86,9 @@ static bool xgetbv(uint64_t& value, uint32_t index) noexcept
     return false;
 #endif
 }
+#endif
 
+#if defined(WITH_AVX2) || defined(WITH_SSE41) || defined(WITH_SSE4) || defined(WITH_SHANI)
 static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
@@ -104,6 +109,7 @@ static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     return false;
 #endif
 }
+#endif
 
 // runtime checks for intrinsic availability
 // ----------------------------------------------------------------------------
