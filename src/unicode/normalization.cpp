@@ -163,6 +163,8 @@ bool to_upper(std::string& out, const std::string& in) noexcept
 
 #else // _MSC_VER
 
+// TODO: deprecation warnings in clang.
+
 constexpr auto icu_backend_name = "icu";
 constexpr auto utf8_locale_name = "en_US.UTF8";
 

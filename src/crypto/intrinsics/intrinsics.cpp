@@ -39,6 +39,7 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
+// TODO: Unused variable warnings.
 // TODO: conditionally exclude constants or change to enumerations.
 
 namespace cpu1_0
