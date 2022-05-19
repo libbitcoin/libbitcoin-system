@@ -110,6 +110,9 @@ namespace bc = libbitcoin;
     #define BC_CPP_20
 #endif
 
+// External: Requires that <bitcoin/system.hpp> be included before boost.
+// Current alphabetical sort of system.hpp ensures this appears before boost.
+// Internal: Placeholders are not currently used in this system library.
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
 // This arises when including <functional>, which declares std::placeholders.
 // This results in an declared symbol when boost includes use placeholders.

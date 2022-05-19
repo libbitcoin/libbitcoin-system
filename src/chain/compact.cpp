@@ -36,11 +36,11 @@ static constexpr uint32_t sign_bit = 0x00800000;
 static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
 static constexpr size_t mantissa_bits = to_bits(sub1(sizeof(uint32_t)));
 
-// assertions
+// Assertions.
 BC_DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
 BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 
-// Inlines
+// Inlines.
 // ----------------------------------------------------------------------------
 
 inline bool is_negated(uint32_t compact) noexcept
@@ -91,7 +91,7 @@ inline size_t logical_size(uint256_t value) noexcept
     return byte;
 }
 
-// Constructors
+// Constructors.
 // ----------------------------------------------------------------------------
 
 compact::compact(uint32_t compact) noexcept
@@ -105,6 +105,9 @@ compact::compact(const uint256_t& value) noexcept
 {
     normal_ = from_big(big_);
 }
+
+// Properties.
+// ----------------------------------------------------------------------------
 
 bool compact::is_overflowed() const noexcept
 {
@@ -120,6 +123,9 @@ compact::operator const uint256_t&() const noexcept
 {
     return big_;
 }
+
+// Conversions.
+// ----------------------------------------------------------------------------
 
 // Returns false on overflow, negatives are converted to zero.
 bool compact::from_compact(uint256_t& out, uint32_t compact) noexcept

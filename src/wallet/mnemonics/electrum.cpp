@@ -129,7 +129,7 @@ electrum::grinding electrum::grinder(const data_chunk& entropy,
         // electrum and public for bip39, so we use the bip39/mnemonic format.
         // This results in any electrum entropy/prefix value producing the same
         // words as that same entropy/checksum value in bip39/mnemonic.
-        hash[entropy_size - 1u] &= padding_mask;
+        hash[sub1(entropy_size)] &= padding_mask;
         words = encoder(hash, identifier);
 
         // Avoid collisions with Electrum v1 (en) and BIP39 mnemonics.
