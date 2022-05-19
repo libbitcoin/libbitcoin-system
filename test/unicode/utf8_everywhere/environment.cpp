@@ -185,9 +185,9 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__ascii__expected)
     size_t truncated;
     const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
-    BOOST_REQUIRE_EQUAL(truncated, 0u);
+    BOOST_REQUIRE_EQUAL(truncated, zero);
+    BOOST_REQUIRE(utf16 == expected_utf16);
 }
 
 BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii__expected)
@@ -204,9 +204,9 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii__expected)
     size_t truncated;
     const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
-    BOOST_REQUIRE_EQUAL(truncated, 0u);
+    BOOST_REQUIRE_EQUAL(truncated, zero);
+    BOOST_REQUIRE(utf16 == expected_utf16);
 }
 
 BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation1__expected)
@@ -234,8 +234,8 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation1__ex
     const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
+    BOOST_REQUIRE(utf16 == expected_utf16);
 }
 
 BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__expected)
@@ -263,8 +263,8 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__ex
     const auto size = to_utf16(truncated, utf16, length, utf8.c_str(), utf8.length());
 
     BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
-    BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
+    BOOST_REQUIRE(utf16 == expected_utf16);
 }
 
 // BC_USE_LIBBITCOIN_MAIN

@@ -22,6 +22,8 @@
 
 BOOST_AUTO_TEST_SUITE(utf8_ostream_tests)
 
+// std::wstring is not serializable.
+
 // Use of L is not recommended as it will only work for ascii.
 BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
 {
@@ -34,10 +36,10 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
 
 #ifdef _MSC_VER
     BOOST_REQUIRE(narrow_stream.str().empty());
-////    BOOST_REQUIRE_EQUAL(wide_stream.str().c_str(), L"ascii");
+    BOOST_REQUIRE(wide_stream.str() == L"ascii");
 #else
     BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE_EQUAL(narrow_stream.str(), "ascii");
+    BOOST_REQUIRE(narrow_stream.str() == "ascii");
 #endif
 }
 
@@ -55,10 +57,10 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
 
 #ifdef _MSC_VER
     BOOST_REQUIRE(narrow_stream.str().empty());
-    BOOST_REQUIRE_EQUAL(wide_stream.str().c_str(), utf16.c_str());
+    BOOST_REQUIRE(wide_stream.str() == utf16);
 #else
     BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE_EQUAL(narrow_stream.str(), utf8);
+    BOOST_REQUIRE(narrow_stream.str() == utf8);
 #endif
 }
 
@@ -103,10 +105,10 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
 
 #ifdef _MSC_VER
     BOOST_REQUIRE(narrow_stream.str().empty());
-    BOOST_REQUIRE_EQUAL(wide_stream.str().c_str(), utf16_600_chars.c_str());
+    BOOST_REQUIRE(wide_stream.str() == utf16_600_chars);
 #else
     BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE_EQUAL(narrow_stream.str(), utf8_1800_bytes);
+    BOOST_REQUIRE(narrow_stream.str() == utf8_1800_bytes);
 #endif
 }
 
