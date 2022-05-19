@@ -28,6 +28,8 @@
 namespace libbitcoin {
 namespace system {
 
+// DEPRECATED: avoid structured exception handling.
+
 // throw is not constexpr at least through C++20.
 
 // TODO: generalize to signed integers.
@@ -53,41 +55,41 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
     return left + right;
 }
 
-// TODO: generalize to signed integers.
-template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_subtract(Integer left, Integer right) noexcept(false)
-{
-    if (left < (std::numeric_limits<Integer>::min() + right))
-        throw underflow_exception("safe subtraction underflow");
-
-    return left - right;
-}
-
-// TODO: generalize to signed integers.
-template <typename Integer, if_unsigned_integer<Integer>>
-void safe_increment(Integer& value) noexcept(false)
-{
-    value = safe_add(value, one);
-}
-
-// TODO: generalize to signed integers.
-template <typename Integer, if_unsigned_integer<Integer>>
-void safe_decrement(Integer& value)
-{
-    value = safe_subtract(value, one);
-}
-
-template <typename To, typename From, if_integer<To>, if_integer<From>>
-To safe_cast(From value) noexcept(false)
-{
-    if (is_lesser(value, std::numeric_limits<To>::min()))
-        throw range_exception("safe cast below minimum range");
-
-    if (is_greater(value, std::numeric_limits<To>::max()))
-        throw range_exception("safe cast above maximum range");
-
-    return static_cast<To>(value);
-}
+////// TODO: generalize to signed integers.
+////template <typename Integer, if_unsigned_integer<Integer>>
+////Integer safe_subtract(Integer left, Integer right) noexcept(false)
+////{
+////    if (left < (std::numeric_limits<Integer>::min() + right))
+////        throw underflow_exception("safe subtraction underflow");
+////
+////    return left - right;
+////}
+////
+////// TODO: generalize to signed integers.
+////template <typename Integer, if_unsigned_integer<Integer>>
+////void safe_increment(Integer& value) noexcept(false)
+////{
+////    value = safe_add(value, one);
+////}
+////
+////// TODO: generalize to signed integers.
+////template <typename Integer, if_unsigned_integer<Integer>>
+////void safe_decrement(Integer& value)
+////{
+////    value = safe_subtract(value, one);
+////}
+////
+////template <typename To, typename From, if_integer<To>, if_integer<From>>
+////To safe_cast(From value) noexcept(false)
+////{
+////    if (is_lesser(value, std::numeric_limits<To>::min()))
+////        throw range_exception("safe cast below minimum range");
+////
+////    if (is_greater(value, std::numeric_limits<To>::max()))
+////        throw range_exception("safe cast above maximum range");
+////
+////    return static_cast<To>(value);
+////}
 
 } // namespace system
 } // namespace libbitcoin

@@ -68,7 +68,11 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     uint64_t set_size, uint64_t target_false_positive_rate,
     const siphash_key& key) noexcept
 {
-    const auto bound = safe_multiply(target_false_positive_rate, set_size);
+    // Guard against overflow.
+    if (max_uint64 / set_size < target_false_positive_rate)
+        return {};
+
+    const auto bound = target_false_positive_rate * set_size;
     static default_allocator<uint64_t> no_fill_allocator{};
     std::vector<uint64_t> hashes(no_fill_allocator);
     hashes.resize(items.size());

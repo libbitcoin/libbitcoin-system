@@ -26,30 +26,32 @@
 namespace libbitcoin {
 namespace system {
 
+// DEPRECATED: 2 uses in libbitcoin
 /// Throws overflow_exception on overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_multiply(Integer left, Integer right) noexcept(false);
 
+// DEPRECATED: 1 use in libbitcoin
 /// Throws overflow_exception on overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right) noexcept(false);
 
-/// Throws underflow_exception on underflow.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-Integer safe_subtract(Integer left, Integer right) noexcept(false);
-
-/// Throws overflow_exception on overflow.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-void safe_increment(Integer& value) noexcept(false);
-
-/// Throws underflow_exception on underflow.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-void safe_decrement(Integer& value) noexcept(false);
-
-/// Throws range_exception if From value is above or below To size limits.
-template <typename To, typename From,
-    if_integer<To> = true, if_integer<From> = true>
-To safe_cast(From value) noexcept(false);
+/////// Throws underflow_exception on underflow.
+////template <typename Integer, if_unsigned_integer<Integer> = true>
+////Integer safe_subtract(Integer left, Integer right) noexcept(false);
+////
+/////// Throws overflow_exception on overflow.
+////template <typename Integer, if_unsigned_integer<Integer> = true>
+////void safe_increment(Integer& value) noexcept(false);
+////
+/////// Throws underflow_exception on underflow.
+////template <typename Integer, if_unsigned_integer<Integer> = true>
+////void safe_decrement(Integer& value) noexcept(false);
+////
+/////// Throws range_exception if From value is above or below To size limits.
+////template <typename To, typename From,
+////    if_integer<To> = true, if_integer<From> = true>
+////To safe_cast(From value) noexcept(false);
 
 } // namespace system
 } // namespace libbitcoin
