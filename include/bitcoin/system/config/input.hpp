@@ -36,11 +36,12 @@ public:
     input(const input& other) noexcept;
     input(const chain::input& value) noexcept;
     input(const chain::point& value) noexcept;
-    input(const std::string& tuple);
+    input(const std::string& tuple) noexcept(false);
 
     operator const chain::input&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& stream, input& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        input& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const input& argument) noexcept;
 

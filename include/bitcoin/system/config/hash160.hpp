@@ -35,11 +35,12 @@ public:
     hash160() noexcept;
     hash160(const hash160& other) noexcept;
     hash160(const short_hash& value) noexcept;
-    hash160(const std::string& hexcode);
+    hash160(const std::string& hexcode) noexcept(false);
 
     operator const short_hash&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, hash160& argument);
+    friend std::istream& operator>>(std::istream& input,
+        hash160& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const hash160& argument) noexcept;
 

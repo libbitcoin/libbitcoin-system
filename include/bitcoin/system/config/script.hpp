@@ -39,7 +39,7 @@ public:
     script(const chain::script& value) noexcept;
     script(const data_chunk& value) noexcept;
     script(const std::vector<std::string>& tokens);
-    script(const std::string& mnemonic);
+    script(const std::string& mnemonic) noexcept(false);
 
     /// Serialize the script to bytes according to the p2p wire protocol.
     data_chunk to_data() const noexcept;
@@ -50,7 +50,8 @@ public:
 
     operator const chain::script&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, script& argument);
+    friend std::istream& operator>>(std::istream& input,
+        script& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const script& argument) noexcept;
 

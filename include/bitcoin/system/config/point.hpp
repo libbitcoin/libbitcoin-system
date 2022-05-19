@@ -37,11 +37,12 @@ public:
     point() noexcept;
     point(const point& other) noexcept;
     point(const chain::point& value) noexcept;
-    point(const std::string& tuple);
+    point(const std::string& tuple) noexcept(false);
 
     operator const chain::point&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, point& argument);
+    friend std::istream& operator>>(std::istream& input,
+        point& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const point& argument) noexcept;
 

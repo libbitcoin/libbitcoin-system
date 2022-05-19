@@ -37,13 +37,14 @@ public:
     hash256() noexcept;
     hash256(const hash256& other) noexcept;
     hash256(const hash_digest& value) noexcept;
-    hash256(const std::string& hexcode);
+    hash256(const std::string& hexcode) noexcept(false);
 
     std::string to_string() const noexcept;
 
     operator const hash_digest&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, hash256& argument);
+    friend std::istream& operator>>(std::istream& input,
+        hash256& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const hash256& argument) noexcept;
 

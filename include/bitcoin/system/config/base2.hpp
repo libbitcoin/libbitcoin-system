@@ -37,14 +37,15 @@ public:
     base2() noexcept;
     base2(const base2& other) noexcept;
     base2(const binary& value) noexcept;
-    base2(const std::string& binary);
+    base2(const std::string& binary) noexcept(false);
 
     /// Get number of bits.
     size_t size() const noexcept;
 
     operator const binary&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, base2& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base2& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base2& argument) noexcept;
 

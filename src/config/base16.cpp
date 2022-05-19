@@ -43,7 +43,7 @@ base16::base16(const base16& other) noexcept
 {
 }
 
-base16::base16(const std::string& hexcode)
+base16::base16(const std::string& hexcode) noexcept(false)
 {
     std::stringstream(hexcode) >> *this;
 }
@@ -58,7 +58,7 @@ base16::operator data_slice() const noexcept
     return { value_.begin(), value_.end() };
 }
 
-std::istream& operator>>(std::istream& input, base16& argument)
+std::istream& operator>>(std::istream& input, base16& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

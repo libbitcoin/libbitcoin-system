@@ -41,7 +41,7 @@ base2::base2(const base2& other) noexcept
 {
 }
 
-base2::base2(const std::string& binary)
+base2::base2(const std::string& binary) noexcept(false)
 {
     std::stringstream(binary) >> *this;
 }
@@ -56,7 +56,7 @@ base2::operator const binary&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base2& argument)
+std::istream& operator>>(std::istream& input, base2& argument) noexcept(false)
 {
     std::string binary;
     input >> binary;

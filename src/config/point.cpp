@@ -73,7 +73,7 @@ point::point(const point& other) noexcept
 {
 }
 
-point::point(const std::string& tuple)
+point::point(const std::string& tuple) noexcept(false)
 {
     std::stringstream(tuple) >> *this;
 }
@@ -83,7 +83,7 @@ point::operator const chain::point&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, point& argument)
+std::istream& operator>>(std::istream& input, point& argument) noexcept(false)
 {
     std::string tuple;
     input >> tuple;

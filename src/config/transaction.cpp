@@ -45,7 +45,7 @@ transaction::transaction(const transaction& other) noexcept
 {
 }
 
-transaction::transaction(const std::string& hexcode)
+transaction::transaction(const std::string& hexcode) noexcept(false)
 {
     std::stringstream(hexcode) >> *this;
 }
@@ -60,7 +60,8 @@ transaction::operator const chain::transaction&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, transaction& argument)
+std::istream& operator>>(std::istream& input,
+    transaction& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

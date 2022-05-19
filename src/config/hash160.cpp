@@ -43,7 +43,7 @@ hash160::hash160(const hash160& other) noexcept
 {
 }
 
-hash160::hash160(const std::string& hexcode)
+hash160::hash160(const std::string& hexcode) noexcept(false)
 {
     std::stringstream(hexcode) >> *this;
 }
@@ -53,7 +53,7 @@ hash160::operator const short_hash&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, hash160& argument)
+std::istream& operator>>(std::istream& input, hash160& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

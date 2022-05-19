@@ -26,47 +26,35 @@
 namespace libbitcoin {
 namespace system {
 
-/**
- * Class to translate internal utf8 iostreams to external utf16 iostreams.
- * This uses wide and narrow input and output buffers of 1024 characters/bytes.
- * However because of utf8-utf16 conversion ratios of up to 4:1 the effective
- * wide output buffering may be reduced to as much as 256 characters.
- */
+/// Not thread safe, virtual.
+/// Class to translate internal utf8 iostreams to external utf16 iostreams.
+/// This uses wide and narrow input and output buffers of 1024 characters/bytes.
+/// However because of utf8-utf16 conversion ratios of up to 4:1 the effective
+/// wide output buffering may be reduced to as much as 256 characters.
 class BC_API unicode_streambuf
   : public std::streambuf
 {
 public:
-    /**
-     * Construct unicode stream buffer from a weak reference to a wide buffer.
-     * @param[in]  wide_buffer  A wide stream buffer for i/o relay.
-     * @param[in]  size         The wide buffer size.
-     */
-    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size);
+    /// Construct unicode stream buffer from a weak reference to a wide buffer.
+    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size) noexcept(false);
 
-    /**
-     * Synchronize stream buffer.
-     */
-    virtual ~unicode_streambuf();
+    /// Synchronize stream buffer.
+    virtual ~unicode_streambuf() noexcept;
 
 protected:
-    /**
-     * Implement underflow for support of input streams.
-     */
-    virtual std::streambuf::int_type underflow();
+    /// Underflow for support of input streams.
+    virtual std::streambuf::int_type underflow() noexcept(false);
 
-    /**
-     * Implement overflow for support of output streams.
-     * @param[in]  character  A single byte to be explicitly put.
-     */
+    /// Overflow for support of output streams.
     virtual std::streambuf::int_type overflow(
-        std::streambuf::int_type character);
+        std::streambuf::int_type character) noexcept(false);
 
-    /**
-     * Implement sync for support of output streams.
-     */
-    virtual int sync();
+    //// Sync for support of output streams.
+    virtual int sync() noexcept(false);
 
 private:
+    // These are not thread safe.
+
     // The constructed wide buffer size in number of characters.
     size_t wide_size_;
 

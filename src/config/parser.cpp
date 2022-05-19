@@ -34,9 +34,14 @@ using namespace boost::filesystem;
 using namespace boost::program_options;
 using namespace boost::system;
 
+parser::~parser() noexcept
+{
+}
+
 // The error is obtained from boost, which circumvents our localization.
 // English-only hack to patch missing arg name in boost exception message.
-std::string parser::format_invalid_parameter(const std::string& message)
+std::string parser::format_invalid_parameter(
+    const std::string& message) noexcept
 {
     std::string clean_message(message);
     boost::replace_all(clean_message, "for option is invalid", "is invalid");
@@ -44,7 +49,7 @@ std::string parser::format_invalid_parameter(const std::string& message)
 }
 
 path parser::get_config_option(variables_map& variables,
-    const std::string& name)
+    const std::string& name) noexcept
 {
     // read config from the map so we don't require an early notify
     const auto& config = variables[name];
@@ -56,7 +61,8 @@ path parser::get_config_option(variables_map& variables,
     return config.as<path>();
 }
 
-bool parser::get_option(variables_map& variables, const std::string& name)
+bool parser::get_option(variables_map& variables,
+    const std::string& name) noexcept
 {
     // Read settings from the map so we don't require an early notify call.
     const auto& variable = variables[name];
@@ -69,7 +75,7 @@ bool parser::get_option(variables_map& variables, const std::string& name)
 }
 
 void parser::load_command_variables(variables_map& variables, int argc,
-    const char* argv[])
+    const char* argv[]) noexcept(false)
 {
     const auto options = load_options();
     const auto arguments = load_arguments();
@@ -79,7 +85,7 @@ void parser::load_command_variables(variables_map& variables, int argc,
 }
 
 void parser::load_environment_variables(variables_map& variables,
-    const std::string& prefix)
+    const std::string& prefix) noexcept(false)
 {
     const auto& environment_variables = load_environment();
     const auto environment = parse_environment(environment_variables, prefix);
@@ -87,7 +93,7 @@ void parser::load_environment_variables(variables_map& variables,
 }
 
 bool parser::load_configuration_variables(variables_map& variables,
-    const std::string& option_name)
+    const std::string& option_name) noexcept(false)
 {
     const auto config_settings = load_settings();
     const auto config_path = get_config_option(variables, option_name);

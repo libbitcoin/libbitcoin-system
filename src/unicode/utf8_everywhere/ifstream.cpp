@@ -28,7 +28,7 @@ namespace system {
 // C++17: use std::filesystem.
 // VC++ EXTENSION: "construct with wide-named file".
 ifstream::ifstream(const boost::filesystem::path& path,
-    std::ifstream::openmode mode)
+    std::ifstream::openmode mode) noexcept(false)
   : std::ifstream(to_extended_path(path), mode)
 {
     // This opens the stream, which does not require a file system file or even

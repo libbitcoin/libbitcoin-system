@@ -42,7 +42,7 @@ base58::base58(const base58& other) noexcept
 {
 }
 
-base58::base58(const std::string& base58)
+base58::base58(const std::string& base58) noexcept(false)
 {
     std::stringstream(base58) >> *this;
 }
@@ -52,7 +52,7 @@ base58::operator const data_chunk&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base58& argument)
+std::istream& operator>>(std::istream& input, base58& argument) noexcept(false)
 {
     std::string base58;
     input >> base58;

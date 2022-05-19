@@ -34,7 +34,7 @@ namespace system {
 #ifdef _MSC_VER
 
 // Get Windows input handle.
-static LPVOID get_input_handle()
+static LPVOID get_input_handle() noexcept(false)
 {
     const auto handle = GetStdHandle(STD_INPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
@@ -44,7 +44,7 @@ static LPVOID get_input_handle()
 }
 
 // Hack for faulty std::wcin translation of non-ASCII keyboard input.
-void console_streambuf::initialize(size_t size)
+void console_streambuf::initialize(size_t stream_buffer_size) noexcept(false)
 {
     // Set the console to operate in UTF-8 for this process.
     if (SetConsoleCP(CP_UTF8) == FALSE)
@@ -53,25 +53,25 @@ void console_streambuf::initialize(size_t size)
     DWORD console_mode;
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
     {
-        static console_streambuf buffer(*std::wcin.rdbuf(), size);
+        static console_streambuf buffer(*std::wcin.rdbuf(), stream_buffer_size);
         std::wcin.rdbuf(&buffer);
     }
 }
 
 console_streambuf::console_streambuf(
-    const std::wstreambuf& stream_buffer, size_t size)
+    const std::wstreambuf& stream_buffer, size_t size) noexcept(false)
     : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
     std::wstreambuf(stream_buffer)
 {
 }
 
-console_streambuf::~console_streambuf()
+console_streambuf::~console_streambuf() noexcept
 {
     delete[] buffer_;
 }
 
 std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
-    std::streamsize size)
+    std::streamsize size) noexcept(false)
 {
     DWORD read_bytes;
 
@@ -82,7 +82,7 @@ std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     return static_cast<std::streamsize>(read_bytes);
 }
 
-std::wstreambuf::int_type console_streambuf::underflow()
+std::wstreambuf::int_type console_streambuf::underflow() noexcept(false)
 {
     if (gptr() == nullptr || gptr() >= egptr())
     {
@@ -97,24 +97,26 @@ std::wstreambuf::int_type console_streambuf::underflow()
 
 #else
 
-void console_streambuf::initialize(size_t)
+void console_streambuf::initialize(size_t) noexcept(false)
 {
 }
 
-console_streambuf::console_streambuf(const std::wstreambuf&, size_t)
+console_streambuf::console_streambuf(const std::wstreambuf&,
+    size_t) noexcept(false)
 {
 }
 
-console_streambuf::~console_streambuf()
+console_streambuf::~console_streambuf() noexcept
 {
 }
 
-std::streamsize console_streambuf::xsgetn(wchar_t*, std::streamsize)
+std::streamsize console_streambuf::xsgetn(wchar_t*,
+    std::streamsize) noexcept(false)
 {
     return 0;
 }
 
-std::wstreambuf::int_type console_streambuf::underflow()
+std::wstreambuf::int_type console_streambuf::underflow() noexcept(false)
 {
     return traits_type::to_int_type(*gptr());
 }

@@ -33,12 +33,12 @@ namespace config {
 
 /// Shorthand for property declarations in printer class.
 #define BC_PROPERTY(type, name) \
-    public: virtual const type& name() const { return name##_; } \
+    public: virtual const type& name() const noexcept { return name##_; } \
     private: type name##_
 
 /// Shorthand for reference getter declarations in printer class.
 #define BC_PROPERTY_GET_REF(type, name) \
-    public: virtual type& get_##name() { return name##_; } \
+    public: virtual type& get_##name() noexcept { return name##_; } \
     private: type name##_
 
 /// Class for managing the serialization of command line options and arguments.
@@ -49,15 +49,13 @@ public:
     /// Number of arguments above which the argument is considered unlimited.
     static const int max_arguments;
 
-    /// Destructor.
-    virtual ~printer();
-
     /// Construct an instance of the printer class.
     /// settings     Populated config file settings metadata.
     /// application  This application (e.g. 'bitcoin_server').
     /// description  This application description (e.g. 'Server').
     printer(const boost::program_options::options_description& settings,
-        const std::string& application, const std::string& description="");
+        const std::string& application,
+        const std::string& description="") noexcept;
 
     /// Construct an instance of the printer class.
     /// options      Populated command line options metadata.
@@ -68,7 +66,10 @@ public:
     printer(const boost::program_options::options_description& options,
         const boost::program_options::positional_options_description& arguments,
         const std::string& application, const std::string& description="",
-        const std::string& command="");
+        const std::string& command="") noexcept;
+
+    /// Destructor.
+    virtual ~printer() noexcept;
 
     /// Convert a paragraph of text into a column.
     /// This formats to 80 char width as: [ 23 | ' ' | 55 | '\n' ].
@@ -77,49 +78,50 @@ public:
     /// paragraph  The paragraph to columnize.
     /// return     The column, as a list of fragments.
     virtual std::vector<std::string> columnize(const std::string& paragraph,
-        size_t width);
+        size_t width) noexcept;
 
     /// Format the command description.
-    virtual std::string format_description();
+    virtual std::string format_description() noexcept;
 
     /// Format the parameters table.
     /// positional  True for positional otherwize named.
     /// return      The formatted help arguments table.
-    virtual std::string format_parameters_table(bool positional);
+    virtual std::string format_parameters_table(bool positional) noexcept;
 
     /// Format the settings table.
     /// return  The formatted settings table.
-    virtual std::string format_settings_table();
+    virtual std::string format_settings_table() noexcept;
 
     /// Format a paragraph.
     /// paragraph  The text to format.
     /// return     The formatted paragraph.
-    virtual std::string format_paragraph(const std::string& paragraph);
+    virtual std::string format_paragraph(
+        const std::string& paragraph) noexcept;
 
     /// Format the command line usage.
     /// return  The formatted usage.
-    virtual std::string format_usage();
+    virtual std::string format_usage() noexcept;
 
     /// Format the command line parameters.
     /// return  The formatted command line parameters.
-    virtual std::string format_usage_parameters();
+    virtual std::string format_usage_parameters() noexcept;
 
     /// Build the list of argument name/count tuples.
-    virtual void generate_argument_names();
+    virtual void generate_argument_names() noexcept;
 
     /// Build the list of parameters.
-    virtual void generate_parameters();
+    virtual void generate_parameters() noexcept;
 
     /// Parse the arguments and options into the normalized parameter list.
-    virtual void initialize();
+    virtual void initialize() noexcept;
 
     /// Serialize command line help (full details).
     /// output  Stream that is sink for output.
-    virtual void commandline(std::ostream& output);
+    virtual void commandline(std::ostream& output) noexcept;
 
     /// Serialize as config settings (full details).
     /// output  Stream that is sink for output.
-    virtual void settings(std::ostream& output);
+    virtual void settings(std::ostream& output) noexcept;
 
     /// Virtual property declarations, passed on construct.
     BC_PROPERTY(boost::program_options::options_description, options);

@@ -35,14 +35,14 @@ public:
     transaction() noexcept;
     transaction(const transaction& other) noexcept;
     transaction(const chain::transaction& value) noexcept;
-    transaction(const std::string& hexcode);
+    transaction(const std::string& hexcode) noexcept(false);
 
     chain::transaction& data() noexcept;
 
     operator const chain::transaction&() const noexcept;
 
     friend std::istream& operator>>(std::istream& input,
-        transaction& argument);
+        transaction& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const transaction& argument) noexcept;
 

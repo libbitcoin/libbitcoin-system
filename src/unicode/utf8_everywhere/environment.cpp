@@ -54,13 +54,13 @@ LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
 #ifdef _MSC_VER
 
-static void set_utf8_stdio(FILE* file)
+static void set_utf8_stdio(FILE* file) noexcept(false)
 {
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
         throw runtime_exception("Could not set STDIO to utf8 mode.");
 }
 
-static void set_binary_stdio(FILE* file)
+static void set_binary_stdio(FILE* file) noexcept(false)
 {
     if (_setmode(_fileno(file), _O_BINARY) == -1)
         throw runtime_exception("Could not set STDIO to binary mode.");
@@ -68,18 +68,18 @@ static void set_binary_stdio(FILE* file)
 
 #else // _MSC_VER
 
-static void set_utf8_stdio(FILE*)
+static void set_utf8_stdio(FILE*) noexcept(false)
 {
 }
 
-static void set_binary_stdio(FILE*)
+static void set_binary_stdio(FILE*) noexcept(false)
 {
 }
 
 #endif
 
 // Set stdio to use UTF8 translation on Win32.
-void set_utf8_stdio()
+void set_utf8_stdio() noexcept(false)
 {
     set_utf8_stdin();
     set_utf8_stdout();
@@ -87,31 +87,31 @@ void set_utf8_stdio()
 }
 
 // Set stdio to use UTF8 translation on Win32.
-void set_utf8_stdin()
+void set_utf8_stdin() noexcept(false)
 {
     set_utf8_stdio(stdin);
 }
 
 // Set stdio to use UTF8 translation on Win32.
-void set_utf8_stdout()
+void set_utf8_stdout() noexcept(false)
 {
     set_utf8_stdio(stdout);
 }
 
 // Set stdio to use UTF8 translation on Win32.
-void set_utf8_stderr()
+void set_utf8_stderr() noexcept(false)
 {
     set_utf8_stdio(stderr);
 }
 
 // Set stdio to use UTF8 translation on Win32.
-void set_binary_stdin()
+void set_binary_stdin() noexcept(false)
 {
     set_binary_stdio(stdin);
 }
 
 // Set stdio to use UTF8 translation on Win32.
-void set_binary_stdout()
+void set_binary_stdout() noexcept(false)
 {
     set_binary_stdio(stdout);
 }
@@ -122,14 +122,14 @@ LCOV_EXCL_STOP()
 // ----------------------------------------------------------------------------
 
 // All non-leading bytes of utf8 have the same two bit prefix.
-inline bool is_utf8_trailing_byte(char byte)
+inline bool is_utf8_trailing_byte(char byte) noexcept
 {
     // 10xxxxxx
     return ((0xc0 & byte) == 0x80);
 }
 
 // Determine if the full sequence is a valid utf8 character.
-static bool is_utf8_leading_byte(char byte, size_t size)
+static bool is_utf8_leading_byte(char byte, size_t size) noexcept
 {
     BC_ASSERT(size <= utf8_max_character_size);
 
@@ -156,7 +156,7 @@ static bool is_utf8_leading_byte(char byte, size_t size)
 // TODO: walk backwards to the first leading byte (performance).
 // The number of bytes of a partial utf8 character at the end of text.
 // This assumes that the text is well formed utf8 but truncated at any point.
-size_t utf8_remainder_size(const char text[], size_t size)
+size_t utf8_remainder_size(const char text[], size_t size) noexcept
 {
     if (size == 0u)
         return 0;
@@ -181,7 +181,7 @@ size_t utf8_remainder_size(const char text[], size_t size)
 // Convert utf16 wchar_t buffer to utf8 char buffer.
 // This is used in wmain for conversion of wide args and environ on Win32.
 size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
-    size_t from_chars)
+    size_t from_chars) noexcept
 {
     if (from == nullptr || out_to == nullptr || is_zero(from_chars) ||
         to_bytes < (from_chars * utf8_max_character_size))
@@ -200,7 +200,7 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
 // Convert utf8 char buffer to utf16 wchar_t buffer, with truncation handling.
 // Truncation results from having split the input buffer arbitrarily (stream).
 size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
-    const char from[], size_t from_bytes)
+    const char from[], size_t from_bytes) noexcept
 {
     remainder = 0;
     if (from == nullptr || out_to == nullptr || is_zero(from_bytes) ||
@@ -232,7 +232,7 @@ constexpr size_t utf16_buffer_size = 256;
 static std::once_flag io_mutex;
 
 // Static initializer for bc::system::cin.
-std::istream& cin_stream()
+std::istream& cin_stream() noexcept(false)
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
@@ -240,7 +240,7 @@ std::istream& cin_stream()
 }
 
 // Static initializer for bc::system::cout.
-std::ostream& cout_stream()
+std::ostream& cout_stream() noexcept(false)
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
@@ -248,7 +248,7 @@ std::ostream& cout_stream()
 }
 
 // Static initializer for bc::system::cerr.
-std::ostream& cerr_stream()
+std::ostream& cerr_stream() noexcept(false)
 {
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
@@ -258,7 +258,7 @@ std::ostream& cerr_stream()
 // BC_USE_LIBBITCOIN_MAIN
 // ----------------------------------------------------------------------------
 
-void free_environment(char* environment[])
+void free_environment(char* environment[]) noexcept
 {
     if (environment != nullptr)
     {
@@ -271,7 +271,7 @@ void free_environment(char* environment[])
 
 // Convert UTF16/wchar_t argument buffer to utf8/char argument buffer.
 // Caller (or compiler, in case of environment replacement) must free.
-char** allocate_environment(int argc, wchar_t* argv[])
+char** allocate_environment(int argc, wchar_t* argv[]) noexcept
 {
     // Allocate argument pointer array.
     const auto size = add1(static_cast<size_t>(argc));
@@ -312,12 +312,12 @@ char** allocate_environment(int argc, wchar_t* argv[])
     }
 
     // Table terminator.
-    arguments[argc] = '\0';
+    arguments[argc] = 0;
     return arguments;
 }
 
 // Convert UTF16/wchar_t environment buffer to utf8/char environment buffer.
-char** allocate_environment(wchar_t* environment[])
+char** allocate_environment(wchar_t* environment[]) noexcept
 {
     int count;
     for (count = 0; environment[count] != nullptr; count++);
@@ -325,7 +325,7 @@ char** allocate_environment(wchar_t* environment[])
 }
 
 int call_utf8_main(int argc, wchar_t* argv[],
-    int(*main)(int argc, char* argv[]))
+    int(*main)(int argc, char* argv[])) noexcept
 {
     // C++17: use std::filesystem.
     // When working with boost and utf8 narrow characters on Win32 the thread
@@ -364,7 +364,8 @@ int call_utf8_main(int argc, wchar_t* argv[],
 
 // C++17: use std::filesystem.
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
-std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
+std::wstring to_fully_qualified_path(
+    const boost::filesystem::path& path) noexcept
 {
     const auto replace_all = [](std::string text, char from, char to) noexcept
     {
@@ -412,7 +413,7 @@ std::wstring to_fully_qualified_path(const boost::filesystem::path& path)
 // Otherwise use in any Win32 (W) APIs with _MSC_VER defined, such as we do in 
 // interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
 // calls CreateFileA. The length extension prefix requires Win32 (W) APIs.
-std::wstring to_extended_path(const boost::filesystem::path& path)
+std::wstring to_extended_path(const boost::filesystem::path& path) noexcept
 {
     // The length extension prefix works only with a fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
@@ -421,7 +422,7 @@ std::wstring to_extended_path(const boost::filesystem::path& path)
     return (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full;
 }
 #else
-std::string to_extended_path(const boost::filesystem::path& path)
+std::string to_extended_path(const boost::filesystem::path& path) noexcept
 {
     return path.string();
 }

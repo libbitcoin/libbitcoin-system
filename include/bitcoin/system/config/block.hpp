@@ -35,7 +35,7 @@ public:
     block() noexcept;
     block(const block& other) noexcept;
     block(const chain::block& value) noexcept;
-    block(const std::string& hexcode);
+    block(const std::string& hexcode) noexcept(false);
 
     block& operator=(const block& other) noexcept;
     block& operator=(chain::block&& other) noexcept;
@@ -45,7 +45,8 @@ public:
 
     std::string to_string() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, block& argument);
+    friend std::istream& operator>>(std::istream& input,
+        block& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const block& argument) noexcept;
 

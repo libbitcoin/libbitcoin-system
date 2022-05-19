@@ -43,7 +43,7 @@ base85::base85(const base85& other) noexcept
 {
 }
 
-base85::base85(const std::string& base85)
+base85::base85(const std::string& base85) noexcept(false)
 {
     std::stringstream(base85) >> *this;
 }
@@ -65,7 +65,7 @@ std::string base85::to_string() const
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, base85& argument)
+std::istream& operator>>(std::istream& input, base85& argument) noexcept(false)
 {
     std::string base85;
     input >> base85;

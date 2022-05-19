@@ -35,11 +35,12 @@ public:
     header() noexcept;
     header(const header& other) noexcept;
     header(const chain::header& value) noexcept;
-    header(const std::string& hexcode);
+    header(const std::string& hexcode) noexcept(false);
 
     operator const chain::header&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, header& argument);
+    friend std::istream& operator>>(std::istream& input,
+        header& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const header& argument) noexcept;
 

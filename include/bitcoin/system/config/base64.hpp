@@ -35,11 +35,12 @@ public:
     base64() noexcept;
     base64(const base64& other) noexcept;
     base64(const data_chunk& value) noexcept;
-    base64(const std::string& base64);
+    base64(const std::string& base64) noexcept(false);
 
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, base64& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base64& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base64& argument) noexcept;
 

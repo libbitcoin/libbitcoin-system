@@ -36,7 +36,7 @@ class BC_API output
 {
 public:
     output() noexcept;
-    output(const std::string& tuple);
+    output(const std::string& tuple) noexcept(false);
 
     /// Parsed properties
     bool is_stealth() const noexcept;
@@ -45,7 +45,8 @@ public:
     const chain::script& script() const noexcept;
     const short_hash& pay_to_hash() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, output& argument);
+    friend std::istream& operator>>(std::istream& input,
+        output& argument) noexcept(false);
 
 private:
     bool is_stealth_;

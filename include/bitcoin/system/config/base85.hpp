@@ -37,7 +37,7 @@ public:
     base85() noexcept;
     base85(const base85& other) noexcept;
     base85(const data_chunk& value) noexcept;
-    base85(const std::string& base85);
+    base85(const std::string& base85) noexcept(false);
 
     /// True if the data size is evenly divisible by 4.
     operator bool() const noexcept;
@@ -47,7 +47,8 @@ public:
     /// the key as a base85 encoded (z85) string.
     std::string to_string() const;
 
-    friend std::istream& operator>>(std::istream& input, base85& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base85& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base85& argument);
 

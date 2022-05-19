@@ -34,7 +34,7 @@ class BC_API ofstream
 public:
     /// This also opens the file.
     ofstream(const boost::filesystem::path& path,
-        std::ofstream::openmode mode=std::ofstream::out);
+        std::ofstream::openmode mode=std::ofstream::out) noexcept(false);
 };
 
 } // namespace system

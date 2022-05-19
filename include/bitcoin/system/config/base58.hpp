@@ -35,11 +35,12 @@ public:
     base58() noexcept;
     base58(const base58& other) noexcept;
     base58(const data_chunk& value) noexcept;
-    base58(const std::string& base58);
+    base58(const std::string& base58) noexcept(false);
 
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, base58& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base58& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base58& argument) noexcept;
 

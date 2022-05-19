@@ -48,7 +48,7 @@ output::output() noexcept
 {
 }
 
-output::output(const std::string& tuple)
+output::output(const std::string& tuple) noexcept(false)
   : output()
 {
     std::stringstream(tuple) >> *this;
@@ -79,7 +79,7 @@ const short_hash& output::pay_to_hash() const noexcept
     return pay_to_hash_;
 }
 
-std::istream& operator>>(std::istream& input, output& argument)
+std::istream& operator>>(std::istream& input, output& argument) noexcept(false)
 {
     std::string tuple;
     input >> tuple;

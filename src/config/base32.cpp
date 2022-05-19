@@ -42,7 +42,7 @@ base32::base32(const base32& other) noexcept
 {
 }
 
-base32::base32(const std::string& base32)
+base32::base32(const std::string& base32) noexcept(false)
 {
     std::stringstream(base32) >> *this;
 }
@@ -52,7 +52,7 @@ base32::operator const data_chunk&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base32& argument)
+std::istream& operator>>(std::istream& input, base32& argument) noexcept(false)
 {
     std::string base32;
     input >> base32;

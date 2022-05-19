@@ -26,48 +26,36 @@
 namespace libbitcoin {
 namespace system {
 
-/**
- * Class to patch Windows stdin keyboard input, file input is not a problem.
- * This class and members are no-ops when called in non-MSVC++ builds.
- * When working in Windows console set font to "Lucida Console".
- */
+/// Not thread safe, virtual.
+/// Class to patch Windows stdin keyboard input, file input is not a problem.
+/// This class and members are no-ops when called in non-MSVC++ builds.
+/// When working in Windows console set font to "Lucida Console".
 class BC_API console_streambuf
   : public std::wstreambuf
 {
 public:
-    /**
-     * Initialize stdio to use utf8 translation on Windows.
-     * @param[in]  size  The stream buffer size.
-     */
-    static void initialize(size_t size);
+    /// Initialize stdio to use utf8 translation on Windows.
+    static void initialize(size_t stream_buffer_size) noexcept(false);
 
 protected:
-    /**
-     * Protected construction, use static initialize method.
-     * @param[in]  stream_buffer  The stream buffer to patch.
-     * @param[in]  size           The stream buffer size.
-     */
-    console_streambuf(const std::wstreambuf& stream_buffer, size_t size);
+    /// Protected construction, use static initialize method.
+    console_streambuf(const std::wstreambuf& stream_buffer,
+        size_t stream_buffer_size) noexcept(false);
 
-    /**
-     * Delete stream buffer.
-     */
-    virtual ~console_streambuf();
+    /// Delete stream buffer.
+    virtual ~console_streambuf() noexcept;
 
-    /**
-     * Implement alternate console read.
-     * @param[in]  buffer  Pointer to the buffer to fill with console reads.
-     * @param[in]  size    The size of the buffer that may be populated.
-     */
-    virtual std::streamsize xsgetn(wchar_t* buffer, std::streamsize size);
+    /// Alternate console read.
+    virtual std::streamsize xsgetn(wchar_t* buffer,
+        std::streamsize size) noexcept(false);
 
-    /**
-     * Implement alternate console read.
-     */
-    virtual std::wstreambuf::int_type underflow();
+    /// Alternate console read.
+    virtual std::wstreambuf::int_type underflow() noexcept(false);
 
 #ifdef _MSC_VER
 private:
+    // These are not thread safe.
+
     // The constructed buffer size.
     size_t buffer_size_;
 

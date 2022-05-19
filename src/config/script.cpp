@@ -49,7 +49,7 @@ script::script(const data_chunk& value) noexcept
     value_ = chain::script(value, false);
 }
 
-script::script(const std::vector<std::string>& tokens)
+script::script(const std::vector<std::string>& tokens) noexcept(false)
   : script(join(tokens))
 {
 }
@@ -74,7 +74,7 @@ script::operator const chain::script&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, script& argument)
+std::istream& operator>>(std::istream& input, script& argument) noexcept(false)
 {
     std::istreambuf_iterator<char> end;
     std::string mnemonic(std::istreambuf_iterator<char>(input), end);

@@ -30,9 +30,12 @@
 namespace libbitcoin {
 namespace system {
 
-unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
-  : wide_size_(size), narrow_size_(wide_size_ * utf8_max_character_size),
-    narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
+unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
+    size_t size) noexcept(false)
+  : wide_size_(size),
+    narrow_size_(wide_size_ * utf8_max_character_size),
+    narrow_(new char[narrow_size_]),
+    wide_(new wchar_t[narrow_size_]),
     wide_buffer_(wide_buffer)
 {
     if (is_zero(wide_size_) || wide_buffer == nullptr ||
@@ -46,7 +49,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     setp(narrow_, &narrow_[sub1(narrow_size_)]);
 }
 
-unicode_streambuf::~unicode_streambuf()
+unicode_streambuf::~unicode_streambuf() noexcept
 {
     sync();
     delete[] wide_;
@@ -57,7 +60,7 @@ unicode_streambuf::~unicode_streambuf()
 // This invokes wide_buffer_.xsgetn() which requires a patch for
 // console (keyboard) input on Windows, so ensure this class is
 // initialized with a patched std::wcin when std::wcin is used.
-std::streambuf::int_type unicode_streambuf::underflow()
+std::streambuf::int_type unicode_streambuf::underflow() noexcept(false)
 {
     // streamsize is signed.
     const auto size = static_cast<std::streamsize>(wide_size_);
@@ -91,7 +94,7 @@ std::streambuf::int_type unicode_streambuf::underflow()
 // assumes the stream will treat each byte of a multibyte narrow
 // chracter as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
-    std::streambuf::int_type character)
+    std::streambuf::int_type character) noexcept(false)
 {
     // Add a single explicitly read byte to the buffer.
     // The narrow buffer is underexposed by 1 byte to accomodate this.
@@ -151,7 +154,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
 }
 
 // Flush our output sequence.
-int unicode_streambuf::sync()
+int unicode_streambuf::sync() noexcept(false)
 {
     const int success = zero;
     const int failure = negative_one;

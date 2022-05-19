@@ -68,38 +68,36 @@ using boost::format;
 
 const int printer::max_arguments = 256;
 
-printer::~printer()
-{
-}
-
 printer::printer(const po::options_description& options,
     const po::positional_options_description& arguments,
     const std::string& application, const std::string& description,
-    const std::string& command)
+    const std::string& command) noexcept
   : options_(options), arguments_(arguments), application_(application),
     description_(description), command_(command)
 {
 }
 
 printer::printer(const po::options_description& settings,
-    const std::string& application, const std::string& description)
+    const std::string& application, const std::string& description) noexcept
   : options_(settings), application_(application), description_(description)
+{
+}
+
+printer::~printer() noexcept
 {
 }
 
 /* Formatters */
 
-// 100% component tested.
 static void enqueue_fragment(std::string& fragment,
-    std::vector<std::string>& column)
+    std::vector<std::string>& column) noexcept
 {
     if (!fragment.empty())
         column.push_back(fragment);
 }
 
-// 100% component tested.
 std::vector<std::string> printer::columnize(const std::string& paragraph,
-    size_t width)
+    size_t width) noexcept
 {
     const auto words = split(paragraph, ascii_space, false);
 
@@ -122,8 +120,7 @@ std::vector<std::string> printer::columnize(const std::string& paragraph,
     return column;
 }
 
-// 100% component tested.
-static std::string format_row_name(const parameter& value)
+static std::string format_row_name(const parameter& value) noexcept
 {
     // We hack in upper case for all positional args because of a bug in
     // boost that requires environment variable options to be lower case
@@ -145,17 +142,15 @@ static std::string format_row_name(const parameter& value)
             value.short_name() % value.long_name()).str();
 }
 
-// 100% component tested.
 static bool match_positional(bool positional, const parameter& value)
 {
     auto positioned = value.position() != parameter::not_positional;
     return positioned == positional;
 }
 
-// 100% component tested.
 // This formats to 73 char width as: [ 20 | ' ' | 52 | '\n' ]
 // GitHub code examples start horizontal scroll after 73 characters.
-std::string printer::format_parameters_table(bool positional)
+std::string printer::format_parameters_table(bool positional) noexcept
 {
     std::stringstream output;
     const auto& parameters = get_parameters();
@@ -188,7 +183,7 @@ std::string printer::format_parameters_table(bool positional)
 
 // This formats to 73 char width: [ 73 | '\n' ]
 // GitHub code examples start horizontal scroll after 73 characters.
-std::string printer::format_paragraph(const std::string& paragraph)
+std::string printer::format_paragraph(const std::string& paragraph) noexcept
 {
     std::stringstream output;
     format paragraph_format("%-73s\n");
@@ -202,7 +197,7 @@ std::string printer::format_paragraph(const std::string& paragraph)
 }
 
 static std::string format_setting(const parameter& value,
-    const std::string& name)
+    const std::string& name) noexcept
 {
     // A required argument may only be preceded by required arguments.
     // Requiredness may be in error if the metadata is inconsistent.
@@ -224,7 +219,7 @@ static std::string format_setting(const parameter& value,
 
 // Requires a single period in each setting (i.e. no unnamed sections).
 static void split_setting_name(const parameter& value, std::string& name,
-    std::string& section)
+    std::string& section) noexcept
 {
     const auto tokens = split(value.long_name(), ".");
     if (tokens.size() != 2)
@@ -238,7 +233,7 @@ static void split_setting_name(const parameter& value, std::string& name,
     name = tokens[1];
 }
 
-std::string printer::format_settings_table()
+std::string printer::format_settings_table() noexcept
 {
     std::string name;
     std::string section;
@@ -274,7 +269,7 @@ std::string printer::format_settings_table()
     return output.str();
 }
 
-std::string printer::format_usage()
+std::string printer::format_usage() noexcept
 {
     // USAGE: bx COMMAND [-hvt] -n VALUE [-m VALUE] [-w VALUE]... REQUIRED
     // [OPTIONAL] [MULTIPLE]...
@@ -284,7 +279,7 @@ std::string printer::format_usage()
     return format_paragraph(usage.str());
 }
 
-std::string printer::format_description()
+std::string printer::format_description() noexcept
 {
     // Info: %1%
     const auto described = format(BC_PRINTER_DESCRIPTION_FORMAT) %
@@ -293,8 +288,7 @@ std::string printer::format_description()
     return format_paragraph(described.str());
 }
 
-// 100% component tested.
-std::string printer::format_usage_parameters()
+std::string printer::format_usage_parameters() noexcept
 {
     std::string toggle_short_options;
     std::vector<std::string> toggle_long_options;
@@ -394,8 +388,8 @@ std::string printer::format_usage_parameters()
 
 /* Initialization */
 
-// 100% component tested.
-static void enqueue_name(int count, std::string& name, argument_list& names)
+static void enqueue_name(int count, std::string& name,
+    argument_list& names) noexcept
 {
     if (count <= 0)
         return;
@@ -406,10 +400,9 @@ static void enqueue_name(int count, std::string& name, argument_list& names)
     names.push_back(argument_pair(name, count));
 }
 
-// 100% component tested.
 // This method just gives us a copy of arguments_metadata private state.
 // It would be nice if instead that state was public.
-void printer::generate_argument_names()
+void printer::generate_argument_names() noexcept
 {
     // Member values
     const auto& args = arguments();
@@ -451,14 +444,13 @@ void printer::generate_argument_names()
         argument_names);
 }
 
-// 100% component tested.
-static bool compare_parameters(const parameter left, const parameter right)
+static bool compare_parameters(const parameter left,
+    const parameter right) noexcept
 {
     return left.format_name() < right.format_name();
 }
 
-// 100% component tested.
-void printer::generate_parameters()
+void printer::generate_parameters() noexcept
 {
     const auto& argument_names = get_argument_names();
     const auto& opts = options();
@@ -479,8 +471,7 @@ void printer::generate_parameters()
     }
 }
 
-// 100% component tested.
-void printer::initialize()
+void printer::initialize() noexcept
 {
     generate_argument_names();
     generate_parameters();
@@ -488,7 +479,7 @@ void printer::initialize()
 
 /* Printers */
 
-void printer::commandline(std::ostream& output)
+void printer::commandline(std::ostream& output) noexcept
 {
     const auto& option_table = format_parameters_table(false);
     const auto& argument_table = format_parameters_table(true);
@@ -508,7 +499,7 @@ void printer::commandline(std::ostream& output)
         << std::endl << argument_table;
 }
 
-void printer::settings(std::ostream& output)
+void printer::settings(std::ostream& output) noexcept
 {
     const auto& setting_table = format_settings_table();
 

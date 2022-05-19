@@ -43,7 +43,7 @@ hash256::hash256(const hash256& other) noexcept
 {
 }
 
-hash256::hash256(const std::string& hexcode)
+hash256::hash256(const std::string& hexcode) noexcept(false)
 {
     std::stringstream(hexcode) >> *this;
 }
@@ -60,7 +60,7 @@ hash256::operator const hash_digest&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, hash256& argument)
+std::istream& operator>>(std::istream& input, hash256& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

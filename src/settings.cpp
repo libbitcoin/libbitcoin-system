@@ -247,30 +247,38 @@ settings::settings(chain::selection context) noexcept
 // Computed properties.
 // TODO: optimize to prevent recomputation.
 
-// The true maximum amount of money as of bip42.
+// The exact maximum amount of money (as of bip42).
+//*****************************************************************************
+// CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
+//*****************************************************************************
+//*****************************************************************************
+// CONSENSUS: The satoshi client uses a "sanity check" value that is
+// effectively based on a round but incorrect value of recursive_money,
+// which is higher than this true value. Despite comments to the contrary
+// in the satoshi code, no value could be consensus critical unless it was
+// *less* than the true value. This is non a consensus-critical method, as the
+// consensus limit on money is stricly a function of subsidy recursion and
+// overspend constraints.
+//*****************************************************************************
 uint64_t settings::max_money() const noexcept
 {
-    //*************************************************************************
-    // CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
-    //*************************************************************************
     std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) noexcept
     {
+        // DEPRECATED: safe_add.
+        // Guarded by parameterization (config).
         return is_zero(subsidy) ? 0 : safe_add(subsidy, total(subsidy >> 1));
     };
 
-    //*************************************************************************
-    // CONSENSUS: The satoshi client uses a "sanity check" value that is
-    // effectively based on a round but incorrect value of recursive_money,
-    // which is higher than this true value. Despite comments to the contrary
-    // in the satoshi code, no value could be consensus critical unless it was
-    // *less* than the true value.
-    //*************************************************************************
+    // DEPRECATED: safe_multiply.
+    // Guarded by parameterization (config).
     return safe_multiply(total(initial_subsidy()), subsidy_interval_blocks);
 }
 
-// Utility.
+// Used to initialize initial subsidy setting.
 uint64_t settings::bitcoin_to_satoshi(uint64_t value) const noexcept
 {
+    // DEPRECATED: safe_multiply.
+    // Guarded by parameterization (config).
     return safe_multiply(value, chain::satoshi_per_bitcoin);
 }
 
@@ -303,7 +311,8 @@ size_t settings::retargeting_interval() const noexcept
 
 uint256_t settings::work_limit() const noexcept
 {
-    return { chain::compact(proof_of_work_limit) };
+    // Warns on multiple implicit conversions without explicit construct.
+    return uint256_t{ chain::compact(proof_of_work_limit) };
 }
 
 } // namespace system

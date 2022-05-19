@@ -43,7 +43,7 @@ block::block(const block& other) noexcept
 {
 }
 
-block::block(const std::string& hexcode)
+block::block(const std::string& hexcode) noexcept(false)
   : value_()
 {
     std::stringstream(hexcode) >> *this;
@@ -78,7 +78,7 @@ std::string block::to_string() const noexcept
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, block& argument)
+std::istream& operator>>(std::istream& input, block& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

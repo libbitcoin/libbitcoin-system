@@ -45,7 +45,7 @@ header::header(const header& other) noexcept
 {
 }
 
-header::header(const std::string& hexcode)
+header::header(const std::string& hexcode) noexcept(false)
   : value_()
 {
     std::stringstream(hexcode) >> *this;
@@ -56,7 +56,7 @@ header::operator const chain::header&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, header& argument)
+std::istream& operator>>(std::istream& input, header& argument) noexcept(false)
 {
     std::string hexcode;
     input >> hexcode;

@@ -27,19 +27,20 @@ namespace system {
 
 unicode_ostream::unicode_ostream(
 #ifdef _MSC_VER
-    std::ostream&, std::wostream& wide_stream, size_t size)
+    std::ostream&, std::wostream& wide_stream,
+    size_t wide_buffer_size) noexcept(false)
 #else
     std::ostream& narrow_stream, std::wostream&, size_t)
 #endif
 #ifdef _MSC_VER
-  : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), size))
+  : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), wide_buffer_size))
 #else
   : std::ostream(narrow_stream.rdbuf())
 #endif
 {
 }
 
-unicode_ostream::~unicode_ostream()
+unicode_ostream::~unicode_ostream() noexcept
 {
 #ifdef _MSC_VER
     delete rdbuf();

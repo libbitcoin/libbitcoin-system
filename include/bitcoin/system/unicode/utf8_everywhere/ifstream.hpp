@@ -34,7 +34,7 @@ class BC_API ifstream
 public:
     /// This also opens the file.
     ifstream(const boost::filesystem::path& path,
-        std::ifstream::openmode mode=std::ifstream::in);
+        std::ifstream::openmode mode=std::ifstream::in) noexcept(false);
 };
 
 } // namespace system

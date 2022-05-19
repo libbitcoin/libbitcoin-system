@@ -37,7 +37,7 @@ public:
     base16() noexcept;
     base16(const base16& other) noexcept;
     base16(const data_chunk& value) noexcept;
-    base16(const std::string& hexcode);
+    base16(const std::string& hexcode) noexcept(false);
 
     template<size_t Size>
     base16(const data_array<Size>& value) noexcept
@@ -48,7 +48,8 @@ public:
     operator const data_chunk&() const noexcept;
     operator data_slice() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, base16& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base16& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base16& argument) noexcept;
 

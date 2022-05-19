@@ -35,11 +35,12 @@ public:
     base32() noexcept;
     base32(const base32& other) noexcept;
     base32(const data_chunk& value) noexcept;
-    base32(const std::string& base32);
+    base32(const std::string& base32) noexcept(false);
 
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input, base32& argument);
+    friend std::istream& operator>>(std::istream& input,
+        base32& argument) noexcept(false);
     friend std::ostream& operator<<(std::ostream& output,
         const base32& argument) noexcept;
 
