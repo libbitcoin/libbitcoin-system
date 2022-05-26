@@ -31,18 +31,18 @@ namespace config {
 
 // Declare config_default_path() via BC_DECLARE_CONFIG_DEFAULT_PATH(relative).
 #define CONFIG_DEFAULT_PATH(directory, subdirectory) \
-    static boost::filesystem::path config_default_path() noexcept \
-    { \
-        const boost::filesystem::path folder(directory); \
-        return folder / subdirectory; \
-    }
+static boost::filesystem::path config_default_path() noexcept \
+{ \
+    const boost::filesystem::path folder(directory); \
+    return folder / subdirectory; \
+}
 
 // The SYSCONFDIR symbol must be defined at compile for the project.
 // Therefore this must be compiled directly into the relevant project(s).
 #ifdef _MSC_VER
     #define BC_DECLARE_CONFIG_DEFAULT_PATH(relative) \
         CONFIG_DEFAULT_PATH(bc::system::config::windows_config_directory(),\
-        relative)
+            relative)
 #else
     #define BC_DECLARE_CONFIG_DEFAULT_PATH(relative) \
         CONFIG_DEFAULT_PATH(SYSCONFDIR, relative)

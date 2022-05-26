@@ -63,6 +63,7 @@ std::mt19937& pseudo_random::get_twister() noexcept
     };
 
     // Maintain thread static state space.
+    // This throws given insufficient resources.
     static boost::thread_specific_ptr<std::mt19937> twister(deleter);
 
     // Use the clock for seeding.

@@ -30,21 +30,17 @@ constexpr uint8_t btc_decimal_places = 8;
 constexpr uint8_t mbtc_decimal_places = 5;
 constexpr uint8_t ubtc_decimal_places = 2;
 
-/**
- * Validates and parses an amount string according to the BIP21 grammar.
- * @param decimal_places the location of the decimal point.
- * @param strict true disallows fractional results, false rounds up.
- * @return false for failure.
- */
+/// Validates and parses an amount string according to the BIP21 grammar.
+/// @param decimal_places the location of the decimal point.
+/// @param strict true disallows fractional results, false rounds up.
+/// @return false for failure.
 BC_API bool decode_base10(uint64_t& out, const std::string& amount,
     uint8_t decimal_places=0, bool strict=true) noexcept;
 
-/**
- * Writes a Bitcoin amount to a string, following the BIP21 grammar.
- * Avoids the rounding issues often seen with floating-point methods.
- * @param decmial_places the location of the decimal point.
- * The default is 0, which treats the input as a normal integer.
- */
+/// Writes a Bitcoin amount to a string, following the BIP21 grammar.
+/// Avoids the rounding issues often seen with floating-point methods.
+/// @param decmial_places the location of the decimal point.
+/// The default is 0, which treats the input as a normal integer.
 BC_API std::string encode_base10(uint64_t amount,
     uint8_t decimal_places=0) noexcept;
 

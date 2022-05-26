@@ -27,50 +27,36 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * A parsed URI according to RFC 3986.
- */
+/// A parsed URI according to RFC 3986.
 class BC_API uri
 {
 public:
-    /**
-     * Decodes a URI from a string.
-     * @param strict Set to false to tolerate unescaped special characters.
-     */
+    /// Decodes a URI from a string.
+    /// @param strict Set to false to tolerate unescaped special characters.
     bool decode(const std::string& encoded, bool strict=true) noexcept;
     std::string encoded() const noexcept;
 
-    /**
-     * Returns the lowercased URI scheme.
-     */
+    /// Returns the lowercased URI scheme.
     std::string scheme() const noexcept;
     void set_scheme(const std::string& scheme) noexcept;
 
-    /**
-     * Obtains the unescaped authority part, if any (user@server:port).
-     */
+    /// Obtains the unescaped authority part, if any (user@server:port).
     std::string authority() const noexcept;
     bool has_authority() const noexcept;
     void set_authority(const std::string& authority) noexcept;
     void remove_authority() noexcept;
 
-    /**
-     * Obtains the unescaped path part.
-     */
+    /// Obtains the unescaped path part.
     std::string path() const noexcept;
     void set_path(const std::string& path) noexcept;
 
-    /**
-     * Returns the unescaped query string, if any.
-     */
+    /// Returns the unescaped query string, if any.
     std::string query() const noexcept;
     bool has_query() const noexcept;
     void set_query(const std::string& query) noexcept;
     void remove_query() noexcept;
 
-    /**
-     * Returns the unescaped fragment string, if any.
-     */
+    /// Returns the unescaped fragment string, if any.
     std::string fragment() const noexcept;
     bool has_fragment() const noexcept;
     void set_fragment(const std::string& fragment) noexcept;
@@ -78,17 +64,15 @@ public:
 
     typedef std::map<std::string, std::string> query_map;
 
-    /**
-     * Interprets the query string as a sequence of key-value pairs.
-     * All query strings are valid, so this function cannot fail.
-     * The results are unescaped. Both keys and values can be zero-length,
-     * and if the same key is appears multiple times, the final one wins.
-     */
+    /// Interprets the query string as a sequence of key-value pairs.
+    /// All query strings are valid, so this function cannot fail.
+    /// The results are unescaped. Both keys and values can be zero-length,
+    /// and if the same key is appears multiple times, the final one wins.
     query_map decode_query() const noexcept;
     void encode_query(const query_map& map) noexcept;
 
 private:
-    // All parts are stored with their original escaping:
+    // All parts are stored with their original escaping.
     std::string scheme_;
     std::string authority_;
     std::string path_;

@@ -27,22 +27,18 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * Interface for URI deserialization.
- * The URI parser calls these methods as it extracts each URI component.
- * A false return from any setter is expected to terminate the parser.
- */
+/// Interface for URI deserialization.
+/// The URI parser calls these methods as it extracts each URI component.
+/// A false return from any setter is expected to terminate the parser.
 class BC_API uri_reader
 {
 public:
 
-    /**
-     * Parses any URI string into its individual components.
-     * @param[in]  uri     The URI to parse.
-     * @param[in]  strict  Only accept properly-escaped parameters.
-     * @return The parsed URI or a default instance if the `uri` is malformed
-     * according to the  `UriReader`.
-     */
+    /// Parses any URI string into its individual components.
+    /// @param[in]  uri     The URI to parse.
+    /// @param[in]  strict  Only accept properly-escaped parameters.
+    /// @return The parsed URI or a default instance if the `uri` is malformed
+    /// according to the  `UriReader`.
     template <class UriReader>
     static UriReader parse(const std::string& uri, bool strict=true) noexcept
     {
