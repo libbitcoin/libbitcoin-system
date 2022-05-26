@@ -36,13 +36,11 @@ namespace bc = libbitcoin;
     #define BC_ASSERT(expression)
     #define BC_ASSERT_MSG(expression, text)
     #define BC_DEBUG_ONLY(expression)
-    #define BC_EXCEPT noexcept
 #else
     #include <cassert>
     #define BC_ASSERT(expression) assert(expression)
     #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define BC_DEBUG_ONLY(expression) expression
-    #define BC_EXCEPT
 #endif
 
 // See http://gcc.gnu.org/wiki/Visibility
@@ -121,9 +119,9 @@ namespace bc = libbitcoin;
 
 // These are ADL free functions for use with boost-json.
 #define DECLARE_JSON_VALUE_CONVERTORS(name) \
-name tag_invoke(boost::json::value_to_tag<name>, \
+BC_API name tag_invoke(boost::json::value_to_tag<name>, \
     const boost::json::value& value) noexcept; \
-void tag_invoke(boost::json::value_from_tag, \
+BC_API void tag_invoke(boost::json::value_from_tag, \
     boost::json::value& value, const name& instance) noexcept
 
 // Define so we can have better visibility of lcov exclusion ranges.
