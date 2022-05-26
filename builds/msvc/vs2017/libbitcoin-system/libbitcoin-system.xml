@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
   <Rule Name="libbitcoin-system-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="avx2" DisplayName="avx2" />
+      <Category Name="sse41" DisplayName="sse41" />
+      <Category Name="shani" DisplayName="shani" />
+      <Category Name="sse4" DisplayName="sse4" />
+      <Category Name="neon" DisplayName="neon" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Option-avx2" DisplayName="Enable AVX2 Intrinsics" Description="Use AVX2 intrinsics." Category="avx2">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-sse41" DisplayName="Enable SSE4.1 Intrinsics" Description="Use SSE4.1 intrinsics." Category="sse41">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-shani" DisplayName="Enable SHA Native Intrinsics" Description="Use SHA native intrinsics." Category="shani">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-neon" DisplayName="Enable ARM Neon Intrinsics" Description="Use ARM Neon intrinsics." Category="neon">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-sse4" DisplayName="Enable SSE4" Description="Use SSE4 intrinsics." Category="sse4">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
   </Rule>
 </ProjectSchemaDefinitions>
