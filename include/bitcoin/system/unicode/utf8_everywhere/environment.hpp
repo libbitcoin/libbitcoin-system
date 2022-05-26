@@ -83,9 +83,11 @@ BC_API int call_utf8_main(int argc, wchar_t* argv[],
 
 #ifdef _MSC_VER
 // Not thread safe.
-std::wstring to_extended_path(const boost::filesystem::path& path) noexcept;
+BC_API std::wstring to_extended_path(
+    const boost::filesystem::path& path) noexcept;
 #else
-std::string to_extended_path(const boost::filesystem::path& path) noexcept;
+BC_API std::string to_extended_path(
+    const boost::filesystem::path& path) noexcept;
 
 #endif
 

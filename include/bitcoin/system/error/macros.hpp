@@ -53,7 +53,7 @@ template<> struct hash<cat##_t> \
 // For use of codes without conditions.
 #define DECLARE_ERROR_T_CODE_CATEGORY(cat) \
 enum cat##_condition_t {};\
-class cat##_category \
+class BC_API cat##_category \
   : public std::error_category \
 { \
     static const message_map<cat##_t> messages; \
@@ -70,7 +70,7 @@ std::error_condition make_error_condition(cat##_t value) noexcept
 // corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
 #define DECLARE_ERROR_T_CONDITION_CATEGORY(cat) \
 enum cat##_condition_t {};\
-class cat##_category \
+class BC_API cat##_category \
   : public std::error_category \
 { \
     static const message_map<cat##_t> messages; \

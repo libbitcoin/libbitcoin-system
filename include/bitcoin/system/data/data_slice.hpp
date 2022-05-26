@@ -164,8 +164,8 @@ private:
 };
 
 /// Binary operators.
-bool operator==(const data_slice& left, const data_slice& right) noexcept;
-bool operator!=(const data_slice& left, const data_slice& right) noexcept;
+BC_API bool operator==(const data_slice& left, const data_slice& right) noexcept;
+BC_API bool operator!=(const data_slice& left, const data_slice& right) noexcept;
 
 typedef std::initializer_list<data_slice> data_loaf;
 

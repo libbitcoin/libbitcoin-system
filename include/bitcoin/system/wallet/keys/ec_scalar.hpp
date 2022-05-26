@@ -66,15 +66,15 @@ private:
     ec_secret secret_;
 };
 
-bool operator==(int64_t left, const ec_scalar& right) noexcept;
-bool operator!=(int64_t left, const ec_scalar& right) noexcept;
-bool operator==(const ec_scalar& left, int64_t right) noexcept;
-bool operator!=(const ec_scalar& left, int64_t right) noexcept;
-bool operator==(const ec_scalar& left, const ec_scalar& right) noexcept;
-bool operator!=(const ec_scalar& left, const ec_scalar& right) noexcept;
-ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) noexcept;
-ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) noexcept;
-ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API bool operator==(int64_t left, const ec_scalar& right) noexcept;
+BC_API bool operator!=(int64_t left, const ec_scalar& right) noexcept;
+BC_API bool operator==(const ec_scalar& left, int64_t right) noexcept;
+BC_API bool operator!=(const ec_scalar& left, int64_t right) noexcept;
+BC_API bool operator==(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API bool operator!=(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

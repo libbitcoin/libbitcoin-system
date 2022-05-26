@@ -115,9 +115,9 @@ private:
     payment payment_;
 };
 
-bool operator==(const payment_address& left,
+BC_API bool operator==(const payment_address& left,
     const payment_address& right) noexcept;
-bool operator!=(const payment_address& left,
+BC_API bool operator!=(const payment_address& left,
     const payment_address& right) noexcept;
 
 } // namespace wallet

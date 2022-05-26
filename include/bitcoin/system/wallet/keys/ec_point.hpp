@@ -71,12 +71,12 @@ private:
     ec_compressed point_;
 };
 
-bool operator==(const ec_point& left, const ec_point& right) noexcept;
-bool operator!=(const ec_point& left, const ec_point& right) noexcept;
-ec_point operator+(const ec_point& left, const ec_point& right) noexcept;
-ec_point operator-(const ec_point& left, const ec_point& right) noexcept;
-ec_point operator*(const ec_point& left, const ec_scalar& right) noexcept;
-ec_point operator*(const ec_scalar& left, const ec_point& right) noexcept;
+BC_API bool operator==(const ec_point& left, const ec_point& right) noexcept;
+BC_API bool operator!=(const ec_point& left, const ec_point& right) noexcept;
+BC_API ec_point operator+(const ec_point& left, const ec_point& right) noexcept;
+BC_API ec_point operator-(const ec_point& left, const ec_point& right) noexcept;
+BC_API ec_point operator*(const ec_point& left, const ec_scalar& right) noexcept;
+BC_API ec_point operator*(const ec_scalar& left, const ec_point& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

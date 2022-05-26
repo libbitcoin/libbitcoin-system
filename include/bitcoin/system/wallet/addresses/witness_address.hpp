@@ -188,9 +188,9 @@ private:
     uint8_t version_;
 };
 
-bool operator==(const witness_address& left,
+BC_API bool operator==(const witness_address& left,
     const witness_address& right) noexcept;
-bool operator!=(const witness_address& left,
+BC_API bool operator!=(const witness_address& left,
     const witness_address& right) noexcept;
 
 } // namespace wallet

@@ -145,8 +145,8 @@ private:
 };
 
 /// Binary operators.
-bool operator==(const data_slab& left, const data_slab& right) noexcept;
-bool operator!=(const data_slab& left, const data_slab& right) noexcept;
+BC_API bool operator==(const data_slab& left, const data_slab& right) noexcept;
+BC_API bool operator!=(const data_slab& left, const data_slab& right) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
