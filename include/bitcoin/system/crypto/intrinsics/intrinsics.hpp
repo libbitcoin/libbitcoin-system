@@ -27,6 +27,14 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
+// Defined externally for non-msvc builds.
+#if defined(_MSC_VER) && !defined(PORTABLE)
+    #define WITH_AVX2
+    #define WITH_SSE41
+    #define WITH_SSE4
+    #define WITH_SHANI
+#endif
+
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
