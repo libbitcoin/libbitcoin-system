@@ -29,14 +29,14 @@ namespace system {
 /// github.com/libbitcoin/libbitcoin-system/wiki/Integer-Division-Unraveled
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
-/// This is equivalent to c++ % for negative quotients.
+/// This is equivalent to C++ % for negative quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
     -> decltype(dividend / divisor);
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
-/// This is equivalent to c++ % for negative quotients.
+/// This is equivalent to C++ % for negative quotients.
 /// The result is signed because positive operands yield a negative result.
 /// Native operators would convert a negative logical result to its two's
 /// complement representation, which is not generally useful as the negative.
@@ -46,28 +46,28 @@ constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
     -> typename std::make_signed<decltype(dividend % divisor)>::type;
 
 /// Obtain the floored (rounded down) integer modulo quotient.
-/// This is equivalent to c++ % for positive quotients.
+/// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
     -> decltype(dividend / divisor);
 
 /// Obtain the floorded (rounded down) integer modulo quotient.
-/// This is equivalent to c++ % for positive quotients.
+/// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
     -> decltype(dividend % divisor);
 
 /// Obtain the truncated (rounded toward zero) integer quotient.
-/// This is equivalent to c++ /.
+/// This is equivalent to C++ /.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto truncated_divide(Dividend dividend, Divisor divisor) noexcept
     -> decltype(dividend / divisor);
 
 /// Obtain the truncated (rounded toward zero) integer divide remainder.
-/// This is equivalent to c++ %.
+/// This is equivalent to C++ %.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto truncated_modulo(Dividend dividend, Divisor divisor) noexcept

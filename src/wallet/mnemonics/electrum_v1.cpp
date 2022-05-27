@@ -157,7 +157,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy,
         const auto value = reader.read_4_bytes_big_endian();
 
         // [(value/size0 + 0)%size1] is a nop, shown for consistency.
-        // Pos quotient integer div/mod is floor in c++ and python[2/3].
+        // Pos quotient integer div/mod is floor in C++ and python[2/3].
         const auto uno = (value / size0 + 0x0) % size1;
         const auto dos = (value / size1 + uno) % size1;
         const auto tre = (value / size2 + dos) % size1;
@@ -193,7 +193,7 @@ v1_decoding electrum_v1::decoder(const string_list& words,
         const int64_t tre = dictionaries_.index(*word++, identifier);
 
         // [floored_modulo(uno-0, size1)*size0] is a nop, shown for consistency.
-        // Neg quotient integer div/mod is ceil in c++ and floor in python[2/3].
+        // Neg quotient integer div/mod is ceil in C++ and floor in python[2/3].
         const auto value =
             floored_modulo(uno - 0x0, size1) * size0 +
             floored_modulo(dos - uno, size1) * size1 +

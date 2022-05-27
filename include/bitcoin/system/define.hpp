@@ -91,7 +91,7 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
-// ISO predefined constant for c++ version.
+// ISO predefined constant for C++ version.
 #if __cplusplus >= 199711L
     #define BC_CPP_03
 #endif

@@ -145,7 +145,7 @@ public:
         const chain::script& sub) const noexcept;
 
 private:
-    // A space-efficient dynamic bitset (specialized by c++ std lib).
+    // A space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
     static chain::operations create_strip_ops(

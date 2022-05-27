@@ -116,7 +116,7 @@ data_chunk base32_pack(const base32_chunk& unpacked) noexcept
     data_chunk packed;
     write::bits::data sink(packed);
 
-    // This is how c++ developers do it. :)
+    // This is how C++ developers do it. :)
     for (const auto& value: unpacked)
         sink.write_bits(value.convert_to<uint8_t>(), 5);
 
@@ -144,7 +144,7 @@ base32_chunk base32_unpack(const data_chunk& packed) noexcept
     base32_chunk unpacked;
     read::bits::copy source(packed);
 
-    // This is how c++ developers do it. :)
+    // This is how C++ developers do it. :)
     while (!source.is_exhausted())
         unpacked.push_back(source.read_bits(5));
 

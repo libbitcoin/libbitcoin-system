@@ -470,7 +470,7 @@ bool block::is_invalid_witness_commitment() const noexcept
 
 //*****************************************************************************
 // CONSENSUS:
-// bip42 compensates for c++ undefined behavior of a right shift of a number of
+// bip42 compensates for C++ undefined behavior of a right shift of a number of
 // bits greater or equal to the shifted integer width. Yet being undefined, the
 // result of this operation may vary by compiler. The shift_right call below
 // explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
