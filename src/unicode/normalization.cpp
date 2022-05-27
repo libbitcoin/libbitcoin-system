@@ -28,6 +28,13 @@
 #else
     #include <mutex>
 #endif
+ 
+ // std::auto_ptr is deprecated in C++11 and removed in C++17:
+ // en.cppreference.com/w/cpp/memory/auto_ptr
+ // boost.locale exposes it to the API, so cannot remove it until C++17:
+ // github.com/boostorg/locale/issues/27#issuecomment-414932853
+ // Must use BOOST_LOCALE_HIDE_AUTO_PTR to hide the warnings.
+#define BOOST_LOCALE_HIDE_AUTO_PTR
 #include <boost/locale.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -40,7 +47,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Avoid codecvt as it is deprecated in c++17.
+// Avoid codecvt as it is deprecated in C++17.
 using namespace boost::locale;
 
 // Local helpers.
@@ -162,8 +169,6 @@ bool to_upper(std::string& out, const std::string& in) noexcept
 }
 
 #else // _MSC_VER
-
-// TODO: deprecation warnings in clang.
 
 constexpr auto icu_backend_name = "icu";
 constexpr auto utf8_locale_name = "en_US.UTF8";
