@@ -73,7 +73,8 @@ std::string ascii_to_lower(const std::string& text) noexcept
 
     const auto to_lower = [](char value) noexcept
     {
-        return 'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value;
+        return static_cast<uint8_t>(
+            'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value);
     };
 
     std::transform(text.begin(), text.end(), copy.begin(), to_lower);
@@ -86,7 +87,8 @@ std::string ascii_to_upper(const std::string& text) noexcept
 
     const auto to_upper = [](char value) noexcept
     {
-        return 'a' <= value && value <= 'z' ? value + ('A' - 'a') : value;
+        return static_cast<uint8_t>(
+            'a' <= value && value <= 'z' ? value + ('A' - 'a') : value);
     };
 
     std::transform(text.begin(), text.end(), copy.begin(), to_upper);
