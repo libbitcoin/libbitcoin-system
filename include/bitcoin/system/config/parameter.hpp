@@ -51,7 +51,6 @@ typedef std::vector<parameter> parameter_list;
 class BC_API parameter
 {
 private:
-
     /// Enumerated options for selecting the canonical name.
     enum search_options : int
     {
@@ -66,7 +65,6 @@ private:
     };
 
 public:
-
     /// Sentinel - the option is not a positional argument.
     static const int not_positional;
 
@@ -75,6 +73,8 @@ public:
 
     /// The character used to prefix command line options.
     static const char option_prefix_char;
+
+    virtual ~parameter() noexcept;
 
      /// Populate with normalized parameter data.
     /// option     The metadata of the option to test.
