@@ -151,30 +151,30 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
 {
     const auto sum = base16_array("0404040000000000000000000000000000000000000000000000000000000000");
 
-    ec_secret secret1{ { 1, 2, 3 } };
+    ec_secret secret_one{ { 1, 2, 3 } };
     ec_compressed public1;
-    BOOST_REQUIRE(secret_to_public(public1, secret1));
+    BOOST_REQUIRE(secret_to_public(public1, secret_one));
 
-    const ec_secret secret2{ { 3, 2, 1 } };
-    BOOST_REQUIRE(ec_add(secret1, secret2));
-    BOOST_REQUIRE_EQUAL(secret1, sum);
+    const ec_secret secret_two{ { 3, 2, 1 } };
+    BOOST_REQUIRE(ec_add(secret_one, secret_two));
+    BOOST_REQUIRE_EQUAL(secret_one, sum);
 
     ec_compressed public2;
-    BOOST_REQUIRE(secret_to_public(public2, secret1));
-    BOOST_REQUIRE(ec_add(public1, secret2));
+    BOOST_REQUIRE(secret_to_public(public2, secret_one));
+    BOOST_REQUIRE(ec_add(public1, secret_two));
     BOOST_REQUIRE_EQUAL(public1, public2);
 }
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__expected)
 {
     // = n - 1
-    auto secret1 = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
-    ec_secret secret2{ { 0 } };
-    secret2[31] = 1;
+    auto secret_one = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
+    ec_secret secret_two{ { 0 } };
+    secret_two[31] = 1;
     ec_compressed public1;
-    BOOST_REQUIRE(secret_to_public(public1, secret1));
-    BOOST_REQUIRE(!ec_add(secret1, secret2));
-    BOOST_REQUIRE(!ec_add(public1, secret2));
+    BOOST_REQUIRE(secret_to_public(public1, secret_one));
+    BOOST_REQUIRE(!ec_add(secret_one, secret_two));
+    BOOST_REQUIRE(!ec_add(public1, secret_two));
 }
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum__expected)
@@ -196,18 +196,18 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum__expected)
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply__expected)
 {
-    ec_secret secret1{ {0} };
-    ec_secret secret2{ {0} };
-    secret1[31] = 11;
-    secret2[31] = 22;
+    ec_secret secret_one{ {0} };
+    ec_secret secret_two{ {0} };
+    secret_one[31] = 11;
+    secret_two[31] = 22;
     ec_compressed public1;
-    BOOST_REQUIRE(secret_to_public(public1, secret1));
-    BOOST_REQUIRE(ec_multiply(secret1, secret2));
-    BOOST_REQUIRE_EQUAL(secret1[31], 242u);
-    BOOST_REQUIRE(ec_multiply(public1, secret2));
+    BOOST_REQUIRE(secret_to_public(public1, secret_one));
+    BOOST_REQUIRE(ec_multiply(secret_one, secret_two));
+    BOOST_REQUIRE_EQUAL(secret_one[31], 242u);
+    BOOST_REQUIRE(ec_multiply(public1, secret_two));
 
     ec_compressed public2;
-    BOOST_REQUIRE(secret_to_public(public2, secret1));
+    BOOST_REQUIRE(secret_to_public(public2, secret_one));
     BOOST_REQUIRE_EQUAL(public1, public2);
 }
 

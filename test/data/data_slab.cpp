@@ -29,6 +29,8 @@ BOOST_AUTO_TEST_SUITE(data_slab_tests)
 BOOST_AUTO_TEST_CASE(data_slab__construct__default__empty)
 {
     data_slab slab{};
+    const data_array<0> empty_array{};
+    const data_slab empty_slab{};
 
     // properties (with value reads past end, zero padded)
     BOOST_REQUIRE(slab.empty());
@@ -55,10 +57,10 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__default__empty)
     // operator==/operator!=
     BOOST_REQUIRE(slab == slab);
     BOOST_REQUIRE(!(slab != slab));
-    BOOST_REQUIRE(slab == data_slab{});
-    BOOST_REQUIRE(!(slab != data_slab{}));
-    BOOST_REQUIRE(slab == data_array<0>{});
-    BOOST_REQUIRE(!(slab != data_array<0>{}));
+    BOOST_REQUIRE(slab == empty_slab);
+    BOOST_REQUIRE(!(slab != empty_slab));
+    BOOST_REQUIRE(slab == empty_array);
+    BOOST_REQUIRE(!(slab != empty_array));
 }
 
 BOOST_AUTO_TEST_CASE(data_slab__construct__array_empty__empty)
@@ -99,7 +101,6 @@ std::string string{ "foobar" };
 data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-data_array<8> negative_byte{ { 'b', 'a', 'a', 'd', 'f', '0', '0', 'd' } };
 auto encoded = encode_base16(string);
 
 
@@ -276,16 +277,16 @@ BOOST_AUTO_TEST_CASE(data_slab__resize__empty__false)
 
 BOOST_AUTO_TEST_CASE(data_slab__resize__downsize__true_expected)
 {
-    data_array<6> data{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-    data_slab slab(data);
+    data_array<6> data_value{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+    data_slab slab(data_value);
     BOOST_REQUIRE(slab.resize(3));
     BOOST_REQUIRE_EQUAL(slab.to_string(), "foo");
 }
 
 BOOST_AUTO_TEST_CASE(data_slab__resize__upsize__false_expected)
 {
-    data_array<6> data{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-    data_slab slab(data);
+    data_array<6> data_value{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+    data_slab slab(data_value);
     BOOST_REQUIRE(!slab.resize(6));
     BOOST_REQUIRE(!slab.resize(7));
     BOOST_REQUIRE(slab.resize(3));
