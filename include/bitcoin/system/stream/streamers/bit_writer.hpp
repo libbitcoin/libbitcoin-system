@@ -25,19 +25,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
-
-namespace libbitcoin {
-namespace system {
 
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif // _MSC_VER
+BC_PUSH_MSVC_WARNING(4250)
+
+namespace libbitcoin {
+namespace system {
 
 /// A bit writer that accepts an ostream.
 template <typename OStream = std::ostream>
@@ -69,12 +67,10 @@ private:
     uint8_t offset_;
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_MSVC_WARNING()
 
 #include <bitcoin/system/impl/stream/streamers/bit_writer.ipp>
 

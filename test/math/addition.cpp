@@ -19,6 +19,9 @@
 #include "../test.hpp"
 #include <cstddef>
 
+// Suppress C4310: cast truncates constant value (intended behavior).
+BC_PUSH_MSVC_WARNING(4310)
+
 constexpr uint32_t min_uint32 = 0;
 constexpr uint32_t pos_uint32 = 42;
 constexpr  int32_t pos_int32 = 42;
@@ -175,3 +178,5 @@ static_assert(floored_subtract(unsigned_maximum, unsigned_half) == add1(unsigned
 static_assert(floored_subtract(unsigned_half, unsigned_maximum) == unsigned_minimum, "");
 static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_minimum, "");
 static_assert(std::is_same<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>::value, "");
+
+BC_POP_MSVC_WARNING()

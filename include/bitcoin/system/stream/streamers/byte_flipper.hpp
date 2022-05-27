@@ -21,19 +21,17 @@
 
 #include <iostream>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/byteflipper.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 // Suppress multiple inheritance warnings.
 // The only multiple inheritance conflict is destructors and bool/!.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif // _MSC_VER
+BC_PUSH_MSVC_WARNING(4250)
+
+namespace libbitcoin {
+namespace system {
 
 /// A byte reader/writer that accepts an iostream.
 template <typename IOStream = std::iostream>
@@ -70,11 +68,9 @@ public:
     }
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_MSVC_WARNING()
 
 #endif

@@ -129,8 +129,19 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
 #define LCOV_EXCL_STOP()
 
 #ifdef _MSC_VER
-    // Suppress C4706: assignment within conditional expression.
+    // Suppress C4706: assignment within conditional expression (we allow).
     #pragma warning(disable:4706)
+#endif
+
+#ifdef _MSC_VER
+    #define PRAGMA(pragma) _Pragma(#pragma)
+    #define BC_PUSH_MSVC_WARNING(value) \
+        PRAGMA(warning(push)) \
+        PRAGMA(warning(disable:value))
+    #define BC_POP_MSVC_WARNING() PRAGMA(warning(pop))
+#else
+    #define BC_PUSH_MSVC_WARNING(warning)
+    #define BC_POP_MSVC_WARNING()
 #endif
 
 #endif

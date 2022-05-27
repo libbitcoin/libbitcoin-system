@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
@@ -217,7 +218,13 @@ inline void mask_right_into(Value& value, size_t bits) noexcept
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value unmask_left(size_t bits) noexcept
 {
+    // Suppress C4244: 'return' : conversion from 'Integer' to 'Value'.
+    // The compiler does not recognize that Value and Integer must be same type.
+    BC_PUSH_MSVC_WARNING(4244)
+
     return ones_complement(bit_all<Value>() >> bits);
+
+    BC_POP_MSVC_WARNING()
 }
 
 template <typename Value, if_unsigned_integer<Value>>
@@ -236,7 +243,13 @@ inline void unmask_left_into(Value& value, size_t bits) noexcept
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value unmask_right(size_t bits) noexcept
 {
+    // Suppress C4244: 'return' : conversion from 'Integer' to 'Value'.
+    // The compiler does not recognize that Value and Integer must be same type.
+    BC_PUSH_MSVC_WARNING(4244)
+
     return ones_complement(bit_all<Value>() << bits);
+
+    BC_POP_MSVC_WARNING()
 }
 
 template <typename Value, if_unsigned_integer<Value>>

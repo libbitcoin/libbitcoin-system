@@ -19,18 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
-
-namespace libbitcoin {
-namespace system {
 
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif // _MSC_VER
+BC_PUSH_MSVC_WARNING(4250)
+
+namespace libbitcoin {
+namespace system {
 
 /// Construct an output stream and feed it to a writer.
 /// For std::ostream just pass to writer on construct.
@@ -54,11 +52,9 @@ protected:
     Stream stream_;
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_MSVC_WARNING()
 
 #endif

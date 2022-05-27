@@ -18,6 +18,9 @@
  */
 #include "../test.hpp"
 
+ // Suppress C4310: cast truncates constant value (intended behavior).
+BC_PUSH_MSVC_WARNING(4310)
+
 // TODO: test inline overloads.
 
  // ones_complement
@@ -648,3 +651,4 @@ static_assert(shift_right<uint8_t>(0x80, 9, false) == 0x40, "");
 
 static_assert(std::is_same<decltype(shift_left<uint8_t>(0, 0, true)), uint8_t>::value, "");
 
+BC_POP_MSVC_WARNING()

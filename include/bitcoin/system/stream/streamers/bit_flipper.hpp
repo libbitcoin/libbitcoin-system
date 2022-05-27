@@ -23,19 +23,17 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_FLIPPER_HPP
 
 #include <iostream>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 // Suppress multiple inheritance warnings.
 // The only multiple inheritance conflict is destructors and bool/!.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif // _MSC_VER
+BC_PUSH_MSVC_WARNING(4250)
+
+namespace libbitcoin {
+namespace system {
 
 /// A bit reader/writer that accepts an iostream.
 /// Bit actions may lead to unextected read behavior, as they are read and
@@ -79,11 +77,9 @@ public:
     }
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_MSVC_WARNING()
 
 #endif

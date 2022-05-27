@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -83,6 +84,7 @@ inline Exponent floored_log2(Value value) noexcept
 }
 
 // Returns 0 for undefined (0^0).
+// Overflow is allowed behavior as this mimics a mathematical operator.
 template <typename Value, typename Base, typename Exponent,
     if_integer<Value>, if_integer<Base>, if_integer<Exponent>>
 inline Value power(Base base, Exponent exponent) noexcept
@@ -97,13 +99,22 @@ inline Value power(Base base, Exponent exponent) noexcept
         return absolute(base) > 1 ? 0 :
             (is_odd(exponent) && is_negative(base) ? -1 : 1);
 
-    Value value = base;
+    auto value = static_cast<Value>(base);
+
+    // Suppress C4244: '*=' : conversion from 'Base' to 'uint16_t'.
+    // Overflow is allowed behavior as this mimics a mathematical operator.
+    BC_PUSH_MSVC_WARNING(4244)
+
     while (--exponent > 0) { value *= base; }
+
+    BC_POP_MSVC_WARNING();
+
     return value;
 }
 
 // uintx power2 can be implemented by bit_set(int, exponent) on a new int.
 // We could use 64 element lookup table for integrals, instead of shifting.
+// Overflow is allowed behavior as this mimics a mathematical operator.
 template <typename Value, typename Exponent,
     if_integer<Value>, if_integer<Exponent>>
 inline Value power2(Exponent exponent) noexcept
