@@ -1604,7 +1604,7 @@ int QRinput_Struct_insertStructuredAppendHeaders(QRinput_Struct *s)
 	i = 1;
 	list = s->head;
 	while(list != NULL) {
-		if(QRinput_insertStructuredAppendHeader(list->input, s->size, i, s->parity))
+		if(QRinput_insertStructuredAppendHeader(list->input, s->size, i, (unsigned char)s->parity))
 			return -1;
 		i++;
 		list = list->next;
