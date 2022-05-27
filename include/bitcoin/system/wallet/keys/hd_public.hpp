@@ -25,6 +25,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
 namespace libbitcoin {
@@ -32,7 +33,7 @@ namespace system {
 namespace wallet {
 
 /// A constant used in key derivation.
-static constexpr uint32_t hd_first_hardened_key = 1 << 31;
+static constexpr auto hd_first_hardened_key = bit_hi<uint32_t>();
 
 /// An hd key chain code.
 static constexpr size_t hd_chain_code_size = 32;
