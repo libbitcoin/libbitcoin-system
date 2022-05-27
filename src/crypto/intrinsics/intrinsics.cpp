@@ -39,31 +39,40 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
-// TODO: Unused variable warnings.
-// TODO: conditionally exclude constants or change to enumerations.
-
 namespace cpu1_0
 {
+#if defined(WITH_AVX2) || defined(WITH_SSE41) || defined(WITH_SSE4) || defined(WITH_SHANI)
     constexpr uint32_t leaf = 1;
     constexpr uint32_t subleaf = 0;
     constexpr size_t sse4_ecx_bit = 19;
+#endif
+#if defined(WITH_AVX2)
     constexpr size_t xsave_ecx_bit = 27;
     constexpr size_t avx_ecx_bit = 28;
+#endif
 }
 
 namespace cpu7_0
 {
+#if defined(WITH_AVX2) || defined(WITH_SHANI)
     constexpr uint32_t leaf = 7;
     constexpr uint32_t subleaf = 0;
+#endif
+#if defined(WITH_AVX2)
     constexpr size_t avx2_ebx_bit = 5;
+#endif
+#if defined(WITH_SHANI)
     constexpr size_t shani_ebx_bit = 29;
+#endif
 }
 
 namespace xcr0
 {
+#if defined(WITH_AVX2)
     constexpr uint32_t feature = 0;
     constexpr size_t sse_bit = 1;
     constexpr size_t avx_bit = 2;
+#endif
 }
 
 // In msvc intrinsics always compile, however on other platforms this support
