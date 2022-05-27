@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE(bit_flipper__read_8_bytes_little_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bits::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_little_endian(), 0x0102030405060708);
+    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_little_endian(), 0x0102030405060708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE(bit_flipper__read_variable_size__eight_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708u);
     reader.rewind_bytes(9);
 
-    if (sizeof(size_t) < sizeof(uint64_t))
+    if constexpr (sizeof(size_t) < sizeof(uint64_t))
     {
         BOOST_REQUIRE_EQUAL(reader.read_size(), 0u);
         BOOST_REQUIRE(!reader);
@@ -454,7 +454,6 @@ BOOST_AUTO_TEST_CASE(bit_flipper__read_variable_size__eight_bytes__expected)
         BOOST_REQUIRE(reader);
     }
 }
-
 
 // read_error_code
 

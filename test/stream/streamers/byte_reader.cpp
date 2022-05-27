@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_big_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_big_endian<uint64_t>(), 0x0807060504030201);
+    BOOST_REQUIRE_EQUAL(reader.read_big_endian<uint64_t>(), 0x0807060504030201u);
     BOOST_REQUIRE(reader);
 }
 
@@ -592,7 +592,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__eight_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708u);
     reader.rewind_bytes(9);
 
-    if (sizeof(size_t) < sizeof(uint64_t))
+    if constexpr (sizeof(size_t) < sizeof(uint64_t))
     {
         BOOST_REQUIRE_EQUAL(reader.read_size(), 0u);
         BOOST_REQUIRE(!reader);
