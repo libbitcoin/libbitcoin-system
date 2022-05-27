@@ -298,10 +298,12 @@ static bool data_from_decimal(data_chunk& out_data,
 // private/static
 operation operation::from_string(const std::string& mnemonic) noexcept
 {
-    opcode code;
     data_chunk chunk;
     auto valid = false;
     auto underflow = false;
+
+    // Always defined below, but this fixes warning.
+    opcode code{ opcode::op_xor };
 
     if (is_push_token(mnemonic))
     {
