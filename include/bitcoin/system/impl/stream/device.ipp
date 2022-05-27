@@ -24,6 +24,7 @@
 #include <iterator>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -108,7 +109,9 @@ template <typename Container>
 void device<Container>::do_read(value_type* buffer, size_type size) noexcept
 {
     // Not implemented, override.
-    std::fill(buffer, std::next(buffer, size), 0x00);
+
+    // Pad any unfilled remainder of the array with zeros.
+    filler(buffer, std::next(buffer, size), value_type{ 0x00 });
 }
 
 template <typename Container>

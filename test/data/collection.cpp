@@ -205,6 +205,31 @@ BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
+// filler
+
+BOOST_AUTO_TEST_CASE(collection__filler__empty__empty)
+{
+    data_chunk buffer;
+    filler(buffer.begin(), buffer.end(), uint8_t{ 0x42 });
+    BOOST_REQUIRE(buffer.empty());
+}
+
+BOOST_AUTO_TEST_CASE(collection__filler__partial__expected)
+{
+    data_chunk buffer{ 0x01, 0x02, 0x03, 0x04, 0x05 };
+    const data_chunk expected{ 0x01, 0x42, 0x42, 0x42, 0x05 };
+    filler(std::next(buffer.begin()), std::prev(buffer.end()), uint8_t{ 0x42 });
+    BOOST_REQUIRE_EQUAL(buffer, expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__filler__full__expected)
+{
+    data_chunk buffer(42, 0x00);
+    const data_chunk expected(42, 0x42);
+    filler(buffer.begin(), buffer.end(), uint8_t{ 0x42 });
+    BOOST_REQUIRE_EQUAL(buffer, expected);
+}
+
 // move_append
 
 BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__empty)

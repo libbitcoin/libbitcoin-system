@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -75,10 +76,25 @@ binary_search(const Collection& list, const Element& element) noexcept
     return negative_one;
 }
 
+// C++17: Parallel policy for std::transform.
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept
 {
-    return { std::begin(source), std::end(source) };
+    ////// Suppress C4244: conversion from 'const _Elem' to '_Ty'.
+    ////// This is the intent of the operation, caller ensures cast safety.
+    ////BC_PUSH_MSVC_WARNING(4244)
+    ////return { std::begin(source), std::end(source) };
+    ////BC_POP_MSVC_WARNING()
+
+    std::vector<To> out;
+    out.reserve(source.size());
+    std::transform(std::begin(source), std::end(source), std::begin(out),
+        [](const From& element)
+        {
+            return static_cast<To>(element);
+        });
+
+    return out;
 }
 
 // C++17: Parallel policy for std::transform.
@@ -89,7 +105,7 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element) noexcept
         {
-            return element;
+            return static_cast<To>(element);
         });
 
     return out;
@@ -123,6 +139,22 @@ bool equal_points(
             return (first && second && (*first == *second)) ||
                 (!first && !second);
         });
+}
+
+template <typename Iterator, typename Value>
+void filler(Iterator begin, const Iterator& end, const Value& value)
+{
+    // This suppression doesn't work.
+    // Suppress C4244: '=': conversion from 'const _Ty' to '_Ty' (bogus).
+    ////BC_PUSH_MSVC_WARNING(4244)
+    ////std::fill(begin, end, value);
+    ////BC_POP_MSVC_WARNING()
+
+    // C++17: Parallel policy for std::for_each.
+    std::for_each(begin, end, [&](Value& element)
+    {
+        element = value;
+    });
 }
 
 // TODO: constrain to std::pair elements.

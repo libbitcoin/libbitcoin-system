@@ -26,9 +26,11 @@
 #include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/memory.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -74,7 +76,7 @@ data_array<Size> build_array(const data_loaf& slices) noexcept
     }
 
     // Pad any unfilled remainder of the array with zeros.
-    std::fill(position, out.end(), 0x00);
+    filler(position, out.end(), uint8_t{ 0x00 });
     return out;
 }
 

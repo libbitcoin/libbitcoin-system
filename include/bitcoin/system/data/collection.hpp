@@ -59,6 +59,10 @@ bool equal_points(
     const std::vector<std::shared_ptr<const Element>>& left,
     const std::vector<std::shared_ptr<const Element>>& right);
 
+/// Fill a buffer with values.
+template <typename Iterator, typename Value>
+void filler(Iterator begin, const Iterator& end, const Value& value);
+
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
 typename Collection::difference_type
