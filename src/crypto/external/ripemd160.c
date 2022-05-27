@@ -136,10 +136,10 @@ void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
 
     for (i = 0; i < RMD160_DIGEST_LENGTH; i += 4)
     {
-        digest[i + 0] = (context->state[i >> 2] >> 0);
-        digest[i + 1] = (context->state[i >> 2] >> 8);
-        digest[i + 2] = (context->state[i >> 2] >> 16);
-        digest[i + 3] = (context->state[i >> 2] >> 24);
+        digest[i + 0] = (uint8_t)(context->state[i >> 2] >> 0);
+        digest[i + 1] = (uint8_t)(context->state[i >> 2] >> 8);
+        digest[i + 2] = (uint8_t)(context->state[i >> 2] >> 16);
+        digest[i + 3] = (uint8_t)(context->state[i >> 2] >> 24);
     }
 }
 

@@ -94,7 +94,7 @@ void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
 
     for (i = 0; i < SHA1_DIGEST_LENGTH; ++i)
     {
-        digest[i] = context->state[i >> 2] >> 8 * (3 - (i & 0x03));
+        digest[i] = (uint8_t)(context->state[i >> 2] >> 8 * (3 - (i & 0x03)));
     }
 }
 
@@ -217,15 +217,15 @@ void SHA1PadMessage(SHA1CTX* context)
     lo_length = (uint32_t)(context->length);
     hi_length = (uint32_t)(((uint64_t)context->length) >> 32);
 
-    context->block[56] = hi_length >> 24;
-    context->block[57] = hi_length >> 16;
-    context->block[58] = hi_length >> 8;
-    context->block[59] = hi_length >> 0;
+    context->block[56] = (uint8_t)(hi_length >> 24);
+    context->block[57] = (uint8_t)(hi_length >> 16);
+    context->block[58] = (uint8_t)(hi_length >> 8);
+    context->block[59] = (uint8_t)(hi_length >> 0);
 
-    context->block[60] = lo_length >> 24;
-    context->block[61] = lo_length >> 16;
-    context->block[62] = lo_length >> 8;
-    context->block[63] = lo_length >> 0;
+    context->block[60] = (uint8_t)(lo_length >> 24);
+    context->block[61] = (uint8_t)(lo_length >> 16);
+    context->block[62] = (uint8_t)(lo_length >> 8);
+    context->block[63] = (uint8_t)(lo_length >> 0);
 
     SHA1ProcessMessageBlock(context);
 }
