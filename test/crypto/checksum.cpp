@@ -269,7 +269,6 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
 
 // bech32_verify_checked
 
-base32_chunk checked;
 uint8_t out_version;
 data_chunk out_program;
 
@@ -299,6 +298,8 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__five_program_bytes__round_
 }
 
 // bech32_verify_checked - BIP173
+
+base32_chunk checked;
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wkh__true_expected_version_and_program)
 {
