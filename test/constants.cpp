@@ -127,7 +127,7 @@ static_assert(sub1(-42) == -42 - 1, "");
 static_assert(sub1(0xff) == 0xff - 1, "");
 static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value, "");
 
-constexpr uint32_t value = 42;
+constexpr uint32_t value42 = 42;
 static_assert(width<bool>() == to_bits(sizeof(char)), "");
 static_assert(width<char>() == to_bits(sizeof(char)), "");
 static_assert(width<short>() == to_bits(sizeof(short)), "");
@@ -153,7 +153,7 @@ static_assert(width<int32_t>() == 32, "");
 static_assert(width<uint32_t>() == 32, "");
 static_assert(width<int64_t>() == 64, "");
 static_assert(width<uint64_t>() == 64, "");
-static_assert(width(value) == to_bits(sizeof(value)), "");
+static_assert(width(value42) == to_bits(sizeof(value42)), "");
 static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value, "");
 
 BOOST_AUTO_TEST_SUITE(constants_tests)

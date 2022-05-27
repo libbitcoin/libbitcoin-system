@@ -40,13 +40,13 @@ namespace test {
 const std::string directory = "tests";
 
 // C++17: use std::filesystem.
-bool clear(const boost::filesystem::path& directory) noexcept
+bool clear(const boost::filesystem::path& file_directory) noexcept
 {
     // C++17: use std::filesystem.
     // remove_all returns count removed, and error code if fails.
     // create_directories returns true if path exists or created.
     // used for setup, with no expectations of file/directory existence.
-    const auto path = to_extended_path(directory);
+    const auto path = to_extended_path(file_directory);
     boost::system::error_code ec;
     boost::filesystem::remove_all(path, ec);
     return !ec && boost::filesystem::create_directories(path, ec);
