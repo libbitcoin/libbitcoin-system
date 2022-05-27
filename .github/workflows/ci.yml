@@ -153,11 +153,17 @@ jobs:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
-      - name: Failure display compiler version
+      - name: Failure display selected compiler version
         if: ${{ failure() }}
         run: |
-          gcc -v
+          ${CC} -v
+          ${CXX} -v
+
+      - name: Failure display default compiler version
+        if: ${{ failure() }}
+        run: |
           clang -v
+          gcc -v
 
       - name: Failure display env
         if: ${{ failure() }}
