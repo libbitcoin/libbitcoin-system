@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_big_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_big_endian<uint64_t>(), 0x0807060504030201);
+    BOOST_REQUIRE_EQUAL(reader.read_big_endian<uint64_t>(), 0x0807060504030201u);
     BOOST_REQUIRE(reader);
 }
 
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_2_bytes_big_endian__full__expected)
     const std::string value{ 0x08, 0x07 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_2_bytes_big_endian(), 0x0807);
+    BOOST_REQUIRE_EQUAL(reader.read_2_bytes_big_endian(), 0x0807u);
     BOOST_REQUIRE(reader);
 }
 
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_8_bytes_big_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_big_endian(), 0x0807060504030201);
+    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_big_endian(), 0x0807060504030201u);
     BOOST_REQUIRE(reader);
 }
 
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_little_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_little_endian<uint64_t>(), 0x0102030405060708);
+    BOOST_REQUIRE_EQUAL(reader.read_little_endian<uint64_t>(), 0x0102030405060708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_2_bytes_little_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_2_bytes_little_endian(), 0x0708);
+    BOOST_REQUIRE_EQUAL(reader.read_2_bytes_little_endian(), 0x0708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_4_bytes_little_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_4_bytes_little_endian(), 0x05060708);
+    BOOST_REQUIRE_EQUAL(reader.read_4_bytes_little_endian(), 0x05060708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_8_bytes_little_endian__full__expected)
     const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_little_endian(), 0x0102030405060708);
+    BOOST_REQUIRE_EQUAL(reader.read_8_bytes_little_endian(), 0x0102030405060708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -408,9 +408,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_variable_size__one_byte__expected)
     const std::string value{ 0x08 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x08);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x08u);
     reader.rewind_bytes(1);
-    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x08);
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x08u);
     BOOST_REQUIRE(reader);
 }
 
@@ -419,9 +419,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_variable_size__two_bytes__expected)
     const std::string value{ (char)varint_two_bytes, 0x08, 0x07 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0708);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0708u);
     reader.rewind_bytes(3);
-    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0708);
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -430,9 +430,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_variable_size__four_bytes__expected)
     const std::string value{ (char)varint_four_bytes, 0x08, 0x07, 0x06, 0x05 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x05060708);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x05060708u);
     reader.rewind_bytes(5);
-    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x05060708);
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x05060708u);
     BOOST_REQUIRE(reader);
 }
 
@@ -441,7 +441,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_variable_size__eight_bytes__expected)
     const std::string value{ (char)varint_eight_bytes, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708);
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708u);
     reader.rewind_bytes(9);
 
     if (sizeof(size_t) < sizeof(uint64_t))
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_variable_size__eight_bytes__expected)
     }
     else
     {
-        BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0102030405060708);
+        BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0102030405060708u);
         BOOST_REQUIRE(reader);
     }
 }

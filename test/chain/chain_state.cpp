@@ -29,8 +29,8 @@ chain::chain_state::data get_values(size_t retargeting_interval)
 {
     chain::chain_state::data values;
     values.height = retargeting_interval;
-    values.bits.ordered.push_back(0x1e0ffff0);
-    values.timestamp.ordered.push_back(1692625);
+    values.bits.ordered.push_back(0x1e0ffff0u);
+    values.timestamp.ordered.push_back(1692625u);
     values.timestamp.retarget = 0;
     return values;
 }
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_disable
     const auto values = get_values(settings.retargeting_interval());
     const auto forks = chain::forks::retarget;
     const auto work = test_chain_state::work_required(values, forks, settings);
-    BOOST_REQUIRE_EQUAL(work, 0x1e0884d1);
+    BOOST_REQUIRE_EQUAL(work, 0x1e0884d1u);
 }
 
 BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled__correct_value)

@@ -140,13 +140,13 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__chunk_to_integer_short__expecte
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__chunk_to_integer_long__expected)
 {
     // 4 bytes of data for an 2 byte integer.
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(data_forward), value32 >> 16);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(data_forward), value32 >> 16u);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian__chunk_to_integer_long__expected)
 {
     // 4 bytes of data for an 2 byte integer.
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(data_reverse), value32 & 0x0000ffff);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(data_reverse), value32 & 0x0000ffffu);
 }
 
 #endif // ENDIAN_VARIABLE_SIZE
@@ -197,13 +197,13 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__array_to_integer_short__expecte
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__array_to_integer_long__expected)
 {
     // 4 bytes of data for an 2 byte integer.
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(array_forward), value32 >> 16);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(array_forward), value32 >> 16u);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian__array_to_integer_long__expected)
 {
     // 4 bytes of data for an 2 byte integer.
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(array_reverse), value32 & 0x0000ffff);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(array_reverse), value32 & 0x0000ffffu);
 }
 
 #endif // ENDIAN_FIXED_SIZE
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_stream__expected)
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__data_to_uintx__expected)
 {
     // Populating uintx8
-    BOOST_REQUIRE_EQUAL(from_big_endian<1>(data_forward), value32 >> 24);
+    BOOST_REQUIRE_EQUAL(from_big_endian<1>(data_forward), value32 >> 24u);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian__data_to_uintx__expected)
@@ -470,10 +470,10 @@ BOOST_AUTO_TEST_CASE(from_big_endian__parallel__always__expected)
     };
 
     from_big_endian<4>(to, from);
-    BOOST_REQUIRE_EQUAL(to[0], 0x01020304);
-    BOOST_REQUIRE_EQUAL(to[1], 0x05060708);
-    BOOST_REQUIRE_EQUAL(to[2], 0x090a0b0c);
-    BOOST_REQUIRE_EQUAL(to[3], 0x0d0e0f00);
+    BOOST_REQUIRE_EQUAL(to[0], 0x01020304u);
+    BOOST_REQUIRE_EQUAL(to[1], 0x05060708u);
+    BOOST_REQUIRE_EQUAL(to[2], 0x090a0b0cu);
+    BOOST_REQUIRE_EQUAL(to[3], 0x0d0e0f00u);
 }
 
 BOOST_AUTO_TEST_CASE(from_little_endian__parallel__always__expected)
@@ -488,10 +488,10 @@ BOOST_AUTO_TEST_CASE(from_little_endian__parallel__always__expected)
     };
 
     from_little_endian<4>(to, from);
-    BOOST_REQUIRE_EQUAL(to[0], 0x04030201);
-    BOOST_REQUIRE_EQUAL(to[1], 0x08070605);
-    BOOST_REQUIRE_EQUAL(to[2], 0x0c0b0a09);
-    BOOST_REQUIRE_EQUAL(to[3], 0x000f0e0d);
+    BOOST_REQUIRE_EQUAL(to[0], 0x04030201u);
+    BOOST_REQUIRE_EQUAL(to[1], 0x08070605u);
+    BOOST_REQUIRE_EQUAL(to[2], 0x0c0b0a09u);
+    BOOST_REQUIRE_EQUAL(to[3], 0x000f0e0du);
 }
 
 BOOST_AUTO_TEST_CASE(to_big_endian__parallel__always__expected)
@@ -507,25 +507,25 @@ BOOST_AUTO_TEST_CASE(to_big_endian__parallel__always__expected)
 
     to_big_endian<4>(to, from);
 
-    BOOST_REQUIRE_EQUAL(to[0], 0x01);
-    BOOST_REQUIRE_EQUAL(to[1], 0x02);
-    BOOST_REQUIRE_EQUAL(to[2], 0x03);
-    BOOST_REQUIRE_EQUAL(to[3], 0x04);
+    BOOST_REQUIRE_EQUAL(to[0], 0x01u);
+    BOOST_REQUIRE_EQUAL(to[1], 0x02u);
+    BOOST_REQUIRE_EQUAL(to[2], 0x03u);
+    BOOST_REQUIRE_EQUAL(to[3], 0x04u);
 
-    BOOST_REQUIRE_EQUAL(to[4], 0x05);
-    BOOST_REQUIRE_EQUAL(to[5], 0x06);
-    BOOST_REQUIRE_EQUAL(to[6], 0x07);
-    BOOST_REQUIRE_EQUAL(to[7], 0x08);
+    BOOST_REQUIRE_EQUAL(to[4], 0x05u);
+    BOOST_REQUIRE_EQUAL(to[5], 0x06u);
+    BOOST_REQUIRE_EQUAL(to[6], 0x07u);
+    BOOST_REQUIRE_EQUAL(to[7], 0x08u);
 
-    BOOST_REQUIRE_EQUAL(to[8], 0x09);
-    BOOST_REQUIRE_EQUAL(to[9], 0x0a);
-    BOOST_REQUIRE_EQUAL(to[10], 0x0b);
-    BOOST_REQUIRE_EQUAL(to[11], 0x0c);
+    BOOST_REQUIRE_EQUAL(to[8], 0x09u);
+    BOOST_REQUIRE_EQUAL(to[9], 0x0au);
+    BOOST_REQUIRE_EQUAL(to[10], 0x0bu);
+    BOOST_REQUIRE_EQUAL(to[11], 0x0cu);
 
-    BOOST_REQUIRE_EQUAL(to[12], 0x0d);
-    BOOST_REQUIRE_EQUAL(to[13], 0x0e);
-    BOOST_REQUIRE_EQUAL(to[14], 0x0f);
-    BOOST_REQUIRE_EQUAL(to[15], 0x00);
+    BOOST_REQUIRE_EQUAL(to[12], 0x0du);
+    BOOST_REQUIRE_EQUAL(to[13], 0x0eu);
+    BOOST_REQUIRE_EQUAL(to[14], 0x0fu);
+    BOOST_REQUIRE_EQUAL(to[15], 0x00u);
 }
 
 BOOST_AUTO_TEST_CASE(to_little_endian__parallel__always__expected)
@@ -541,25 +541,25 @@ BOOST_AUTO_TEST_CASE(to_little_endian__parallel__always__expected)
 
     to_little_endian<4>(to, from);
 
-    BOOST_REQUIRE_EQUAL(to[0], 0x04);
-    BOOST_REQUIRE_EQUAL(to[1], 0x03);
-    BOOST_REQUIRE_EQUAL(to[2], 0x02);
-    BOOST_REQUIRE_EQUAL(to[3], 0x01);
+    BOOST_REQUIRE_EQUAL(to[0], 0x04u);
+    BOOST_REQUIRE_EQUAL(to[1], 0x03u);
+    BOOST_REQUIRE_EQUAL(to[2], 0x02u);
+    BOOST_REQUIRE_EQUAL(to[3], 0x01u);
 
-    BOOST_REQUIRE_EQUAL(to[4], 0x08);
-    BOOST_REQUIRE_EQUAL(to[5], 0x07);
-    BOOST_REQUIRE_EQUAL(to[6], 0x06);
-    BOOST_REQUIRE_EQUAL(to[7], 0x05);
+    BOOST_REQUIRE_EQUAL(to[4], 0x08u);
+    BOOST_REQUIRE_EQUAL(to[5], 0x07u);
+    BOOST_REQUIRE_EQUAL(to[6], 0x06u);
+    BOOST_REQUIRE_EQUAL(to[7], 0x05u);
 
-    BOOST_REQUIRE_EQUAL(to[8], 0x0c);
-    BOOST_REQUIRE_EQUAL(to[9], 0x0b);
-    BOOST_REQUIRE_EQUAL(to[10], 0x0a);
-    BOOST_REQUIRE_EQUAL(to[11], 0x09);
+    BOOST_REQUIRE_EQUAL(to[8], 0x0cu);
+    BOOST_REQUIRE_EQUAL(to[9], 0x0bu);
+    BOOST_REQUIRE_EQUAL(to[10], 0x0au);
+    BOOST_REQUIRE_EQUAL(to[11], 0x09u);
 
-    BOOST_REQUIRE_EQUAL(to[12], 0x00);
-    BOOST_REQUIRE_EQUAL(to[13], 0x0f);
-    BOOST_REQUIRE_EQUAL(to[14], 0x0e);
-    BOOST_REQUIRE_EQUAL(to[15], 0x0d);
+    BOOST_REQUIRE_EQUAL(to[12], 0x00u);
+    BOOST_REQUIRE_EQUAL(to[13], 0x0fu);
+    BOOST_REQUIRE_EQUAL(to[14], 0x0eu);
+    BOOST_REQUIRE_EQUAL(to[15], 0x0du);
 }
 
 #endif // ENDIAN_BYTE

@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     BOOST_REQUIRE_EQUAL(slice.data(), nullptr);
     BOOST_REQUIRE_EQUAL(slice.begin(), nullptr);
     BOOST_REQUIRE_EQUAL(slice.end(), nullptr);
-    BOOST_REQUIRE_EQUAL(slice.front(), 0x00);
-    BOOST_REQUIRE_EQUAL(slice.back(), 0x00);
+    BOOST_REQUIRE_EQUAL(slice.front(), 0x00u);
+    BOOST_REQUIRE_EQUAL(slice.back(), 0x00u);
 
     // methods
     BOOST_REQUIRE_EQUAL(slice.encoded(), "");
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     BOOST_REQUIRE_EQUAL(slice.to_array<0>(), data_array<0>{});
 
     // operator[] (value read past end, zero padded)
-    BOOST_REQUIRE_EQUAL(slice[0], 0x00);
+    BOOST_REQUIRE_EQUAL(slice[0], 0x00u);
 
     // cast operators
     BOOST_REQUIRE(static_cast<data_chunk>(slice).empty());
@@ -354,13 +354,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     // construct(initializer - data)
     const data_slice slice4{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     BOOST_WARN(!slice4.empty());
-    BOOST_WARN_EQUAL(slice4.size(), 10);
+    BOOST_WARN_EQUAL(slice4.size(), 10u);
     BOOST_WARN_EQUAL(slice4.encoded(), "00010203040506070809");
 
     // construct(initializer - data)
     const data_slice slice5 = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     BOOST_WARN(!slice5.empty());
-    BOOST_WARN_EQUAL(slice5.size(), 10);
+    BOOST_WARN_EQUAL(slice5.size(), 10u);
     BOOST_WARN_EQUAL(slice5.encoded(), "00010203040506070809");
 
     // construct(initializer - data)

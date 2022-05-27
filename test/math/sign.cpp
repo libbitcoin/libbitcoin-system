@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(greater__signed__equal__expected)
 BOOST_AUTO_TEST_CASE(greater__unsigned__different__expected)
 {
     BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1), 1);
+    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1), 1u);
     BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 0u), 1u);
     BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 1u), 1u);
     BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0u), 1u);

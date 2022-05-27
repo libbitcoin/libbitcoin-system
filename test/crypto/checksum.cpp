@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(checksum__verify_checksum_slice__invalidated__false)
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_one_empty__expected_size)
 {
     const auto checked = bech32_build_checked(1, {}, "");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1 + 0 + 6);
+    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "p2gdwpf");
 }
 
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_overflow__empty)
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__prefix_empty_payload__size_same_as_empty_prefix)
 {
     const auto checked = bech32_build_checked(0, {}, "abcdef");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1 + 0 + 6);
+    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "qgfl9ah");
 }
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expecte
 {
     const data_chunk program{ 1, 2, 3, 4, 5 };
     const auto checked = bech32_build_checked(0, program, "");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1 + (program.size() * 8) / 5 + 6);
+    BOOST_REQUIRE_EQUAL(checked.size(), 1u + (program.size() * 8u) / 5u + 6u);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "qqypqxpq939vyak");
 }
 

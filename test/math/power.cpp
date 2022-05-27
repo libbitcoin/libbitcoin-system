@@ -620,29 +620,29 @@ BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__power_2__identity)
 
 BOOST_AUTO_TEST_CASE(power__pow2__0__1)
 {
-    BOOST_REQUIRE_EQUAL(power2(0), 1);
+    BOOST_REQUIRE_EQUAL(power2(0), 1u);
     BOOST_REQUIRE_EQUAL(power2(0u), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__pow2__1__2)
 {
-    BOOST_REQUIRE_EQUAL(power2(1), 2);
+    BOOST_REQUIRE_EQUAL(power2(1), 2u);
     BOOST_REQUIRE_EQUAL(power2(1u), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(power__pow2__negative_1__0)
 {
-    BOOST_REQUIRE_EQUAL(power2(-1), 1 / 2);
+    BOOST_REQUIRE_EQUAL(power2(-1), 1u / 2u);
 }
 
 BOOST_AUTO_TEST_CASE(power__pow2__negative_2__0)
 {
-    BOOST_REQUIRE_EQUAL(power2(-2), 1 / 4);
+    BOOST_REQUIRE_EQUAL(power2(-2), 1u / 4u);
 }
 
 BOOST_AUTO_TEST_CASE(power__pow2__negative_3__underflow)
 {
-    BOOST_REQUIRE_EQUAL(power2(-3), 0);
+    BOOST_REQUIRE_EQUAL(power2(-3), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__pow2__15__0x8000)
@@ -660,57 +660,57 @@ BOOST_AUTO_TEST_CASE(power__pow2__overflow__0)
 BOOST_AUTO_TEST_CASE(power__power__0_0__undefined)
 {
     // undefined
-    BOOST_REQUIRE_EQUAL(power(0, 0), 0);
+    BOOST_REQUIRE_EQUAL(power(0, 0), 0u);
     BOOST_REQUIRE_EQUAL(power(0u, 0u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__0_1__0)
 {
-    BOOST_REQUIRE_EQUAL(power(0, 1), 0);
+    BOOST_REQUIRE_EQUAL(power(0, 1), 0u);
     BOOST_REQUIRE_EQUAL(power(0u, 1u), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__1_0__1)
 {
-    BOOST_REQUIRE_EQUAL(power(1, 0), 1);
+    BOOST_REQUIRE_EQUAL(power(1, 0), 1u);
     BOOST_REQUIRE_EQUAL(power(1u, 0u), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__1_1__1)
 {
-    BOOST_REQUIRE_EQUAL(power(1, 1), 1);
+    BOOST_REQUIRE_EQUAL(power(1, 1), 1u);
     BOOST_REQUIRE_EQUAL(power(1u, 1u), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__3_0__1)
 {
-    BOOST_REQUIRE_EQUAL(power(3, 0), 1);
+    BOOST_REQUIRE_EQUAL(power(3, 0), 1u);
     BOOST_REQUIRE_EQUAL(power(3u, 0u), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__1_negative_1__1)
 {
-    BOOST_REQUIRE_EQUAL(power(1, -1), 1 / 1);
+    BOOST_REQUIRE_EQUAL(power(1, -1), 1u / 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__3_negative_1__0)
 {
-    BOOST_REQUIRE_EQUAL(power(3, -1), 1 / 3);
+    BOOST_REQUIRE_EQUAL(power(3, -1), 1u / 3u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__3_negative_2__0)
 {
-    BOOST_REQUIRE_EQUAL(power(3, -2), 1 / 9);
+    BOOST_REQUIRE_EQUAL(power(3, -2), 1u / 9u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__3_negative_3__0)
 {
-    BOOST_REQUIRE_EQUAL(power(3, -3), 1 / 81);
+    BOOST_REQUIRE_EQUAL(power(3, -3), 1u / 81u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__3_10__0xe6a9)
 {
-    BOOST_REQUIRE_EQUAL(power(3, 10), 0xe6a9);
+    BOOST_REQUIRE_EQUAL(power(3, 10), 0xe6a9u);
     BOOST_REQUIRE_EQUAL(power(3u, 10u), 0xe6a9u);
 }
 
@@ -727,42 +727,42 @@ BOOST_AUTO_TEST_CASE(power__power__2_16__equals_pow2_16)
 
 BOOST_AUTO_TEST_CASE(power__power__negative_1_0__1)
 {
-    BOOST_REQUIRE_EQUAL(power(-1, 0), 1);
+    BOOST_REQUIRE_EQUAL(power(-1, 0), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_1_1__negative_1)
 {
-    BOOST_REQUIRE_EQUAL(power(-1, 1), -1 / 1);
+    BOOST_REQUIRE_EQUAL(power(-1, 1), static_cast<size_t>(-1));
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_0__1)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, 0), 1);
+    BOOST_REQUIRE_EQUAL(power(-3, 0), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_1__negative_3)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, 1), -3);
+    BOOST_REQUIRE_EQUAL(power(-3, 1), static_cast<size_t>(-3));
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_negative_1__0)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, -1), 1 / -3);
+    BOOST_REQUIRE_EQUAL(power(-3, -1), 1u / static_cast<size_t>(-3));
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_negative_2__0)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, -2), 1 / 9);
+    BOOST_REQUIRE_EQUAL(power(-3, -2),1u / 9u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_negative_3__0)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, -3), 1 / -81);
+    BOOST_REQUIRE_EQUAL(power(-3, -3), 1u / static_cast<size_t>(-81));
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_3_10__0xe6a9)
 {
-    BOOST_REQUIRE_EQUAL(power(-3, 10), 0xe6a9);
+    BOOST_REQUIRE_EQUAL(power(-3, 10), 0xe6a9u);
 }
 
 BOOST_AUTO_TEST_CASE(power__power__negative_overflow__expected)

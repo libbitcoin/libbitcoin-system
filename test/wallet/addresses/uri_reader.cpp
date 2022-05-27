@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__positive_unknown_optional_parameter__tes
     const auto uri = parse("bitcoin:?ignore=true");
     BOOST_REQUIRE(uri);
     BOOST_REQUIRE(uri.address().empty());
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
     BOOST_REQUIRE(uri.label().empty());
     BOOST_REQUIRE(uri.message().empty());
     BOOST_REQUIRE(uri.r().empty());
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__address__test)
     const auto uri = parse("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
     BOOST_REQUIRE(uri);
     BOOST_REQUIRE_EQUAL(uri.payment().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
     BOOST_REQUIRE(uri.label().empty());
     BOOST_REQUIRE(uri.message().empty());
     BOOST_REQUIRE(uri.r().empty());
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__minimal_amount__test)
 {
     const auto uri = parse("bitcoin:?amount=.");
     BOOST_REQUIRE(uri);
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(uri_reader__parse__invalid_amount__test)
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__label_only__test)
     const auto uri = parse("bitcoin:?label=test");
     BOOST_REQUIRE(uri);
     BOOST_REQUIRE(!uri.payment());
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
     BOOST_REQUIRE_EQUAL(uri.label(), "test");
     BOOST_REQUIRE(uri.message().empty());
     BOOST_REQUIRE(uri.r().empty());
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__message_only__test)
 {
     const auto uri = parse("bitcoin:?message=Hi%20Alice");
     BOOST_REQUIRE(!uri.payment());
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
     BOOST_REQUIRE(uri.label().empty());
     BOOST_REQUIRE_EQUAL(uri.message(), "Hi Alice");
     BOOST_REQUIRE(uri.r().empty());
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__payment_protocol_only__test)
 {
     const auto uri = parse("bitcoin:?r=http://www.example.com?purchase%3Dshoes");
     BOOST_REQUIRE(!uri.payment());
-    BOOST_REQUIRE_EQUAL(uri.amount(), 0);
+    BOOST_REQUIRE_EQUAL(uri.amount(), 0u);
     BOOST_REQUIRE(uri.label().empty());
     BOOST_REQUIRE(uri.message().empty());
     BOOST_REQUIRE_EQUAL(uri.r(), "http://www.example.com?purchase=shoes");
