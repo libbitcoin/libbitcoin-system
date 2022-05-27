@@ -617,8 +617,8 @@ operations script::to_pay_multisig_pattern(uint8_t signatures,
 {
     static constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     static constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-    static constexpr auto zero = op_81 - 1;
-    static constexpr auto max = op_96 - zero;
+    static constexpr auto base = op_81 - 1;
+    static constexpr auto max = op_96 - base;
 
     const auto m = signatures;
     const auto n = points.size();
@@ -626,8 +626,8 @@ operations script::to_pay_multisig_pattern(uint8_t signatures,
     if (m < 1 || m > n || n < 1 || n > max)
         return operations();
 
-    const auto op_m = static_cast<opcode>(m + zero);
-    const auto op_n = static_cast<opcode>(points.size() + zero);
+    const auto op_m = static_cast<opcode>(m + base);
+    const auto op_n = static_cast<opcode>(points.size() + base);
 
     operations ops;
     ops.reserve(points.size() + 3);

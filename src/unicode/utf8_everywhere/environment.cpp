@@ -281,7 +281,7 @@ void free_environment(char* environment[]) noexcept
 char** allocate_environment(int argc, wchar_t* argv[]) noexcept
 {
     // Allocate argument pointer array.
-    const auto size = add1(static_cast<size_t>(argc));
+    auto size = add1(static_cast<size_t>(argc));
     const auto buffer = std::malloc(size * sizeof(char*));
     const auto arguments = reinterpret_cast<char**>(buffer);
 
@@ -297,7 +297,7 @@ char** allocate_environment(int argc, wchar_t* argv[]) noexcept
             return nullptr;
 
         const auto utf8 = to_utf8(argv[arg]);
-        const auto size = utf8.size();
+        size = utf8.size();
 
         // Guard terminator addition.
         if (size == max_size_t)
