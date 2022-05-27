@@ -41,7 +41,7 @@ parse_encrypted_public::magic_
 data_array<parse_encrypted_public::prefix_size>
 parse_encrypted_public::prefix_factory(uint8_t address) noexcept
 {
-    const auto context = default_context_ + address;
+    const auto context = static_cast<uint8_t>(default_context_ + address);
     return splice(magic_, to_array(context));
 }
 

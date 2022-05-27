@@ -41,7 +41,7 @@ parse_encrypted_private::prefix_factory(uint8_t address,
     bool multiplied) noexcept
 {
     const auto base = multiplied ? multiplied_context_ : default_context_;
-    const auto context = base + address;
+    const auto context = static_cast<uint8_t>(base + address);
     return splice(magic_, to_array(context));
 }
 
