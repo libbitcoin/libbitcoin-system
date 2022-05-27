@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/define.hpp>
 
 #ifdef WITH_AVX2
 
@@ -108,8 +109,10 @@ void inline Write8(uint8_t* out, int offset, __m256i v) noexcept
     to_little_endian(out + 224 + offset, _mm256_extract_epi32(v, 0));
 }
 
-void sha256_avx2(uint32_t* state, const uint8_t* data, uint32_t blocks)
+////void sha256_avx2(uint32_t* state, const uint8_t* data, uint32_t blocks)
+void sha256_avx2(uint32_t*, const uint8_t*, uint32_t)
 {
+    BC_ASSERT_MSG(false, "not implemented");
     // TODO: iterate over N blocks, eight lanes per block.
     // TODO: this is currently disabled in single_sha256.
 }

@@ -9,6 +9,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/define.hpp>
 
 #ifdef WITH_SSE41
 
@@ -98,8 +99,10 @@ void inline Write4(uint8_t* out, int offset, __m128i v) noexcept
     to_little_endian(out + 96 + offset, _mm_extract_epi32(v, 0));
 }
 
-void sha256_sse41(uint32_t* state, const uint8_t* data, uint32_t blocks)
+////void sha256_sse41(uint32_t* state, const uint8_t* data, uint32_t blocks)
+void sha256_sse41(uint32_t*, const uint8_t*, uint32_t)
 {
+    BC_ASSERT_MSG(false, "not implemented");
     // TODO: iterate over N blocks, four lanes per block.
     // TODO: this is currently disabled in single_sha256.
 }
