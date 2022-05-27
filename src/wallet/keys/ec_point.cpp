@@ -30,7 +30,7 @@ namespace system {
 const uint8_t ec_point::invalid = 0x00;
 const uint8_t ec_point::compressed_even = 0x02;
 const uint8_t ec_point::compressed_odd = 0x03;
-const uint8_t ec_point::uncompressed = 0x04;
+const uint8_t ec_point::compressed_off = 0x04;
 const ec_point ec_point::generator{ ec_compressed_generator };
 
 // private

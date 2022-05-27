@@ -37,7 +37,7 @@ public:
     static const uint8_t invalid;
     static const uint8_t compressed_even;
     static const uint8_t compressed_odd;
-    static const uint8_t uncompressed;
+    static const uint8_t compressed_off;
     static const ec_point generator;
 
     /// Constructors.

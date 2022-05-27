@@ -260,9 +260,9 @@ bool electrum_v1::is_valid_dictionary(language identifier) noexcept
     return dictionaries_.exists(identifier);
 }
 
-bool electrum_v1::is_valid_entropy_size(size_t size) noexcept
+bool electrum_v1::is_valid_entropy_size(size_t value) noexcept
 {
-    return size == entropy_minimum || size == entropy_maximum;
+    return value == entropy_minimum || value == entropy_maximum;
 }
 
 bool electrum_v1::is_valid_word_count(size_t count) noexcept
