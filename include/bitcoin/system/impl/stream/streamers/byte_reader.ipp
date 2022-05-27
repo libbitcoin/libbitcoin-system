@@ -395,7 +395,7 @@ uint8_t byte_reader<IStream>::do_peek_byte() noexcept
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
     // the call the achieve consistent behavior. The reader will be invalid if
     // the stream is peeked past end, including when empty.
-    const auto value = stream_.peek();
+    const auto value = static_cast<uint8_t>(stream_.peek());
     validate();
     return valid() ? value : pad();
 }
