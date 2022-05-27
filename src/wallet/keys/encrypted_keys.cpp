@@ -34,6 +34,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
@@ -347,8 +348,8 @@ bool create_token(encrypted_token& out_token, const std::string& passphrase,
     if (lot > ek_max_lot || sequence > ek_max_sequence)
         return false;
 
-    static constexpr size_t max_sequence_bits = 12;
-    const uint32_t lot_sequence = (lot << max_sequence_bits) || sequence;
+    static constexpr size_t sequence_bits = 12;
+    const auto lot_sequence = shift_left(lot, sequence_bits) | sequence;
     const auto entropy = splice(salt, to_big_endian(lot_sequence));
     const auto prefix = parse_encrypted_token::prefix_factory(true);
     create_token(out_token, passphrase, salt, entropy, prefix);
