@@ -334,9 +334,9 @@ BOOST_AUTO_TEST_CASE(ec_scalar__sum__secret1a_secret1b__sum1)
 
 BOOST_AUTO_TEST_CASE(ec_scalar__sum__positive1_positive2__positive3)
 {
-    const ec_scalar one{ positive1 };
-    const ec_scalar two{ positive2 };
-    BOOST_REQUIRE_EQUAL((one + two), positive3);
+    const ec_scalar one_value{ positive1 };
+    const ec_scalar two_value{ positive2 };
+    BOOST_REQUIRE_EQUAL((one_value + two_value), positive3);
 }
 
 BOOST_AUTO_TEST_CASE(ec_scalar__sum__positives__expected)
@@ -388,9 +388,9 @@ BOOST_AUTO_TEST_CASE(ec_scalar__difference__cool__expected)
 
 BOOST_AUTO_TEST_CASE(ec_scalar__difference__positive1_positive2__negative1)
 {
-    const ec_scalar one{ positive1 };
-    const ec_scalar two{ positive2 };
-    BOOST_REQUIRE_EQUAL((one - two), negative1);
+    const ec_scalar one_value{ positive1 };
+    const ec_scalar two_value{ positive2 };
+    BOOST_REQUIRE_EQUAL((one_value - two_value), negative1);
 }
 
 BOOST_AUTO_TEST_CASE(ec_scalar__difference__same_positives__zero)
@@ -458,16 +458,16 @@ BOOST_AUTO_TEST_CASE(ec_scalar__product__secret1a_secret1b__product1)
 
 BOOST_AUTO_TEST_CASE(ec_scalar__product__zero_positive2__zero)
 {
-    const ec_scalar zero;
-    const ec_scalar two{ positive2 };
-    BOOST_REQUIRE_EQUAL((zero * two), zero);
+    const ec_scalar zero_value;
+    const ec_scalar two_value{ positive2 };
+    BOOST_REQUIRE_EQUAL((zero_value * two_value), zero_value);
 }
 
 BOOST_AUTO_TEST_CASE(ec_scalar__product__positive1_positive2__positive2)
 {
-    const ec_scalar one{ positive1 };
-    const ec_scalar two{ positive2 };
-    BOOST_REQUIRE_EQUAL((one * two), positive2);
+    const ec_scalar one_value{ positive1 };
+    const ec_scalar two_value{ positive2 };
+    BOOST_REQUIRE_EQUAL((one_value * two_value), positive2);
 }
 
 BOOST_AUTO_TEST_CASE(ec_scalar__product__positives__expected)

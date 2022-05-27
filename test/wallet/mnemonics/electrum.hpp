@@ -60,9 +60,9 @@ struct electrum_vector
     long_hash seed;
 
     // Standardize sentence delimiters (for output comparison only).
-    std::string sentence(language lingo) const
+    std::string sentence(language value) const
     {
-        const auto is_japanese = (lingo == language::ja);
+        const auto is_japanese = (value == language::ja);
         const auto space = is_japanese ? ideographic_space : ascii_space;
         return join(split(mnemonic), space);
     }
