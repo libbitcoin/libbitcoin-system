@@ -38,12 +38,12 @@ inline uint8_t from_base16_characters(char high, char low) noexcept
     const auto from_base16_digit = [](char character) noexcept
     {
         if (is_between(character, 'A', 'F'))
-            return character - 'A' + '\xA';
+            return static_cast<uint8_t>(character - 'A' + '\xA');
 
         if (is_between(character, 'a', 'f'))
-            return character - 'a' + '\xa';
+            return static_cast<uint8_t>(character - 'a' + '\xa');
 
-        return character - '0' + '\x0';
+        return static_cast<uint8_t>(character - '0' + '\x0');
     };
 
     return (from_base16_digit(high) << to_half(byte_bits)) |
