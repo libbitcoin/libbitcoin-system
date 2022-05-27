@@ -258,7 +258,6 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_1__success)
 {
-
     stream::in::copy stream(tx1_data);
     const transaction tx(stream, true);
     BOOST_REQUIRE(tx.is_valid());
