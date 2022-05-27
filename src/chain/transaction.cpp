@@ -1169,6 +1169,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     using namespace system::machine;
 
     code ec;
+    bool witnessed;
     const auto& in = (*inputs_)[index];
 
     // Evaluate input script.
@@ -1186,9 +1187,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
-    auto witnessed = in->prevout->script().is_pay_to_witness(state.forks);
-
-    if (witnessed)
+    if ((witnessed = in->prevout->script().is_pay_to_witness(state.forks)))
     {
         // The input script must be empty (bip141).
         if (!in->script().ops().empty())
@@ -1246,9 +1245,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
-        witnessed = embedded_script.is_pay_to_witness(state.forks);
-
-        if (witnessed)
+        if ((witnessed = embedded_script.is_pay_to_witness(state.forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
             if (in->script().ops().size() != one)
