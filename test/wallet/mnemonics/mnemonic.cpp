@@ -514,11 +514,11 @@ BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__sizes__expected)
 BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__denormalization__expected)
 {
 #ifdef WITH_ICU
-    const auto abnormals_en = 0;
-    const auto abnormals_ja = 22u;
+    const ptrdiff_t abnormals_en = 0;
+    const ptrdiff_t abnormals_ja = 22;
 #else
-    const auto abnormals_en = 0;
-    const auto abnormals_ja = 0;
+    const ptrdiff_t abnormals_en = 0;
+    const ptrdiff_t abnormals_ja = 0;
 #endif
     // When WITH_ICU is undefined normalization cannot be verified.
     BOOST_REQUIRE_EQUAL(abnormals(vectors_en, ascii_space), abnormals_en);

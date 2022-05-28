@@ -1382,7 +1382,7 @@ BOOST_AUTO_TEST_CASE(electrum__verify_vectors__size__expected)
 
 BOOST_AUTO_TEST_CASE(electrum__verify_vectors__denormalization__expected)
 {
-    const auto abnormal_vectors = 0;
+    const ptrdiff_t abnormal_vectors = 0;
 
     // When WITH_ICU is undefined normalization cannot be verified.
     BOOST_REQUIRE_EQUAL(abnormals(vectors, ascii_space), abnormal_vectors);
