@@ -66,6 +66,13 @@ std::ostream& operator<<(std::ostream& stream,
 #define TEST_PATH \
     TEST_DIRECTORY + "/" + TEST_NAME
 
+// Avoid warning which occurs in either case.
+#ifdef BC_CPP_20
+    #define IF_CONSTEXPR if constexpr
+#else
+    #define IF_CONSTEXPR if
+#endif
+
 namespace test {
 
 // Common directory for all test file creations.
