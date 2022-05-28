@@ -80,14 +80,14 @@ binary_search(const Collection& list, const Element& element) noexcept
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept
 {
+    // This suppression doesn't work, but calls std::transform anyway.
     ////// Suppress C4244: conversion from 'const _Elem' to '_Ty'.
     ////// This is the intent of the operation, caller ensures cast safety.
     ////BC_PUSH_MSVC_WARNING(4244)
     ////return { std::begin(source), std::end(source) };
     ////BC_POP_MSVC_WARNING()
 
-    std::vector<To> out;
-    out.reserve(source.size());
+    std::vector<To> out(source.size());
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element)
         {
