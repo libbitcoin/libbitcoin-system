@@ -25,6 +25,12 @@
       <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- Enable use of CPU intrinsics. -->
+      <PreprocessorDefinitions Condition="'$(Option-avx2)'  == 'true'">WITH_AVX2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sse41)' == 'true'">WITH_SSE41;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-shani)' == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sse4)'   == 'true'">WITH_SSE4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-neon)'  == 'true'">WITH_NEON;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 

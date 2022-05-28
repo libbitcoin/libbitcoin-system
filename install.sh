@@ -126,7 +126,7 @@ make_jobs()
     shift 1
 
     SEQUENTIAL=1
-    # Avoid setting -j1 (causes problems on Travis).
+    # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
     if [[ $JOBS > $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@"
     else
@@ -348,23 +348,6 @@ set_with_boost_prefix()
     fi
 }
 
-
-# Initialize the build environment.
-#==============================================================================
-enable_exit_on_error
-parse_command_line_options "$@"
-handle_help_line_option
-handle_custom_options
-set_operating_system
-configure_build_parallelism
-set_os_specific_compiler_settings "$@"
-link_to_standard_library
-normalize_static_and_shared_options "$@"
-remove_build_options
-set_prefix
-set_pkgconfigdir
-set_with_boost_prefix
-
 display_configuration()
 {
     display_message "libbitcoin-system installer configuration."
@@ -389,49 +372,6 @@ display_configuration()
     display_message "with_pkgconfigdir     : ${with_pkgconfigdir}"
     display_message "--------------------------------------------------------------------"
 }
-
-
-# Define build options.
-#==============================================================================
-# Define icu options.
-#------------------------------------------------------------------------------
-ICU_OPTIONS=(
-"--enable-draft" \
-"--enable-tools" \
-"--disable-extras" \
-"--disable-icuio" \
-"--disable-layout" \
-"--disable-layoutex" \
-"--disable-tests" \
-"--disable-samples")
-
-# Define boost options.
-#------------------------------------------------------------------------------
-BOOST_OPTIONS=(
-"--with-atomic" \
-"--with-chrono" \
-"--with-date_time" \
-"--with-filesystem" \
-"--with-iostreams" \
-"--with-locale" \
-"--with-log" \
-"--with-program_options" \
-"--with-regex" \
-"--with-system" \
-"--with-thread" \
-"--with-test")
-
-# Define secp256k1 options.
-#------------------------------------------------------------------------------
-SECP256K1_OPTIONS=(
-"--disable-tests" \
-"--enable-module-recovery")
-
-# Define bitcoin-system options.
-#------------------------------------------------------------------------------
-BITCOIN_SYSTEM_OPTIONS=(
-"${with_boost}" \
-"${with_pkgconfigdir}")
 
 
 # Define build functions.
@@ -466,6 +406,9 @@ build_from_tarball()
     local OPTIONS=$7
     shift 7
 
+    local SAVE_LDFLAGS="$LDFLAGS"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+
     # For some platforms we need to set ICU pkg-config path.
     if [[ ! ($BUILD) ]]; then
         if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
@@ -476,7 +419,6 @@ build_from_tarball()
 
     # Because ICU tools don't know how to locate internal dependencies.
     if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
-        local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
@@ -647,6 +589,7 @@ build_from_tarball_boost()
     # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
+        "cxxstd=11" \
         "variant=release" \
         "threading=multi" \
         "$BOOST_TOOLSET" \
@@ -715,8 +658,8 @@ build_from_local()
     make_current_directory "$JOBS" "${CONFIGURATION[@]}"
 }
 
-# Because Travis alread has downloaded the primary repo.
-build_from_travis()
+# Because continuous integration services has downloaded the primary repository.
+build_from_ci()
 {
     local ACCOUNT=$1
     local REPO=$2
@@ -725,9 +668,9 @@ build_from_travis()
     local OPTIONS=$5
     shift 5
 
-    # The primary build is not downloaded if we are running in Travis.
-    if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
+    # The primary build is not downloaded if we are running on a continuous integration system.
+    if [[ $CI == true ]]; then
+        build_from_local "Local $CI_REPOSITORY" "$JOBS" "${OPTIONS[@]}" "$@"
         make_tests "$JOBS"
     else
         build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
@@ -747,8 +690,69 @@ build_all()
     build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
     build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
     build_from_github libbitcoin secp256k1 version7 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
-    build_from_travis libbitcoin libbitcoin-system version3 "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
+    build_from_ci libbitcoin libbitcoin-system version3 "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
+
+
+# Initialize the build environment.
+#==============================================================================
+enable_exit_on_error
+parse_command_line_options "$@"
+handle_help_line_option
+handle_custom_options
+set_operating_system
+configure_build_parallelism
+set_os_specific_compiler_settings "$@"
+link_to_standard_library
+normalize_static_and_shared_options "$@"
+remove_build_options
+set_prefix
+set_pkgconfigdir
+set_with_boost_prefix
+
+
+# Define build options.
+#==============================================================================
+# Define icu options.
+#------------------------------------------------------------------------------
+ICU_OPTIONS=(
+"--enable-draft" \
+"--enable-rpath" \
+"--enable-tools" \
+"--disable-extras" \
+"--disable-icuio" \
+"--disable-layout" \
+"--disable-layoutex" \
+"--disable-tests" \
+"--disable-samples")
+
+# Define boost options.
+#------------------------------------------------------------------------------
+BOOST_OPTIONS=(
+"--with-atomic" \
+"--with-chrono" \
+"--with-date_time" \
+"--with-filesystem" \
+"--with-iostreams" \
+"--with-locale" \
+"--with-log" \
+"--with-program_options" \
+"--with-regex" \
+"--with-system" \
+"--with-thread" \
+"--with-test")
+
+# Define secp256k1 options.
+#------------------------------------------------------------------------------
+SECP256K1_OPTIONS=(
+"--disable-tests" \
+"--enable-module-recovery")
+
+# Define bitcoin-system options.
+#------------------------------------------------------------------------------
+BITCOIN_SYSTEM_OPTIONS=(
+"${with_boost}" \
+"${with_pkgconfigdir}")
 
 
 # Build the primary library and all dependencies.
