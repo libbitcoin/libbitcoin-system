@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(istream__clear__all_flags_set__cleared)
     isstream.setstate(std::istream::eofbit);
     isstream.setstate(std::istream::failbit);
     isstream.setstate(std::istream::badbit);
-    BOOST_REQUIRE_NE(isstream.rdstate(), 0);
+    BOOST_REQUIRE_NE(isstream.rdstate(), std::istream::goodbit);
     isstream.clear();
     BOOST_REQUIRE_EQUAL(isstream.rdstate(), std::istream::goodbit);
 
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(istream__clear__all_flags_set__cleared)
     istream.setstate(std::istream::eofbit);
     istream.setstate(std::istream::failbit);
     istream.setstate(std::istream::badbit);
-    BOOST_REQUIRE_NE(istream.rdstate(), 0);
+    BOOST_REQUIRE_NE(istream.rdstate(), std::istream::goodbit);
     istream.clear();
     BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
 }
