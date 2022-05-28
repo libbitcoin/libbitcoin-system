@@ -27,7 +27,8 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
-// Defined externally for non-msvc builds.
+// These are defined in the GUI for VS builds and by command line for others.
+// But overriding these here for VS builds to keep tests active.
 #if defined(_MSC_VER) && defined(BC_X64_BUILD) && !defined(BC_PORTABLE)
     #define WITH_AVX2
     #define WITH_SSE41
