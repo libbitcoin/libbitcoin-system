@@ -13,10 +13,34 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
+
+      <!-- General -->
+      <!-- WarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <WarningLevel>Level4</WarningLevel>
+      <CompileAsManaged>false</CompileAsManaged>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+
+      <!-- Language -->
+      <!-- Language extensions are enabled by default (required for STL/Boost). -->
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <!-- These override each other in sequence, so order matters (unspecified reverts to defaults). -->
+      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 15.0">stdcpp14</LanguageStandard>
+      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 16.0">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 17.0"><!-- /std:c++20 --></LanguageStandard>
+      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 15.0">false</ConformanceMode>
+      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 16.0">true</ConformanceMode>
+      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 17.0">true</ConformanceMode>
+      <EnableModules>false</EnableModules>
+
+      <!-- External Includes -->
+      <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <ExternalWarningLevel>Level4</ExternalWarningLevel>
+      </ClCompile>
   </ItemDefinitionGroup>
 
 </Project>
