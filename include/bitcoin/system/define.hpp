@@ -108,6 +108,23 @@ namespace bc = libbitcoin;
     #define BC_CPP_20
 #endif
 
+// MSFT predefined constant for VS version.
+#if _MSC_VER >= 1800
+#define BC_VS2013
+#endif
+#if _MSC_VER >= 1900
+#define BC_VS2015
+#endif
+#if _MSC_VER >= 1910
+#define BC_VS2017
+#endif
+#if _MSC_VER >= 1920
+#define BC_VS2019
+#endif
+#if _MSC_VER >= 1930
+#define BC_VS2022
+#endif
+
 // External: Requires that <bitcoin/system.hpp> be included before boost.
 // Current alphabetical sort of system.hpp ensures this appears before boost.
 // Internal: Placeholders are not currently used in this system library.
@@ -131,14 +148,29 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
 #ifdef _MSC_VER
     // Suppress C4706: assignment within conditional expression (we allow).
     #pragma warning(disable:4706)
+
+    // Suppress C4459: declaration of 'one' hides global declaration.
+    // This arises from boost templates  defining 'one' as a local variable,
+    // in their own namespaces. Have found no narrower way to exclude it.
+    #pragma warning(disable:4459)
 #endif
 
 #ifdef _MSC_VER
-    #define PRAGMA(pragma) _Pragma(#pragma)
+    // vs2017 and earlier do not support _Pragma, though these suppressions
+    // apply only to msvc in any case, so just use the vc++ extension.
     #define BC_PUSH_MSVC_WARNING(value) \
-        PRAGMA(warning(push)) \
-        PRAGMA(warning(disable:value))
-    #define BC_POP_MSVC_WARNING() PRAGMA(warning(pop))
+        __pragma(warning(push)) \
+        __pragma(warning(disable:value))
+    #define BC_POP_MSVC_WARNING() \
+        __pragma(warning(pop))
+////#ifdef BC_VS2019
+////    #define PRAGMA(pragma) _Pragma(#pragma)
+////    #define BC_PUSH_MSVC_WARNING(value) \
+////        PRAGMA(warning(push)) \
+////        PRAGMA(warning(disable:value))
+////    #define BC_POP_MSVC_WARNING() \
+////        PRAGMA(warning(pop))
+////#endif
 #else
     #define BC_PUSH_MSVC_WARNING(warning)
     #define BC_POP_MSVC_WARNING()
