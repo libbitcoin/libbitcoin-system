@@ -181,6 +181,7 @@ BOOST_AUTO_TEST_CASE(hash__hash_reduce__two_pair__expected)
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
+// BUGBUG: throws on 32 bit builds.
 BOOST_AUTO_TEST_CASE(hash__hash_reduce__four_pair__expected)
 {
     hash_list hashes

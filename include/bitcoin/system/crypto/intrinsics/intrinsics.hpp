@@ -28,7 +28,7 @@
 #include <bitcoin/system/define.hpp>
 
 // Defined externally for non-msvc builds.
-#if defined(_MSC_VER) && !defined(PORTABLE)
+#if defined(_MSC_VER) && defined(BC_X64_BUILD) && !defined(BC_PORTABLE)
     #define WITH_AVX2
     #define WITH_SSE41
     #define WITH_SSE4

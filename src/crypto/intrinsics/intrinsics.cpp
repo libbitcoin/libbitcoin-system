@@ -322,6 +322,7 @@ void sha256_paired_double(uint8_t* out, const uint8_t* in,
     {
         while (blocks >= 4)
         {
+            // BUGBUG: throws on 32 bit builds.
             double_sha256_x4_sse41(out, in);
             std::advance(out, hash_size * 4);
             std::advance(in, block_size * 4);

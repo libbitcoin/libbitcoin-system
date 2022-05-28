@@ -91,6 +91,15 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
+// ISO predefined constant for targeted CPU architecture.
+#if defined _M_IX86
+    #define BC_X86_BUILD
+#elif defined _M_X64
+    #define BC_X64_BUILD
+#elif defined _M_IA64
+    #define BC_ITANIUM_BUILD
+#endif
+
 // ISO predefined constant for C++ version.
 #if __cplusplus >= 199711L
     #define BC_CPP_03
