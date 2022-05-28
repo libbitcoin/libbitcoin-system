@@ -47,7 +47,7 @@
 
 // Regarding source files:
 //
-// Don't use #pragma execution_character_set("utf-8") in VC++.
+// Don't use #pragma execution_character_set("utf-8") in vc++.
 // This instruction causes sources to be explicitly interpreted as utf8.
 // However this technique improperly encodes literals ("フ" for example).
 // Instead use non-BOM UTF8 encoded files. To do this use "save as..."
