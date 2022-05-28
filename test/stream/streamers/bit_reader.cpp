@@ -432,7 +432,10 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__eight_bytes__expected)
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708u);
     reader.rewind_bytes(9);
 
-    IF_CONSTEXPR(sizeof(size_t) < sizeof(uint64_t))
+    // Suppress 4127: constant conditional expression.
+    BC_PUSH_MSVC_WARNING(4127)
+
+    if (sizeof(size_t) < sizeof(uint64_t))
     {
         BOOST_REQUIRE_EQUAL(reader.read_size(), 0u);
         BOOST_REQUIRE(!reader);
@@ -442,6 +445,8 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_variable_size__eight_bytes__expected)
         BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0102030405060708u);
         BOOST_REQUIRE(reader);
     }
+
+    BC_POP_MSVC_WARNING()
 }
 
 // read_error_code

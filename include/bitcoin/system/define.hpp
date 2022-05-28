@@ -43,7 +43,7 @@ namespace bc = libbitcoin;
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-// See http://gcc.gnu.org/wiki/Visibility
+// See gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
 // GNU visibilty attribute overrides compiler flag `fvisibility`.
@@ -165,21 +165,23 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
 #endif
 
 #ifdef _MSC_VER
-    // vs2017 and earlier do not support _Pragma, though these suppressions
-    // apply only to msvc in any case, so just use the vc++ extension.
-    #define BC_PUSH_MSVC_WARNING(value) \
-        __pragma(warning(push)) \
-        __pragma(warning(disable:value))
-    #define BC_POP_MSVC_WARNING() \
-        __pragma(warning(pop))
-////#ifdef BC_VS2019
-////    #define PRAGMA(pragma) _Pragma(#pragma)
-////    #define BC_PUSH_MSVC_WARNING(value) \
-////        PRAGMA(warning(push)) \
-////        PRAGMA(warning(disable:value))
-////    #define BC_POP_MSVC_WARNING() \
-////        PRAGMA(warning(pop))
-////#endif
+    // vs2017 and earlier do not support _Pragma, though it allows macros to
+    // parameterize the warning value. Degrade to broader exclusion in vs2017.
+    #ifdef BC_VS2019
+        #define PRAGMA(pragma) _Pragma(#pragma)
+        #define BC_PUSH_MSVC_WARNING(value) \
+            PRAGMA(warning(push)) \
+            PRAGMA(warning(disable:value))
+        #define BC_POP_MSVC_WARNING() \
+            PRAGMA(warning(pop))
+    #else
+        #define BC_PUSH_MSVC_WARNING(value) \
+            __pragma(warning(push)) \
+            __pragma(warning(disable:value))
+        #define BC_POP_MSVC_WARNING() \
+            __pragma(warning(pop))
+    #endif
+
 #else
     #define BC_PUSH_MSVC_WARNING(warning)
     #define BC_POP_MSVC_WARNING()
