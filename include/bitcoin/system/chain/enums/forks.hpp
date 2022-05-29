@@ -117,21 +117,21 @@ enum forks : uint32_t
     // TODO:
     /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
     /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
-    unlock_rule = bit_right<uint32_t>(21),
+    unlock_rule = bit_right<uint32_t>(23),
 
     // TODO:
     /// This allowed double spends, applied and removed (hard fork, inflation).
     /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
-    inflation_rule = bit_right<uint32_t>(23),
+    inflation_rule = bit_right<uint32_t>(24),
 
     // TODO:
     /// Tx and input hashes max 4,500 per block (hard fork, determinism).
     /// This (initially) soft fork rule expires, which makes it a hard fork.
-    bip50_rule = bit_right<uint32_t>(24),
+    bip50_rule = bit_right<uint32_t>(25),
 
     // TODO:
     /// Reduces threshold segregated witness signaling (soft fork, feature).
-    bip91_rule = bit_right<uint32_t>(25),
+    bip91_rule = bit_right<uint32_t>(26),
 
     /// TODO: taproot rules.
 
