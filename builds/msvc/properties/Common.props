@@ -27,15 +27,14 @@
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <!-- These override each other in sequence, so order matters (unspecified reverts to defaults). -->
-      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 15.0">stdcpp14</LanguageStandard>
-      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 16.0">stdcpp17</LanguageStandard>
-      <LanguageStandard Condition="'$(VisualStudioVersion)' >= 17.0"><!-- /std:c++20 --></LanguageStandard>
-      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 15.0">false</ConformanceMode>
-      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 16.0">true</ConformanceMode>
-      <ConformanceMode Condition="'$(VisualStudioVersion)' >= 17.0">true</ConformanceMode>
       <EnableModules>false</EnableModules>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v141'">stdcpp14</LanguageStandard>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v142'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v143'">stdcpp20</LanguageStandard>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v141'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v142'">true</ConformanceMode>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v143'">true</ConformanceMode>
 
       <!-- External Includes -->
       <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->

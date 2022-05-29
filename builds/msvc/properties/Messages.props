@@ -6,9 +6,11 @@
   </PropertyGroup>
 
   <Target Name="ConfigInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Visual Studio     : $(VisualStudioVersion)" Importance="high"/>
+    <Message Text="PlatformToolset   : $(PlatformToolset)" Importance="high"/>
     <Message Text="ConfigurationType : $(ConfigurationType)" Importance="high"/>
     <Message Text="Configuration     : $(Configuration)" Importance="high"/>
-    <Message Text="PlatformToolset   : $(PlatformToolset)" Importance="high"/>
+    <Message Text="Processor         : $(ProcessorArchitecture)" Importance="high"/>
     <Message Text="TargetPath        : $(TargetPath)" Importance="high"/>
   </Target>
 
