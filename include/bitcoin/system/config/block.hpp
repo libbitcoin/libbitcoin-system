@@ -28,26 +28,36 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper to convert between serialized and deserialized block.
+/// Serialization helper for chain::block.
 class BC_API block
 {
 public:
-    block() noexcept;
-    block(const block& other) noexcept;
-    block(const chain::block& value) noexcept;
-    block(const std::string& hexcode) noexcept(false);
+    /// Defaults.
+    block(block&&) = default;
+    block(const block&) = default;
+    block& operator=(block&&) = default;
+    block& operator=(const block&) = default;
+    ~block() = default;
 
-    block& operator=(const block& other) noexcept;
-    block& operator=(chain::block&& other) noexcept;
+    /// Constructors.
+    block() noexcept;
+    block(chain::block&& value) noexcept;
+    block(const chain::block& value) noexcept;
+    block(const std::string& base16) noexcept(false);
+
+    std::string to_string() const noexcept;
+
+    /// Operators.
+
+    block& operator=(chain::block&& value) noexcept;
+    block& operator=(const chain::block& value) noexcept;
     bool operator==(const block& other) const noexcept;
 
     operator const chain::block&() const noexcept;
 
-    std::string to_string() const noexcept;
-
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         block& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const block& argument) noexcept;
 
 private:

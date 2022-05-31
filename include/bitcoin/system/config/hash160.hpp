@@ -32,16 +32,26 @@ namespace config {
 class BC_API hash160
 {
 public:
+    /// Defaults.
+    hash160(hash160&&) = default;
+    hash160(const hash160&) = default;
+    hash160& operator=(hash160&&) = default;
+    hash160& operator=(const hash160&) = default;
+    ~hash160() = default;
+
+    /// Constructors.
     hash160() noexcept;
-    hash160(const hash160& other) noexcept;
+    hash160(short_hash&& value) noexcept;
     hash160(const short_hash& value) noexcept;
-    hash160(const std::string& hexcode) noexcept(false);
+    hash160(const std::string& base16) noexcept(false);
+
+    /// Operators.
 
     operator const short_hash&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         hash160& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const hash160& argument) noexcept;
 
 private:

@@ -18,8 +18,10 @@
  */
 #include <bitcoin/system/config/base2.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -31,24 +33,19 @@ base2::base2() noexcept
 {
 }
 
+base2::base2(binary&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 base2::base2(const binary& value) noexcept
   : value_(value)
 {
 }
 
-base2::base2(const base2& other) noexcept
-  : base2(other.value_)
-{
-}
-
 base2::base2(const std::string& binary) noexcept(false)
 {
-    std::stringstream(binary) >> *this;
-}
-
-size_t base2::size() const noexcept
-{
-    return value_.bits();
+    std::istringstream(binary) >> *this;
 }
 
 base2::operator const binary&() const noexcept
@@ -56,22 +53,22 @@ base2::operator const binary&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base2& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base2& argument) noexcept(false)
 {
     std::string binary;
-    input >> binary;
+    stream >> binary;
 
     if (!binary::is_base2(binary))
         throw istream_exception(binary);
 
-    std::stringstream(binary) >> argument.value_;
-    return input;
+    std::istringstream(binary) >> argument.value_;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base2& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base2& argument) noexcept
 {
-    output << argument.value_;
-    return output;
+    stream << argument.value_;
+    return stream;
 }
 
 } // namespace config

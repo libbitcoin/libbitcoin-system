@@ -152,7 +152,7 @@ static bool match_positional(bool positional, const parameter& value)
 // GitHub code examples start horizontal scroll after 73 characters.
 std::string printer::format_parameters_table(bool positional) noexcept
 {
-    std::stringstream output;
+    std::ostringstream output;
     const auto& parameters = get_parameters();
     format table_format("%-20s %-52s\n");
 
@@ -185,7 +185,7 @@ std::string printer::format_parameters_table(bool positional) noexcept
 // GitHub code examples start horizontal scroll after 73 characters.
 std::string printer::format_paragraph(const std::string& paragraph) noexcept
 {
-    std::stringstream output;
+    std::ostringstream output;
     format paragraph_format("%-73s\n");
 
     const auto lines = columnize(paragraph, 73);
@@ -237,7 +237,7 @@ std::string printer::format_settings_table() noexcept
 {
     std::string name;
     std::string section;
-    std::stringstream output;
+    std::ostringstream output;
     std::string preceding_section;
 
     const auto& parameters = get_parameters();
@@ -349,7 +349,7 @@ std::string printer::format_usage_parameters() noexcept
         }
     }
 
-    std::stringstream usage;
+    std::ostringstream usage;
 
     if (!toggle_short_options.empty())
         usage << format(BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT) %

@@ -18,11 +18,13 @@
  */
 #include <bitcoin/system/config/base64.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/radix/base_64.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,19 +34,19 @@ base64::base64() noexcept
 {
 }
 
+base64::base64(data_chunk&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 base64::base64(const data_chunk& value) noexcept
   : value_(value)
 {
 }
 
-base64::base64(const base64& other) noexcept
-  : base64(other.value_)
-{
-}
-
 base64::base64(const std::string& base64) noexcept(false)
 {
-    std::stringstream(base64) >> *this;
+    std::istringstream(base64) >> *this;
 }
 
 base64::operator const data_chunk&() const noexcept
@@ -52,21 +54,21 @@ base64::operator const data_chunk&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base64& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base64& argument) noexcept(false)
 {
     std::string base64;
-    input >> base64;
+    stream >> base64;
 
     if (!decode_base64(argument.value_, base64))
         throw istream_exception(base64);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base64& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base64& argument) noexcept
 {
-    output << encode_base64(argument.value_);
-    return output;
+    stream << encode_base64(argument.value_);
+    return stream;
 }
 
 } // namespace config

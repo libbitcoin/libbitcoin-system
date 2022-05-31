@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/config/point.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -36,24 +37,30 @@ using namespace boost::program_options;
 
 const std::string point::delimiter = ":";
 
-// Point format is currently private to bx.
+// Point format is currently private to bx:
+// "txhash:index"
+
 static bool decode_point(chain::point& point,
-    const std::string& tuple) noexcept
+    const std::string& tuple) noexcept(false)
 {
     uint32_t index;
     const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() != 2 || !deserialize(index, tokens[1]))
         return false;
 
-    // Validate and deserialize the transaction hash.
-    point = chain::point{ hash256{ tokens[0] }, index };
+    // Throws istream_exception.
+    point = chain::point
+    {
+        hash256{ tokens[0] },
+        index
+    };
+
     return true;
 }
 
-// Point format is currently private to bx.
 static std::string encode_point(const chain::point& point) noexcept
 {
-    std::stringstream result;
+    std::ostringstream result;
     result << hash256(point.hash()) << point::delimiter << point.index();
     return result.str();
 }
@@ -63,19 +70,19 @@ point::point() noexcept
 {
 }
 
+point::point(chain::point&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 point::point(const chain::point& value) noexcept
   : value_(value)
 {
 }
 
-point::point(const point& other) noexcept
-  : point(other.value_)
-{
-}
-
 point::point(const std::string& tuple) noexcept(false)
 {
-    std::stringstream(tuple) >> *this;
+    std::istringstream(tuple) >> *this;
 }
 
 point::operator const chain::point&() const noexcept
@@ -83,21 +90,21 @@ point::operator const chain::point&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, point& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, point& argument) noexcept(false)
 {
     std::string tuple;
-    input >> tuple;
+    stream >> tuple;
 
     if (!decode_point(argument.value_, tuple))
         throw istream_exception(tuple);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const point& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const point& argument) noexcept
 {
-    output << encode_point(argument.value_);
-    return output;
+    stream << encode_point(argument.value_);
+    return stream;
 }
 
 } // namespace config

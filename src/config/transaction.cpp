@@ -18,11 +18,14 @@
  */
 #include <bitcoin/system/config/transaction.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -35,24 +38,19 @@ transaction::transaction() noexcept
 {
 }
 
+transaction::transaction(chain::transaction&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 transaction::transaction(const chain::transaction& value) noexcept
   : value_(value)
 {
 }
 
-transaction::transaction(const transaction& other) noexcept
-  : transaction(other.value_)
+transaction::transaction(const std::string& base16) noexcept(false)
 {
-}
-
-transaction::transaction(const std::string& hexcode) noexcept(false)
-{
-    std::stringstream(hexcode) >> *this;
-}
-
-chain::transaction& transaction::data() noexcept
-{
-    return value_;
+    std::istringstream(base16) >> *this;
 }
 
 transaction::operator const chain::transaction&() const noexcept
@@ -60,25 +58,29 @@ transaction::operator const chain::transaction&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input,
+std::istream& operator>>(std::istream& stream,
     transaction& argument) noexcept(false)
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    argument.value_ = chain::transaction{ base16(hexcode), true };
+    data_chunk bytes;
+    if (!decode_base16(bytes, base16))
+        throw istream_exception(base16);
+
+    argument.value_ = chain::transaction{ bytes, true };
 
     if (!argument.value_.is_valid())
-        throw istream_exception(hexcode);
+        throw istream_exception(base16);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output,
+std::ostream& operator<<(std::ostream& stream,
     const transaction& argument) noexcept
 {
-    output << base16(argument.value_.to_data(true));
-    return output;
+    stream << encode_base16(argument.value_.to_data(true));
+    return stream;
 }
 
 } // namespace config

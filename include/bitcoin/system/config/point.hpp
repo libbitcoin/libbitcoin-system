@@ -28,22 +28,34 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper to convert between text and an point.
+/// Serialization helper for chain::point.
 class BC_API point
 {
 public:
     static const std::string delimiter;
 
+    /// Defaults.
+    point(point&&) = default;
+    point(const point&) = default;
+    point& operator=(point&&) = default;
+    point& operator=(const point&) = default;
+    ~point() = default;
+
+    /// Constructors.
     point() noexcept;
-    point(const point& other) noexcept;
+    point(chain::point&& value) noexcept;
     point(const chain::point& value) noexcept;
     point(const std::string& tuple) noexcept(false);
 
+    ////std::string to_string() const noexcept;
+
+    /// Operators.
+
     operator const chain::point&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         point& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const point& argument) noexcept;
 
 private:

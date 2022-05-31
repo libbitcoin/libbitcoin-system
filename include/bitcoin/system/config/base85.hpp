@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -34,22 +33,32 @@ namespace config {
 class BC_API base85
 {
 public:
+    /// Defaults.
+    base85(base85&&) = default;
+    base85(const base85&) = default;
+    base85& operator=(base85&&) = default;
+    base85& operator=(const base85&) = default;
+    ~base85() = default;
+
+    /// Constructors.
     base85() noexcept;
-    base85(const base85& other) noexcept;
+    base85(data_chunk&& value) noexcept;
     base85(const data_chunk& value) noexcept;
     base85(const std::string& base85) noexcept(false);
+
+    /// Operators.
 
     /// True if the data size is evenly divisible by 4.
     operator bool() const noexcept;
 
     operator const data_chunk&() const noexcept;
 
-    /// the key as a base85 encoded (z85) string.
+    /// The key as a base85 encoded (z85) string.
     std::string to_string() const;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         base85& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const base85& argument);
 
 private:

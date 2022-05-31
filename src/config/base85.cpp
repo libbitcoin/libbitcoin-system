@@ -21,15 +21,20 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/radix/base_85.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
 base85::base85() noexcept
-  : value_()
+{
+}
+
+base85::base85(data_chunk&& value) noexcept
+  : value_(std::move(value))
 {
 }
 
@@ -38,14 +43,9 @@ base85::base85(const data_chunk& value) noexcept
 {
 }
 
-base85::base85(const base85& other) noexcept
-  : base85(other.value_)
-{
-}
-
 base85::base85(const std::string& base85) noexcept(false)
 {
-    std::stringstream(base85) >> *this;
+    std::istringstream(base85) >> *this;
 }
 
 base85::operator bool() const noexcept
@@ -60,25 +60,25 @@ base85::operator const data_chunk&() const noexcept
 
 std::string base85::to_string() const
 {
-    std::stringstream value;
+    std::ostringstream value;
     value << *this;
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, base85& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base85& argument) noexcept(false)
 {
     std::string base85;
-    input >> base85;
+    stream >> base85;
 
     data_chunk out_value;
     if (!decode_base85(out_value, base85) || (out_value.size() % 4) != 0u)
         throw istream_exception(base85);
 
     argument.value_ = out_value;
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base85& argument)
+std::ostream& operator<<(std::ostream& stream, const base85& argument)
 {
     std::string decoded;
 
@@ -86,8 +86,8 @@ std::ostream& operator<<(std::ostream& output, const base85& argument)
     if (!encode_base85(decoded, argument.value_))
         throw ostream_exception(decoded);
 
-    output << decoded;
-    return output;
+    stream << decoded;
+    return stream;
 }
 
 } // namespace config

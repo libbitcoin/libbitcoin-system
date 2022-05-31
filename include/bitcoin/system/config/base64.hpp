@@ -32,16 +32,26 @@ namespace config {
 class BC_API base64
 {
 public:
+    /// Defaults.
+    base64(base64&&) = default;
+    base64(const base64&) = default;
+    base64& operator=(base64&&) = default;
+    base64& operator=(const base64&) = default;
+    ~base64() = default;
+
+    /// Constructors.
     base64() noexcept;
-    base64(const base64& other) noexcept;
+    base64(data_chunk&& value) noexcept;
     base64(const data_chunk& value) noexcept;
     base64(const std::string& base64) noexcept(false);
 
+    /// Operators.
+
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         base64& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const base64& argument) noexcept;
 
 private:

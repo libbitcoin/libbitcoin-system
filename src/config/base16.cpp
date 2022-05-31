@@ -21,9 +21,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -33,19 +34,19 @@ base16::base16() noexcept
 {
 }
 
+base16::base16(data_chunk&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 base16::base16(const data_chunk& value) noexcept
   : value_(value)
 {
 }
 
-base16::base16(const base16& other) noexcept
-  : base16(other.value_)
+base16::base16(const std::string& base16) noexcept(false)
 {
-}
-
-base16::base16(const std::string& hexcode) noexcept(false)
-{
-    std::stringstream(hexcode) >> *this;
+    std::istringstream(base16) >> *this;
 }
 
 base16::operator const data_chunk&() const noexcept
@@ -53,29 +54,29 @@ base16::operator const data_chunk&() const noexcept
     return value_;
 }
 
-base16::operator data_slice() const noexcept
-{
-    return { value_.begin(), value_.end() };
-}
+////base16::operator data_slice() const noexcept
+////{
+////    return { value_.begin(), value_.end() };
+////}
 
-std::istream& operator>>(std::istream& input, base16& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base16& argument) noexcept(false)
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    if (!decode_base16(argument.value_, hexcode))
+    if (!decode_base16(argument.value_, base16))
     {
         using namespace boost::program_options;
-        throw istream_exception(hexcode);
+        throw istream_exception(base16);
     }
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base16& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base16& argument) noexcept
 {
-    output << encode_base16(argument.value_);
-    return output;
+    stream << encode_base16(argument.value_);
+    return stream;
 }
 
 } // namespace config

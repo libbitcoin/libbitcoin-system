@@ -100,8 +100,10 @@ private:
 bool operator<(const checkpoint& left, const checkpoint& right) noexcept;
 bool operator==(const checkpoint& left, const checkpoint& right) noexcept;
 bool operator!=(const checkpoint& left, const checkpoint& right) noexcept;
-std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept;
-std::istream& operator>>(std::istream& input, checkpoint& out) noexcept;
+
+// TODO: rationalize with config.
+std::ostream& operator<<(std::ostream& stream, const checkpoint& in) noexcept;
+std::istream& operator>>(std::istream& stream, checkpoint& out) noexcept;
 
 typedef std::vector<checkpoint> checkpoints;
 

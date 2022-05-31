@@ -32,16 +32,26 @@ namespace config {
 class BC_API base58
 {
 public:
+    /// Defaults.
+    base58(base58&&) = default;
+    base58(const base58&) = default;
+    base58& operator=(base58&&) = default;
+    base58& operator=(const base58&) = default;
+    ~base58() = default;
+
+    /// Constructors.
     base58() noexcept;
-    base58(const base58& other) noexcept;
+    base58(data_chunk&& value) noexcept;
     base58(const data_chunk& value) noexcept;
     base58(const std::string& base58) noexcept(false);
 
+    /// Operators.
+
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         base58& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const base58& argument) noexcept;
 
 private:

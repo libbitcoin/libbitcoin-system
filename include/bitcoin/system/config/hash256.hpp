@@ -34,18 +34,28 @@ class BC_API hash256
 public:
     typedef std::vector<hash256> list;
 
+    /// Defaults.
+    hash256(hash256&&) = default;
+    hash256(const hash256&) = default;
+    hash256& operator=(hash256&&) = default;
+    hash256& operator=(const hash256&) = default;
+    ~hash256() = default;
+
+    /// Constructors.
     hash256() noexcept;
-    hash256(const hash256& other) noexcept;
+    hash256(hash_digest&& value) noexcept;
     hash256(const hash_digest& value) noexcept;
-    hash256(const std::string& hexcode) noexcept(false);
+    hash256(const std::string& base16) noexcept(false);
 
     std::string to_string() const noexcept;
 
+    /// Operators.
+
     operator const hash_digest&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         hash256& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const hash256& argument) noexcept;
 
 private:

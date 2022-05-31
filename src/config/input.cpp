@@ -18,11 +18,13 @@
  */
 #include <bitcoin/system/config/input.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/config/point.hpp>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/serial/deserialize.hpp>
 
@@ -32,31 +34,36 @@ namespace config {
 
 using namespace boost::program_options;
 
-// input is a private encoding in bx.
+// Input format is currently private to bx:
+// "script:txhash:index:sequence=max_input_sequence"
+
 static bool decode_input(chain::input& input,
-    const std::string& tuple) noexcept
+    const std::string& tuple) noexcept(false)
 {
     const auto tokens = split(tuple, point::delimiter);
-    if (tokens.size() != 2)
+    if (tokens.size() != 3 && tokens.size() != 4)
         return false;
 
+    auto sequence = chain::max_input_sequence;
+    if (tokens.size() == 4 && !deserialize(sequence, tokens[3]))
+        return false;
+
+    // Throws istream_exception.
     input = chain::input
     {
-        point{ tokens[0] + ":" + tokens[1] },
-        input.script(),
-        chain::max_input_sequence
+        point{ tokens[1] + point::delimiter + tokens[2] },
+        script{ tokens[0] },
+        sequence
     };
 
     return true;
 }
 
-// input is currently a private encoding in bx.
 static std::string encode_input(const chain::input& input) noexcept
 {
-    std::stringstream result;
-    result << point(input.point()) << point::delimiter
-        << input.sequence();
-
+    std::ostringstream result;
+    result << script(input.script()) << point(input.point())
+        << point::delimiter << input.sequence();
     return result.str();
 }
 
@@ -65,8 +72,8 @@ input::input() noexcept
 {
 }
 
-input::input(const input& other) noexcept
-  : input(other.value_)
+input::input(chain::input&& value) noexcept
+  : value_(std::move(value))
 {
 }
 
@@ -75,14 +82,9 @@ input::input(const chain::input& value) noexcept
 {
 }
 
-input::input(const chain::point& value) noexcept
-  : value_({value, {}, chain::max_input_sequence})
-{
-}
-
 input::input(const std::string& tuple) noexcept(false)
 {
-    std::stringstream(tuple) >> *this;
+    std::istringstream(tuple) >> *this;
 }
 
 input::operator const chain::input&() const noexcept
@@ -101,10 +103,10 @@ std::istream& operator>>(std::istream& stream, input& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const input& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const input& argument) noexcept
 {
-    output << encode_input(argument.value_);
-    return output;
+    stream << encode_input(argument.value_);
+    return stream;
 }
 
 } // namespace config

@@ -18,8 +18,10 @@
  */
 #include <bitcoin/system/config/script.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -34,8 +36,8 @@ script::script() noexcept
 {
 }
 
-script::script(const script& other) noexcept
-  : script(other.value_)
+script::script(chain::script&& value) noexcept
+  : value_(std::move(value))
 {
 }
 
@@ -56,17 +58,7 @@ script::script(const std::vector<std::string>& tokens) noexcept(false)
 
 script::script(const std::string& mnemonic)
 {
-    std::stringstream(mnemonic) >> *this;
-}
-
-data_chunk script::to_data() const noexcept
-{
-    return value_.to_data(false);
-}
-
-std::string script::to_string(uint32_t flags) const noexcept
-{
-    return value_.to_string(flags);
+    std::istringstream(mnemonic) >> *this;
 }
 
 script::operator const chain::script&() const noexcept
@@ -74,24 +66,23 @@ script::operator const chain::script&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, script& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, script& argument) noexcept(false)
 {
     std::istreambuf_iterator<char> end;
-    std::string mnemonic(std::istreambuf_iterator<char>(input), end);
+    std::string mnemonic(std::istreambuf_iterator<char>(stream), end);
 
-    argument.value_ = chain::script(mnemonic);
+    argument.value_ = chain::script{ mnemonic };
 
     if (!argument.value_.is_valid())
         throw istream_exception(mnemonic);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const script& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const script& argument) noexcept
 {
-    static constexpr auto flags = chain::forks::all_rules;
-    output << argument.value_.to_string(flags);
-    return output;
+    stream << argument.value_.to_string(chain::forks::all_rules);
+    return stream;
 }
 
 } // namespace config

@@ -19,41 +19,45 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
 
-#include <cstdint>
 #include <iostream>
 #include <string>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper to convert between a base58-string:number and a
-/// vector of chain::output.
+/// Serialization helper for chain::output.
 class BC_API output
 {
 public:
+    /// Defaults.
+    output(output&&) = default;
+    output(const output&) = default;
+    output& operator=(output&&) = default;
+    output& operator=(const output&) = default;
+    ~output() = default;
+
+    /// Constructors.
     output() noexcept;
+    output(chain::output&& value) noexcept;
+    output(const chain::output& value) noexcept;
     output(const std::string& tuple) noexcept(false);
 
-    /// Parsed properties
-    bool is_stealth() const noexcept;
-    uint64_t amount() const noexcept;
-    uint8_t version() const noexcept;
-    const chain::script& script() const noexcept;
-    const short_hash& pay_to_hash() const noexcept;
+    ////std::string to_string() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    /// Operators.
+
+    operator const chain::output&() const noexcept;
+
+    friend std::istream& operator>>(std::istream& stream,
         output& argument) noexcept(false);
+    friend std::ostream& operator<<(std::ostream& stream,
+        const output& argument) noexcept;
 
 private:
-    bool is_stealth_;
-    uint64_t amount_;
-    uint8_t version_;
-    chain::script script_;
-    short_hash pay_to_hash_;
+    chain::output value_;
 };
 
 } // namespace config

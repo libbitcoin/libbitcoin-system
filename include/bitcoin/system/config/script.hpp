@@ -30,29 +30,38 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper to convert between base16/raw script and script_type.
+/// Serialization helper for chain::script.
 class BC_API script
 {
 public:
+    /// Defaults.
+    script(script&&) = default;
+    script(const script&) = default;
+    script& operator=(script&&) = default;
+    script& operator=(const script&) = default;
+    ~script() = default;
+
+    /// Constructors.
     script() noexcept;
-    script(const script& other) noexcept;
+    script(chain::script&& value) noexcept;
     script(const chain::script& value) noexcept;
-    script(const data_chunk& value) noexcept;
-    script(const std::vector<std::string>& tokens);
+
+    /// Split or unsplit tokens.
     script(const std::string& mnemonic) noexcept(false);
+    script(const std::vector<std::string>& tokens) noexcept(false);
 
-    /// Serialize the script to bytes according to the p2p wire protocol.
-    data_chunk to_data() const noexcept;
+    /// Default text encoding is mnemonic, so provide data for base16.
+    script(const data_chunk& value) noexcept;
 
-    /// Return a pretty-printed copy of the script.
-    std::string to_string(
-        uint32_t flags=chain::forks::all_rules) const noexcept;
+    ////std::string to_string() const noexcept;
+
+    /// Operators.
 
     operator const chain::script&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         script& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const script& argument) noexcept;
 
 private:

@@ -28,20 +28,32 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper for header.
+/// Serialization helper for chain::header.
 class BC_API header
 {
 public:
+    /// Defaults.
+    header(header&&) = default;
+    header(const header&) = default;
+    header& operator=(header&&) = default;
+    header& operator=(const header&) = default;
+    ~header() = default;
+
+    /// Constructors.
     header() noexcept;
-    header(const header& other) noexcept;
+    header(chain::header&& value) noexcept;
     header(const chain::header& value) noexcept;
-    header(const std::string& hexcode) noexcept(false);
+    header(const std::string& base16) noexcept(false);
+
+    ////std::string to_string() const noexcept;
+
+    /// Operators.
 
     operator const chain::header&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         header& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const header& argument) noexcept;
 
 private:

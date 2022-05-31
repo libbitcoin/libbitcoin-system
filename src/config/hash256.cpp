@@ -18,8 +18,10 @@
  */
 #include <bitcoin/system/config/hash256.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/radix/radix.hpp>
@@ -33,24 +35,24 @@ hash256::hash256() noexcept
 {
 }
 
+hash256::hash256(hash_digest&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 hash256::hash256(const hash_digest& value) noexcept
   : value_(value)
 {
 }
 
-hash256::hash256(const hash256& other) noexcept
-  : hash256(other.value_)
+hash256::hash256(const std::string& base16) noexcept(false)
 {
-}
-
-hash256::hash256(const std::string& hexcode) noexcept(false)
-{
-    std::stringstream(hexcode) >> *this;
+    std::istringstream(base16) >> *this;
 }
 
 std::string hash256::to_string() const noexcept
 {
-    std::stringstream value;
+    std::ostringstream value;
     value << *this;
     return value.str();
 }
@@ -60,21 +62,21 @@ hash256::operator const hash_digest&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, hash256& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, hash256& argument) noexcept(false)
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    if (!decode_hash(argument.value_, hexcode))
-        throw istream_exception(hexcode);
+    if (!decode_hash(argument.value_, base16))
+        throw istream_exception(base16);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const hash256& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const hash256& argument) noexcept
 {
-    output << encode_hash(argument.value_);
-    return output;
+    stream << encode_hash(argument.value_);
+    return stream;
 }
 
 } // namespace config

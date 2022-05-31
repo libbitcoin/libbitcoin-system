@@ -50,16 +50,6 @@ binary::binary() noexcept
 {
 }
 
-binary::binary(binary&& other) noexcept
-  : bits_(other.bits_), bytes_(std::move(other.bytes_))
-{
-}
-
-binary::binary(const binary& other) noexcept
-  : bits_(other.bits_), bytes_(other.bytes_)
-{
-}
-
 binary::binary(const std::string& bits) noexcept
   : binary(from_string(bits))
 {
@@ -156,20 +146,6 @@ bool binary::operator[](size_t index) const noexcept
 bool binary::operator<(const binary& other) const noexcept
 {
     return encoded() < other.encoded();
-}
-
-binary& binary::operator=(binary&& other) noexcept
-{
-    bits_ = other.bits_;
-    bytes_ = std::move(other.bytes_);
-    return *this;
-}
-
-binary& binary::operator=(const binary& other) noexcept
-{
-    bits_ = other.bits_;
-    bytes_ = other.bytes_;
-    return *this;
 }
 
 bool operator==(const binary& left, const binary& right) noexcept

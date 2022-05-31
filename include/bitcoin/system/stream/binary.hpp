@@ -39,9 +39,16 @@ public:
     static bool is_base2(const std::string& text) noexcept;
 
     /// Constructors.
+
     binary() noexcept;
-    binary(binary&& other) noexcept;
-    binary(const binary& other) noexcept;
+
+    /// Defaults.
+    binary(binary&&) = default;
+    binary(const binary&) = default;
+    binary& operator=(binary&&) = default;
+    binary& operator=(const binary&) = default;
+    ~binary() = default;
+
     binary(const std::string& bits) noexcept;
     binary(size_t bits, const data_slice& data) noexcept;
 
@@ -55,8 +62,6 @@ public:
     operator const data_chunk&() const noexcept;
     bool operator[](size_t index) const noexcept;
     bool operator<(const binary& other) const noexcept;
-    binary& operator=(binary&& other) noexcept;
-    binary& operator=(const binary& other) noexcept;
 
 private:
     binary(data_chunk&& bytes, size_t bits) noexcept;

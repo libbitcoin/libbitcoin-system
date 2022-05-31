@@ -18,11 +18,13 @@
  */
 #include <bitcoin/system/config/base58.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/radix/base_58.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,19 +34,19 @@ base58::base58() noexcept
 {
 }
 
+base58::base58(data_chunk&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 base58::base58(const data_chunk& value) noexcept
   : value_(value)
 {
 }
 
-base58::base58(const base58& other) noexcept
-  : base58(other.value_)
-{
-}
-
 base58::base58(const std::string& base58) noexcept(false)
 {
-    std::stringstream(base58) >> *this;
+    std::istringstream(base58) >> *this;
 }
 
 base58::operator const data_chunk&() const noexcept
@@ -52,21 +54,21 @@ base58::operator const data_chunk&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base58& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base58& argument) noexcept(false)
 {
     std::string base58;
-    input >> base58;
+    stream >> base58;
 
     if (!decode_base58(argument.value_, base58))
         throw istream_exception(base58);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base58& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base58& argument) noexcept
 {
-    output << encode_base58(argument.value_);
-    return output;
+    stream << encode_base58(argument.value_);
+    return stream;
 }
 
 } // namespace config

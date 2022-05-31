@@ -32,16 +32,26 @@ namespace config {
 class BC_API base32
 {
 public:
+    /// Defaults.
+    base32(base32&&) = default;
+    base32(const base32&) = default;
+    base32& operator=(base32&&) = default;
+    base32& operator=(const base32&) = default;
+    ~base32() = default;
+
+    /// Constructors.
     base32() noexcept;
-    base32(const base32& other) noexcept;
+    base32(data_chunk&& value) noexcept;
     base32(const data_chunk& value) noexcept;
     base32(const std::string& base32) noexcept(false);
 
+    /// Operators.
+
     operator const data_chunk&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         base32& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const base32& argument) noexcept;
 
 private:

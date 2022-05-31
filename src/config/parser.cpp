@@ -114,7 +114,7 @@ bool parser::load_configuration_variables(variables_map& variables,
     }
 
     // Loading from an empty stream causes the defaults to populate.
-    std::stringstream stream;
+    std::istringstream stream;
     const auto config = parse_config_file(stream, config_settings);
     store(config, variables);
     return false;

@@ -28,21 +28,32 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper stub for chain::input.
+/// Serialization helper for chain::input.
 class BC_API input
 {
 public:
+    /// Defaults.
+    input(input&&) = default;
+    input(const input&) = default;
+    input& operator=(input&&) = default;
+    input& operator=(const input&) = default;
+    ~input() = default;
+
+    /// Constructors.
     input() noexcept;
-    input(const input& other) noexcept;
+    input(chain::input&& value) noexcept;
     input(const chain::input& value) noexcept;
-    input(const chain::point& value) noexcept;
     input(const std::string& tuple) noexcept(false);
+
+    ////std::string to_string() const noexcept;
+
+    /// Operators.
 
     operator const chain::input&() const noexcept;
 
     friend std::istream& operator>>(std::istream& stream,
         input& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const input& argument) noexcept;
 
 private:

@@ -18,11 +18,13 @@
  */
 #include <bitcoin/system/config/base32.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/radix/base_32.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -32,19 +34,19 @@ base32::base32() noexcept
 {
 }
 
+base32::base32(data_chunk&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 base32::base32(const data_chunk& value) noexcept
   : value_(value)
 {
 }
 
-base32::base32(const base32& other) noexcept
-  : base32(other.value_)
-{
-}
-
 base32::base32(const std::string& base32) noexcept(false)
 {
-    std::stringstream(base32) >> *this;
+    std::istringstream(base32) >> *this;
 }
 
 base32::operator const data_chunk&() const noexcept
@@ -52,21 +54,21 @@ base32::operator const data_chunk&() const noexcept
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base32& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base32& argument) noexcept(false)
 {
     std::string base32;
-    input >> base32;
+    stream >> base32;
 
     if (!decode_base32(argument.value_, base32))
         throw istream_exception(base32);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base32& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base32& argument) noexcept
 {
-    output << encode_base32(argument.value_);
-    return output;
+    stream << encode_base32(argument.value_);
+    return stream;
 }
 
 } // namespace config

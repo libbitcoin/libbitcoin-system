@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE2_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_BASE2_HPP
 
-#include <cstddef>
 #include <iostream>
 #include <string>
 #include <bitcoin/system/define.hpp>
@@ -33,20 +32,26 @@ namespace config {
 class BC_API base2
 {
 public:
+    /// Defaults.
+    base2(base2&&) = default;
+    base2(const base2&) = default;
+    base2& operator=(base2&&) = default;
+    base2& operator=(const base2&) = default;
+    ~base2() = default;
 
+    /// Constructors.
     base2() noexcept;
-    base2(const base2& other) noexcept;
+    base2(binary&& value) noexcept;
     base2(const binary& value) noexcept;
     base2(const std::string& binary) noexcept(false);
 
-    /// Get number of bits.
-    size_t size() const noexcept;
+    /// Operators.
 
     operator const binary&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         base2& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const base2& argument) noexcept;
 
 private:

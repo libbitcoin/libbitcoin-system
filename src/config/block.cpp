@@ -18,11 +18,14 @@
  */
 #include <bitcoin/system/config/block.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -33,31 +36,31 @@ block::block() noexcept
 {
 }
 
+block::block(chain::block&& value) noexcept
+  : value_(std::move(value))
+{
+}
+
 block::block(const chain::block& value) noexcept
   : value_(value)
 {
 }
 
-block::block(const block& other) noexcept
-  : block(other.value_)
-{
-}
-
-block::block(const std::string& hexcode) noexcept(false)
+block::block(const std::string& base16) noexcept(false)
   : value_()
 {
-    std::stringstream(hexcode) >> *this;
+    std::istringstream(base16) >> *this;
 }
 
-block& block::operator=(const block& other) noexcept
+block& block::operator=(chain::block&& value) noexcept
 {
-    value_ = chain::block(other.value_);
+    value_ = std::move(value);
     return *this;
 }
 
-block& block::operator=(chain::block&& other) noexcept
+block& block::operator=(const chain::block& value) noexcept
 {
-    value_ = std::move(other);
+    value_ = value;
     return *this;
 }
 
@@ -78,25 +81,27 @@ std::string block::to_string() const noexcept
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, block& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, block& argument) noexcept(false)
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    argument.value_ = chain::block{ base16(hexcode), true };
+    data_chunk bytes;
+    if (!decode_base16(bytes, base16))
+        throw istream_exception(base16);
+
+    argument.value_ = chain::block{ bytes, true };
 
     if (!argument.value_.is_valid())
-        throw istream_exception(hexcode);
+        throw istream_exception(base16);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const block& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const block& argument) noexcept
 {
-    const auto bytes = argument.value_.to_data(true);
-
-    output << base16(bytes);
-    return output;
+    stream << encode_base16(argument.value_.to_data(true));
+    return stream;
 }
 
 } // namespace config

@@ -103,10 +103,10 @@ bool operator!=(const checkpoint& left, const checkpoint& right) noexcept
 
 // TODO: add from_string.
 // TODO: add get_line/put_line to reader and eliminate stream_result.
-std::istream& operator>>(std::istream& input, checkpoint& out) noexcept
+std::istream& operator>>(std::istream& stream, checkpoint& out) noexcept
 {
     std::string value;
-    input >> value;
+    stream >> value;
 
     hash_digest hash;
     size_t height(zero);
@@ -117,11 +117,11 @@ std::istream& operator>>(std::istream& input, checkpoint& out) noexcept
         deserialize(height, tokens.back()))
     {
         out = { hash, height };
-        return stream_result(input, true);
+        return stream_result(stream, true);
     }
 
     out = {};
-    return stream_result(input, false);
+    return stream_result(stream, false);
 }
 
 bool checkpoint::is_valid() const noexcept
@@ -132,10 +132,10 @@ bool checkpoint::is_valid() const noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-std::ostream& operator<<(std::ostream& output, const checkpoint& in) noexcept
+std::ostream& operator<<(std::ostream& stream, const checkpoint& in) noexcept
 {
-    output << in.to_string();
-    return output;
+    stream << in.to_string();
+    return stream;
 }
 
 std::string checkpoint::to_string() const noexcept

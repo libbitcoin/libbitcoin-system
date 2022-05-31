@@ -28,22 +28,32 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper for transactions.
+/// Serialization helper for chain::script.
 class BC_API transaction
 {
 public:
-    transaction() noexcept;
-    transaction(const transaction& other) noexcept;
-    transaction(const chain::transaction& value) noexcept;
-    transaction(const std::string& hexcode) noexcept(false);
+    /// Defaults.
+    transaction(transaction&&) = default;
+    transaction(const transaction&) = default;
+    transaction& operator=(transaction&&) = default;
+    transaction& operator=(const transaction&) = default;
+    ~transaction() = default;
 
-    chain::transaction& data() noexcept;
+    /// Constructors.
+    transaction() noexcept;
+    transaction(chain::transaction&& value) noexcept;
+    transaction(const chain::transaction& value) noexcept;
+    transaction(const std::string& base16) noexcept(false);
+
+    ////std::string to_string() const noexcept;
+
+    /// Operators.
 
     operator const chain::transaction&() const noexcept;
 
-    friend std::istream& operator>>(std::istream& input,
+    friend std::istream& operator>>(std::istream& stream,
         transaction& argument) noexcept(false);
-    friend std::ostream& operator<<(std::ostream& output,
+    friend std::ostream& operator<<(std::ostream& stream,
         const transaction& argument) noexcept;
 
 private:
