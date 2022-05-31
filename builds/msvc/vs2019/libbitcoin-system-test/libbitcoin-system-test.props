@@ -25,7 +25,7 @@
       <PreprocessorDefinitions Condition="'$(DefaultLinkage)' == 'dynamic'">BOOST_TEST_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
-      <Command>"$(TargetPath)" --run_test=* --show_progress=no --build_info=yes</Command>
+      <Command>"$(TargetPath)" --run_test=* --show_progress=no --result_code=no --detect_memory_leak=0 --report_level=no --build_info=yes</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
 
