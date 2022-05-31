@@ -58,7 +58,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/base64.cpp \
     src/config/base85.cpp \
     src/config/block.cpp \
-    src/config/directory.cpp \
     src/config/hash160.cpp \
     src/config/hash256.cpp \
     src/config/header.cpp \
@@ -374,6 +373,7 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
+    include/bitcoin/system/boost.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
@@ -421,7 +421,6 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/base85.hpp \
     include/bitcoin/system/config/block.hpp \
     include/bitcoin/system/config/config.hpp \
-    include/bitcoin/system/config/directory.hpp \
     include/bitcoin/system/config/hash160.hpp \
     include/bitcoin/system/config/hash256.hpp \
     include/bitcoin/system/config/header.hpp \

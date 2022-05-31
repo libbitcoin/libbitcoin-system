@@ -297,7 +297,6 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/config/base64.cpp"
     "../../src/config/base85.cpp"
     "../../src/config/block.cpp"
-    "../../src/config/directory.cpp"
     "../../src/config/hash160.cpp"
     "../../src/config/hash256.cpp"
     "../../src/config/header.cpp"
