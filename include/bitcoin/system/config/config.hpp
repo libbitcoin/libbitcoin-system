@@ -26,7 +26,6 @@
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
-#include <bitcoin/system/config/directory.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/config/header.hpp>

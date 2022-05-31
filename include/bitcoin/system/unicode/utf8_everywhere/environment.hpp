@@ -54,6 +54,13 @@ BC_API void set_binary_stdin() noexcept(false);
 /// Initialize windows to use binary for stdout. This cannot be uninitialized.
 BC_API void set_binary_stdout() noexcept(false);
 
+// System Configuration.
+// ----------------------------------------------------------------------------
+
+/// Get the default configuration file path with subdirectory.
+BC_API boost::filesystem::path default_config_path(
+    const boost::filesystem::path& subdirectory) noexcept;
+
 // BC_USE_LIBBITCOIN_MAIN dependencies.
 // ----------------------------------------------------------------------------
 // Do not use these directly, they are exposed via bc::system::main.
@@ -88,7 +95,6 @@ BC_API std::wstring to_extended_path(
 #else
 BC_API std::string to_extended_path(
     const boost::filesystem::path& path) noexcept;
-
 #endif
 
 } // namespace system

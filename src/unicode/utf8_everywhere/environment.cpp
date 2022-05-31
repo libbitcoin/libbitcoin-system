@@ -31,17 +31,10 @@
 #ifdef _MSC_VER
     #include <fcntl.h>
     #include <io.h>
+    #include <shlobj.h>
     #include <windows.h>
 #endif
-#include <boost/filesystem.hpp>
-
- // std::auto_ptr is deprecated in C++11 and removed in C++17:
- // en.cppreference.com/w/cpp/memory/auto_ptr
- // boost.locale exposes it to the API, so cannot remove it until C++17:
- // github.com/boostorg/locale/issues/27#issuecomment-414932853
- // Must use BOOST_LOCALE_HIDE_AUTO_PTR to hide the warnings.
-#define BOOST_LOCALE_HIDE_AUTO_PTR
-#include <boost/locale.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
@@ -260,6 +253,32 @@ std::ostream& cerr_stream() noexcept(false)
     std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
+}
+
+// Stream utilities.
+// ----------------------------------------------------------------------------
+
+#ifdef _MSC_VER
+static std::string windows_config_directory() noexcept
+{
+    wchar_t directory[MAX_PATH];
+    const auto result = SHGetFolderPathW(NULL, CSIDL_COMMON_APPDATA, NULL,
+        SHGFP_TYPE_CURRENT, directory);
+    return SUCCEEDED(result) ? to_utf8(directory) : "";
+}
+#endif
+
+boost::filesystem::path default_config_path(
+    const boost::filesystem::path& subdirectory) noexcept
+{
+    static const std::string directory =
+#ifdef _MSC_VER
+        windows_config_directory();
+#else
+        SYSCONFDIR;
+#endif
+
+    return boost::filesystem::path{ directory } / subdirectory;
 }
 
 // BC_USE_LIBBITCOIN_MAIN
