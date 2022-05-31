@@ -29,6 +29,7 @@
 #include <bitcoin/system/unicode/code_points.hpp>
 
 // We built this because po::options_description.print() sucks.
+// C++20: en.cppreference.com/w/cpp/utility/format/format
 
 // TODO: parameterize these localized values.
 // Various shared localizable strings.
