@@ -35,6 +35,7 @@ std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
     auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
         values.size());
 
+    // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
         [](Type& value)
         {
@@ -52,6 +53,7 @@ std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
     auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
         values.size());
 
+    // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
         [](const Type& value)
         {

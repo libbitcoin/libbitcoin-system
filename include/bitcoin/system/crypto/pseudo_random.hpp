@@ -38,6 +38,7 @@ class BC_API pseudo_random
     template<size_t Size>
     static void fill(data_array<Size>& out) noexcept
     {
+        // C++17: Parallel policy for std::transform.
         std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) noexcept
         {
             return next();
