@@ -35,11 +35,6 @@ data_slab::data_slab() noexcept
 {
 }
 
-data_slab::data_slab(const data_slab& other) noexcept
-  : begin_(other.begin_), end_(other.end_), size_(other.size_)
-{
-}
-
 data_slab::data_slab(std::string& text) noexcept
   : data_slab(from_size(text.begin(), text.size()))
 {

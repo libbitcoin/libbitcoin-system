@@ -30,11 +30,6 @@ data_reference::data_reference() noexcept
 {
 }
 
-data_reference::data_reference(const data_reference& other) noexcept
-  : data_slice(other)
-{
-}
-
 data_reference::data_reference(const data_slice& data) noexcept
   : data_slice(data)
 {

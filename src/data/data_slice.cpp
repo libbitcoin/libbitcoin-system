@@ -37,11 +37,6 @@ data_slice::data_slice() noexcept
 {
 }
 
-data_slice::data_slice(const data_slice& other) noexcept
-  : begin_(other.begin_), end_(other.end_), size_(other.size_)
-{
-}
-
 data_slice::data_slice(const std::string& text) noexcept
   : data_slice(from_size(text.begin(), text.size()))
 {
@@ -162,13 +157,13 @@ bool operator!=(const data_slice& left, const data_slice& right) noexcept
     return !(left == right);
 }
 
-data_slice& data_slice::operator=(const data_slice& other)
-{
-    begin_ = other.begin_;
-    end_ = other.end_;
-    size_ = other.size_;
-    return *this;
-}
+////data_slice& data_slice::operator=(const data_slice& other)
+////{
+////    begin_ = other.begin_;
+////    end_ = other.end_;
+////    size_ = other.size_;
+////    return *this;
+////}
 
 } // namespace system
 } // namespace libbitcoin

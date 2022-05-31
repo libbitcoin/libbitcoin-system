@@ -53,38 +53,33 @@ public:
     /// Empty reference.
     data_reference() noexcept;
 
-    /// Copy construction.
-    data_reference(const data_reference& other) noexcept;
+    /// Defaults.
+    data_reference(data_reference&&) = default;
+    data_reference(const data_reference&) = default;
+    data_reference& operator=(data_reference&&) = default;
+    data_reference& operator=(const data_reference&) = default;
+    ~data_reference() = default;
 
     /// data_slice construction.
     data_reference(const data_slice& data) noexcept;
-    data_reference(data_slice&& data) = delete;
 
     /// std::string constructor (casts char to uint8_t).
     data_reference(const std::string& text) noexcept;
-    data_reference(std::string&& text) = delete;
 
     /// data_chunk constructor.
     data_reference(const data_chunk& data) noexcept;
-    data_reference(data_chunk&& text) = delete;
 
     /// data_array constructor.
     template <size_type Size>
     data_reference(const data_array<Size>& data) noexcept;
-    template <size_type Size>
-    data_reference(data_array<Size>&&) = delete;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_byte<Byte> = true>
     data_reference(const std::array<Byte, Size>& data) noexcept;
-    template <size_type Size, typename Byte, if_byte<Byte> = true>
-    data_reference(std::array<Byte, Size>&&) = delete;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_byte<Byte> = true>
     data_reference(const std::vector<Byte>& data) noexcept;
-    template <typename Byte, if_byte<Byte> = true>
-    data_reference(std::vector<Byte>&&) = delete;
 
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>

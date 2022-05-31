@@ -75,8 +75,12 @@ public:
     /// Empty slice.
     data_slice() noexcept;
 
-    /// Copy construction.
-    data_slice(const data_slice& other) noexcept;
+    /// Defaults.
+    data_slice(data_slice&&) = default;
+    data_slice(const data_slice&) = default;
+    data_slice& operator=(data_slice&&) = default;
+    data_slice& operator=(const data_slice&) = default;
+    ~data_slice() = default;
 
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
@@ -142,7 +146,6 @@ public:
     operator std::array<value_type, Size>() const noexcept;
     operator std::vector<value_type>() const noexcept;
     value_type operator[](size_type index) const noexcept;
-    data_slice& operator=(const data_slice& other);
 
 private:
     data_slice(pointer begin, pointer end, size_type size) noexcept;
@@ -157,8 +160,7 @@ private:
     template <typename Pointer>
     static data_slice from_size(Pointer begin, size_type size) noexcept;
 
-    // Non-const because of assignment operator.
-    /*const*/ pointer begin_;
+    pointer begin_;
     pointer end_;
     size_type size_;
 };

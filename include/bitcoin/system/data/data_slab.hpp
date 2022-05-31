@@ -63,8 +63,12 @@ public:
     /// Empty slab.
     data_slab() noexcept;
 
-    /// Copy construction.
-    data_slab(const data_slab& other) noexcept;
+    /// Defaults.
+    data_slab(data_slab&&) = default;
+    data_slab(const data_slab&) = default;
+    data_slab& operator=(data_slab&&) = default;
+    data_slab& operator=(const data_slab&) = default;
+    ~data_slab() = default;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_byte<Byte> = true>
@@ -139,7 +143,7 @@ private:
     template <typename Pointer>
     static data_slab from_size(const Pointer begin, size_type size) noexcept;
 
-    const pointer begin_;
+    pointer begin_;
     pointer end_;
     size_type size_;
 };
