@@ -103,21 +103,20 @@ data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 auto encoded = encode_base16(string);
 
-
 // copy construct
 
 BOOST_AUTO_TEST_CASE(data_slab__construct__copy__expected)
 {
     const data_slab slab(byte);
     const data_slab copy(slab);
-    BOOST_REQUIRE_EQUAL(slab.size(), size);
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
 
     // size/data
-    BOOST_REQUIRE(!slab.empty());
-    BOOST_REQUIRE_EQUAL(slab.size(), size);
-    BOOST_REQUIRE_EQUAL(*slab.data(), 'f');
-    BOOST_REQUIRE_EQUAL(slab.back(), 'r');
-    BOOST_REQUIRE_EQUAL(slab[sub1(size)], 'r');
+    BOOST_REQUIRE(!copy.empty());
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
+    BOOST_REQUIRE_EQUAL(*copy.data(), 'f');
+    BOOST_REQUIRE_EQUAL(copy.back(), 'r');
+    BOOST_REQUIRE_EQUAL(copy[sub1(size)], 'r');
 }
 
 // construct, not empty
