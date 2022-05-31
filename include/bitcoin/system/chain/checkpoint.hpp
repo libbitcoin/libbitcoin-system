@@ -45,8 +45,12 @@ public:
     /// Default checkpoint is an invalid object.
     checkpoint() noexcept;
 
-    checkpoint(checkpoint&& other) noexcept;
-    checkpoint(const checkpoint& other) noexcept;
+    /// Defaults.
+    checkpoint(checkpoint&&) = default;
+    checkpoint(const checkpoint&) = default;
+    checkpoint& operator=(checkpoint&&) = default;
+    checkpoint& operator=(const checkpoint&) = default;
+    ~checkpoint() = default;
 
     checkpoint(hash_digest&& hash, size_t height) noexcept;
     checkpoint(const hash_digest& hash, size_t height) noexcept;
@@ -57,12 +61,6 @@ public:
       : checkpoint(std::string(string), height)
     {
     }
-
-    // Operators.
-    // ------------------------------------------------------------------------
-
-    checkpoint& operator=(checkpoint&& other) noexcept;
-    checkpoint& operator=(const checkpoint& other) noexcept;
 
     // Deserialization.
     // ------------------------------------------------------------------------

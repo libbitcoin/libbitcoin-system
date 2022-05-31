@@ -45,16 +45,6 @@ output::output() noexcept
 {
 }
 
-output::output(output&& other) noexcept
-  : output(other)
-{
-}
-
-output::output(const output& other) noexcept
-  : output(other.value_, other.script_, other.valid_)
-{
-}
-
 output::output(uint64_t value, chain::script&& script) noexcept
   : output(value, to_shared(std::move(script)), true)
 {
@@ -104,20 +94,6 @@ output::output(uint64_t value, const chain::script::ptr& script,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-output& output::operator=(output&& other) noexcept
-{
-    *this = other;
-    return *this;
-}
-
-output& output::operator=(const output& other) noexcept
-{
-    value_ = other.value_;
-    script_ = other.script_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool output::operator==(const output& other) const noexcept
 {

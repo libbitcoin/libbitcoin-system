@@ -58,16 +58,6 @@ block::block() noexcept
 {
 }
 
-block::block(block&& other) noexcept
-  : block(other)
-{
-}
-
-block::block(const block& other) noexcept
-  : block(other.header_, other.txs_, other.valid_)
-{
-}
-
 block::block(chain::header&& header, chain::transactions&& txs) noexcept
   : block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
@@ -120,20 +110,6 @@ block::block(const chain::header::ptr& header, const transactions_ptr& txs,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-block& block::operator=(block&& other) noexcept
-{
-    *this = other;
-    return *this;
-}
-
-block& block::operator=(const block& other) noexcept
-{
-    header_ = other.header_;
-    txs_ = other.txs_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool block::operator==(const block& other) const noexcept
 {

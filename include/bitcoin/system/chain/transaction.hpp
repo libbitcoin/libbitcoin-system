@@ -49,7 +49,9 @@ public:
 
     /// Default transaction is an invalid object.
     transaction() noexcept;
+    ~transaction() noexcept;
 
+    /// Metadata is defaulted on copy/assign.
     transaction(transaction&& other) noexcept;
     transaction(const transaction& other) noexcept;
 
@@ -69,6 +71,7 @@ public:
     // Operators.
     // ------------------------------------------------------------------------
 
+    /// Metadata is defaulted on copy/assign.
     transaction& operator=(transaction&& other) noexcept;
     transaction& operator=(const transaction& other) noexcept;
 
@@ -141,8 +144,9 @@ public:
     code connect(const context& state) const noexcept;
 
 protected:
-    transaction(bool segregated, uint32_t version, const inputs_ptr& inputs,
-        const outputs_ptr& outputs, uint32_t locktime, bool valid) noexcept;
+    transaction(uint32_t version, const inputs_ptr& inputs,
+        const outputs_ptr& outputs, uint32_t locktime, bool segregated,
+        bool valid) noexcept;
 
     // Guard (context free).
     // ------------------------------------------------------------------------

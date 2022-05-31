@@ -49,8 +49,12 @@ public:
     /// Default point is an invalid null point (null_hash/null_index) object.
     point() noexcept;
 
-    point(point&& other) noexcept;
-    point(const point& other) noexcept;
+    /// Defaults.
+    point(point&&) = default;
+    point(const point&) = default;
+    point& operator=(point&&) = default;
+    point& operator=(const point&) = default;
+    ~point() = default;
 
     point(hash_digest&& hash, uint32_t index) noexcept;
     point(const hash_digest& hash, uint32_t index) noexcept;
@@ -63,9 +67,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    point& operator=(point&& other) noexcept;
-    point& operator=(const point& other) noexcept;
 
     bool operator==(const point& other) const noexcept;
     bool operator!=(const point& other) const noexcept;

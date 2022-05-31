@@ -54,7 +54,9 @@ public:
 
     /// Default script is an invalid empty script object.
     script() noexcept;
+    ~script() noexcept;
 
+    /// Metadata is defaulted on copy/assign.
     script(script&& other) noexcept;
     script(const script& other) noexcept;
 
@@ -72,6 +74,7 @@ public:
     // Operators.
     // ------------------------------------------------------------------------
 
+    /// Metadata is defaulted on copy/assign.
     script& operator=(script&& other) noexcept;
     script& operator=(const script& other) noexcept;
 

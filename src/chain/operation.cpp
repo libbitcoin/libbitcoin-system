@@ -61,17 +61,6 @@ operation::operation() noexcept
 {
 }
 
-// This is provided only for interface consistency.
-operation::operation(operation&& other) noexcept
-  : operation(other)
-{
-}
-
-operation::operation(const operation& other) noexcept
-  : operation(other.code_, other.data_, other.underflow_)
-{
-}
-
 // If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code) noexcept
   : operation(code, no_data(), false)
@@ -131,21 +120,6 @@ operation::operation(opcode code, chunk_ptr push_data, bool underflow) noexcept
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-// This is provided only for interface consistency.
-operation& operation::operator=(operation&& other) noexcept
-{
-    *this = other;
-    return *this;
-}
-
-operation& operation::operator=(const operation& other) noexcept
-{
-    code_ = other.code_;
-    data_ = other.data_;
-    underflow_ = other.underflow_;
-    return *this;
-}
 
 bool operation::operator==(const operation& other) const noexcept
 {

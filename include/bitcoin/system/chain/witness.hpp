@@ -48,8 +48,12 @@ public:
     /// Default witness is an invalid empty stack object.
     witness() noexcept;
 
-    witness(witness&& other) noexcept;
-    witness(const witness& other) noexcept;
+    /// Defaults.
+    witness(witness&&) = default;
+    witness(const witness&) = default;
+    witness& operator=(witness&&) = default;
+    witness& operator=(const witness&) = default;
+    ~witness() = default;
 
     witness(data_stack&& stack) noexcept;
     witness(const data_stack& stack) noexcept;
@@ -67,9 +71,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    witness& operator=(witness&& other) noexcept;
-    witness& operator=(const witness& other) noexcept;
 
     bool operator==(const witness& other) const noexcept;
     bool operator!=(const witness& other) const noexcept;

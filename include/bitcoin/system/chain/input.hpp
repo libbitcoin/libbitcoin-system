@@ -49,8 +49,12 @@ public:
     /// Default input is an invalid null point object with an invalid prevout.
     input() noexcept;
 
-    input(input&& other) noexcept;
-    input(const input& other) noexcept;
+    /// Defaults.
+    input(input&&) = default;
+    input(const input&) = default;
+    input& operator=(input&&) = default;
+    input& operator=(const input&) = default;
+    ~input() = default;
 
     input(chain::point&& point, chain::script&& script,
         uint32_t sequence) noexcept;
@@ -74,9 +78,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    input& operator=(input&& other) noexcept;
-    input& operator=(const input& other) noexcept;
 
     bool operator==(const input& other) const noexcept;
     bool operator!=(const input& other) const noexcept;

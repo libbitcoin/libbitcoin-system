@@ -52,8 +52,12 @@ public:
     /// Default block is an invalid object.
     block() noexcept;
 
-    block(block&& other) noexcept;
-    block(const block& other) noexcept;
+    /// Defaults.
+    block(block&&) = default;
+    block(const block&) = default;
+    block& operator=(block&&) = default;
+    block& operator=(const block&) = default;
+    ~block() = default;
 
     block(chain::header&& header, transactions&& txs) noexcept;
     block(const chain::header& header, const transactions& txs) noexcept;
@@ -68,9 +72,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    block& operator=(block&& other) noexcept;
-    block& operator=(const block& other) noexcept;
 
     bool operator==(const block& other) const noexcept;
     bool operator!=(const block& other) const noexcept;

@@ -48,8 +48,12 @@ public:
     /// Default output is an invalid object (input.prevout relies on this).
     output() noexcept;
 
-    output(output&& other) noexcept;
-    output(const output& other) noexcept;
+    /// Defaults.
+    output(output&&) = default;
+    output(const output&) = default;
+    output& operator=(output&&) = default;
+    output& operator=(const output&) = default;
+    ~output() = default;
 
     output(uint64_t value, chain::script&& script) noexcept;
     output(uint64_t value, const chain::script& script) noexcept;
@@ -63,9 +67,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    output& operator=(output&& other) noexcept;
-    output& operator=(const output& other) noexcept;
 
     bool operator==(const output& other) const noexcept;
     bool operator!=(const output& other) const noexcept;

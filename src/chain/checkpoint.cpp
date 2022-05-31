@@ -41,16 +41,6 @@ checkpoint::checkpoint() noexcept
 {
 }
 
-checkpoint::checkpoint(checkpoint&& other) noexcept
-  : checkpoint(std::move(other.hash_), other.height_, other.valid_)
-{
-}
-
-checkpoint::checkpoint(const checkpoint& other) noexcept
-  : checkpoint(other.hash_, other.height_, other.valid_)
-{
-}
-
 checkpoint::checkpoint(hash_digest&& hash, size_t height) noexcept
   : checkpoint(std::move(hash), height, true)
 {
@@ -92,22 +82,6 @@ checkpoint checkpoint::from_string(const std::string& hash,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-checkpoint& checkpoint::operator=(checkpoint&& other) noexcept
-{
-    hash_ = std::move(other.hash_);
-    height_ = other.height_;
-    valid_ = other.valid_;
-    return *this;
-}
-
-checkpoint& checkpoint::operator=(const checkpoint& other) noexcept
-{
-    hash_ = other.hash_;
-    height_ = other.height_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool operator<(const checkpoint& left, const checkpoint& right) noexcept
 {

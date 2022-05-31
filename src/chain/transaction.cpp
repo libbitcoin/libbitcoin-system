@@ -51,11 +51,14 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 transaction::transaction() noexcept
-  : transaction(
-      false, 0,
+  : transaction(0,
       to_shared<input_ptrs>(),
       to_shared<output_ptrs>(),
-      0, false)
+      0, false, false)
+{
+}
+
+transaction::~transaction() noexcept
 {
 }
 
@@ -67,33 +70,34 @@ transaction::transaction(transaction&& other) noexcept
 // Cache not copied or moved.
 transaction::transaction(const transaction& other) noexcept
   : transaction(
-      other.segregated_,
       other.version_,
       other.inputs_,
       other.outputs_,
       other.locktime_,
+      other.segregated_,
       other.valid_)
 {
 }
 
-// segregated_ is the first property because of this constructor.
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
     chain::outputs&& outputs, uint32_t locktime) noexcept
-  : transaction(segregated(inputs), version, to_shareds(std::move(inputs)),
-      to_shareds(std::move(outputs)), locktime, true)
+  : transaction(version, to_shareds(std::move(inputs)),
+      to_shareds(std::move(outputs)), locktime, false, true)
 {
+    // Defer execution for constructor move.
+    segregated_ = segregated(inputs_);
 }
 
 transaction::transaction(uint32_t version, const chain::inputs& inputs,
     const chain::outputs& outputs, uint32_t locktime) noexcept
-  : transaction(segregated(inputs), version, to_shareds(inputs),
-      to_shareds(outputs), locktime, true)
+  : transaction(version, to_shareds(inputs), to_shareds(outputs), locktime,
+      segregated(inputs), true)
 {
 }
 
 transaction::transaction(uint32_t version, const inputs_ptr& inputs,
     const outputs_ptr& outputs, uint32_t locktime) noexcept
-  : transaction(segregated(inputs), version, inputs, outputs, locktime, true)
+  : transaction(version, inputs, outputs, locktime, segregated(inputs), true)
 {
 }
 
@@ -123,9 +127,9 @@ transaction::transaction(reader& source, bool witness) noexcept
 }
 
 // protected
-transaction::transaction(bool segregated, uint32_t version,
+transaction::transaction(uint32_t version,
     const inputs_ptr& inputs, const outputs_ptr& outputs, uint32_t locktime,
-    bool valid) noexcept
+    bool segregated, bool valid) noexcept
   : version_(version),
     inputs_(inputs ? inputs : to_shared<input_ptrs>()),
     outputs_(outputs ? outputs : to_shared<output_ptrs>()),
@@ -237,7 +241,7 @@ transaction transaction::from_data(reader& source, bool witness) noexcept
     const auto locktime = source.read_4_bytes_little_endian();
 
     // to_const is overhead, creating an extra shared pointer per input.
-    return { segregated, version, inputs, outputs, locktime, source };
+    return { version, inputs, outputs, locktime, segregated, source };
 }
 
 // Serialization.

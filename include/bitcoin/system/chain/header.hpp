@@ -50,8 +50,12 @@ public:
     /// Default header is an invalid object.
     header() noexcept;
 
-    header(header&& other) noexcept;
-    header(const header& other) noexcept;
+    /// Defaults.
+    header(header&&) = default;
+    header(const header&) = default;
+    header& operator=(header&&) = default;
+    header& operator=(const header&) = default;
+    ~header() = default;
 
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
@@ -68,9 +72,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    header& operator=(header&& other) noexcept;
-    header& operator=(const header& other) noexcept;
 
     bool operator==(const header& other) const noexcept;
     bool operator!=(const header& other) const noexcept;

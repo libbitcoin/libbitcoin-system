@@ -46,8 +46,12 @@ public:
     /// Default operation is any invalid opcode with underflow set.
     operation() noexcept;
 
-    operation(operation&& other) noexcept;
-    operation(const operation& other) noexcept;
+    /// Defaults.
+    operation(operation&&) = default;
+    operation(const operation&) = default;
+    operation& operator=(operation&&) = default;
+    operation& operator=(const operation&) = default;
+    ~operation() = default;
 
     /// Use data constructors for push_data ops.
     operation(opcode code) noexcept;
@@ -71,9 +75,6 @@ public:
 
     // Operators.
     // ------------------------------------------------------------------------
-
-    operation& operator=(operation&& other) noexcept;
-    operation& operator=(const operation& other) noexcept;
 
     bool operator==(const operation& other) const noexcept;
     bool operator!=(const operation& other) const noexcept;

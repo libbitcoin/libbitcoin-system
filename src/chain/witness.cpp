@@ -51,16 +51,6 @@ witness::witness() noexcept
 {
 }
 
-witness::witness(witness&& other) noexcept
-  : witness(std::move(other.stack_), other.valid_)
-{
-}
-
-witness::witness(const witness& other) noexcept
-  : witness(other.stack_, other.valid_)
-{
-}
-
 witness::witness(data_stack&& stack) noexcept
   : witness(*to_shareds(std::move(stack)), true)
 {
@@ -125,20 +115,6 @@ witness::witness(const chunk_ptrs& stack, bool valid) noexcept
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-witness& witness::operator=(witness&& other) noexcept
-{
-    stack_ = std::move(other.stack_);
-    valid_ = other.valid_;
-    return *this;
-}
-
-witness& witness::operator=(const witness& other) noexcept
-{
-    stack_ = other.stack_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool witness::operator==(const witness& other) const noexcept
 {

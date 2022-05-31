@@ -63,6 +63,10 @@ script::script() noexcept
 {
 }
 
+script::~script() noexcept
+{
+}
+
 script::script(script&& other) noexcept
   : script(std::move(other.ops_), other.valid_)
 {

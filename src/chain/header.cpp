@@ -45,30 +45,6 @@ header::header() noexcept
 {
 }
 
-header::header(header&& other) noexcept
-: header(
-    other.version_,
-    std::move(other.previous_block_hash_),
-    std::move(other.merkle_root_),
-    other.timestamp_,
-    other.bits_,
-    other.nonce_,
-    other.valid_)
-{
-}
-
-header::header(const header& other) noexcept
-: header(
-    other.version_,
-    other.previous_block_hash_,
-    other.merkle_root_,
-    other.timestamp_,
-    other.bits_,
-    other.nonce_,
-    other.valid_)
-{
-}
-
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
     uint32_t nonce) noexcept
@@ -140,30 +116,6 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-header& header::operator=(header&& other) noexcept
-{
-    version_ = other.version_;
-    previous_block_hash_ = std::move(other.previous_block_hash_);
-    merkle_root_ = std::move(other.merkle_root_);
-    timestamp_ = other.timestamp_;
-    bits_ = other.bits_;
-    nonce_ = other.nonce_;
-    valid_ = other.valid_;
-    return *this;
-}
-
-header& header::operator=(const header& other) noexcept
-{
-    version_ = other.version_;
-    previous_block_hash_ = other.previous_block_hash_;
-    merkle_root_ = other.merkle_root_;
-    timestamp_ = other.timestamp_;
-    bits_ = other.bits_;
-    nonce_ = other.nonce_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool header::operator==(const header& other) const noexcept
 {

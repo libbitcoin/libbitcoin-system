@@ -50,22 +50,6 @@ input::input() noexcept
 {
 }
 
-input::input(input&& other) noexcept
-  : input(other)
-{
-}
-
-input::input(const input& other) noexcept
-  : input(
-      other.point_,
-      other.script_,
-      other.witness_,
-      other.sequence_,
-      other.valid_,
-      other.prevout)
-{
-}
-
 input::input(chain::point&& point, chain::script&& script,
     uint32_t sequence) noexcept
   : input(
@@ -162,23 +146,6 @@ input::input(const chain::point::ptr& point, const chain::script::ptr& script,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-input& input::operator=(input&& other) noexcept
-{
-    *this = other;
-    return *this;
-}
-
-input& input::operator=(const input& other) noexcept
-{
-    point_ = other.point_;
-    script_ = other.script_;
-    witness_ = other.witness_;
-    sequence_ = other.sequence_;
-    valid_ = other.valid_;
-    prevout = other.prevout;
-    return *this;
-}
 
 bool input::operator==(const input& other) const noexcept
 {

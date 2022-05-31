@@ -43,16 +43,6 @@ point::point() noexcept
 {
 }
 
-point::point(point&& other) noexcept
-  : point(std::move(other.hash_), other.index_, true)
-{
-}
-
-point::point(const point& other) noexcept
-  : point(other.hash_, other.index_, other.valid_)
-{
-}
-
 point::point(hash_digest&& hash, uint32_t index) noexcept
   : point(std::move(hash), index, true)
 {
@@ -102,22 +92,6 @@ point::point(const hash_digest& hash, uint32_t index, bool valid) noexcept
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-point& point::operator=(point&& other) noexcept
-{
-    hash_ = std::move(other.hash_);
-    index_ = other.index_;
-    valid_ = other.valid_;
-    return *this;
-}
-
-point& point::operator=(const point& other) noexcept
-{
-    hash_ = other.hash_;
-    index_ = other.index_;
-    valid_ = other.valid_;
-    return *this;
-}
 
 bool point::operator==(const point& other) const noexcept
 {
