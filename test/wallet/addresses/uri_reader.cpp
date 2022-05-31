@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
 BOOST_AUTO_TEST_SUITE(uri_reader_tests)

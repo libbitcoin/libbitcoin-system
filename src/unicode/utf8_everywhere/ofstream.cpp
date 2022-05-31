@@ -19,7 +19,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/ofstream.hpp>
 
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 namespace libbitcoin {

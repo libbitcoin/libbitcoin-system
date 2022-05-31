@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include <sstream>
-#include <boost/range/adaptor/reversed.hpp>
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 

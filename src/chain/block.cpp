@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include <utility>
 #include <unordered_map>
-#include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>

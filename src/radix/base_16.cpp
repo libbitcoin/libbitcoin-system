@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
-#include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 

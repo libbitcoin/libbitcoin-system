@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <limits>
 #include <random>
-#include <boost/thread.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 

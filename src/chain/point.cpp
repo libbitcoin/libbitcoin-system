@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <memory>
 #include <utility>
-#include <boost/json.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/math/math.hpp>

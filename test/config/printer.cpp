@@ -19,8 +19,6 @@
 #include "../test.hpp"
 #include <iostream>
 #include <vector>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 
 BOOST_AUTO_TEST_SUITE(printer_tests)
 

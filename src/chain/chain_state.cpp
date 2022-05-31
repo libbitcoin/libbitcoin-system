@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <boost/range/adaptor/reversed.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/checkpoint.hpp>

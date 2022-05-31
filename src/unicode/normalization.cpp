@@ -28,14 +28,7 @@
 #else
     #include <mutex>
 #endif
- 
- // std::auto_ptr is deprecated in C++11 and removed in C++17:
- // en.cppreference.com/w/cpp/memory/auto_ptr
- // boost.locale exposes it to the API, so cannot remove it until C++17:
- // github.com/boostorg/locale/issues/27#issuecomment-414932853
- // Must use BOOST_LOCALE_HIDE_AUTO_PTR to hide the warnings.
-#define BOOST_LOCALE_HIDE_AUTO_PTR
-#include <boost/locale.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/exceptions.hpp>

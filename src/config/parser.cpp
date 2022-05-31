@@ -20,9 +20,7 @@
 
 #include <string>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 

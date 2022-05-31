@@ -23,7 +23,6 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <boost/optional.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>

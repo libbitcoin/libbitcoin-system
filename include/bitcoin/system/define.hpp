@@ -134,15 +134,6 @@ namespace bc = libbitcoin;
 #define BC_VS2022
 #endif
 
-// External: Requires that <bitcoin/system.hpp> be included before boost.
-// Current alphabetical sort of system.hpp ensures this appears before boost.
-// Internal: Placeholders are not currently used in this system library.
-// Avoid namespace conflict between boost::placeholders and std::placeholders.
-// This arises when including <functional>, which declares std::placeholders.
-// This results in an declared symbol when boost includes use placeholders.
-// So bracket those includes with an undefine and redefine of this symbol.
-#define BOOST_BIND_NO_PLACEHOLDERS
-
 // These are ADL free functions for use with boost-json.
 #define DECLARE_JSON_VALUE_CONVERTORS(name) \
 BC_API name tag_invoke(boost::json::value_to_tag<name>, \
@@ -165,8 +156,7 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
 #endif
 
 #ifdef _MSC_VER
-    // vs2017 and earlier do not support _Pragma, though it allows macros to
-    // parameterize the warning value. Degrade to broader exclusion in vs2017.
+    // vs2017 and earlier do not support _Pragma (ISO).
     #ifdef BC_VS2019
         #define PRAGMA(pragma) _Pragma(#pragma)
         #define BC_PUSH_MSVC_WARNING(value) \
@@ -174,6 +164,7 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
             PRAGMA(warning(disable:value))
         #define BC_POP_MSVC_WARNING() \
             PRAGMA(warning(pop))
+    // Degrade to broader non-standard exclusion in vs2017.
     #else
         #define BC_PUSH_MSVC_WARNING(value) \
             __pragma(warning(push)) \

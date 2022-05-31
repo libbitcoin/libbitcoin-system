@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/config/parameter.hpp>
 
-#include <boost/program_options.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/data/data.hpp>
 
 namespace po = boost::program_options;

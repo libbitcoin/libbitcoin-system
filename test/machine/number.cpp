@@ -21,7 +21,6 @@
 #include <iostream>
 #include <limits>
 ////#include <sstream>
-////#include <boost/format.hpp>
 #include "number.hpp"
 
 BOOST_AUTO_TEST_SUITE(number_tests)

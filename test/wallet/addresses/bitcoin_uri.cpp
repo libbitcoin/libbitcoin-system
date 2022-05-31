@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <boost/optional.hpp>
 
 BOOST_AUTO_TEST_SUITE(bitcoin_uri_tests)
 

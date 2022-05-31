@@ -20,8 +20,6 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 
 BOOST_AUTO_TEST_SUITE(parameter_tests)
 
