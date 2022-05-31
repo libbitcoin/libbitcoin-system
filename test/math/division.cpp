@@ -399,7 +399,7 @@ static_assert(truncated_identity(-42, -8), "");
 // Identity: (x / y_) * y + (x % y_) = x
 
 // Divide increment magnitude.
-constexpr auto i = 1;
+constexpr auto i_ = 1;
 
 // Operand magnitudes (_ avoids warnings on hiding by boost macros).
 constexpr auto x_ = 4;
@@ -434,42 +434,42 @@ static_assert((+x_ / -y_) * (-y_) + (+x_ % -y_) == +x_, "-");
 // ----------------------------------------------------------------------------
 
 // Ceilinged divide: (increment truncated quotient if positive and remainder)
-static_assert((+x_ / +y_) + (((+x_ < 0) == (+y_ < 0)) ? ((+x_ % +y_) != 0 ? +i : 0) : 0) == +1 + i, "+");
-static_assert((-x_ / -y_) + (((-x_ < 0) == (-y_ < 0)) ? ((-x_ % -y_) != 0 ? +i : 0) : 0) == +1 + i, "+");
-static_assert((-x_ / +y_) + (((-x_ < 0) == (+y_ < 0)) ? ((-x_ % +y_) != 0 ? +i : 0) : 0) == -1 + 0, "-");
-static_assert((+x_ / -y_) + (((+x_ < 0) == (-y_ < 0)) ? ((+x_ % -y_) != 0 ? +i : 0) : 0) == -1 + 0, "-");
+static_assert((+x_ / +y_) + (((+x_ < 0) == (+y_ < 0)) ? ((+x_ % +y_) != 0 ? +i_ : 0) : 0) == +1 + i_, "+");
+static_assert((-x_ / -y_) + (((-x_ < 0) == (-y_ < 0)) ? ((-x_ % -y_) != 0 ? +i_ : 0) : 0) == +1 + i_, "+");
+static_assert((-x_ / +y_) + (((-x_ < 0) == (+y_ < 0)) ? ((-x_ % +y_) != 0 ? +i_ : 0) : 0) == -1 + 0 , "-");
+static_assert((+x_ / -y_) + (((+x_ < 0) == (-y_ < 0)) ? ((+x_ % -y_) != 0 ? +i_ : 0) : 0) == -1 + 0 , "-");
 
 // Ceilinged modulo: (decrease truncated modulo by_ divisor if positive and remainder)
 static_assert((+x_ % +y_) - (((+x_ < 0) == (+y_ < 0)) ? +y_ : 0) == +1 - +y_, "+");
 static_assert((-x_ % -y_) - (((-x_ < 0) == (-y_ < 0)) ? -y_ : 0) == -1 - -y_, "+");
-static_assert((-x_ % +y_) - (((-x_ < 0) == (+y_ < 0)) ? +y_ : 0) == -1 - +0, "-");
-static_assert((+x_ % -y_) - (((+x_ < 0) == (-y_ < 0)) ? -y_ : 0) == +1 - -0, "-");
+static_assert((-x_ % +y_) - (((-x_ < 0) == (+y_ < 0)) ? +y_ : 0) == -1 - +0 , "-");
+static_assert((+x_ % -y_) - (((+x_ < 0) == (-y_ < 0)) ? -y_ : 0) == +1 - -0 , "-");
 
 // Ceilinged identity
-static_assert((+1 + i) * (+y_) + (+1 - +y_) == +x_, "+");
-static_assert((+1 + i) * (-y_) + (-1 - -y_) == -x_, "+");
-static_assert((-1 + 0) * (+y_) + (-1 - +0) == -x_, "-");
-static_assert((-1 + 0) * (-y_) + (+1 - -0) == +x_, "-");
+static_assert((+1 + i_) * (+y_) + (+1 - +y_) == +x_, "+");
+static_assert((+1 + i_) * (-y_) + (-1 - -y_) == -x_, "+");
+static_assert((-1 + 0 ) * (+y_) + (-1 - +0 ) == -x_, "-");
+static_assert((-1 + 0 ) * (-y_) + (+1 - -0 ) == +x_, "-");
 
 // ----------------------------------------------------------------------------
 
 // Floored divide: (decrement truncated quotient if negative and remainder)
-static_assert((+x_ / +y_) - (((+x_ < 0) != (+y_ < 0)) ? ((+x_ % +y_) != 0 ? +i : 0) : 0) == +1 - 0, "+");
-static_assert((-x_ / -y_) - (((-x_ < 0) != (-y_ < 0)) ? ((-x_ % -y_) != 0 ? +i : 0) : 0) == +1 - 0, "+");
-static_assert((-x_ / +y_) - (((-x_ < 0) != (+y_ < 0)) ? ((-x_ % +y_) != 0 ? +i : 0) : 0) == -1 - i, "-");
-static_assert((+x_ / -y_) - (((+x_ < 0) != (-y_ < 0)) ? ((+x_ % -y_) != 0 ? +i : 0) : 0) == -1 - i, "-");
+static_assert((+x_ / +y_) - (((+x_ < 0) != (+y_ < 0)) ? ((+x_ % +y_) != 0 ? +i_ : 0) : 0) == +1 - 0 , "+");
+static_assert((-x_ / -y_) - (((-x_ < 0) != (-y_ < 0)) ? ((-x_ % -y_) != 0 ? +i_ : 0) : 0) == +1 - 0 , "+");
+static_assert((-x_ / +y_) - (((-x_ < 0) != (+y_ < 0)) ? ((-x_ % +y_) != 0 ? +i_ : 0) : 0) == -1 - i_, "-");
+static_assert((+x_ / -y_) - (((+x_ < 0) != (-y_ < 0)) ? ((+x_ % -y_) != 0 ? +i_ : 0) : 0) == -1 - i_, "-");
 
 // Floored modulo: (increase truncated modulo by_ divisor if negative and remainder)
-static_assert((+x_ % +y_) + (((+x_ < 0) != (+y_ < 0)) ? +y_ : 0) == +1 + +0, "+");
-static_assert((-x_ % -y_) + (((-x_ < 0) != (-y_ < 0)) ? -y_ : 0) == -1 + +0, "+");
+static_assert((+x_ % +y_) + (((+x_ < 0) != (+y_ < 0)) ? +y_ : 0) == +1 + +0 , "+");
+static_assert((-x_ % -y_) + (((-x_ < 0) != (-y_ < 0)) ? -y_ : 0) == -1 + +0 , "+");
 static_assert((-x_ % +y_) + (((-x_ < 0) != (+y_ < 0)) ? +y_ : 0) == -1 + +y_, "-");
 static_assert((+x_ % -y_) + (((+x_ < 0) != (-y_ < 0)) ? -y_ : 0) == +1 + -y_, "-");
 
 // Floored identity:
-static_assert((+1 - 0) * (+y_) + (+1 + +0) == +x_, "+");
-static_assert((+1 - 0) * (-y_) + (-1 + +0) == -x_, "+");
-static_assert((-1 - i) * (+y_) + (-1 + +y_) == -x_, "-");
-static_assert((-1 - i) * (-y_) + (+1 + -y_) == +x_, "-");
+static_assert((+1 - 0 ) * (+y_) + (+1 + +0 ) == +x_, "+");
+static_assert((+1 - 0 ) * (-y_) + (-1 + +0 ) == -x_, "+");
+static_assert((-1 - i_) * (+y_) + (-1 + +y_) == -x_, "-");
+static_assert((-1 - i_) * (-y_) + (+1 + -y_) == +x_, "-");
 
 // ----------------------------------------------------------------------------
 
