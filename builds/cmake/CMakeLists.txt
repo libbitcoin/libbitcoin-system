@@ -60,6 +60,9 @@ add_compile_options( "-Wno-missing-braces" )
 # Ignore comments within comments or commenting of backslash extended lines.
 add_compile_options( "-Wno-comment" )
 
+# Suppress warning for copy of implicitly generated copy constructor.
+add_compile_options( "-Wno-deprecated-copy" )
+
 # Allow use of C99 'long long' type.
 add_compile_options( "-Wno-long-long" )
 

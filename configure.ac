@@ -382,6 +382,12 @@ AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wno-comment],
         [CXXFLAGS="$CXXFLAGS -Wno-comment"])])
 
+# Suppress warning for copy of implicitly generated copy constructor.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-copy],
+        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-copy"])])
+
 # Conflict in stdlib under clang. Enabled in clang only.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
