@@ -394,6 +394,12 @@ AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
 
+# Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-DBOOST_EXCEPTION_DISABLE],
+        [CFLAGS="$CFLAGS -DBOOST_EXCEPTION_DISABLE"])])
+
 # Protect stack.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
