@@ -522,6 +522,7 @@ size_t byte_reader<IStream>::getter() noexcept
     // Returns current position on success and pos_type(-1) on failure.
     try
     {
+        // This does not honor BOOST_EXCEPTION_DISABLE.
         position = stream_.tellg();
         validate();
     }
@@ -569,6 +570,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
     // boost/istringstream both set failbit on empty over/underflow.
     try
     {
+        // This does not honor BOOST_EXCEPTION_DISABLE.
         stream_.seekg(offset, IStream::cur);
         validate();
     }

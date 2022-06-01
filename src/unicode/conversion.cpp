@@ -37,6 +37,7 @@ static std::basic_string<CharOut> to_utf(
     // So use method_type::stop and trap conversion exceptions.
     try
     {
+        // This does not honor BOOST_EXCEPTION_DISABLE.
         // This is a mathematical conversion that could be reimplemented here.
         out = conv::utf_to_utf<CharOut>(in, conv::method_type::stop);
     }

@@ -23,7 +23,14 @@
 // directly in the throw_exception function. Defining BOOST_EXCEPTION_DISABLE
 // disables this integration."
 // www.boost.org/doc/libs/1_78_0/libs/exception/doc/configuration_macros.html
-#define BOOST_EXCEPTION_DISABLE
+// This does not prevent interfaces that are documented to throw from doing so.
+// It only prevents boost from internally wrapping the exception object with
+// another class (in boost/throw_exception.hpp). Nearly all instances of the
+// internal boost exceptions affecting this library occur in streambuf and are
+// caught and presumed discarded in std::istream (standards allow propagation).
+// See more comments in streamers.hpp on streams that may throw exceptions.
+// Must be set on the command line to ensure it is captured by all includes.
+////#define BOOST_EXCEPTION_DISABLE
 
 // std::auto_ptr is deprecated in C++11 and removed in C++17:
 // en.cppreference.com/w/cpp/memory/auto_ptr
