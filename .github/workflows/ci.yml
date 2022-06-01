@@ -85,7 +85,7 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             cc: "clang"
-            flags: "-Os -fPIE"
+            flags: "-Os -fvisibility=hidden -fPIE"
             packager: "brew"
             packages: ""
 
