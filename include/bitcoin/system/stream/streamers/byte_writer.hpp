@@ -41,6 +41,12 @@ class byte_writer
 public:
     /// Constructors.
     byte_writer(OStream& sink) noexcept;
+
+    /// Copy/move/destruct.
+    byte_writer(byte_writer&& other);
+    byte_writer(const byte_writer& other);
+    byte_writer& operator=(byte_writer&& other);
+    byte_writer& operator=(const byte_writer& other);
     virtual ~byte_writer() noexcept;
 
     /// Type-inferenced integer writers.

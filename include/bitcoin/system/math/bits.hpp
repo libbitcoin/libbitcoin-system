@@ -26,33 +26,57 @@
 namespace libbitcoin {
 namespace system {
 
-/// Offsets that exceed value bit width are undefined:
+/// Unlike native operators, these functions do not promote integer types.
+/// and have well-defined behavior for any type-enabled parameterization.
+
+/// Bit field width determinations.
+/// ---------------------------------------------------------------------------
 
 /// The number of bits required to store the value.
-template <typename Integer, if_integer<Integer> = true>
-inline size_t bit_width(Integer value) noexcept;
+template <typename Value, if_integer<Value> = true>
+inline size_t bit_width(Value value) noexcept;
 
 /// The number of bytes required to store the value.
-template <typename Integer, if_integer<Integer> = true>
-inline size_t byte_width(Integer value) noexcept;
+template <typename Value, if_integer<Value> = true>
+inline size_t byte_width(Value value) noexcept;
 
-/// Two's complement (~n), the bit inversion of any integer.
-template <typename Integer, if_integer<Integer> = true>
-constexpr Integer ones_complement(Integer value) noexcept;
+/// Bitwise logical operations.
+/// ---------------------------------------------------------------------------
 
-/// Two's complement (~n+1), the absolute value of an unsigned negative value.
-template <typename Integer, if_integer<Integer> = true>
-constexpr Integer twos_complement(Integer value) noexcept;
+/// Two's complement (~value + 1).
+/// Absolute value of an unsigned negative value.
+template <typename Value, if_integer<Value> = true>
+constexpr Value twos_complement(Value value) noexcept;
+
+/// Bitwise NOT (~value) operation.
+/// One's complement, the bit inversion of any value.
+template <typename Value, if_integer<Value> = true>
+constexpr Value bit_not(Value value) noexcept;
+
+/// Bitwise AND (left & right) operation.
+template <typename Value, if_integer<Value> = true>
+constexpr Value bit_and(Value left, Value right) noexcept;
+
+/// Bitwise OR (left | right)  operation.
+template <typename Value, if_integer<Value> = true>
+constexpr Value bit_or(Value left, Value right) noexcept;
+
+/// Bitwise XOR (left ^ right)  operation.
+template <typename Value, if_integer<Value> = true>
+constexpr Value bit_xor(Value left, Value right) noexcept;
+
+// Value factories.
+// ---------------------------------------------------------------------------
 
 /// All bits set (maximum value for signed, minimum value for unsigned).
 template <typename Value, if_integer<Value> = true>
 constexpr Value bit_all() noexcept;
 
-/// An instance of value with only the high order bit set (0x8...).
+/// An instance of value with only the high order bit set (0x8...0).
 template <typename Value, if_integer<Value> = true>
 constexpr Value bit_hi() noexcept;
 
-/// An instance of value with only the low order bit set (0x...1).
+/// An instance of value with only the low order bit set (0x0...1).
 template <typename Value, if_integer<Value> = true>
 constexpr Value bit_lo() noexcept;
 
@@ -72,6 +96,9 @@ constexpr bool get_left(Value value, size_t offset=zero) noexcept;
 template <typename Value, if_integer<Value> = true>
 constexpr bool get_right(Value value, size_t offset=zero) noexcept;
 
+/// Set (a bit).
+/// ---------------------------------------------------------------------------
+
 /// Set a bit in target, offset relative to highest order bit.
 template <typename Value, if_integer<Value> = true>
 constexpr Value set_left(const Value& target, size_t offset=zero,
@@ -88,69 +115,95 @@ template <typename Value, if_integer<Value> = true>
 inline void set_right_into(Value& target, size_t offset=zero,
     bool state=true) noexcept;
 
+/// Mask (a field of bits from left/right).
+/// ---------------------------------------------------------------------------
+
 /// A set of bitmasks with high order count of bits unset.
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value mask_left(size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value mask_left(const Value& target, size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 inline void mask_left_into(Value& target, size_t bits) noexcept;
 
 /// A set of bitmasks with low order count of bits unset.
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value mask_right(size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value mask_right(const Value& target, size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 inline void mask_right_into(Value& target, size_t bits) noexcept;
 
+/// Unmask (~mask).
+/// ---------------------------------------------------------------------------
+
 /// A set of bitflags with high order count of bits set.
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value unmask_left(size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value unmask_left(const Value& target, size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 inline Value unmask_left_into(Value& target, size_t bits) noexcept;
 
 /// A set of bitflags with low order count of bits set.
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value unmask_right(size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value unmask_right(const Value& target, size_t bits) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 inline void unmask_right_into(Value& target, size_t bits) noexcept;
 
-/// Offsets that exceed value bit width are well-defined:
+/// Shift (left/right).
+/// ---------------------------------------------------------------------------
 
-/// Rotate the bits of Value to the left by amount 'shift'.
+/// Bitwise LEFT SHIFT (value << shift) operation.
+/// Set overflow to false to modulo shift by Value width.
+/// Signed overload interpret value as unsigned for shift.
+template <typename Value, if_signed_integer<Value> = true>
+constexpr Value shift_left(const Value& value, size_t shift,
+    bool overflow=true) noexcept;
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value shift_left(const Value& value, size_t shift,
+    bool overflow = true) noexcept;
+template <typename Value, if_signed_integer<Value> = true>
+inline void shift_left_into(Value& value, size_t shift,
+    bool overflow=true) noexcept;
+template <typename Value, if_unsigned_integer<Value> = true>
+inline void shift_left_into(Value& value, size_t shift,
+    bool overflow = true) noexcept;
+
+/// Bitwise RIGHT SHIFT (value >> shift) operation.
+/// Set overflow to false to modulo shift by Value width.
+/// Signed overload interpret value as unsigned for shift.
+template <typename Value, if_signed_integer<Value> = true>
+constexpr Value shift_right(const Value& value, size_t shift,
+    bool overflow=true) noexcept;
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr Value shift_right(const Value& value, size_t shift,
+    bool overflow = true) noexcept;
+template <typename Value, if_signed_integer<Value> = true>
+inline void shift_right_into(Value& value, size_t shift,
+    bool overflow=true) noexcept;
+template <typename Value, if_unsigned_integer<Value> = true>
+inline void shift_right_into(Value& value, size_t shift,
+    bool overflow = true) noexcept;
+
+/// Rotate (left/right).
+/// ---------------------------------------------------------------------------
+
+/// Bitwise left rotation of value by shift.
+/// Rotation by any shift behaves as a continuous rotation.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_left(const Value& value, size_t shift) noexcept;
 template <typename Value, if_unsigned_integer<Value> = true>
 inline void rotate_left_into(Value& value, size_t shift) noexcept;
 
-/// Rotate the bits of Value to the right by amount 'shift'.
+/// Bitwise right rotation of value by shift.
+/// Rotation by any shift behaves as a continuous rotation.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr Value rotate_right(const Value& value, size_t shift) noexcept;
 template <typename Value, if_unsigned_integer<Value> = true>
 inline void rotate_right_into(Value& value, size_t shift) noexcept;
-
-/// Shift the bits of Value to the left by amount 'shift'.
-/// Set 'overflow' to false to modulo shift by Value width.
-template <typename Value, if_unsigned_integer<Value> = true>
-constexpr Value shift_left(const Value& value, size_t shift,
-    bool overflow=true) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
-inline void shift_left_into(Value& value, size_t shift,
-    bool overflow=true) noexcept;
-
-/// Shift the bits of Value to the right by amount 'shift'.
-/// Set 'overflow' to false to modulo shift by Value width.
-template <typename Value, if_unsigned_integer<Value> = true>
-constexpr Value shift_right(const Value& value, size_t shift,
-    bool overflow=true) noexcept;
-template <typename Value, if_unsigned_integer<Value> = true>
-inline void shift_right_into(Value& value, size_t shift,
-    bool overflow=true) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

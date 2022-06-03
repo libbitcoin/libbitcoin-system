@@ -305,8 +305,8 @@ uint32_t settings::maximum_timespan() const noexcept
 // The target number of blocks for 2 weeks of work (2016 blocks).
 size_t settings::retargeting_interval() const noexcept
 {
-    return chain::chain_state::retargeting_interval(retargeting_interval_seconds,
-        block_spacing_seconds);
+    return chain::chain_state::retargeting_interval(
+        retargeting_interval_seconds, block_spacing_seconds);
 }
 
 uint256_t settings::work_limit() const noexcept

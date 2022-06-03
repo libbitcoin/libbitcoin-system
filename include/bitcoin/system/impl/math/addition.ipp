@@ -21,6 +21,7 @@
 
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -29,17 +30,23 @@ namespace system {
 // TODO: test with uintx.
 
 template <typename Result, typename Left, typename Right,
+    if_not_lesser_width<Result, Left>,
+    if_not_lesser_width<Result, Right>,
     if_same_signed_integer<Left, Right>>
 constexpr Result add(Left left, Right right) noexcept
 {
-    return static_cast<Result>(left) + static_cast<Result>(right);
+    return possible_sign_cast<Result>(left) +
+        possible_sign_cast<Result>(right);
 }
 
 template <typename Result, typename Left, typename Right,
+    if_not_lesser_width<Result, Left>,
+    if_not_lesser_width<Result, Right>,
     if_same_signed_integer<Left, Right>>
 constexpr Result subtract(Left left, Right right) noexcept
 {
-    return static_cast<Result>(left) - static_cast<Result>(right);
+    return possible_sign_cast<Result>(left) -
+        possible_sign_cast<Result>(right);
 }
 
 template <typename Integer, if_signed_integer<Integer>>

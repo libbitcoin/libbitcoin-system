@@ -61,7 +61,7 @@ bool equal_points(
 
 /// Fill a buffer with values.
 template <typename Iterator, typename Value>
-void filler(Iterator begin, const Iterator& end, const Value& value);
+void filler(Iterator begin, const Iterator& end, const Value& value) noexcept;
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>

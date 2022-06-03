@@ -42,6 +42,12 @@ public:
       : copy_sink<Container>(data)
     {
     }
+    
+    flip_sink(flip_sink&&) = default;
+    flip_sink(const flip_sink&) = default;
+    flip_sink& operator=(flip_sink&&) = default;
+    flip_sink& operator=(const flip_sink&) = default;
+    ~flip_sink() override = default;
 };
 
 } // namespace system

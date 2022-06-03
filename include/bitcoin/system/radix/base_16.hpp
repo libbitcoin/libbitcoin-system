@@ -35,7 +35,8 @@ namespace system {
 constexpr size_t octet_width = 2;
 
 /// True if the character is a hexadecimal digit.
-BC_API bool is_base16(char character) noexcept;
+template <typename Byte, if_byte<Byte> = true>
+constexpr bool is_base16(Byte character) noexcept;
 
 /// Byte value of the literal octet, undefined (but safe) if not base16.
 BC_API uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept;

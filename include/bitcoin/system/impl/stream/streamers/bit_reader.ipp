@@ -44,11 +44,6 @@ bit_reader<IStream>::bit_reader(IStream& source) noexcept
 {
 }
 
-template <typename IStream>
-bit_reader<IStream>::~bit_reader() noexcept
-{
-}
-
 // bits
 // ----------------------------------------------------------------------------
 
@@ -130,7 +125,7 @@ void bit_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 {
     // Suboptimal because shifts each bit and reads single bytes, but simple.
     for (size_t byte = 0; byte < size; ++byte)
-        buffer[byte] = static_cast<uint8_t>(read_bits(byte_bits));
+        buffer[byte] = narrow_cast<uint8_t>(read_bits(byte_bits));
 }
 
 template <typename IStream>

@@ -31,6 +31,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -66,14 +67,14 @@ static Integer from_little(size_t, const data_slice& data) noexcept
 template <typename Data, typename Integer, if_byte<Integer> = true>
 static Data to_big(Data&& bytes, Integer value) noexcept
 {
-    bytes.front() = static_cast<uint8_t>(value);
+    bytes.front() = possible_sign_cast<uint8_t>(value);
     return std::move(bytes);
 }
 
 template <typename Data, typename Integer, if_byte<Integer> = true>
 static Data to_little(Data&& bytes, Integer value) noexcept
 {
-    bytes.front() = static_cast<uint8_t>(value);
+    bytes.front() = possible_sign_cast<uint8_t>(value);
     return std::move(bytes);
 }
 
@@ -100,7 +101,10 @@ static Integer from_big(size_t size, const data_slice& data) noexcept
     for (size_t byte = 0; byte < bytes; ++byte)
     {
         value <<= byte_bits;
-        value |= Integer{ data[byte] };
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_sign_cast<Integer>(data[byte]);
+        BC_POP_WARNING()
     }
 
     return value;
@@ -123,7 +127,10 @@ static Integer from_little(size_t size, const data_slice& data) noexcept
     for (auto byte = bytes; byte > 0; --byte)
     {
         value <<= byte_bits;
-        value |= Integer{ data[sub1(byte)] };
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
+        BC_POP_WARNING()
     }
 
     return value;
@@ -140,9 +147,11 @@ static Data to_big(Data&& bytes, Integer value) noexcept
     // 0x0102 >> 8 => 0x0001
     // 0x0001 >> 8 => 0x0000
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     for (auto& byte: boost::adaptors::reverse(bytes))
+    BC_POP_WARNING()
     {
-        byte = static_cast<uint8_t>(value);
+        byte = possible_sign_narrow_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 
@@ -162,7 +171,7 @@ static Data to_little(Data&& bytes, Integer value) noexcept
 
     for (auto& byte: bytes)
     {
-        byte = static_cast<uint8_t>(value);
+        byte = possible_sign_narrow_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 
@@ -297,7 +306,7 @@ Integer from_big_endian(std::istream& stream) noexcept
     // Guard: stream.gcount() is <= sizeof(Integer) after stream.read.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
-    buffer.resize(static_cast<size_t>(stream.gcount()));
+    buffer.resize(possible_narrow_and_sign_cast<size_t>(stream.gcount()));
     return from_big_endian<Integer>(buffer);
 }
 
@@ -307,7 +316,7 @@ Integer from_little_endian(std::istream& stream) noexcept
     // Guard: stream.gcount() is <= sizeof(Integer) after stream.read.
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
-    buffer.resize(static_cast<size_t>(stream.gcount()));
+    buffer.resize(possible_narrow_and_sign_cast<size_t>(stream.gcount()));
     return from_little_endian<Integer>(buffer);
 }
 

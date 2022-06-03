@@ -25,6 +25,7 @@
 #include <string>
 #include <type_traits>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/words/language.hpp>
 #include <bitcoin/system/words/languages.hpp>
 
@@ -91,12 +92,12 @@ int32_t dictionary<Size>::index(const std::string& word) const noexcept
     // Dictionary sort is configured on each dictionary, verified by tests.
     // Dictionary is char* elements but using std::string (word) for compares.
     if (words_.sorted)
-        return static_cast<int32_t>(binary_search(words_.word, word));
+        return possible_narrow_cast<int32_t>(binary_search(words_.word, word));
 
     // std::find returns first match, though words should be unique.
     const auto it = std::find(words_.word.begin(), words_.word.end(), word);
     return it == words_.word.end() ? -1 : 
-        static_cast<int32_t>(std::distance(words_.word.begin(), it));
+        possible_narrow_cast<int32_t>(std::distance(words_.word.begin(), it));
 }
 
 template <size_t Size>

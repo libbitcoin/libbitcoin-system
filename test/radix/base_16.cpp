@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(base_16_tests)
 
 BOOST_AUTO_TEST_CASE(base16__is_base16__limits__false)
 {
-    BOOST_REQUIRE(!is_base16(0));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>(0)));
     BOOST_REQUIRE(!is_base16(max_uint8));
 }
 
@@ -64,12 +64,12 @@ BOOST_AUTO_TEST_CASE(base16__is_base16__upper_case__true)
 
 BOOST_AUTO_TEST_CASE(base16__is_base16__boundaries__false)
 {
-    BOOST_REQUIRE(!is_base16('0' - 1));
-    BOOST_REQUIRE(!is_base16('9' + 1));
-    BOOST_REQUIRE(!is_base16('a' - 1));
-    BOOST_REQUIRE(!is_base16('f' + 1));
-    BOOST_REQUIRE(!is_base16('A' - 1));
-    BOOST_REQUIRE(!is_base16('F' + 1));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('0' - 1)));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('9' + 1)));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('a' - 1)));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('f' + 1)));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('A' - 1)));
+    BOOST_REQUIRE(!is_base16(narrow_cast<char>('F' + 1)));
 }
 
 // encode_octet
@@ -319,28 +319,28 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_chunk__null_hash__expected)
 BOOST_AUTO_TEST_CASE(base16__decode_base16_array__low_character_count__false)
 {
     const auto value = "424242";
-    data_array<4> out;
+    data_array<4> out{};
     BOOST_REQUIRE(!decode_base16(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_base16_array__high_character_count__false)
 {
     const auto value = "424242";
-    data_array<2> out;
+    data_array<2> out{};
     BOOST_REQUIRE(!decode_base16(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_base16_array__odd_character_count__false)
 {
     const auto value = "42abc";
-    data_array<2> out;
+    data_array<2> out{};
     BOOST_REQUIRE(!decode_base16(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_base16_array__invalid_character__false)
 {
     const auto value = "42xabc";
-    data_array<3> out;
+    data_array<3> out{};
     BOOST_REQUIRE(!decode_base16(out, value));
 }
 
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__empty__empty)
 {
     const data_array<0> expected{};
     const auto value = "";
-    data_array<0> out;
+    data_array<0> out{};
     BOOST_REQUIRE(decode_base16(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__small__expected)
 {
     const data_array<4> expected{ 0xba, 0xad, 0xf0, 0x0d };
     const auto value = "baadf00d";
-    data_array<4> out;
+    data_array<4> out{};
     BOOST_REQUIRE(decode_base16(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__all_characters__expected)
         0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
     };
     const auto value = "0123456789abcdeffedcba9876543210";
-    data_array<16> out;
+    data_array<16> out{};
     BOOST_REQUIRE(decode_base16(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__null_hash__expected)
 {
     const auto& expected = to_array<32>(null_hash);
     const auto value = "0000000000000000000000000000000000000000000000000000000000000000";
-    data_array<32> out;
+    data_array<32> out{};
     BOOST_REQUIRE(decode_base16(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -389,28 +389,28 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__null_hash__expected)
 BOOST_AUTO_TEST_CASE(base16__decode_hash__low_character_count__false)
 {
     const auto value = "424242";
-    data_array<4> out;
+    data_array<4> out{};
     BOOST_REQUIRE(!decode_hash(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_hash__high_character_count__false)
 {
     const auto value = "424242";
-    data_array<2> out;
+    data_array<2> out{};
     BOOST_REQUIRE(!decode_hash(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_hash__odd_character_count__false)
 {
     const auto value = "42abc";
-    data_array<2> out;
+    data_array<2> out{};
     BOOST_REQUIRE(!decode_hash(out, value));
 }
 
 BOOST_AUTO_TEST_CASE(base16__decode_hash__invalid_character__false)
 {
     const auto value = "42xabc";
-    data_array<3> out;
+    data_array<3> out{};
     BOOST_REQUIRE(!decode_hash(out, value));
 }
 
@@ -418,7 +418,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_hash__empty__empty)
 {
     const data_array<0> expected{};
     const auto value = "";
-    data_array<0> out;
+    data_array<0> out{};
     BOOST_REQUIRE(decode_hash(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -427,7 +427,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_hash__small__expected)
 {
     const data_array<4> expected{ 0xba, 0xad, 0xf0, 0x0d };
     const auto value = "0df0adba";
-    data_array<4> out;
+    data_array<4> out{};
     BOOST_REQUIRE(decode_hash(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -440,7 +440,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_hash__all_characters__expected)
         0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
     };
     const auto value = "1032547698badcfeefcdab8967452301";
-    data_array<16> out;
+    data_array<16> out{};
     BOOST_REQUIRE(decode_hash(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_hash__one_hash__expected)
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
     const auto value = "0000000000000000000000000000000000000000000000000000000000000001";
-    data_array<32> out;
+    data_array<32> out{};
     BOOST_REQUIRE(decode_hash(out, value));
     BOOST_REQUIRE_EQUAL(out, expected);
 }

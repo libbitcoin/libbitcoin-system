@@ -31,14 +31,10 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/memory.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-inline one_byte to_array(uint8_t byte) noexcept
-{
-    return { { byte } };
-}
 
 template <size_t Size>
 data_array<Size> to_array(const data_slice& bytes) noexcept
@@ -68,9 +64,9 @@ data_array<Size> build_array(const data_loaf& slices) noexcept
     auto position = out.begin();
     for (const auto& slice: slices)
     {
-        const auto unfilled = std::distance(position, out.end());
-        const auto remaining = static_cast<ptrdiff_t>(slice.size());
-        const auto size = std::min(unfilled, remaining);
+        const auto remaining = limit<data_slice::size_type>(
+            std::distance(position, out.end()));
+        const auto size = std::min(remaining, slice.size());
         std::copy_n(slice.begin(), size, position);
         std::advance(position, size);
     }

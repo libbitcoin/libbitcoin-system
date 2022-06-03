@@ -47,20 +47,27 @@ public:
         next_(data.begin())
     {
     }
+    
+    copy_source(copy_source&&) = default;
+    copy_source(const copy_source&) = default;
+    copy_source& operator=(copy_source&&) = default;
+    copy_source& operator=(const copy_source&) = default;
+    ~copy_source() override = default;
 
 protected:
     typename device<Container>::sequence do_sequence() const noexcept override
     {
         // input_sequence/output_sequence both require non-const buffer ptrs,
         // but the data member is const, so we must cast it for direct devices.
+        // As a source the buffer should/must never be mutated.
         const auto begin = const_cast<typename device<Container>::value_type*>(
             container_.begin());
         const auto end = const_cast<typename device<Container>::value_type*>(
             container_.end());
 
         return std::make_pair(
-            reinterpret_cast<typename device<Container>::char_type*>(begin),
-            reinterpret_cast<typename device<Container>::char_type*>(end));
+            integer_pointer_cast<typename device<Container>::char_type>(begin),
+            integer_pointer_cast<typename device<Container>::char_type>(end));
     }
 
 private:

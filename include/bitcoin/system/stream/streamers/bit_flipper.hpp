@@ -30,7 +30,7 @@
 
 // Suppress multiple inheritance warnings.
 // The only multiple inheritance conflict is destructors and bool/!.
-BC_PUSH_MSVC_WARNING(4250)
+BC_PUSH_WARNING(4250)
 
 namespace libbitcoin {
 namespace system {
@@ -50,6 +50,7 @@ class bit_flipper
     public virtual bitflipper
 {
 public:
+    /// Constructors.
     bit_flipper(IOStream& stream) noexcept
       : bit_reader<IOStream>(stream), bit_writer<IOStream>(stream)
     {
@@ -59,10 +60,14 @@ public:
         // bit_writer -> byte_writer (ostream&)
     }
 
-    ~bit_flipper() noexcept override
-    {
-        // Two base destructor calls order is unimportant (only writes flush).
-    }
+    /// Defaults.
+    bit_flipper(bit_flipper&&) = default;
+    bit_flipper(const bit_flipper&) = default;
+    bit_flipper& operator=(bit_flipper&&) = default;
+    bit_flipper& operator=(const bit_flipper&) = default;
+
+    // Two base destructor calls order is unimportant (only writes flush).
+    ~bit_flipper() override = default;
 
     operator bool() const noexcept override
     {
@@ -80,6 +85,6 @@ public:
 } // namespace system
 } // namespace libbitcoin
 
-BC_POP_MSVC_WARNING()
+BC_POP_WARNING()
 
 #endif

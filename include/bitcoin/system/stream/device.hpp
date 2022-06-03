@@ -33,6 +33,12 @@ template <typename Container>
 class device
 {
 public:
+    device(device&&) = default;
+    device(const device&) = default;
+    device& operator=(device&&) = delete;
+    device& operator=(const device&) = delete;
+    virtual ~device() = default;
+
     /// device types
     typedef char char_type;
     typedef std::streamsize size_type;

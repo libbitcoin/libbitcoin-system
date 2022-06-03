@@ -23,6 +23,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -91,8 +92,10 @@ data_slice data_slice::from_iterators(const Iterator& begin,
     if (is_negative(size) || is_zero(size))
         return {};
 
-    return from_size(&begin[0], static_cast<size_type>(size));
+    return from_size(&begin[0], possible_narrow_sign_cast<size_type>(size));
 }
+
+
 
 // static
 template <typename Pointer>
@@ -102,13 +105,19 @@ data_slice data_slice::from_size(Pointer begin, size_type size) noexcept
     if (is_zero(size))
         return {};
 
-    // Pointer may be a char or uin8_t pointer or iterator type.
-    const auto start = reinterpret_cast<pointer>(&begin[0]);
+    // Indexation is guarded above.
+    // Pointer may be char* or uin8_t*, or iterator type (cast not required).
+    BC_PUSH_WARNING(USE_GSL_AT)
+    const auto start = possible_pointer_cast<const value_type>(&begin[0]);
+    BC_POP_WARNING()
+
     return { start, std::next(start, size), size };
 }
 
+
 // properties
 // ----------------------------------------------------------------------------
+
 
 template <data_slice::size_type Size>
 std::array<typename data_slice::value_type, Size>
@@ -116,9 +125,13 @@ data_slice::to_array() const noexcept
 {
     std::array<data_slice::value_type, Size> out;
 
-    // Array operator safely iterates and emits zeros past end.
     for (size_type index = 0; index < Size; ++index)
+    {
+        // Array operator safely iterates and emits zeros past end.
+        BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
         out[index] = (*this)[index];
+        BC_POP_WARNING()
+    }
 
     return out;
 }

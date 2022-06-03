@@ -162,15 +162,16 @@ BOOST_AUTO_TEST_CASE(collection__cast_vector__distinct_types__same)
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
-{
-    // Implicit narrowing cast doesn't warn.
-    const std::vector<uint32_t> value{ 42, 24 };
-    const auto result = cast<uint8_t>(value);
-    BOOST_REQUIRE_EQUAL(value.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], value[0]);
-    BOOST_REQUIRE_EQUAL(result[1], value[1]);
-}
+// Narrowing is now precluded by type constraints.
+////BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
+////{
+////    // Implicit narrowing cast doesn't warn.
+////    const std::vector<uint32_t> value{ 42, 24 };
+////    const auto result = cast<uint8_t>(value);
+////    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+////    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+////    BOOST_REQUIRE_EQUAL(result[1], value[1]);
+////}
 
 // cast (array)
 
@@ -195,15 +196,16 @@ BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
-{
-    // Implicit narrowing cast doesn't warn.
-    const std::array<uint32_t, 2> value{ 42, 24 };
-    const auto result = cast<uint8_t>(value);
-    BOOST_REQUIRE_EQUAL(value.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], value[0]);
-    BOOST_REQUIRE_EQUAL(result[1], value[1]);
-}
+// Narrowing is now precluded by type constraints.
+////BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
+////{
+////    // Implicit narrowing cast doesn't warn.
+////    const std::array<uint32_t, 2> value{ 42, 24 };
+////    const auto result = cast<uint8_t>(value);
+////    BOOST_REQUIRE_EQUAL(value.size(), result.size());
+////    BOOST_REQUIRE_EQUAL(result[0], value[0]);
+////    BOOST_REQUIRE_EQUAL(result[1], value[1]);
+////}
 
 // filler
 
@@ -452,7 +454,7 @@ BOOST_AUTO_TEST_CASE(collection__difference__empty_sets__empty)
 {
     const data_chunk minuend;
     const data_chunk subtrahend;
-    const auto expected = minuend;
+    const data_chunk expected{ minuend };
     BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
 }
 
@@ -460,7 +462,7 @@ BOOST_AUTO_TEST_CASE(collection__idifference__minuend_empty__empty)
 {
     const data_chunk minuend;
     const data_chunk subtrahend{ 0, 2, 4, 6, 8 };
-    const auto expected = minuend;
+    const data_chunk expected{ minuend };
     BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
 }
 
@@ -468,7 +470,7 @@ BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_empty__minuend)
 {
     const data_chunk minuend{ 2, 0, 0, 8, 6, 4 };
     const data_chunk subtrahend;
-    const auto expected = minuend;
+    const data_chunk expected{ minuend };
     BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
 }
 
@@ -476,7 +478,7 @@ BOOST_AUTO_TEST_CASE(collection__difference__distinct_sets__minuend)
 {
     const data_chunk minuend{ 0, 2, 4, 6, 8 };
     const data_chunk subtrahend{ 1, 3, 5, 7, 9 };
-    const data_chunk expected = minuend;
+    const data_chunk expected{ minuend };
     BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
 }
 

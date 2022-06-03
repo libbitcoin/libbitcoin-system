@@ -21,6 +21,7 @@
 
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -46,7 +47,7 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 {
     return is_lesser(value, minimum) ? minimum :
         (is_greater(value, maximum) ? maximum :
-            static_cast<Result>(value));
+            possible_narrow_and_sign_cast<Result>(value));
 }
 
 } // namespace system

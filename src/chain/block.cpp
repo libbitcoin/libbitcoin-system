@@ -294,7 +294,9 @@ bool block::is_forward_reference() const noexcept
         return !is_zero(hashes.count(input->point().hash()));
     };
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     for (const auto& tx: boost::adaptors::reverse(*txs_))
+    BC_POP_WARNING()
     {
         hashes.emplace(tx->hash(false), bool{});
         if (std::any_of(tx->inputs()->begin(), tx->inputs()->end(), is_forward))
@@ -434,15 +436,18 @@ bool block::is_invalid_witness_commitment() const noexcept
 
     // Last output of commitment pattern holds committed value (bip141).
     if (coinbase->inputs()->front()->reserved_hash(reserved))
+    {
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         for (const auto& output: boost::adaptors::reverse(*coinbase->outputs()))
+        BC_POP_WARNING()
             if (output->committed_hash(committed))
                 return committed == bitcoin_hash(generate_merkle_root(true),
                     reserved);
+    }
     
     // If no block tx has witness data the commitment is optional (bip141).
     return !is_segregated();
 }
-
 
 //*****************************************************************************
 // CONSENSUS:
@@ -456,8 +461,8 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) noexcept
 {
     // Guard: quotient domain cannot increase with positive integer divisor.
-    const auto halvings = static_cast<size_t>(height / subsidy_interval);
-    return shift_right(initial_block_subsidy_satoshi, halvings, bip42);
+    const auto halves = possible_narrow_cast<size_t>(height / subsidy_interval);
+    return shift_right(initial_block_subsidy_satoshi, halves, bip42);
 }
 
 // Prevouts required.
@@ -519,7 +524,7 @@ bool block::is_unspent_coinbase_collision(size_t height) const noexcept
     if (txs_->empty() || txs_->front()->inputs()->empty())
         return false;
 
-    const auto prevout = txs_->front()->inputs()->front()->prevout;
+    const auto& prevout = txs_->front()->inputs()->front()->prevout;
 
     // This requires that prevout.spent was populated for the height of the
     // validating block, otherwise a collision (unspent) must be assumed.

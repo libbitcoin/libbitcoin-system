@@ -24,13 +24,19 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-inline bool is_between(uint8_t value, uint8_t low, uint8_t high) noexcept
+constexpr bool is_between(uint8_t value, uint8_t low, uint8_t high) noexcept
 {
     return low <= value && value <= high;
+}
+
+constexpr char to_base16_character(char digit) noexcept
+{
+    return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
 }
 
 inline uint8_t from_base16_characters(char high, char low) noexcept
@@ -38,16 +44,32 @@ inline uint8_t from_base16_characters(char high, char low) noexcept
     const auto from_base16_digit = [](char character) noexcept
     {
         if (is_between(character, 'A', 'F'))
-            return static_cast<uint8_t>(character - 'A' + '\xA');
+            return narrow_sign_cast<uint8_t>(character - 'A' + '\xA');
 
         if (is_between(character, 'a', 'f'))
-            return static_cast<uint8_t>(character - 'a' + '\xa');
+            return narrow_sign_cast<uint8_t>(character - 'a' + '\xa');
 
-        return static_cast<uint8_t>(character - '0' + '\x0');
+        return narrow_sign_cast<uint8_t>(character - '0' + '\x0');
     };
 
     return (from_base16_digit(high) << to_half(byte_bits)) |
         from_base16_digit(low);
+}
+
+// The C standard library function 'isxdigit' is more trouble than it is worth.
+// "Some implementations (e.g. Microsoft in 1252 codepage) may classify
+// additional single-byte characters as digits...To use these functions safely
+// with plain chars (or signed chars), the argument should first be converted
+// to unsigned char... Similarly, they should not be directly used with standard
+// algorithms when the iterator's value type is char." [e.g. std::string]
+// en.cppreference.com/w/cpp/string/byte/isxdigit
+template <typename Byte, if_byte<Byte>>
+constexpr bool is_base16(Byte character) noexcept
+{
+    return
+        (is_between(possible_sign_cast<uint8_t>(character), '0', '9')) ||
+        (is_between(possible_sign_cast<uint8_t>(character), 'a', 'f')) ||
+        (is_between(possible_sign_cast<uint8_t>(character), 'A', 'F'));
 }
 
 template <size_t Size>
@@ -56,7 +78,7 @@ bool decode_base16(data_array<Size>& out, const std::string& in) noexcept
     if (in.size() != Size * octet_width)
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16))
+    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
         return false;
 
     auto data = out.begin();
@@ -77,7 +99,7 @@ bool decode_hash(data_array<Size>& out, const std::string& in) noexcept
     if (in.size() != Size * octet_width)
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16))
+    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
         return false;
 
     auto data = out.begin();

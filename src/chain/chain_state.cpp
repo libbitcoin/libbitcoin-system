@@ -55,14 +55,28 @@ static const checkpoint mainnet_bip30_exception_checkpoint2
 // Inlines.
 // ----------------------------------------------------------------------------
 
-inline bool is_active(size_t count, size_t activation_threshold) noexcept
+constexpr bool is_active(size_t count, size_t activation_threshold) noexcept
 {
     return count >= activation_threshold;
 }
 
-inline bool is_enforced(size_t count, size_t enforcement_threshold) noexcept
+constexpr bool is_enforced(size_t count, size_t enforcement_threshold) noexcept
 {
     return count >= enforcement_threshold;
+}
+
+// Determine the number of blocks back to the closest retarget height.
+constexpr size_t retarget_distance(size_t height,
+    size_t retargeting_interval) noexcept
+{
+    return height % retargeting_interval;
+}
+
+// Determine if height is a multiple of retargeting_interval.
+constexpr bool is_retarget_height(size_t height,
+    size_t retargeting_interval) noexcept
+{
+    return is_zero(retarget_distance(height, retargeting_interval));
 }
 
 inline bool is_bip30_exception(const checkpoint& check, bool mainnet) noexcept
@@ -100,9 +114,9 @@ chain_state::activations chain_state::activation(const data& values,
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
     // performed this comparison using the signed integer version value.
     //*************************************************************************
-    const auto ge = [](uint32_t value, uint32_t version) noexcept
+    constexpr auto ge = [](uint32_t value, uint32_t version) noexcept
     {
-        return static_cast<int32_t>(value) >= static_cast<int32_t>(version);
+        return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
     };
 
     // Declare bip34-based version predicates.
@@ -320,26 +334,6 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     return bits_high(values);
 }
 
-uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
-    uint256_t limit, uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-    uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept
-{
-    uint256_t target(compact(bits_high(values)));
-
-    // Conditionally implement retarget overflow patch (e.g. Litecoin).
-    // limit precomputed from config as uint256_t(compact(proof_of_work_limit))
-    auto patch = script::is_enabled(forks, forks::retarget_overflow_patch);
-    auto shift = to_int(patch && (floored_log2(target) >= floored_log2(limit)));
-
-    target >>= shift;
-    target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
-    target /= retargeting_interval_seconds;
-    target <<= shift;
-
-    // The proof_of_work_limit constant is pre-normalized.
-    return target > limit ? proof_of_work_limit : compact(target).normal();
-}
-
 // Get the bounded total time spanning the highest 2016 blocks.
 uint32_t chain_state::retarget_timespan(const data& values,
     uint32_t minimum_timespan, uint32_t maximum_timespan) noexcept
@@ -353,6 +347,48 @@ uint32_t chain_state::retarget_timespan(const data& values,
     //*************************************************************************
     const auto timespan = subtract<int64_t>(high, retarget);
     return limit<uint32_t>(timespan, minimum_timespan, maximum_timespan);
+}
+
+uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
+    uint256_t limit, uint32_t proof_of_work_limit, uint32_t minimum_timespan,
+    uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept
+{
+    uint256_t target(compact(bits_high(values)));
+
+    // Conditionally implement retarget overflow patch (e.g. Litecoin).
+    // limit precomputed from config as uint256_t(compact(proof_of_work_limit))
+    const auto patch = script::is_enabled(forks, forks::retarget_overflow_patch);
+    const auto shift = to_int(patch && (floored_log2(target) >= floored_log2(limit)));
+
+    target >>= shift;
+    target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
+    target /= retargeting_interval_seconds;
+    target <<= shift;
+
+    // The proof_of_work_limit constant is pre-normalized.
+    return target > limit ? proof_of_work_limit : compact(target).normal();
+}
+
+inline uint32_t easy_time_limit(const chain_state::data& values,
+    int64_t spacing) noexcept
+{
+    const int64_t high = timestamp_high(values);
+
+    //*************************************************************************
+    // CONSENSUS: add signed 32 bit numbers in signed 64 bit space in
+    // order to prevent overflow before applying the domain constraint.
+    //*************************************************************************
+    return limit<uint32_t>(add<int64_t>(high, spacing));
+}
+
+// A retarget height, or a block that does not have proof_of_work_limit bits.
+constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
+    size_t retargeting_interval, uint32_t proof_of_work_limit) noexcept
+{
+    // Zero is a retarget height, termination required before height underflow.
+    // This is guaranteed, just a comment here because it may not be obvious.
+    return bits != proof_of_work_limit ||
+        is_retarget_height(height, retargeting_interval);
 }
 
 uint32_t chain_state::easy_work_required(const data& values,
@@ -372,54 +408,19 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     for (auto bit: boost::adaptors::reverse(bits))
+    BC_POP_WARNING()
+    {
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
             proof_of_work_limit))
             return bit;
+    }
 
     // Since the set of heights is either a full retarget range or ends at
     // zero this is not reachable unless the data set is invalid.
     BC_ASSERT(false);
     return proof_of_work_limit;
-}
-
-uint32_t chain_state::easy_time_limit(const chain_state::data& values,
-    int64_t spacing) noexcept
-{
-    const int64_t high = timestamp_high(values);
-
-    //*************************************************************************
-    // CONSENSUS: add signed 32 bit numbers in signed 64 bit space in
-    // order to prevent overflow before applying the domain constraint.
-    //*************************************************************************
-    return limit<uint32_t>(add<int64_t>(high, spacing));
-}
-
-// A retarget height, or a block that does not have proof_of_work_limit bits.
-bool chain_state::is_retarget_or_non_limit(size_t height, uint32_t bits,
-    size_t retargeting_interval, uint32_t proof_of_work_limit) noexcept
-{
-    // Zero is a retarget height, ensuring termination before height underflow.
-    // This is guaranteed, just asserting here to document the safeguard.
-    BC_ASSERT_MSG(is_retarget_height(zero, retargeting_interval),
-        "loop overflow potential");
-
-    return bits != proof_of_work_limit ||
-        is_retarget_height(height, retargeting_interval);
-}
-
-// Determine if height is a multiple of retargeting_interval.
-bool chain_state::is_retarget_height(size_t height,
-    size_t retargeting_interval) noexcept
-{
-    return is_zero(retarget_distance(height, retargeting_interval));
-}
-
-// Determine the number of blocks back to the closest retarget height.
-size_t chain_state::retarget_distance(size_t height,
-    size_t retargeting_interval) noexcept
-{
-    return height % retargeting_interval;
 }
 
 // Static
@@ -434,7 +435,7 @@ chain_state::map chain_state::get_map(size_t height,
     if (is_zero(height))
         return {};
 
-    map map;
+    map map{};
 
     // The height bound of the reverse (high to low) retarget search.
     map.bits_self = height;
@@ -491,27 +492,9 @@ uint32_t chain_state::signal_version(uint32_t forks,
     return settings.first_version;
 }
 
-uint32_t chain_state::minimum_timespan(uint32_t retargeting_interval_seconds,
-    uint32_t retargeting_factor) noexcept
-{
-    return retargeting_interval_seconds / retargeting_factor;
-}
-
-uint32_t chain_state::maximum_timespan(uint32_t retargeting_interval_seconds,
-    uint32_t retargeting_factor) noexcept
-{
-    return retargeting_interval_seconds * retargeting_factor;
-}
-
-uint32_t chain_state::retargeting_interval(
-    uint32_t retargeting_interval_seconds,
-    uint32_t block_spacing_seconds) noexcept
-{
-    return retargeting_interval_seconds / block_spacing_seconds;
-}
-
 // Constructors.
 // ----------------------------------------------------------------------------
+
 
 //*****************************************************************************
 // CONSENSUS: satoshi associates the median time past for block N with block
@@ -527,7 +510,11 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) noexcept
 
     // Consensus defines median time using modulo 2 element selection.
     // This differs from arithmetic median which averages two middle values.
+
+    // times[] indexation is guarded.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return times.empty() ? 0 : times[to_half(times.size())];
+    BC_POP_WARNING()
 }
 
 // This is promotion from a preceding height to the next.
@@ -541,15 +528,17 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     const auto retarget = script::is_enabled(forks, forks::retarget);
 
     // Copy data from presumed previous-height block state.
-    auto data = top.data_;
+    chain_state::data data{ top.data_ };
 
     // If this overflows height is zero and result is handled as invalid.
     const auto height = add1(data.height);
-
+    
     // Enqueue previous block values to collections.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     data.bits.ordered.push_back(data.bits.self);
     data.version.ordered.push_back(data.version.self);
     data.timestamp.ordered.push_back(data.timestamp.self);
+    BC_POP_WARNING()
 
     // If bits collection overflows, dequeue oldest member.
     if (data.bits.ordered.size() >
@@ -606,7 +595,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     const checkpoint& bip9_bit1_active_checkpoint) noexcept
 {
     // Copy data from presumed same-height pool state.
-    auto data = pool.data_;
+    chain_state::data data{ pool.data_ };
 
     // Replace pool chain state with block state at same (next) height.
     // Preserve data.timestamp.retarget promotion.
@@ -748,7 +737,7 @@ size_t chain_state::height() const noexcept
 
 chain::context chain_state::context() const noexcept
 {
-    chain::context context;
+    chain::context context{};
     context.forks = forks();
     context.policy = policy();
     context.timestamp = timestamp();
@@ -764,15 +753,14 @@ inline uint64_t zulu_time_seconds() noexcept
 {
     using wall_clock = std::chrono::system_clock;
     const auto now = wall_clock::now();
-    return static_cast<uint64_t>(wall_clock::to_time_t(now));
+    return sign_cast<uint64_t>(wall_clock::to_time_t(now));
 }
 
 // If there is a zero limit then the chain is never considered stale.
 bool chain_state::is_stale() const noexcept
 {
     return !is_zero(stale_seconds_) && data_.timestamp.self <
-        floored_subtract(zulu_time_seconds(),
-            static_cast<uint64_t>(stale_seconds_));
+        floored_subtract<uint64_t>(zulu_time_seconds(), stale_seconds_);
 }
 
 // Semantic invalidity can also arise from too many/few values in the arrays.

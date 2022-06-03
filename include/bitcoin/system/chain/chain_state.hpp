@@ -126,6 +126,27 @@ public:
         } timestamp;
     };
 
+    static constexpr uint32_t minimum_timespan(
+        uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor) noexcept
+    {
+        return retargeting_interval_seconds / retargeting_factor;
+    }
+
+    static constexpr uint32_t maximum_timespan(
+        uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor) noexcept
+    {
+        return retargeting_interval_seconds * retargeting_factor;
+    }
+
+    static constexpr uint32_t retargeting_interval(
+        uint32_t retargeting_interval_seconds,
+        uint32_t block_spacing_seconds) noexcept
+    {
+        return retargeting_interval_seconds / block_spacing_seconds;
+    }
+
     /// Checkpoints must be ordered by height with greatest at back.
     static map get_map(size_t height, const checkpoints& checkpoints,
         uint32_t forks, size_t retargeting_interval, size_t activation_sample,
@@ -134,13 +155,6 @@ public:
 
     static uint32_t signal_version(uint32_t forks,
         const system::settings& settings) noexcept;
-
-    static uint32_t minimum_timespan(uint32_t retargeting_interval_seconds,
-        uint32_t retargeting_factor) noexcept;
-    static uint32_t maximum_timespan(uint32_t retargeting_interval_seconds,
-        uint32_t retargeting_factor) noexcept;
-    static uint32_t retargeting_interval(uint32_t retargeting_interval_seconds,
-        uint32_t block_spacing_seconds) noexcept;
 
     /// Create pool state from top chain top block state.
     chain_state(const chain_state& top,
@@ -232,19 +246,9 @@ private:
         uint32_t retargeting_interval_seconds) noexcept;
     static uint32_t retarget_timespan(const chain_state::data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan) noexcept;
-
-    // easy blocks
     static uint32_t easy_work_required(const data& values,
         size_t retargeting_interval, uint32_t proof_of_work_limit,
         uint32_t block_spacing_seconds) noexcept;
-    static uint32_t easy_time_limit(const chain_state::data& values,
-        int64_t spacing) noexcept;
-    static bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-        size_t retargeting_interval, uint32_t proof_of_work_limit) noexcept;
-    static bool is_retarget_height(size_t height,
-        size_t retargeting_interval) noexcept;
-    static size_t retarget_distance(size_t height,
-        size_t retargeting_interval) noexcept;
 
     // This is retained as an optimization for other constructions.
     // A similar height clone can be partially computed, reducing query cost.

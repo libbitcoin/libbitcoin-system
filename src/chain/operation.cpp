@@ -37,7 +37,6 @@ namespace chain {
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
-
 // static
 chunk_ptr operation::no_data() noexcept
 {

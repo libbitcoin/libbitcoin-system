@@ -46,11 +46,8 @@ template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) noexcept
   : stream_(source), remaining_(std::numeric_limits<size_t>::max())
 {
-}
-
-template <typename IStream>
-byte_reader<IStream>::~byte_reader() noexcept
-{
+    BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
+        "Input stream must not be configured to throw exceptions.");
 }
 
 // big endian
@@ -141,8 +138,8 @@ size_t byte_reader<IStream>::read_size(size_t limit) noexcept
         invalid();
         return zero;
     }
-
-    return static_cast<size_t>(size);
+ 
+    return possible_narrow_cast<size_t>(size);
 }
 
 template <typename IStream>
@@ -385,6 +382,10 @@ bool byte_reader<IStream>::operator!() const noexcept
 // ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
+// Suppress istream members may throw inside noexcept.
+// The intended behavior in this case is program abort.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 {
@@ -395,7 +396,9 @@ uint8_t byte_reader<IStream>::do_peek_byte() noexcept
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
     // the call the achieve consistent behavior. The reader will be invalid if
     // the stream is peeked past end, including when empty.
-    const auto value = static_cast<uint8_t>(stream_.peek());
+    const auto value =
+        possible_narrow_and_sign_cast<uint8_t>(stream_.peek());
+
     validate();
     return valid() ? value : pad();
 }
@@ -415,8 +418,8 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 
     // Read past stream end invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum());
-    stream_.read(reinterpret_cast<char*>(buffer),
-        static_cast<typename IStream::pos_type>(size));
+    stream_.read(pointer_cast<char>(buffer),
+        possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 
     validate();
 }
@@ -429,7 +432,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 
     // Skip past stream end invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum());
-    seeker(static_cast<typename IStream::pos_type>(size));
+    seeker(possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
@@ -443,7 +446,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 
     // Rewind past stream start invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum());
-    seeker(-static_cast<typename IStream::pos_type>(size));
+    seeker(-possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 }
 
 template <typename IStream>
@@ -533,7 +536,8 @@ size_t byte_reader<IStream>::getter() noexcept
     }
 
     // Max size_t is presumed to exceed max IStream::pos_type.
-    return position == failure ? zero : static_cast<size_t>(position);
+    return position == failure ? zero :
+        possible_narrow_and_sign_cast<size_t>(position);
 }
 
 template <typename IStream>
@@ -582,5 +586,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
 
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
 
 #endif

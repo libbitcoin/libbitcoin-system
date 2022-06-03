@@ -25,6 +25,7 @@
 #include <ios>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -46,6 +47,34 @@ template <typename OStream>
 byte_writer<OStream>::byte_writer(OStream& sink) noexcept
   : stream_(sink)
 {
+    BC_ASSERT_MSG(stream_.exceptions() == OStream::goodbit,
+        "Output stream must not be configured to throw exceptions.");
+}
+
+template <typename OStream>
+byte_writer<OStream>::byte_writer(byte_writer&& other)
+  : stream_(std::move(other.stream_))
+{
+}
+
+template <typename OStream>
+byte_writer<OStream>::byte_writer(const byte_writer& other)
+  : stream_(other.stream_)
+{
+}
+
+template <typename OStream>
+typename byte_writer<OStream>::byte_writer& byte_writer<OStream>::operator=(
+    byte_writer&& other)
+{
+    stream_ = std::move(other.stream_);
+}
+
+template <typename OStream>
+typename byte_writer<OStream>::byte_writer& byte_writer<OStream>::operator=(
+    const byte_writer& other)
+{
+    stream_ = other.stream_;
 }
 
 template <typename OStream>
@@ -127,17 +156,17 @@ void byte_writer<OStream>::write_variable(uint64_t value) noexcept
 {
     if (value < varint_two_bytes)
     {
-        write_byte(static_cast<uint8_t>(value));
+        write_byte(narrow_cast<uint8_t>(value));
     }
     else if (value <= max_uint16)
     {
         write_byte(varint_two_bytes);
-        write_2_bytes_little_endian(static_cast<uint16_t>(value));
+        write_2_bytes_little_endian(narrow_cast<uint16_t>(value));
     }
     else if (value <= max_uint32)
     {
         write_byte(varint_four_bytes);
-        write_4_bytes_little_endian(static_cast<uint32_t>(value));
+        write_4_bytes_little_endian(narrow_cast<uint32_t>(value));
     }
     else
     {
@@ -150,7 +179,7 @@ void byte_writer<OStream>::write_variable(uint64_t value) noexcept
 template <typename OStream>
 void byte_writer<OStream>::write_error_code(const code& ec) noexcept
 {
-    write_4_bytes_little_endian(static_cast<uint32_t>(ec.value()));
+    write_4_bytes_little_endian(sign_cast<uint32_t>(ec.value()));
 }
 
 // bytes
@@ -244,6 +273,10 @@ bool byte_writer<OStream>::operator!() const noexcept
 // ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
+// Suppress ostream members may throw inside noexcept.
+// The intended behavior in this case is program abort.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 template <typename OStream>
 void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) noexcept
@@ -252,8 +285,8 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
 
     // Write past stream start invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum());
-    stream_.write(reinterpret_cast<const char*>(data),
-        static_cast<typename OStream::pos_type>(size));
+    stream_.write(pointer_cast<const char>(data),
+        possible_narrow_and_sign_cast<typename OStream::pos_type>(size));
 
     validate();
 }
@@ -322,10 +355,13 @@ size_t byte_writer<OStream>::getter() noexcept
     }
 
     // Max size_t is presumed to exceed max OStream::pos_type.
-    return position == failure ? zero : static_cast<size_t>(position);
+    return position == failure ? zero :
+        possible_narrow_and_sign_cast<size_t>(position);
 }
 
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
 
 #endif

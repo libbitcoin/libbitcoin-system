@@ -159,23 +159,37 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
     // vs2017 and earlier do not support _Pragma (ISO).
     #ifdef BC_VS2019
         #define PRAGMA(pragma) _Pragma(#pragma)
-        #define BC_PUSH_MSVC_WARNING(value) \
+        #define BC_PUSH_WARNING(value) \
             PRAGMA(warning(push)) \
             PRAGMA(warning(disable:value))
-        #define BC_POP_MSVC_WARNING() \
+        #define BC_POP_WARNING() \
             PRAGMA(warning(pop))
     // Degrade to broader non-standard exclusion in vs2017.
     #else
-        #define BC_PUSH_MSVC_WARNING(value) \
+        #define BC_PUSH_WARNING(value) \
             __pragma(warning(push)) \
             __pragma(warning(disable:value))
-        #define BC_POP_MSVC_WARNING() \
+        #define BC_POP_WARNING() \
             __pragma(warning(pop))
     #endif
 
 #else
-    #define BC_PUSH_MSVC_WARNING(warning)
-    #define BC_POP_MSVC_WARNING()
+    #define BC_PUSH_WARNING(warning)
+    #define BC_POP_WARNING()
 #endif
+
+// warnings
+#define CONSTANT_CONDITIONAL 4127
+#define NARROWING_CONVERSION 4244
+#define TRUNCATED_CONSTANT 4310
+
+// lint
+#define NO_GLOBAL_INIT_CALLS 26426
+#define USE_GSL_AT 26446
+#define NO_THROW_IN_NOEXCEPT 26447
+#define NO_CASTS_FOR_ARITHMETIC_CONVERSION 26472
+#define NO_IDENTITY_CAST 26473
+#define NO_DYNAMIC_ARRAY_INDEXING 26482
+#define NO_REINTERPRET_CAST 26490
 
 #endif

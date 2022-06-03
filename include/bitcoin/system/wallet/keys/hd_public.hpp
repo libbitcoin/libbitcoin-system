@@ -64,9 +64,9 @@ public:
     static const uint32_t mainnet;
     static const uint32_t testnet;
 
-    static uint32_t to_prefix(uint64_t prefixes) noexcept
+    static constexpr uint32_t to_prefix(uint64_t prefixes) noexcept
     {
-        return prefixes & 0x00000000ffffffff;
+        return narrow_cast<uint32_t>(prefixes);
     }
 
     /// Constructors.

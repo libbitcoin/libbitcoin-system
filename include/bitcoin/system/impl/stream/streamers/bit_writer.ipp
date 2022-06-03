@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <utility>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -41,6 +42,42 @@ template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) noexcept
   : byte_writer<OStream>(sink), byte_(byte_writer<OStream>::pad()), offset_(0)
 {
+}
+
+template <typename OStream>
+bit_writer<OStream>::bit_writer(bit_writer&& other)
+  : byte_writer<OStream>(std::move(other)),
+    byte_(other.byte_),
+    offset_(other.offset_)
+{
+}
+
+template <typename OStream>
+bit_writer<OStream>::bit_writer(const bit_writer& other)
+  : byte_writer<OStream>(other),
+    byte_(other.byte_),
+    offset_(other.offset_)
+{
+}
+
+template <typename OStream>
+typename bit_writer<OStream>::bit_writer& bit_writer<OStream>::operator=(
+    bit_writer&& other)
+{
+    // TODO: implement swap idiom.
+    *this = static_cast<byte_writer<OStream>>(other);
+    byte_ = other.byte_;
+    offset_ = other.offset_;
+}
+
+template <typename OStream>
+typename bit_writer<OStream>::bit_writer& bit_writer<OStream>::operator=(
+    const bit_writer& other)
+{
+    // TODO: implement swap idiom.
+    *this = static_cast<byte_writer<OStream>>(other);
+    byte_ = other.byte_;
+    offset_ = other.offset_;
 }
 
 template <typename OStream>

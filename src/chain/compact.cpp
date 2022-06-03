@@ -22,6 +22,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -43,19 +44,19 @@ BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 // Inlines.
 // ----------------------------------------------------------------------------
 
-inline bool is_negated(uint32_t compact) noexcept
+constexpr bool is_negated(uint32_t compact) noexcept
 {
     return to_bool(compact & sign_bit);
 }
 
-inline bool is_nonzero(uint32_t compact) noexcept
+constexpr bool is_nonzero(uint32_t compact) noexcept
 {
     return to_bool(compact & mantissa_max);
 }
 
-inline uint8_t log_256(uint32_t mantissa) noexcept
+constexpr uint8_t log_256(uint32_t mantissa) noexcept
 {
-    BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
+    ////BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
 
     return
         (mantissa > 0x0000ffff ? 3 :
@@ -63,22 +64,22 @@ inline uint8_t log_256(uint32_t mantissa) noexcept
         (mantissa > 0x00000000 ? 1 : 0)));
 }
 
-inline bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
-{
-    // Overflow if exponent would shift the mantissa more than 32 bytes.
-    return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
-}
-
-inline uint32_t shift_low(uint8_t exponent) noexcept
+constexpr uint32_t shift_low(uint8_t exponent) noexcept
 {
     BC_ASSERT(exponent <= 3);
     return to_bits(3 - exponent);
 }
 
-inline uint32_t shift_high(uint8_t exponent) noexcept
+constexpr uint32_t shift_high(uint8_t exponent) noexcept
 {
     BC_ASSERT(exponent > 3);
     return to_bits(exponent - 3);
+}
+
+inline bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
+{
+    // Overflow if exponent would shift the mantissa more than 32 bytes.
+    return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
 }
 
 inline size_t logical_size(uint256_t value) noexcept
@@ -144,7 +145,7 @@ bool compact::from_compact(uint256_t& out, uint32_t compact) noexcept
     auto mantissa = compact & mantissa_max;
 
     // Shift off the mantissa and sign to get the exponent byte.
-    const auto exponent = static_cast<uint8_t>(compact >> mantissa_bits);
+    const auto exponent = narrow_cast<uint8_t>(compact >> mantissa_bits);
 
     // Shift the mantissa into the big number.
     if (exponent <= 3)
@@ -167,14 +168,14 @@ bool compact::from_compact(uint256_t& out, uint32_t compact) noexcept
 uint32_t compact::from_big(const uint256_t& big) noexcept
 {
     // This value is limited to 32, so exponent cannot overflow.
-    auto exponent = static_cast<uint8_t>(logical_size(big));
+    auto exponent = narrow_cast<uint8_t>(logical_size(big));
 
     // Shift the big number significant digits into the mantissa.
     const auto mantissa64 = exponent <= 3 ?
         static_cast<uint64_t>(big) << shift_low(exponent) :
         static_cast<uint64_t>(big >> shift_high(exponent));
 
-    auto mantissa = static_cast<uint32_t>(mantissa64);
+    auto mantissa = narrow_cast<uint32_t>(mantissa64);
 
     //*************************************************************************
     // CONSENSUS: Satoshi used a signed implementation to represent unsigned.

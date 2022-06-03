@@ -21,6 +21,7 @@
 
 #include <type_traits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/safe.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -28,13 +29,13 @@ namespace system {
 template <typename Integer, typename Signed, if_integer<Integer>>
 constexpr Signed to_signed(Integer value) noexcept
 {
-    return static_cast<Signed>(value);
+    return possible_sign_cast<Signed>(value);
 }
     
 template <typename Integer, typename Unsigned, if_integer<Integer>>
 constexpr Unsigned to_unsigned(Integer value) noexcept
 {
-    return static_cast<Unsigned>(value);
+    return possible_sign_cast<Unsigned>(value);
 }
 
 template <typename Integer, typename Absolute, if_signed_integer<Integer>>
@@ -106,16 +107,18 @@ template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 constexpr Result greater(Left left, Right right) noexcept
 {
-    return is_greater(left, right) ? static_cast<Result>(left) :
-        static_cast<Result>(right);
+    // Precludes Result narrower than either operand.
+    return is_greater(left, right) ? possible_sign_cast<Result>(left) :
+        possible_sign_cast<Result>(right);
 }
 
 template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
 constexpr Result lesser(Left left, Right right) noexcept
 {
-    return is_lesser(left, right) ? static_cast<Result>(left) :
-        static_cast<Result>(right);
+    // Precludes Result narrower than either operand.
+    return is_lesser(left, right) ? possible_sign_cast<Result>(left) :
+        possible_sign_cast<Result>(right);
 }
 
 } // namespace system

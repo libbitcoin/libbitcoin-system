@@ -357,7 +357,7 @@ bool witness::extract_sigop_script(script& out_script,
 bool witness::extract_script(script& out_script,
     chunk_ptrs& out_stack, const script& program_script) const noexcept
 {
-    auto program = program_script.witness_program();
+    data_chunk program{ program_script.witness_program() };
     out_stack = stack_;
 
     switch (program_script.version())

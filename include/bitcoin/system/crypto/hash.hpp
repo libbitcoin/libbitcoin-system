@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -195,7 +196,7 @@ BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
 BC_API size_t djb2_hash(const data_slice& data) noexcept;
 
 /// Combine hash values, such as a pair of djb2_hash outputs.
-inline size_t hash_combine(size_t left, size_t right) noexcept
+constexpr size_t hash_combine(size_t left, size_t right) noexcept
 {
     return left ^ shift_left(right, one);
 }

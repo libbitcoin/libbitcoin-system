@@ -26,6 +26,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/words/language.hpp>
 
 namespace libbitcoin {
@@ -42,7 +43,7 @@ public:
     typedef std::vector<size_t> search;
     typedef std::vector<int32_t> result;
     typedef struct { bool sorted; std::array<const char*, Size> word; } words;
-    static_assert(Size <= static_cast<size_t>(max_int32), "dictionary");
+    static_assert(Size <= possible_narrow_sign_cast<size_t>(max_int32), "");
 
     /// The number of words in the dictionary.
     static constexpr size_t size() noexcept { return Size; };

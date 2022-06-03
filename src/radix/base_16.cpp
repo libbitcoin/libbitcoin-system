@@ -36,21 +36,6 @@
 namespace libbitcoin {
 namespace system {
 
-inline char to_base16_character(char digit) noexcept
-{
-    return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
-}
-
-// The C standard library function 'isxdigit' depends on the current locale,
-// and does not necessarily match the base16 encoding.
-bool is_base16(char character) noexcept
-{
-    return
-        (is_between(character, '0', '9')) ||
-        (is_between(character, 'a', 'f')) ||
-        (is_between(character, 'A', 'F'));
-}
-
 // Undefined (but safe) behavior if characters are not base16. 
 uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept
 {
@@ -72,13 +57,16 @@ std::string encode_base16(const data_slice& data) noexcept
     return out;
 }
 
+
 std::string encode_hash(const data_slice& hash) noexcept
 {
     std::string out;
     out.resize(hash.size() * octet_width);
     auto digit = out.begin();
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     for (const auto byte: boost::adaptors::reverse(hash))
+    BC_POP_WARNING()
     {
         *digit++ = to_base16_character(byte >> to_half(byte_bits));
         *digit++ = to_base16_character(byte & 0x0f);
@@ -87,12 +75,13 @@ std::string encode_hash(const data_slice& hash) noexcept
     return out;
 }
 
+
 bool decode_base16(data_chunk& out, const std::string& in) noexcept
 {
     if (is_odd(in.size()))
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16))
+    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
         return false;
 
     out.resize(in.size() / octet_width);

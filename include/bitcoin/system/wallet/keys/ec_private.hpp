@@ -26,6 +26,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/keys/ec_scalar.hpp>
 
@@ -62,19 +63,19 @@ public:
     static const uint16_t mainnet;
     static const uint16_t testnet;
 
-    static uint8_t to_address_version(uint16_t versions) noexcept
+    static constexpr uint8_t to_address_version(uint16_t versions) noexcept
     {
-        return versions & 0x00ff;
+        return narrow_cast<uint8_t>(versions);
     }
 
-    static uint8_t to_wif_version(uint16_t versions) noexcept
+    static constexpr uint8_t to_wif_version(uint16_t versions) noexcept
     {
-        return versions >> 8;
+        return narrow_cast<uint8_t>(shift_right(versions, width<uint8_t>()));
     }
 
-    static uint16_t to_versions(uint8_t address, uint8_t wif) noexcept
+    static constexpr uint16_t to_versions(uint8_t address, uint8_t wif) noexcept
     {
-        return uint16_t(wif) << 8 | address;
+        return shift_left<uint16_t>(wif, width<uint8_t>()) | address;
     }
 
     /// Constructors.

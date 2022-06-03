@@ -30,6 +30,8 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 
  // Cannot use a data_slice override as it is not deserializable.
@@ -58,7 +60,7 @@ inline bool deserialize(uint8_t& out, const std::string& text) noexcept
     if (!deserialize(value, text))
         return false;
 
-    out = static_cast<uint8_t>(value);
+    out = narrow_cast<uint8_t>(value);
     return value <= max_uint8;
 }
 
@@ -79,7 +81,7 @@ bool deserialize(std::array<Value, Size>& out, const std::string& text) noexcept
     auto result = true;
     const auto deserializer = [&result](const std::string& token) noexcept
     {
-        Value value;
+        Value value{};
         result &= deserialize(value, token);
         return value;
     };
@@ -95,7 +97,7 @@ bool deserialize(std::vector<Value>& out, const std::string& text) noexcept
     auto result = true;
     const auto deserializer = [&result](const std::string& token) noexcept
     {
-        Value value;
+        Value value{};
         result &= deserialize(value, token);
         return value;
     };
@@ -109,13 +111,18 @@ bool deserialize(std::vector<Value>& out, const std::string& text) noexcept
 template <typename Value>
 bool deserialize(Value& out, const std::string& text) noexcept
 {
-    // This can convert garbage to zero, use is_ascii_number for pre-assurance.
+    // Suppress istringstream may throw inside noexcept.
+    // The intended behavior in this case is program abort.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
     // Trimming is useful for type conversion, which otherwise fails.
     // So trimming of string types (pass-thru) is avoided by template override.
+    // This can convert garbage to zero, use is_ascii_number for pre-assurance.
     std::istringstream istream(trim_copy(text));
     istream >> out;
     return !istream.fail();
+
+    BC_POP_WARNING()
 }
 
 } // namespace system

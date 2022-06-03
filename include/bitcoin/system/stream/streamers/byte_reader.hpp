@@ -42,7 +42,13 @@ class byte_reader
 public:
     /// Constructors.
     byte_reader(IStream& source) noexcept;
-    virtual ~byte_reader() noexcept;
+
+    /// Defaults.
+    byte_reader(byte_reader&&) = default;
+    byte_reader(const byte_reader&) = default;
+    byte_reader& operator=(byte_reader&&) = default;
+    byte_reader& operator=(const byte_reader&) = default;
+    virtual ~byte_reader() = default;
 
     /// Read integer, size determined from parameter type.
     template <typename Integer, if_integer<Integer> = true>
@@ -140,7 +146,7 @@ protected:
     // Should be defined on IStream::pos_type, however that is implementation
     // defined and is not an integer domain. Could rely on std::streamsize,
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
-    static constexpr size_t maximum()
+    static constexpr size_t maximum() noexcept
     {
         return std::numeric_limits<size_t>::max();
     };

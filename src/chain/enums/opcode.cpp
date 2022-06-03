@@ -24,6 +24,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,7 +38,7 @@ if (norm == text || norm == alias) { out_code = opcode::code; return true; }
 
 std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) noexcept
 {
-    static const auto push_zero = static_cast<uint8_t>(opcode::reserved_80);
+    constexpr auto push_zero = static_cast<uint8_t>(opcode::reserved_80);
 
     switch (value)
     {
@@ -119,7 +120,7 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) noexcept
         case opcode::push_size_73:
         case opcode::push_size_74:
         case opcode::push_size_75:
-            return "push_" + std::to_string(static_cast<uint8_t>(value));
+            return "push_" + serialize(static_cast<uint8_t>(value));
         case opcode::push_one_size:
             return "pushdata1";
         case opcode::push_two_size:
@@ -146,7 +147,7 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) noexcept
         case opcode::push_positive_14:
         case opcode::push_positive_15:
         case opcode::push_positive_16:
-            return std::to_string(static_cast<uint8_t>(value) - push_zero);
+            return serialize(static_cast<uint8_t>(value) - push_zero);
         case opcode::nop:
             return "nop";
         case opcode::op_ver:

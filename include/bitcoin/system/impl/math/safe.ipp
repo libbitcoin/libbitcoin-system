@@ -22,17 +22,128 @@
 #include <limits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+/// Explicit integral casts.
+
+template <typename To, typename From,
+    if_lesser_width<To, From>,
+    if_integral_integer<To>,
+    if_integral_integer<From>,
+    if_same_signed_integer<To, From>>
+constexpr To narrow_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_same_width<To, From>,
+    if_integral_integer<To>,
+    if_integral_integer<From>,
+    if_not_same_signed_integer<To, From>>
+constexpr To sign_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_lesser_width<To, From>,
+    if_integral_integer<To>,
+    if_integral_integer<From>,
+    if_not_same_signed_integer<To, From>>
+constexpr To narrow_sign_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+/// Possible integer casts.
+
+template <typename To, typename From,
+    if_same_signed_integer<To, From>>
+constexpr To possible_narrow_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_not_lesser_width<To, From>>
+constexpr To possible_sign_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_not_same_signed_integer<To, From>>
+constexpr To possible_narrow_sign_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_lesser_width<To, From>>
+constexpr To possible_sign_narrow_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From>
+constexpr To possible_narrow_and_sign_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+/// Explicit pointer casts.
+
+template <typename To, typename From>
+constexpr To* pointer_cast(From* value) noexcept
+{
+    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+    return reinterpret_cast<To*>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From>
+constexpr To* possible_pointer_cast(From* value) noexcept
+{
+    BC_PUSH_WARNING(NO_IDENTITY_CAST)
+    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+    return reinterpret_cast<To*>(value);
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From>
+constexpr To* integer_pointer_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+    return reinterpret_cast<To*>(value);
+    BC_POP_WARNING()
+}
+
 // DEPRECATED: avoid structured exception handling.
+// ----------------------------------------------------------------------------
 
-// throw is not constexpr at least through C++20.
-
-// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_multiply(Integer left, Integer right) noexcept(false)
 {
@@ -45,7 +156,6 @@ Integer safe_multiply(Integer left, Integer right) noexcept(false)
     return left * right;
 }
 
-// TODO: generalize to signed integers.
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_add(Integer left, Integer right) noexcept(false)
 {
@@ -55,7 +165,6 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
     return left + right;
 }
 
-////// TODO: generalize to signed integers.
 ////template <typename Integer, if_unsigned_integer<Integer>>
 ////Integer safe_subtract(Integer left, Integer right) noexcept(false)
 ////{
@@ -65,14 +174,12 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
 ////    return left - right;
 ////}
 ////
-////// TODO: generalize to signed integers.
 ////template <typename Integer, if_unsigned_integer<Integer>>
 ////void safe_increment(Integer& value) noexcept(false)
 ////{
 ////    value = safe_add(value, one);
 ////}
 ////
-////// TODO: generalize to signed integers.
 ////template <typename Integer, if_unsigned_integer<Integer>>
 ////void safe_decrement(Integer& value)
 ////{

@@ -22,14 +22,17 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// TODO: test with uintx.
+// Uses typed add/substract functions to preclude integer promotions.
 
-// local
+// helpers
+// ----------------------------------------------------------------------------
+
 template <typename Factor1, typename Factor2,
     if_integer<Factor1> = true, if_integer<Factor2> = true>
 constexpr bool is_negative(Factor1 factor1, Factor2 factor2) noexcept
@@ -60,6 +63,9 @@ constexpr bool is_floored(Dividend dividend, Divisor divisor) noexcept
 {
     return !is_negative(dividend, divisor) || no_remainder(dividend, divisor);
 }
+
+// operations
+// ----------------------------------------------------------------------------
 
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>

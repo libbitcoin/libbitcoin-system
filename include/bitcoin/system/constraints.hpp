@@ -34,6 +34,8 @@ namespace system {
 template <bool Bool, typename Type = void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
+// values
+
 template <size_t Value>
 using if_odd = enable_if_type<is_odd(Value), bool>;
 
@@ -58,11 +60,16 @@ using if_lesser = enable_if_type<(Left < Right), bool>;
 template <size_t Left, size_t Right>
 using if_not_lesser = enable_if_type<!(Left < Right), bool>;
 
-template <typename Type>
-using if_byte = enable_if_type<!(width<Type>() > byte_bits), bool>;
+// types
+
+template <typename Left, typename Right>
+using if_same = std::is_same<Left, Right>;
 
 template <typename Type>
-using if_bytes = enable_if_type<(width<Type>() > byte_bits), bool>;
+using if_byte = enable_if_type<!(width<Type>() > width<uint8_t>()), bool>;
+
+template <typename Type>
+using if_bytes = enable_if_type<(width<Type>() > width<uint8_t>()), bool>;
 
 template <typename Type>
 using if_const = enable_if_type<std::is_const<Type>::value, bool>;
@@ -79,16 +86,20 @@ using if_byte_insertable = enable_if_type<
     std::is_base_of<std::vector<uint8_t>, Type>::value ||
     std::is_base_of<std::string, Type>::value, bool>;
 
+template <typename Left, typename Right>
+using if_same_width = enable_if_type<width<Left>() == width<Right>(), bool>;
+
+template <typename Left, typename Right>
+using if_lesser_width = enable_if_type<width<Left>() < width<Right>(), bool>;
+
+template <typename Left, typename Right>
+using if_not_lesser_width = enable_if_type<width<Left>() >= width<Right>(),
+    bool>;
+
+// integer types
+
 template <typename Type>
 using if_integer = enable_if_type<is_integer<Type>(), bool>;
-
-template <typename Type>
-using if_integral_integer = enable_if_type<is_integer<Type>() &&
-    std::is_integral<Type>::value, bool>;
-
-template <typename Type>
-using if_non_integral_integer = enable_if_type<is_integer<Type>() &&
-    !std::is_integral<Type>::value, bool>;
 
 template <typename Type>
 using if_signed_integer = enable_if_type<is_integer<Type>() &&
@@ -103,16 +114,20 @@ using if_same_signed_integer = enable_if_type<
     is_integer<Left>() && is_integer<Right>() &&
     (std::is_signed<Left>::value == std::is_signed<Right>::value), bool>;
 
-// Derive from 'noncopyable' to preclude copy construct and assign semantics in
-// the derived class. Move semantics are preserved if they are defined.
-class BC_API noncopyable
-{
-public:
-    noncopyable(const noncopyable&) = delete;
-    void operator=(const noncopyable&) = delete;
-protected:
-    noncopyable() {}
-};
+template <typename Left, typename Right>
+using if_not_same_signed_integer = enable_if_type<
+    is_integer<Left>() && is_integer<Right>() &&
+    (std::is_signed<Left>::value != std::is_signed<Right>::value), bool>;
+
+// integral integer types
+
+template <typename Type>
+using if_integral_integer = enable_if_type<is_integer<Type>() &&
+    std::is_integral<Type>::value, bool>;
+
+template <typename Type>
+using if_non_integral_integer = enable_if_type<is_integer<Type>() &&
+    !std::is_integral<Type>::value, bool>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -49,6 +49,12 @@ public:
         container_(data)
     {
     }
+    
+    push_sink(push_sink&&) = default;
+    push_sink(const push_sink&) = default;
+    push_sink& operator=(push_sink&&) = default;
+    push_sink& operator=(const push_sink&) = default;
+    ~push_sink() override = default;
 
 protected:
     const typename device<Container>::size_type default_buffer_size = 1024;

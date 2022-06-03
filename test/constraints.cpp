@@ -22,10 +22,12 @@
 #include <type_traits>
 #include <vector>
 
+// helpers
+
 typedef bool is_non_constant;
 typedef const bool is_constant;
 
-class base : noncopyable {};
+class base {};
 class not_derived {};
 class derived : base {};
 
@@ -36,6 +38,8 @@ constexpr bool is_true()
     // But visual studio intellisense properly evaluations these assertions.
     return !std::is_same<Type, std::enable_if<false, bool>>::value;
 }
+
+// values
 
 static_assert(is_true<if_odd<1>>(), "");
 static_assert(is_true<if_odd<3>>(), "");
@@ -81,6 +85,17 @@ static_assert(is_true<if_not_lesser<0, 0>>(), "");
 static_assert(is_true<if_not_lesser<1, 0>>(), "");
 ////static_assert(!is_true<if_not_lesser<0, 1>>(), "");
 
+// types
+
+static_assert(is_true<if_same<bool, bool>>(), "");
+static_assert(is_true<if_same<uint8_t, uint8_t>>(), "");
+static_assert(is_true<if_same<uint8_t, unsigned char>>(), "");
+static_assert(is_true<if_same<unsigned char, uint8_t>>(), "");
+static_assert(is_true<if_same<base, base>>(), "");
+////static_assert(!is_true<if_same<base, derived>>(), "");
+////static_assert(!is_true<if_same<bool, char>>(), "");
+////static_assert(!is_true<if_same<char, bool>>(), "");
+
 static_assert(is_true<if_byte<bool>>(), "");
 static_assert(is_true<if_byte<char>>(), "");
 static_assert(is_true<if_byte<uint8_t>>(), "");
@@ -122,6 +137,12 @@ static_assert(is_true<if_byte_insertable<std::vector<uint8_t>>>(), "");
 ////static_assert(!is_true<if_byte_insertable<std::vector<uint32_t>>>(), "");
 ////static_assert(!is_true<if_byte_insertable<uint32_t>>(), "");
 
+// if_same_width
+// if_lesser_width
+// if_not_lesser_width
+
+// integer types
+
 static_assert(is_true<if_integer<char>>(), "");
 static_assert(is_true<if_integer<int>>(), "");
 static_assert(is_true<if_integer<uint8_t>>(), "");
@@ -132,29 +153,6 @@ static_assert(is_true<if_integer<uintx>>(), "");
 ////static_assert(!is_true<if_integer<float>>(), "");
 ////static_assert(!is_true<if_integer<double>>(), "");
 ////static_assert(!is_true<if_integer<base>>(), "");
-
-static_assert(is_true<if_integral_integer<char>>(), "");
-static_assert(is_true<if_integral_integer<int>>(), "");
-static_assert(is_true<if_integral_integer<uint8_t>>(), "");
-static_assert(is_true<if_integral_integer<uint32_t>>(), "");
-static_assert(is_true<if_integral_integer<int32_t>>(), "");
-////static_assert(!is_true<if_integral_integer<bool>>(), "");
-////static_assert(!is_true<if_integral_integer<uintx>>(), "");
-////static_assert(!is_true<if_integral_integer<float>>(), "");
-////static_assert(!is_true<if_integral_integer<double>>(), "");
-////static_assert(!is_true<if_integral_integer<base>>(), "");
-
-static_assert(is_true<if_non_integral_integer<uintx>>(), "");
-static_assert(is_true<if_non_integral_integer<uint256_t>>(), "");
-////static_assert(!is_true<if_non_integral_integer<bool>>(), "");
-////static_assert(!is_true<if_non_integral_integer<char>>(), "");
-////static_assert(!is_true<if_non_integral_integer<int>>(), "");
-////static_assert(!is_true<if_non_integral_integer<uint8_t>>(), "");
-////static_assert(!is_true<if_non_integral_integer<uint32_t>>(), "");
-////static_assert(!is_true<if_non_integral_integer<int32_t>>(), "");
-////static_assert(!is_true<if_non_integral_integer<float>>(), "");
-////static_assert(!is_true<if_non_integral_integer<double>>(), "");
-////static_assert(!is_true<if_non_integral_integer<base>>(), "");
 
 static_assert(is_true<if_signed_integer<char>>(), "");
 static_assert(is_true<if_signed_integer<int>>(), "");
@@ -205,7 +203,47 @@ static_assert(is_true<if_same_signed_integer<char, int64_t>>(), "");
 ////static_assert(!is_true<if_same_signed_integer<char, double>>(), "");
 ////static_assert(!is_true<if_same_signed_integer<char, base>>(), "");
 
-static_assert(std::is_copy_constructible<not_derived>::value, "");
-static_assert(!std::is_copy_constructible<noncopyable>::value, "");
-static_assert(!std::is_copy_constructible<derived>::value, "");
-static_assert(!std::is_copy_constructible<base>::value, "");
+static_assert(is_true<if_same_signed_integer<int, int>>(), "");
+static_assert(is_true<if_same_signed_integer<char, char>>(), "");
+static_assert(is_true<if_same_signed_integer<uint8_t, uint8_t>>(), "");
+static_assert(is_true<if_same_signed_integer<uint32_t, uint32_t>>(), "");
+static_assert(is_true<if_same_signed_integer<uint64_t, uint64_t>>(), "");
+////static_assert(is_true<if_same_signed_integer<bool, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<float, float>>(), "");
+////static_assert(!is_true<if_same_signed_integer<double, double>>(), "");
+////static_assert(!is_true<if_same_signed_integer<base, base>>(), "");
+
+static_assert(is_true<if_same_signed_integer<int, char>>(), "");
+static_assert(is_true<if_same_signed_integer<uint16_t, uint8_t>>(), "");
+static_assert(is_true<if_same_signed_integer<uint8_t, unsigned char>>(), "");
+static_assert(is_true<if_same_signed_integer<unsigned char, uint8_t>>(), "");
+////static_assert(!is_true<if_same_signed_integer<int16_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<uint16_t, bool>>(), "");
+////static_assert(!is_true<if_same_signed_integer<char, unsigned char>>(), "");
+
+// if_not_same_signed_integer
+
+// integral integer types
+
+static_assert(is_true<if_integral_integer<char>>(), "");
+static_assert(is_true<if_integral_integer<int>>(), "");
+static_assert(is_true<if_integral_integer<uint8_t>>(), "");
+static_assert(is_true<if_integral_integer<uint32_t>>(), "");
+static_assert(is_true<if_integral_integer<int32_t>>(), "");
+////static_assert(!is_true<if_integral_integer<bool>>(), "");
+////static_assert(!is_true<if_integral_integer<uintx>>(), "");
+////static_assert(!is_true<if_integral_integer<float>>(), "");
+////static_assert(!is_true<if_integral_integer<double>>(), "");
+////static_assert(!is_true<if_integral_integer<base>>(), "");
+
+static_assert(is_true<if_non_integral_integer<uintx>>(), "");
+static_assert(is_true<if_non_integral_integer<uint256_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<bool>>(), "");
+////static_assert(!is_true<if_non_integral_integer<char>>(), "");
+////static_assert(!is_true<if_non_integral_integer<int>>(), "");
+////static_assert(!is_true<if_non_integral_integer<uint8_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<uint32_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<int32_t>>(), "");
+////static_assert(!is_true<if_non_integral_integer<float>>(), "");
+////static_assert(!is_true<if_non_integral_integer<double>>(), "");
+////static_assert(!is_true<if_non_integral_integer<base>>(), "");

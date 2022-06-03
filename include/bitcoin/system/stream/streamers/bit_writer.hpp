@@ -32,7 +32,7 @@
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-BC_PUSH_MSVC_WARNING(4250)
+BC_PUSH_WARNING(4250)
 
 namespace libbitcoin {
 namespace system {
@@ -46,6 +46,12 @@ class bit_writer
 public:
     /// Constructors.
     bit_writer(OStream& sink) noexcept;
+
+    /// Copy/move/destruct.
+    bit_writer(bit_writer&&);
+    bit_writer(const bit_writer&);
+    bit_writer& operator=(bit_writer&&);
+    bit_writer& operator=(const bit_writer&);
     ~bit_writer() noexcept override;
 
     /// Write one bit (high to low).
@@ -70,7 +76,7 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-BC_POP_MSVC_WARNING()
+BC_POP_WARNING()
 
 #include <bitcoin/system/impl/stream/streamers/bit_writer.ipp>
 

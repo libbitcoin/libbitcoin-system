@@ -23,6 +23,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -99,15 +100,13 @@ inline Value power(Base base, Exponent exponent) noexcept
         return absolute(base) > 1 ? 0 :
             (is_odd(exponent) && is_negative(base) ? -1 : 1);
 
-    auto value = static_cast<Value>(base);
+    // Allows Value narrower than Base.
+    auto value = possible_narrow_and_sign_cast<Value>(base);
 
-    // Suppress C4244: '*=' : conversion from 'Base' to 'uint16_t'.
     // Overflow is allowed behavior as this mimics a mathematical operator.
-    BC_PUSH_MSVC_WARNING(4244)
-
+    BC_PUSH_WARNING(NARROWING_CONVERSION)
     while (--exponent > 0) { value *= base; }
-
-    BC_POP_MSVC_WARNING();
+    BC_POP_WARNING();
 
     return value;
 }

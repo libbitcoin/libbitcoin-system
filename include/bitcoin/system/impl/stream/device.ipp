@@ -25,6 +25,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -101,23 +102,20 @@ template <typename Container>
 typename device<Container>::sequence
 device<Container>::do_sequence() const noexcept
 {
-    // Not implemented, override.
-    return { nullptr, nullptr };
+    BC_ASSERT_MSG(false, "device<Container>::do_sequence() not implemented");
+    return {};
 }
 
 template <typename Container>
-void device<Container>::do_read(value_type* buffer, size_type size) noexcept
+void device<Container>::do_read(value_type*, size_type) noexcept
 {
-    // Not implemented, override.
-
-    // Pad any unfilled remainder of the array with zeros.
-    filler(buffer, std::next(buffer, size), value_type{ 0x00 });
+    BC_ASSERT_MSG(false, "device<Container>::do_read() not implemented");
 }
 
 template <typename Container>
 void device<Container>::do_write(const value_type*, size_type) noexcept
 {
-    // Not implemented, override.
+    BC_ASSERT_MSG(false, "device<Container>::do_write() not implemented");
 }
 
 template <typename Container>

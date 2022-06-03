@@ -19,12 +19,81 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
-#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+/// Explicit integral casts.
+
+/// Cast integral to integral of narrower bit width.
+template <typename To, typename From,
+    if_lesser_width<To, From> = true,
+    if_integral_integer<To> = true,
+    if_integral_integer<From> = true,
+    if_same_signed_integer<To, From> = true>
+constexpr To narrow_cast(From value) noexcept;
+
+/// Cast integral sign (must be same bit width).
+template <typename To, typename From,
+    if_same_width<To, From> = true,
+    if_integral_integer<To> = true,
+    if_integral_integer<From> = true,
+    if_not_same_signed_integer<To, From> = true>
+constexpr To sign_cast(From value) noexcept;
+
+/// Cast integral sign to integral of narrower bit width.
+template <typename To, typename From,
+    if_lesser_width<To, From> = true,
+    if_integral_integer<To> = true,
+    if_integral_integer<From> = true,
+    if_not_same_signed_integer<To, From> = true>
+constexpr To narrow_sign_cast(From value) noexcept;
+
+/// Possible integer casts.
+
+/// Possible narrowing without sign cast.
+template <typename To, typename From,
+    if_same_signed_integer<To, From> = true>
+constexpr To possible_narrow_cast(From value) noexcept;
+
+/// Possible sign cast without narrowing.
+template <typename To, typename From,
+    if_not_lesser_width<To, From> = true>
+constexpr To possible_sign_cast(From value) noexcept;
+
+/// Possible narrowing with sign cast.
+template <typename To, typename From,
+    if_not_same_signed_integer<To, From> = true>
+constexpr To possible_narrow_sign_cast(From value) noexcept;
+
+/// Possible sign cast with narrowing.
+template <typename To, typename From,
+    if_lesser_width<To, From> = true>
+constexpr To possible_sign_narrow_cast(From value) noexcept;
+
+/// Possible narrowing and possible sign cast (unrestricted).
+template <typename To, typename From>
+constexpr To possible_narrow_and_sign_cast(From value) noexcept;
+
+/// Explicit pointer casts.
+
+/// Cast of pointer.
+template <typename To, typename From>
+constexpr To* pointer_cast(From* value) noexcept;
+
+/// Possible cast of pointer.
+template <typename To, typename From>
+constexpr To* possible_pointer_cast(From* value) noexcept;
+
+/// Cast integer to pointer.
+template <typename To, typename From>
+constexpr To* integer_pointer_cast(From value) noexcept;
+
+/// Mathematical operations that throw on overflow.
 
 // DEPRECATED: 2 uses in libbitcoin
 /// Throws overflow_exception on overflow.

@@ -25,6 +25,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 #include <bitcoin/system/wallet/keys/hd_public.hpp>
@@ -43,15 +44,16 @@ public:
     static const uint64_t mainnet;
     static const uint64_t testnet;
 
-    static uint32_t to_prefix(uint64_t prefixes) noexcept
+    static constexpr uint32_t to_prefix(uint64_t prefixes) noexcept
     {
-        return prefixes >> 32;
+        return narrow_cast<uint32_t>(shift_right(prefixes, width<uint32_t>()));
     }
 
-    static uint64_t to_prefixes(uint32_t private_prefix,
+    static constexpr uint64_t to_prefixes(uint32_t private_prefix,
         uint32_t public_prefix) noexcept
     {
-        return uint64_t(private_prefix) << 32 | public_prefix;
+        return shift_left<uint64_t>(private_prefix, width<uint32_t>()) |
+            public_prefix;
     }
 
     /// Constructors.

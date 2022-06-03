@@ -44,7 +44,7 @@ using split_parts = std::pair<data_array<Size>, data_array<Size>>;
 typedef data_array<one> one_byte;
 
 /// Create a single byte arrray with given element value.
-inline one_byte to_array(uint8_t byte) noexcept;
+constexpr one_byte to_array(uint8_t byte) noexcept { return { { byte } };}
 
 /// Convert the data slice to an array.
 /// Underfill is padded with 0x00, excess is truncated.

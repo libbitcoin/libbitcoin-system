@@ -25,12 +25,20 @@ namespace libbitcoin {
 namespace system {
 
 /// left + right after cast of each to Result type.
+/// Result type bit width must not be lesser than either operand.
+/// Use overflows<Result>(left, right) to guard.
 template <typename Result, typename Left, typename Right,
+    if_not_lesser_width<Result, Left> = true,
+    if_not_lesser_width<Result, Right> = true,
     if_same_signed_integer<Left, Right> = true>
 constexpr Result add(Left left, Right right) noexcept;
 
 /// left - right after cast of each to Result type.
+/// Result type bit width must not be lesser than either operand.
+/// Use underflows<Result>(left, right) to guard.
 template <typename Result, typename Left, typename Right,
+    if_not_lesser_width<Result, Left> = true,
+    if_not_lesser_width<Result, Right> = true,
     if_same_signed_integer<Left, Right> = true>
 constexpr Result subtract(Left left, Right right) noexcept;
 

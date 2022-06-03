@@ -47,14 +47,20 @@ public:
         next_(data.begin())
     {
     }
+    
+    copy_sink(copy_sink&&) = default;
+    copy_sink(const copy_sink&) = default;
+    copy_sink& operator=(copy_sink&&) = default;
+    copy_sink& operator=(const copy_sink&) = default;
+    ~copy_sink() override = default;
 
 protected:
     typename device<Container>::sequence do_sequence() const noexcept override
     {
         return std::make_pair(
-            reinterpret_cast<typename device<Container>::char_type*>(
+            integer_pointer_cast<typename device<Container>::char_type>(
                 container_.begin()),
-            reinterpret_cast<typename device<Container>::char_type*>(
+            integer_pointer_cast<typename device<Container>::char_type>(
                 container_.end()));
     }
 

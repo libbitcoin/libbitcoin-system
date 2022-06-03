@@ -86,7 +86,7 @@ namespace std
 template<>
 struct hash<bc::system::binary>
 {
-    size_t operator()(const bc::system::binary& value) const
+    size_t operator()(const bc::system::binary& value) const noexcept
     {
         return std::hash<std::string>()(value.encoded());
     }

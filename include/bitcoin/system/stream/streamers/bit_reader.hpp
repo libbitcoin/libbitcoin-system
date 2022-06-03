@@ -32,7 +32,7 @@
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-BC_PUSH_MSVC_WARNING(4250)
+BC_PUSH_WARNING(4250)
 
 namespace libbitcoin {
 namespace system {
@@ -46,7 +46,13 @@ class bit_reader
 public:
     /// Constructors.
     bit_reader(IStream& source) noexcept;
-    ~bit_reader() noexcept override;
+
+    /// Defaults.
+    bit_reader(bit_reader&&) = default;
+    bit_reader(const bit_reader&) = default;
+    bit_reader& operator=(bit_reader&&) = default;
+    bit_reader& operator=(const bit_reader&) = default;
+    ~bit_reader() override = default;
 
     /// Read one bit (high to low).
     bool read_bit() noexcept override;
@@ -82,7 +88,7 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-BC_POP_MSVC_WARNING()
+BC_POP_WARNING()
 
 #include <bitcoin/system/impl/stream/streamers/bit_reader.ipp>
 

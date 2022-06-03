@@ -24,6 +24,9 @@
 #include <limits>
 #include <type_traits>
 
+// TODO: Inclusion order change.
+#include <bitcoin/system/define.hpp>
+
 namespace libbitcoin {
 
 // Guard assumptions within the codebase.
@@ -43,33 +46,43 @@ constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
 constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
 constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
 
-// The number of bits in a byte (uint8_t)
-constexpr uint8_t byte_bits = 8;
-
-// Use zero, one, two when any unsigned or size_t value is required.
+// Use zero, one, two when the unsigned value is required.
+// Literals are used below to prevent sign (unsigned) promotion.
 constexpr size_t zero = 0;
 constexpr size_t one = 1;
 constexpr size_t two = 2;
 
-// Use negative_one when returning negative one (or any negative) as sentinel.
+// The number of bits in a byte (uint8_t).
+constexpr uint8_t byte_bits = 8;
+
+// Use negative_one when returning negative as a sentinel value.
 constexpr int32_t negative_one = -1;
+
+// Avoid typed casts due to circular header inclusion.
+// All functions below 
 
 template <typename Type>
 constexpr bool is_zero(Type value) noexcept
 {
-    return value == 0;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return value == static_cast<Type>(0);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
 constexpr bool is_one(Type value) noexcept
 {
-    return value == 1;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return value == static_cast<Type>(1);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
 constexpr Type lo_bit(Type value) noexcept
 {
-    return value % 2;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(value % 2);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
@@ -100,25 +113,33 @@ constexpr bool is_null(Type value) noexcept
 template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
-    return bytes * 8;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(bytes * 8);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
 constexpr Type to_bytes(Type bits) noexcept
 {
-    return bits / 8;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(bits / 8);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
-    return value / 2;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(value / 2);
+    BC_POP_WARNING()
 }
 
 template <typename Type = int>
 constexpr Type to_int(bool value) noexcept
 {
-    return value ? 1 : 0;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(value ? 1 : 0);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
@@ -130,13 +151,17 @@ constexpr bool to_bool(Type value) noexcept
 template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
-    return value + 1;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(value + 1);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
-    return value - 1;
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Type>(value - 1);
+    BC_POP_WARNING()
 }
 
 template <typename Type>
@@ -155,7 +180,10 @@ constexpr size_t width(Type value) noexcept
 
 constexpr uint8_t to_byte(char character) noexcept
 {
+    // Avoid sign_cast due to circular header inclusion.
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<uint8_t>(character);
+    BC_POP_WARNING()
 }
 
 /// Variable integer prefix sentinels.
