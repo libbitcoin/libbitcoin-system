@@ -66,17 +66,17 @@ constexpr uint8_t log_256(uint32_t mantissa) noexcept
 
 constexpr uint32_t shift_low(uint8_t exponent) noexcept
 {
-    BC_ASSERT(exponent <= 3);
+    ////BC_ASSERT(exponent <= 3);
     return to_bits(3 - exponent);
 }
 
 constexpr uint32_t shift_high(uint8_t exponent) noexcept
 {
-    BC_ASSERT(exponent > 3);
+    ////BC_ASSERT(exponent > 3);
     return to_bits(exponent - 3);
 }
 
-inline bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
+constexpr bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
 {
     // Overflow if exponent would shift the mantissa more than 32 bytes.
     return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
