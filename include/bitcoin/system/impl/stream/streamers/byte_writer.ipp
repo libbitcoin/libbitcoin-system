@@ -47,8 +47,8 @@ template <typename OStream>
 byte_writer<OStream>::byte_writer(OStream& sink) noexcept
   : stream_(sink)
 {
-    BC_ASSERT_MSG(stream_.exceptions() == OStream::goodbit,
-        "Output stream must not be configured to throw exceptions.");
+    ////BC_ASSERT_MSG(stream_.exceptions() == OStream::goodbit,
+    ////    "Output stream must not be configured to throw exceptions.");
 }
 
 template <typename OStream>

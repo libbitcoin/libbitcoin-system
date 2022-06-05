@@ -46,8 +46,8 @@ template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) noexcept
   : stream_(source), remaining_(std::numeric_limits<size_t>::max())
 {
-    BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
-        "Input stream must not be configured to throw exceptions.");
+    ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
+    ////    "Input stream must not be configured to throw exceptions.");
 }
 
 // big endian
