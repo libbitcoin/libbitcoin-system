@@ -124,16 +124,71 @@ public:
     static uint8_t opcode_to_positive(opcode code) noexcept;
 
     /// Categories of opcodes.
-    static bool is_push(opcode code) noexcept;
-    static bool is_payload(opcode code) noexcept;
-    static bool is_counted(opcode code) noexcept;
-    static bool is_version(opcode code) noexcept;
-    static bool is_numeric(opcode code) noexcept;
-    static bool is_positive(opcode code) noexcept;
+
+    /// opcode: [0-79, 81-96].
+    static constexpr bool is_push(opcode code) noexcept
+    {
+        constexpr auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
+        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+        const auto value = static_cast<uint8_t>(code);
+        return value <= op_96 && value != op_80;
+    }
+
+    /// opcode: [1-78].
+    static constexpr bool is_payload(opcode code) noexcept
+    {
+        constexpr auto op_1 = static_cast<uint8_t>(opcode::push_size_1);
+        constexpr auto op_78 = static_cast<uint8_t>(opcode::push_four_size);
+        const auto value = static_cast<uint8_t>(code);
+        return value >= op_1 && value <= op_78;
+    }
+
+    /// opcode: [97-255].
+    static constexpr bool is_counted(opcode code) noexcept
+    {
+        constexpr auto op_97 = static_cast<uint8_t>(opcode::nop);
+        const auto value = static_cast<uint8_t>(code);
+        return value >= op_97;
+    }
+
+    /// stack: [[], 1-16].
+    static constexpr bool is_version(opcode code) noexcept
+    {
+        return code == opcode::push_size_0 || is_positive(code);
+    }
+
+    /// stack: [-1, 1-16].
+    static constexpr bool is_numeric(opcode code) noexcept
+    {
+        return is_positive(code) || code == opcode::push_negative_1;
+    }
+
+    /// stack: [1-16].
+    static constexpr bool is_positive(opcode code) noexcept
+    {
+        constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
+        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+        const auto value = static_cast<uint8_t>(code);
+        return value >= op_81 && value <= op_96;
+    }
+
+    // C++14: switch in constexpr.
     static bool is_invalid(opcode code) noexcept;
     static bool is_reserved(opcode code) noexcept;
     static bool is_conditional(opcode code) noexcept;
-    static bool is_relaxed_push(opcode code) noexcept;
+
+    /// opcode: [0-96].
+    //*****************************************************************************
+    // CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
+    // This affects the operation count in p2sh script evaluation.
+    // Presumably this was an unintended consequence of range testing enums.
+    //*****************************************************************************
+    static constexpr bool is_relaxed_push(opcode code) noexcept
+    {
+        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
+        const auto value = static_cast<uint8_t>(code);
+        return value <= op_96;
+    }
 
     /// Categories of operations.
     /// The is_invalid() method pertains only to opcode consensus validity.

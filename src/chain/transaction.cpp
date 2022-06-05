@@ -102,7 +102,9 @@ transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
 }
 
 transaction::transaction(const data_slice& data, bool witness) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : transaction(stream::in::copy(data), witness)
+    BC_POP_WARNING()
 {
 }
 
@@ -259,7 +261,11 @@ data_chunk transaction::to_data(bool witness) const noexcept
 
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(witness));
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream, witness);
     return data;
 }
@@ -439,8 +445,8 @@ hash_digest transaction::outputs_hash() const noexcept
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    const auto outs = outputs_ptr();
-    for (const auto& output: *outs)
+    const auto& outs = *outputs_ptr();
+    for (const auto& output: outs)
         output->to_data(sink);
 
     sink.flush();
@@ -452,8 +458,8 @@ hash_digest transaction::points_hash() const noexcept
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    const auto ins = inputs_ptr();
-    for (const auto& input: *ins)
+    const auto& ins = *inputs_ptr();
+    for (const auto& input: ins)
         input->point().to_data(sink);
 
     sink.flush();
@@ -465,8 +471,8 @@ hash_digest transaction::sequences_hash() const noexcept
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    const auto ins = inputs_ptr();
-    for (const auto& input: *ins)
+    const auto& ins = *inputs_ptr();
+    for (const auto& input: ins)
         sink.write_4_bytes_little_endian(input->sequence());
 
     sink.flush();

@@ -72,7 +72,9 @@ witness::witness(const chunk_cptrs& stack) noexcept
 }
 
 witness::witness(const data_slice& data, bool prefix) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : witness(stream::in::copy(data), prefix)
+    BC_POP_WARNING()
 {
 }
 
@@ -201,7 +203,11 @@ data_chunk witness::to_data(bool prefix) const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(prefix));
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream, prefix);
     return data;
 }
@@ -289,8 +295,10 @@ bool witness::is_push_size(const chunk_cptrs& stack) noexcept
 // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
 bool witness::is_reserved_pattern(const chunk_cptrs& stack) noexcept
 {
-    return stack.size() == 1 &&
-        stack[0]->size() == hash_size;
+    // More efficient [] dereference is guarded here.
+    BC_PUSH_WARNING(USE_GSL_AT)
+    return stack.size() == 1 && stack[0]->size() == hash_size;
+    BC_POP_WARNING()
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.

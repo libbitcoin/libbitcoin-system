@@ -63,7 +63,9 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 }
 
 header::header(const data_slice& data) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : header(stream::in::copy(data))
+    BC_POP_WARNING()
 {
 }
 
@@ -158,7 +160,11 @@ data_chunk header::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream);
     return data;
 }
@@ -220,7 +226,7 @@ uint32_t header::nonce() const noexcept
 // computed
 hash_digest header::hash() const noexcept
 {
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
     to_data(sink);
     sink.flush();

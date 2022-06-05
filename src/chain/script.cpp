@@ -45,6 +45,9 @@
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
+// More efficient [] dereferences are all guarded here.
+BC_PUSH_WARNING(USE_GSL_AT)
+
 namespace libbitcoin {
 namespace system {
 namespace chain {
@@ -84,7 +87,9 @@ script::script(const operations& ops) noexcept
 }
 
 script::script(const data_slice& data, bool prefix) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : script(stream::in::copy(data), prefix)
+    BC_POP_WARNING()
 {
 }
 
@@ -237,7 +242,11 @@ data_chunk script::to_data(bool prefix) const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(prefix));
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream, prefix);
     return data;
 }
@@ -256,16 +265,23 @@ void script::to_data(writer& sink, bool prefix) const noexcept
 
     const auto stop = ops().end();
 
+    // The iterator must be copied.
+    BC_PUSH_WARNING(USE_REFERENCE)
+
     // Data serialization is affected by offset metadata.
-    ////for (const auto& op: ops())
     for (auto op = offset; op != stop; ++op)
         op->to_data(sink);
+
+    BC_POP_WARNING()
 }
 
 std::string script::to_string(uint32_t active_forks) const noexcept
 {
     auto first = true;
     std::ostringstream text;
+
+    // Throwing stream aborts.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
     for (const auto& op: ops())
     {
@@ -275,7 +291,10 @@ std::string script::to_string(uint32_t active_forks) const noexcept
 
     // An invalid operation has a specialized serialization.
     return text.str();
+
+    BC_POP_WARNING()
 }
+
 
 // Properties.
 // ----------------------------------------------------------------------------
@@ -864,3 +883,5 @@ BC_POP_WARNING()
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING(/*USE_GSL_AT*/)

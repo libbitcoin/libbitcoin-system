@@ -78,9 +78,12 @@ block::block(const chain::header::cptr& header,
 }
 
 block::block(const data_slice& data, bool witness) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : block(stream::in::copy(data), witness)
+    BC_POP_WARNING()
 {
 }
+
 
 block::block(std::istream&& stream, bool witness) noexcept
   : block(read::bytes::istream(stream), witness)
@@ -136,14 +139,25 @@ block block::from_data(reader& source, bool witness) noexcept
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
+        {
+            BC_PUSH_WARNING(NO_NEW_DELETE)
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             txs->emplace_back(new transaction{ source, witness });
+            BC_POP_WARNING()
+            BC_POP_WARNING()
+        }
 
         return txs;
     };
 
     return
     {
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::header{ source }),
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+
         read_transactions(source),
         source
     };
@@ -156,7 +170,11 @@ data_chunk block::to_data(bool witness) const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size(witness));
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream, witness);
     return data;
 }
@@ -290,7 +308,9 @@ bool block::is_extra_coinbases() const noexcept
 //*****************************************************************************
 bool block::is_forward_reference() const noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     std::unordered_map<hash_digest, bool> hashes(txs_->size());
+    BC_POP_WARNING()
 
     const auto is_forward = [&hashes](const input::cptr& input) noexcept
     {
@@ -301,7 +321,10 @@ bool block::is_forward_reference() const noexcept
     for (const auto& tx: boost::adaptors::reverse(*txs_))
     BC_POP_WARNING()
     {
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.emplace(tx->hash(false), false);
+        BC_POP_WARNING()
+
         const auto& inputs = *tx->inputs_ptr();
         if (std::any_of(inputs.begin(), inputs.end(), is_forward))
             return true;
@@ -405,17 +428,26 @@ bool block::is_hash_limit_exceeded() const noexcept
     std::unordered_set<hash_digest> hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     hashes.insert(txs_->front()->hash(false));
+    BC_POP_WARNING()
 
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         // Insert the transaction hash.
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.insert((*tx)->hash(false));
+        BC_POP_WARNING()
+
         const auto& inputs = *(*tx)->inputs_ptr();
 
         // Insert all input point hashes.
         for (const auto& input: inputs)
+        {
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             hashes.insert(input->point().hash());
+            BC_POP_WARNING()
+        }
     }
 
     return hashes.size() > hash_limit;
@@ -436,7 +468,7 @@ bool block::is_invalid_witness_commitment() const noexcept
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    hash_digest reserved, committed;
+    hash_digest reserved{}, committed{};
     const auto& coinbase = txs_->front();
 
     // Last output of commitment pattern holds committed value (bip141).

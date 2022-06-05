@@ -62,7 +62,9 @@ output::output(uint64_t value, const chain::script::cptr& script) noexcept
 }
 
 output::output(const data_slice& data) noexcept
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : output(stream::in::copy(data))
+    BC_POP_WARNING()
 {
 }
 
@@ -116,7 +118,13 @@ output output::from_data(reader& source) noexcept
     return
     {
         source.read_8_bytes_little_endian(),
+
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::script{ source, true }),
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+
         source
     };
 }
@@ -128,7 +136,11 @@ data_chunk output::to_data() const noexcept
 {
     data_chunk data(no_fill_byte_allocator);
     data.resize(serialized_size());
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream);
     return data;
 }
@@ -183,7 +195,12 @@ bool output::committed_hash(hash_digest& out) const noexcept
         return false;
 
     // The four byte offset for the witness commitment hash (bip141).
+
+    // More efficient [] dereference is guarded above.
+    BC_PUSH_WARNING(USE_GSL_AT)
     const auto start = std::next(ops[1].data().begin(), sizeof(witness_head));
+    BC_POP_WARNING()
+
     std::copy_n(start, hash_size, out.begin());
     return true;
 }

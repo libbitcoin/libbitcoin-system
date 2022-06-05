@@ -23,6 +23,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <bitcoin/system/define.hpp>
 
 // TODO: test.
 
@@ -42,28 +43,36 @@ namespace system {
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<Type>();
+    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from instance pointer.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(Type* value) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::shared_ptr<const Type>(value);
+    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from moved instance.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(Type&& value) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(std::forward<Type>(value));
+    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from copied instance.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(const Type& value) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(value);
+    BC_POP_WARNING()
 }
 
 /// Create shared pointer to vector of const shared pointers from moved vector.
