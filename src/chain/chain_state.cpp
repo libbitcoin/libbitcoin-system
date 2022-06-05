@@ -120,11 +120,11 @@ chain_state::activations chain_state::activation(const data& values,
     };
 
     // Declare bip34-based version predicates.
-    const auto ge_2 = [=](uint32_t value) noexcept { return ge(value,
+    const auto ge_2 = [&](uint32_t value) noexcept { return ge(value,
         settings.bip34_version); };
-    const auto ge_3 = [=](uint32_t value) noexcept { return ge(value,
+    const auto ge_3 = [&](uint32_t value) noexcept { return ge(value,
         settings.bip66_version); };
-    const auto ge_4 = [=](uint32_t value) noexcept { return ge(value,
+    const auto ge_4 = [&](uint32_t value) noexcept { return ge(value,
         settings.bip65_version); };
 
     // Compute bip34-based activation version summaries.
@@ -512,7 +512,7 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) noexcept
     // This differs from arithmetic median which averages two middle values.
 
     // times[] indexation is guarded.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    BC_PUSH_WARNING(USE_GSL_AT)
     return times.empty() ? 0 : times[to_half(times.size())];
     BC_POP_WARNING()
 }
