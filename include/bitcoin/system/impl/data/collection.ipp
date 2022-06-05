@@ -84,7 +84,6 @@ std::vector<To> cast(const std::vector<From>& source) noexcept
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element)
         {
-            // Does not allow narrowing or base conversion.
             return possible_sign_cast<To>(element);
         });
 
@@ -99,7 +98,6 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element) noexcept
         {
-            // Does not allow narrowing or base conversion.
             return possible_sign_cast<To>(element);
         });
 
@@ -121,7 +119,7 @@ bool contains(const Collection& list,
 template <typename Element>
 bool equal_points(
     const std::vector<std::shared_ptr<const Element>>& left,
-    const std::vector<std::shared_ptr<const Element>>& right)
+    const std::vector<std::shared_ptr<const Element>>& right) noexcept
 {
     // C++14: a new std::equal overload can replace this guard.
     if (left.size() != right.size())

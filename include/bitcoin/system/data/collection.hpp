@@ -42,7 +42,7 @@ template <typename Collection, typename Element>
 typename Collection::difference_type
 binary_search(const Collection& list, const Element& element) noexcept;
 
-/// Cast collection of From members to a new collection of To members.
+/// Copy/move collection of From members to a new collection of To members.
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept;
 template <typename To, typename From, size_t Size>
@@ -57,7 +57,7 @@ bool contains(const Collection& list,
 template <typename Element>
 bool equal_points(
     const std::vector<std::shared_ptr<const Element>>& left,
-    const std::vector<std::shared_ptr<const Element>>& right);
+    const std::vector<std::shared_ptr<const Element>>& right) noexcept;
 
 /// Fill a buffer with values.
 template <typename Iterator, typename Value>
