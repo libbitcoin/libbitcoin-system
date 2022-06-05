@@ -110,11 +110,12 @@ chain_state::activations chain_state::activation(const data& values,
     const auto retarget = script::is_enabled(forks, forks::retarget);
     const auto mainnet = retarget && difficult;
 
+    // C++17: lambda closure types are literal types (use constexpr).
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
     // performed this comparison using the signed integer version value.
     //*************************************************************************
-    constexpr auto ge = [](uint32_t value, uint32_t version) noexcept
+    const auto ge = [](uint32_t value, uint32_t version) noexcept
     {
         return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
     };
