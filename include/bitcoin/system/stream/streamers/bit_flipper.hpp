@@ -28,9 +28,8 @@
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 
-// Suppress multiple inheritance warnings.
 // The only multiple inheritance conflict is destructors and bool/!.
-BC_PUSH_WARNING(4250)
+BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 namespace libbitcoin {
 namespace system {

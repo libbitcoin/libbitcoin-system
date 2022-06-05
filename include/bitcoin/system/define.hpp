@@ -167,7 +167,7 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
             __pragma(warning(pop))
     #endif
 #else
-    #define BC_PUSH_WARNING(warning)
+    #define BC_PUSH_WARNING(value)
     #define BC_POP_WARNING()
 #endif
 
@@ -175,6 +175,7 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
     // Test only (see test.hpp).
     #define CONSTANT_CONDITIONAL 4127
     #define NARROWING_CONVERSION 4244
+    #define DIAMOND_INHERITANCE 4250
     #define TRUNCATED_CONSTANT 4310
 
     // Global (see below).

@@ -29,10 +29,9 @@
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 
-// Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-BC_PUSH_WARNING(4250)
+BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 namespace libbitcoin {
 namespace system {
