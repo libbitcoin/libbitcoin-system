@@ -29,7 +29,9 @@ std::ostream& operator<<(std::ostream& stream,
 {
     // Avoid serialize() here for its own test benefit.
     // stream << serialize(slice);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream << encode_base16(slice);
+    BC_POP_WARNING()
     return stream;
 }
 
@@ -56,16 +58,20 @@ bool clear(const boost::filesystem::path& file_directory) noexcept
 bool create(const boost::filesystem::path& file_path) noexcept
 {
     // Creates and returns true if file already existed (and no error).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     std::ofstream file(to_extended_path(file_path));
     return file.good();
+    BC_POP_WARNING()
 }
 
 // C++17: use std::filesystem.
 bool exists(const boost::filesystem::path& file_path) noexcept
 {
     // Returns true only if file existed.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     std::ifstream file(to_extended_path(file_path));
     return file.good();
+    BC_POP_WARNING()
 }
 
 // C++17: use std::filesystem.

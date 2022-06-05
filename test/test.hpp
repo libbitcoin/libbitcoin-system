@@ -26,6 +26,26 @@
 #include <vector>
 #include <bitcoin/system.hpp>
 
+#define TEST_NAME \
+    boost::unit_test::framework::current_test_case().p_name.get()
+#define SUITE_NAME \
+    boost::unit_test::framework::current_auto_test_suite().p_name.get()
+#define TEST_DIRECTORY \
+    test::directory
+#define TEST_PATH \
+    TEST_DIRECTORY + "/" + TEST_NAME
+
+#ifdef _MSC_VER
+    #define NO_GLOBAL_INIT_CALLS 26426
+    #define NO_UNUSED_LOCAL_SMART_PTR 26414
+#endif
+
+#ifdef _MSC_VER
+    BC_DISABLE_WARNING(USE_GSL_AT)
+    BC_DISABLE_WARNING(NO_GLOBAL_INIT_CALLS)
+    BC_DISABLE_WARNING(NO_UNUSED_LOCAL_SMART_PTR)
+#endif
+
 using namespace bc;
 using namespace bc::system;
 
@@ -41,7 +61,9 @@ std::ostream& operator<<(std::ostream& stream,
     const std::vector<Type>& values) noexcept
 {
     // Ok when testing serialize because only used for error message out.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream << serialize(values);
+    BC_POP_WARNING()
     return stream;
 }
 
@@ -51,20 +73,13 @@ std::ostream& operator<<(std::ostream& stream,
     const std::array<Type, Size>& values) noexcept
 {
     // Ok when testing serialize because only used for error message out.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream << serialize(values);
+    BC_POP_WARNING()
     return stream;
 }
 
 } // namespace std
-
-#define TEST_NAME \
-    boost::unit_test::framework::current_test_case().p_name.get()
-#define SUITE_NAME \
-    boost::unit_test::framework::current_auto_test_suite().p_name.get()
-#define TEST_DIRECTORY \
-    test::directory
-#define TEST_PATH \
-    TEST_DIRECTORY + "/" + TEST_NAME
 
 namespace test {
 
