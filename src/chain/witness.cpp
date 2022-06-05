@@ -47,7 +47,7 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness() noexcept
-  : witness(chunk_ptrs{}, false)
+  : witness(chunk_cptrs{}, false)
 {
 }
 
@@ -61,12 +61,12 @@ witness::witness(const data_stack& stack) noexcept
 {
 }
 
-witness::witness(chunk_ptrs&& stack) noexcept
+witness::witness(chunk_cptrs&& stack) noexcept
   : witness(std::move(stack), true)
 {
 }
 
-witness::witness(const chunk_ptrs& stack) noexcept
+witness::witness(const chunk_cptrs& stack) noexcept
   : witness(stack, true)
 {
 }
@@ -102,13 +102,13 @@ witness::witness(const std::string& mnemonic) noexcept
 }
 
 // protected
-witness::witness(chunk_ptrs&& stack, bool valid) noexcept
+witness::witness(chunk_cptrs&& stack, bool valid) noexcept
   : stack_(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
-witness::witness(const chunk_ptrs& stack, bool valid) noexcept
+witness::witness(const chunk_cptrs& stack, bool valid) noexcept
   : stack_(stack), valid_(valid)
 {
 }
@@ -138,7 +138,7 @@ static data_chunk read_element(reader& source) noexcept
 // static/private
 witness witness::from_data(reader& source, bool prefix) noexcept
 {
-    chunk_ptrs stack;
+    chunk_cptrs stack;
 
     if (prefix)
     {
@@ -180,17 +180,14 @@ witness witness::from_string(const std::string& mnemonic) noexcept
     if (tokens.front().empty())
         tokens.clear();
 
-    data_chunk data;
-    chunk_ptrs stack;
-    stack.reserve(tokens.size());
+    data_stack stack(tokens.size());
+    auto data = stack.begin();
 
     // Create data stack from the split tokens.
     for (const auto& token: tokens)
     {
-        if (is_push_token(token) && decode_base16(data,
-            remove_token_delimiters(token)))
-            stack.push_back(to_shared<data_chunk>(std::move(data)));
-        else
+        if (!is_push_token(token) ||
+            !decode_base16(*data++, remove_token_delimiters(token)))
             return {};
     }
 
@@ -250,7 +247,7 @@ bool witness::is_valid() const noexcept
     return valid_;
 }
 
-const chunk_ptrs& witness::stack() const noexcept
+const chunk_cptrs& witness::stack() const noexcept
 {
     return stack_;
 }
@@ -258,7 +255,7 @@ const chunk_ptrs& witness::stack() const noexcept
 // private
 size_t witness::serialized_size() const noexcept
 {
-    const auto sum = [](size_t total, const chunk_ptr& element) noexcept
+    const auto sum = [](size_t total, const chunk_cptr& element) noexcept
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
         const auto size = element->size();
@@ -278,9 +275,9 @@ size_t witness::serialized_size(bool prefix) const noexcept
 // ----------------------------------------------------------------------------
 
 // static
-bool witness::is_push_size(const chunk_ptrs& stack) noexcept
+bool witness::is_push_size(const chunk_cptrs& stack) noexcept
 {
-    const auto push_size = [](const chunk_ptr& element) noexcept
+    const auto push_size = [](const chunk_cptr& element) noexcept
     {
         return element->size() <= max_push_data_size;
     };
@@ -290,7 +287,7 @@ bool witness::is_push_size(const chunk_ptrs& stack) noexcept
 
 // static
 // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-bool witness::is_reserved_pattern(const chunk_ptrs& stack) noexcept
+bool witness::is_reserved_pattern(const chunk_cptrs& stack) noexcept
 {
     return stack.size() == 1 &&
         stack[0]->size() == hash_size;
@@ -354,8 +351,8 @@ bool witness::extract_sigop_script(script& out_script,
 }
 
 // Extract script and initial execution stack.
-bool witness::extract_script(script& out_script,
-    chunk_ptrs& out_stack, const script& program_script) const noexcept
+bool witness::extract_script(script& out_script, chunk_cptrs& out_stack,
+    const script& program_script) const noexcept
 {
     data_chunk program{ program_script.witness_program() };
     out_stack = stack_;
@@ -423,6 +420,9 @@ bool witness::extract_script(script& out_script,
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 witness tag_invoke(json::value_to_tag<witness>,
     const json::value& value) noexcept
 {
@@ -435,17 +435,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value = witness.to_string();
 }
 
-witness::ptr tag_invoke(json::value_to_tag<witness::ptr>,
+BC_POP_WARNING()
+
+witness::cptr tag_invoke(json::value_to_tag<witness::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<witness>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const witness::ptr& output) noexcept
+    const witness::cptr& output) noexcept
 {
     tag_invoke(tag, value, *output);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

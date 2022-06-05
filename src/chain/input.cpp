@@ -29,6 +29,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -70,8 +71,8 @@ input::input(const chain::point& point, const chain::script& script,
 {
 }
 
-input::input(const chain::point::ptr& point, const chain::script::ptr& script,
-    uint32_t sequence) noexcept
+input::input(const chain::point::cptr& point,
+    const chain::script::cptr& script, uint32_t sequence) noexcept
   : input(
       point ? point : to_shared<chain::point>(),
       script ? script : to_shared<chain::script>(),
@@ -100,8 +101,8 @@ input::input(const chain::point& point, const chain::script& script,
 {
 }
 
-input::input(const chain::point::ptr& point, const chain::script::ptr& script,
-    const chain::witness::ptr& witness, uint32_t sequence) noexcept
+input::input(const chain::point::cptr& point, const chain::script::cptr& script,
+    const chain::witness::cptr& witness, uint32_t sequence) noexcept
   : input(point, script, witness, sequence, true, to_shared<chain::prevout>())
 {
 }
@@ -132,9 +133,9 @@ input::input(reader& source) noexcept
 }
 
 // protected
-input::input(const chain::point::ptr& point, const chain::script::ptr& script,
-    const chain::witness::ptr& witness, uint32_t sequence, bool valid,
-    const chain::prevout::ptr& prevout) noexcept
+input::input(const chain::point::cptr& point, const chain::script::cptr& script,
+    const chain::witness::cptr& witness, uint32_t sequence, bool valid,
+    const chain::prevout::cptr& prevout) noexcept
   : point_(point),
     script_(script),
     witness_(witness),
@@ -239,17 +240,17 @@ const chain::witness& input::witness() const noexcept
     return *witness_;
 }
 
-const point::ptr input::point_ptr() const noexcept
+const point::cptr& input::point_ptr() const noexcept
 {
     return point_;
 }
 
-const chain::script::ptr input::script_ptr() const noexcept
+const chain::script::cptr& input::script_ptr() const noexcept
 {
     return script_;
 }
 
-const chain::witness::ptr input::witness_ptr() const noexcept
+const chain::witness::cptr& input::witness_ptr() const noexcept
 {
     return witness_;
 }
@@ -369,6 +370,9 @@ size_t input::signature_operations(bool bip16, bool bip141) const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 input tag_invoke(json::value_to_tag<input>, const json::value& value) noexcept
 {
     return
@@ -392,17 +396,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     };
 }
 
-input::ptr tag_invoke(json::value_to_tag<input::ptr>,
+BC_POP_WARNING()
+
+input::cptr tag_invoke(json::value_to_tag<input::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<input>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const input::ptr& input) noexcept
+    const input::cptr& input) noexcept
 {
     tag_invoke(tag, value, *input);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

@@ -37,8 +37,8 @@ const auto encoded = encode_base16(string);
 
 BOOST_AUTO_TEST_CASE(data_reference__construct__default__empty)
 {
-    data_reference reference{};
-    data_reference reference2(string);
+    const data_reference reference{};
+    const data_reference reference2(string);
 
     // properties (with value reads past end, zero padded)
     BOOST_REQUIRE(reference.empty());

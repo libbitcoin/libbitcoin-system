@@ -49,8 +49,7 @@ int bc::system::main(int argc, char* argv[])
 
     // Extracting Satoshi's words from genesis block.
     const auto block = settings(chain::selection::mainnet).genesis_block;
-    const auto message = to_string((*(*block.transactions())[0]->inputs())[0]->
-        script().ops()[2].data());
+    const auto message = to_string((*(*block.transactions_ptr())[0]->inputs_ptr())[0]->script().ops()[2].data());
     system::cout << message << std::endl;
 
     return EXIT_SUCCESS;

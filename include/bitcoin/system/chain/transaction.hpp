@@ -42,7 +42,7 @@ namespace chain {
 class BC_API transaction
 {
 public:
-    typedef std::shared_ptr<const transaction> ptr;
+    typedef std::shared_ptr<const transaction> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -59,8 +59,8 @@ public:
         chain::outputs&& outputs, uint32_t locktime) noexcept;
     transaction(uint32_t version, const chain::inputs& inputs,
         const chain::outputs& outputs, uint32_t locktime) noexcept;
-    transaction(uint32_t version, const inputs_ptr& inputs,
-        const outputs_ptr& outputs, uint32_t locktime) noexcept;
+    transaction(uint32_t version, const inputs_cptr& inputs,
+        const outputs_cptr& outputs, uint32_t locktime) noexcept;
     
     transaction(const data_slice& data, bool witness) noexcept;
     transaction(std::istream&& stream, bool witness) noexcept;
@@ -91,8 +91,8 @@ public:
     /// Native properties.
     bool is_valid() const noexcept;
     uint32_t version() const noexcept;
-    const inputs_ptr inputs() const noexcept;
-    const outputs_ptr outputs() const noexcept;
+    const inputs_cptr& inputs_ptr() const noexcept;
+    const outputs_cptr& outputs_ptr() const noexcept;
     uint32_t locktime() const noexcept;
 
     /// Computed properties.
@@ -144,8 +144,8 @@ public:
     code connect(const context& state) const noexcept;
 
 protected:
-    transaction(uint32_t version, const inputs_ptr& inputs,
-        const outputs_ptr& outputs, uint32_t locktime, bool segregated,
+    transaction(uint32_t version, const chain::inputs_cptr& inputs,
+        const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
         bool valid) noexcept;
 
     // Guard (context free).
@@ -196,7 +196,7 @@ protected:
 private:
     static transaction from_data(reader& source, bool witness) noexcept;
     static bool segregated(const chain::inputs& inputs) noexcept;
-    static bool segregated(const inputs_ptr& inputs) noexcept;
+    static bool segregated(const chain::inputs_cptr& inputs) noexcept;
     ////static size_t maximum_size(bool coinbase) noexcept;
 
     // signature hash
@@ -214,8 +214,8 @@ private:
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
-    inputs_ptr inputs_;
-    outputs_ptr outputs_;
+    chain::inputs_cptr inputs_;
+    chain::outputs_cptr outputs_;
     uint32_t locktime_;
     bool segregated_;
     bool valid_;
@@ -234,12 +234,14 @@ private:
     mutable std::unique_ptr<hash_cache> cache_;
 };
 
+// TODO: rename inputs_ptr => inputs_cptr
+// TODO: rename outputs_ptr => outputs_cptr
 typedef std::vector<transaction> transactions;
-typedef std::vector<transaction::ptr> transaction_ptrs;
-typedef std::shared_ptr<transaction_ptrs> transactions_ptr;
+typedef std::vector<transaction::cptr> transaction_ptrs;
+typedef std::shared_ptr<const transaction_ptrs> transactions_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(transaction);
-DECLARE_JSON_VALUE_CONVERTORS(transaction::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(transaction::cptr);
 
 } // namespace chain
 } // namespace system

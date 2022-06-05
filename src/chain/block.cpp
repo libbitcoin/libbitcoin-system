@@ -38,6 +38,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>
@@ -69,8 +70,8 @@ block::block(const chain::header& header,
 {
 }
 
-block::block(const chain::header::ptr& header,
-    const transactions_ptr& txs) noexcept
+block::block(const chain::header::cptr& header,
+    const chain::transactions_cptr& txs) noexcept
   : block(header ? header : to_shared<chain::header>(),
       txs ? txs : to_shared<transaction_ptrs>(), true)
 {
@@ -102,8 +103,8 @@ block::block(reader& source, bool witness) noexcept
 }
 
 // protected
-block::block(const chain::header::ptr& header, const transactions_ptr& txs,
-    bool valid) noexcept
+block::block(const chain::header::cptr& header,
+    const chain::transactions_cptr& txs, bool valid) noexcept
   : header_(header), txs_(txs), valid_(valid)
 {
 }
@@ -188,12 +189,14 @@ const chain::header&block::header() const noexcept
     return *header_;
 }
 
-const chain::header::ptr block::header_ptr() const noexcept
+const chain::header::cptr block::header_ptr() const noexcept
 {
     return header_;
 }
 
-const transactions_ptr block::transactions() const noexcept
+// vector<transaction> is not exposed (because we don't have it).
+// This would reqiure a from_shared(txs_) conversion (expensive).
+const transactions_cptr& block::transactions_ptr() const noexcept
 {
     return txs_;
 }
@@ -207,7 +210,7 @@ hash_list block::transaction_hashes(bool witness) const noexcept
     out.reserve(is_odd(count) && !is_one(count) ? add1(count) : count);
     out.resize(count);
 
-    const auto hash = [witness](const transaction::ptr& tx) noexcept
+    const auto hash = [witness](const transaction::cptr& tx) noexcept
     {
         return tx->hash(witness);
     };
@@ -225,12 +228,12 @@ hash_digest block::hash() const noexcept
 size_t block::serialized_size(bool witness) const noexcept
 {
     // Overflow returns max_size_t.
-    auto sum = [witness](size_t total, const transaction::ptr& tx) noexcept
+    auto sum = [witness](size_t total, const transaction::cptr& tx) noexcept
     {
         return ceilinged_add(total, tx->serialized_size(witness));
     };
 
-    return header_->serialized_size()
+    return header::serialized_size()
         + variable_size(txs_->size())
         + std::accumulate(txs_->begin(), txs_->end(), zero, sum);
 
@@ -273,7 +276,7 @@ bool block::is_extra_coinbases() const noexcept
     if (txs_->empty())
         return false;
 
-    const auto value = [](const transaction::ptr& tx) noexcept
+    const auto value = [](const transaction::cptr& tx) noexcept
     {
         return tx->is_coinbase();
     };
@@ -289,7 +292,7 @@ bool block::is_forward_reference() const noexcept
 {
     std::unordered_map<hash_digest, bool> hashes(txs_->size());
 
-    const auto is_forward = [&hashes](const input::ptr& input) noexcept
+    const auto is_forward = [&hashes](const input::cptr& input) noexcept
     {
         return !is_zero(hashes.count(input->point().hash()));
     };
@@ -298,8 +301,9 @@ bool block::is_forward_reference() const noexcept
     for (const auto& tx: boost::adaptors::reverse(*txs_))
     BC_POP_WARNING()
     {
-        hashes.emplace(tx->hash(false), bool{});
-        if (std::any_of(tx->inputs()->begin(), tx->inputs()->end(), is_forward))
+        hashes.emplace(tx->hash(false), false);
+        const auto& inputs = *tx->inputs_ptr();
+        if (std::any_of(inputs.begin(), inputs.end(), is_forward))
             return true;
     }
 
@@ -310,9 +314,9 @@ bool block::is_forward_reference() const noexcept
 size_t block::non_coinbase_inputs() const noexcept
 {
     // Overflow returns max_size_t.
-    const auto inputs = [](size_t total, const transaction::ptr& tx) noexcept
+    const auto inputs = [](size_t total, const transaction::cptr& tx) noexcept
     {
-        return ceilinged_add(total, tx->inputs()->size());
+        return ceilinged_add(total, tx->inputs_ptr()->size());
     };
 
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
@@ -324,7 +328,7 @@ bool block::is_internal_double_spend() const noexcept
         return false;
 
     // A set is used to collapse duplicate points.
-    std::unordered_set<point> outs;
+    std::unordered_set<point> outs{};
 
     // Move the points of all non-coinbase transactions into one set.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
@@ -381,10 +385,10 @@ bool block::is_overweight() const noexcept
 
 bool block::is_invalid_coinbase_script(size_t height) const noexcept
 {
-    if (txs_->empty() || txs_->front()->inputs()->empty())
+    if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    const auto& script = txs_->front()->inputs()->front()->script();
+    const auto& script = txs_->front()->inputs_ptr()->front()->script();
     return !script::is_coinbase_pattern(script.ops(), height);
 }
 
@@ -407,10 +411,11 @@ bool block::is_hash_limit_exceeded() const noexcept
     {
         // Insert the transaction hash.
         hashes.insert((*tx)->hash(false));
+        const auto& inputs = *(*tx)->inputs_ptr();
 
         // Insert all input point hashes.
-        for (const auto& in: *(*tx)->inputs())
-            hashes.insert(in->point().hash());
+        for (const auto& input: inputs)
+            hashes.insert(input->point().hash());
     }
 
     return hashes.size() > hash_limit;
@@ -418,7 +423,7 @@ bool block::is_hash_limit_exceeded() const noexcept
 
 bool block::is_segregated() const noexcept
 {
-    const auto segregated = [](const transaction::ptr& tx) noexcept
+    const auto segregated = [](const transaction::cptr& tx) noexcept
     {
         return tx->is_segregated();
     };
@@ -428,21 +433,25 @@ bool block::is_segregated() const noexcept
 
 bool block::is_invalid_witness_commitment() const noexcept
 {
-    if (txs_->empty() || txs_->front()->inputs()->empty())
+    if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
     hash_digest reserved, committed;
     const auto& coinbase = txs_->front();
 
     // Last output of commitment pattern holds committed value (bip141).
-    if (coinbase->inputs()->front()->reserved_hash(reserved))
+    if (coinbase->inputs_ptr()->front()->reserved_hash(reserved))
     {
+        const auto& outputs = *coinbase->outputs_ptr();
+
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        for (const auto& output: boost::adaptors::reverse(*coinbase->outputs()))
+        for (const auto& output: boost::adaptors::reverse(outputs))
         BC_POP_WARNING()
+        {
             if (output->committed_hash(committed))
                 return committed == bitcoin_hash(generate_merkle_root(true),
                     reserved);
+        }
     }
     
     // If no block tx has witness data the commitment is optional (bip141).
@@ -470,12 +479,12 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 uint64_t block::fees() const noexcept
 {
     // Overflow returns max_uint64.
-    const auto value = [](uint64_t total, const transaction::ptr& tx) noexcept
+    const auto value = [](uint64_t total, const transaction::cptr& tx) noexcept
     {
         return ceilinged_add(total, tx->fee());
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), uint64_t(0), value);
+    return std::accumulate(txs_->begin(), txs_->end(), uint64_t{0}, value);
 }
 
 uint64_t block::claim() const noexcept
@@ -504,7 +513,7 @@ bool block::is_signature_operations_limited(bool bip16,
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
 
     // Overflow returns max_size_t.
-    const auto value = [=](size_t total, const transaction::ptr& tx) noexcept
+    const auto value = [=](size_t total, const transaction::cptr& tx) noexcept
     {
         return ceilinged_add(total, tx->signature_operations(bip16, bip141));
     };
@@ -521,10 +530,10 @@ bool block::is_signature_operations_limited(bool bip16,
 //*****************************************************************************
 bool block::is_unspent_coinbase_collision(size_t height) const noexcept
 {
-    if (txs_->empty() || txs_->front()->inputs()->empty())
+    if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    const auto& prevout = txs_->front()->inputs()->front()->prevout;
+    const auto& prevout = txs_->front()->inputs_ptr()->front()->prevout;
 
     // This requires that prevout.spent was populated for the height of the
     // validating block, otherwise a collision (unspent) must be assumed.
@@ -574,8 +583,6 @@ code block::connect_transactions(const context& state) const noexcept
 // These checks are self-contained; blockchain (and so version) independent.
 code block::check() const noexcept
 {
-    code ec;
-
     // Inputs and outputs are required.
     if (is_empty())
         return error::empty_block;
@@ -618,7 +625,6 @@ code block::check() const noexcept
 code block::accept(const context& state, size_t subsidy_interval,
     uint64_t initial_subsidy) const noexcept
 {
-    code ec;
     const auto bip16 = state.is_enabled(bip16_rule);
     const auto bip30 = state.is_enabled(bip30_rule);
     const auto bip34 = state.is_enabled(bip34_rule);
@@ -675,6 +681,9 @@ code block::connect(const context& state) const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 block tag_invoke(json::value_to_tag<block>,
     const json::value& value) noexcept
 {
@@ -691,21 +700,30 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value =
     {
         { "header", block.header() },
-        { "transactions", *block.transactions() },
+        { "transactions", *block.transactions_ptr() },
     };
 }
 
-block::ptr tag_invoke(json::value_to_tag<block::ptr>,
+BC_POP_WARNING()
+
+block::cptr tag_invoke(json::value_to_tag<block::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<block>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const block::ptr& block) noexcept
+    const block::cptr& block) noexcept
 {
     tag_invoke(tag, value, *block);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

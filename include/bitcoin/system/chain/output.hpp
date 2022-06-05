@@ -37,7 +37,7 @@ namespace chain {
 class BC_API output
 {
 public:
-    typedef std::shared_ptr<const output> ptr;
+    typedef std::shared_ptr<const output> cptr;
 
     /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
@@ -57,7 +57,7 @@ public:
 
     output(uint64_t value, chain::script&& script) noexcept;
     output(uint64_t value, const chain::script& script) noexcept;
-    output(uint64_t value, const chain::script::ptr& script) noexcept;
+    output(uint64_t value, const chain::script::cptr& script) noexcept;
 
     output(const data_slice& data) noexcept;
     output(std::istream&& stream) noexcept;
@@ -85,7 +85,7 @@ public:
     bool is_valid() const noexcept;
     uint64_t value() const noexcept;
     const chain::script& script() const noexcept;
-    const chain::script::ptr script_ptr() const noexcept;
+    const chain::script::cptr& script_ptr() const noexcept;
 
     /// Computed properties.
     size_t serialized_size() const noexcept;
@@ -98,7 +98,7 @@ public:
     bool is_dust(uint64_t minimum_output_value) const noexcept;
 
 protected:
-    output(uint64_t value, const chain::script::ptr& script,
+    output(uint64_t value, const chain::script::cptr& script,
         bool valid) noexcept;
 
 private:
@@ -107,16 +107,16 @@ private:
     // Output should be stored as shared (adds 16 bytes).
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
     uint64_t value_;
-    chain::script::ptr script_;
+    chain::script::cptr script_;
     bool valid_;
 };
 
 typedef std::vector<output> outputs;
-typedef std::vector<output::ptr> output_ptrs;
-typedef std::shared_ptr<output_ptrs> outputs_ptr;
+typedef std::vector<output::cptr> output_cptrs;
+typedef std::shared_ptr<const output_cptrs> outputs_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(output);
-DECLARE_JSON_VALUE_CONVERTORS(output::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(output::cptr);
 
 } // namespace chain
 } // namespace system

@@ -26,15 +26,62 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 
+// C++ now allows only vectors of "any non-const object type".
+// stackoverflow.com/questions/6954906/does-c11-allow-vectorconst-t
+// Since const std::vector<T> implies all elements are const, this is ok.
+// The following naming conventions are applied to pointers and vectors.
+//
+// T::ptr implies shared_ptr<T>.
+// name is an arbitrary alias for T.
+//
+// [name]_ptr implies ptr<T>.
+// [name]_cptr implies a ptr<const T>.
+//
+// [name]s_ptr implies a ptr<collection<T>>.
+// [name]s_cptr implies a ptr<const collection<T>>.
+//
+// [name]s implies collection<T>.
+// [name]_ptrs implies collection<[name]_ptr>.
+// [name]_cptrs implies a collection<[name]_cptr>.
+//
+// [name]_ptrs_ptr implies a ptr<[name]s_ptr>.
+// [name]_cptrs_ptr implies a ptr<[name]s_cptr>.
+// [name]_cptrs_cptr implies a ptr<const [name]s_cptr>.
+
 namespace libbitcoin {
 namespace system {
 
-/// Byte storage types.
+/// Define data_chunk types.
+
 typedef std::vector<uint8_t> data_chunk;
-typedef std::vector<data_chunk> data_stack;
-typedef std::shared_ptr<const data_chunk> chunk_ptr;
+
+typedef std::shared_ptr<data_chunk> chunk_ptr;
+typedef std::shared_ptr<const data_chunk> chunk_cptr;
+
 typedef std::vector<chunk_ptr> chunk_ptrs;
-typedef std::shared_ptr<const chunk_ptrs> chunks_ptr;
+typedef std::vector<chunk_cptr> chunk_cptrs;
+
+typedef std::shared_ptr<chunk_ptrs> chunk_ptrs_ptr;
+typedef std::shared_ptr<const chunk_ptrs> chunk_ptrs_cptr;
+
+typedef std::shared_ptr<chunk_cptrs> chunk_cptrs_ptr;
+typedef std::shared_ptr<const chunk_cptrs> chunk_cptrs_cptr;
+
+/// Define data_stack types.
+
+typedef std::vector<data_chunk> data_stack;
+
+typedef std::shared_ptr<data_stack> stack_ptr;
+typedef std::shared_ptr<const data_stack> stack_cptr;
+
+typedef std::vector<stack_ptr> stack_ptrs;
+typedef std::vector<stack_cptr> stack_cptrs;
+
+typedef std::shared_ptr<stack_ptrs> stack_ptrs_ptr;
+typedef std::shared_ptr<const stack_ptrs> stack_ptrs_cptr;
+
+typedef std::shared_ptr<stack_cptrs> stack_cptrs_ptr;
+typedef std::shared_ptr<const stack_cptrs> stack_cptrs_cptr;
 
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) noexcept;

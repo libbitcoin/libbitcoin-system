@@ -36,7 +36,7 @@ class BC_API prevout
 {
 public:
     // prevout::ptr is non-const.
-    typedef std::shared_ptr<prevout> ptr;
+    typedef std::shared_ptr<prevout> cptr;
 
     /// Use base class constructors, default construction is invalid.
     using chain::output::output;
@@ -70,7 +70,7 @@ public:
 };
 
 DECLARE_JSON_VALUE_CONVERTORS(prevout);
-DECLARE_JSON_VALUE_CONVERTORS(prevout::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(prevout::cptr);
 
 } // namespace chain
 } // namespace system

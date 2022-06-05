@@ -44,7 +44,7 @@ namespace chain {
 class BC_API block
 {
 public:
-    typedef std::shared_ptr<const block> ptr;
+    typedef std::shared_ptr<const block> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -61,8 +61,8 @@ public:
 
     block(chain::header&& header, transactions&& txs) noexcept;
     block(const chain::header& header, const transactions& txs) noexcept;
-    block(const chain::header::ptr& header,
-        const transactions_ptr& txs) noexcept;
+    block(const chain::header::cptr& header,
+        const transactions_cptr& txs) noexcept;
 
     block(const data_slice& data, bool witness) noexcept;
     block(std::istream&& stream, bool witness) noexcept;
@@ -89,8 +89,8 @@ public:
     /// Native properties.
     bool is_valid() const noexcept;
     const chain::header& header() const noexcept;
-    const chain::header::ptr header_ptr() const noexcept;
-    const transactions_ptr transactions() const noexcept;
+    const chain::header::cptr header_ptr() const noexcept;
+    const transactions_cptr& transactions_ptr() const noexcept;
     hash_list transaction_hashes(bool witness) const noexcept;
 
     /// Computed properties.
@@ -111,8 +111,8 @@ public:
     code connect(const context& state) const noexcept;
 
 protected:
-    block(const chain::header::ptr& header, const transactions_ptr& txs,
-        bool valid) noexcept;
+    block(const chain::header::cptr& header,
+        const chain::transactions_cptr& txs, bool valid) noexcept;
 
     // Check (context free).
     // ------------------------------------------------------------------------
@@ -172,15 +172,15 @@ private:
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).
-    chain::header::ptr header_;
-    transactions_ptr txs_;
+    chain::header::cptr header_;
+    chain::transactions_cptr txs_;
     bool valid_;
 };
 
 typedef std::vector<block> blocks;
 
 DECLARE_JSON_VALUE_CONVERTORS(block);
-DECLARE_JSON_VALUE_CONVERTORS(block::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(block::cptr);
 
 } // namespace chain
 } // namespace system

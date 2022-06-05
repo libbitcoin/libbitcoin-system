@@ -44,7 +44,7 @@ static const transaction default_transaction{};
 // Constructors.
 // ----------------------------------------------------------------------------
 
-program::program(const script::ptr& script, const chain::transaction& tx,
+program::program(const script::cptr& script, const chain::transaction& tx,
     uint32_t index, uint32_t forks) noexcept
   : script_(script),
     transaction_(tx),
@@ -56,11 +56,11 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     operation_count_(0)
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BC_ASSERT(index < transaction_.inputs()->size());
+    BC_ASSERT(index < transaction_.inputs_ptr()->size());
 }
 
 // Reuse copied program stack .
-program::program(const script::ptr& script, const program& other) noexcept
+program::program(const script::cptr& script, const program& other) noexcept
   : script_(script),
     transaction_(other.transaction_),
     input_index_(other.input_index_),
@@ -74,7 +74,7 @@ program::program(const script::ptr& script, const program& other) noexcept
 }
 
 // Reuse moved program stack.
-program::program(const script::ptr& script, program&& other) noexcept
+program::program(const script::cptr& script, program&& other) noexcept
   : script_(script),
     transaction_(other.transaction_),
     input_index_(other.input_index_),
@@ -88,8 +88,8 @@ program::program(const script::ptr& script, program&& other) noexcept
 }
 
 // Condition, alternate, jump and operation_count are not copied.
-program::program(const script::ptr& script, const chain::transaction& tx,
-    uint32_t index, uint32_t forks, chunk_ptrs&& stack, uint64_t value,
+program::program(const script::cptr& script, const chain::transaction& tx,
+    uint32_t index, uint32_t forks, chunk_cptrs&& stack, uint64_t value,
     script_version version) noexcept
   : script_(script),
     transaction_(tx),
@@ -102,7 +102,7 @@ program::program(const script::ptr& script, const chain::transaction& tx,
     primary_(std::move(stack))
 {
     // This is guarded by is_invalid, and in the interpreter.
-    BC_ASSERT(index < tx.inputs()->size());
+    BC_ASSERT(index < tx.inputs_ptr()->size());
 }
 
 // Utilities.
@@ -117,7 +117,7 @@ bool program::is_invalid() const noexcept
     // TODO: nops rule must be enabled.
     return
         (/*nops_rule && */script_->is_oversized()) ||
-        (input_index_ > transaction_.inputs()->size()) ||
+        (input_index_ > transaction_.inputs_ptr()->size()) ||
         (bip141 && !chain::witness::is_push_size(primary_));
 }
 
@@ -133,8 +133,8 @@ bool program::is_enabled(chain::forks rule) const noexcept
 const input& program::input() const noexcept
 {
     // This is guarded by is_invalid().
-    BC_ASSERT(input_index_ < transaction().inputs()->size());
-    return *(*transaction_.inputs())[input_index_];
+    BC_ASSERT(input_index_ < transaction().inputs_ptr()->size());
+    return *(*transaction_.inputs_ptr())[input_index_];
 }
 
 const chain::transaction& program::transaction() const noexcept
@@ -219,12 +219,12 @@ void program::push_copy(const data_chunk& item) noexcept
     push_ref(to_shared<data_chunk>(item));
 }
 
-void program::push_ref(chunk_ptr&& item) noexcept
+void program::push_ref(chunk_cptr&& item) noexcept
 {
     primary_.push_back(std::move(item));
 }
 
-void program::push_ref(const chunk_ptr& item) noexcept
+void program::push_ref(const chunk_cptr& item) noexcept
 {
     primary_.push_back(item);
 }
@@ -239,7 +239,7 @@ data_chunk program::pop() noexcept
 }
 
 // This must be guarded.
-chunk_ptr program::pop_ref() noexcept
+chunk_cptr program::pop_ref() noexcept
 {
     BC_ASSERT(!empty());
     const auto value = primary_.back();
@@ -296,7 +296,7 @@ bool program::pop_position(stack_iterator& out_position) noexcept
 }
 
 // pop1/pop2/.../pop[count]
-bool program::pop(chunk_ptrs& section, int32_t signed_count) noexcept
+bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
 {
     if (is_negative(signed_count))
         return false;
@@ -426,7 +426,7 @@ program::stack_iterator program::position(size_t index) const noexcept
 }
 
 // This must be guarded.
-chunk_ptr program::item(size_t index) const noexcept
+const chunk_cptr& program::item(size_t index) const noexcept
 {
     // Stack index is zero-based (zero is top).
     return *position(index);
@@ -440,13 +440,13 @@ bool program::empty_alternate() const noexcept
     return alternate_.empty();
 }
 
-void program::push_alternate(chunk_ptr&& value) noexcept
+void program::push_alternate(chunk_cptr&& value) noexcept
 {
     alternate_.push_back(std::move(value));
 }
 
 // This must be guarded.
-chunk_ptr program::pop_alternate() noexcept
+chunk_cptr program::pop_alternate() noexcept
 {
     BC_ASSERT(!alternate_.empty());
     const auto value = alternate_.back();
@@ -538,7 +538,8 @@ bool program::set_subscript(const operation& op) noexcept
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-script::ptr program::subscript(const chunk_ptrs& endorsements) const noexcept
+script::cptr program::subscript(
+    const chunk_cptrs& endorsements) const noexcept
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
@@ -559,7 +560,7 @@ script::ptr program::subscript(const chunk_ptrs& endorsements) const noexcept
 
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
-    hash_digest& hash, const chunk_ptr& endorsement) const noexcept
+    hash_digest& hash, const chunk_cptr& endorsement) const noexcept
 {
     uint8_t flags;
     data_slice distinguished;
@@ -602,7 +603,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // CONSENSUS: nominal endorsement operation encoding required.
 // ****************************************************************************
 chain::operations program::create_strip_ops(
-    const chunk_ptrs& endorsements) noexcept
+    const chunk_cptrs& endorsements) noexcept
 {
     constexpr auto non_mininal = false;
 

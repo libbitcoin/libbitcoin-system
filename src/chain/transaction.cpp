@@ -52,8 +52,8 @@ namespace chain {
 
 transaction::transaction() noexcept
   : transaction(0,
-      to_shared<input_ptrs>(),
-      to_shared<output_ptrs>(),
+      to_shared<input_cptrs>(),
+      to_shared<output_cptrs>(),
       0, false, false)
 {
 }
@@ -95,8 +95,8 @@ transaction::transaction(uint32_t version, const chain::inputs& inputs,
 {
 }
 
-transaction::transaction(uint32_t version, const inputs_ptr& inputs,
-    const outputs_ptr& outputs, uint32_t locktime) noexcept
+transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
+    const chain::outputs_cptr& outputs, uint32_t locktime) noexcept
   : transaction(version, inputs, outputs, locktime, segregated(inputs), true)
 {
 }
@@ -128,11 +128,11 @@ transaction::transaction(reader& source, bool witness) noexcept
 
 // protected
 transaction::transaction(uint32_t version,
-    const inputs_ptr& inputs, const outputs_ptr& outputs, uint32_t locktime,
-    bool segregated, bool valid) noexcept
+    const chain::inputs_cptr& inputs, const chain::outputs_cptr& outputs,
+    uint32_t locktime, bool segregated, bool valid) noexcept
   : version_(version),
-    inputs_(inputs ? inputs : to_shared<input_ptrs>()),
-    outputs_(outputs ? outputs : to_shared<output_ptrs>()),
+    inputs_(inputs ? inputs : to_shared<input_cptrs>()),
+    outputs_(outputs ? outputs : to_shared<output_cptrs>()),
     locktime_(locktime),
     segregated_(segregated),
     valid_(valid)
@@ -178,7 +178,7 @@ bool transaction::operator!=(const transaction& other) const noexcept
 // ----------------------------------------------------------------------------
 
 template<class Put, class Source>
-std::shared_ptr<std::vector<std::shared_ptr<const Put>>>
+std::shared_ptr<const std::vector<std::shared_ptr<const Put>>>
 read_puts(Source& source) noexcept
 {
     auto puts = to_shared<std::vector<std::shared_ptr<const Put>>>();
@@ -187,6 +187,8 @@ read_puts(Source& source) noexcept
     for (auto put = zero; put < puts->capacity(); ++put)
         puts->emplace_back(new Put{ source });
 
+    // This is a pointer copy from non-const to const, which is unavoidable if
+    // we want to avoid a vector move into a pointer to a const vector.
     return puts;
 }
 
@@ -197,7 +199,7 @@ transaction transaction::from_data(reader& source, bool witness) noexcept
 
     // Inputs must be non-const so that they may assign the witness.
     auto inputs = read_puts<chain::input>(source);
-    outputs_ptr outputs;
+    chain::outputs_cptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
     const auto segregated =
@@ -222,7 +224,13 @@ transaction transaction::from_data(reader& source, bool witness) noexcept
                 // Safe to cast as this method exclusively owns the input and
                 // input::witness_ a mutable public property of the instance.
                 const auto setter = const_cast<chain::input*>(input.get());
+
+                // Use of pointer forward here avoids move construction.
+                BC_PUSH_WARNING(NO_NEW_DELETE)
+                BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
                 setter->witness_ = to_shared(new chain::witness{ source, true });
+                BC_POP_WARNING()
+                BC_POP_WARNING()
             }
             else
             {
@@ -295,13 +303,13 @@ size_t transaction::serialized_size(bool witness) const noexcept
 {
     witness &= segregated_;
 
-    const auto ins = [=](size_t total, const input::ptr& input) noexcept
+    const auto ins = [=](size_t total, const input::cptr& input) noexcept
     {
         // Inputs account for witness bytes. 
         return total + input->serialized_size(witness);
     };
 
-    const auto outs = [](size_t total, const output::ptr& output) noexcept
+    const auto outs = [](size_t total, const output::cptr& output) noexcept
     {
         return total + output->serialized_size();
     };
@@ -333,12 +341,12 @@ uint32_t transaction::locktime() const noexcept
     return locktime_;
 }
 
-const inputs_ptr transaction::inputs() const noexcept
+const inputs_cptr& transaction::inputs_ptr() const noexcept
 {
     return inputs_;
 }
 
-const outputs_ptr transaction::outputs() const noexcept
+const outputs_cptr& transaction::outputs_ptr() const noexcept
 {
     return outputs_;
 }
@@ -356,7 +364,7 @@ hash_digest transaction::hash(bool witness) const noexcept
     if (witness && segregated_ && is_coinbase())
         return null_hash;
 
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
     to_data(sink, witness);
     sink.flush();
@@ -368,7 +376,7 @@ hash_digest transaction::hash(bool witness) const noexcept
 
 bool transaction::is_dusty(uint64_t minimum_output_value) const noexcept
 {
-    const auto dusty = [=](const output::ptr& output) noexcept
+    const auto dusty = [=](const output::cptr& output) noexcept
     {
         return output->is_dust(minimum_output_value);
     };
@@ -379,12 +387,12 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const noexcept
 size_t transaction::signature_operations(bool bip16, bool bip141) const noexcept
 {
     // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
-    const auto in = [=](size_t total, const input::ptr& input) noexcept
+    const auto in = [=](size_t total, const input::cptr& input) noexcept
     {
         return ceilinged_add(total, input->signature_operations(bip16, bip141));
     };
 
-    const auto out = [=](size_t total, const output::ptr& output) noexcept
+    const auto out = [=](size_t total, const output::cptr& output) noexcept
     {
         return ceilinged_add(total, output->signature_operations(bip141));
     };
@@ -400,7 +408,7 @@ chain::points transaction::points() const noexcept
     chain::points out(no_fill_allocator);
     out.resize(inputs_->size());
 
-    const auto point = [](const input::ptr& input) noexcept
+    const auto point = [](const input::cptr& input) noexcept
     {
         return input->point();
     };
@@ -417,7 +425,7 @@ hash_digest transaction::output_hash(uint32_t index) const noexcept
     if (index >= outputs_->size())
         return null_hash;
 
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
     (*outputs_)[index]->to_data(sink);
@@ -428,10 +436,11 @@ hash_digest transaction::output_hash(uint32_t index) const noexcept
 
 hash_digest transaction::outputs_hash() const noexcept
 {
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    for (const auto& output: *outputs())
+    const auto outs = outputs_ptr();
+    for (const auto& output: *outs)
         output->to_data(sink);
 
     sink.flush();
@@ -440,10 +449,11 @@ hash_digest transaction::outputs_hash() const noexcept
 
 hash_digest transaction::points_hash() const noexcept
 {
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    for (const auto& input: *inputs())
+    const auto ins = inputs_ptr();
+    for (const auto& input: *ins)
         input->point().to_data(sink);
 
     sink.flush();
@@ -452,10 +462,11 @@ hash_digest transaction::points_hash() const noexcept
 
 hash_digest transaction::sequences_hash() const noexcept
 {
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
-    for (const auto& input: *inputs())
+    const auto ins = inputs_ptr();
+    for (const auto& input: *ins)
         sink.write_4_bytes_little_endian(input->sequence());
 
     sink.flush();
@@ -497,7 +508,7 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
         const auto& inputs = *inputs_;
         const auto& self = inputs[index];
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_ptrs::const_iterator input;
+        input_cptrs::const_iterator input{};
 
         sink.write_variable(anyone ? one : inputs.size());
 
@@ -546,7 +557,7 @@ void transaction::signature_hash_none(writer& sink, uint32_t index,
         const auto& inputs = *inputs_;
         const auto& self = inputs[index];
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_ptrs::const_iterator input;
+        input_cptrs::const_iterator input{};
 
         sink.write_variable(anyone ? one : inputs.size());
 
@@ -584,7 +595,7 @@ void transaction::signature_hash_all(writer& sink, uint32_t index,
         const auto& inputs = *inputs_;
         const auto& self = inputs[index];
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_ptrs::const_iterator input;
+        input_cptrs::const_iterator input{};
 
         sink.write_variable(anyone ? one : inputs.size());
 
@@ -631,11 +642,11 @@ hash_digest transaction::unversioned_signature_hash(uint32_t index,
     //*************************************************************************
     // CONSENSUS: if index exceeds outputs in signature hash, return one_hash.
     //*************************************************************************
-    if ((flag == coverage::hash_single) && index >= outputs()->size())
+    if ((flag == coverage::hash_single) && index >= outputs_ptr()->size())
         return one_hash;
 
     // Create hash writer.
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
     switch (flag)
@@ -690,7 +701,7 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
     const auto& input = (*inputs_)[index];
 
     // Create hash writer.
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
     // Create signature hash.
@@ -747,7 +758,7 @@ hash_digest transaction::signature_hash(uint32_t index, const script& sub,
     BC_ASSERT(!is_coinbase());
 
     // Null return implies program misparameterization, not consensus possible.
-    if (index >= inputs()->size())
+    if (index >= inputs_ptr()->size())
         return {};
 
     switch (version)
@@ -831,12 +842,12 @@ bool transaction::segregated(const chain::inputs& inputs) noexcept
 }
 
 // static/private
-bool transaction::segregated(const inputs_ptr& inputs) noexcept
+bool transaction::segregated(const chain::inputs_cptr& inputs) noexcept
 {
     if (!inputs)
         return false;
 
-    const auto witnessed = [](const input::ptr& input) noexcept
+    const auto witnessed = [](const input::cptr& input) noexcept
     {
         return !input->witness().stack().empty();
     };
@@ -885,7 +896,7 @@ bool transaction::is_null_non_coinbase() const noexcept
 {
     BC_ASSERT(!is_coinbase());
 
-    const auto invalid = [](const input::ptr& input) noexcept
+    const auto invalid = [](const input::cptr& input) noexcept
     {
         return input->point().is_null();
     };
@@ -913,7 +924,7 @@ bool transaction::is_non_final(size_t height, uint32_t timestamp,
     // timestamps, rather than the timestamp of the block including the tx.
     const auto time = bip113 ? median_time_past : timestamp;
 
-    const auto finalized = [](const input::ptr& input) noexcept
+    const auto finalized = [](const input::cptr& input) noexcept
     {
         return input->is_final();
     };
@@ -929,7 +940,7 @@ bool transaction::is_missing_prevouts() const noexcept
     BC_ASSERT(!is_coinbase());
 
     // Invalidity indicates not found.
-    const auto missing = [](const input::ptr& input) noexcept
+    const auto missing = [](const input::cptr& input) noexcept
     {
         return !input->prevout->is_valid();
     };
@@ -940,25 +951,25 @@ bool transaction::is_missing_prevouts() const noexcept
 uint64_t transaction::claim() const noexcept
 {
     // Overflow returns max_uint64.
-    const auto sum = [](uint64_t total, const output::ptr& output) noexcept
+    const auto sum = [](uint64_t total, const output::cptr& output) noexcept
     {
         return ceilinged_add(total, output->value());
     };
 
     // The amount claimed by outputs.
-    return std::accumulate(outputs_->begin(), outputs_->end(), uint64_t(0), sum);
+    return std::accumulate(outputs_->begin(), outputs_->end(), uint64_t{0}, sum);
 }
 
 uint64_t transaction::value() const noexcept
 {
     // Overflow and coinbase (default) return max_uint64.
-    const auto sum = [](uint64_t total, const input::ptr& input) noexcept
+    const auto sum = [](uint64_t total, const input::cptr& input) noexcept
     {
         return ceilinged_add(total, input->prevout->value());
     };
 
     // The amount of prevouts (referenced by inputs).
-    return std::accumulate(inputs_->begin(), inputs_->end(), uint64_t(0), sum);
+    return std::accumulate(inputs_->begin(), inputs_->end(), uint64_t{0}, sum);
 }
 
 bool transaction::is_overspent() const noexcept
@@ -978,7 +989,7 @@ bool transaction::is_immature(size_t height) const noexcept
     // Overflow returns max_size_t.
     // Zero is either genesis or not found, either is immature.
     // Spends internal to a block are handled by block validation.
-    const auto immature = [=](const input::ptr& input) noexcept
+    const auto immature = [=](const input::cptr& input) noexcept
     {
         return input->prevout->coinbase && (is_zero(input->prevout->height) ||
             height < ceilinged_add(input->prevout->height, coinbase_maturity));
@@ -998,7 +1009,7 @@ bool transaction::is_locked(size_t height,
         return false;
 
     // BIP68: references to median time past are as defined by bip113.
-    const auto locked = [=](const input::ptr& input) noexcept
+    const auto locked = [=](const input::cptr& input) noexcept
     {
         return input->is_locked(height, median_time_past);
     };
@@ -1016,7 +1027,7 @@ bool transaction::is_unconfirmed_spend(size_t height) const noexcept
     // Zero is either genesis or not found.
     // Test maturity first to obtain proper error code.
     // Spends internal to a block are handled by block validation.
-    const auto unconfirmed = [=](const input::ptr& input) noexcept
+    const auto unconfirmed = [=](const input::cptr& input) noexcept
     {
         return is_zero(input->prevout->height) &&
             !(height > input->prevout->height);
@@ -1030,7 +1041,7 @@ bool transaction::is_confirmed_double_spend(size_t height) const noexcept
     BC_ASSERT(!is_coinbase());
 
     // Spends internal to a block are handled by block validation.
-    const auto spent = [=](const input::ptr& input) noexcept
+    const auto spent = [=](const input::cptr& input) noexcept
     {
         return input->prevout->spent && height > input->prevout->height;
     };
@@ -1198,7 +1209,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         {
             case script_version::zero:
             {
-                chunk_ptrs stack;
+                chunk_cptrs stack;
                 script witness_script;
                 if (!in->witness().extract_script(witness_script, stack,
                     in->prevout->script()))
@@ -1256,7 +1267,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             {
                 case script_version::zero:
                 {
-                    chunk_ptrs stack;
+                    chunk_cptrs stack;
                     script witness_script;
                     if (!in->witness().extract_script(witness_script, stack,
                         embedded_script))
@@ -1298,6 +1309,9 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 transaction tag_invoke(json::value_to_tag<transaction>,
     const json::value& value) noexcept
 {
@@ -1316,23 +1330,32 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value =
     {
         { "version", tx.version() },
-        { "inputs", *tx.inputs() },
-        { "outputs", *tx.outputs() },
+        { "inputs", *tx.inputs_ptr() },
+        { "outputs", *tx.outputs_ptr() },
         { "locktime", tx.locktime() }
     };
 }
 
-transaction::ptr tag_invoke(json::value_to_tag<transaction::ptr>,
+BC_POP_WARNING()
+
+transaction::cptr tag_invoke(json::value_to_tag<transaction::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<transaction>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const transaction::ptr& tx) noexcept
+    const transaction::cptr& tx) noexcept
 {
     tag_invoke(tag, value, *tx);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

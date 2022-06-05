@@ -40,7 +40,7 @@ class transaction;
 class BC_API witness
 {
 public:
-    typedef std::shared_ptr<const witness> ptr;
+    typedef std::shared_ptr<const witness> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -58,8 +58,8 @@ public:
     witness(data_stack&& stack) noexcept;
     witness(const data_stack& stack) noexcept;
 
-    witness(chunk_ptrs&& stack) noexcept;
-    witness(const chunk_ptrs& stack) noexcept;
+    witness(chunk_cptrs&& stack) noexcept;
+    witness(const chunk_cptrs& stack) noexcept;
 
     witness(const data_slice& data, bool prefix) noexcept;
     witness(std::istream&& stream, bool prefix) noexcept;
@@ -89,7 +89,7 @@ public:
 
     /// Native properties.
     bool is_valid() const noexcept;
-    const chunk_ptrs& stack() const noexcept;
+    const chunk_cptrs& stack() const noexcept;
 
     /// Computed properties.
     size_t serialized_size(bool prefix) const noexcept;
@@ -97,12 +97,12 @@ public:
     // Utilities.
     // ------------------------------------------------------------------------
 
-    static bool is_push_size(const chunk_ptrs& stack) noexcept;
-    static bool is_reserved_pattern(const chunk_ptrs& stack) noexcept;
+    static bool is_push_size(const chunk_cptrs& stack) noexcept;
+    static bool is_reserved_pattern(const chunk_cptrs& stack) noexcept;
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const noexcept;
-    bool extract_script(script& out_script, chunk_ptrs& out_stack,
+    bool extract_script(script& out_script, chunk_cptrs& out_stack,
         const script& program_script) const noexcept;
 
 private:
@@ -110,18 +110,18 @@ private:
     static witness from_string(const std::string& mnemonic) noexcept;
     size_t serialized_size() const noexcept;
 
-    witness(chunk_ptrs&& stack, bool valid) noexcept;
-    witness(const chunk_ptrs& stack, bool valid) noexcept;
+    witness(chunk_cptrs&& stack, bool valid) noexcept;
+    witness(const chunk_cptrs& stack, bool valid) noexcept;
 
     // Witness should be stored as shared.
-    chunk_ptrs stack_;
+    chunk_cptrs stack_;
     bool valid_;
 };
 
 typedef std::vector<witness> witnesses;
 
 DECLARE_JSON_VALUE_CONVERTORS(witness);
-DECLARE_JSON_VALUE_CONVERTORS(witness::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 
 } // namespace chain
 } // namespace system

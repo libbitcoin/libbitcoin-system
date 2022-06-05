@@ -41,7 +41,7 @@ namespace chain {
 class BC_API input
 {
 public:
-    typedef std::shared_ptr<const input> ptr;
+    typedef std::shared_ptr<const input> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -60,15 +60,15 @@ public:
         uint32_t sequence) noexcept;
     input(const chain::point& point, const chain::script& script,
         uint32_t sequence) noexcept;
-    input(const chain::point::ptr& point, const chain::script::ptr& script,
+    input(const chain::point::cptr& point, const chain::script::cptr& script,
         uint32_t sequence) noexcept;
 
     input(chain::point&& point, chain::script&& script,
         chain::witness&& witness, uint32_t sequence) noexcept;
     input(const chain::point& point, const chain::script& script,
         const chain::witness& witness, uint32_t sequence) noexcept;
-    input(const chain::point::ptr& point, const chain::script::ptr& script,
-        const chain::witness::ptr& witness, uint32_t sequence) noexcept;
+    input(const chain::point::cptr& point, const chain::script::cptr& script,
+        const chain::witness::cptr& witness, uint32_t sequence) noexcept;
 
     input(const data_slice& data) noexcept;
     input(std::istream&& stream) noexcept;
@@ -97,9 +97,9 @@ public:
     const chain::point& point() const noexcept;
     const chain::script& script() const noexcept;
     const chain::witness& witness() const noexcept;
-    const chain::point::ptr point_ptr() const noexcept;
-    const chain::script::ptr script_ptr() const noexcept;
-    const chain::witness::ptr witness_ptr() const noexcept;
+    const chain::point::cptr& point_ptr() const noexcept;
+    const chain::script::cptr& script_ptr() const noexcept;
+    const chain::witness::cptr& witness_ptr() const noexcept;
     uint32_t sequence() const noexcept;
 
     /// Computed properties.
@@ -118,9 +118,9 @@ protected:
     // So that witness may be set late in deserialization.
     friend class transaction;
 
-    input(const chain::point::ptr& point, const chain::script::ptr& script,
-        const chain::witness::ptr& witness, uint32_t sequence, bool valid,
-        const chain::prevout::ptr& prevout) noexcept;
+    input(const chain::point::cptr& point, const chain::script::cptr& script,
+        const chain::witness::cptr& witness, uint32_t sequence, bool valid,
+        const chain::prevout::cptr& prevout) noexcept;
 
 private:
     static input from_data(reader& source) noexcept;
@@ -128,24 +128,24 @@ private:
 
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).
-    // mutable chain::prevout::ptr prevout; (public)
-    chain::point::ptr point_;
-    chain::script::ptr script_;
-    chain::witness::ptr witness_;
+    // mutable chain::prevout::cptr prevout; (public)
+    chain::point::cptr point_;
+    chain::script::cptr script_;
+    chain::witness::cptr witness_;
     uint32_t sequence_;
     bool valid_;
 
 public:
     /// Public mutable metadata access, copied but not compared for equality.
-    mutable chain::prevout::ptr prevout;
+    mutable chain::prevout::cptr prevout;
 };
 
 typedef std::vector<input> inputs;
-typedef std::vector<input::ptr> input_ptrs;
-typedef std::shared_ptr<input_ptrs> inputs_ptr;
+typedef std::vector<input::cptr> input_cptrs;
+typedef std::shared_ptr<const input_cptrs> inputs_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(input);
-DECLARE_JSON_VALUE_CONVERTORS(input::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(input::cptr);
 
 } // namespace chain
 } // namespace system

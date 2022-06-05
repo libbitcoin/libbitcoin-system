@@ -24,6 +24,7 @@
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -186,6 +187,9 @@ bool point::is_null() const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 point tag_invoke(json::value_to_tag<point>, const json::value& value) noexcept
 {
     hash_digest hash;
@@ -209,17 +213,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     };
 }
 
-point::ptr tag_invoke(json::value_to_tag<point::ptr>,
+BC_POP_WARNING()
+
+point::cptr tag_invoke(json::value_to_tag<point::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<point>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const point::ptr& output) noexcept
+    const point::cptr& output) noexcept
 {
     tag_invoke(tag, value, *output);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

@@ -47,7 +47,7 @@ class transaction;
 class BC_API script
 {
 public:
-    typedef std::shared_ptr<const script> ptr;
+    typedef std::shared_ptr<const script> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -105,7 +105,10 @@ public:
     // ------------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
-    static bool is_enabled(uint32_t active_forks, forks fork) noexcept;
+    static constexpr bool is_enabled(uint32_t active_forks, forks fork) noexcept
+    {
+        return to_bool(fork & active_forks);
+    }
 
     /// Consensus patterns.
     static bool is_push_only(const operations& ops) noexcept;
@@ -194,7 +197,7 @@ public:
 typedef std::vector<script> scripts;
 
 DECLARE_JSON_VALUE_CONVERTORS(script);
-DECLARE_JSON_VALUE_CONVERTORS(script::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(script::cptr);
 
 } // namespace chain
 } // namespace system

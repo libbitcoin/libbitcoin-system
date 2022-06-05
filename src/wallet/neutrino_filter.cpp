@@ -44,11 +44,11 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) noexcept
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
     data_stack scripts;
 
-    for (const auto& tx: *block.transactions())
+    for (const auto& tx: *block.transactions_ptr())
     {
         if (!tx->is_coinbase())
         {
-            for (const auto& input: *(tx->inputs()))
+            for (const auto& input: *(tx->inputs_ptr()))
             {
                 if (!input->prevout->is_valid())
                     return false;
@@ -60,7 +60,7 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) noexcept
             }
         }
 
-        for (const auto& output: *(tx->outputs()))
+        for (const auto& output: *(tx->outputs_ptr()))
         {
             const auto& script = output->script();
 

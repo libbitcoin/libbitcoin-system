@@ -42,7 +42,7 @@ namespace chain {
 class BC_API header
 {
 public:
-    typedef std::shared_ptr<const header> ptr;
+    typedef std::shared_ptr<const header> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -147,11 +147,11 @@ private:
 };
 
 typedef std::vector<header> headers;
-typedef std::vector<header::ptr> header_ptrs;
-typedef std::shared_ptr<header_ptrs> headers_ptr;
+typedef std::vector<header::cptr> header_cptrs;
+typedef std::shared_ptr<const header_cptrs> headers_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(header);
-DECLARE_JSON_VALUE_CONVERTORS(header::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(header::cptr);
 
 } // namespace chain
 } // namespace system

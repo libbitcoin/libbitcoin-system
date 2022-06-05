@@ -38,14 +38,14 @@ namespace chain {
 static constexpr auto any_invalid = opcode::op_xor;
 
 // static
-chunk_ptr operation::no_data() noexcept
+chunk_cptr operation::no_data_ptr() noexcept
 {
     static const auto empty = to_shared<data_chunk>();
     return empty;
 }
 
 // static
-chunk_ptr operation::any_data() noexcept
+chunk_cptr operation::any_data_ptr() noexcept
 {
     // Push data is not possible with an invalid code, combination is invalid.
     static const auto any = to_shared<data_chunk>({ 0x42 });
@@ -56,13 +56,13 @@ chunk_ptr operation::any_data() noexcept
 // ----------------------------------------------------------------------------
 
 operation::operation() noexcept
-  : operation(any_invalid, any_data(), false)
+  : operation(any_invalid, any_data_ptr(), false)
 {
 }
 
 // If code is push data the data member will be inconsistent (empty).
 operation::operation(opcode code) noexcept
-  : operation(code, no_data(), false)
+  : operation(code, no_data_ptr(), false)
 {
 }
 
@@ -76,7 +76,7 @@ operation::operation(const data_chunk& push_data, bool minimal) noexcept
 {
 }
 
-operation::operation(chunk_ptr push_data, bool minimal) noexcept
+operation::operation(const chunk_cptr& push_data, bool minimal) noexcept
   : operation(from_push_data(push_data, minimal))
 {
 }
@@ -112,7 +112,8 @@ operation::operation(const std::string& mnemonic) noexcept
 }
 
 // protected
-operation::operation(opcode code, chunk_ptr push_data, bool underflow) noexcept
+operation::operation(opcode code, const chunk_cptr& push_data,
+    bool underflow) noexcept
   : code_(code), data_(push_data), underflow_(underflow)
 {
 }
@@ -185,14 +186,14 @@ operation operation::from_data(reader& source) noexcept
 }
 
 // static/private
-operation operation::from_push_data(const chunk_ptr& data,
+operation operation::from_push_data(const chunk_cptr& data,
     bool minimal) noexcept
 {
     const auto code = opcode_from_data(*data, minimal);
 
     // Minimal interpretation affects only single byte push data.
     // Revert data if (minimal) opcode_from_data produced a numeric encoding.
-    const auto push = is_payload(code) ? data : no_data();
+    const auto push = is_payload(code) ? data : no_data_ptr();
 
     return { code, push, false };
 }
@@ -436,7 +437,7 @@ const data_chunk& operation::data() const noexcept
     return *data_;
 }
 
-chunk_ptr operation::data_ptr() const noexcept
+const chunk_cptr& operation::data_ptr() const noexcept
 {
     return data_;
 }
@@ -858,6 +859,9 @@ bool operation::is_underflow() const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 operation tag_invoke(json::value_to_tag<operation>,
     const json::value& value) noexcept
 {
@@ -870,17 +874,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value = operation.to_string(forks::all_rules);
 }
 
-operation::ptr tag_invoke(json::value_to_tag<operation::ptr>,
+BC_POP_WARNING()
+
+operation::cptr tag_invoke(json::value_to_tag<operation::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<operation>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const operation::ptr& operation) noexcept
+    const operation::cptr& operation) noexcept
 {
     tag_invoke(tag, value, *operation);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

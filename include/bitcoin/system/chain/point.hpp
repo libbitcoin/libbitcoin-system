@@ -37,7 +37,7 @@ namespace chain {
 class BC_API point
 {
 public:
-    typedef std::shared_ptr<const point> ptr;
+    typedef std::shared_ptr<const point> cptr;
 
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
     /// This value is serialized and defined by consensus, not implementation.
@@ -113,7 +113,7 @@ bool operator<(const point& left, const point& right) noexcept;
 typedef std::vector<point> points;
 
 DECLARE_JSON_VALUE_CONVERTORS(point);
-DECLARE_JSON_VALUE_CONVERTORS(point::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(point::cptr);
 
 } // namespace chain
 } // namespace system

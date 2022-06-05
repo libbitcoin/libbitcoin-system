@@ -38,6 +38,7 @@
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/radix/radix.hpp>
@@ -49,11 +50,6 @@ namespace system {
 namespace chain {
 
 using namespace bc::system::machine;
-
-bool script::is_enabled(uint32_t active_forks, forks fork) noexcept
-{
-    return to_bool(fork & active_forks);
-}
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -775,12 +771,12 @@ inline size_t multisig_sigops(bool accurate, opcode code) noexcept
         operation::opcode_to_positive(code) : multisig_default_sigops;
 }
 
-inline bool is_single_sigop(opcode code) noexcept
+constexpr bool is_single_sigop(opcode code) noexcept
 {
     return code == opcode::checksig || code == opcode::checksigverify;
 }
 
-inline bool is_multiple_sigop(opcode code) noexcept
+constexpr bool is_multiple_sigop(opcode code) noexcept
 {
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
@@ -829,6 +825,9 @@ bool script::is_unspendable() const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 script tag_invoke(json::value_to_tag<script>,
     const json::value& value) noexcept
 {
@@ -841,17 +840,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value = script.to_string(forks::all_rules);
 }
 
-script::ptr tag_invoke(json::value_to_tag<script::ptr>,
+BC_POP_WARNING()
+
+script::cptr tag_invoke(json::value_to_tag<script::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<script>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const script::ptr& script) noexcept
+    const script::cptr& script) noexcept
 {
     tag_invoke(tag, value, *script);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

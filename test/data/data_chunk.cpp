@@ -20,12 +20,92 @@
 
 BOOST_AUTO_TEST_SUITE(data_chunk_tests)
 
+BOOST_AUTO_TEST_CASE(data_chunk__types__all__expected)
+{
+    constexpr uint8_t byte{ 0u };
+
+    // chunk_[c]ptr
+
+    // mutable (private)
+    chunk_ptr p1 = std::make_shared<data_chunk>(data_chunk{});
+    p1->push_back(byte);        // modify container
+    p1->back() = byte;          // modify element
+
+    // immutable (public)
+    chunk_cptr p2 = std::make_shared<const data_chunk>(data_chunk{});
+    ////p2->push_back(byte);    // const container
+    ////p2->back() = byte;      // const element
+
+    // const_ptr is NOT move/copy assignable to ptr.
+
+    // use const& to avoid copy.
+    // ptr is move/copy assignable to const_ptr.
+    const chunk_cptr copy{ p1 };
+
+    // chunk_[c]ptrs
+
+    // mutable (private)
+    chunk_ptrs p3 = std::vector<chunk_ptr>({ p1 });
+    p3.front()->push_back({ byte });        // modify container
+    p3.front()->front() = byte;             // modify element
+
+    // immutable (public)
+    chunk_cptrs p4 = std::vector<chunk_cptr>({ p1, p2 });
+    ////p4.front()->push_back({ byte });    // const container
+    ////p4.front()->front() = byte;         // const element
+
+    // A vector of non-const is NOT assignable to a vector of const.
+
+    // chunk_[c]ptrs_[c]ptr
+
+    // fully mutable
+    chunk_ptrs_ptr p5 = std::make_shared<chunk_ptrs>(p3);
+    p5->front()->push_back({ byte });       // modify container
+    p5->front()->front() = byte;            // modify element
+    p5->front().reset();                    // modify pointer to container
+
+    // mutable container/elements
+    chunk_ptrs_cptr p6 = std::make_shared<const chunk_ptrs>(p3);
+    p6->front()->push_back({ byte });       // modify container
+    p6->front()->front() = byte;            // modify element
+    ////p6->front().reset();                // const pointer to container
+
+    // mutable container pointer
+    chunk_cptrs_ptr p7 = std::make_shared<chunk_cptrs>(p4);
+    ////p7->front()->push_back({ byte });   // const container
+    ////p7->front()->front() = byte;        // const element
+    p7->front().reset();                    // modify pointer to container
+
+    // fully immutable (public)
+    chunk_cptrs_cptr p8 = std::make_shared<const chunk_cptrs>(p4);
+    ////p8->front()->push_back({ byte });   // const container
+    ////p8->front()->front() = byte;        // const element
+    ////p8->front().reset();                // const pointer to container
+
+    // use const& to avoid copy.
+    // ptr is move/copy assignable only to const_ptr.
+    const chunk_ptrs_cptr copy1 = p5;
+    const chunk_cptrs_cptr copy2 = p7;
+
+    // The fully immutable chunk_cptrs_cptr can ony be publicly exposed
+    // by pointer copy (or const&) from chunk_cptrs_ptr.
+    const chunk_cptrs_cptr& reference3 = p7;
+
+    // Use reference to suppress warning.
+    BOOST_REQUIRE(reference3);
+
+    // There is no way to expose a container of pointers to mutable data as
+    // pointers to immutable data without at least a vector copy. Cast copies
+    // contents, though a move overload could be added as necessary. So usage:
+    // [chunk_cptrs_cptr] non-mutable internal storage.
+    // [chunk_ptrs_ptr] internal mutable container not exposed publicly.
+}
 
 // to_chunk (byte)
 
 BOOST_AUTO_TEST_CASE(data_chunk__to_chunk1__value__expected_size_and_value)
 {
-    const uint8_t expected = 42;
+    constexpr uint8_t expected = 42;
     const auto result = to_chunk(expected);
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
     BOOST_REQUIRE_EQUAL(result[0], expected);
@@ -41,8 +121,8 @@ BOOST_AUTO_TEST_CASE(data_chunk__to_chunk2__to_string__inverse)
 
 BOOST_AUTO_TEST_CASE(data_chunk__to_chunk2__array__expected)
 {
-    const uint8_t l = 42;
-    const uint8_t u = 24;
+    constexpr uint8_t l = 42;
+    constexpr uint8_t u = 24;
     const long_hash source
     {
         {
@@ -59,8 +139,8 @@ BOOST_AUTO_TEST_CASE(data_chunk__to_chunk2__array__expected)
 
 BOOST_AUTO_TEST_CASE(data_chunk__to_chunk2__vector__expected)
 {
-    const uint8_t l = 42;
-    const uint8_t u = 24;
+    constexpr uint8_t l = 42;
+    constexpr uint8_t u = 24;
     const data_chunk source
     {
         {

@@ -38,7 +38,7 @@ namespace chain {
 class BC_API operation
 {
 public:
-    typedef std::shared_ptr<const operation> ptr;
+    typedef std::shared_ptr<const operation> cptr;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -60,7 +60,7 @@ public:
     /// When minimal is true the data is interpreted as minimally-encoded push.
     operation(data_chunk&& push_data, bool minimal) noexcept;
     operation(const data_chunk& push_data, bool minimal) noexcept;
-    operation(chunk_ptr push_data, bool minimal) noexcept;
+    operation(const chunk_cptr& push_data, bool minimal) noexcept;
 
     /// These deserialize operations (with codes), not from push-data.
     operation(const data_slice& op_data) noexcept;
@@ -95,7 +95,7 @@ public:
     bool is_valid() const noexcept;
     opcode code() const noexcept;
     const data_chunk& data() const noexcept;
-    chunk_ptr data_ptr() const noexcept;
+    const chunk_cptr& data_ptr() const noexcept;
 
     /// Computed properties.
     size_t serialized_size() const noexcept;
@@ -153,33 +153,36 @@ public:
     bool is_underflow() const noexcept;
 
 protected:
-    operation(opcode code, chunk_ptr push_data_ptr, bool underflow) noexcept;
+    operation(opcode code, const chunk_cptr& push_data_ptr,
+        bool underflow) noexcept;
 
 private:
     // So script may call count_op.
     friend class script;
 
     static operation from_data(reader& source) noexcept;
-    static operation from_push_data(const chunk_ptr& data, bool minimal) noexcept;
+    static operation from_push_data(const chunk_cptr& data,
+        bool minimal) noexcept;
     static operation from_string(const std::string& mnemonic) noexcept;
 
-    static chunk_ptr no_data() noexcept;
-    static chunk_ptr any_data() noexcept;
+    static chunk_cptr no_data_ptr() noexcept;
+    static chunk_cptr any_data_ptr() noexcept;
     static bool count_op(reader& source) noexcept;
     static uint32_t read_data_size(opcode code, reader& source) noexcept;
-    static opcode opcode_from_data(const data_chunk& push_data, bool minimal) noexcept;
+    static opcode opcode_from_data(const data_chunk& push_data,
+        bool minimal) noexcept;
 
     // Operation should not be stored as shared (adds 16 bytes).
     // copy: 8 + 2 * 64 + 1 = 18 bytes (vs. 16 when shared).
     opcode code_;
-    chunk_ptr data_;
+    chunk_cptr data_;
     bool underflow_;
 };
 
 typedef std::vector<operation> operations;
 
 DECLARE_JSON_VALUE_CONVERTORS(operation);
-DECLARE_JSON_VALUE_CONVERTORS(operation::ptr);
+DECLARE_JSON_VALUE_CONVERTORS(operation::cptr);
 
 } // namespace chain
 } // namespace system

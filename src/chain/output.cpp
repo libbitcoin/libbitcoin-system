@@ -25,6 +25,7 @@
 #include <memory>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -55,7 +56,7 @@ output::output(uint64_t value, const chain::script& script) noexcept
 {
 }
 
-output::output(uint64_t value, const chain::script::ptr& script) noexcept
+output::output(uint64_t value, const chain::script::cptr& script) noexcept
   : output(value, script ? script : to_shared<chain::script>(), true)
 {
 }
@@ -86,7 +87,7 @@ output::output(reader& source) noexcept
 }
 
 // protected
-output::output(uint64_t value, const chain::script::ptr& script,
+output::output(uint64_t value, const chain::script::cptr& script,
     bool valid) noexcept
   : value_(value), script_(script), valid_(valid)
 {
@@ -167,7 +168,7 @@ const chain::script& output::script() const noexcept
     return *script_;
 }
 
-const chain::script::ptr output::script_ptr() const noexcept
+const chain::script::cptr& output::script_ptr() const noexcept
 {
     return script_;
 }
@@ -214,6 +215,9 @@ bool output::is_dust(uint64_t minimum_value) const noexcept
 
 namespace json = boost::json;
 
+// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 output tag_invoke(json::value_to_tag<output>,
     const json::value& value) noexcept
 {
@@ -234,17 +238,26 @@ void tag_invoke(json::value_from_tag, json::value& value,
     };
 }
 
-output::ptr tag_invoke(json::value_to_tag<output::ptr>,
+BC_POP_WARNING()
+
+output::cptr tag_invoke(json::value_to_tag<output::cptr>,
     const json::value& value) noexcept
 {
     return to_shared(tag_invoke(json::value_to_tag<output>{}, value));
 }
 
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const output::ptr& output) noexcept
+    const output::cptr& output) noexcept
 {
     tag_invoke(tag, value, *output);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

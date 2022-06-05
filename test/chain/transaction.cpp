@@ -211,10 +211,10 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE_EQUAL(instance.inputs()->size(), 1u);
-    BOOST_REQUIRE_EQUAL(instance.outputs()->size(), 1u);
-    BOOST_REQUIRE(*instance.inputs()->front() == input);
-    BOOST_REQUIRE(*instance.outputs()->front() == output);
+    BOOST_REQUIRE_EQUAL(instance.inputs_ptr()->size(), 1u);
+    BOOST_REQUIRE_EQUAL(instance.outputs_ptr()->size(), 1u);
+    BOOST_REQUIRE(*instance.inputs_ptr()->front() == input);
+    BOOST_REQUIRE(*instance.outputs_ptr()->front() == output);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
@@ -234,8 +234,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE(inputs[0] == *(*instance.inputs())[0]);
-    BOOST_REQUIRE(outputs[0] == *(*instance.outputs())[0]);
+    BOOST_REQUIRE(inputs[0] == *(*instance.inputs_ptr())[0]);
+    BOOST_REQUIRE(outputs[0] == *(*instance.outputs_ptr())[0]);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_below_mi
         0
     };
 
-    BOOST_REQUIRE_LT(instance.inputs()->back()->script().serialized_size(false), min_coinbase_size);
+    BOOST_REQUIRE_LT(instance.inputs_ptr()->back()->script().serialized_size(false), min_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 
@@ -921,7 +921,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_ma
         0
     };
 
-    BOOST_REQUIRE_GT(instance.inputs()->back()->script().serialized_size(false), max_coinbase_size);
+    BOOST_REQUIRE_GT(instance.inputs_ptr()->back()->script().serialized_size(false), max_coinbase_size);
     BOOST_REQUIRE(instance.is_invalid_coinbase_size());
 }
 

@@ -75,12 +75,12 @@ interpreter::result interpreter::op_push_size(program& program,
 }
 
 interpreter::result interpreter::op_push_data(program& program,
-    chunk_ptr&& data, uint32_t size_limit) noexcept
+    const chunk_cptr& data, uint32_t size_limit) noexcept
 {
     if (data->size() > size_limit)
         return error::op_push_data;
 
-    program.push_ref(std::move(data));
+    program.push_ref(data);
     return error::op_success;
 }
 
@@ -872,7 +872,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (!program.increment_op_count(count))
         return error::op_check_multisig_verify2;
 
-    chunk_ptrs keys;
+    chunk_cptrs keys;
     if (!program.pop(keys, count))
         return error::op_check_multisig_verify3;
 
@@ -882,7 +882,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (is_greater(count, keys.size()))
         return error::op_check_multisig_verify5;
 
-    chunk_ptrs endorsements;
+    chunk_cptrs endorsements;
     if (!program.pop(endorsements, count))
         return error::op_check_multisig_verify6;
 
