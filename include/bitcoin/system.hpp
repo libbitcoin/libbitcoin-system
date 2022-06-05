@@ -21,6 +21,7 @@
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
+#include <bitcoin/system/warnings.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>

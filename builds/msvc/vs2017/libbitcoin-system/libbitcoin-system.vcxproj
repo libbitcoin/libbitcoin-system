@@ -444,6 +444,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\wallet.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\warnings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\mnemonic.hpp" />

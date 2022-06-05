@@ -1172,6 +1172,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\wallet.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\warnings.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum.hpp">
       <Filter>include\bitcoin\system\words\catalogs</Filter>
     </ClInclude>
