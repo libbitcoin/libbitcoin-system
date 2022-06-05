@@ -245,7 +245,7 @@ bool create_key_pair(encrypted_private& out_private,
     bool compressed) noexcept
 {
     const parse_encrypted_token parse(token);
-    if (!parse.valid())
+    if (!parse.is_valid())
         return false;
 
     const auto point = splice(parse.sign(), parse.data());
@@ -451,7 +451,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
     const encrypted_private& key, const std::string& passphrase) noexcept
 {
     const parse_encrypted_private parse(key);
-    if (!parse.valid())
+    if (!parse.is_valid())
         return false;
 
     const auto success = parse.multiplied() ?
@@ -475,7 +475,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     const std::string& passphrase) noexcept
 {
     const parse_encrypted_public parse(key);
-    if (!parse.valid())
+    if (!parse.is_valid())
         return false;
 
     const auto version = parse.address_version();

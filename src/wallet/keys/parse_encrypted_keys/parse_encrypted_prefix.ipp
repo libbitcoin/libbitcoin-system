@@ -48,13 +48,13 @@ data_array<Size> parse_encrypted_prefix<Size>::prefix() const noexcept
 }
 
 template<uint8_t Size>
-bool parse_encrypted_prefix<Size>::valid() const noexcept
+bool parse_encrypted_prefix<Size>::is_valid() const noexcept
 {
     return valid_;
 }
 
 template<uint8_t Size>
-void parse_encrypted_prefix<Size>::valid(bool value) noexcept
+void parse_encrypted_prefix<Size>::set_valid(bool value) noexcept
 {
     valid_ = value;
 }

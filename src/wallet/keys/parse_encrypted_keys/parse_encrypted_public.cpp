@@ -55,7 +55,7 @@ parse_encrypted_public::parse_encrypted_public(
     sign_(slice<18, 19>(key)),
     data_(slice<19, 51>(key))
 {
-    valid(verify_magic() && verify_checksum(key));
+    set_valid(verify_magic() && verify_checksum(key));
 }
 
 uint8_t parse_encrypted_public::address_version() const noexcept

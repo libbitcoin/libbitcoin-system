@@ -55,7 +55,7 @@ parse_encrypted_private::parse_encrypted_private(
     data1_(slice<15, 23>(key)),
     data2_(slice<23, 39>(key))
 {
-    valid(verify_magic() && verify_checksum(key));
+    set_valid(verify_magic() && verify_checksum(key));
 }
 
 uint8_t parse_encrypted_private::address_version() const noexcept

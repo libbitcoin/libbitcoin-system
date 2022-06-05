@@ -50,7 +50,7 @@ parse_encrypted_token::parse_encrypted_token(
     sign_(slice<16, 17>(value)),
     data_(slice<17, 49>(value))
 {
-    valid(verify_magic() && verify_context() && verify_checksum(value));
+    set_valid(verify_magic() && verify_context() && verify_checksum(value));
 }
 
 hash_digest parse_encrypted_token::data() const noexcept
