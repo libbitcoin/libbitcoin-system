@@ -29,11 +29,13 @@ namespace system {
 
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
-std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    std::vector<Type>&& values) noexcept
+std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
+to_shareds(std::vector<Type>&& values) noexcept
 {
-    auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
-        values.size());
+    // Pointed must be to non-const to allow vector population.
+    // Returned pointer may be copied/moved to pointer to const as required.
+    const auto out = std::make_shared<std::vector<
+        std::shared_ptr<const Type>>>(values.size());
 
     // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
@@ -50,8 +52,10 @@ template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
     const std::vector<Type>& values) noexcept
 {
-    auto out = std::make_shared<std::vector<std::shared_ptr<const Type>>>(
-        values.size());
+    // Pointed must be to non-const to allow vector population.
+    // Returned pointer may be copied/moved to pointer to const as required.
+    const auto out = std::make_shared<std::vector<
+        std::shared_ptr<const Type>>>(values.size());
 
     // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
