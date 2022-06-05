@@ -102,11 +102,11 @@ BOOST_AUTO_TEST_CASE(data_reference__construct__copy__expected)
     BOOST_REQUIRE_EQUAL(reference.size(), size);
 
     // size/data
-    BOOST_REQUIRE(!reference.empty());
-    BOOST_REQUIRE_EQUAL(reference.size(), size);
-    BOOST_REQUIRE_EQUAL(*reference.data(), 'f');
-    BOOST_REQUIRE_EQUAL(reference.back(), 'r');
-    BOOST_REQUIRE_EQUAL(reference[sub1(size)], 'r');
+    BOOST_REQUIRE(!copy.empty());
+    BOOST_REQUIRE_EQUAL(copy.size(), size);
+    BOOST_REQUIRE_EQUAL(*copy.data(), 'f');
+    BOOST_REQUIRE_EQUAL(copy.back(), 'r');
+    BOOST_REQUIRE_EQUAL(copy[sub1(size)], 'r');
 }
 
 // construct, not empty
