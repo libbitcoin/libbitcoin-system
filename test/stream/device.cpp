@@ -25,10 +25,26 @@ class device_accessor
   : public device<data_chunk>
 {
 public:
-    device_accessor()
+    device_accessor() noexcept
       : device(0)
     {
         // Only zero size remaining is safe to test.
+    }
+
+    // Avoid not-implemented assertion.
+    sequence do_sequence() const noexcept override
+    {
+        return {};
+    }
+
+    // Avoid not-implemented assertion.
+    void do_read(value_type*, size_type) noexcept override
+    {
+    }
+
+    // Avoid not-implemented assertion.
+    void do_write(const value_type*, size_type) noexcept override
+    {
     }
 };
 
