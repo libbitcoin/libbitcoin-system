@@ -64,15 +64,13 @@ byte_writer<OStream>::byte_writer(const byte_writer& other)
 }
 
 template <typename OStream>
-typename byte_writer<OStream>::byte_writer& byte_writer<OStream>::operator=(
-    byte_writer&& other)
+byte_writer<OStream>& byte_writer<OStream>::operator=(byte_writer&& other)
 {
     stream_ = std::move(other.stream_);
 }
 
 template <typename OStream>
-typename byte_writer<OStream>::byte_writer& byte_writer<OStream>::operator=(
-    const byte_writer& other)
+byte_writer<OStream>& byte_writer<OStream>::operator=(const byte_writer& other)
 {
     stream_ = other.stream_;
 }

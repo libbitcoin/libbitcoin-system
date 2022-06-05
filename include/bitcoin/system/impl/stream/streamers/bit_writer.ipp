@@ -61,8 +61,7 @@ bit_writer<OStream>::bit_writer(const bit_writer& other)
 }
 
 template <typename OStream>
-typename bit_writer<OStream>::bit_writer& bit_writer<OStream>::operator=(
-    bit_writer&& other)
+bit_writer<OStream>& bit_writer<OStream>::operator=(bit_writer&& other)
 {
     // TODO: implement swap idiom.
     *this = static_cast<byte_writer<OStream>>(other);
@@ -71,8 +70,7 @@ typename bit_writer<OStream>::bit_writer& bit_writer<OStream>::operator=(
 }
 
 template <typename OStream>
-typename bit_writer<OStream>::bit_writer& bit_writer<OStream>::operator=(
-    const bit_writer& other)
+bit_writer<OStream>& bit_writer<OStream>::operator=(const bit_writer& other)
 {
     // TODO: implement swap idiom.
     *this = static_cast<byte_writer<OStream>>(other);
