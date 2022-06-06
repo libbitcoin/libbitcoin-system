@@ -44,10 +44,6 @@ public:
     {
     }
 
-    ~make_streamer() noexcept override
-    {
-    }
-
 protected:
     Stream stream_;
 };

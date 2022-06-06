@@ -35,6 +35,9 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 
+ // C-style functions, all usage verified.
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
@@ -93,6 +96,7 @@ static bool xgetbv(uint64_t& value, uint32_t index) noexcept
     value = _xgetbv(index);
     return true;
 #else
+    value = {};
     return false;
 #endif
 }
@@ -110,10 +114,10 @@ static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #elif defined(_M_X64) || defined(_M_AMD64) || defined(_M_IX86)
     int out[4];
     __cpuidex(out, leaf, subleaf);
-    a = static_cast<uint32_t>(out[0]);
-    b = static_cast<uint32_t>(out[1]);
-    c = static_cast<uint32_t>(out[2]);
-    d = static_cast<uint32_t>(out[3]);
+    a = sign_cast<uint32_t>(out[0]);
+    b = sign_cast<uint32_t>(out[1]);
+    c = sign_cast<uint32_t>(out[2]);
+    d = sign_cast<uint32_t>(out[3]);
     return true;
 #else
     return false;
@@ -280,7 +284,7 @@ void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept
 
 // Multiple blocks are hashed independently into an array of hash values stored
 // into 'out'. This is used to reduce hash sets during merkle tree computation.
-void sha256_paired_double(uint8_t* out, const uint8_t* in,
+void sha256_paired_double(uint8_t out[], const uint8_t in[],
     size_t blocks) noexcept
 {
     constexpr auto block_size = 64;
@@ -408,7 +412,7 @@ const std::array<uint8_t, 64> sha256x2_buffer
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
 };
 
-void double_sha256_x1_portable(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) noexcept
 {
     auto buffer = sha256x2_buffer;
 
@@ -425,3 +429,5 @@ void double_sha256_x1_portable(uint8_t* out, const uint8_t in[1 * 64]) noexcept
 } // namespace intrinsics
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()

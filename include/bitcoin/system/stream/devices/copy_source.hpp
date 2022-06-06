@@ -22,6 +22,7 @@
 #include <utility>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
@@ -57,13 +58,15 @@ public:
 protected:
     typename device<Container>::sequence do_sequence() const noexcept override
     {
-        // input_sequence/output_sequence both require non-const buffer ptrs,
-        // but the data member is const, so we must cast it for direct devices.
-        // As a source the buffer should/must never be mutated.
+        // boost input_sequence/output_sequence both require non-const buffer
+        // ptrs, but the data member is const, so we must cast it for direct
+        // devices. As a source the buffer should/must never be mutated.
+        BC_PUSH_WARNING(NO_CONST_CAST)
         const auto begin = const_cast<typename device<Container>::value_type*>(
             container_.begin());
         const auto end = const_cast<typename device<Container>::value_type*>(
             container_.end());
+        BC_POP_WARNING()
 
         return std::make_pair(
             integer_pointer_cast<typename device<Container>::char_type>(begin),

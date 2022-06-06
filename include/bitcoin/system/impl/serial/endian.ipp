@@ -352,13 +352,15 @@ Integer from_little_endian_unchecked(const Iterator& data) noexcept
 
 // data[] <=> integral[]
 /// ---------------------------------------------------------------------------
+// Hack: pointer_cast fools transform into accepting a C-style array. This is
+// safe because std::array must have only the C-style array non-static member.
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>
 void from_big_endian(Integer to[Count],
     const uint8_t from[Count * sizeof(Integer)]) noexcept
 {
     typedef data_array<sizeof(Integer)> data;
-    const auto in = reinterpret_cast<const data*>(from);
+    const auto in = pointer_cast<const data>(from);
 
     /// C++17: Parallel policy for std::transform.
     std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
@@ -372,7 +374,7 @@ void from_little_endian(Integer to[Count],
     const uint8_t from[Count * sizeof(Integer)]) noexcept
 {
     typedef data_array<sizeof(Integer)> data;
-    const auto in = reinterpret_cast<const data*>(from);
+    const auto in = pointer_cast<const data>(from);
 
     /// C++17: Parallel policy for std::transform.
     std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
@@ -386,7 +388,7 @@ void to_big_endian(uint8_t to[Count * sizeof(Integer)],
     const Integer from[Count]) noexcept
 {
     typedef data_array<sizeof(Integer)> data;
-    const auto out = reinterpret_cast<data*>(to);
+    const auto out = pointer_cast<data>(to);
 
     /// C++17: Parallel policy for std::transform.
     std::transform(from, std::next(from, Count), out, [](Integer value) noexcept
@@ -400,7 +402,7 @@ void to_little_endian(uint8_t to[Count * sizeof(Integer)],
     const Integer from[Count]) noexcept
 {
     typedef data_array<sizeof(Integer)> data;
-    const auto out = reinterpret_cast<data*>(to);
+    const auto out = pointer_cast<data>(to);
 
     /// C++17: Parallel policy for std::transform.
     std::transform(from, std::next(from, Count), out, [](Integer value) noexcept

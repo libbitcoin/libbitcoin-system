@@ -92,7 +92,10 @@ data_slice data_slice::from_iterators(const Iterator& begin,
     if (is_negative(size) || is_zero(size))
         return {};
 
+    // Indexation is guarded above.
+    BC_PUSH_WARNING(USE_GSL_AT)
     return from_size(&begin[0], possible_narrow_sign_cast<size_type>(size));
+    BC_POP_WARNING()
 }
 
 

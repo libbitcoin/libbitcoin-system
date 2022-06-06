@@ -44,7 +44,7 @@ constexpr To narrow_cast(From value) noexcept
 }
 
 template <typename To, typename From,
-    if_same_width<To, From>,
+    if_not_lesser_width<To, From>,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_not_same_signed_integer<To, From>>

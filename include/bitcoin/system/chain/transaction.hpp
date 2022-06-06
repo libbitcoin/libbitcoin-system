@@ -196,7 +196,7 @@ protected:
 private:
     static transaction from_data(reader& source, bool witness) noexcept;
     static bool segregated(const chain::inputs& inputs) noexcept;
-    static bool segregated(const chain::inputs_cptr& inputs) noexcept;
+    static bool segregated(const chain::input_cptrs& inputs) noexcept;
     ////static size_t maximum_size(bool coinbase) noexcept;
 
     // signature hash

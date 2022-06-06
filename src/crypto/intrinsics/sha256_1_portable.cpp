@@ -28,7 +28,14 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstddef>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
+
+// C-style functions, all usage verified.
+BC_PUSH_WARNING(USE_GSL_AT)
+BC_PUSH_WARNING(USE_NOT_NULL)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
 namespace libbitcoin {
 namespace system {
@@ -214,19 +221,23 @@ void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept
 
 // This calls single_sha256, which may call any of the instrinsic transforms or
 // may call sha256_x1_portable (above), depending on platform configuration.
-void sha256_update(sha256_context& context, const uint8_t* input,
+void sha256_update(sha256_context& context, const uint8_t input[],
     size_t size) noexcept
 {
-    uint32_t bit_length[2];
-    uint32_t r = (context.count[1] >> 3) & 0x3f;
+    const uint32_t bit_length[]
+    {
+        possible_narrow_cast<uint32_t>(shift_right(size, 29)),
+        possible_narrow_cast<uint32_t>(shift_left(size, 3))
+    };
 
-    bit_length[1] = ((uint32_t)size) << 3;
-    bit_length[0] = (uint32_t)(size >> 29);
+    const auto r = bit_and<uint32_t>(shift_right(context.count[1], 3), 0x3f);
 
     if (((context.count[1] += bit_length[1])) < bit_length[1])
         context.count[0]++;
 
     context.count[0] += bit_length[0];
+
+    BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 
     if (size < block_size - r)
     {
@@ -248,6 +259,8 @@ void sha256_update(sha256_context& context, const uint8_t* input,
     }
 
     std::copy_n(input, size, context.buffer);
+
+    BC_POP_WARNING()
 }
 
 void sha256_pad(sha256_context& context) noexcept
@@ -269,7 +282,7 @@ void sha256_finalize(sha256_context& context, uint8_t digest[32]) noexcept
     to_big_endian<8>(digest, context.state.data());
 }
 
-void sha256(const uint8_t* input, size_t size, uint8_t digest[32]) noexcept
+void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) noexcept
 {
     sha256_context context{ sha256_initial };
     sha256_update(context, input, size);
@@ -279,3 +292,8 @@ void sha256(const uint8_t* input, size_t size, uint8_t digest[32]) noexcept
 } // namespace intrinsics
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()

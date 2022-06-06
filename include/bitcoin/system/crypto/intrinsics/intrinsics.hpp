@@ -54,14 +54,14 @@ extern const std::array<uint8_t, 64> sha256x2_buffer;
 
 BC_API void sha256_initialize(sha256_context& context) noexcept;
 BC_API void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept;
-BC_API void sha256_update(sha256_context& context, const uint8_t* input, size_t size) noexcept;
+BC_API void sha256_update(sha256_context& context, const uint8_t input[], size_t size) noexcept;
 BC_API void sha256_pad(sha256_context& context) noexcept;
 BC_API void sha256_finalize(sha256_context& context, uint8_t digest[32]) noexcept;
-BC_API void sha256(const uint8_t* input, size_t size, uint8_t digest[32]) noexcept;
+BC_API void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) noexcept;
 
 BC_API void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept;
-BC_API void sha256_paired_double(uint8_t* out, const uint8_t* in, size_t blocks) noexcept;
-BC_API void double_sha256_x1_portable(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
+BC_API void sha256_paired_double(uint8_t out[], const uint8_t in[], size_t blocks) noexcept;
+BC_API void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) noexcept;
 
 } // namespace intrinsics
 } // namespace system

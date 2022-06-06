@@ -37,6 +37,12 @@ class sha256x2_writer
 public:
     /// Constructors.
     sha256x2_writer(OStream& sink) noexcept;
+
+    /// Copy/move/destruct.
+    sha256x2_writer(sha256x2_writer&&);
+    sha256x2_writer(const sha256x2_writer&);
+    sha256x2_writer& operator=(sha256x2_writer&&);
+    sha256x2_writer& operator=(const sha256x2_writer&);
     ~sha256x2_writer() noexcept override;
 
 protected:

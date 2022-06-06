@@ -132,9 +132,12 @@ bool program::is_enabled(chain::forks rule) const noexcept
 // This must be guarded (intended for interpreter internal use).
 const input& program::input() const noexcept
 {
-    // This is guarded by is_invalid().
     BC_ASSERT(input_index_ < transaction().inputs_ptr()->size());
+
+    // array index is guarded by is_invalid().
+    BC_PUSH_WARNING(USE_GSL_AT)
     return *(*transaction_.inputs_ptr())[input_index_];
+    BC_POP_WARNING()
 }
 
 const chain::transaction& program::transaction() const noexcept
@@ -158,7 +161,7 @@ program::op_iterator program::end() const noexcept
 // Instructions.
 // ----------------------------------------------------------------------------
 
-inline bool operation_overflow(size_t count) noexcept
+constexpr bool operation_overflow(size_t count) noexcept
 {
     // ************************************************************************
     // CONSENSUS:
@@ -185,7 +188,8 @@ bool program::increment_op_count(const operation& op) noexcept
 // This is guarded by script size.
 bool program::increment_op_count(int32_t public_keys) noexcept
 {
-    static const auto max_keys = static_cast<int32_t>(max_script_public_keys);
+    constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
+        max_script_public_keys);
 
     // bit.ly/2d1bsdB
     if (is_negative(public_keys) || public_keys > max_keys)
@@ -204,27 +208,28 @@ bool program::increment_op_count(int32_t public_keys) noexcept
 // push
 void program::push(bool value) noexcept
 {
-    push_move(value ? data_chunk{ numbers::positive_1 } : data_chunk{});
+    // It is safe to share instances of these shared pointers across threads.
+    static const auto true_ = to_shared<data_chunk>({ numbers::positive_1 });
+    static const auto false_ = to_shared<data_chunk>({});
+
+    push(value ? true_ : false_);
 }
 
-// Be explicit about the intent to move or copy, to get compiler help.
-void program::push_move(data_chunk&& item) noexcept
+// TODO: moves can be avoided by shared_ptr construction of data_chunks.
+void program::push(data_chunk&& item) noexcept
 {
-    push_ref(to_shared<data_chunk>(std::move(item)));
+    push(to_shared<data_chunk>(std::move(item)));
 }
 
-// Be explicit about the intent to move or copy, to get compiler help.
-void program::push_copy(const data_chunk& item) noexcept
-{
-    push_ref(to_shared<data_chunk>(item));
-}
-
-void program::push_ref(chunk_cptr&& item) noexcept
+// Moving a shared pointer to the stack is optimal and acceptable.
+BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
+void program::push(chunk_cptr&& item) noexcept
+BC_POP_WARNING()
 {
     primary_.push_back(std::move(item));
 }
 
-void program::push_ref(const chunk_cptr& item) noexcept
+void program::push(const chunk_cptr& item) noexcept
 {
     primary_.push_back(item);
 }
@@ -233,16 +238,10 @@ void program::push_ref(const chunk_cptr& item) noexcept
 // ----------------------------------------------------------------------------
 
 // This must be guarded.
-data_chunk program::pop() noexcept
-{
-    return *pop_ref();
-}
-
-// This must be guarded.
-chunk_cptr program::pop_ref() noexcept
+chunk_cptr program::pop() noexcept
 {
     BC_ASSERT(!empty());
-    const auto value = primary_.back();
+    const auto& value = primary_.back();
     primary_.pop_back();
     return value;
 }
@@ -259,7 +258,7 @@ bool program::pop(int32_t& out_value) noexcept
 
 bool program::pop(number& out_number, size_t maxiumum_size) noexcept
 {
-    return !empty() && out_number.set_data(*pop_ref(), maxiumum_size);
+    return !empty() && out_number.set_data(*pop(), maxiumum_size);
 }
 
 bool program::pop_binary(number& first, number& second) noexcept
@@ -286,7 +285,7 @@ bool program::pop_position(stack_iterator& out_position) noexcept
     if (is_negative(signed_index))
         return false;
 
-    const auto index = static_cast<uint32_t>(signed_index);
+    const auto index = sign_cast<uint32_t>(signed_index);
 
     if (index >= size())
         return false;
@@ -301,14 +300,14 @@ bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
     if (is_negative(signed_count))
         return false;
 
-    const auto count = static_cast<uint32_t>(signed_count);
+    const auto count = sign_cast<uint32_t>(signed_count);
 
     if (size() < count)
         return false;
 
     section.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        section.push_back(pop_ref());
+        section.push_back(pop());
 
     return true;
 }
@@ -319,7 +318,7 @@ bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
 // pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
 void program::duplicate(size_t index) noexcept
 {
-    push_ref(item(index));
+    push(item(index));
 }
 
 // pop1/pop2/push1/push2
@@ -362,12 +361,12 @@ bool program::stack_to_bool(bool clean) const noexcept
     if (top->empty() || (clean && primary_.size() != one))
         return false;
 
-    auto not_zero = [](uint8_t value) noexcept
+    constexpr auto not_zero = [](uint8_t value) noexcept
     {
         return value != numbers::positive_0;
     };
 
-    auto non_zero = [](uint8_t value)  noexcept
+    constexpr auto non_zero = [](uint8_t value) noexcept
     {
         return (value & ~numbers::negative_sign) != numbers::positive_0;
     };
@@ -421,8 +420,8 @@ program::stack_iterator program::position(size_t index) const noexcept
 {
     BC_ASSERT(index < size());
 
-    // Stack index is zero-based (zero is top).
-    return std::prev(primary_.end(), ++index);
+    // Stack index is zero-based, last element is "top".
+    return std::prev(primary_.end(), add1(index));
 }
 
 // This must be guarded.
@@ -440,16 +439,20 @@ bool program::empty_alternate() const noexcept
     return alternate_.empty();
 }
 
+// Moving a shared pointer to the alternate stack is optimal and acceptable.
+BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push_alternate(chunk_cptr&& value) noexcept
+BC_POP_WARNING()
 {
     alternate_.push_back(std::move(value));
 }
+
 
 // This must be guarded.
 chunk_cptr program::pop_alternate() noexcept
 {
     BC_ASSERT(!alternate_.empty());
-    const auto value = alternate_.back();
+    const auto& value = alternate_.back();
     alternate_.pop_back();
     return value;
 }
@@ -555,7 +558,11 @@ script::cptr program::subscript(
         return script_;
 
     // Create new script from stripped copy of subscript operations.
+    BC_PUSH_WARNING(NO_NEW_DELETE)
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return to_shared(new script{ difference(script_->offset, stop, strip) });
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
@@ -633,8 +640,10 @@ hash_digest program::signature_hash(const script& sub,
 void program::signature_hash(hash_cache& cache, const script& sub,
     uint8_t flags) const noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (cache.find(flags) == cache.end())
         cache.emplace(flags, signature_hash(sub, flags));
+    BC_POP_WARNING()
 }
 
 } // namespace machine

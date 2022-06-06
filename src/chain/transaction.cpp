@@ -85,7 +85,7 @@ transaction::transaction(uint32_t version, chain::inputs&& inputs,
       to_shareds(std::move(outputs)), locktime, false, true)
 {
     // Defer execution for constructor move.
-    segregated_ = segregated(inputs_);
+    segregated_ = segregated(*inputs_);
 }
 
 transaction::transaction(uint32_t version, const chain::inputs& inputs,
@@ -97,7 +97,7 @@ transaction::transaction(uint32_t version, const chain::inputs& inputs,
 
 transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
     const chain::outputs_cptr& outputs, uint32_t locktime) noexcept
-  : transaction(version, inputs, outputs, locktime, segregated(inputs), true)
+  : transaction(version, inputs, outputs, locktime, segregated(*inputs), true)
 {
 }
 
@@ -434,7 +434,10 @@ hash_digest transaction::output_hash(uint32_t index) const noexcept
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
 
+    // Guarded above.
+    BC_PUSH_WARNING(USE_GSL_AT)
     (*outputs_)[index]->to_data(sink);
+    BC_POP_WARNING()
 
     sink.flush();
     return sha256_hash(sha256);
@@ -488,6 +491,7 @@ static const auto null_output = output{}.to_data();
 static const auto empty_script = script{}.to_data(prefixed);
 static const auto zero_sequence = to_little_endian<uint32_t>(0);
 
+// C++14: switch in constexpr.
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -512,7 +516,12 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
     const auto write_inputs = [&](writer& sink) noexcept
     {
         const auto& inputs = *inputs_;
+
+        // Guarded private method.
+        BC_PUSH_WARNING(USE_GSL_AT)
         const auto& self = inputs[index];
+        BC_POP_WARNING()
+
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator input{};
 
@@ -545,7 +554,9 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
             sink.write_bytes(null_output);
 
         // Index guarded in unversioned_signature_hash.
+        BC_PUSH_WARNING(USE_GSL_AT)
         (*outputs_)[index]->to_data(sink);
+        BC_POP_WARNING()
     };
 
     sink.write_4_bytes_little_endian(version_);
@@ -561,7 +572,12 @@ void transaction::signature_hash_none(writer& sink, uint32_t index,
     const auto write_inputs = [&](writer& sink) noexcept
     {
         const auto& inputs = *inputs_;
+
+        // Guarded private method.
+        BC_PUSH_WARNING(USE_GSL_AT)
         const auto& self = inputs[index];
+        BC_POP_WARNING()
+
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator input{};
 
@@ -599,7 +615,12 @@ void transaction::signature_hash_all(writer& sink, uint32_t index,
     const auto write_inputs = [&](writer& sink) noexcept
     {
         const auto& inputs = *inputs_;
+
+        // Guarded private method.
+        BC_PUSH_WARNING(USE_GSL_AT)
         const auto& self = inputs[index];
+        BC_POP_WARNING();
+
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator input{};
 
@@ -682,12 +703,18 @@ void transaction::initialize_hash_cache() const noexcept
     // This overconstructs the cache (anyone or !all), however it is simple and
     // the same criteria applied by satoshi.
     if (segregated_)
+    {
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         cache_.reset(new hash_cache
-            {
-                outputs_hash(),
-                points_hash(),
-                sequences_hash()
-            });
+        {
+            outputs_hash(),
+            points_hash(),
+            sequences_hash()
+        });
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+    }
 }
 
 // private
@@ -700,11 +727,16 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
         return unversioned_signature_hash(index, sub, flags);
 
     // Set options.
+    // C++14: switch in constexpr.
     const auto anyone = to_bool(flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
+
+    // Guarded private method.
+    BC_PUSH_WARNING(USE_GSL_AT)
     const auto& input = (*inputs_)[index];
+    BC_POP_WARNING()
 
     // Create hash writer.
     hash_digest sha256{};
@@ -848,17 +880,14 @@ bool transaction::segregated(const chain::inputs& inputs) noexcept
 }
 
 // static/private
-bool transaction::segregated(const chain::inputs_cptr& inputs) noexcept
+bool transaction::segregated(const chain::input_cptrs& inputs) noexcept
 {
-    if (!inputs)
-        return false;
-
     const auto witnessed = [](const input::cptr& input) noexcept
     {
         return !input->witness().stack().empty();
     };
 
-    return std::any_of(inputs->begin(), inputs->end(), witnessed);
+    return std::any_of(inputs.begin(), inputs.end(), witnessed);
 }
 
 bool transaction::is_segregated() const noexcept
@@ -1187,7 +1216,10 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
 
     code ec;
     bool witnessed;
+
+    BC_PUSH_WARNING_UNGUARDED(USE_GSL_AT)
     const auto& in = (*inputs_)[index];
+    BC_POP_WARNING()
 
     // Evaluate input script.
     program input(in->script_ptr(), *this, index, state.forks);
@@ -1251,7 +1283,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        script embedded_script(input.pop(), false);
+        script embedded_script(*input.pop(), false);
 
         program embedded(to_shared<script>(embedded_script), std::move(input));
         if ((ec = interpreter::run(embedded)))

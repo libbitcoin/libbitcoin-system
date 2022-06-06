@@ -45,6 +45,9 @@
     #define BC_POP_WARNING()
 #endif
 
+// These are explicit TODO items.
+#define BC_PUSH_WARNING_UNGUARDED(value) BC_PUSH_WARNING(value)
+
 #ifdef _MSC_VER
     // Test only (see test.hpp).
     #define CONSTANT_CONDITIONAL 4127
@@ -60,14 +63,20 @@
 #define USE_REFERENCE 42 // TODO
     #define NO_NEW_DELETE 26409
     #define SMART_PTR_NOT_NEEDED 26415
+    #define NO_RVALUE_REF_SHARED_PTR 26416
     #define NO_VALUE_OR_CONST_REF_SHARED_PTR 26418
     #define NO_GLOBAL_INIT_CALLS 26426
+    #define USE_NOT_NULL 26429
     #define USE_GSL_AT 26446
     #define NO_THROW_IN_NOEXCEPT 26447
     #define NO_CASTS_FOR_ARITHMETIC_CONVERSION 26472
     #define NO_IDENTITY_CAST 26473
+    #define NO_UNSAFE_COPY_N 26459
+    #define NO_POINTER_ARITHMETIC 26481
     #define NO_DYNAMIC_ARRAY_INDEXING 26482
+    #define NO_ARRAY_TO_POINTER_DECAY 26485
     #define NO_REINTERPRET_CAST 26490
+    #define NO_CONST_CAST 26492
 ////#define NO_USE_OF_MOVED_FROM_OBJECT 26800
 #endif
 

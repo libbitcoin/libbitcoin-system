@@ -37,9 +37,9 @@ template <typename To, typename From,
     if_same_signed_integer<To, From> = true>
 constexpr To narrow_cast(From value) noexcept;
 
-/// Cast integral sign (must be same bit width).
+/// Cast integral sign (non-narrowing).
 template <typename To, typename From,
-    if_same_width<To, From> = true,
+    if_not_lesser_width<To, From> = true,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_not_same_signed_integer<To, From> = true>
