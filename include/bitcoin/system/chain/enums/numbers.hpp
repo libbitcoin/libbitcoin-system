@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_NUMBERS_HPP
 
 #include <cstdint>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -45,7 +46,7 @@ enum numbers : uint8_t
     positive_15 = 15,
     positive_16 = 16,
     negative_sign = 0x80,
-    negative_1 = negative_sign | positive_1
+    negative_1 = bit_or<uint8_t>(negative_sign, positive_1)
 };
 
 } // namespace chain
