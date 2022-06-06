@@ -184,10 +184,20 @@ std::shared_ptr<const std::vector<std::shared_ptr<const Put>>>
 read_puts(Source& source) noexcept
 {
     auto puts = to_shared<std::vector<std::shared_ptr<const Put>>>();
+
+    // Subsequent emplace is non-allocating, but still noexcept(false).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     puts->reserve(source.read_size(max_block_size));
+    BC_POP_WARNING()
 
     for (auto put = zero; put < puts->capacity(); ++put)
+    {
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         puts->emplace_back(new Put{ source });
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+    }
 
     // This is a pointer copy from non-const to const, which is unavoidable if
     // we want to avoid a vector move into a pointer to a const vector.
@@ -487,9 +497,13 @@ hash_digest transaction::sequences_hash() const noexcept
 
 // Precompute fixed elements of signature hashing.
 static constexpr auto prefixed = true;
+
+// TODO: output may be subject to static init race.
+BC_PUSH_WARNING(NO_GLOBAL_INIT_CALLS)
 static const auto null_output = output{}.to_data();
 static const auto empty_script = script{}.to_data(prefixed);
 static const auto zero_sequence = to_little_endian<uint32_t>(0);
+BC_POP_WARNING()
 
 // C++14: switch in constexpr.
 //*****************************************************************************
@@ -1232,7 +1246,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         return ec;
 
     // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout.stack_result(false))
+    if (!prevout.stack_result(program::stack::dirty))
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
@@ -1262,8 +1276,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return ec;
 
                 // A v0 script must succeed with a clean true stack (bip141).
-                return witness.stack_result(true) ? error::script_success :
-                    error::stack_false;
+                return witness.stack_result(program::stack::clean) ?
+                    error::script_success : error::stack_false;
             }
 
             // These versions are reserved for future extensions (bip141).
@@ -1283,14 +1297,14 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        script embedded_script(*input.pop(), false);
+        script embedded_script(*input.safe_pop(), false);
 
         program embedded(to_shared<script>(embedded_script), std::move(input));
         if ((ec = interpreter::run(embedded)))
             return ec;
 
         // This precludes embedded witness programs of -0 (undocumented).
-        if (!embedded.stack_result(false))
+        if (!embedded.stack_result(program::stack::dirty))
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
@@ -1320,8 +1334,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                         return ec;
 
                     // A v0 script must succeed with a clean true stack (bip141).
-                    return witness.stack_result(true) ? error::script_success :
-                        error::stack_false;
+                    return witness.stack_result(program::stack::clean) ?
+                        error::script_success : error::stack_false;
                 }
 
                 // These versions are reserved for future extensions (bip141).

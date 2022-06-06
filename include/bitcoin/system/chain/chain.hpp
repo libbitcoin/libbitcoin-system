@@ -64,21 +64,21 @@
 // sequence of closures, where one element is passed to the closure and the
 // next passed on its completion handler until all are processed. To avoid
 // copying, each element could be deserialized into vectors of shared pointers.
-// However ashared pointer to the containing object must be passed into the
-// closure for iteration, which keeps references to its members alive. As such
-// each element may be passed as std::ref(element), avoiding the overhead of a
-// shared pointer for each.
+// However a shared pointer to the containing object must be passed into the
+// closure for iteration, which keeps references to its members alive. Instead
+// an element may be passed as std::ref(element), avoiding the overhead of a
+// shared pointer copy, in the case where the parent object maintains lifetime.
 
 // Wire serialization.
 // Objects obtained from the store in response to p2p/server queries are
 // deserialized in parts and aggregated. For example, inputs and outputs are
 // obtained for a transaction, and then passed into the transaction, the header
 // and transactions are obtained for a block and then passed into the block.
-// To avoid costly object copies/moves of collections, we store inputs::ptr,
-// and outputs::ptr on transaction, and transactions::ptr on block. Otherwise a
-// copy/move operation is required for at least a vector of pointers, which
-// may number in the thousands, and if pointers are not used in the vector
-// this would apply to all object instances as well.
+// To avoid costly object copies/moves of collections, we store inputs::cptr,
+// and outputs::cptr on transaction, and transactions::cptr on block. Otherwise
+// a copy/move operation is required for at least a vector of pointers, which
+// may number in the thousands, where pointers are not used in the vector this
+// would apply to all object instances as well.
 
 // Consensus validation.
 // Op.data is stored as a data_ptr, allowing all push_data to be stacked with a

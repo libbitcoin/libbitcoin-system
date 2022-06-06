@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_COVERAGE_HPP
 
 #include <cstdint>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,12 +32,12 @@ enum coverage : uint8_t
 {
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.
-    hash_all = 0x01,
+    hash_all = bit_right<uint8_t>(0),
 
     /// Signs all of the inputs but none of the outputs, allowing anyone to
     /// change where the satoshis are going unless other signatures using
     /// other signature hash flags protect the outputs.
-    hash_none = 0x02,
+    hash_none = bit_right<uint8_t>(1),
 
     /// The only output signed is the one corresponding to this input (the
     /// output with the same output index number as this input), ensuring
@@ -46,29 +47,29 @@ enum coverage : uint8_t
     /// security scheme. This input, as well as other inputs, are included
     /// in the signature. The sequence numbers of other inputs are not
     /// included in the signature, and can be updated.
-    hash_single = 0x03,
+    hash_single = bit_or<uint8_t>(hash_all, hash_none),
 
     /// The above types can be modified with this flag, creating three new
     /// combined types.
-    anyone_can_pay = 0x80,
+    anyone_can_pay = bit_right<uint8_t>(7),
 
     /// Signs all of the outputs but only this one input, and it also allows
     /// anyone to add or remove other inputs, so anyone can contribute
     /// additional satoshis but they cannot change how many satoshis are
     /// sent nor where they go.
-    all_anyone_can_pay = hash_all | anyone_can_pay,
+    all_anyone_can_pay = bit_or<uint8_t>(hash_all, anyone_can_pay),
 
     /// Signs only this one input and allows anyone to add or remove other
     /// inputs or outputs, so anyone who gets a copy of this input can spend
     /// it however they'd like.
-    none_anyone_can_pay = hash_none | anyone_can_pay,
+    none_anyone_can_pay = bit_or<uint8_t>(hash_none, anyone_can_pay),
 
     /// Signs this one input and its corresponding output. Allows anyone to
     /// add or remove other inputs.
-    single_anyone_can_pay = hash_single | anyone_can_pay,
+    single_anyone_can_pay = bit_or<uint8_t>(hash_single, anyone_can_pay),
 
     /// Used to mask unused bits in the signature hash byte.
-    mask = 0x1f
+    mask = unmask_right<uint8_t>(5)
 };
 
 } // namespace chain

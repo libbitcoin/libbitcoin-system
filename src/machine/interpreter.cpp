@@ -44,7 +44,7 @@ interpreter::result interpreter::op_unevaluated(opcode code) noexcept
 }
 
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
-interpreter::result interpreter::op_nop(program& program, opcode) noexcept
+interpreter::result interpreter::op_nop(const program& program, opcode) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return error::op_success;
@@ -58,7 +58,7 @@ interpreter::result interpreter::op_nop(program& program, opcode) noexcept
 interpreter::result interpreter::op_push_number(program& program,
     uint8_t value) noexcept
 {
-    program.push_move({ value });
+    program.push(to_chunk(value));
     return error::op_success;
 }
 
@@ -70,7 +70,7 @@ interpreter::result interpreter::op_push_size(program& program,
     if (op.data().size() > op_75)
         return error::op_push_size;
 
-    program.push_ref(op.data_ptr());
+    program.push(op.data_ptr());
     return error::op_success;
 }
 
@@ -80,7 +80,7 @@ interpreter::result interpreter::op_push_data(program& program,
     if (data->size() > size_limit)
         return error::op_push_data;
 
-    program.push_ref(data);
+    program.push(data);
     return error::op_success;
 }
 
@@ -93,7 +93,7 @@ interpreter::result interpreter::op_nop(opcode) noexcept
     return error::op_success;
 }
 
-interpreter::result interpreter::op_ver(program& program) noexcept
+interpreter::result interpreter::op_ver(const program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
@@ -105,13 +105,13 @@ interpreter::result interpreter::op_if(program& program) noexcept
 {
     auto value = false;
 
-    if (program.succeeded())
+    if (program.is_succeess())
     {
         if (program.empty())
             return error::op_if;
 
-        value = program.stack_true(false);
-        program.pop();
+        value = program.stack_true(program::stack::dirty);
+        program.drop();
     }
 
     program.open(value);
@@ -122,20 +122,20 @@ interpreter::result interpreter::op_notif(program& program) noexcept
 {
     auto value = false;
 
-    if (program.succeeded())
+    if (program.is_succeess())
     {
         if (program.empty())
             return error::op_notif;
 
-        value = !program.stack_true(false);
-        program.pop();
+        value = !program.stack_true(program::stack::dirty);
+        program.drop();
     }
 
     program.open(value);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_verif(program& program) noexcept
+interpreter::result interpreter::op_verif(const program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
@@ -143,7 +143,7 @@ interpreter::result interpreter::op_verif(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_vernotif(program& program) noexcept
+interpreter::result interpreter::op_vernotif(const program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
@@ -153,7 +153,7 @@ interpreter::result interpreter::op_vernotif(program& program) noexcept
 
 interpreter::result interpreter::op_else(program& program) noexcept
 {
-    if (program.closed())
+    if (program.is_closed())
         return error::op_else;
 
     program.negate();
@@ -162,7 +162,7 @@ interpreter::result interpreter::op_else(program& program) noexcept
 
 interpreter::result interpreter::op_endif(program& program) noexcept
 {
-    if (program.closed())
+    if (program.is_closed())
         return error::op_endif;
 
     program.close();
@@ -174,14 +174,14 @@ interpreter::result interpreter::op_verify(program& program) noexcept
     if (program.empty())
         return error::op_verify1;
 
-    if (!program.stack_true(false))
+    if (!program.stack_true(program::stack::dirty))
         return error::op_verify2;
 
-    program.pop();
+    program.drop();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_return(program& program) noexcept
+interpreter::result interpreter::op_return(const program& program) noexcept
 {
     if (program.is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_return);
@@ -194,16 +194,16 @@ interpreter::result interpreter::op_to_alt_stack(program& program) noexcept
     if (program.empty())
         return error::op_to_alt_stack;
 
-    program.push_alternate(program.pop_ref());
+    program.push_alternate(program.pop());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_from_alt_stack(program& program) noexcept
 {
-    if (program.empty_alternate())
+    if (program.is_alternate_empty())
         return error::op_from_alt_stack;
 
-    program.push_ref(program.pop_alternate());
+    program.push(program.pop_alternate());
     return error::op_success;
 }
 
@@ -212,8 +212,9 @@ interpreter::result interpreter::op_drop2(program& program) noexcept
     if (program.size() < 2)
         return error::op_drop2;
 
-    program.pop();
-    program.pop();
+    // 0, 1, 2, 3 => 1, 2, 3 => 2, 3
+    program.drop();
+    program.drop();
     return error::op_success;
 }
 
@@ -222,11 +223,9 @@ interpreter::result interpreter::op_dup2(program& program) noexcept
     if (program.size() < 2)
         return error::op_dup2;
 
-    auto item1 = program.item(1);
-    auto item0 = program.item(0);
-
-    program.push_ref(std::move(item1));
-    program.push_ref(std::move(item0));
+    // 0, 1, 2, 3 => 1, 0, 1, 2, 3 =>  0, 1, 0, 1, 2, 3
+    program.push(program.item(1));
+    program.push(program.item(1));
     return error::op_success;
 }
 
@@ -235,13 +234,10 @@ interpreter::result interpreter::op_dup3(program& program) noexcept
     if (program.size() < 3)
         return error::op_dup3;
 
-    auto item2 = program.item(2);
-    auto item1 = program.item(1);
-    auto item0 = program.item(0);
-
-    program.push_ref(std::move(item2));
-    program.push_ref(std::move(item1));
-    program.push_ref(std::move(item0));
+    // 0, 1, 2, 3 => 2, 0, 1, 2, 3 => 1, 2, 0, 1, 2, 3 => 0, 1, 2, 0, 1, 2, 3
+    program.push(program.item(2));
+    program.push(program.item(2));
+    program.push(program.item(2));
     return error::op_success;
 }
 
@@ -250,11 +246,9 @@ interpreter::result interpreter::op_over2(program& program) noexcept
     if (program.size() < 4)
         return error::op_over2;
 
-    auto item3 = program.item(3);
-    auto item2 = program.item(2);
-
-    program.push_ref(std::move(item3));
-    program.push_ref(std::move(item2));
+    // 0, 1, 2, 3 => 2, 3, 0, 1, 2, 3
+    program.push(program.item(3));
+    program.push(program.item(3));
     return error::op_success;
 }
 
@@ -263,15 +257,13 @@ interpreter::result interpreter::op_rot2(program& program) noexcept
     if (program.size() < 6)
         return error::op_rot2;
 
-    const auto position5 = program.position(5);
-    const auto position4 = program.position(4);
+    // 0, 1, 2, 3, 4, 5 => 5, 0, 1, 2, 3, 4, 5 =  4, 5, 0, 1, 2, 3, 4, 5
+    program.push(program.item(5));
+    program.push(program.item(5));
 
-    auto item5 = *position5;
-    auto item4 = *position4;
-
-    program.erase(position5, add1(position4));
-    program.push_ref(std::move(item5));
-    program.push_ref(std::move(item4));
+    // 4, 5, 0, 1, 2, 3, 4, 5 => 4, 5, 0, 1, 2, 3, 5 => 4, 5, 0, 1, 2, 3
+    program.erase(6);
+    program.erase(6);
     return error::op_success;
 }
 
@@ -280,8 +272,9 @@ interpreter::result interpreter::op_swap2(program& program) noexcept
     if (program.size() < 4)
         return error::op_swap2;
 
-    program.swap(3, 1);
-    program.swap(2, 0);
+    // 0, 1, 2, 3, 4 => 0, 3, 2, 1, 4 =  2, 3, 0, 1, 4
+    program.swap(1, 3);
+    program.swap(0, 2);
     return error::op_success;
 }
 
@@ -290,15 +283,17 @@ interpreter::result interpreter::op_if_dup(program& program) noexcept
     if (program.empty())
         return error::op_if_dup;
 
-    if (program.stack_true(false))
-        program.duplicate(0);
+    // 0, 1, 2 => 0, 0, 1, 2
+    if (program.stack_true(program::stack::dirty))
+        program.push(program.item(0));
 
     return error::op_success;
 }
 
 interpreter::result interpreter::op_depth(program& program) noexcept
 {
-    program.push_move(number(program.size()).data());
+    // 0, 1, 2 => #, 0, 1, 2
+    program.push(number(program.size()).data());
     return error::op_success;
 }
 
@@ -307,7 +302,8 @@ interpreter::result interpreter::op_drop(program& program) noexcept
     if (program.empty())
         return error::op_drop;
 
-    program.pop();
+    // 0, 1, 2 => 1, 2
+    program.drop();
     return error::op_success;
 }
 
@@ -316,7 +312,8 @@ interpreter::result interpreter::op_dup(program& program) noexcept
     if (program.empty())
         return error::op_dup;
 
-    program.duplicate(0);
+    // 0, 1, 2 => 0, 0, 1, 2
+    program.push(program.item(0));
     return error::op_success;
 }
 
@@ -325,7 +322,8 @@ interpreter::result interpreter::op_nip(program& program) noexcept
     if (program.size() < 2)
         return error::op_nip;
 
-    program.erase(program.position(1));
+    // 0, 1 => 0
+    program.erase(1);
     return error::op_success;
 }
 
@@ -334,29 +332,31 @@ interpreter::result interpreter::op_over(program& program) noexcept
     if (program.size() < 2)
         return error::op_over;
 
-    program.duplicate(1);
+    // 0, 1 => 1, 0, 1
+    program.push(program.item(1));
     return error::op_success;
 }
 
 interpreter::result interpreter::op_pick(program& program) noexcept
 {
-    program::stack_iterator position;
-    if (!program.pop_position(position))
+    size_t index;
+    if (!program.pop_index(index))
         return error::op_pick;
 
-    program.push_ref(*position);
+    // [2]: 0, 1, 2, 3 => 2, 0, 1, 2, 3
+    program.push(program.item(index));
     return error::op_success;
 }
 
 interpreter::result interpreter::op_roll(program& program) noexcept
 {
-    program::stack_iterator position;
-    if (!program.pop_position(position))
+    size_t index;
+    if (!program.pop_index(index))
         return error::op_roll;
 
-    auto copy = *position;
-    program.erase(position);
-    program.push_ref(std::move(copy));
+    // [2]: 0, 1, 2, 3 => 2, 0, 1, 2, 3 => 2, 0, 1, 3
+    program.push(program.item(index));
+    program.erase(add1(index));
     return error::op_success;
 }
 
@@ -365,8 +365,9 @@ interpreter::result interpreter::op_rot(program& program) noexcept
     if (program.size() < 3)
         return error::op_rot;
 
-    program.swap(2, 1);
-    program.swap(1, 0);
+    // 0, 1, 2, 3 = > 0, 2, 1, 3 => 2, 0, 1, 3
+    program.swap(1, 2);
+    program.swap(0, 1);
     return error::op_success;
 }
 
@@ -375,7 +376,8 @@ interpreter::result interpreter::op_swap(program& program) noexcept
     if (program.size() < 2)
         return error::op_swap;
 
-    program.swap(1, 0);
+    // 0, 1, 2 = > 1, 0, 2
+    program.swap(0, 1);
     return error::op_success;
 }
 
@@ -384,15 +386,13 @@ interpreter::result interpreter::op_tuck(program& program) noexcept
     if (program.size() < 2)
         return error::op_tuck;
 
-    auto first = program.pop_ref();
-    auto second = program.pop_ref();
-    program.push_ref(first);
-    program.push_ref(std::move(second));
-    program.push_ref(std::move(first));
+    // 0, 1, 2 = > 0, 1, 0, 2 
+    program.swap(0, 1);
+    program.push(program.item(1));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_cat(program& program) noexcept
+interpreter::result interpreter::op_cat(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
@@ -400,7 +400,7 @@ interpreter::result interpreter::op_cat(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_substr(program& program) noexcept
+interpreter::result interpreter::op_substr(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
@@ -408,7 +408,7 @@ interpreter::result interpreter::op_substr(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_left(program& program) noexcept
+interpreter::result interpreter::op_left(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_left);
@@ -416,7 +416,7 @@ interpreter::result interpreter::op_left(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_right(program& program) noexcept
+interpreter::result interpreter::op_right(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_right);
@@ -429,14 +429,11 @@ interpreter::result interpreter::op_size(program& program) noexcept
     if (program.empty())
         return error::op_size;
 
-    auto top = program.pop_ref();
-    const auto size = top->size();
-    program.push_ref(std::move(top));
-    program.push_move(number(size).data());
+    program.push(number(program.item(0)->size()).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_invert(program& program) noexcept
+interpreter::result interpreter::op_invert(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
@@ -444,7 +441,7 @@ interpreter::result interpreter::op_invert(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_and(program& program) noexcept
+interpreter::result interpreter::op_and(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_and);
@@ -452,7 +449,7 @@ interpreter::result interpreter::op_and(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_or(program& program) noexcept
+interpreter::result interpreter::op_or(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_or);
@@ -460,7 +457,7 @@ interpreter::result interpreter::op_or(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_xor(program& program) noexcept
+interpreter::result interpreter::op_xor(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
@@ -473,7 +470,7 @@ interpreter::result interpreter::op_equal(program& program) noexcept
     if (program.size() < 2)
         return error::op_equal;
 
-    program.push(program.pop() == program.pop());
+    program.push(*program.pop() == *program.pop());
     return error::op_success;
 }
 
@@ -482,7 +479,7 @@ interpreter::result interpreter::op_equal_verify(program& program) noexcept
     if (program.size() < 2)
         return error::op_equal_verify1;
 
-    return (program.pop() == program.pop()) ? error::op_success :
+    return (*program.pop() == *program.pop()) ? error::op_success :
         error::op_equal_verify2;
 }
 
@@ -493,7 +490,7 @@ interpreter::result interpreter::op_add1(program& program) noexcept
         return error::op_add1;
 
     number += 1;
-    program.push_move(number.data());
+    program.push(number.data());
     return error::op_success;
 }
 
@@ -504,11 +501,11 @@ interpreter::result interpreter::op_sub1(program& program) noexcept
         return error::op_sub1;
 
     number -= 1;
-    program.push_move(number.data());
+    program.push(number.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul2(program& program) noexcept
+interpreter::result interpreter::op_mul2(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
@@ -516,7 +513,7 @@ interpreter::result interpreter::op_mul2(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div2(program& program) noexcept
+interpreter::result interpreter::op_div2(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
@@ -531,7 +528,7 @@ interpreter::result interpreter::op_negate(program& program) noexcept
         return error::op_negate;
 
     number = -number;
-    program.push_move(number.data());
+    program.push(number.data());
     return error::op_success;
 }
 
@@ -544,7 +541,7 @@ interpreter::result interpreter::op_abs(program& program) noexcept
     if (number < 0)
         number = -number;
 
-    program.push_move(number.data());
+    program.push(number.data());
     return error::op_success;
 }
 
@@ -570,27 +567,25 @@ interpreter::result interpreter::op_nonzero(program& program) noexcept
 
 interpreter::result interpreter::op_add(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_add;
 
-    const auto result = first + second;
-    program.push_move(result.data());
+    program.push((left + right).data());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_sub(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_sub;
 
-    const auto result = second - first;
-    program.push_move(result.data());
+    program.push((left - right).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul(program& program) noexcept
+interpreter::result interpreter::op_mul(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
@@ -598,7 +593,7 @@ interpreter::result interpreter::op_mul(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div(program& program) noexcept
+interpreter::result interpreter::op_div(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div);
@@ -606,7 +601,7 @@ interpreter::result interpreter::op_div(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_mod(program& program) noexcept
+interpreter::result interpreter::op_mod(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
@@ -614,7 +609,7 @@ interpreter::result interpreter::op_mod(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_lshift(program& program) noexcept
+interpreter::result interpreter::op_lshift(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
@@ -622,7 +617,7 @@ interpreter::result interpreter::op_lshift(program& program) noexcept
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_rshift(program& program) noexcept
+interpreter::result interpreter::op_rshift(const program& program) noexcept
 {
     if (program.is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
@@ -632,130 +627,121 @@ interpreter::result interpreter::op_rshift(program& program) noexcept
 
 interpreter::result interpreter::op_bool_and(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_bool_and;
 
-    program.push(first.is_true() && second.is_true());
+    program.push(left.is_true() && right.is_true());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_bool_or(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_bool_or;
 
-    program.push(first.is_true() || second.is_true());
+    program.push(left.is_true() || right.is_true());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_num_equal(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_num_equal;
 
-    program.push(first == second);
+    program.push(left == right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_num_equal_verify(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_num_equal_verify1;
 
-    return (first == second) ? error::op_success :
-        error::op_num_equal_verify2;
+    return (left == right) ? error::op_success : error::op_num_equal_verify2;
 }
 
 interpreter::result interpreter::op_num_not_equal(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_num_not_equal;
 
-    program.push(first != second);
+    program.push(left != right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_less_than(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_less_than;
 
-    program.push(second < first);
+    program.push(left < right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_greater_than(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_greater_than;
 
-    program.push(second > first);
+    program.push(left > right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_less_than_or_equal(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_less_than_or_equal;
 
-    program.push(second <= first);
+    program.push(left <= right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_greater_than_or_equal(
     program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_greater_than_or_equal;
 
-    program.push(second >= first);
+    program.push(left >= right);
     return error::op_success;
 }
 
 interpreter::result interpreter::op_min(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_min;
 
-    if (second < first)
-        program.push_move(second.data());
-    else
-        program.push_move(first.data());
-
+    program.push(left < right ? left.data() : right.data());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_max(program& program) noexcept
 {
-    number first, second;
-    if (!program.pop_binary(first, second))
+    number right, left;
+    if (!program.pop_binary(left, right))
         return error::op_max;
 
-    if (second > first)
-        program.push_move(second.data());
-    else
-        program.push_move(first.data());
-
+    program.push(left > right ? left.data() : right.data());
     return error::op_success;
 }
 
 interpreter::result interpreter::op_within(program& program) noexcept
 {
-    number first, second, third;
-    if (!program.pop_ternary(first, second, third))
+    number upper, lower, value;
+    if (!program.pop_ternary(upper, lower, value))
         return error::op_within;
 
-    program.push(second <= third && third < first);
+    program.push((lower <= value) && (value < upper));
     return error::op_success;
 }
 
@@ -764,7 +750,7 @@ interpreter::result interpreter::op_ripemd160(program& program) noexcept
     if (program.empty())
         return error::op_ripemd160;
 
-    program.push_move(ripemd160_hash_chunk(program.pop()));
+    program.push(ripemd160_hash_chunk(*program.pop()));
     return error::op_success;
 }
 
@@ -773,7 +759,7 @@ interpreter::result interpreter::op_sha1(program& program) noexcept
     if (program.empty())
         return error::op_sha1;
 
-    program.push_move(sha1_hash_chunk(program.pop()));
+    program.push(sha1_hash_chunk(*program.pop()));
     return error::op_success;
 }
 
@@ -782,7 +768,7 @@ interpreter::result interpreter::op_sha256(program& program) noexcept
     if (program.empty())
         return error::op_sha256;
 
-    program.push_move(sha256_hash_chunk(program.pop()));
+    program.push(sha256_hash_chunk(*program.pop()));
     return error::op_success;
 }
 
@@ -791,7 +777,7 @@ interpreter::result interpreter::op_hash160(program& program) noexcept
     if (program.empty())
         return error::op_hash160;
 
-    program.push_move(ripemd160_hash_chunk(sha256_hash(program.pop())));
+    program.push(ripemd160_hash_chunk(sha256_hash(*program.pop())));
     return error::op_success;
 }
 
@@ -800,7 +786,7 @@ interpreter::result interpreter::op_hash256(program& program) noexcept
     if (program.empty())
         return error::op_hash256;
 
-    program.push_move(sha256_hash_chunk(sha256_hash(program.pop())));
+    program.push(sha256_hash_chunk(sha256_hash(*program.pop())));
     return error::op_success;
 }
 
@@ -811,6 +797,19 @@ interpreter::result interpreter::op_codeseparator(program& program,
         error::op_code_separator;
 }
 
+interpreter::result interpreter::op_check_sig(program& program) noexcept
+{
+    const auto verify = op_check_sig_verify(program);
+    const auto bip66 = program.is_enabled(forks::bip66_rule);
+
+    // BIP66: invalid signature encoding fails the operation.
+    if (bip66 && verify == error::op_check_sig_verify_parse)
+        return error::op_check_sig;
+
+    program.push(verify == error::op_success);
+    return error::op_success;
+}
+
 // In signing mode, prepare_signature converts key from a private key to
 // a public key and generates the signature from key and hash. The signature is
 // then verified against the key and hash as if obtained from the script.
@@ -819,7 +818,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
     if (program.empty())
         return error::op_check_sig_verify1;
 
-    const auto key = program.pop_ref();
+    const auto key = program.pop();
 
     if (key->empty())
         return error::op_check_sig_verify2;
@@ -827,7 +826,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
     if (program.empty())
         return error::op_check_sig_verify3;
 
-    const auto endorsement = program.pop_ref();
+    const auto endorsement = program.pop();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -847,14 +846,14 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
         error::op_success : error::op_check_sig_verify5;
 }
 
-interpreter::result interpreter::op_check_sig(program& program) noexcept
+interpreter::result interpreter::op_check_multisig(program& program) noexcept
 {
-    auto verify = op_check_sig_verify(program);
-    auto bip66 = program.is_enabled(forks::bip66_rule);
+    const auto verify = op_check_multisig_verify(program);
+    const auto bip66 = program.is_enabled(forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verify == error::op_check_sig_verify_parse)
-        return error::op_check_sig;
+    if (bip66 && verify == error::op_check_multisig_verify_parse)
+        return error::op_check_multisig;
 
     program.push(verify == error::op_success);
     return error::op_success;
@@ -863,7 +862,7 @@ interpreter::result interpreter::op_check_sig(program& program) noexcept
 interpreter::result interpreter::op_check_multisig_verify(
     program& program) noexcept
 {
-    auto bip147 = program.is_enabled(forks::bip147_rule);
+    const auto bip147 = program.is_enabled(forks::bip147_rule);
 
     int32_t count;
     if (!program.pop(count))
@@ -892,7 +891,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    if (!program.pop().empty() && bip147)
+    if (!program.pop()->empty() && bip147)
         return error::op_check_multisig_verify8;
 
     uint8_t flags;
@@ -920,8 +919,12 @@ interpreter::result interpreter::op_check_multisig_verify(
             if (!program.prepare(sig, *key, cache, flags, **endorsement, *sub))
                 return error::op_check_multisig_verify_parse;
 
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+            const auto& hash = cache.at(flags);
+            BC_POP_WARNING()
+
             // TODO: for signing mode - make key mutable and return above.
-            if (system::verify_signature(*key, cache.at(flags), sig))
+            if (system::verify_signature(*key, hash, sig))
                 ++endorsement;
         }
     }
@@ -930,21 +933,8 @@ interpreter::result interpreter::op_check_multisig_verify(
         error::op_check_multisig_verify9 : error::op_success;
 }
 
-interpreter::result interpreter::op_check_multisig(program& program) noexcept
-{
-    auto verify = op_check_multisig_verify(program);
-    auto bip66 = program.is_enabled(forks::bip66_rule);
-
-    // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verify == error::op_check_multisig_verify_parse)
-        return error::op_check_multisig;
-
-    program.push(verify == error::op_success);
-    return error::op_success;
-}
-
 interpreter::result interpreter::op_check_locktime_verify(
-    program& program) noexcept
+    const program& program) noexcept
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!program.is_enabled(forks::bip65_rule))
@@ -965,8 +955,8 @@ interpreter::result interpreter::op_check_locktime_verify(
         return error::op_check_locktime_verify3;
 
     // The top stack item is positive, so cast is safe.
-    const auto locktime = static_cast<uint64_t>(stack.int64());
-    const auto& tx_locktime = program.transaction().locktime();
+    const auto locktime = sign_cast<uint64_t>(stack.int64());
+    const auto tx_locktime = program.transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
     if ((locktime < locktime_threshold) != (tx_locktime < locktime_threshold))
@@ -978,7 +968,7 @@ interpreter::result interpreter::op_check_locktime_verify(
 }
 
 interpreter::result interpreter::op_check_sequence_verify(
-    program& program) noexcept
+    const program& program) noexcept
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
     if (!program.is_enabled(forks::bip112_rule))
@@ -995,7 +985,7 @@ interpreter::result interpreter::op_check_sequence_verify(
         return error::op_check_sequence_verify2;
 
     // The top stack item is positive, and only 32 bits are ever tested.
-    const auto sequence = static_cast<uint32_t>(absolute(stack.int64()));
+    const auto sequence = narrow_sign_cast<uint32_t>(stack.int64());
     const auto tx_sequence = program.input().sequence();
 
     // BIP112: the stack sequence is disabled, treat as nop3.
@@ -1363,7 +1353,7 @@ code interpreter::run(program& program) noexcept
     }
 
     // Guard against unclosed evaluation scope.
-    return program.closed() ? error::script_success :
+    return program.is_closed() ? error::script_success :
         error::invalid_stack_scope;
 }
 

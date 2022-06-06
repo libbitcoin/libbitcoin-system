@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_SELECTION_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_SELECTION_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SELECTION_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SELECTION_HPP
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
+/// Network selection for settings construction.
 enum class selection
 {
     none,

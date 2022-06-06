@@ -105,6 +105,9 @@ program::program(const script::cptr& script, const chain::transaction& tx,
     BC_ASSERT(index < tx.inputs_ptr()->size());
 }
 
+// Public.
+// ============================================================================
+
 // Utilities.
 // ----------------------------------------------------------------------------
 
@@ -126,39 +129,7 @@ bool program::is_enabled(chain::forks rule) const noexcept
     return to_bool(forks_ & rule);
 }
 
-// Constant registers.
-// ----------------------------------------------------------------------------
-
-// This must be guarded (intended for interpreter internal use).
-const input& program::input() const noexcept
-{
-    BC_ASSERT(input_index_ < transaction().inputs_ptr()->size());
-
-    // array index is guarded by is_invalid().
-    BC_PUSH_WARNING(USE_GSL_AT)
-    return *(*transaction_.inputs_ptr())[input_index_];
-    BC_POP_WARNING()
-}
-
-const chain::transaction& program::transaction() const noexcept
-{
-    return transaction_;
-}
-
-// Program registers.
-// ----------------------------------------------------------------------------
-
-program::op_iterator program::begin() const noexcept
-{
-    return script_->ops().begin();
-}
-
-program::op_iterator program::end() const noexcept
-{
-    return script_->ops().end();
-}
-
-// Instructions.
+//  Accumulators.
 // ----------------------------------------------------------------------------
 
 constexpr bool operation_overflow(size_t count) noexcept
@@ -173,11 +144,10 @@ constexpr bool operation_overflow(size_t count) noexcept
     return count > max_counted_ops;
 }
 
-// This is guarded by script size.
 bool program::increment_op_count(const operation& op) noexcept
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(max_size_t - one >= operation_count_);
+    BC_ASSERT(sub1(max_size_t) >= operation_count_);
 
     if (operation::is_counted(op.code()))
         ++operation_count_;
@@ -185,7 +155,6 @@ bool program::increment_op_count(const operation& op) noexcept
     return !operation_overflow(operation_count_);
 }
 
-// This is guarded by script size.
 bool program::increment_op_count(int32_t public_keys) noexcept
 {
     constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
@@ -202,20 +171,57 @@ bool program::increment_op_count(int32_t public_keys) noexcept
     return !operation_overflow(operation_count_);
 }
 
+bool program::stack_result(stack clean) const noexcept
+{
+    return !empty() && stack_true(clean);
+}
+
+// Program registers.
+// ----------------------------------------------------------------------------
+
+program::op_iterator program::begin() const noexcept
+{
+    return script_->ops().begin();
+}
+
+program::op_iterator program::end() const noexcept
+{
+    return script_->ops().end();
+}
+
+// Protected (interpreter friend).
+// ============================================================================
+
+// Constant registers.
+// ----------------------------------------------------------------------------
+
+const input& program::input() const noexcept
+{
+    // array index is guarded by caller using is_invalid().
+    BC_ASSERT(input_index_ < transaction().inputs_ptr()->size());
+
+    BC_PUSH_WARNING(USE_GSL_AT)
+    return *(*transaction_.inputs_ptr())[input_index_];
+    BC_POP_WARNING()
+}
+
+const chain::transaction& program::transaction() const noexcept
+{
+    return transaction_;
+}
+
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
-// push
 void program::push(bool value) noexcept
 {
     // It is safe to share instances of these shared pointers across threads.
     static const auto true_ = to_shared<data_chunk>({ numbers::positive_1 });
-    static const auto false_ = to_shared<data_chunk>({});
+    static const auto false_ = to_shared<data_chunk>(data_chunk{});
 
     push(value ? true_ : false_);
 }
 
-// TODO: moves can be avoided by shared_ptr construction of data_chunks.
 void program::push(data_chunk&& item) noexcept
 {
     push(to_shared<data_chunk>(std::move(item)));
@@ -226,24 +232,39 @@ BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push(chunk_cptr&& item) noexcept
 BC_POP_WARNING()
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_.push_back(std::move(item));
+    BC_POP_WARNING()
 }
 
 void program::push(const chunk_cptr& item) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_.push_back(item);
+    BC_POP_WARNING()
 }
 
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
-// This must be guarded.
+// public (transaction)
 chunk_cptr program::pop() noexcept
 {
+    // This must be guarded (is_relaxed_push is checked in transaction).
     BC_ASSERT(!empty());
-    const auto& value = primary_.back();
-    primary_.pop_back();
+
+    // This must be a pointer copy, as the pointer is about to be destroyed.
+    const chunk_cptr value{ primary_.back() };
+    drop();
     return value;
+}
+
+void program::drop() noexcept
+{
+    // This must be guarded (is_relaxed_push is checked in transaction).
+    BC_ASSERT(!empty());
+
+    primary_.pop_back();
 }
 
 bool program::pop(int32_t& out_value) noexcept
@@ -261,37 +282,30 @@ bool program::pop(number& out_number, size_t maxiumum_size) noexcept
     return !empty() && out_number.set_data(*pop(), maxiumum_size);
 }
 
-bool program::pop_binary(number& first, number& second) noexcept
-{
-    // The right hand side number is at the top of the stack.
-    return pop(first) && pop(second);
-}
-
-bool program::pop_ternary(number& first, number& second, number& third) noexcept
-{
-    // The upper bound is at stack top, lower bound next, value next.
-    return pop(first) && pop(second) && pop(third);
-}
-
-// Determines if popped value is valid post-pop stack index and returns index.
-bool program::pop_position(stack_iterator& out_position) noexcept
+// True if popped value is valid post-pop stack index.
+bool program::pop_index(size_t& index) noexcept
 {
     int32_t signed_index;
     if (!pop(signed_index))
         return false;
 
-    // Ensure the index is within bounds.
-
     if (is_negative(signed_index))
         return false;
 
-    const auto index = sign_cast<uint32_t>(signed_index);
+    index = sign_cast<size_t>(signed_index);
+    return index < size();
+}
 
-    if (index >= size())
-        return false;
+bool program::pop_binary(number& left, number& right) noexcept
+{
+    // The right hand side operand is at the top of the stack.
+    return pop(right) && pop(left);
+}
 
-    out_position = position(index);
-    return true;
+bool program::pop_ternary(number& upper, number& lower, number& value) noexcept
+{
+    // The upper bound is at stack top, lower bound next, value next.
+    return pop(upper) && pop(lower) && pop(value);
 }
 
 // pop1/pop2/.../pop[count]
@@ -312,67 +326,41 @@ bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
     return true;
 }
 
-// Primary push/pop optimizations (active).
+// Primary stack push/pop non-const functions (optimizations).
 // ----------------------------------------------------------------------------
-
-// pop1/pop2/.../pop[index]/push[index]/.../push2/push1/push[index]
-void program::duplicate(size_t index) noexcept
-{
-    push(item(index));
-}
 
 // pop1/pop2/push1/push2
 void program::swap(size_t left, size_t right) noexcept
 {
-    // position(index) is const, but must have non-const iterators here.
+    // This must be guarded.
+    BC_ASSERT(std::max(left, right) < size());
+
+    // Stack index is zero-based, last element is "top".
     std::swap(
-        *std::prev(primary_.end(), ++left),
-        *std::prev(primary_.end(), ++right));
+        *std::prev(primary_.end(), add1(left)),
+        *std::prev(primary_.end(), add1(right)));
 }
 
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
-void program::erase(const stack_iterator& position) noexcept
+void program::erase(size_t index) noexcept
 {
-    primary_.erase(position);
+    // This must be guarded.
+    BC_ASSERT(index < size());
+
+    // Stack index is zero-based, last element is "top".
+    primary_.erase(std::prev(primary_.end(), add1(index)));
 }
 
-// pop1/pop2/.../pop[i]/pop[first]/.../pop[last]/push[i]/.../push2/push1
-void program::erase(const stack_iterator& first,
-    const stack_iterator& last) noexcept
-{
-    primary_.erase(first, last);
-}
-
-// Primary push/pop optimizations (passive).
+// Primary stack push/pop const functions.
 // ----------------------------------------------------------------------------
 
-// Reversed byte order in this example (big-endian).
-// []               : false (empty)
-// [00 00 00 00 00] : false (+zero)
-// [80 00 00 00 00] : false (-zero)
-// [42 00 00 00 00] : true
-// [00 80 00 00 00] : true
-
-// private
-bool program::stack_to_bool(bool clean) const noexcept
+const chunk_cptr& program::item(size_t index) const noexcept
 {
-    const auto& top = primary_.back();
+    // This must be guarded.
+    BC_ASSERT(index < size());
 
-    if (top->empty() || (clean && primary_.size() != one))
-        return false;
-
-    constexpr auto not_zero = [](uint8_t value) noexcept
-    {
-        return value != numbers::positive_0;
-    };
-
-    constexpr auto non_zero = [](uint8_t value) noexcept
-    {
-        return (value & ~numbers::negative_sign) != numbers::positive_0;
-    };
-
-    return non_zero(top->back()) ||
-        std::any_of(top->begin(), std::prev(top->end()), not_zero);
+    // Stack index is zero-based (zero is top).
+    return *std::prev(primary_.end(), add1(index));
 }
 
 size_t program::size() const noexcept
@@ -385,29 +373,24 @@ bool program::empty() const noexcept
     return primary_.empty();
 }
 
-// This must be guarded (intended for interpreter internal use).
-bool program::stack_true(bool clean) const noexcept
+bool program::stack_true(stack clean) const noexcept
 {
+    // This must be guarded.
     BC_ASSERT(!empty());
-    return stack_to_bool(clean);
-}
 
-// This is safe to call when empty (intended for completion handlers).
-bool program::stack_result(bool clean) const noexcept
-{
-    return !empty() && stack_true(clean);
+    return stack_to_bool(clean);
 }
 
 bool program::is_stack_overflow() const noexcept
 {
     // bit.ly/2cowHlP
-    // Addition is safe due to script size metadata.
+    // Addition is safe due to script size constraints.
     return size() + alternate_.size() > max_stack_size;
 }
 
 bool program::if_(const operation& op) const noexcept
 {
-    return op.is_conditional() || succeeded();
+    return op.is_conditional() || is_succeess();
 }
 
 bool program::top(number& out_number, size_t maxiumum_size) const noexcept
@@ -415,26 +398,10 @@ bool program::top(number& out_number, size_t maxiumum_size) const noexcept
     return !empty() && out_number.set_data(*item(zero), maxiumum_size);
 }
 
-// This must be guarded.
-program::stack_iterator program::position(size_t index) const noexcept
-{
-    BC_ASSERT(index < size());
-
-    // Stack index is zero-based, last element is "top".
-    return std::prev(primary_.end(), add1(index));
-}
-
-// This must be guarded.
-const chunk_cptr& program::item(size_t index) const noexcept
-{
-    // Stack index is zero-based (zero is top).
-    return *position(index);
-}
-
 // Alternate stack.
 // ----------------------------------------------------------------------------
 
-bool program::empty_alternate() const noexcept
+bool program::is_alternate_empty() const noexcept
 {
     return alternate_.empty();
 }
@@ -444,15 +411,18 @@ BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push_alternate(chunk_cptr&& value) noexcept
 BC_POP_WARNING()
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     alternate_.push_back(std::move(value));
+    BC_POP_WARNING()
 }
 
-
-// This must be guarded.
 chunk_cptr program::pop_alternate() noexcept
 {
+    // This must be guarded.
     BC_ASSERT(!alternate_.empty());
-    const auto& value = alternate_.back();
+
+    // This must be a pointer copy, as the pointer is about to be destroyed.
+    const chunk_cptr value{ alternate_.back() };
     alternate_.pop_back();
     return value;
 }
@@ -466,10 +436,11 @@ void program::open(bool value) noexcept
     condition_.push_back(value);
 }
 
-// This must be guarded.
 void program::negate() noexcept
 {
-    BC_ASSERT(!closed());
+    // This must be guarded.
+    BC_ASSERT(!is_closed());
+
     const auto value = condition_.back();
     negative_count_ += (value ? 1 : -1);
     condition_.back() = !value;
@@ -478,10 +449,11 @@ void program::negate() noexcept
     ////condition_.back() = !condition_.back();
 }
 
-// This must be guarded.
 void program::close() noexcept
 {
-    BC_ASSERT(!closed());
+    // This must be guarded.
+    BC_ASSERT(!is_closed());
+
     const auto value = condition_.back();
     negative_count_ += (value ? 0 : -1);
     condition_.pop_back();
@@ -490,12 +462,12 @@ void program::close() noexcept
     ////condition_.pop_back();
 }
 
-bool program::closed() const noexcept
+bool program::is_closed() const noexcept
 {
     return condition_.empty();
 }
 
-bool program::succeeded() const noexcept
+bool program::is_succeess() const noexcept
 {
     return is_zero(negative_count_);
 
@@ -504,7 +476,7 @@ bool program::succeeded() const noexcept
     ////return std::all_of(condition_.begin(), condition_.end(), true);
 }
 
-// Subscript.
+// Signature validation.
 // ----------------------------------------------------------------------------
 
 // Subscripts are referenced by script.offset mutable metadata. This allows for
@@ -604,7 +576,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 }
 
 // Private.
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
@@ -613,15 +585,47 @@ chain::operations program::create_strip_ops(
     const chunk_cptrs& endorsements) noexcept
 {
     constexpr auto non_mininal = false;
-
     operations strip;
+
+    // Subsequent emplaces are non-allocating, but still noexcept(false).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     strip.reserve(add1(endorsements.size()));
 
     for (const auto& push: endorsements)
         strip.emplace_back(push, non_mininal);
 
     strip.emplace_back(opcode::codeseparator);
+    BC_POP_WARNING()
+
     return strip;
+}
+
+// Reversed byte order in this example (big-endian).
+// []               : false (empty)
+// [00 00 00 00 00] : false (+zero)
+// [80 00 00 00 00] : false (-zero)
+// [42 00 00 00 00] : true
+// [00 80 00 00 00] : true
+bool program::stack_to_bool(stack clean) const noexcept
+{
+    const auto& top = primary_.back();
+
+    if (top->empty() || ((clean == stack::clean) && (primary_.size() != one)))
+        return false;
+
+    constexpr auto non_zero = [](uint8_t value) noexcept
+    {
+        return value != numbers::positive_0;
+    };
+
+    constexpr auto zero_magnitude = [](uint8_t value) noexcept
+    {
+        constexpr auto sign_mask = bit_not<uint8_t>(numbers::negative_sign);
+        return bit_and<uint8_t>(value, sign_mask) == numbers::positive_0;
+    };
+
+    return !zero_magnitude(top->back()) ||
+        std::any_of(top->begin(), std::prev(top->end()), non_zero);
 }
 
 hash_digest program::signature_hash(const script& sub,

@@ -26,6 +26,9 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+/// Analog to chain::forks but without impacting validation. These provide
+/// additional validation context, giving a node the option to reject an
+/// unconfirmed transaction.
 enum policy : uint32_t
 {
     no_policy = 0,

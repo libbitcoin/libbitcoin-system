@@ -38,7 +38,7 @@ public:
     // ------------------------------------------------------------------------
 
     static result op_unevaluated(chain::opcode) noexcept;
-    static result op_nop(program& program, chain::opcode) noexcept;
+    static result op_nop(const program& program, chain::opcode) noexcept;
     static result op_push_number(program& program, uint8_t value) noexcept;
     static result op_push_size(program& program,
         const chain::operation& op) noexcept;
@@ -49,15 +49,15 @@ public:
     // ------------------------------------------------------------------------
 
     static result op_nop(chain::opcode) noexcept;
-    static result op_ver(program& program) noexcept;
+    static result op_ver(const program& program) noexcept;
     static result op_if(program& program) noexcept;
     static result op_notif(program& program) noexcept;
-    static result op_verif(program& program) noexcept;
-    static result op_vernotif(program& program) noexcept;
+    static result op_verif(const program& program) noexcept;
+    static result op_vernotif(const program& program) noexcept;
     static result op_else(program& program) noexcept;
     static result op_endif(program& program) noexcept;
     static result op_verify(program& program) noexcept;
-    static result op_return(program& program) noexcept;
+    static result op_return(const program& program) noexcept;
     static result op_to_alt_stack(program& program) noexcept;
     static result op_from_alt_stack(program& program) noexcept;
     static result op_drop2(program& program) noexcept;
@@ -77,32 +77,32 @@ public:
     static result op_rot(program& program) noexcept;
     static result op_swap(program& program) noexcept;
     static result op_tuck(program& program) noexcept;
-    static result op_cat(program& program) noexcept;
-    static result op_substr(program& program) noexcept;
-    static result op_left(program& program) noexcept;
-    static result op_right(program& program) noexcept;
+    static result op_cat(const program& program) noexcept;
+    static result op_substr(const program& program) noexcept;
+    static result op_left(const program& program) noexcept;
+    static result op_right(const program& program) noexcept;
     static result op_size(program& program) noexcept;
-    static result op_invert(program& program) noexcept;
-    static result op_and(program& program) noexcept;
-    static result op_or(program& program) noexcept;
-    static result op_xor(program& program) noexcept;
+    static result op_invert(const program& program) noexcept;
+    static result op_and(const program& program) noexcept;
+    static result op_or(const program& program) noexcept;
+    static result op_xor(const program& program) noexcept;
     static result op_equal(program& program) noexcept;
     static result op_equal_verify(program& program) noexcept;
     static result op_add1(program& program) noexcept;
     static result op_sub1(program& program) noexcept;
-    static result op_mul2(program& program) noexcept;
-    static result op_div2(program& program) noexcept;
+    static result op_mul2(const program& program) noexcept;
+    static result op_div2(const program& program) noexcept;
     static result op_negate(program& program) noexcept;
     static result op_abs(program& program) noexcept;
     static result op_not(program& program) noexcept;
     static result op_nonzero(program& program) noexcept;
     static result op_add(program& program) noexcept;
     static result op_sub(program& program) noexcept;
-    static result op_mul(program& program) noexcept;
-    static result op_div(program& program) noexcept;
-    static result op_mod(program& program) noexcept;
-    static result op_lshift(program& program) noexcept;
-    static result op_rshift(program& program) noexcept;
+    static result op_mul(const program& program) noexcept;
+    static result op_div(const program& program) noexcept;
+    static result op_mod(const program& program) noexcept;
+    static result op_lshift(const program& program) noexcept;
+    static result op_rshift(const program& program) noexcept;
     static result op_bool_and(program& program) noexcept;
     static result op_bool_or(program& program) noexcept;
     static result op_num_equal(program& program) noexcept;
@@ -126,14 +126,17 @@ public:
     static result op_check_sig(program& program) noexcept;
     static result op_check_multisig_verify(program& program) noexcept;
     static result op_check_multisig(program& program) noexcept;
-    static result op_check_locktime_verify(program& program) noexcept;
-    static result op_check_sequence_verify(program& program) noexcept;
+    static result op_check_locktime_verify(const program& program) noexcept;
+    static result op_check_sequence_verify(const program& program) noexcept;
 
     /// Run program script.
     static code run(program& program) noexcept;
 
 private:
     static result run_op(const chain::operation& op, program& program) noexcept;
+
+    // Not constructable (really just a namespace).
+    interpreter() = delete;
 };
 
 } // namespace machine
