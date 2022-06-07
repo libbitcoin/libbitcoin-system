@@ -1246,7 +1246,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         return ec;
 
     // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout.stack_result(program::stack::dirty))
+    if (!prevout.is_stack_true(program::stack::dirty))
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
@@ -1261,8 +1261,12 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         {
             case script_version::zero:
             {
-                chunk_cptrs stack;
+                // TODO: return witness_script and stack as pointers
+                // TODO: from within extract_script to preclude moves.
+                ////chunk_cptrs_cptr stack;
+                ////script::cptr witness_script;
                 script witness_script;
+                chunk_cptrs stack;
                 if (!in->witness().extract_script(witness_script, stack,
                     in->prevout->script()))
                     return error::invalid_witness;
@@ -1276,7 +1280,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return ec;
 
                 // A v0 script must succeed with a clean true stack (bip141).
-                return witness.stack_result(program::stack::clean) ?
+                return witness.is_stack_true(program::stack::clean) ?
                     error::script_success : error::stack_false;
             }
 
@@ -1297,44 +1301,49 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        script embedded_script(*input.safe_pop(), false);
+        const auto embedded_script =
+            to_shared<script>({ *input.safe_pop(), false });
 
-        program embedded(to_shared<script>(embedded_script), std::move(input));
+        program embedded(embedded_script, std::move(input));
         if ((ec = interpreter::run(embedded)))
             return ec;
 
         // This precludes embedded witness programs of -0 (undocumented).
-        if (!embedded.stack_result(program::stack::dirty))
+        if (!embedded.is_stack_true(program::stack::dirty))
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
-        if ((witnessed = embedded_script.is_pay_to_witness(state.forks)))
+        if ((witnessed = embedded_script->is_pay_to_witness(state.forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
             if (in->script().ops().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
-            switch (embedded_script.version())
+            switch (embedded_script->version())
             {
                 case script_version::zero:
                 {
+                    // TODO: return witness_script and stack as pointers
+                    // TODO: from within extract_script to preclude moves.
+                    ////chunk_cptrs_cptr stack;
+                    ////script::cptr witness_script;
                     chunk_cptrs stack;
                     script witness_script;
                     if (!in->witness().extract_script(witness_script, stack,
-                        embedded_script))
+                        *embedded_script))
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
                     program witness(to_shared<script>(witness_script), *this,
                         index, state.forks, std::move(stack),
-                        in->prevout->value(), embedded_script.version());
+                        in->prevout->value(), embedded_script->version());
 
                     if ((ec = interpreter::run(witness)))
                         return ec;
 
                     // A v0 script must succeed with a clean true stack (bip141).
-                    return witness.stack_result(program::stack::clean) ?
+                    return witness.is_stack_true(program::stack::clean) ?
                         error::script_success : error::stack_false;
                 }
 

@@ -363,6 +363,10 @@ bool witness::extract_script(script& out_script, chunk_cptrs& out_stack,
     const script& program_script) const noexcept
 {
     data_chunk program{ program_script.witness_program() };
+
+    // Witness stack is immutable within tx but initializes the mutable program
+    // stack, so must be copied. But only the vector of pointers is copied, not
+    // the stack data chunks.
     out_stack = stack_;
 
     switch (program_script.version())

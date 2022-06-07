@@ -44,8 +44,11 @@ static const transaction default_transaction{};
 // Constructors.
 // ----------------------------------------------------------------------------
 
-program::program(const script::cptr& script, const chain::transaction& tx,
-    uint32_t index, uint32_t forks) noexcept
+/// Create an instance with empty stacks, value unused/max (input run).
+program::program(const script::cptr& script,
+    const chain::transaction& tx,
+    uint32_t index,
+    uint32_t forks) noexcept
   : script_(script),
     transaction_(tx),
     input_index_(index),
@@ -59,7 +62,7 @@ program::program(const script::cptr& script, const chain::transaction& tx,
     BC_ASSERT(index < transaction_.inputs_ptr()->size());
 }
 
-// Reuse copied program stack .
+// Create using copied tx, input, forks, value, stack (prevout run).
 program::program(const script::cptr& script, const program& other) noexcept
   : script_(script),
     transaction_(other.transaction_),
@@ -73,7 +76,7 @@ program::program(const script::cptr& script, const program& other) noexcept
 {
 }
 
-// Reuse moved program stack.
+/// Create using copied tx, input, forks, value and moved stack (p2sh run).
 program::program(const script::cptr& script, program&& other) noexcept
   : script_(script),
     transaction_(other.transaction_),
@@ -87,9 +90,14 @@ program::program(const script::cptr& script, program&& other) noexcept
 {
 }
 
+// Create an instance with initialized stack (witness run).
 // Condition, alternate, jump and operation_count are not copied.
-program::program(const script::cptr& script, const chain::transaction& tx,
-    uint32_t index, uint32_t forks, chunk_cptrs&& stack, uint64_t value,
+program::program(const script::cptr& script,
+    const chain::transaction& tx,
+    uint32_t index,
+    uint32_t forks,
+    chunk_cptrs&& stack,
+    uint64_t value,
     script_version version) noexcept
   : script_(script),
     transaction_(tx),
@@ -117,7 +125,7 @@ bool program::is_invalid() const noexcept
     const auto bip141 = is_enabled(forks::bip141_rule);
     ////const auto nops_rule = is_enabled(forks::nops_rule);
 
-    // TODO: nops rule must be enabled.
+    // TODO: nops rule must be enabled in tests and config.
     return
         (/*nops_rule && */script_->is_oversized()) ||
         (input_index_ > transaction_.inputs_ptr()->size()) ||
@@ -127,6 +135,11 @@ bool program::is_invalid() const noexcept
 bool program::is_enabled(chain::forks rule) const noexcept
 {
     return to_bool(forks_ & rule);
+}
+
+bool program::is_stack_true(stack clean) const noexcept
+{
+    return !is_empty() && stack_to_bool(clean);
 }
 
 //  Accumulators.
@@ -144,7 +157,7 @@ constexpr bool operation_overflow(size_t count) noexcept
     return count > max_counted_ops;
 }
 
-bool program::increment_op_count(const operation& op) noexcept
+bool program::ops_increment(const operation& op) noexcept
 {
     // Addition is safe due to script size constraint.
     BC_ASSERT(sub1(max_size_t) >= operation_count_);
@@ -155,7 +168,7 @@ bool program::increment_op_count(const operation& op) noexcept
     return !operation_overflow(operation_count_);
 }
 
-bool program::increment_op_count(int32_t public_keys) noexcept
+bool program::ops_increment(int32_t public_keys) noexcept
 {
     constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
         max_script_public_keys);
@@ -169,11 +182,6 @@ bool program::increment_op_count(int32_t public_keys) noexcept
 
     operation_count_ += public_keys;
     return !operation_overflow(operation_count_);
-}
-
-bool program::stack_result(stack clean) const noexcept
-{
-    return !empty() && stack_true(clean);
 }
 
 // Program registers.
@@ -279,7 +287,7 @@ bool program::pop(int32_t& out_value) noexcept
 
 bool program::pop(number& out_number, size_t maxiumum_size) noexcept
 {
-    return !empty() && out_number.set_data(*pop(), maxiumum_size);
+    return !is_empty() && out_number.set_data(*pop(), maxiumum_size);
 }
 
 // True if popped value is valid post-pop stack index.
@@ -368,17 +376,9 @@ size_t program::size() const noexcept
     return primary_.size();
 }
 
-bool program::empty() const noexcept
+bool program::is_empty() const noexcept
 {
     return primary_.empty();
-}
-
-bool program::stack_true(stack clean) const noexcept
-{
-    // This must be guarded.
-    BC_ASSERT(!empty());
-
-    return stack_to_bool(clean);
 }
 
 bool program::is_stack_overflow() const noexcept
@@ -388,14 +388,9 @@ bool program::is_stack_overflow() const noexcept
     return size() + alternate_.size() > max_stack_size;
 }
 
-bool program::if_(const operation& op) const noexcept
+bool program::get_top(number& out_number, size_t maxiumum_size) const noexcept
 {
-    return op.is_conditional() || is_succeess();
-}
-
-bool program::top(number& out_number, size_t maxiumum_size) const noexcept
-{
-    return !empty() && out_number.set_data(*item(zero), maxiumum_size);
+    return !is_empty() && out_number.set_data(*item(zero), maxiumum_size);
 }
 
 // Alternate stack.
@@ -476,7 +471,12 @@ bool program::is_succeess() const noexcept
     ////return std::all_of(condition_.begin(), condition_.end(), true);
 }
 
-// Signature validation.
+bool program::if_(const operation& op) const noexcept
+{
+    return op.is_conditional() || is_succeess();
+}
+
+// Signature validation helpers.
 // ----------------------------------------------------------------------------
 
 // Subscripts are referenced by script.offset mutable metadata. This allows for

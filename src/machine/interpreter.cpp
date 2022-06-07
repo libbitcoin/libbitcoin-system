@@ -107,10 +107,10 @@ interpreter::result interpreter::op_if(program& program) noexcept
 
     if (program.is_succeess())
     {
-        if (program.empty())
+        if (program.is_empty())
             return error::op_if;
 
-        value = program.stack_true(program::stack::dirty);
+        value = program.is_stack_true(program::stack::dirty);
         program.drop();
     }
 
@@ -124,10 +124,10 @@ interpreter::result interpreter::op_notif(program& program) noexcept
 
     if (program.is_succeess())
     {
-        if (program.empty())
+        if (program.is_empty())
             return error::op_notif;
 
-        value = !program.stack_true(program::stack::dirty);
+        value = !program.is_stack_true(program::stack::dirty);
         program.drop();
     }
 
@@ -171,10 +171,10 @@ interpreter::result interpreter::op_endif(program& program) noexcept
 
 interpreter::result interpreter::op_verify(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_verify1;
 
-    if (!program.stack_true(program::stack::dirty))
+    if (!program.is_stack_true(program::stack::dirty))
         return error::op_verify2;
 
     program.drop();
@@ -191,7 +191,7 @@ interpreter::result interpreter::op_return(const program& program) noexcept
 
 interpreter::result interpreter::op_to_alt_stack(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_to_alt_stack;
 
     program.push_alternate(program.pop());
@@ -280,11 +280,11 @@ interpreter::result interpreter::op_swap2(program& program) noexcept
 
 interpreter::result interpreter::op_if_dup(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_if_dup;
 
     // 0, 1, 2 => 0, 0, 1, 2
-    if (program.stack_true(program::stack::dirty))
+    if (program.is_stack_true(program::stack::dirty))
         program.push(program.item(0));
 
     return error::op_success;
@@ -299,7 +299,7 @@ interpreter::result interpreter::op_depth(program& program) noexcept
 
 interpreter::result interpreter::op_drop(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_drop;
 
     // 0, 1, 2 => 1, 2
@@ -309,7 +309,7 @@ interpreter::result interpreter::op_drop(program& program) noexcept
 
 interpreter::result interpreter::op_dup(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_dup;
 
     // 0, 1, 2 => 0, 0, 1, 2
@@ -426,7 +426,7 @@ interpreter::result interpreter::op_right(const program& program) noexcept
 
 interpreter::result interpreter::op_size(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_size;
 
     program.push(number(program.item(0)->size()).data());
@@ -747,7 +747,7 @@ interpreter::result interpreter::op_within(program& program) noexcept
 
 interpreter::result interpreter::op_ripemd160(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_ripemd160;
 
     program.push(ripemd160_hash_chunk(*program.pop()));
@@ -756,7 +756,7 @@ interpreter::result interpreter::op_ripemd160(program& program) noexcept
 
 interpreter::result interpreter::op_sha1(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_sha1;
 
     program.push(sha1_hash_chunk(*program.pop()));
@@ -765,7 +765,7 @@ interpreter::result interpreter::op_sha1(program& program) noexcept
 
 interpreter::result interpreter::op_sha256(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_sha256;
 
     program.push(sha256_hash_chunk(*program.pop()));
@@ -774,7 +774,7 @@ interpreter::result interpreter::op_sha256(program& program) noexcept
 
 interpreter::result interpreter::op_hash160(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_hash160;
 
     program.push(ripemd160_hash_chunk(sha256_hash(*program.pop())));
@@ -783,7 +783,7 @@ interpreter::result interpreter::op_hash160(program& program) noexcept
 
 interpreter::result interpreter::op_hash256(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_hash256;
 
     program.push(sha256_hash_chunk(sha256_hash(*program.pop())));
@@ -815,7 +815,7 @@ interpreter::result interpreter::op_check_sig(program& program) noexcept
 // then verified against the key and hash as if obtained from the script.
 interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
 {
-    if (program.empty())
+    if (program.is_empty())
         return error::op_check_sig_verify1;
 
     const auto key = program.pop();
@@ -823,7 +823,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    if (program.empty())
+    if (program.is_empty())
         return error::op_check_sig_verify3;
 
     const auto endorsement = program.pop();
@@ -868,7 +868,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (!program.pop(count))
         return error::op_check_multisig_verify1;
 
-    if (!program.increment_op_count(count))
+    if (!program.ops_increment(count))
         return error::op_check_multisig_verify2;
 
     chunk_cptrs keys;
@@ -885,7 +885,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     if (!program.pop(endorsements, count))
         return error::op_check_multisig_verify6;
 
-    if (program.empty())
+    if (program.is_empty())
         return error::op_check_multisig_verify7;
 
     //*************************************************************************
@@ -946,16 +946,16 @@ interpreter::result interpreter::op_check_locktime_verify(
 
     // BIP65: the stack is empty.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    number stack;
-    if (!program.top(stack, max_check_locktime_verify_number_size))
+    number top;
+    if (!program.get_top(top, max_check_locktime_verify_number_size))
         return error::op_check_locktime_verify2;
 
     // BIP65: the top stack item is negative.
-    if (stack.is_negative())
+    if (top.is_negative())
         return error::op_check_locktime_verify3;
 
     // The top stack item is positive, so cast is safe.
-    const auto locktime = sign_cast<uint64_t>(stack.int64());
+    const auto locktime = sign_cast<uint64_t>(top.int64());
     const auto tx_locktime = program.transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
@@ -976,16 +976,16 @@ interpreter::result interpreter::op_check_sequence_verify(
 
     // BIP112: the stack is empty.
     // BIP112: extend the (signed) script number range to 5 bytes.
-    number stack;
-    if (!program.top(stack, max_check_sequence_verify_number_size))
+    number top;
+    if (!program.get_top(top, max_check_sequence_verify_number_size))
         return error::op_check_sequence_verify1;
 
     // BIP112: the top stack item is negative.
-    if (stack.is_negative())
+    if (top.is_negative())
         return error::op_check_sequence_verify2;
 
     // The top stack item is positive, and only 32 bits are ever tested.
-    const auto sequence = narrow_sign_cast<uint32_t>(stack.int64());
+    const auto sequence = narrow_sign_cast<uint32_t>(top.int64());
     const auto tx_sequence = program.input().sequence();
 
     // BIP112: the stack sequence is disabled, treat as nop3.
@@ -1336,7 +1336,7 @@ code interpreter::run(program& program) noexcept
             return error::op_invalid;
 
         // Enforce opcode count limit (201).
-        if (!program.increment_op_count(op))
+        if (!program.ops_increment(op))
             return error::invalid_operation_count;
 
         // Conditional evaluation scope.
