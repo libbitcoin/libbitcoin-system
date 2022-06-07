@@ -613,12 +613,12 @@ bool program::stack_to_bool(stack clean) const noexcept
     if (top->empty() || ((clean == stack::clean) && (primary_.size() != one)))
         return false;
 
-    constexpr auto non_zero = [](uint8_t value) noexcept
+    const auto non_zero = [](uint8_t value) noexcept
     {
         return value != numbers::positive_0;
     };
 
-    constexpr auto zero_magnitude = [](uint8_t value) noexcept
+    const auto zero_magnitude = [](uint8_t value) noexcept
     {
         constexpr auto sign_mask = bit_not<uint8_t>(numbers::negative_sign);
         return bit_and<uint8_t>(value, sign_mask) == numbers::positive_0;
