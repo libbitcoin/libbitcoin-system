@@ -589,53 +589,6 @@ uint8_t operation::opcode_to_positive(opcode code) noexcept
 // Categories of opcodes.
 // ----------------------------------------------------------------------------
 
-////// opcode: [0-79, 81-96]
-////bool operation::is_push(opcode code) noexcept
-////{
-////    constexpr auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
-////    constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-////    const auto value = static_cast<uint8_t>(code);
-////    return value <= op_96 && value != op_80;
-////}
-////
-////// opcode: [1-78]
-////bool operation::is_payload(opcode code) noexcept
-////{
-////    constexpr auto op_1 = static_cast<uint8_t>(opcode::push_size_1);
-////    constexpr auto op_78 = static_cast<uint8_t>(opcode::push_four_size);
-////    const auto value = static_cast<uint8_t>(code);
-////    return value >= op_1 && value <= op_78;
-////}
-////
-////// opcode: [97-255]
-////bool operation::is_counted(opcode code) noexcept
-////{
-////    constexpr auto op_97 = static_cast<uint8_t>(opcode::nop);
-////    const auto value = static_cast<uint8_t>(code);
-////    return value >= op_97;
-////}
-////
-////// stack: [[], 1-16]
-////bool operation::is_version(opcode code) noexcept
-////{
-////    return code == opcode::push_size_0 || is_positive(code);
-////}
-////
-////// stack: [-1, 1-16]
-////bool operation::is_numeric(opcode code) noexcept
-////{
-////    return is_positive(code) || code == opcode::push_negative_1;
-////}
-////
-////// stack: [1-16]
-////bool operation::is_positive(opcode code) noexcept
-////{
-////    constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-////    constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-////    const auto value = static_cast<uint8_t>(code);
-////    return value >= op_81 && value <= op_96;
-////}
-
 // opcode: [101-102, 126-129, 131-134, 141-142, 149-153]
 // ****************************************************************************
 // CONSENSUS: These are invalid even if evaluation is precluded by conditional.
@@ -743,7 +696,7 @@ bool operation::is_invalid(opcode code) noexcept
 // ****************************************************************************
 bool operation::is_reserved(opcode code) noexcept
 {
-    constexpr auto op_185 = static_cast<uint8_t>(opcode::nop10);
+    constexpr auto op_185 = opcode::nop10;
 
     // C++14: switch in constexpr.
     switch (code)
@@ -758,7 +711,7 @@ bool operation::is_reserved(opcode code) noexcept
         case opcode::reserved_138:
             return true;
         default:
-            return static_cast<uint8_t>(code) > op_185;
+            return code > op_185;
     }
 }
 
@@ -786,9 +739,8 @@ bool operation::is_conditional(opcode code) noexcept
 ////// opcode: [0-96]
 ////bool operation::is_relaxed_push(opcode code) noexcept
 ////{
-////    constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-////    const auto value = static_cast<uint8_t>(code);
-////    return value <= op_96;
+////    constexpr auto op_96 = opcode::push_positive_16;
+////    return code <= op_96;
 ////}
 
 // Categories of operations.

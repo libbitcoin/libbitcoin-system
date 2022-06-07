@@ -128,27 +128,24 @@ public:
     /// opcode: [0-79, 81-96].
     static constexpr bool is_push(opcode code) noexcept
     {
-        constexpr auto op_80 = static_cast<uint8_t>(opcode::reserved_80);
-        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-        const auto value = static_cast<uint8_t>(code);
-        return value <= op_96 && value != op_80;
+        constexpr auto op_80 = opcode::reserved_80;
+        constexpr auto op_96 = opcode::push_positive_16;
+        return code <= op_96 && code != op_80;
     }
 
     /// opcode: [1-78].
     static constexpr bool is_payload(opcode code) noexcept
     {
-        constexpr auto op_1 = static_cast<uint8_t>(opcode::push_size_1);
-        constexpr auto op_78 = static_cast<uint8_t>(opcode::push_four_size);
-        const auto value = static_cast<uint8_t>(code);
-        return value >= op_1 && value <= op_78;
+        constexpr auto op_1 = opcode::push_size_1;
+        constexpr auto op_78 = opcode::push_four_size;
+        return code >= op_1 && code <= op_78;
     }
 
     /// opcode: [97-255].
     static constexpr bool is_counted(opcode code) noexcept
     {
-        constexpr auto op_97 = static_cast<uint8_t>(opcode::nop);
-        const auto value = static_cast<uint8_t>(code);
-        return value >= op_97;
+        constexpr auto op_97 = opcode::nop;
+        return code >= op_97;
     }
 
     /// stack: [[], 1-16].
@@ -166,10 +163,9 @@ public:
     /// stack: [1-16].
     static constexpr bool is_positive(opcode code) noexcept
     {
-        constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-        const auto value = static_cast<uint8_t>(code);
-        return value >= op_81 && value <= op_96;
+        constexpr auto op_81 = opcode::push_positive_1;
+        constexpr auto op_96 = opcode::push_positive_16;
+        return code >= op_81 && code <= op_96;
     }
 
     // C++14: switch in constexpr.
@@ -185,9 +181,8 @@ public:
     //*****************************************************************************
     static constexpr bool is_relaxed_push(opcode code) noexcept
     {
-        constexpr auto op_96 = static_cast<uint8_t>(opcode::push_positive_16);
-        const auto value = static_cast<uint8_t>(code);
-        return value <= op_96;
+        constexpr auto op_96 = opcode::push_positive_16;
+        return code <= op_96;
     }
 
     /// Categories of operations.
