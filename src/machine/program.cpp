@@ -259,7 +259,7 @@ void program::push(const chunk_cptr& item) noexcept
 chunk_cptr program::pop() noexcept
 {
     // This must be guarded (is_relaxed_push is checked in transaction).
-    BC_ASSERT(!empty());
+    BC_ASSERT(!is_empty());
 
     // This must be a pointer copy, as the pointer is about to be destroyed.
     const chunk_cptr value{ primary_.back() };
@@ -270,7 +270,7 @@ chunk_cptr program::pop() noexcept
 void program::drop() noexcept
 {
     // This must be guarded (is_relaxed_push is checked in transaction).
-    BC_ASSERT(!empty());
+    BC_ASSERT(!is_empty());
 
     primary_.pop_back();
 }
