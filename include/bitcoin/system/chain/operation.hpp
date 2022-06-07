@@ -128,24 +128,26 @@ public:
     /// opcode: [0-79, 81-96].
     static constexpr bool is_push(opcode code) noexcept
     {
-        constexpr auto op_80 = opcode::reserved_80;
-        constexpr auto op_96 = opcode::push_positive_16;
-        return code <= op_96 && code != op_80;
+        ////constexpr auto op_80 = opcode::reserved_80;
+        ////constexpr auto op_96 = opcode::push_positive_16;
+        return code <= opcode::push_positive_16 &&
+            code != opcode::reserved_80;
     }
 
     /// opcode: [1-78].
     static constexpr bool is_payload(opcode code) noexcept
     {
-        constexpr auto op_1 = opcode::push_size_1;
-        constexpr auto op_78 = opcode::push_four_size;
-        return code >= op_1 && code <= op_78;
+        ////constexpr auto op_1 = opcode::push_size_1;
+        ////constexpr auto op_78 = opcode::push_four_size;
+        return code >= opcode::push_size_1 &&
+            code <= opcode::push_four_size;
     }
 
     /// opcode: [97-255].
     static constexpr bool is_counted(opcode code) noexcept
     {
-        constexpr auto op_97 = opcode::nop;
-        return code >= op_97;
+        ////constexpr auto op_97 = opcode::nop;
+        return code >= opcode::nop;
     }
 
     /// stack: [[], 1-16].
@@ -163,9 +165,10 @@ public:
     /// stack: [1-16].
     static constexpr bool is_positive(opcode code) noexcept
     {
-        constexpr auto op_81 = opcode::push_positive_1;
-        constexpr auto op_96 = opcode::push_positive_16;
-        return code >= op_81 && code <= op_96;
+        ////constexpr auto op_81 = opcode::push_positive_1;
+        ////constexpr auto op_96 = opcode::push_positive_16;
+        return code >= opcode::push_positive_1 &&
+            code <= opcode::push_positive_16;
     }
 
     // C++14: switch in constexpr.
@@ -181,8 +184,8 @@ public:
     //*****************************************************************************
     static constexpr bool is_relaxed_push(opcode code) noexcept
     {
-        constexpr auto op_96 = opcode::push_positive_16;
-        return code <= op_96;
+        ////constexpr auto op_96 = opcode::push_positive_16;
+        return code <= opcode::push_positive_16;
     }
 
     /// Categories of operations.
