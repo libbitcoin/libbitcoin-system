@@ -59,21 +59,26 @@ inline chunk_cptrs_ptr copy_stack(const chunk_cptrs& stack) noexcept
 // Constructors.
 // ----------------------------------------------------------------------------
 
+// Pass input const_iterator vs. input&.
+// Don't store input, index, sequence, or final.
+// Just obtain from the iterator, exposed as protected methods.
+// Index is obtained from the std::distance(inputs.begin, it), though this
+// requires that the iterator is an interator of the inputs vector. It is a
+// runtime failure if the iterator is null/end and is a compile time failure to
+// compare an from of a different collection (i.e. via std::distance).
+
 // Input script run (default/empty stack).
-program::program(const chain::transaction& tx, const chain::input& input,
-     uint32_t forks, uint32_t index) noexcept
-  : program(tx, input, input.script_ptr(), forks, unused_value, unused_version,
-      default_stack(), index)
+program::program(const chain::transaction& tx, const input_iterator& input,
+     uint32_t forks) noexcept
+  : program(tx, input, (*input)->script_ptr(), forks, unused_value,
+      unused_version, default_stack())
 {
 }
 
 // Legacy p2sh or prevout script run (copied input stack - use first).
-program::program(const program& other, const script::cptr& script,
-    uint32_t index) noexcept
+program::program(const program& other, const script::cptr& script) noexcept
   : transaction_(other.transaction_),
-    index_(index),
-    sequence_(other.sequence_),
-    final_(other.final_),
+    input_(other.input_),
     script_(script),
     forks_(other.forks_),
     value_(other.value_),
@@ -83,12 +88,9 @@ program::program(const program& other, const script::cptr& script,
 }
 
 // Legacy p2sh or prevout script run (moved input stack - use last).
-program::program(program&& other, const script::cptr& script,
-    uint32_t index) noexcept
+program::program(program&& other, const script::cptr& script) noexcept
   : transaction_(other.transaction_),
-    index_(index),
-    sequence_(other.sequence_),
-    final_(other.final_),
+    input_(other.input_),
     script_(script),
     forks_(other.forks_),
     value_(other.value_),
@@ -98,22 +100,20 @@ program::program(program&& other, const script::cptr& script,
 }
 
 // Witness script run (witness-initialized stack).
-program::program(const chain::transaction& tx, const chain::input& input,
+program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& stack, uint32_t index) noexcept
-  : program(tx, input, script, forks, input.prevout->value(), version, stack, index)
+    const chunk_cptrs_ptr& stack) noexcept
+  : program(tx, input, script, forks, (*input)->prevout->value(), version,
+      stack)
 {
 }
 
 // protected
-program::program(const chain::transaction& tx, const chain::input& input,
+program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, uint64_t value,
-    script_version version, const chunk_cptrs_ptr& stack,
-    uint32_t index) noexcept
+    script_version version, const chunk_cptrs_ptr& stack) noexcept
   : transaction_(tx),
-    index_(index),
-    sequence_(input.sequence()),
-    final_(input.is_final()),
+    input_(input),
     script_(script),
     forks_(forks),
     value_(value),
@@ -213,12 +213,12 @@ program::op_iterator program::end() const noexcept
 
 bool program::is_final() const noexcept
 {
-    return final_;
+    return (*input_)->is_final();
 }
 
 uint32_t program::sequence() const noexcept
 {
-    return sequence_;
+    return (*input_)->sequence();
 }
 
 const chain::transaction& program::transaction() const noexcept
@@ -643,8 +643,8 @@ hash_digest program::signature_hash(const script& sub,
     const auto bip143 = is_enabled(forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(index_, sub, value_, flags,
-        version_, bip143);
+    return transaction_.signature_hash(input_, sub, value_, flags, version_,
+        bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.

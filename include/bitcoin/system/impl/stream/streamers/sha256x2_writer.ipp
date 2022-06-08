@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
@@ -71,7 +72,10 @@ void sha256x2_writer<OStream>::do_flush() noexcept
 template <typename OStream>
 void sha256x2_writer<OStream>::flusher() noexcept
 {
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest hash;
+    BC_POP_WARNING()
+
     intrinsics::sha256_finalize(context_, hash.data());
     byte_writer<OStream>::do_write_bytes(sha256_hash(hash).data(), hash_size);
     byte_writer<OStream>::do_flush();

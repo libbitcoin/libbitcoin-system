@@ -43,6 +43,7 @@ class BC_API transaction
 {
 public:
     typedef std::shared_ptr<const transaction> cptr;
+    typedef input_cptrs::const_iterator input_iterator;
 
     // Constructors.
     // ------------------------------------------------------------------------
@@ -111,13 +112,12 @@ public:
     bool is_dusty(uint64_t minimum_output_value) const noexcept;
     size_t signature_operations(bool bip16, bool bip141) const noexcept;
     chain::points points() const noexcept;
-    hash_digest output_hash(uint32_t index) const noexcept;
     hash_digest outputs_hash() const noexcept;
     hash_digest points_hash() const noexcept;
     hash_digest sequences_hash() const noexcept;
 
     // signature_hash exposed for op_check_multisig caching.
-    hash_digest signature_hash(uint32_t index, const script& sub,
+    hash_digest signature_hash(const input_iterator& input, const script& sub,
         uint64_t value, uint8_t flags, script_version version,
         bool bip143) const noexcept;
 
@@ -200,16 +200,20 @@ private:
     ////static size_t maximum_size(bool coinbase) noexcept;
 
     // signature hash
-    void signature_hash_single(writer& sink, uint32_t index, const script& sub,
-        uint8_t flags) const noexcept;
-    void signature_hash_none(writer& sink, uint32_t index, const script& sub,
-        uint8_t flags) const noexcept;
-    void signature_hash_all(writer& sink, uint32_t index, const script& sub,
-        uint8_t flags) const noexcept;
-    hash_digest unversioned_signature_hash(uint32_t index, const script& sub,
-        uint8_t flags) const noexcept;
-    hash_digest version_0_signature_hash(uint32_t index, const script& sub,
-        uint64_t value, uint8_t flags, bool bip143) const noexcept;
+    hash_digest output_hash(const input_iterator& input) const noexcept;
+    input_iterator input_at(uint32_t index) const noexcept;
+    uint32_t input_index(const input_iterator& input) const noexcept;
+    void signature_hash_single(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const noexcept;
+    void signature_hash_none(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const noexcept;
+    void signature_hash_all(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const noexcept;
+    hash_digest unversioned_signature_hash(const input_iterator& input,
+        const script& sub, uint8_t flags) const noexcept;
+    hash_digest version_0_signature_hash(const input_iterator& input,
+        const script& sub, uint64_t value, uint8_t flags,
+        bool bip143) const noexcept;
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).

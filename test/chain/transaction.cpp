@@ -1440,10 +1440,11 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     const script prevout_script(std::string{ "dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig" });
     BOOST_REQUIRE(prevout_script.is_valid());
 
-    const auto index = 0u;
+    ////const auto index = 0u;
     const auto value = 0u;
     const auto bip143 = false;
-    const auto sighash = test_tx.signature_hash(index, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
+    const auto& input = test_tx.inputs_ptr()->begin();
+    const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
 }

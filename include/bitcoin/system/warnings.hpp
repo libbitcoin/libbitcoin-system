@@ -54,6 +54,7 @@
     #define NARROWING_CONVERSION 4244
     #define DIAMOND_INHERITANCE 4250
     #define TRUNCATED_CONSTANT 4310
+    #define LOCAL_VARIABLE_NOT_INITIALIZED 4700
 
     // Global (see below).
     #define LOCAL_HIDES_GLOBAL 4459

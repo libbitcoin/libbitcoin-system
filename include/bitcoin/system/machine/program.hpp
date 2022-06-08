@@ -37,6 +37,7 @@ class BC_API program
 {
 public:
     typedef chain::operations::const_iterator op_iterator;
+    typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
     enum class stack
@@ -46,22 +47,19 @@ public:
     };
 
     /// Input script run (default/empty stack).
-    program(const chain::transaction& transaction, const chain::input& input,
-        uint32_t forks, uint32_t index) noexcept;
+    program(const chain::transaction& transaction, const input_iterator& input,
+        uint32_t forks) noexcept;
 
     /// Legacy p2sh or prevout script run (copied input stack).
-    program(const program& other, const chain::script::cptr& script,
-        uint32_t index) noexcept;
+    program(const program& other, const chain::script::cptr& script) noexcept;
 
     /// Legacy p2sh or prevout script run (moved input stack).
-    program(program&& other, const chain::script::cptr& script,
-        uint32_t index) noexcept;
+    program(program&& other, const chain::script::cptr& script) noexcept;
 
     /// Witness script run (witness-initialized stack).
-    program(const chain::transaction& transaction, const chain::input& input,
+    program(const chain::transaction& transaction, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks,
-        chain::script_version version, const chunk_cptrs_ptr& stack,
-        uint32_t index) noexcept;
+        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
 
     /// Defaults.
     program(program&&) = delete;
@@ -92,10 +90,9 @@ public:
 protected:
     friend class interpreter;
 
-    program(const chain::transaction& tx, const chain::input& input,
+    program(const chain::transaction& tx, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks, uint64_t value,
-        chain::script_version version, const chunk_cptrs_ptr& stack,
-        uint32_t index) noexcept;
+        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
 
     /// Constant registers.
     /// -----------------------------------------------------------------------
@@ -186,9 +183,10 @@ private:
 
     // Input script.
     const chain::transaction& transaction_;
-    const uint32_t index_;
-    const uint32_t sequence_;
-    const bool final_;
+    const input_iterator input_;
+    ////const uint32_t index_;
+    ////const uint32_t sequence_;
+    ////const bool final_;
 
     // Prevout script.
     const chain::script::cptr script_;

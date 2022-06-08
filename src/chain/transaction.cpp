@@ -380,7 +380,11 @@ hash_digest transaction::hash(bool witness) const noexcept
     if (witness && segregated_ && is_coinbase())
         return null_hash;
 
-    hash_digest sha256{};
+    // This is an out parameter.
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
     to_data(sink, witness);
     sink.flush();
@@ -433,32 +437,15 @@ chain::points transaction::points() const noexcept
     return out;
 }
 
-hash_digest transaction::output_hash(uint32_t index) const noexcept
-{
-    //*************************************************************************
-    // CONSENSUS: if index exceeds outputs in signature hash, return null_hash.
-    //*************************************************************************
-    if (index >= outputs_->size())
-        return null_hash;
-
-    hash_digest sha256{};
-    hash::sha256::copy sink(sha256);
-
-    // Guarded above.
-    BC_PUSH_WARNING(USE_GSL_AT)
-    (*outputs_)[index]->to_data(sink);
-    BC_POP_WARNING()
-
-    sink.flush();
-    return sha256_hash(sha256);
-}
-
 hash_digest transaction::outputs_hash() const noexcept
 {
-    hash_digest sha256{};
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
 
-    const auto& outs = *outputs_ptr();
+    const auto& outs = *outputs_;
     for (const auto& output: outs)
         output->to_data(sink);
 
@@ -468,10 +455,13 @@ hash_digest transaction::outputs_hash() const noexcept
 
 hash_digest transaction::points_hash() const noexcept
 {
-    hash_digest sha256{};
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
 
-    const auto& ins = *inputs_ptr();
+    const auto& ins = *inputs_;
     for (const auto& input: ins)
         input->point().to_data(sink);
 
@@ -481,10 +471,13 @@ hash_digest transaction::points_hash() const noexcept
 
 hash_digest transaction::sequences_hash() const noexcept
 {
-    hash_digest sha256{};
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
 
-    const auto& ins = *inputs_ptr();
+    const auto& ins = *inputs_;
     for (const auto& input: ins)
         sink.write_4_bytes_little_endian(input->sequence());
 
@@ -505,6 +498,27 @@ static const auto empty_script = script{}.to_data(prefixed);
 static const auto zero_sequence = to_little_endian<uint32_t>(0);
 BC_POP_WARNING()
 
+// private
+transaction::input_iterator transaction::input_at(
+    uint32_t index) const noexcept
+{
+    // Guarded by check_signature and create_endorsement.
+    BC_ASSERT_MSG(index < inputs_->size(), "invalid input index");
+
+    return std::next(inputs_->begin(), index);
+}
+
+// private
+uint32_t transaction::input_index(const input_iterator& input) const noexcept
+{
+    // Guarded by unversioned_signature_hash and output_hash.
+    BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
+
+    // std::distance<std::vector> is constant time, just as array dereference.
+    return possible_narrow_and_sign_cast<uint32_t>(
+        std::distance(inputs_->begin(), input));
+}
+
 // C++14: switch in constexpr.
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
@@ -524,53 +538,51 @@ inline coverage mask_sighash(uint8_t flags) noexcept
     }
 }
 
-void transaction::signature_hash_single(writer& sink, uint32_t index,
-    const script& sub, uint8_t flags) const noexcept
+/// REQUIRES INDEX.
+void transaction::signature_hash_single(writer& sink,
+    const input_iterator& input, const script& sub,
+    uint8_t flags) const noexcept
 {
-    const auto write_inputs = [&](writer& sink) noexcept
+    const auto write_inputs = [this, &sink, &input, &sub, flags](
+        writer& sink) noexcept
     {
-        const auto& inputs = *inputs_;
-
-        // Guarded private method.
-        BC_PUSH_WARNING(USE_GSL_AT)
-        const auto& self = inputs[index];
-        BC_POP_WARNING()
-
+        const auto& self = **input;
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_cptrs::const_iterator input{};
+        input_cptrs::const_iterator in;
 
-        sink.write_variable(anyone ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs_->size());
 
-        for (input = inputs.begin(); !anyone && *input != self; ++input)
+        for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
             sink.write_bytes(zero_sequence);
         }
 
-        self->point().to_data(sink);
+        self.point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self->sequence());
+        sink.write_4_bytes_little_endian(self.sequence());
 
-        for (++input; !anyone && input != inputs.end(); ++input)
+        for (++in; !anyone && in != inputs_->end(); ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
             sink.write_bytes(zero_sequence);
         }
     };
 
-    const auto write_outputs = [&](writer& sink) noexcept
+    const auto write_outputs = [this, &sink, &input](
+        writer& sink) noexcept
     {
+        // Guarded by unversioned_signature_hash.
+        const auto index = input_index(input);
+
         sink.write_variable(add1(index));
 
         for (size_t output = 0; output < index; ++output)
             sink.write_bytes(null_output);
 
-        // Index guarded in unversioned_signature_hash.
-        BC_PUSH_WARNING(USE_GSL_AT)
-        (*outputs_)[index]->to_data(sink);
-        BC_POP_WARNING()
+        outputs_->at(index)->to_data(sink);
     };
 
     sink.write_4_bytes_little_endian(version_);
@@ -580,37 +592,33 @@ void transaction::signature_hash_single(writer& sink, uint32_t index,
     sink.write_4_bytes_little_endian(flags);
 }
 
-void transaction::signature_hash_none(writer& sink, uint32_t index,
-    const script& sub, uint8_t flags) const noexcept
+void transaction::signature_hash_none(writer& sink,
+    const input_iterator& input, const script& sub,
+    uint8_t flags) const noexcept
 {
-    const auto write_inputs = [&](writer& sink) noexcept
+    const auto write_inputs = [this, &input, &sub, flags](
+        writer& sink) noexcept
     {
-        const auto& inputs = *inputs_;
-
-        // Guarded private method.
-        BC_PUSH_WARNING(USE_GSL_AT)
-        const auto& self = inputs[index];
-        BC_POP_WARNING()
-
+        const auto& self = **input;
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_cptrs::const_iterator input{};
+        input_cptrs::const_iterator in;
 
-        sink.write_variable(anyone ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs_->size());
 
-        for (input = inputs.begin(); !anyone && *input != self; ++input)
+        for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
             sink.write_bytes(zero_sequence);
         }
 
-        self->point().to_data(sink);
+        self.point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self->sequence());
+        sink.write_4_bytes_little_endian(self.sequence());
 
-        for (++input; !anyone && input != inputs.end(); ++input)
+        for (++in; !anyone && in != inputs_->end(); ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
             sink.write_bytes(zero_sequence);
         }
@@ -623,43 +631,39 @@ void transaction::signature_hash_none(writer& sink, uint32_t index,
     sink.write_4_bytes_little_endian(flags);
 }
 
-void transaction::signature_hash_all(writer& sink, uint32_t index,
-    const script& sub, uint8_t flags) const noexcept
+void transaction::signature_hash_all(writer& sink,
+    const input_iterator& input, const script& sub,
+    uint8_t flags) const noexcept
 {
-    const auto write_inputs = [&](writer& sink) noexcept
+    const auto write_inputs = [this, &input, &sub, flags](
+        writer& sink) noexcept
     {
-        const auto& inputs = *inputs_;
-
-        // Guarded private method.
-        BC_PUSH_WARNING(USE_GSL_AT)
-        const auto& self = inputs[index];
-        BC_POP_WARNING();
-
+        const auto& self = **input;
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-        input_cptrs::const_iterator input{};
+        input_cptrs::const_iterator in;
 
-        sink.write_variable(anyone ? one : inputs.size());
+        sink.write_variable(anyone ? one : inputs_->size());
 
-        for (input = inputs.begin(); !anyone && *input != self; ++input)
+        for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
-            sink.write_4_bytes_little_endian((*input)->sequence());
+            sink.write_4_bytes_little_endian((*in)->sequence());
         }
 
-        self->point().to_data(sink);
+        self.point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self->sequence());
+        sink.write_4_bytes_little_endian(self.sequence());
 
-        for (++input; !anyone && input != inputs.end(); ++input)
+        for (++in; !anyone && in != inputs_->end(); ++in)
         {
-            (*input)->point().to_data(sink);
+            (*in)->point().to_data(sink);
             sink.write_bytes(empty_script);
-            sink.write_4_bytes_little_endian((*input)->sequence());
+            sink.write_4_bytes_little_endian((*in)->sequence());
         }
     };
 
-    const auto write_outputs = [&](writer& sink) noexcept
+    const auto write_outputs = [this](writer& sink) noexcept
     {
         sink.write_variable(outputs_->size());
         for (const auto& output: *outputs_)
@@ -674,33 +678,41 @@ void transaction::signature_hash_all(writer& sink, uint32_t index,
 }
 
 // private
-hash_digest transaction::unversioned_signature_hash(uint32_t index,
-    const script& sub, uint8_t flags) const noexcept
+hash_digest transaction::unversioned_signature_hash(
+    const input_iterator& input, const script& sub,
+    uint8_t flags) const noexcept
 {
     // Set options.
     const auto flag = mask_sighash(flags);
 
-    //*************************************************************************
-    // CONSENSUS: if index exceeds outputs in signature hash, return one_hash.
-    //*************************************************************************
-    if ((flag == coverage::hash_single) && index >= outputs_ptr()->size())
-        return one_hash;
-
     // Create hash writer.
-    hash_digest sha256{};
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
 
     switch (flag)
     {
         case coverage::hash_single:
-            signature_hash_single(sink, index, sub, flags);
+        {
+            //*****************************************************************
+            // CONSENSUS: return one_hash if index exceeds outputs in sighash.
+            // Bug: https://bitcointalk.org/index.php?topic=260595
+            // Expoit: http://joncave.co.uk/2014/08/bitcoin-sighash-single/
+            //*****************************************************************
+            if (input_index(input) >= outputs_->size())
+                return one_hash;
+
+            signature_hash_single(sink, input, sub, flags);
             break;
+        }
         case coverage::hash_none:
-            signature_hash_none(sink, index, sub, flags);
+            signature_hash_none(sink, input, sub, flags);
             break;
         default:
         case coverage::hash_all:
-            signature_hash_all(sink, index, sub, flags);
+            signature_hash_all(sink, input, sub, flags);
     }
 
     sink.flush();
@@ -732,13 +744,34 @@ void transaction::initialize_hash_cache() const noexcept
 }
 
 // private
-hash_digest transaction::version_0_signature_hash(uint32_t index,
+hash_digest transaction::output_hash(const input_iterator& input) const noexcept
+{
+    const auto index = input_index(input);
+
+    //*************************************************************************
+    // CONSENSUS: if index exceeds outputs in signature hash, return null_hash.
+    //*************************************************************************
+    if (index >= outputs_->size())
+        return null_hash;
+
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
+    hash::sha256::copy sink(sha256);
+    outputs_->at(index)->to_data(sink);
+    sink.flush();
+    return sha256_hash(sha256);
+}
+
+// private
+hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     const script& sub, uint64_t value, uint8_t flags,
     bool bip143) const noexcept
 {
     // bip143/v0: the way of serialization is changed.
     if (!bip143)
-        return unversioned_signature_hash(index, sub, flags);
+        return unversioned_signature_hash(input, sub, flags);
 
     // Set options.
     // C++14: switch in constexpr.
@@ -746,14 +779,13 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
     const auto flag = mask_sighash(flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
-
-    // Guarded private method.
-    BC_PUSH_WARNING(USE_GSL_AT)
-    const auto& input = (*inputs_)[index];
-    BC_POP_WARNING()
+    const auto& self = **input;
 
     // Create hash writer.
-    hash_digest sha256{};
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest sha256;
+    BC_POP_WARNING()
+
     hash::sha256::copy sink(sha256);
 
     // Create signature hash.
@@ -774,14 +806,14 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
     else
         sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
-    input->point().to_data(sink);
+    self.point().to_data(sink);
     sub.to_data(sink, prefixed);
     sink.write_little_endian(value);
-    sink.write_little_endian(input->sequence());
+    sink.write_little_endian(self.sequence());
 
     // outputs
     if (single)
-        sink.write_bytes(output_hash(index));
+        sink.write_bytes(output_hash(input));
     else if (cache_)
         sink.write_bytes(all ? cache_->outputs : null_hash);
     else
@@ -802,52 +834,53 @@ hash_digest transaction::version_0_signature_hash(uint32_t index,
 // bytes in the signature hash preimage serialization.
 // ****************************************************************************
 
-hash_digest transaction::signature_hash(uint32_t index, const script& sub,
-    uint64_t value, uint8_t flags, script_version version,
+hash_digest transaction::signature_hash(const input_iterator& input,
+    const script& sub, uint64_t value, uint8_t flags, script_version version,
     bool bip143) const noexcept
 {
     // There is no rational interpretation of a signature hash for a coinbase.
     BC_ASSERT(!is_coinbase());
 
-    // Null return implies program misparameterization, not consensus possible.
-    if (index >= inputs_ptr()->size())
-        return {};
-
     switch (version)
     {
         case script_version::unversioned:
-            return unversioned_signature_hash(index, sub, flags);
+            return unversioned_signature_hash(input, sub, flags);
         case script_version::zero:
-            return version_0_signature_hash(index, sub, value, flags, bip143);
+            return version_0_signature_hash(input, sub, value, flags, bip143);
         case script_version::reserved:
         default:
             return {};
     }
 }
 
+// This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
     const data_slice& public_key, const script& sub, uint32_t index,
     uint64_t value, uint8_t flags, script_version version,
     bool bip143) const noexcept
 {
-    if (signature.empty() || public_key.empty())
+    if ((index >= inputs_->size()) ||
+        signature.empty() || public_key.empty())
         return false;
 
-    const auto sighash = signature_hash(index, sub, value, flags, version,
-        bip143);
+    const auto sighash = signature_hash(input_at(index), sub, value, flags,
+        version, bip143);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
 }
 
+// This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& sub, uint32_t index, uint64_t value, uint8_t flags,
     script_version version, bool bip143) const noexcept
 {
-    out.reserve(max_endorsement_size);
+    if (index >= inputs_->size())
+        return false;
 
-    const auto sighash = signature_hash(index, sub, value, flags, version,
-        bip143);
+    out.reserve(max_endorsement_size);
+    const auto sighash = signature_hash(input_at(index), sub, value, flags,
+        version, bip143);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;
@@ -1231,17 +1264,17 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     code ec;
     bool witnessed;
 
-    BC_PUSH_WARNING_UNGUARDED(USE_GSL_AT)
-    const chain::input& in = *(*inputs_)[index];
-    BC_POP_WARNING()
+    // Iterator and reference to the input (constant time with std::vector).
+    const auto it = std::next(inputs_->begin(), index);
+    const auto& in = **it;
 
     // Evaluate input script.
-    program input_program(*this, in, state.forks, index);
+    program input_program(*this, it, state.forks);
     if ((ec = interpreter::run(input_program)))
         return ec;
 
     // Evaluate output script using stack copied from input script.
-    program prevout_program(input_program, in.prevout->script_ptr(), index);
+    program prevout_program(input_program, in.prevout->script_ptr());
     if ((ec = interpreter::run(prevout_program)))
         return ec;
 
@@ -1268,8 +1301,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
-                program witness(*this, in, script, state.forks,
-                    in.prevout->script().version(), stack, index);
+                program witness(*this, it, script, state.forks,
+                    in.prevout->script().version(), stack);
 
                 if ((ec = interpreter::run(witness)))
                     return ec;
@@ -1300,7 +1333,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             { *input_program.safe_pop(), false });
 
         // Evaluate embedded script using stack moved from input script.
-        program embed_program(std::move(input_program), embed_script, index);
+        program embed_program(std::move(input_program), embed_script);
         if ((ec = interpreter::run(embed_program)))
             return ec;
 
@@ -1327,8 +1360,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
-                    program witness(*this, in, script, state.forks,
-                        embed_script->version(), stack, index);
+                    program witness(*this, it, script, state.forks,
+                        embed_script->version(), stack);
 
                     if ((ec = interpreter::run(witness)))
                         return ec;
