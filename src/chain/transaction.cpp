@@ -514,7 +514,6 @@ uint32_t transaction::input_index(const input_iterator& input) const noexcept
     // Guarded by unversioned_signature_hash and output_hash.
     BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
 
-    // std::distance<std::vector> is constant time, just as array dereference.
     return possible_narrow_and_sign_cast<uint32_t>(
         std::distance(inputs_->begin(), input));
 }
@@ -1261,12 +1260,14 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
 {
     using namespace system::machine;
 
-    code ec;
-    bool witnessed;
+    if (index >= inputs_->size())
+        return error::inputs_overflow;
 
     // Iterator and reference to the input (constant time with std::vector).
     const auto it = std::next(inputs_->begin(), index);
     const auto& in = **it;
+    bool witnessed;
+    code ec;
 
     // Evaluate input script.
     program input_program(*this, it, state.forks);

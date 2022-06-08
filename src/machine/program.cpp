@@ -59,14 +59,6 @@ inline chunk_cptrs_ptr copy_stack(const chunk_cptrs& stack) noexcept
 // Constructors.
 // ----------------------------------------------------------------------------
 
-// Pass input const_iterator vs. input&.
-// Don't store input, index, sequence, or final.
-// Just obtain from the iterator, exposed as protected methods.
-// Index is obtained from the std::distance(inputs.begin, it), though this
-// requires that the iterator is an interator of the inputs vector. It is a
-// runtime failure if the iterator is null/end and is a compile time failure to
-// compare an from of a different collection (i.e. via std::distance).
-
 // Input script run (default/empty stack).
 program::program(const chain::transaction& tx, const input_iterator& input,
      uint32_t forks) noexcept
@@ -351,7 +343,7 @@ void program::swap(size_t left, size_t right) noexcept
     // This must be guarded.
     BC_ASSERT(std::max(left, right) < size());
 
-    // Stack index is zero-based, last element is "top".
+    // Stack index is zero-based, back() is "top"/[0].
     std::swap(
         *std::prev(primary_->end(), add1(left)),
         *std::prev(primary_->end(), add1(right)));
@@ -363,7 +355,7 @@ void program::erase(size_t index) noexcept
     // This must be guarded.
     BC_ASSERT(index < size());
 
-    // Stack index is zero-based, last element is "top".
+    // Stack index is zero-based, back() is "top"/[0].
     primary_->erase(std::prev(primary_->end(), add1(index)));
 }
 
@@ -375,7 +367,7 @@ const chunk_cptr& program::item(size_t index) const noexcept
     // This must be guarded.
     BC_ASSERT(index < size());
 
-    // Stack index is zero-based (zero is top).
+    // Stack index is zero-based, back() is "top"/[0].
     return *std::prev(primary_->end(), add1(index));
 }
 
