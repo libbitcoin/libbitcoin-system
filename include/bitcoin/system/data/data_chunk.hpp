@@ -74,15 +74,6 @@ typedef std::vector<data_chunk> data_stack;
 typedef std::shared_ptr<data_stack> stack_ptr;
 typedef std::shared_ptr<const data_stack> stack_cptr;
 
-typedef std::vector<stack_ptr> stack_ptrs;
-typedef std::vector<stack_cptr> stack_cptrs;
-
-typedef std::shared_ptr<stack_ptrs> stack_ptrs_ptr;
-typedef std::shared_ptr<const stack_ptrs> stack_ptrs_cptr;
-
-typedef std::shared_ptr<stack_cptrs> stack_cptrs_ptr;
-typedef std::shared_ptr<const stack_cptrs> stack_cptrs_cptr;
-
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) noexcept;
 
