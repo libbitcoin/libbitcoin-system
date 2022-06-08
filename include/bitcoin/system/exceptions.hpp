@@ -56,7 +56,7 @@ using dependency_exception = std::runtime_error;
 
 /// Maths.
 using overflow_exception = std::overflow_error;
-using underflow_exception = std::underflow_error;
+////using underflow_exception = std::underflow_error;
 
 /// This is used as a guard for math operations that should not fail under
 /// expected conditions (such as block height exceeding max_uint32). This should
