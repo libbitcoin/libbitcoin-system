@@ -542,7 +542,7 @@ void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
     uint8_t flags) const noexcept
 {
-    const auto write_inputs = [this, &sink, &input, &sub, flags](
+    const auto write_inputs = [this, &input, &sub, flags](
         writer& sink) noexcept
     {
         const auto& self = **input;
@@ -570,7 +570,7 @@ void transaction::signature_hash_single(writer& sink,
         }
     };
 
-    const auto write_outputs = [this, &sink, &input](
+    const auto write_outputs = [this, &input](
         writer& sink) noexcept
     {
         // Guarded by unversioned_signature_hash.
