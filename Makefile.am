@@ -220,6 +220,7 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
+    test/integrals.cpp \
     test/main.cpp \
     test/settings.cpp \
     test/test.cpp \
@@ -378,6 +379,7 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
+    include/bitcoin/system/integrals.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/version.hpp \
     include/bitcoin/system/warnings.hpp

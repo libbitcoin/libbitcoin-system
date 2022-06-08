@@ -60,14 +60,8 @@ add_compile_options( "-Wno-missing-braces" )
 # Ignore comments within comments or commenting of backslash extended lines.
 add_compile_options( "-Wno-comment" )
 
-# Suppress warning for copy of implicitly generated copy constructor.
-add_compile_options( "-Wno-deprecated-copy" )
-
 # Allow use of C99 'long long' type.
 add_compile_options( "-Wno-long-long" )
-
-# Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw.
-add_compile_options( "-DBOOST_EXCEPTION_DISABLE" )
 
 # Conflict in stdlib under clang.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -526,6 +520,7 @@ if (with-tests)
     add_executable( libbitcoin-system-test
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
+        "../../test/integrals.cpp"
         "../../test/main.cpp"
         "../../test/settings.cpp"
         "../../test/test.cpp"

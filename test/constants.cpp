@@ -18,12 +18,6 @@
  */
 #include "test.hpp"
 
-static_assert(zero == 0u, "");
-static_assert(one == 1u, "");
-static_assert(two == 2u, "");
-static_assert(byte_bits == 8u, "");
-static_assert(negative_one == -1, "");
-
 static_assert(is_zero(0), "");
 static_assert(!is_zero(1u), "");
 static_assert(!is_zero(0xff), "");
@@ -92,6 +86,11 @@ static_assert(to_bits(-42) == -42 * 8, "");
 static_assert(to_bits(0xff) == 0xff * 8, "");
 static_assert(std::is_same<decltype(to_bits<int16_t>(0)), int16_t>::value, "");
 
+static_assert(to_byte('\0') == uint8_t{ 0 }, "");
+static_assert(to_byte('x') == uint8_t{ 'x' }, "");
+static_assert(to_byte('\xff') == uint8_t{ 255 }, "");
+static_assert(std::is_same<decltype(to_byte('\0')), uint8_t>::value, "");
+
 static_assert(to_bytes(0) == 0 / 8, "");
 static_assert(to_bytes(1u) == 1u / 8u, "");
 static_assert(to_bytes(-42) == -42 / 8, "");
@@ -145,20 +144,31 @@ static_assert(width<unsigned int>() == to_bits(sizeof(unsigned int)), "");
 static_assert(width<unsigned long>() == to_bits(sizeof(unsigned long)), "");
 static_assert(width<unsigned long long>() == to_bits(sizeof(unsigned long long)), "");
 static_assert(width<wchar_t>() == to_bits(sizeof(wchar_t)), "");
-static_assert(width<int8_t>() == 8, "");
-static_assert(width<uint8_t>() == 8, "");
-static_assert(width<int16_t>() == 16, "");
-static_assert(width<uint16_t>() == 16, "");
-static_assert(width<int32_t>() == 32, "");
-static_assert(width<uint32_t>() == 32, "");
-static_assert(width<int64_t>() == 64, "");
-static_assert(width<uint64_t>() == 64, "");
+static_assert(width<int8_t>() == 8u, "");
+static_assert(width<uint8_t>() == 8u, "");
+static_assert(width<int16_t>() == 16u, "");
+static_assert(width<uint16_t>() == 16u, "");
+static_assert(width<int32_t>() == 32u, "");
+static_assert(width<uint32_t>() == 32u, "");
+static_assert(width<int64_t>() == 64u, "");
+static_assert(width<uint64_t>() == 64u, "");
 static_assert(width(value42) == to_bits(sizeof(value42)), "");
 static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value, "");
 
-BOOST_AUTO_TEST_SUITE(constants_tests)
+static_assert(variable_size(zero) == 1u, "");
+static_assert(variable_size(1) == 1u, "");
+static_assert(variable_size(0xfe) == 3u, "");
+static_assert(variable_size(0x10000) == 5u, "");
+static_assert(variable_size(0x100000000) == 9u, "");
+static_assert(variable_size(max_uint8) == 3u, "");
+static_assert(variable_size(max_uint16) == 3u, "");
+static_assert(variable_size(max_uint32) == 5u, "");
+static_assert(variable_size(max_uint32) == 5u, "");
+static_assert(variable_size(max_uint64) == 9u, "");
 
 // These results are inconsistent across platforms, and unimportant.
+////BOOST_AUTO_TEST_SUITE(constants_tests)
+////
 ////BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
 ////{
 ////    BOOST_REQUIRE_EQUAL(width<uintx>(), 192u);
@@ -174,14 +184,5 @@ BOOST_AUTO_TEST_SUITE(constants_tests)
 ////    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 320u);
 ////    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 576u);
 ////}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-static_assert(to_byte('\0') == uint8_t{ 0 }, "");
-static_assert(to_byte('x') == uint8_t{ 'x' }, "");
-static_assert(to_byte('\xff') == uint8_t{ 255 }, "");
-
-static_assert(variable_size(1) == 1u, "");
-static_assert(variable_size(0xfe) == 3u, "");
-static_assert(variable_size(0x10000) == 5u, "");
-static_assert(variable_size(0x100000000) == 9u, "");
+////
+////BOOST_AUTO_TEST_SUITE_END()

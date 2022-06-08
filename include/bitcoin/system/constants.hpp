@@ -24,42 +24,13 @@
 #include <limits>
 #include <type_traits>
 
-// TODO: Inclusion order change.
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/integrals.hpp>
 
 namespace libbitcoin {
 
-// Guard assumptions within the codebase.
-static_assert(sizeof(size_t) == sizeof(uint32_t) ||
-    sizeof(size_t) == sizeof(uint64_t), "unsupported size_t");
-
-// Integral value limits.
-constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
-constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
-constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
-constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
-constexpr int16_t min_int16 = std::numeric_limits<int16_t>::min();
-constexpr int16_t max_int16 = std::numeric_limits<int16_t>::max();
-constexpr uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
-constexpr uint32_t max_uint32 = std::numeric_limits<uint32_t>::max();
-constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
-constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
-constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
-
-// Use zero, one, two when the unsigned value is required.
-// Literals are used below to prevent sign (unsigned) promotion.
-constexpr size_t zero = 0;
-constexpr size_t one = 1;
-constexpr size_t two = 2;
-
-// The number of bits in a byte (uint8_t).
-constexpr uint8_t byte_bits = 8;
-
-// Use negative_one when returning negative as a sentinel value.
-constexpr int32_t negative_one = -1;
-
 // Avoid typed casts due to circular header inclusion.
-// All functions below 
+// Avoid integral constants due to pre-cast integral conversion.
 
 template <typename Type>
 constexpr bool is_zero(Type value) noexcept
@@ -115,6 +86,13 @@ constexpr Type to_bits(Type bytes) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(bytes * 8);
+    BC_POP_WARNING()
+}
+
+constexpr uint8_t to_byte(char character) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<uint8_t>(character);
     BC_POP_WARNING()
 }
 
@@ -177,19 +155,6 @@ constexpr size_t width(Type value) noexcept
     // This is not always a logical size for non-integral types.
     return to_bits(sizeof(value));
 }
-
-constexpr uint8_t to_byte(char character) noexcept
-{
-    // Avoid sign_cast due to circular header inclusion.
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<uint8_t>(character);
-    BC_POP_WARNING()
-}
-
-/// Variable integer prefix sentinels.
-constexpr uint8_t varint_two_bytes = 0xfd;
-constexpr uint8_t varint_four_bytes = 0xfe;
-constexpr uint8_t varint_eight_bytes = 0xff;
 
 /// Determine the bitcoin variable-serialized size of a given value.
 constexpr size_t variable_size(uint64_t value) noexcept

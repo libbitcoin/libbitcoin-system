@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\integrals.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>

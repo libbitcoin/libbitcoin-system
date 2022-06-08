@@ -125,6 +125,7 @@
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\integrals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />

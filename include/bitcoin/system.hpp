@@ -19,6 +19,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/integrals.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/warnings.hpp>

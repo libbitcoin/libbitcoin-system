@@ -878,6 +878,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\integrals.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp">
       <Filter>include\bitcoin\system\machine</Filter>
     </ClInclude>

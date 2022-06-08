@@ -48,8 +48,8 @@ ICU_ARCHIVE="icu4c-55_2-src.tgz"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.78.0/boost_1_78_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_78_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.76.0/boost_1_76_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_76_0.tar.bz2"
 
 
 # Define utility functions.
@@ -406,9 +406,6 @@ build_from_tarball()
     local OPTIONS=$7
     shift 7
 
-    local SAVE_LDFLAGS="$LDFLAGS"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-
     # For some platforms we need to set ICU pkg-config path.
     if [[ ! ($BUILD) ]]; then
         if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
@@ -419,6 +416,7 @@ build_from_tarball()
 
     # Because ICU tools don't know how to locate internal dependencies.
     if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
+        local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
@@ -717,7 +715,6 @@ set_with_boost_prefix
 #------------------------------------------------------------------------------
 ICU_OPTIONS=(
 "--enable-draft" \
-"--enable-rpath" \
 "--enable-tools" \
 "--disable-extras" \
 "--disable-icuio" \

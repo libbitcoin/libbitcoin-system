@@ -346,6 +346,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\integrals.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\machine.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number.hpp" />

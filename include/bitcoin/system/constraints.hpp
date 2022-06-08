@@ -30,7 +30,14 @@
 namespace libbitcoin {
 namespace system {
 
-// C++14: use enable_if_t.
+// C++11: std::integral_constant
+// C++11: std::conditional
+// C++14: std::conditional_t
+// C++17: std::conjunction/conjunction_v
+// C++17: std::disjunction/disjunction_v
+// C++17: std::negation/negation_v
+
+// C++14: use enable_if_t
 template <bool Bool, typename Type = void>
 using enable_if_type = typename std::enable_if<Bool, Type>::type;
 
