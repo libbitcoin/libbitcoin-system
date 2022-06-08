@@ -39,78 +39,87 @@ namespace machine {
 
 using namespace system::chain;
 
-static const transaction default_transaction{};
+constexpr auto unused_value = max_uint64;
+constexpr auto unused_version = script_version::unversioned;
+
+inline chunk_cptrs_ptr default_stack() noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return std::make_shared<chunk_cptrs>();
+    BC_POP_WARNING()
+}
+
+inline chunk_cptrs_ptr copy_stack(const chunk_cptrs& stack) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return std::make_shared<chunk_cptrs>(chunk_cptrs{ stack });
+    BC_POP_WARNING()
+}
 
 // Constructors.
 // ----------------------------------------------------------------------------
 
-/// Create an instance with empty stacks, value unused/max (input run).
-program::program(const script::cptr& script,
-    const chain::transaction& tx,
-    uint32_t index,
-    uint32_t forks) noexcept
-  : script_(script),
-    transaction_(tx),
-    input_index_(index),
-    forks_(forks),
-    value_(max_uint64),
-    version_(script_version::unversioned),
-    negative_count_(0),
-    operation_count_(0)
-{
-    // This is guarded by is_invalid, and in the interpreter.
-    BC_ASSERT(index < transaction_.inputs_ptr()->size());
-}
-
-// Create using copied tx, input, forks, value, stack (prevout run).
-program::program(const script::cptr& script, const program& other) noexcept
-  : script_(script),
-    transaction_(other.transaction_),
-    input_index_(other.input_index_),
-    forks_(other.forks_),
-    value_(other.value_),
-    version_(other.version_),
-    negative_count_(0),
-    operation_count_(0),
-    primary_(other.primary_)
+// Input script run (default/empty stack).
+program::program(const chain::transaction& tx, const chain::input& input,
+     uint32_t forks, uint32_t index) noexcept
+  : program(tx, input, input.script_ptr(), forks, unused_value, unused_version,
+      default_stack(), index)
 {
 }
 
-/// Create using copied tx, input, forks, value and moved stack (p2sh run).
-program::program(const script::cptr& script, program&& other) noexcept
-  : script_(script),
-    transaction_(other.transaction_),
-    input_index_(other.input_index_),
+// Legacy p2sh or prevout script run (copied input stack - use first).
+program::program(const program& other, const script::cptr& script,
+    uint32_t index) noexcept
+  : transaction_(other.transaction_),
+    index_(index),
+    sequence_(other.sequence_),
+    final_(other.final_),
+    script_(script),
     forks_(other.forks_),
     value_(other.value_),
     version_(other.version_),
-    negative_count_(0),
-    operation_count_(0),
+    primary_(copy_stack(*other.primary_))
+{
+}
+
+// Legacy p2sh or prevout script run (moved input stack - use last).
+program::program(program&& other, const script::cptr& script,
+    uint32_t index) noexcept
+  : transaction_(other.transaction_),
+    index_(index),
+    sequence_(other.sequence_),
+    final_(other.final_),
+    script_(script),
+    forks_(other.forks_),
+    value_(other.value_),
+    version_(other.version_),
     primary_(std::move(other.primary_))
 {
 }
 
-// Create an instance with initialized stack (witness run).
-// Condition, alternate, jump and operation_count are not copied.
-program::program(const script::cptr& script,
-    const chain::transaction& tx,
-    uint32_t index,
-    uint32_t forks,
-    chunk_cptrs&& stack,
-    uint64_t value,
-    script_version version) noexcept
-  : script_(script),
-    transaction_(tx),
-    input_index_(index),
+// Witness script run (witness-initialized stack).
+program::program(const chain::transaction& tx, const chain::input& input,
+    const script::cptr& script, uint32_t forks, script_version version,
+    const chunk_cptrs_ptr& stack, uint32_t index) noexcept
+  : program(tx, input, script, forks, input.prevout->value(), version, stack, index)
+{
+}
+
+// protected
+program::program(const chain::transaction& tx, const chain::input& input,
+    const script::cptr& script, uint32_t forks, uint64_t value,
+    script_version version, const chunk_cptrs_ptr& stack,
+    uint32_t index) noexcept
+  : transaction_(tx),
+    index_(index),
+    sequence_(input.sequence()),
+    final_(input.is_final()),
+    script_(script),
     forks_(forks),
     value_(value),
     version_(version),
-    negative_count_(0),
-    operation_count_(0),
-    primary_(std::move(stack))
+    primary_(stack)
 {
-    // This is guarded by is_invalid, and in the interpreter.
-    BC_ASSERT(index < tx.inputs_ptr()->size());
 }
 
 // Public.
@@ -122,14 +131,13 @@ program::program(const script::cptr& script,
 // Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_invalid() const noexcept
 {
-    const auto bip141 = is_enabled(forks::bip141_rule);
-    ////const auto nops_rule = is_enabled(forks::nops_rule);
-
     // TODO: nops rule must be enabled in tests and config.
+    ////const auto nops_rule = is_enabled(forks::nops_rule);
+    const auto bip141 = is_enabled(forks::bip141_rule);
+
     return
         (/*nops_rule && */script_->is_oversized()) ||
-        (input_index_ > transaction_.inputs_ptr()->size()) ||
-        (bip141 && !chain::witness::is_push_size(primary_));
+        (bip141 && !chain::witness::is_push_size(*primary_));
 }
 
 bool program::is_enabled(chain::forks rule) const noexcept
@@ -203,14 +211,14 @@ program::op_iterator program::end() const noexcept
 // Constant registers.
 // ----------------------------------------------------------------------------
 
-const input& program::input() const noexcept
+bool program::is_final() const noexcept
 {
-    // array index is guarded by caller using is_invalid().
-    BC_ASSERT(input_index_ < transaction().inputs_ptr()->size());
+    return final_;
+}
 
-    BC_PUSH_WARNING(USE_GSL_AT)
-    return *(*transaction_.inputs_ptr())[input_index_];
-    BC_POP_WARNING()
+uint32_t program::sequence() const noexcept
+{
+    return sequence_;
 }
 
 const chain::transaction& program::transaction() const noexcept
@@ -241,14 +249,14 @@ void program::push(chunk_cptr&& item) noexcept
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_.push_back(std::move(item));
+    primary_->push_back(std::move(item));
     BC_POP_WARNING()
 }
 
 void program::push(const chunk_cptr& item) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_.push_back(item);
+    primary_->push_back(item);
     BC_POP_WARNING()
 }
 
@@ -262,7 +270,7 @@ chunk_cptr program::pop() noexcept
     BC_ASSERT(!is_empty());
 
     // This must be a pointer copy, as the pointer is about to be destroyed.
-    const chunk_cptr value{ primary_.back() };
+    const chunk_cptr value{ primary_->back() };
     drop();
     return value;
 }
@@ -272,7 +280,7 @@ void program::drop() noexcept
     // This must be guarded (is_relaxed_push is checked in transaction).
     BC_ASSERT(!is_empty());
 
-    primary_.pop_back();
+    primary_->pop_back();
 }
 
 bool program::pop(int32_t& out_value) noexcept
@@ -345,8 +353,8 @@ void program::swap(size_t left, size_t right) noexcept
 
     // Stack index is zero-based, last element is "top".
     std::swap(
-        *std::prev(primary_.end(), add1(left)),
-        *std::prev(primary_.end(), add1(right)));
+        *std::prev(primary_->end(), add1(left)),
+        *std::prev(primary_->end(), add1(right)));
 }
 
 // pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
@@ -356,7 +364,7 @@ void program::erase(size_t index) noexcept
     BC_ASSERT(index < size());
 
     // Stack index is zero-based, last element is "top".
-    primary_.erase(std::prev(primary_.end(), add1(index)));
+    primary_->erase(std::prev(primary_->end(), add1(index)));
 }
 
 // Primary stack push/pop const functions.
@@ -368,17 +376,17 @@ const chunk_cptr& program::item(size_t index) const noexcept
     BC_ASSERT(index < size());
 
     // Stack index is zero-based (zero is top).
-    return *std::prev(primary_.end(), add1(index));
+    return *std::prev(primary_->end(), add1(index));
 }
 
 size_t program::size() const noexcept
 {
-    return primary_.size();
+    return primary_->size();
 }
 
 bool program::is_empty() const noexcept
 {
-    return primary_.empty();
+    return primary_->empty();
 }
 
 bool program::is_stack_overflow() const noexcept
@@ -427,21 +435,21 @@ chunk_cptr program::pop_alternate() noexcept
 
 void program::open(bool value) noexcept
 {
-    negative_count_ += (value ? 0 : 1);
+    ////negative_condition_count_ += (value ? 0 : 1);
+
     condition_.push_back(value);
 }
 
-void program::negate() noexcept
+void program::reopen() noexcept
 {
     // This must be guarded.
     BC_ASSERT(!is_closed());
 
-    const auto value = condition_.back();
-    negative_count_ += (value ? 1 : -1);
-    condition_.back() = !value;
+    ////const auto value = condition_.back();
+    ////negative_condition_count_ += (value ? 1 : -1);
+    ////condition_.back() = !value;
 
-    // Optimized above to avoid succeeded loop.
-    ////condition_.back() = !condition_.back();
+    condition_.back() = !condition_.back();
 }
 
 void program::close() noexcept
@@ -449,12 +457,11 @@ void program::close() noexcept
     // This must be guarded.
     BC_ASSERT(!is_closed());
 
-    const auto value = condition_.back();
-    negative_count_ += (value ? 0 : -1);
-    condition_.pop_back();
-
-    // Optimized above to avoid succeeded loop.
+    ////const auto value = condition_.back();
+    ////negative_condition_count_ += (value ? 0 : -1);
     ////condition_.pop_back();
+
+    condition_.pop_back();
 }
 
 bool program::is_closed() const noexcept
@@ -464,15 +471,16 @@ bool program::is_closed() const noexcept
 
 bool program::is_succeess() const noexcept
 {
-    return is_zero(negative_count_);
+    ////return is_zero(negative_condition_count_);
 
-    // Optimized above to avoid succeeded loop.
-    ////const auto is_true = [](bool value) noexcept { return value; };
-    ////return std::all_of(condition_.begin(), condition_.end(), true);
+    const auto is_true = [](bool value) noexcept { return value; };
+
+    return std::all_of(condition_.begin(), condition_.end(), is_true);
 }
 
 bool program::if_(const operation& op) const noexcept
 {
+    // Conditional op execution is not predicated on conditional stack.
     return op.is_conditional() || is_succeess();
 }
 
@@ -608,9 +616,9 @@ chain::operations program::create_strip_ops(
 // [00 80 00 00 00] : true
 bool program::stack_to_bool(stack clean) const noexcept
 {
-    const auto& top = primary_.back();
+    const auto& top = primary_->back();
 
-    if (top->empty() || ((clean == stack::clean) && (primary_.size() != one)))
+    if (top->empty() || ((clean == stack::clean) && (primary_->size() != one)))
         return false;
 
     const auto non_zero = [](uint8_t value) noexcept
@@ -635,7 +643,7 @@ hash_digest program::signature_hash(const script& sub,
     const auto bip143 = is_enabled(forks::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(input_index_, sub, value_, flags,
+    return transaction_.signature_hash(index_, sub, value_, flags,
         version_, bip143);
 }
 

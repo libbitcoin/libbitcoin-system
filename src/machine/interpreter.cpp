@@ -156,7 +156,7 @@ interpreter::result interpreter::op_else(program& program) noexcept
     if (program.is_closed())
         return error::op_else;
 
-    program.negate();
+    program.reopen();
     return error::op_success;
 }
 
@@ -941,7 +941,7 @@ interpreter::result interpreter::op_check_locktime_verify(
         return op_nop(program, opcode::nop2);
 
     // BIP65: the tx sequence is 0xffffffff.
-    if (program.input().is_final())
+    if (program.is_final())
         return error::op_check_locktime_verify1;
 
     // BIP65: the stack is empty.
@@ -986,7 +986,7 @@ interpreter::result interpreter::op_check_sequence_verify(
 
     // The top stack item is positive, and only 32 bits are ever tested.
     const auto sequence = narrow_sign_cast<uint32_t>(top.int64());
-    const auto tx_sequence = program.input().sequence();
+    const auto tx_sequence = program.sequence();
 
     // BIP112: the stack sequence is disabled, treat as nop3.
     if (get_right(sequence, relative_locktime_disabled_bit))

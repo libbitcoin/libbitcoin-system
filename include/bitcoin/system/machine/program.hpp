@@ -45,28 +45,23 @@ public:
         dirty
     };
 
-    /// Create an instance with empty stacks, value unused/max (input run).
-    program(const chain::script::cptr& script,
-        const chain::transaction& transaction,
-        uint32_t index,
-        uint32_t forks) noexcept;
+    /// Input script run (default/empty stack).
+    program(const chain::transaction& transaction, const chain::input& input,
+        uint32_t forks, uint32_t index) noexcept;
 
-    /// Create using copied tx, input, forks, value, stack (prevout run).
-    program(const chain::script::cptr& script,
-        const program& other) noexcept;
+    /// Legacy p2sh or prevout script run (copied input stack).
+    program(const program& other, const chain::script::cptr& script,
+        uint32_t index) noexcept;
 
-    /// Create using copied tx, input, forks, value and moved stack (p2sh run).
-    program(const chain::script::cptr& script,
-        program&& other) noexcept;
+    /// Legacy p2sh or prevout script run (moved input stack).
+    program(program&& other, const chain::script::cptr& script,
+        uint32_t index) noexcept;
 
-    /// Create an instance with initialized stack (witness run).
-    program(const chain::script::cptr& script,
-        const chain::transaction& transaction,
-        uint32_t index,
-        uint32_t forks,
-        chunk_cptrs&& stack,
-        uint64_t value,
-        chain::script_version version) noexcept;
+    /// Witness script run (witness-initialized stack).
+    program(const chain::transaction& transaction, const chain::input& input,
+        const chain::script::cptr& script, uint32_t forks,
+        chain::script_version version, const chunk_cptrs_ptr& stack,
+        uint32_t index) noexcept;
 
     /// Defaults.
     program(program&&) = delete;
@@ -97,10 +92,16 @@ public:
 protected:
     friend class interpreter;
 
+    program(const chain::transaction& tx, const chain::input& input,
+        const chain::script::cptr& script, uint32_t forks, uint64_t value,
+        chain::script_version version, const chunk_cptrs_ptr& stack,
+        uint32_t index) noexcept;
+
     /// Constant registers.
     /// -----------------------------------------------------------------------
 
-    const chain::input& input() const noexcept;
+    bool is_final() const noexcept;
+    uint32_t sequence() const noexcept;
     const chain::transaction& transaction() const noexcept;
 
     /// Primary stack.
@@ -145,7 +146,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     void open(bool value) noexcept;
-    void negate() noexcept;
+    void reopen() noexcept;
     void close() noexcept;
     bool is_closed() const noexcept;
     bool is_succeess() const noexcept;
@@ -171,7 +172,7 @@ protected:
         const chain::script& sub) const noexcept;
 
 private:
-    // A space-efficient dynamic bitset (specialized by C++ std lib).
+    // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
     static chain::operations create_strip_ops(
@@ -183,18 +184,28 @@ private:
     void signature_hash(hash_cache& cache, const chain::script& sub,
         uint8_t flags) const noexcept;
 
-    const chain::script::cptr script_;
+    // Input script.
     const chain::transaction& transaction_;
-    const uint32_t input_index_;
+    const uint32_t index_;
+    const uint32_t sequence_;
+    const bool final_;
+
+    // Prevout script.
+    const chain::script::cptr script_;
+
+    // Chain context.
     const uint32_t forks_;
+
+    // Witness initialization.
     const uint64_t value_;
     const chain::script_version version_;
+    chunk_cptrs_ptr primary_;
 
-    size_t negative_count_;
-    size_t operation_count_;
-    chunk_cptrs primary_;
-    chunk_cptrs alternate_;
-    bool_stack condition_;
+    // Always default initialized.
+    ////size_t negative_condition_count_{};
+    size_t operation_count_{};
+    chunk_cptrs alternate_{};
+    bool_stack condition_{};
 };
 
 } // namespace machine

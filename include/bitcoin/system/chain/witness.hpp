@@ -102,7 +102,7 @@ public:
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const noexcept;
-    bool extract_script(script& out_script, chunk_cptrs& out_stack,
+    bool extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const noexcept;
 
 private:

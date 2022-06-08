@@ -1006,7 +1006,7 @@ uint64_t transaction::claim() const noexcept
     };
 
     // The amount claimed by outputs.
-    return std::accumulate(outputs_->begin(), outputs_->end(), uint64_t{0}, sum);
+    return std::accumulate(outputs_->begin(), outputs_->end(), zero, sum);
 }
 
 uint64_t transaction::value() const noexcept
@@ -1232,49 +1232,44 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     bool witnessed;
 
     BC_PUSH_WARNING_UNGUARDED(USE_GSL_AT)
-    const auto& in = (*inputs_)[index];
+    const chain::input& in = *(*inputs_)[index];
     BC_POP_WARNING()
 
     // Evaluate input script.
-    program input(in->script_ptr(), *this, index, state.forks);
-    if ((ec = interpreter::run(input)))
+    program input_program(*this, in, state.forks, index);
+    if ((ec = interpreter::run(input_program)))
         return ec;
 
-    // Evaluate output script using stack result from input script.
-    program prevout(in->prevout->script_ptr(), input);
-    if ((ec = interpreter::run(prevout)))
+    // Evaluate output script using stack copied from input script.
+    program prevout_program(input_program, in.prevout->script_ptr(), index);
+    if ((ec = interpreter::run(prevout_program)))
         return ec;
 
     // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout.is_stack_true(program::stack::dirty))
+    if (!prevout_program.is_stack_true(program::stack::dirty))
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
-    if ((witnessed = in->prevout->script().is_pay_to_witness(state.forks)))
+    if ((witnessed = in.prevout->script().is_pay_to_witness(state.forks)))
     {
         // The input script must be empty (bip141).
-        if (!in->script().ops().empty())
+        if (!in.script().ops().empty())
             return error::dirty_witness;
 
         // Validate the native script.
-        switch (in->prevout->script().version())
+        switch (in.prevout->script().version())
         {
             case script_version::zero:
             {
-                // TODO: return witness_script and stack as pointers
-                // TODO: from within extract_script to preclude moves.
-                ////chunk_cptrs_cptr stack;
-                ////script::cptr witness_script;
-                script witness_script;
-                chunk_cptrs stack;
-                if (!in->witness().extract_script(witness_script, stack,
-                    in->prevout->script()))
+                script::cptr script;
+                chunk_cptrs_ptr stack;
+                if (!in.witness().extract_script(script, stack,
+                    in.prevout->script()))
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
-                program witness(to_shared<script>(witness_script), *this,
-                    index, state.forks, std::move(stack), in->prevout->value(),
-                    in->prevout->script().version());
+                program witness(*this, in, script, state.forks,
+                    in.prevout->script().version(), stack, index);
 
                 if ((ec = interpreter::run(witness)))
                     return ec;
@@ -1295,49 +1290,45 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     }
 
     // p2sh and p2w are mutually exclusive.
-    else if (in->prevout->script().is_pay_to_script_hash(state.forks))
+    else if (in.prevout->script().is_pay_to_script_hash(state.forks))
     {
-        if (!script::is_relaxed_push(in->script().ops()))
+        if (!script::is_relaxed_push(in.script().ops()))
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        const auto embedded_script =
-            to_shared<script>({ *input.safe_pop(), false });
+        const auto embed_script = to_shared<script>(
+            { *input_program.safe_pop(), false });
 
-        program embedded(embedded_script, std::move(input));
-        if ((ec = interpreter::run(embedded)))
+        // Evaluate embedded script using stack moved from input script.
+        program embed_program(std::move(input_program), embed_script, index);
+        if ((ec = interpreter::run(embed_program)))
             return ec;
 
         // This precludes embedded witness programs of -0 (undocumented).
-        if (!embedded.is_stack_true(program::stack::dirty))
+        if (!embed_program.is_stack_true(program::stack::dirty))
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
-        if ((witnessed = embedded_script->is_pay_to_witness(state.forks)))
+        if ((witnessed = embed_script->is_pay_to_witness(state.forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
-            if (in->script().ops().size() != one)
+            if (in.script().ops().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
-            switch (embedded_script->version())
+            switch (embed_script->version())
             {
                 case script_version::zero:
                 {
-                    // TODO: return witness_script and stack as pointers
-                    // TODO: from within extract_script to preclude moves.
-                    ////chunk_cptrs_cptr stack;
-                    ////script::cptr witness_script;
-                    chunk_cptrs stack;
-                    script witness_script;
-                    if (!in->witness().extract_script(witness_script, stack,
-                        *embedded_script))
+                    script::cptr script;
+                    chunk_cptrs_ptr stack;
+                    if (!in.witness().extract_script(script, stack,
+                        *embed_script))
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
-                    program witness(to_shared<script>(witness_script), *this,
-                        index, state.forks, std::move(stack),
-                        in->prevout->value(), embedded_script->version());
+                    program witness(*this, in, script, state.forks,
+                        embed_script->version(), stack, index);
 
                     if ((ec = interpreter::run(witness)))
                         return ec;
@@ -1359,7 +1350,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     }
 
     // Witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !in->witness().stack().empty())
+    if (!witnessed && !in.witness().stack().empty())
         return error::unexpected_witness;
 
     return error::script_success;
