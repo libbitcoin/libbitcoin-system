@@ -135,7 +135,7 @@ block block::from_data(reader& source, bool witness) noexcept
 {
     const auto read_transactions = [witness](reader& source) noexcept
     {
-        auto txs = to_shared<transaction_ptrs>();
+        auto txs = std::make_shared<transaction_ptrs>();
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)

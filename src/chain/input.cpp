@@ -76,8 +76,8 @@ input::input(const chain::point::cptr& point,
   : input(
       point ? point : to_shared<chain::point>(),
       script ? script : to_shared<chain::script>(),
-      std::make_shared<chain::witness>(), sequence, true,
-      std::make_shared<chain::prevout>())
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
@@ -346,7 +346,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const noexcept
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
     // Count heavy sigops in the input script.
-    auto sigops = script_->sigops(false) * factor;
+    const auto sigops = script_->sigops(false) * factor;
 
     if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
     {
