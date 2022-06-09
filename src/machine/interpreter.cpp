@@ -212,7 +212,7 @@ interpreter::result interpreter::op_drop2(program& program) noexcept
     if (program.size() < 2)
         return error::op_drop2;
 
-    // 0, 1, 2, 3 => 1, 2, 3 => 2, 3
+    // 0,1,[2,3] => 1,[2,3] => [2,3]
     program.drop();
     program.drop();
     return error::op_success;
@@ -223,7 +223,7 @@ interpreter::result interpreter::op_dup2(program& program) noexcept
     if (program.size() < 2)
         return error::op_dup2;
 
-    // 0, 1, 2, 3 => 1, 0, 1, 2, 3 =>  0, 1, 0, 1, 2, 3
+    // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
     program.push(program.item(1));
     program.push(program.item(1));
     return error::op_success;
@@ -234,7 +234,7 @@ interpreter::result interpreter::op_dup3(program& program) noexcept
     if (program.size() < 3)
         return error::op_dup3;
 
-    // 0, 1, 2, 3 => 2, 0, 1, 2, 3 => 1, 2, 0, 1, 2, 3 => 0, 1, 2, 0, 1, 2, 3
+    // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
     program.push(program.item(2));
     program.push(program.item(2));
     program.push(program.item(2));
@@ -246,7 +246,7 @@ interpreter::result interpreter::op_over2(program& program) noexcept
     if (program.size() < 4)
         return error::op_over2;
 
-    // 0, 1, 2, 3 => 2, 3, 0, 1, 2, 3
+    // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
     program.push(program.item(3));
     program.push(program.item(3));
     return error::op_success;
@@ -257,13 +257,12 @@ interpreter::result interpreter::op_rot2(program& program) noexcept
     if (program.size() < 6)
         return error::op_rot2;
 
-    // 0, 1, 2, 3, 4, 5 => 5, 0, 1, 2, 3, 4, 5 =  4, 5, 0, 1, 2, 3, 4, 5
-    program.push(program.item(5));
-    program.push(program.item(5));
-
-    // 4, 5, 0, 1, 2, 3, 4, 5 => 4, 5, 0, 1, 2, 3, 5 => 4, 5, 0, 1, 2, 3
-    program.erase(6);
-    program.erase(6);
+    // More efficient than: read(2 times), shift(4 bytes), push(2 times).
+    // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] => [4,5,0,3,2,1] => [4,5,0,1,2,3]
+    program.swap(0, 4);
+    program.swap(1, 5);
+    program.swap(2, 4);
+    program.swap(3, 5);
     return error::op_success;
 }
 
@@ -272,9 +271,9 @@ interpreter::result interpreter::op_swap2(program& program) noexcept
     if (program.size() < 4)
         return error::op_swap2;
 
-    // 0, 1, 2, 3, 4 => 0, 3, 2, 1, 4 =  2, 3, 0, 1, 4
-    program.swap(1, 3);
-    program.swap(0, 2);
+    // [0,1,2,3],4 => [0,3,2,1],4 =  [2,3,0,1],4
+    program.swap(1,3);
+    program.swap(0,2);
     return error::op_success;
 }
 
@@ -283,16 +282,17 @@ interpreter::result interpreter::op_if_dup(program& program) noexcept
     if (program.is_empty())
         return error::op_if_dup;
 
-    // 0, 1, 2 => 0, 0, 1, 2
+    // [0,1,2] => 0,[0,1,2]
     if (program.is_stack_true(program::stack::dirty))
         program.push(program.item(0));
 
     return error::op_success;
 }
 
+// TODO: return number.data_ptr().
 interpreter::result interpreter::op_depth(program& program) noexcept
 {
-    // 0, 1, 2 => #, 0, 1, 2
+    // [0,1,2] => 3,[0,1,2]
     program.push(number(program.size()).data());
     return error::op_success;
 }
@@ -302,7 +302,7 @@ interpreter::result interpreter::op_drop(program& program) noexcept
     if (program.is_empty())
         return error::op_drop;
 
-    // 0, 1, 2 => 1, 2
+    // 0,[1,2] => [1,2]
     program.drop();
     return error::op_success;
 }
@@ -312,7 +312,7 @@ interpreter::result interpreter::op_dup(program& program) noexcept
     if (program.is_empty())
         return error::op_dup;
 
-    // 0, 1, 2 => 0, 0, 1, 2
+    // [0,1,2] => 0,[0,1 2]
     program.push(program.item(0));
     return error::op_success;
 }
@@ -322,8 +322,9 @@ interpreter::result interpreter::op_nip(program& program) noexcept
     if (program.size() < 2)
         return error::op_nip;
 
-    // 0, 1 => 0
-    program.erase(1);
+    // [0,1,2] => 1,[0,2] => [0,2]
+    program.swap(0, 1);
+    program.drop();
     return error::op_success;
 }
 
@@ -332,7 +333,7 @@ interpreter::result interpreter::op_over(program& program) noexcept
     if (program.size() < 2)
         return error::op_over;
 
-    // 0, 1 => 1, 0, 1
+    // [0,1] => 1,[0,1]
     program.push(program.item(1));
     return error::op_success;
 }
@@ -340,23 +341,50 @@ interpreter::result interpreter::op_over(program& program) noexcept
 interpreter::result interpreter::op_pick(program& program) noexcept
 {
     size_t index;
+
+    // 2,[0,1,2,3] => {2} [0,1,2,3]
     if (!program.pop_index(index))
         return error::op_pick;
 
-    // [2]: 0, 1, 2, 3 => 2, 0, 1, 2, 3
+    // [0,1,2,3] => 2,[0,1,2,3]
     program.push(program.item(index));
     return error::op_success;
 }
 
+// ****************************************************************************
+// Rock-and-ROLL:
+// "The value stack can store a maximum of 1000 elements. The following script
+// fills the stack and then moves each stack element 200 times, so the number
+// of moved elements is 200K. This took almost 5.6 seconds in my test VM (for
+// a block filled with these scriptSigs):
+// 1 {999 times}, 998 OP_ROLL{ 200 times }"
+// bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
+// Shifting larger chunks does not change time, as vector stores references.
+// This remains the current satoshi implementation (std::vector):
+//case OP_ROLL:
+//{
+//    valtype vch = stacktop(-n-1);
+//    stack.erase(stack.end()-n-1);
+//    stack.push_back(vch);
+//}
+// ****************************************************************************
 interpreter::result interpreter::op_roll(program& program) noexcept
 {
     size_t index;
+
+    // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
     if (!program.pop_index(index))
         return error::op_roll;
 
-    // [2]: 0, 1, 2, 3 => 2, 0, 1, 2, 3 => 2, 0, 1, 3
-    program.push(program.item(index));
-    program.erase(add1(index));
+    // Copy indexed item reference, as it will be deleted.
+    chunk_cptr item{ program.item(index) };
+
+    // Shifts maximum of n-1 references within vector of n.
+    // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
+    program.erase(index);
+
+    // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
+    program.push(std::move(item));
     return error::op_success;
 }
 
@@ -365,9 +393,9 @@ interpreter::result interpreter::op_rot(program& program) noexcept
     if (program.size() < 3)
         return error::op_rot;
 
-    // 0, 1, 2, 3 = > 0, 2, 1, 3 => 2, 0, 1, 3
-    program.swap(1, 2);
-    program.swap(0, 1);
+    // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
+    program.swap(1,2);
+    program.swap(0,1);
     return error::op_success;
 }
 
@@ -376,8 +404,8 @@ interpreter::result interpreter::op_swap(program& program) noexcept
     if (program.size() < 2)
         return error::op_swap;
 
-    // 0, 1, 2 = > 1, 0, 2
-    program.swap(0, 1);
+    // [0,1,2] = > [1,0,2]
+    program.swap(0,1);
     return error::op_success;
 }
 
@@ -386,7 +414,7 @@ interpreter::result interpreter::op_tuck(program& program) noexcept
     if (program.size() < 2)
         return error::op_tuck;
 
-    // 0, 1, 2 = > 0, 1, 0, 2 
+    // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
     program.swap(0, 1);
     program.push(program.item(1));
     return error::op_success;

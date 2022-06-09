@@ -294,7 +294,7 @@ bool program::pop(number& out_number, size_t maxiumum_size) noexcept
     return !is_empty() && out_number.set_data(*pop(), maxiumum_size);
 }
 
-// True if popped value is valid post-pop stack index.
+// True if popped value is valid post-pop stack index (precluded if size < 2).
 bool program::pop_index(size_t& index) noexcept
 {
     int32_t signed_index;
