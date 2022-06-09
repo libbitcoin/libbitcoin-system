@@ -153,7 +153,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
-    bool set_subscript(const chain::operation& op) noexcept;
+    bool set_subscript(const op_iterator& op) noexcept;
 
     /// Strip endorsement and code_separator opcodes from returned subscript.
     chain::script::cptr subscript(

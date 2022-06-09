@@ -33,6 +33,7 @@ class BC_API interpreter
 {
 public:
     typedef error::op_error_t result;
+    typedef program::op_iterator op_iterator;
 
     // Operations (shared).
     // ------------------------------------------------------------------------
@@ -121,7 +122,7 @@ public:
     static result op_hash160(program& program) noexcept;
     static result op_hash256(program& program) noexcept;
     static result op_codeseparator(program& program,
-        const chain::operation& op) noexcept;
+        const op_iterator& op) noexcept;
     static result op_check_sig_verify(program& program) noexcept;
     static result op_check_sig(program& program) noexcept;
     static result op_check_multisig_verify(program& program) noexcept;
@@ -133,7 +134,7 @@ public:
     static code run(program& program) noexcept;
 
 private:
-    static result run_op(const chain::operation& op, program& program) noexcept;
+    static result run_op(const op_iterator& op, program& program) noexcept;
 
     // Not constructable (really just a namespace).
     interpreter() = delete;

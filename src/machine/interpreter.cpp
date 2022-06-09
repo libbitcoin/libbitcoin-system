@@ -791,7 +791,7 @@ interpreter::result interpreter::op_hash256(program& program) noexcept
 }
 
 interpreter::result interpreter::op_codeseparator(program& program,
-    const operation& op) noexcept
+    const op_iterator& op) noexcept
 {
     return program.set_subscript(op) ? error::op_success :
         error::op_code_separator;
@@ -1013,10 +1013,10 @@ interpreter::result interpreter::op_check_sequence_verify(
 
 // private:
 // It is expected that the compiler will produce a very efficient jump table.
-interpreter::result interpreter::run_op(const operation& op,
+interpreter::result interpreter::run_op(const op_iterator& op,
     program& program) noexcept
 {
-    const auto code = op.code();
+    const auto code = op->code();
 
     switch (code)
     {
@@ -1096,13 +1096,13 @@ interpreter::result interpreter::run_op(const operation& op,
         case opcode::push_size_73:
         case opcode::push_size_74:
         case opcode::push_size_75:
-            return op_push_size(program, op);
+            return op_push_size(program, *op);
         case opcode::push_one_size:
-            return op_push_data(program, op.data_ptr(), max_uint8);
+            return op_push_data(program, op->data_ptr(), max_uint8);
         case opcode::push_two_size:
-            return op_push_data(program, op.data_ptr(), max_uint16);
+            return op_push_data(program, op->data_ptr(), max_uint16);
         case opcode::push_four_size:
-            return op_push_data(program, op.data_ptr(), max_uint32);
+            return op_push_data(program, op->data_ptr(), max_uint32);
         case opcode::push_negative_1:
             return op_push_number(program, numbers::negative_1);
         case opcode::reserved_80:
@@ -1325,8 +1325,11 @@ code interpreter::run(program& program) noexcept
     if (!program.is_valid())
         return error::invalid_script;
 
-    for (const auto& op: program)
+    for (auto it = program.begin(); it != program.end(); ++it)
     {
+        // An iterator is required only for run_op:op_codeseparator.
+        const auto& op = *it;
+
         // Enforce push data limit (520) [0.3.6+].
         if (op.is_oversized())
             return error::invalid_push_data_size;
@@ -1343,7 +1346,7 @@ code interpreter::run(program& program) noexcept
         if (program.if_(op))
         {
             // Evaluate opcode (switch).
-            if ((ec = run_op(op, program)))
+            if ((ec = run_op(it, program)))
                 return ec;
 
             // Enforce combined stacks size limit (1,000).

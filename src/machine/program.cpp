@@ -486,28 +486,14 @@ bool program::if_(const operation& op) const noexcept
 // Subscripts are referenced by script.offset mutable metadata. This allows for
 // efficient subscripting with no copying. However, execution of any one given
 // script instance is not safe for concurrent execution (unnecessary scenario).
-bool program::set_subscript(const operation& op) noexcept
+bool program::set_subscript(const op_iterator& op) noexcept
 {
-    if (script_->ops().empty())
-        return false;
-
-    const auto stop = script_->ops().end();
-
-    // This avoids std::find_if using equality operator override.
-    const auto finder = [&op](const operation& operation) noexcept
-    {
-        return &operation == &op;
-    };
-
-    // This is not efficient (linear) but rarely used.
-    script_->offset = std::find_if(script_->ops().begin(), stop, finder);
-
-    // This is not reachable if op is an element of script_.
-    if (script_->offset == stop)
+    // End is not reachable if op is an element of script_.
+    if (script_->ops().empty() || op == script_->ops().end())
         return false;
 
     // Advance the offset to the op following the found code separator.
-    std::advance(script_->offset, one);
+    script_->offset = std::next(op, one);
     return true;
 }
 
