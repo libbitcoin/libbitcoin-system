@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 
@@ -76,8 +77,11 @@ data_chunk number::data() const noexcept
     if (is_false())
         return {};
 
-    auto data = to_little_endian_chunk(absolute(value_));
+    auto data = to_little_endian_chunk(absolute(value_), one);
     const auto negative_bit_set = get_left(data.back());
+
+    // Reserved one extra byte to preclude reallocation on possible push.
+    BC_ASSERT_MSG(add1(data.size()) == data.capacity(), "unexpected capacity");
 
     // Push a 0x80 byte that will be popped off when converting to an integral.
     if (negative_bit_set && is_negative())
