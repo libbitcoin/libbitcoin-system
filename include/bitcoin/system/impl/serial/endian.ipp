@@ -195,17 +195,19 @@ data_array<Size> to_little_endian_array(Integer value) noexcept
 }
 
 template <typename Integer, if_integer<Integer>>
-data_chunk to_big_endian_chunk(Integer value) noexcept
+data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 {
     data_chunk chunk(no_fill_byte_allocator);
+    chunk.reserve(byte_width(value) + excess);
     chunk.resize(byte_width(value));
     return to_big(std::move(chunk), value);
 }
 
 template <typename Integer, if_integer<Integer>>
-data_chunk to_little_endian_chunk(Integer value) noexcept
+data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
 {
     data_chunk chunk(no_fill_byte_allocator);
+    chunk.reserve(byte_width(value) + excess);
     chunk.resize(byte_width(value));
     return to_little(std::move(chunk), value);
 }

@@ -30,6 +30,7 @@ namespace system {
 
 /// integer (inferred type) -> data (value-sized) or array (explicit size)
 /// ---------------------------------------------------------------------------
+/// Use excess to reserve the specified number of bytes beyond return size.
 
 template <size_t Size, typename Integer, if_integer<Integer> = true>
 data_array<Size> to_big_endian_array(Integer value) noexcept;
@@ -38,10 +39,10 @@ template <size_t Size, typename Integer, if_integer<Integer> = true>
 data_array<Size> to_little_endian_array(Integer value) noexcept;
 
 template <typename Integer, if_integer<Integer> = true>
-data_chunk to_big_endian_chunk(Integer value) noexcept;
+data_chunk to_big_endian_chunk(Integer value, size_t excess=zero) noexcept;
 
 template <typename Integer, if_integer<Integer> = true>
-data_chunk to_little_endian_chunk(Integer value) noexcept;
+data_chunk to_little_endian_chunk(Integer value, size_t excess=zero) noexcept;
 
 /// data -> integral (inferred type), integral -> array (implicit size)
 /// ---------------------------------------------------------------------------
