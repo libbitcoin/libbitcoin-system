@@ -114,7 +114,7 @@ interpreter::result interpreter::op_if(program& program) noexcept
         program.drop();
     }
 
-    program.open(value);
+    program.begin_if(value);
     return error::op_success;
 }
 
@@ -131,7 +131,7 @@ interpreter::result interpreter::op_notif(program& program) noexcept
         program.drop();
     }
 
-    program.open(value);
+    program.begin_if(value);
     return error::op_success;
 }
 
@@ -153,19 +153,19 @@ interpreter::result interpreter::op_vernotif(const program& program) noexcept
 
 interpreter::result interpreter::op_else(program& program) noexcept
 {
-    if (program.is_closed())
+    if (program.is_balanced())
         return error::op_else;
 
-    program.reopen();
+    program.else_if();
     return error::op_success;
 }
 
 interpreter::result interpreter::op_endif(program& program) noexcept
 {
-    if (program.is_closed())
+    if (program.is_balanced())
         return error::op_endif;
 
-    program.close();
+    program.end_if();
     return error::op_success;
 }
 
@@ -1356,7 +1356,7 @@ code interpreter::run(program& program) noexcept
     }
 
     // Guard against unclosed evaluation scope.
-    return program.is_closed() ? error::script_success :
+    return program.is_balanced() ? error::script_success :
         error::invalid_stack_scope;
 }
 

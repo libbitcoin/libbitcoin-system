@@ -142,10 +142,10 @@ protected:
     /// Conditional stack.
     /// -----------------------------------------------------------------------
 
-    void open(bool value) noexcept;
-    void reopen() noexcept;
-    void close() noexcept;
-    bool is_closed() const noexcept;
+    void begin_if(bool value) noexcept;
+    void else_if() noexcept;
+    void end_if() noexcept;
+    bool is_balanced() const noexcept;
     bool is_succeess() const noexcept;
     bool if_(const chain::operation& op) const noexcept;
 
@@ -200,7 +200,7 @@ private:
     chunk_cptrs_ptr primary_;
 
     // Always default initialized.
-    ////size_t negative_condition_count_{};
+    size_t negative_condition_count_{};
     size_t operation_count_{};
     chunk_cptrs alternate_{};
     bool_stack condition_{};

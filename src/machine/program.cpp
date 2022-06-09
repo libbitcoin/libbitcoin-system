@@ -428,50 +428,58 @@ chunk_cptr program::pop_alternate() noexcept
 
 // Conditional stack.
 // ----------------------------------------------------------------------------
+// Condition count additions are guarded by script size limit.
 
-void program::open(bool value) noexcept
+void program::begin_if(bool value) noexcept
 {
-    ////negative_condition_count_ += (value ? 0 : 1);
+    // Optimize is_succeess().
+    negative_condition_count_ += (value ? 0 : 1);
 
     condition_.push_back(value);
 }
 
-void program::reopen() noexcept
+// ****************************************************************************
+// CONSENSUS: "You may have noticed the strange behavior of Bitcoin's ELSE
+// statement. Bitcoin allows one to switch between true and false conditions
+// several times. For example, the following script is valid and leaves the
+// value 2 on the stack: 1 OP_IF OP_ELSE OP_ELSE 2 OP_ENDIF"
+// bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
+// ****************************************************************************
+void program::else_if() noexcept
 {
     // This must be guarded.
-    BC_ASSERT(!is_closed());
+    BC_ASSERT(!is_balanced());
 
-    ////const auto value = condition_.back();
-    ////negative_condition_count_ += (value ? 1 : -1);
-    ////condition_.back() = !value;
+    // Optimize is_succeess().
+    negative_condition_count_ += (condition_.back() ? 1 : -1);
 
     condition_.back() = !condition_.back();
 }
 
-void program::close() noexcept
+void program::end_if() noexcept
 {
     // This must be guarded.
-    BC_ASSERT(!is_closed());
+    BC_ASSERT(!is_balanced());
 
-    ////const auto value = condition_.back();
-    ////negative_condition_count_ += (value ? 0 : -1);
-    ////condition_.pop_back();
+    // Optimize is_succeess().
+    negative_condition_count_ += (condition_.back() ? 0 : -1);
 
     condition_.pop_back();
 }
 
-bool program::is_closed() const noexcept
+bool program::is_balanced() const noexcept
 {
     return condition_.empty();
 }
 
 bool program::is_succeess() const noexcept
 {
-    ////return is_zero(negative_condition_count_);
+    // Optimization changes O(n) search [for every operation] to O(1).
+    // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
+    return is_zero(negative_condition_count_);
 
-    const auto is_true = [](bool value) noexcept { return value; };
-
-    return std::all_of(condition_.begin(), condition_.end(), is_true);
+    ////const auto is_true = [](bool value) noexcept { return value; };
+    ////return std::all_of(condition_.begin(), condition_.end(), is_true);
 }
 
 bool program::if_(const operation& op) const noexcept
