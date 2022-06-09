@@ -69,7 +69,7 @@ public:
     ~program() = default;
 
     /// Utilities.
-    bool is_invalid() const noexcept;
+    bool is_valid() const noexcept;
     bool is_enabled(chain::forks rule) const noexcept;
     bool is_stack_true(stack clean) const noexcept;
 

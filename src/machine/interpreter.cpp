@@ -1322,7 +1322,7 @@ code interpreter::run(program& program) noexcept
 
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
-    if (program.is_invalid())
+    if (!program.is_valid())
         return error::invalid_script;
 
     for (const auto& op: program)

@@ -121,15 +121,19 @@ program::program(const chain::transaction& tx, const input_iterator& input,
 // ----------------------------------------------------------------------------
 
 // Check initial program state for validity (i.e. can evaluation return true).
-bool program::is_invalid() const noexcept
+bool program::is_valid() const noexcept
 {
-    // TODO: nops rule must be enabled in tests and config.
+    // TODO: nops rule must first be enabled in tests and config.
     ////const auto nops_rule = is_enabled(forks::nops_rule);
+    constexpr auto nops_rule = true;
     const auto bip141 = is_enabled(forks::bip141_rule);
 
     return
-        (/*nops_rule && */script_->is_oversized()) ||
-        (bip141 && !chain::witness::is_push_size(*primary_));
+        // nops_rule establishes script size limit.
+        (!nops_rule || !script_->is_oversized()) &&
+
+        // bip_141 introduces an initialized stack, so must validate.
+        (!bip141    || chain::witness::is_push_size(*primary_));
 }
 
 bool program::is_enabled(chain::forks rule) const noexcept

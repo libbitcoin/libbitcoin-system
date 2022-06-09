@@ -435,7 +435,8 @@ std::string operation::to_string(uint32_t active_forks) const noexcept
 
 bool operation::is_valid() const noexcept
 {
-    // Push data is not possible with an invalid code, combination is invalid.
+    // Push data not possible with any is_invalid, combination is invalid.
+    // This is necessary because there can be no invalid sentinel value.
     return !(code_ == any_invalid && !underflow_ && !data_->empty());
 }
 
