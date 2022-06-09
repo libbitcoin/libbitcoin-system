@@ -257,8 +257,9 @@ interpreter::result interpreter::op_rot2(program& program) noexcept
     if (program.size() < 6)
         return error::op_rot2;
 
-    // More efficient than: read(2 times), shift(4 bytes), push(2 times).
-    // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] => [4,5,0,3,2,1] => [4,5,0,1,2,3]
+
+    // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
+    // [4,5,0,3,2,1] => [4,5,0,1,2,3]
     program.swap(0, 4);
     program.swap(1, 5);
     program.swap(2, 4);
@@ -271,7 +272,7 @@ interpreter::result interpreter::op_swap2(program& program) noexcept
     if (program.size() < 4)
         return error::op_swap2;
 
-    // [0,1,2,3],4 => [0,3,2,1],4 =  [2,3,0,1],4
+    // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
     program.swap(1,3);
     program.swap(0,2);
     return error::op_success;
@@ -289,7 +290,6 @@ interpreter::result interpreter::op_if_dup(program& program) noexcept
     return error::op_success;
 }
 
-// TODO: return number.data_ptr().
 interpreter::result interpreter::op_depth(program& program) noexcept
 {
     // [0,1,2] => 3,[0,1,2]
