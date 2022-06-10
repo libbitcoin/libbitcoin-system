@@ -41,7 +41,8 @@ using namespace system::error;
 
 op_error_t interpreter::op_unevaluated(opcode code) const noexcept
 {
-    return operation::is_invalid(code) ? error::op_invalid : error::op_reserved;
+    return operation::is_invalid(code) ? error::op_invalid :
+        error::op_reserved;
 }
 
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
