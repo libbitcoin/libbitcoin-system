@@ -29,115 +29,125 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
+/// Class to isolate operation iteration, dispatch, and handlers from state.
 class BC_API interpreter
+  : public program
 {
 public:
-    typedef error::op_error_t result;
-    typedef program::op_iterator op_iterator;
+    /// Use program constructors.
+    using program::program;
 
-    // Operations (shared).
-    // ------------------------------------------------------------------------
+    /// Defaults.
+    interpreter(interpreter&&) = delete;
+    interpreter(const interpreter&) = delete;
+    interpreter& operator=(interpreter&&) = delete;
+    interpreter& operator=(const interpreter&) = delete;
+    ~interpreter() = default;
 
-    static result op_unevaluated(chain::opcode) noexcept;
-    static result op_nop(const program& program, chain::opcode) noexcept;
-    static result op_push_number(program& program, uint8_t value) noexcept;
-    static result op_push_size(program& program,
-        const chain::operation& op) noexcept;
-    static result op_push_data(program& program, const chunk_cptr& data,
-        uint32_t size_limit) noexcept;
+    /// Operation handlers.
+    error::op_error_t op_unevaluated(chain::opcode) const noexcept;
+    error::op_error_t op_nop(chain::opcode) const noexcept;
+    error::op_error_t op_push_no_size(const chain::operation& op) noexcept;
+    error::op_error_t op_push_one_size(const chunk_cptr& data) noexcept;
+    error::op_error_t op_push_two_size(const chunk_cptr& data) noexcept;
+    error::op_error_t op_push_four_size(const chunk_cptr& data) noexcept;
+    error::op_error_t op_push_number(uint8_t value) noexcept;
+    error::op_error_t op_nop() const noexcept;
+    error::op_error_t op_ver() const noexcept;
+    error::op_error_t op_if() noexcept;
+    error::op_error_t op_notif() noexcept;
+    error::op_error_t op_verif() const noexcept;
+    error::op_error_t op_vernotif() const noexcept;
+    error::op_error_t op_else() noexcept;
+    error::op_error_t op_endif() noexcept;
+    error::op_error_t op_verify() noexcept;
+    error::op_error_t op_return() const noexcept;
+    error::op_error_t op_to_alt_stack() noexcept;
+    error::op_error_t op_from_alt_stack() noexcept;
+    error::op_error_t op_drop2() noexcept;
+    error::op_error_t op_dup2() noexcept;
+    error::op_error_t op_dup3() noexcept;
+    error::op_error_t op_over2() noexcept;
+    error::op_error_t op_rot2() noexcept;
+    error::op_error_t op_swap2() noexcept;
+    error::op_error_t op_if_dup() noexcept;
+    error::op_error_t op_depth() noexcept;
+    error::op_error_t op_drop() noexcept;
+    error::op_error_t op_dup() noexcept;
+    error::op_error_t op_nip() noexcept;
+    error::op_error_t op_over() noexcept;
+    error::op_error_t op_pick() noexcept;
+    error::op_error_t op_roll() noexcept;
+    error::op_error_t op_rot() noexcept;
+    error::op_error_t op_swap() noexcept;
+    error::op_error_t op_tuck() noexcept;
+    error::op_error_t op_cat() const noexcept;
+    error::op_error_t op_substr() const noexcept;
+    error::op_error_t op_left() const noexcept;
+    error::op_error_t op_right() const noexcept;
+    error::op_error_t op_size() noexcept;
+    error::op_error_t op_invert() const noexcept;
+    error::op_error_t op_and() const noexcept;
+    error::op_error_t op_or() const noexcept;
+    error::op_error_t op_xor() const noexcept;
+    error::op_error_t op_equal() noexcept;
+    error::op_error_t op_equal_verify() noexcept;
+    error::op_error_t op_add1() noexcept;
+    error::op_error_t op_sub1() noexcept;
+    error::op_error_t op_mul2() const noexcept;
+    error::op_error_t op_div2() const noexcept;
+    error::op_error_t op_negate() noexcept;
+    error::op_error_t op_abs() noexcept;
+    error::op_error_t op_not() noexcept;
+    error::op_error_t op_nonzero() noexcept;
+    error::op_error_t op_add() noexcept;
+    error::op_error_t op_sub() noexcept;
+    error::op_error_t op_mul() const noexcept;
+    error::op_error_t op_div() const noexcept;
+    error::op_error_t op_mod() const noexcept;
+    error::op_error_t op_lshift() const noexcept;
+    error::op_error_t op_rshift() const noexcept;
+    error::op_error_t op_bool_and() noexcept;
+    error::op_error_t op_bool_or() noexcept;
+    error::op_error_t op_num_equal() noexcept;
+    error::op_error_t op_num_equal_verify() noexcept;
+    error::op_error_t op_num_not_equal() noexcept;
+    error::op_error_t op_less_than() noexcept;
+    error::op_error_t op_greater_than() noexcept;
+    error::op_error_t op_less_than_or_equal() noexcept;
+    error::op_error_t op_greater_than_or_equal() noexcept;
+    error::op_error_t op_min() noexcept;
+    error::op_error_t op_max() noexcept;
+    error::op_error_t op_within() noexcept;
+    error::op_error_t op_ripemd160() noexcept;
+    error::op_error_t op_sha1() noexcept;
+    error::op_error_t op_sha256() noexcept;
+    error::op_error_t op_hash160() noexcept;
+    error::op_error_t op_hash256() noexcept;
+    error::op_error_t op_codeseparator(const op_iterator& op) noexcept;
+    error::op_error_t op_check_sig_verify() noexcept;
+    error::op_error_t op_check_sig() noexcept;
+    error::op_error_t op_check_multisig_verify() noexcept;
+    error::op_error_t op_check_multisig() noexcept;
+    error::op_error_t op_check_locktime_verify() const noexcept;
+    error::op_error_t op_check_sequence_verify() const noexcept;
 
-    // Operations (not shared).
-    // ------------------------------------------------------------------------
+    /// Operation loop (script execution).
+    code run() noexcept;
 
-    static result op_nop(chain::opcode) noexcept;
-    static result op_ver(const program& program) noexcept;
-    static result op_if(program& program) noexcept;
-    static result op_notif(program& program) noexcept;
-    static result op_verif(const program& program) noexcept;
-    static result op_vernotif(const program& program) noexcept;
-    static result op_else(program& program) noexcept;
-    static result op_endif(program& program) noexcept;
-    static result op_verify(program& program) noexcept;
-    static result op_return(const program& program) noexcept;
-    static result op_to_alt_stack(program& program) noexcept;
-    static result op_from_alt_stack(program& program) noexcept;
-    static result op_drop2(program& program) noexcept;
-    static result op_dup2(program& program) noexcept;
-    static result op_dup3(program& program) noexcept;
-    static result op_over2(program& program) noexcept;
-    static result op_rot2(program& program) noexcept;
-    static result op_swap2(program& program) noexcept;
-    static result op_if_dup(program& program) noexcept;
-    static result op_depth(program& program) noexcept;
-    static result op_drop(program& program) noexcept;
-    static result op_dup(program& program) noexcept;
-    static result op_nip(program& program) noexcept;
-    static result op_over(program& program) noexcept;
-    static result op_pick(program& program) noexcept;
-    static result op_roll(program& program) noexcept;
-    static result op_rot(program& program) noexcept;
-    static result op_swap(program& program) noexcept;
-    static result op_tuck(program& program) noexcept;
-    static result op_cat(const program& program) noexcept;
-    static result op_substr(const program& program) noexcept;
-    static result op_left(const program& program) noexcept;
-    static result op_right(const program& program) noexcept;
-    static result op_size(program& program) noexcept;
-    static result op_invert(const program& program) noexcept;
-    static result op_and(const program& program) noexcept;
-    static result op_or(const program& program) noexcept;
-    static result op_xor(const program& program) noexcept;
-    static result op_equal(program& program) noexcept;
-    static result op_equal_verify(program& program) noexcept;
-    static result op_add1(program& program) noexcept;
-    static result op_sub1(program& program) noexcept;
-    static result op_mul2(const program& program) noexcept;
-    static result op_div2(const program& program) noexcept;
-    static result op_negate(program& program) noexcept;
-    static result op_abs(program& program) noexcept;
-    static result op_not(program& program) noexcept;
-    static result op_nonzero(program& program) noexcept;
-    static result op_add(program& program) noexcept;
-    static result op_sub(program& program) noexcept;
-    static result op_mul(const program& program) noexcept;
-    static result op_div(const program& program) noexcept;
-    static result op_mod(const program& program) noexcept;
-    static result op_lshift(const program& program) noexcept;
-    static result op_rshift(const program& program) noexcept;
-    static result op_bool_and(program& program) noexcept;
-    static result op_bool_or(program& program) noexcept;
-    static result op_num_equal(program& program) noexcept;
-    static result op_num_equal_verify(program& program) noexcept;
-    static result op_num_not_equal(program& program) noexcept;
-    static result op_less_than(program& program) noexcept;
-    static result op_greater_than(program& program) noexcept;
-    static result op_less_than_or_equal(program& program) noexcept;
-    static result op_greater_than_or_equal(program& program) noexcept;
-    static result op_min(program& program) noexcept;
-    static result op_max(program& program) noexcept;
-    static result op_within(program& program) noexcept;
-    static result op_ripemd160(program& program) noexcept;
-    static result op_sha1(program& program) noexcept;
-    static result op_sha256(program& program) noexcept;
-    static result op_hash160(program& program) noexcept;
-    static result op_hash256(program& program) noexcept;
-    static result op_codeseparator(program& program,
-        const op_iterator& op) noexcept;
-    static result op_check_sig_verify(program& program) noexcept;
-    static result op_check_sig(program& program) noexcept;
-    static result op_check_multisig_verify(program& program) noexcept;
-    static result op_check_multisig(program& program) noexcept;
-    static result op_check_locktime_verify(const program& program) noexcept;
-    static result op_check_sequence_verify(const program& program) noexcept;
+    inline chunk_cptr safe_pop() noexcept
+    {
+        return is_empty() ? to_shared<data_chunk>() : pop();
+    }
 
-    /// Run program script.
-    static code run(program& program) noexcept;
+    inline bool is_stack_true(stack clean) const noexcept
+    {
+        return !is_empty() && stack_to_bool(clean);
+    }
 
-private:
-    static result run_op(const op_iterator& op, program& program) noexcept;
-
-    // Not constructable (really just a namespace).
-    interpreter() = delete;
+protected:
+    /// Operation disatch.
+    error::op_error_t run_op(const op_iterator& op) noexcept;
 };
 
 } // namespace machine

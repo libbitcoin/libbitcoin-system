@@ -1270,17 +1270,17 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     code ec;
 
     // Evaluate input script.
-    program input_program(*this, it, state.forks);
-    if ((ec = interpreter::run(input_program)))
+    interpreter input(*this, it, state.forks);
+    if ((ec = input.run()))
         return ec;
 
     // Evaluate output script using stack copied from input script.
-    program prevout_program(input_program, in.prevout->script_ptr());
-    if ((ec = interpreter::run(prevout_program)))
+    interpreter prevout(input, in.prevout->script_ptr());
+    if ((ec = prevout.run()))
         return ec;
 
     // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout_program.is_stack_true(program::stack::dirty))
+    if (!prevout.is_stack_true(program::stack::dirty))
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
@@ -1302,10 +1302,10 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
-                program witness(*this, it, script, state.forks,
+                interpreter witness(*this, it, script, state.forks,
                     in.prevout->script().version(), stack);
 
-                if ((ec = interpreter::run(witness)))
+                if ((ec = witness.run()))
                     return ec;
 
                 // A v0 script must succeed with a clean true stack (bip141).
@@ -1330,45 +1330,45 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        const auto embed_script = to_shared<script>(
-            { *input_program.safe_pop(), false });
+        const auto embeded_script = to_shared<script>({ *input.safe_pop(),
+            false });
 
         // Evaluate embedded script using stack moved from input script.
-        program embed_program(std::move(input_program), embed_script);
-        if ((ec = interpreter::run(embed_program)))
+        interpreter embeded(std::move(input), embeded_script);
+        if ((ec = embeded.run()))
             return ec;
 
         // This precludes embedded witness programs of -0 (undocumented).
-        if (!embed_program.is_stack_true(program::stack::dirty))
+        if (!embeded.is_stack_true(program::stack::dirty))
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
-        if ((witnessed = embed_script->is_pay_to_witness(state.forks)))
+        if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
         {
             // The input script must be a push of the embedded_script (bip141).
             if (in.script().ops().size() != one)
                 return error::dirty_witness;
 
             // Validate the non-native script.
-            switch (embed_script->version())
+            switch (embeded_script->version())
             {
                 case script_version::zero:
                 {
                     script::cptr script;
                     chunk_cptrs_ptr stack;
                     if (!in.witness().extract_script(script, stack,
-                        *embed_script))
+                        *embeded_script))
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
-                    program witness(*this, it, script, state.forks,
-                        embed_script->version(), stack);
+                    interpreter witness_program(*this, it, script, state.forks,
+                        embeded_script->version(), stack);
 
-                    if ((ec = interpreter::run(witness)))
+                    if ((ec = witness_program.run()))
                         return ec;
 
                     // A v0 script must succeed with a clean true stack (bip141).
-                    return witness.is_stack_true(program::stack::clean) ?
+                    return witness_program.is_stack_true(program::stack::clean) ?
                         error::script_success : error::stack_false;
                 }
 

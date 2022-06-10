@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/machine/interpreter.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
@@ -26,7 +27,6 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/number.hpp>
-#include <bitcoin/system/machine/program.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -34,320 +34,334 @@ namespace system {
 namespace machine {
 
 using namespace system::chain;
+using namespace system::error;
 
-// Operations (shared).
+// Operation handlers.
 // ----------------------------------------------------------------------------
 
-interpreter::result interpreter::op_unevaluated(opcode code) noexcept
+op_error_t interpreter::op_unevaluated(opcode code) const noexcept
 {
     return operation::is_invalid(code) ? error::op_invalid : error::op_reserved;
 }
 
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
-interpreter::result interpreter::op_nop(const program& program, opcode) noexcept
+op_error_t interpreter::op_nop(opcode) const noexcept
 {
-    if (program.is_enabled(forks::nops_rule))
+    if (is_enabled(forks::nops_rule))
         return error::op_success;
 
     // TODO: nops_rule *must* be enabled in test cases and default config.
     // TODO: cats_rule should be enabled in test cases and default config.
-    return error::op_success;
     ////return op_unevaluated(code);
-}
-
-interpreter::result interpreter::op_push_number(program& program,
-    uint8_t value) noexcept
-{
-    program.push(to_chunk(value));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_push_size(program& program,
-    const operation& op) noexcept
+op_error_t interpreter::op_push_no_size(const operation& op) noexcept
 {
-    static constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    BC_ASSERT_MSG(op.data().size() <= static_cast<uint8_t>(
+        opcode::push_size_75), "invalid op_push_size");
 
-    if (op.data().size() > op_75)
-        return error::op_push_size;
-
-    program.push(op.data_ptr());
+    push(op.data_ptr());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_push_data(program& program,
-    const chunk_cptr& data, uint32_t size_limit) noexcept
+op_error_t interpreter::op_push_number(uint8_t value) noexcept
 {
-    if (data->size() > size_limit)
+    BC_ASSERT_MSG(operation::is_numeric(static_cast<opcode>(value)),
+        "invalid op_push_number");
+
+    push(to_chunk(value));
+    return error::op_success;
+}
+
+op_error_t interpreter::op_push_one_size(const chunk_cptr& data) noexcept
+{
+    if (data->size() > max_uint8)
         return error::op_push_data;
 
-    program.push(data);
+    push(data);
     return error::op_success;
 }
 
-// Operations (not shared).
-// ----------------------------------------------------------------------------
-// All index parameters are zero-based and relative to stack top.
+op_error_t interpreter::op_push_two_size(const chunk_cptr& data) noexcept
+{
+    if (data->size() > max_uint16)
+        return error::op_push_data;
 
-interpreter::result interpreter::op_nop(opcode) noexcept
+    push(data);
+    return error::op_success;
+}
+
+op_error_t interpreter::op_push_four_size(const chunk_cptr& data) noexcept
+{
+    if (data->size() > max_uint32)
+        return error::op_push_data;
+
+    push(data);
+    return error::op_success;
+}
+
+op_error_t interpreter::op_nop() const noexcept
 {
     return error::op_success;
 }
 
-interpreter::result interpreter::op_ver(const program& program) noexcept
+op_error_t interpreter::op_ver() const noexcept
 {
-    if (program.is_enabled(forks::nops_rule))
+    if (is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_if(program& program) noexcept
+op_error_t interpreter::op_if() noexcept
 {
     auto value = false;
 
-    if (program.is_succeess())
+    if (is_succeess())
     {
-        if (program.is_empty())
+        if (is_empty())
             return error::op_if;
 
-        value = program.is_stack_true(program::stack::dirty);
-        program.drop();
+        value = is_stack_true(program::stack::dirty);
+        drop();
     }
 
-    program.begin_if(value);
+    begin_if(value);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_notif(program& program) noexcept
+op_error_t interpreter::op_notif() noexcept
 {
     auto value = false;
 
-    if (program.is_succeess())
+    if (is_succeess())
     {
-        if (program.is_empty())
+        if (is_empty())
             return error::op_notif;
 
-        value = !program.is_stack_true(program::stack::dirty);
-        program.drop();
+        value = !is_stack_true(program::stack::dirty);
+        drop();
     }
 
-    program.begin_if(value);
+    begin_if(value);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_verif(const program& program) noexcept
+op_error_t interpreter::op_verif() const noexcept
 {
-    if (program.is_enabled(forks::nops_rule))
+    if (is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_vernotif(const program& program) noexcept
+op_error_t interpreter::op_vernotif() const noexcept
 {
-    if (program.is_enabled(forks::nops_rule))
+    if (is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_else(program& program) noexcept
+op_error_t interpreter::op_else() noexcept
 {
-    if (program.is_balanced())
+    if (is_balanced())
         return error::op_else;
 
-    program.else_if();
+    else_if();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_endif(program& program) noexcept
+op_error_t interpreter::op_endif() noexcept
 {
-    if (program.is_balanced())
+    if (is_balanced())
         return error::op_endif;
 
-    program.end_if();
+    end_if();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_verify(program& program) noexcept
+op_error_t interpreter::op_verify() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_verify1;
 
-    if (!program.is_stack_true(program::stack::dirty))
+    if (!is_stack_true(program::stack::dirty))
         return error::op_verify2;
 
-    program.drop();
+    drop();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_return(const program& program) noexcept
+op_error_t interpreter::op_return() const noexcept
 {
-    if (program.is_enabled(forks::nops_rule))
+    if (is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_return);
         
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_to_alt_stack(program& program) noexcept
+op_error_t interpreter::op_to_alt_stack() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_to_alt_stack;
 
-    program.push_alternate(program.pop());
+    push_alternate(pop());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_from_alt_stack(program& program) noexcept
+op_error_t interpreter::op_from_alt_stack() noexcept
 {
-    if (program.is_alternate_empty())
+    if (is_alternate_empty())
         return error::op_from_alt_stack;
 
-    program.push(program.pop_alternate());
+    push(pop_alternate());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_drop2(program& program) noexcept
+op_error_t interpreter::op_drop2() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
-    program.drop();
-    program.drop();
+    drop();
+    drop();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup2(program& program) noexcept
+op_error_t interpreter::op_dup2() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_dup2;
 
     // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
-    program.push(program.item(1));
-    program.push(program.item(1));
+    push(item(1));
+    push(item(1));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup3(program& program) noexcept
+op_error_t interpreter::op_dup3() noexcept
 {
-    if (program.size() < 3)
+    if (size() < 3)
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    program.push(program.item(2));
-    program.push(program.item(2));
-    program.push(program.item(2));
+    push(item(2));
+    push(item(2));
+    push(item(2));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_over2(program& program) noexcept
+op_error_t interpreter::op_over2() noexcept
 {
-    if (program.size() < 4)
+    if (size() < 4)
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    program.push(program.item(3));
-    program.push(program.item(3));
+    push(item(3));
+    push(item(3));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_rot2(program& program) noexcept
+op_error_t interpreter::op_rot2() noexcept
 {
-    if (program.size() < 6)
+    if (size() < 6)
         return error::op_rot2;
 
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
     // [4,5,0,3,2,1] => [4,5,0,1,2,3]
-    program.swap(0, 4);
-    program.swap(1, 5);
-    program.swap(2, 4);
-    program.swap(3, 5);
+    swap(0, 4);
+    swap(1, 5);
+    swap(2, 4);
+    swap(3, 5);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_swap2(program& program) noexcept
+op_error_t interpreter::op_swap2() noexcept
 {
-    if (program.size() < 4)
+    if (size() < 4)
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    program.swap(1,3);
-    program.swap(0,2);
+    swap(1,3);
+    swap(0,2);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_if_dup(program& program) noexcept
+op_error_t interpreter::op_if_dup() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_if_dup;
 
     // [0,1,2] => 0,[0,1,2]
-    if (program.is_stack_true(program::stack::dirty))
-        program.push(program.item(0));
+    if (is_stack_true(program::stack::dirty))
+        push(item(0));
 
     return error::op_success;
 }
 
-interpreter::result interpreter::op_depth(program& program) noexcept
+op_error_t interpreter::op_depth() noexcept
 {
     // [0,1,2] => 3,[0,1,2]
-    program.push(number(program.size()).data());
+    ////push_number(size());
+    push(number(size()).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_drop(program& program) noexcept
+op_error_t interpreter::op_drop() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_drop;
 
     // 0,[1,2] => [1,2]
-    program.drop();
+    drop();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_dup(program& program) noexcept
+op_error_t interpreter::op_dup() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    program.push(program.item(0));
+    push(item(0));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_nip(program& program) noexcept
+op_error_t interpreter::op_nip() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
-    program.swap(0, 1);
-    program.drop();
+    swap(0, 1);
+    drop();
     return error::op_success;
 }
 
-interpreter::result interpreter::op_over(program& program) noexcept
+op_error_t interpreter::op_over() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    program.push(program.item(1));
+    push(item(1));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_pick(program& program) noexcept
+op_error_t interpreter::op_pick() noexcept
 {
     size_t index;
 
     // 2,[0,1,2,3] => {2} [0,1,2,3]
-    if (!program.pop_index(index))
+    if (!pop_index(index))
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    program.push(program.item(index));
+    push(item(index));
     return error::op_success;
 }
 
@@ -368,493 +382,491 @@ interpreter::result interpreter::op_pick(program& program) noexcept
 //    stack.push_back(vch);
 //}
 // ****************************************************************************
-interpreter::result interpreter::op_roll(program& program) noexcept
+op_error_t interpreter::op_roll() noexcept
 {
     size_t index;
 
     // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
-    if (!program.pop_index(index))
+    if (!pop_index(index))
         return error::op_roll;
 
     // Copy indexed item reference, as it will be deleted.
-    chunk_cptr item{ program.item(index) };
+    chunk_cptr temporary{ item(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
-    program.erase(index);
+    erase(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
-    program.push(std::move(item));
+    push(std::move(temporary));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_rot(program& program) noexcept
+op_error_t interpreter::op_rot() noexcept
 {
-    if (program.size() < 3)
+    if (size() < 3)
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    program.swap(1,2);
-    program.swap(0,1);
+    swap(1,2);
+    swap(0,1);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_swap(program& program) noexcept
+op_error_t interpreter::op_swap() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    program.swap(0,1);
+    swap(0,1);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_tuck(program& program) noexcept
+op_error_t interpreter::op_tuck() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
-    program.swap(0, 1);
-    program.push(program.item(1));
+    swap(0, 1);
+    push(item(1));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_cat(const program& program) noexcept
+op_error_t interpreter::op_cat() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_substr(const program& program) noexcept
+op_error_t interpreter::op_substr() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_left(const program& program) noexcept
+op_error_t interpreter::op_left() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_left);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_right(const program& program) noexcept
+op_error_t interpreter::op_right() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_right);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_size(program& program) noexcept
+op_error_t interpreter::op_size() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_size;
 
-    program.push(number(program.item(0)->size()).data());
+    push(number(item(0)->size()).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_invert(const program& program) noexcept
+op_error_t interpreter::op_invert() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_and(const program& program) noexcept
+op_error_t interpreter::op_and() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_and);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_or(const program& program) noexcept
+op_error_t interpreter::op_or() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_or);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_xor(const program& program) noexcept
+op_error_t interpreter::op_xor() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_equal(program& program) noexcept
+op_error_t interpreter::op_equal() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_equal;
 
-    program.push(*program.pop() == *program.pop());
+    push(*pop() == *pop());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_equal_verify(program& program) noexcept
+op_error_t interpreter::op_equal_verify() noexcept
 {
-    if (program.size() < 2)
+    if (size() < 2)
         return error::op_equal_verify1;
 
-    return (*program.pop() == *program.pop()) ? error::op_success :
+    return (*pop() == *pop()) ? error::op_success :
         error::op_equal_verify2;
 }
 
-interpreter::result interpreter::op_add1(program& program) noexcept
+op_error_t interpreter::op_add1() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_add1;
 
     number += 1;
-    program.push(number.data());
+    push(number.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sub1(program& program) noexcept
+op_error_t interpreter::op_sub1() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_sub1;
 
     number -= 1;
-    program.push(number.data());
+    push(number.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul2(const program& program) noexcept
+op_error_t interpreter::op_mul2() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div2(const program& program) noexcept
+op_error_t interpreter::op_div2() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_negate(program& program) noexcept
+op_error_t interpreter::op_negate() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_negate;
 
     number = -number;
-    program.push(number.data());
+    push(number.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_abs(program& program) noexcept
+op_error_t interpreter::op_abs() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_abs;
 
     if (number < 0)
         number = -number;
 
-    program.push(number.data());
+    push(number.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_not(program& program) noexcept
+op_error_t interpreter::op_not() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_not;
 
-    program.push(number.is_false());
+    push(number.is_false());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_nonzero(program& program) noexcept
+op_error_t interpreter::op_nonzero() noexcept
 {
     number number;
-    if (!program.pop(number))
+    if (!pop(number))
         return error::op_nonzero;
 
-    program.push(number.is_true());
+    push(number.is_true());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_add(program& program) noexcept
+op_error_t interpreter::op_add() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_add;
 
-    program.push((left + right).data());
+    push((left + right).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sub(program& program) noexcept
+op_error_t interpreter::op_sub() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_sub;
 
-    program.push((left - right).data());
+    push((left - right).data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_mul(const program& program) noexcept
+op_error_t interpreter::op_mul() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_div(const program& program) noexcept
+op_error_t interpreter::op_div() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_mod(const program& program) noexcept
+op_error_t interpreter::op_mod() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_lshift(const program& program) noexcept
+op_error_t interpreter::op_lshift() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_rshift(const program& program) noexcept
+op_error_t interpreter::op_rshift() const noexcept
 {
-    if (program.is_enabled(forks::cats_rule))
+    if (is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
 
     return error::op_not_implemented;
 }
 
-interpreter::result interpreter::op_bool_and(program& program) noexcept
+op_error_t interpreter::op_bool_and() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_bool_and;
 
-    program.push(left.is_true() && right.is_true());
+    push(left.is_true() && right.is_true());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_bool_or(program& program) noexcept
+op_error_t interpreter::op_bool_or() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_bool_or;
 
-    program.push(left.is_true() || right.is_true());
+    push(left.is_true() || right.is_true());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_num_equal(program& program) noexcept
+op_error_t interpreter::op_num_equal() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_num_equal;
 
-    program.push(left == right);
+    push(left == right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_num_equal_verify(program& program) noexcept
+op_error_t interpreter::op_num_equal_verify() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_num_equal_verify1;
 
     return (left == right) ? error::op_success : error::op_num_equal_verify2;
 }
 
-interpreter::result interpreter::op_num_not_equal(program& program) noexcept
+op_error_t interpreter::op_num_not_equal() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_num_not_equal;
 
-    program.push(left != right);
+    push(left != right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_less_than(program& program) noexcept
+op_error_t interpreter::op_less_than() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_less_than;
 
-    program.push(left < right);
+    push(left < right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_greater_than(program& program) noexcept
+op_error_t interpreter::op_greater_than() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_greater_than;
 
-    program.push(left > right);
+    push(left > right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_less_than_or_equal(program& program) noexcept
+op_error_t interpreter::op_less_than_or_equal() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_less_than_or_equal;
 
-    program.push(left <= right);
+    push(left <= right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_greater_than_or_equal(
-    program& program) noexcept
+op_error_t interpreter::op_greater_than_or_equal() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_greater_than_or_equal;
 
-    program.push(left >= right);
+    push(left >= right);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_min(program& program) noexcept
+op_error_t interpreter::op_min() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_min;
 
-    program.push(left < right ? left.data() : right.data());
+    push(left < right ? left.data() : right.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_max(program& program) noexcept
+op_error_t interpreter::op_max() noexcept
 {
     number right, left;
-    if (!program.pop_binary(left, right))
+    if (!pop_binary(left, right))
         return error::op_max;
 
-    program.push(left > right ? left.data() : right.data());
+    push(left > right ? left.data() : right.data());
     return error::op_success;
 }
 
-interpreter::result interpreter::op_within(program& program) noexcept
+op_error_t interpreter::op_within() noexcept
 {
     number upper, lower, value;
-    if (!program.pop_ternary(upper, lower, value))
+    if (!pop_ternary(upper, lower, value))
         return error::op_within;
 
-    program.push((lower <= value) && (value < upper));
+    push((lower <= value) && (value < upper));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_ripemd160(program& program) noexcept
+op_error_t interpreter::op_ripemd160() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_ripemd160;
 
-    program.push(ripemd160_hash_chunk(*program.pop()));
+    push(ripemd160_hash_chunk(*pop()));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sha1(program& program) noexcept
+op_error_t interpreter::op_sha1() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_sha1;
 
-    program.push(sha1_hash_chunk(*program.pop()));
+    push(sha1_hash_chunk(*pop()));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_sha256(program& program) noexcept
+op_error_t interpreter::op_sha256() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_sha256;
 
-    program.push(sha256_hash_chunk(*program.pop()));
+    push(sha256_hash_chunk(*pop()));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_hash160(program& program) noexcept
+op_error_t interpreter::op_hash160() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_hash160;
 
-    program.push(ripemd160_hash_chunk(sha256_hash(*program.pop())));
+    push(ripemd160_hash_chunk(sha256_hash(*pop())));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_hash256(program& program) noexcept
+op_error_t interpreter::op_hash256() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_hash256;
 
-    program.push(sha256_hash_chunk(sha256_hash(*program.pop())));
+    push(sha256_hash_chunk(sha256_hash(*pop())));
     return error::op_success;
 }
 
-interpreter::result interpreter::op_codeseparator(program& program,
-    const op_iterator& op) noexcept
+op_error_t interpreter::op_codeseparator(const op_iterator& op) noexcept
 {
-    return program.set_subscript(op) ? error::op_success :
+    return set_subscript(op) ? error::op_success :
         error::op_code_separator;
 }
 
-interpreter::result interpreter::op_check_sig(program& program) noexcept
+op_error_t interpreter::op_check_sig() noexcept
 {
-    const auto verify = op_check_sig_verify(program);
-    const auto bip66 = program.is_enabled(forks::bip66_rule);
+    const auto verify = op_check_sig_verify();
+    const auto bip66 = is_enabled(forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
-    program.push(verify == error::op_success);
+    push(verify == error::op_success);
     return error::op_success;
 }
 
 // In signing mode, prepare_signature converts key from a private key to
 // a public key and generates the signature from key and hash. The signature is
 // then verified against the key and hash as if obtained from the script.
-interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
+op_error_t interpreter::op_check_sig_verify() noexcept
 {
-    if (program.is_empty())
+    if (is_empty())
         return error::op_check_sig_verify1;
 
-    const auto key = program.pop();
+    const auto key = pop();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    if (program.is_empty())
+    if (is_empty())
         return error::op_check_sig_verify3;
 
-    const auto endorsement = program.pop();
+    const auto endorsement = pop();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -866,7 +878,7 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
-    if (!program.prepare(sig, *key, hash, endorsement))
+    if (!prepare(sig, *key, hash, endorsement))
         return error::op_check_sig_verify_parse;
 
     // TODO: for signing mode - make key mutable and return above.
@@ -874,52 +886,51 @@ interpreter::result interpreter::op_check_sig_verify(program& program) noexcept
         error::op_success : error::op_check_sig_verify5;
 }
 
-interpreter::result interpreter::op_check_multisig(program& program) noexcept
+op_error_t interpreter::op_check_multisig() noexcept
 {
-    const auto verify = op_check_multisig_verify(program);
-    const auto bip66 = program.is_enabled(forks::bip66_rule);
+    const auto verify = op_check_multisig_verify();
+    const auto bip66 = is_enabled(forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_multisig_verify_parse)
         return error::op_check_multisig;
 
-    program.push(verify == error::op_success);
+    push(verify == error::op_success);
     return error::op_success;
 }
 
-interpreter::result interpreter::op_check_multisig_verify(
-    program& program) noexcept
+op_error_t interpreter::op_check_multisig_verify() noexcept
 {
-    const auto bip147 = program.is_enabled(forks::bip147_rule);
+    const auto bip147 = is_enabled(forks::bip147_rule);
 
     int32_t count;
-    if (!program.pop(count))
+    if (!pop(count))
         return error::op_check_multisig_verify1;
 
-    if (!program.ops_increment(count))
+    if (!ops_increment(count))
         return error::op_check_multisig_verify2;
 
     chunk_cptrs keys;
-    if (!program.pop(keys, count))
+    if (!pop(keys, count))
         return error::op_check_multisig_verify3;
 
-    if (!program.pop(count))
+    if (!pop(count))
         return error::op_check_multisig_verify4;
 
     if (is_greater(count, keys.size()))
         return error::op_check_multisig_verify5;
 
     chunk_cptrs endorsements;
-    if (!program.pop(endorsements, count))
+    if (!pop(endorsements, count))
         return error::op_check_multisig_verify6;
 
-    if (program.is_empty())
+    if (is_empty())
         return error::op_check_multisig_verify7;
 
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    if (!program.pop()->empty() && bip147)
+    if (!pop()->empty() && bip147)
         return error::op_check_multisig_verify8;
 
     uint8_t flags;
@@ -927,7 +938,7 @@ interpreter::result interpreter::op_check_multisig_verify(
     program::hash_cache cache;
 
     // Subscript is the same for all signatures.
-    const auto sub = program.subscript(endorsements);
+    const auto sub = subscript(endorsements);
     auto endorsement = endorsements.begin();
 
     // Keys may be empty, endorsements is an ordered subset of corresponding
@@ -944,7 +955,7 @@ interpreter::result interpreter::op_check_multisig_verify(
         {
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
-            if (!program.prepare(sig, *key, cache, flags, **endorsement, *sub))
+            if (!prepare(sig, *key, cache, flags, **endorsement, *sub))
                 return error::op_check_multisig_verify_parse;
 
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -961,21 +972,20 @@ interpreter::result interpreter::op_check_multisig_verify(
         error::op_check_multisig_verify9 : error::op_success;
 }
 
-interpreter::result interpreter::op_check_locktime_verify(
-    const program& program) noexcept
+op_error_t interpreter::op_check_locktime_verify() const noexcept
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
-    if (!program.is_enabled(forks::bip65_rule))
-        return op_nop(program, opcode::nop2);
+    if (!is_enabled(forks::bip65_rule))
+        return op_nop(opcode::nop2);
 
     // BIP65: the tx sequence is 0xffffffff.
-    if (program.is_final())
+    if (input().is_final())
         return error::op_check_locktime_verify1;
 
     // BIP65: the stack is empty.
     // BIP65: extend the (signed) script number range to 5 bytes.
     number top;
-    if (!program.get_top(top, max_check_locktime_verify_number_size))
+    if (!get_top(top, max_check_locktime_verify_number_size))
         return error::op_check_locktime_verify2;
 
     // BIP65: the top stack item is negative.
@@ -984,7 +994,7 @@ interpreter::result interpreter::op_check_locktime_verify(
 
     // The top stack item is positive, so cast is safe.
     const auto locktime = sign_cast<uint64_t>(top.int64());
-    const auto tx_locktime = program.transaction().locktime();
+    const auto tx_locktime = transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
     if ((locktime < locktime_threshold) != (tx_locktime < locktime_threshold))
@@ -995,17 +1005,16 @@ interpreter::result interpreter::op_check_locktime_verify(
         error::op_success;
 }
 
-interpreter::result interpreter::op_check_sequence_verify(
-    const program& program) noexcept
+op_error_t interpreter::op_check_sequence_verify() const noexcept
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
-    if (!program.is_enabled(forks::bip112_rule))
-        return op_nop(program, opcode::nop3);
+    if (!is_enabled(forks::bip112_rule))
+        return op_nop(opcode::nop3);
 
     // BIP112: the stack is empty.
     // BIP112: extend the (signed) script number range to 5 bytes.
     number top;
-    if (!program.get_top(top, max_check_sequence_verify_number_size))
+    if (!get_top(top, max_check_sequence_verify_number_size))
         return error::op_check_sequence_verify1;
 
     // BIP112: the top stack item is negative.
@@ -1013,36 +1022,38 @@ interpreter::result interpreter::op_check_sequence_verify(
         return error::op_check_sequence_verify2;
 
     // The top stack item is positive, and only 32 bits are ever tested.
-    const auto sequence = narrow_sign_cast<uint32_t>(top.int64());
-    const auto tx_sequence = program.sequence();
+    const auto stack_sequence = narrow_sign_cast<uint32_t>(top.int64());
+    const auto input_sequence = input().sequence();
 
     // BIP112: the stack sequence is disabled, treat as nop3.
-    if (get_right(sequence, relative_locktime_disabled_bit))
-        return op_nop(program, opcode::nop3);
+    if (get_right(stack_sequence, relative_locktime_disabled_bit))
+        return op_nop(opcode::nop3);
 
     // BIP112: the stack sequence is enabled and tx version less than 2.
-    if (program.transaction().version() < relative_locktime_min_version)
+    if (transaction().version() < relative_locktime_min_version)
         return error::op_check_sequence_verify3;
 
     // BIP112: the transaction sequence is disabled.
-    if (get_right(tx_sequence, relative_locktime_disabled_bit))
+    if (get_right(input_sequence, relative_locktime_disabled_bit))
         return error::op_check_sequence_verify4;
 
     // BIP112: the stack sequence type differs from that of tx input.
-    if (get_right(sequence, relative_locktime_time_locked_bit) !=
-        get_right(tx_sequence, relative_locktime_time_locked_bit))
+    if (get_right(stack_sequence, relative_locktime_time_locked_bit) !=
+        get_right(input_sequence, relative_locktime_time_locked_bit))
         return error::op_check_sequence_verify5;
 
     // BIP112: the unmasked stack sequence is greater than that of tx sequence.
-    return (mask_left(sequence, relative_locktime_mask_left)) >
-        (mask_left(tx_sequence, relative_locktime_mask_left)) ?
+    return (mask_left(stack_sequence, relative_locktime_mask_left)) >
+        (mask_left(input_sequence, relative_locktime_mask_left)) ?
         error::op_check_sequence_verify6 : error::op_success;
 }
 
-// private:
+// Operation disatch.
+// ----------------------------------------------------------------------------
 // It is expected that the compiler will produce a very efficient jump table.
-interpreter::result interpreter::run_op(const op_iterator& op,
-    program& program) noexcept
+
+// private:
+op_error_t interpreter::run_op(const op_iterator& op) noexcept
 {
     const auto code = op->code();
 
@@ -1124,213 +1135,213 @@ interpreter::result interpreter::run_op(const op_iterator& op,
         case opcode::push_size_73:
         case opcode::push_size_74:
         case opcode::push_size_75:
-            return op_push_size(program, *op);
+            return op_push_no_size(*op);
         case opcode::push_one_size:
-            return op_push_data(program, op->data_ptr(), max_uint8);
+            return op_push_one_size(op->data_ptr());
         case opcode::push_two_size:
-            return op_push_data(program, op->data_ptr(), max_uint16);
+            return op_push_two_size(op->data_ptr());
         case opcode::push_four_size:
-            return op_push_data(program, op->data_ptr(), max_uint32);
+            return op_push_four_size(op->data_ptr());
         case opcode::push_negative_1:
-            return op_push_number(program, numbers::negative_1);
+            return op_push_number(numbers::negative_1);
         case opcode::reserved_80:
             return op_unevaluated(code);
         case opcode::push_positive_1:
-            return op_push_number(program, numbers::positive_1);
+            return op_push_number(numbers::positive_1);
         case opcode::push_positive_2:
-            return op_push_number(program, numbers::positive_2);
+            return op_push_number(numbers::positive_2);
         case opcode::push_positive_3:
-            return op_push_number(program, numbers::positive_3);
+            return op_push_number(numbers::positive_3);
         case opcode::push_positive_4:
-            return op_push_number(program, numbers::positive_4);
+            return op_push_number(numbers::positive_4);
         case opcode::push_positive_5:
-            return op_push_number(program, numbers::positive_5);
+            return op_push_number(numbers::positive_5);
         case opcode::push_positive_6:
-            return op_push_number(program, numbers::positive_6);
+            return op_push_number(numbers::positive_6);
         case opcode::push_positive_7:
-            return op_push_number(program, numbers::positive_7);
+            return op_push_number(numbers::positive_7);
         case opcode::push_positive_8:
-            return op_push_number(program, numbers::positive_8);
+            return op_push_number(numbers::positive_8);
         case opcode::push_positive_9:
-            return op_push_number(program, numbers::positive_9);
+            return op_push_number(numbers::positive_9);
         case opcode::push_positive_10:
-            return op_push_number(program, numbers::positive_10);
+            return op_push_number(numbers::positive_10);
         case opcode::push_positive_11:
-            return op_push_number(program, numbers::positive_11);
+            return op_push_number(numbers::positive_11);
         case opcode::push_positive_12:
-            return op_push_number(program, numbers::positive_12);
+            return op_push_number(numbers::positive_12);
         case opcode::push_positive_13:
-            return op_push_number(program, numbers::positive_13);
+            return op_push_number(numbers::positive_13);
         case opcode::push_positive_14:
-            return op_push_number(program, numbers::positive_14);
+            return op_push_number(numbers::positive_14);
         case opcode::push_positive_15:
-            return op_push_number(program, numbers::positive_15);
+            return op_push_number(numbers::positive_15);
         case opcode::push_positive_16:
-            return op_push_number(program, numbers::positive_16);
+            return op_push_number(numbers::positive_16);
         case opcode::nop:
-            return op_nop(code);
+            return op_nop();
         case opcode::op_ver:
-            return op_ver(program);
+            return op_ver();
         case opcode::if_:
-            return op_if(program);
+            return op_if();
         case opcode::notif:
-            return op_notif(program);
+            return op_notif();
         case opcode::op_verif:
-            return op_verif(program);
+            return op_verif();
         case opcode::op_vernotif:
-            return op_vernotif(program);
+            return op_vernotif();
         case opcode::else_:
-            return op_else(program);
+            return op_else();
         case opcode::endif:
-            return op_endif(program);
+            return op_endif();
         case opcode::verify:
-            return op_verify(program);
+            return op_verify();
         case opcode::op_return:
-            return op_return(program);
+            return op_return();
         case opcode::toaltstack:
-            return op_to_alt_stack(program);
+            return op_to_alt_stack();
         case opcode::fromaltstack:
-            return op_from_alt_stack(program);
+            return op_from_alt_stack();
         case opcode::drop2:
-            return op_drop2(program);
+            return op_drop2();
         case opcode::dup2:
-            return op_dup2(program);
+            return op_dup2();
         case opcode::dup3:
-            return op_dup3(program);
+            return op_dup3();
         case opcode::over2:
-            return op_over2(program);
+            return op_over2();
         case opcode::rot2:
-            return op_rot2(program);
+            return op_rot2();
         case opcode::swap2:
-            return op_swap2(program);
+            return op_swap2();
         case opcode::ifdup:
-            return op_if_dup(program);
+            return op_if_dup();
         case opcode::depth:
-            return op_depth(program);
+            return op_depth();
         case opcode::drop:
-            return op_drop(program);
+            return op_drop();
         case opcode::dup:
-            return op_dup(program);
+            return op_dup();
         case opcode::nip:
-            return op_nip(program);
+            return op_nip();
         case opcode::over:
-            return op_over(program);
+            return op_over();
         case opcode::pick:
-            return op_pick(program);
+            return op_pick();
         case opcode::roll:
-            return op_roll(program);
+            return op_roll();
         case opcode::rot:
-            return op_rot(program);
+            return op_rot();
         case opcode::swap:
-            return op_swap(program);
+            return op_swap();
         case opcode::tuck:
-            return op_tuck(program);
+            return op_tuck();
         case opcode::op_cat:
-            return op_cat(program);
+            return op_cat();
         case opcode::op_substr:
-            return op_substr(program);
+            return op_substr();
         case opcode::op_left:
-            return op_left(program);
+            return op_left();
         case opcode::op_right:
-            return op_right(program);
+            return op_right();
         case opcode::size:
-            return op_size(program);
+            return op_size();
         case opcode::op_invert:
-            return op_invert(program);
+            return op_invert();
         case opcode::op_and:
-            return op_and(program);
+            return op_and();
         case opcode::op_or:
-            return op_or(program);
+            return op_or();
         case opcode::op_xor:
-            return op_xor(program);
+            return op_xor();
         case opcode::equal:
-            return op_equal(program);
+            return op_equal();
         case opcode::equalverify:
-            return op_equal_verify(program);
+            return op_equal_verify();
         case opcode::reserved_137:
             return op_unevaluated(code);
         case opcode::reserved_138:
             return op_unevaluated(code);
         case opcode::add1:
-            return op_add1(program);
+            return op_add1();
         case opcode::sub1:
-            return op_sub1(program);
+            return op_sub1();
         case opcode::op_mul2:
-            return op_mul2(program);
+            return op_mul2();
         case opcode::op_div2:
-            return op_div2(program);
+            return op_div2();
         case opcode::negate:
-            return op_negate(program);
+            return op_negate();
         case opcode::abs:
-            return op_abs(program);
+            return op_abs();
         case opcode::not_:
-            return op_not(program);
+            return op_not();
         case opcode::nonzero:
-            return op_nonzero(program);
+            return op_nonzero();
         case opcode::add:
-            return op_add(program);
+            return op_add();
         case opcode::sub:
-            return op_sub(program);
+            return op_sub();
         case opcode::op_mul:
-            return op_mul(program);
+            return op_mul();
         case opcode::op_div:
-            return op_div(program);
+            return op_div();
         case opcode::op_mod:
-            return op_mod(program);
+            return op_mod();
         case opcode::op_lshift:
-            return op_lshift(program);
+            return op_lshift();
         case opcode::op_rshift:
-            return op_rshift(program);
+            return op_rshift();
         case opcode::booland:
-            return op_bool_and(program);
+            return op_bool_and();
         case opcode::boolor:
-            return op_bool_or(program);
+            return op_bool_or();
         case opcode::numequal:
-            return op_num_equal(program);
+            return op_num_equal();
         case opcode::numequalverify:
-            return op_num_equal_verify(program);
+            return op_num_equal_verify();
         case opcode::numnotequal:
-            return op_num_not_equal(program);
+            return op_num_not_equal();
         case opcode::lessthan:
-            return op_less_than(program);
+            return op_less_than();
         case opcode::greaterthan:
-            return op_greater_than(program);
+            return op_greater_than();
         case opcode::lessthanorequal:
-            return op_less_than_or_equal(program);
+            return op_less_than_or_equal();
         case opcode::greaterthanorequal:
-            return op_greater_than_or_equal(program);
+            return op_greater_than_or_equal();
         case opcode::min:
-            return op_min(program);
+            return op_min();
         case opcode::max:
-            return op_max(program);
+            return op_max();
         case opcode::within:
-            return op_within(program);
+            return op_within();
         case opcode::ripemd160:
-            return op_ripemd160(program);
+            return op_ripemd160();
         case opcode::sha1:
-            return op_sha1(program);
+            return op_sha1();
         case opcode::sha256:
-            return op_sha256(program);
+            return op_sha256();
         case opcode::hash160:
-            return op_hash160(program);
+            return op_hash160();
         case opcode::hash256:
-            return op_hash256(program);
+            return op_hash256();
         case opcode::codeseparator:
-            return op_codeseparator(program, op);
+            return op_codeseparator(op);
         case opcode::checksig:
-            return op_check_sig(program);
+            return op_check_sig();
         case opcode::checksigverify:
-            return op_check_sig_verify(program);
+            return op_check_sig_verify();
         case opcode::checkmultisig:
-            return op_check_multisig(program);
+            return op_check_multisig();
         case opcode::checkmultisigverify:
-            return op_check_multisig_verify(program);
+            return op_check_multisig_verify();
         case opcode::nop1:
-            return op_nop(program, code);
+            return op_nop(code);
         case opcode::checklocktimeverify:
-            return op_check_locktime_verify(program);
+            return op_check_locktime_verify();
         case opcode::checksequenceverify:
-            return op_check_sequence_verify(program);
+            return op_check_sequence_verify();
         case opcode::nop4:
         case opcode::nop5:
         case opcode::nop6:
@@ -1338,22 +1349,25 @@ interpreter::result interpreter::run_op(const op_iterator& op,
         case opcode::nop8:
         case opcode::nop9:
         case opcode::nop10:
-            return op_nop(program, code);
+            return op_nop(code);
         default:
             return op_unevaluated(code);
     }
 }
 
-code interpreter::run(program& program) noexcept
+// Operation loop (script execution).
+// ----------------------------------------------------------------------------
+
+code interpreter::run() noexcept
 {
-    result ec;
+    error::op_error_t ec;
 
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
-    if (!program.is_valid())
+    if (!is_valid())
         return error::invalid_script;
 
-    for (auto it = program.begin(); it != program.end(); ++it)
+    for (auto it = begin(); it != end(); ++it)
     {
         // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
@@ -1367,24 +1381,24 @@ code interpreter::run(program& program) noexcept
             return error::op_invalid;
 
         // Enforce opcode count limit (201).
-        if (!program.ops_increment(op))
+        if (!ops_increment(op))
             return error::invalid_operation_count;
 
         // Conditional evaluation scope.
-        if (program.if_(op))
+        if (if_(op))
         {
             // Evaluate opcode (switch).
-            if ((ec = run_op(it, program)))
+            if ((ec = run_op(it)))
                 return ec;
 
             // Enforce combined stacks size limit (1,000).
-            if (program.is_stack_overflow())
+            if (is_stack_overflow())
                 return error::invalid_stack_size;
         }
     }
 
-    // Guard against unclosed evaluation scope.
-    return program.is_balanced() ? error::script_success :
+    // Guard against unbalanced evaluation scope.
+    return is_balanced() ? error::script_success :
         error::invalid_stack_scope;
 }
 

@@ -115,12 +115,8 @@ program::program(const chain::transaction& tx, const input_iterator& input,
 }
 
 // Public.
-// ============================================================================
-
-// Utilities.
 // ----------------------------------------------------------------------------
 
-// Check initial program state for validity (i.e. can evaluation return true).
 bool program::is_valid() const noexcept
 {
     // TODO: nops rule must first be enabled in tests and config.
@@ -136,98 +132,11 @@ bool program::is_valid() const noexcept
         (!bip141    || chain::witness::is_push_size(*primary_));
 }
 
-bool program::is_enabled(chain::forks rule) const noexcept
-{
-    return to_bool(forks_ & rule);
-}
-
-bool program::is_stack_true(stack clean) const noexcept
-{
-    return !is_empty() && stack_to_bool(clean);
-}
-
-//  Accumulators.
-// ----------------------------------------------------------------------------
-
-constexpr bool operation_overflow(size_t count) noexcept
-{
-    // ************************************************************************
-    // CONSENSUS:
-    // Satoshi compares the count to 200 with a composed postfix increment,
-    // which makes the actual maximum 201, not the presumably-intended 200.
-    // The code was later revised to make this explicit, by use of a prefix
-    // increment against a limit of 201.
-    // ************************************************************************
-    return count > max_counted_ops;
-}
-
-bool program::ops_increment(const operation& op) noexcept
-{
-    // Addition is safe due to script size constraint.
-    BC_ASSERT(sub1(max_size_t) >= operation_count_);
-
-    if (operation::is_counted(op.code()))
-        ++operation_count_;
-
-    return !operation_overflow(operation_count_);
-}
-
-bool program::ops_increment(int32_t public_keys) noexcept
-{
-    constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
-        max_script_public_keys);
-
-    // bit.ly/2d1bsdB
-    if (is_negative(public_keys) || public_keys > max_keys)
-        return false;
-
-    // Addition is safe due to script size constraint.
-    BC_ASSERT(max_size_t - public_keys >= operation_count_);
-
-    operation_count_ += public_keys;
-    return !operation_overflow(operation_count_);
-}
-
-// Program registers.
-// ----------------------------------------------------------------------------
-
-program::op_iterator program::begin() const noexcept
-{
-    return script_->ops().begin();
-}
-
-program::op_iterator program::end() const noexcept
-{
-    return script_->ops().end();
-}
-
-// Protected (interpreter friend).
-// ============================================================================
-
-// Constant registers.
-// ----------------------------------------------------------------------------
-
-bool program::is_final() const noexcept
-{
-    return (*input_)->is_final();
-}
-
-uint32_t program::sequence() const noexcept
-{
-    return (*input_)->sequence();
-}
-
-const chain::transaction& program::transaction() const noexcept
-{
-    return transaction_;
-}
-
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
 void program::push(bool value) noexcept
 {
-    // It is safe to share instances of these shared pointers across threads.
     static const auto true_ = to_shared<data_chunk>({ numbers::positive_1 });
     static const auto false_ = to_shared<data_chunk>(data_chunk{});
 
@@ -259,7 +168,6 @@ void program::push(const chunk_cptr& item) noexcept
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
-// public (transaction)
 chunk_cptr program::pop() noexcept
 {
     // This must be guarded (is_relaxed_push is checked in transaction).
@@ -320,7 +228,6 @@ bool program::pop_ternary(number& upper, number& lower, number& value) noexcept
     return pop(upper) && pop(lower) && pop(value);
 }
 
-// pop1/pop2/.../pop[count]
 bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
 {
     if (is_negative(signed_count))
@@ -340,38 +247,35 @@ bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
 
 // Primary stack push/pop non-const functions (optimizations).
 // ----------------------------------------------------------------------------
+// Stack index is zero-based, back() is element zero.
 
-// pop1/pop2/push1/push2
 void program::swap(size_t left, size_t right) noexcept
 {
     // This must be guarded.
     BC_ASSERT(std::max(left, right) < size());
 
-    // Stack index is zero-based, back() is "top"/[0].
     std::swap(
         *std::prev(primary_->end(), add1(left)),
         *std::prev(primary_->end(), add1(right)));
 }
 
-// pop1/pop2/.../pop[pos-1]/pop[pos]/push[pos-1]/.../push2/push1
 void program::erase(size_t index) noexcept
 {
     // This must be guarded.
     BC_ASSERT(index < size());
 
-    // Stack index is zero-based, back() is "top"/[0].
     primary_->erase(std::prev(primary_->end(), add1(index)));
 }
 
 // Primary stack push/pop const functions.
 // ----------------------------------------------------------------------------
+// Stack index is zero-based, back() is element zero.
 
 const chunk_cptr& program::item(size_t index) const noexcept
 {
     // This must be guarded.
     BC_ASSERT(index < size());
 
-    // Stack index is zero-based, back() is "top"/[0].
     return *std::prev(primary_->end(), add1(index));
 }
 
@@ -395,6 +299,35 @@ bool program::is_stack_overflow() const noexcept
 bool program::get_top(number& out_number, size_t maxiumum_size) const noexcept
 {
     return !is_empty() && out_number.set_data(*item(zero), maxiumum_size);
+}
+
+bool program::stack_to_bool(stack clean) const noexcept
+{
+    // Reversed byte order in this example (big-endian).
+    // []               : false (empty)
+    // [00 00 00 00 00] : false (+zero)
+    // [80 00 00 00 00] : false (-zero)
+    // [42 00 00 00 00] : true
+    // [00 80 00 00 00] : true
+
+    const auto& top = primary_->back();
+
+    if (top->empty() || ((clean == stack::clean) && (primary_->size() != one)))
+        return false;
+
+    const auto non_zero = [](uint8_t value) noexcept
+    {
+        return value != numbers::positive_0;
+    };
+
+    const auto zero_magnitude = [](uint8_t value) noexcept
+    {
+        constexpr auto sign_mask = bit_not<uint8_t>(numbers::negative_sign);
+        return bit_and<uint8_t>(value, sign_mask) == numbers::positive_0;
+    };
+
+    return !zero_magnitude(top->back()) ||
+        std::any_of(top->begin(), std::prev(top->end()), non_zero);
 }
 
 // Alternate stack.
@@ -474,18 +407,60 @@ bool program::is_balanced() const noexcept
 
 bool program::is_succeess() const noexcept
 {
+    ////const auto is_true = [](bool value) noexcept { return value; };
+    ////return std::all_of(condition_.begin(), condition_.end(), is_true);
+
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
     return is_zero(negative_condition_count_);
-
-    ////const auto is_true = [](bool value) noexcept { return value; };
-    ////return std::all_of(condition_.begin(), condition_.end(), is_true);
 }
 
 bool program::if_(const operation& op) const noexcept
 {
     // Conditional op execution is not predicated on conditional stack.
     return op.is_conditional() || is_succeess();
+}
+
+//  Accumulators.
+// ----------------------------------------------------------------------------
+
+// ****************************************************************************
+// CONSENSUS:
+// Satoshi compares the count to 200 with a composed postfix increment, which
+// makes the actual maximum 201, not the presumably-intended 200. The code was
+// later revised to make this explicit, by use of a prefix increment against a
+// limit of 201.
+// ****************************************************************************
+constexpr bool operation_overflow(size_t count) noexcept
+{
+    return count > max_counted_ops;
+}
+
+bool program::ops_increment(const operation& op) noexcept
+{
+    // Addition is safe due to script size constraint.
+    BC_ASSERT(sub1(max_size_t) >= operation_count_);
+
+    if (operation::is_counted(op.code()))
+        ++operation_count_;
+
+    return operation_count_ <= max_counted_ops;
+}
+
+bool program::ops_increment(int32_t public_keys) noexcept
+{
+    constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
+        max_script_public_keys);
+
+    // bit.ly/2d1bsdB
+    if (is_negative(public_keys) || public_keys > max_keys)
+        return false;
+
+    // Addition is safe due to script size constraint.
+    BC_ASSERT(max_size_t - public_keys >= operation_count_);
+
+    operation_count_ += public_keys;
+    return !operation_overflow(operation_count_);
 }
 
 // Signature validation helpers.
@@ -574,7 +549,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 }
 
 // Private.
-// ============================================================================
+// ----------------------------------------------------------------------------
 
 // ****************************************************************************
 // CONSENSUS: nominal endorsement operation encoding required.
@@ -596,34 +571,6 @@ chain::operations program::create_strip_ops(
     BC_POP_WARNING()
 
     return strip;
-}
-
-// Reversed byte order in this example (big-endian).
-// []               : false (empty)
-// [00 00 00 00 00] : false (+zero)
-// [80 00 00 00 00] : false (-zero)
-// [42 00 00 00 00] : true
-// [00 80 00 00 00] : true
-bool program::stack_to_bool(stack clean) const noexcept
-{
-    const auto& top = primary_->back();
-
-    if (top->empty() || ((clean == stack::clean) && (primary_->size() != one)))
-        return false;
-
-    const auto non_zero = [](uint8_t value) noexcept
-    {
-        return value != numbers::positive_0;
-    };
-
-    const auto zero_magnitude = [](uint8_t value) noexcept
-    {
-        constexpr auto sign_mask = bit_not<uint8_t>(numbers::negative_sign);
-        return bit_and<uint8_t>(value, sign_mask) == numbers::positive_0;
-    };
-
-    return !zero_magnitude(top->back()) ||
-        std::any_of(top->begin(), std::prev(top->end()), non_zero);
 }
 
 hash_digest program::signature_hash(const script& sub,

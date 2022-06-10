@@ -68,38 +68,41 @@ public:
     program& operator=(const program&) = delete;
     ~program() = default;
 
-    /// Utilities.
+    /// Program validity.
     bool is_valid() const noexcept;
-    bool is_enabled(chain::forks rule) const noexcept;
-    bool is_stack_true(stack clean) const noexcept;
-
-    /// Accumulator.
-    bool ops_increment(const chain::operation& op) noexcept;
-    bool ops_increment(int32_t public_keys) noexcept;
-
-    /// Program registers.
-    op_iterator begin() const noexcept;
-    op_iterator end() const noexcept;
-
-    /// Pop an element from the stack (empty if stack is empty).
-    inline chunk_cptr safe_pop() noexcept
-    {
-        return is_empty() ? to_shared<data_chunk>() : pop();
-    }
 
 protected:
-    friend class interpreter;
-
     program(const chain::transaction& tx, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks, uint64_t value,
         chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
 
-    /// Constant registers.
+    /// Constants.
     /// -----------------------------------------------------------------------
 
-    bool is_final() const noexcept;
-    uint32_t sequence() const noexcept;
-    const chain::transaction& transaction() const noexcept;
+    inline op_iterator begin() const noexcept
+    {
+        return script_->ops().begin();
+    }
+
+    inline op_iterator end() const noexcept
+    {
+        return script_->ops().end();
+    }
+
+    inline const chain::input& input() const noexcept
+    {
+        return **input_;
+    }
+
+    inline const chain::transaction& transaction() const noexcept
+    {
+        return transaction_;
+    }
+
+    inline bool is_enabled(chain::forks rule) const noexcept
+    {
+        return to_bool(forks_ & rule);
+    }
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
@@ -120,16 +123,17 @@ protected:
     bool pop_ternary(number& upper, number& lower, number& value) noexcept;
     bool pop(chunk_cptrs& section, int32_t signed_count) noexcept;
 
-    /// Primary stack push/pop optimizations.
+    /// Primary stack optimizations.
     void drop() noexcept;
     void swap(size_t left, size_t right) noexcept;
     void erase(size_t index) noexcept;
 
-    /// Primary stack push/pop const functions.
+    /// Primary stack const functions.
     size_t size() const noexcept;
     bool is_empty() const noexcept;
     bool is_stack_overflow() const noexcept;
     bool get_top(number& out_number, size_t maxiumum_size) const noexcept;
+    bool stack_to_bool(stack clean) const noexcept;
     const chunk_cptr& item(size_t index) const noexcept;
 
     /// Alternate stack.
@@ -148,6 +152,12 @@ protected:
     bool is_balanced() const noexcept;
     bool is_succeess() const noexcept;
     bool if_(const chain::operation& op) const noexcept;
+
+    /// Accumulator.
+    /// -----------------------------------------------------------------------
+
+    bool ops_increment(const chain::operation& op) noexcept;
+    bool ops_increment(int32_t public_keys) noexcept;
 
     /// Signature validation helpers.
     /// -----------------------------------------------------------------------
@@ -175,35 +185,29 @@ private:
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;
 
-    bool stack_to_bool(stack clean) const noexcept;
     hash_digest signature_hash(const chain::script& sub,
         uint8_t flags) const noexcept;
     void signature_hash(hash_cache& cache, const chain::script& sub,
         uint8_t flags) const noexcept;
 
-    // Input script.
+    // Constants.
     const chain::transaction& transaction_;
     const input_iterator input_;
-    ////const uint32_t index_;
-    ////const uint32_t sequence_;
-    ////const bool final_;
-
-    // Prevout script.
     const chain::script::cptr script_;
-
-    // Chain context.
     const uint32_t forks_;
-
-    // Witness initialization.
     const uint64_t value_;
     const chain::script_version version_;
-    chunk_cptrs_ptr primary_;
 
-    // Always default initialized.
-    size_t negative_condition_count_{};
-    size_t operation_count_{};
+    // Three stacks.
+    chunk_cptrs_ptr primary_;
     chunk_cptrs alternate_{};
     bool_stack condition_{};
+
+    // Accumulator.
+    size_t operation_count_{};
+
+    // Condition stack optimization.
+    size_t negative_condition_count_{};
 };
 
 } // namespace machine
