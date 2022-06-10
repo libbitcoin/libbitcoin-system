@@ -55,21 +55,21 @@ static bool is(uint8_t byte)
 }
 
 // check left - right
-static bool subtract_overflow64(const int64_t left, const int64_t right)
+constexpr bool subtract_overflow64(const int64_t left, const int64_t right)
 {
     return
         ((right > 0 && left < std::numeric_limits<int64_t>::min() + right) ||
         (right < 0 && left > std::numeric_limits<int64_t>::max() + right));
 }
 
-static bool add_overflow64(const int64_t left, const int64_t right)
+constexpr bool add_overflow64(const int64_t left, const int64_t right)
 {
     return
         ((right > 0 && left > (std::numeric_limits<int64_t>::max() - right)) ||
         (right < 0 && left < (std::numeric_limits<int64_t>::min() - right)));
 }
 
-static bool negate_overflow64(const int64_t number)
+constexpr bool negate_overflow64(const int64_t number)
 {
     return number == std::numeric_limits<int64_t>::min();
 }
@@ -86,8 +86,7 @@ static void CheckAdd(const int64_t num1, const int64_t num2, size_t value,
 
     if (!add_overflow64(num1, num2))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2, value, offset,
-            test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2, value, offset, test);
         BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + num2, value, offset, test);
         BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum2 + num1, value, offset, test);
     }
@@ -114,18 +113,14 @@ static void CheckSubtract(const int64_t num1, const int64_t num2, size_t value,
 
     if (!subtract_overflow64(num1, num2))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2,
-            value, offset, test);
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2, value,
-            offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2, value, offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2, value, offset, test);
     }
 
     if (!subtract_overflow64(num2, num1))
     {
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1,
-            value, offset, test);
-        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1, value,
-            offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1, value, offset, test);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1, value, offset, test);
     }
 }
 
@@ -192,8 +187,8 @@ BOOST_AUTO_TEST_CASE(number__operators__data_driven__expected)
     {
         for (size_t j = 0; j < number_offsets_count; ++j)
         {
-            auto a = number_values[i];
-            auto b = number_offsets[j];
+            const auto a = number_values[i];
+            const auto b = number_offsets[j];
 
             RunOperators(a, +a,         i, j, 0);
             RunOperators(a, -a,         i, j, 1);
@@ -215,7 +210,7 @@ BOOST_AUTO_TEST_CASE(number__operators__data_driven__expected)
 
 BOOST_AUTO_TEST_CASE(number__construct__default__zero)
 {
-    number instance{};
+    const number instance{};
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE_EQUAL(instance.int32(), 0);
     BOOST_REQUIRE_EQUAL(instance.int64(), 0);
@@ -223,7 +218,7 @@ BOOST_AUTO_TEST_CASE(number__construct__default__zero)
 
 BOOST_AUTO_TEST_CASE(number__construct__zero__zero)
 {
-    number instance{ 0 };
+    const number instance{ 0 };
     BOOST_REQUIRE(instance.data().empty());
     BOOST_REQUIRE_EQUAL(instance.int32(), 0);
     BOOST_REQUIRE_EQUAL(instance.int64(), 0);
@@ -240,7 +235,7 @@ static const data_chunk max64_data{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x
 
 BOOST_AUTO_TEST_CASE(number__construct__minimum__minimums)
 {
-    number instance{ min64 };
+    const number instance{ min64 };
     BOOST_REQUIRE_EQUAL(instance.data(), min64_data );
     BOOST_REQUIRE_EQUAL(instance.int32(), min32);
     BOOST_REQUIRE_EQUAL(instance.int64(), min64);
@@ -248,7 +243,7 @@ BOOST_AUTO_TEST_CASE(number__construct__minimum__minimums)
 
 BOOST_AUTO_TEST_CASE(number__construct__maximum__maximums)
 {
-    number instance{ max64 };
+    const number instance{ max64 };
     BOOST_REQUIRE_EQUAL(instance.data(), max64_data);
     BOOST_REQUIRE_EQUAL(instance.int32(), max32);
     BOOST_REQUIRE_EQUAL(instance.int64(), max64);
@@ -327,38 +322,82 @@ BOOST_AUTO_TEST_CASE(number__set_data__six_five__expected)
 
 BOOST_AUTO_TEST_CASE(number__is_true__one__true)
 {
-    number instance{ 1 };
+    const number instance{ 1 };
     BOOST_REQUIRE(instance.is_true());
 }
 
 BOOST_AUTO_TEST_CASE(number__is_true__zero__false)
 {
-    number instance{ 0 };
+    const number instance{ 0 };
     BOOST_REQUIRE(!instance.is_true());
 }
 
 BOOST_AUTO_TEST_CASE(number__is_false__one__false)
 {
-    number instance{ 1 };
+    const number instance{ 1 };
     BOOST_REQUIRE(!instance.is_false());
 }
 
 BOOST_AUTO_TEST_CASE(number__is_false__zero__true)
 {
-    number instance{ 0 };
+    const number instance{ 0 };
     BOOST_REQUIRE(instance.is_false());
 }
 
 BOOST_AUTO_TEST_CASE(number__is_negative__negative__true)
 {
-    number instance{ -1 };
+    const number instance{ -1 };
     BOOST_REQUIRE(instance.is_negative());
 }
 
 BOOST_AUTO_TEST_CASE(number__is_negative__positive__false)
 {
-    number instance{ 1 };
+    const number instance{ 1 };
     BOOST_REQUIRE(!instance.is_negative());
 }
+
+// data
+
+BOOST_AUTO_TEST_CASE(number__data__x00__empty)
+{
+    const number instance{ 0x00 };
+    const data_chunk expected{};
+    const auto result = instance.data();
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(number__data__x01__0x01)
+{
+    const number instance{ 0x01 };
+    const data_chunk expected{ 0x01 };
+    const auto result = instance.data();
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(number__data__x7f__0x7f)
+{
+    const number instance{ 0x7f };
+    const data_chunk expected{ 0x7f };
+    const auto result = instance.data();
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(number__data__xff__0x00ff)
+{
+    const number instance{ 0xff };
+    const data_chunk expected{ 0xff, 0x00 };
+    const auto result = instance.data();
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+BOOST_AUTO_TEST_CASE(number__data__negative_1__0x81)
+{
+    const number instance{ -1 };
+    const data_chunk expected{ 0x81 };
+    const auto result = instance.data();
+    BOOST_REQUIRE_EQUAL(result, expected);
+}
+
+constexpr auto foo = absolute(-1);
 
 BOOST_AUTO_TEST_SUITE_END()

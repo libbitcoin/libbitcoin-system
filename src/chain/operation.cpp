@@ -540,7 +540,7 @@ opcode operation::minimal_opcode_from_data(const data_chunk& data) noexcept
         if (value == numbers::negative_1)
             return opcode::push_negative_1;
 
-        if (value == numbers::positive_0)
+        if (value == numbers::number_0)
             return opcode::push_size_0;
 
         if (value >= numbers::positive_1 &&
@@ -568,7 +568,7 @@ opcode operation::opcode_from_data(const data_chunk& data,
 opcode operation::opcode_from_version(uint8_t value) noexcept
 {
     BC_ASSERT(value <= numbers::positive_16);
-    return (value == numbers::positive_0) ? opcode::push_size_0 :
+    return (value == numbers::number_0) ? opcode::push_size_0 :
         operation::opcode_from_positive(value);
 }
 
@@ -590,7 +590,7 @@ uint8_t operation::opcode_to_positive(opcode code) noexcept
 // Categories of opcodes.
 // ----------------------------------------------------------------------------
 
-// opcode: [101-102, 126-129, 131-134, 141-142, 149-153]
+// opcode: [101, 102, 126..129, 131..134, 141, 142, 149..153]
 // ****************************************************************************
 // CONSENSUS: These are invalid even if evaluation is precluded by conditional.
 // ****************************************************************************
@@ -625,7 +625,7 @@ bool operation::is_invalid(opcode code) noexcept
     }
 }
 
-// opcode: [80, 98, 106, 137-138, 186-255]
+// opcode: [80, 98, 106, 137..138, 186..255]
 // ****************************************************************************
 // CONSENSUS: These are invalid unless evaluation is precluded by conditional.
 //
@@ -716,7 +716,7 @@ bool operation::is_reserved(opcode code) noexcept
     }
 }
 
-// opcode: [99-100, 103-104]
+// opcode: [99..100, 103..104]
 bool operation::is_conditional(opcode code) noexcept
 {
     // C++14: switch in constexpr.
@@ -731,18 +731,6 @@ bool operation::is_conditional(opcode code) noexcept
             return false;
     }
 }
-
-//*****************************************************************************
-// CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
-// This affects the operation count in p2sh script evaluation.
-// Presumably this was an unintended consequence of range testing enums.
-//*****************************************************************************
-////// opcode: [0-96]
-////bool operation::is_relaxed_push(opcode code) noexcept
-////{
-////    constexpr auto op_96 = opcode::push_positive_16;
-////    return code <= op_96;
-////}
 
 // Categories of operations.
 // ----------------------------------------------------------------------------

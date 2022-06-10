@@ -66,12 +66,12 @@ op_error_t interpreter::op_push_no_size(const operation& op) noexcept
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_number(uint8_t value) noexcept
+op_error_t interpreter::op_push_numeric(uint8_t value) noexcept
 {
     BC_ASSERT_MSG(operation::is_numeric(static_cast<opcode>(value)),
         "invalid op_push_number");
 
-    push(to_chunk(value));
+    push_byte(value);
     return error::op_success;
 }
 
@@ -307,8 +307,7 @@ op_error_t interpreter::op_if_dup() noexcept
 op_error_t interpreter::op_depth() noexcept
 {
     // [0,1,2] => 3,[0,1,2]
-    ////push_number(size());
-    push(number(size()).data());
+    push_length(size());
     return error::op_success;
 }
 
@@ -358,7 +357,7 @@ op_error_t interpreter::op_pick() noexcept
     size_t index;
 
     // 2,[0,1,2,3] => {2} [0,1,2,3]
-    if (!pop_index(index))
+    if (!pop_index_four_bytes(index))
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
@@ -388,7 +387,7 @@ op_error_t interpreter::op_roll() noexcept
     size_t index;
 
     // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
-    if (!pop_index(index))
+    if (!pop_index_four_bytes(index))
         return error::op_roll;
 
     // Copy indexed item reference, as it will be deleted.
@@ -472,7 +471,7 @@ op_error_t interpreter::op_size() noexcept
     if (is_empty())
         return error::op_size;
 
-    push(number(item(0)->size()).data());
+    push_length(item(0)->size());
     return error::op_success;
 }
 
@@ -513,7 +512,7 @@ op_error_t interpreter::op_equal() noexcept
     if (size() < 2)
         return error::op_equal;
 
-    push(*pop() == *pop());
+    push_bool(*pop() == *pop());
     return error::op_success;
 }
 
@@ -529,22 +528,22 @@ op_error_t interpreter::op_equal_verify() noexcept
 op_error_t interpreter::op_add1() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_add1;
 
     number += 1;
-    push(number.data());
+    push_number(number);
     return error::op_success;
 }
 
 op_error_t interpreter::op_sub1() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_sub1;
 
     number -= 1;
-    push(number.data());
+    push_number(number);
     return error::op_success;
 }
 
@@ -567,64 +566,64 @@ op_error_t interpreter::op_div2() const noexcept
 op_error_t interpreter::op_negate() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_negate;
 
     number = -number;
-    push(number.data());
+    push_number(number);
     return error::op_success;
 }
 
 op_error_t interpreter::op_abs() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_abs;
 
     if (number < 0)
         number = -number;
 
-    push(number.data());
+    push_number(number);
     return error::op_success;
 }
 
 op_error_t interpreter::op_not() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_not;
 
-    push(number.is_false());
+    push_bool(number.is_false());
     return error::op_success;
 }
 
 op_error_t interpreter::op_nonzero() noexcept
 {
     number number;
-    if (!pop(number))
+    if (!pop_number_four_bytes(number))
         return error::op_nonzero;
 
-    push(number.is_true());
+    push_bool(number.is_true());
     return error::op_success;
 }
 
 op_error_t interpreter::op_add() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_add;
 
-    push((left + right).data());
+    push_number((left + right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_sub() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_sub;
 
-    push((left - right).data());
+    push_number((left - right));
     return error::op_success;
 }
 
@@ -671,37 +670,37 @@ op_error_t interpreter::op_rshift() const noexcept
 op_error_t interpreter::op_bool_and() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_bool_and;
 
-    push(left.is_true() && right.is_true());
+    push_bool(left.is_true() && right.is_true());
     return error::op_success;
 }
 
 op_error_t interpreter::op_bool_or() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_bool_or;
 
-    push(left.is_true() || right.is_true());
+    push_bool(left.is_true() || right.is_true());
     return error::op_success;
 }
 
 op_error_t interpreter::op_num_equal() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_num_equal;
 
-    push(left == right);
+    push_bool(left == right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_num_equal_verify() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_num_equal_verify1;
 
     return (left == right) ? error::op_success : error::op_num_equal_verify2;
@@ -710,80 +709,80 @@ op_error_t interpreter::op_num_equal_verify() noexcept
 op_error_t interpreter::op_num_not_equal() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_num_not_equal;
 
-    push(left != right);
+    push_bool(left != right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_less_than() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_less_than;
 
-    push(left < right);
+    push_bool(left < right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_greater_than() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_greater_than;
 
-    push(left > right);
+    push_bool(left > right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_less_than_or_equal() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_less_than_or_equal;
 
-    push(left <= right);
+    push_bool(left <= right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_greater_than_or_equal() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_greater_than_or_equal;
 
-    push(left >= right);
+    push_bool(left >= right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_min() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_min;
 
-    push(left < right ? left.data() : right.data());
+    push_number(left < right ? left : right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_max() noexcept
 {
     number right, left;
-    if (!pop_binary(left, right))
+    if (!pop_binary_four_bytes(left, right))
         return error::op_max;
 
-    push(left > right ? left.data() : right.data());
+    push_number(left > right ? left : right);
     return error::op_success;
 }
 
 op_error_t interpreter::op_within() noexcept
 {
     number upper, lower, value;
-    if (!pop_ternary(upper, lower, value))
+    if (!pop_ternary_four_bytes(upper, lower, value))
         return error::op_within;
 
-    push((lower <= value) && (value < upper));
+    push_bool((lower <= value) && (value < upper));
     return error::op_success;
 }
 
@@ -792,7 +791,7 @@ op_error_t interpreter::op_ripemd160() noexcept
     if (is_empty())
         return error::op_ripemd160;
 
-    push(ripemd160_hash_chunk(*pop()));
+    push_chunk(ripemd160_hash_chunk(*pop()));
     return error::op_success;
 }
 
@@ -801,7 +800,7 @@ op_error_t interpreter::op_sha1() noexcept
     if (is_empty())
         return error::op_sha1;
 
-    push(sha1_hash_chunk(*pop()));
+    push_chunk(sha1_hash_chunk(*pop()));
     return error::op_success;
 }
 
@@ -810,7 +809,7 @@ op_error_t interpreter::op_sha256() noexcept
     if (is_empty())
         return error::op_sha256;
 
-    push(sha256_hash_chunk(*pop()));
+    push_chunk(sha256_hash_chunk(*pop()));
     return error::op_success;
 }
 
@@ -819,7 +818,7 @@ op_error_t interpreter::op_hash160() noexcept
     if (is_empty())
         return error::op_hash160;
 
-    push(ripemd160_hash_chunk(sha256_hash(*pop())));
+    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop())));
     return error::op_success;
 }
 
@@ -828,7 +827,7 @@ op_error_t interpreter::op_hash256() noexcept
     if (is_empty())
         return error::op_hash256;
 
-    push(sha256_hash_chunk(sha256_hash(*pop())));
+    push_chunk(sha256_hash_chunk(sha256_hash(*pop())));
     return error::op_success;
 }
 
@@ -847,7 +846,7 @@ op_error_t interpreter::op_check_sig() noexcept
     if (bip66 && verify == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
-    push(verify == error::op_success);
+    push_bool(verify == error::op_success);
     return error::op_success;
 }
 
@@ -856,7 +855,7 @@ op_error_t interpreter::op_check_sig() noexcept
 // then verified against the key and hash as if obtained from the script.
 op_error_t interpreter::op_check_sig_verify() noexcept
 {
-    if (is_empty())
+    if (size() < 2)
         return error::op_check_sig_verify1;
 
     const auto key = pop();
@@ -864,14 +863,11 @@ op_error_t interpreter::op_check_sig_verify() noexcept
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    if (is_empty())
-        return error::op_check_sig_verify3;
-
     const auto endorsement = pop();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
-        return error::op_check_sig_verify4;
+        return error::op_check_sig_verify3;
 
     hash_digest hash;
     ec_signature sig;
@@ -884,7 +880,7 @@ op_error_t interpreter::op_check_sig_verify() noexcept
 
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
-        error::op_success : error::op_check_sig_verify5;
+        error::op_success : error::op_check_sig_verify4;
 }
 
 op_error_t interpreter::op_check_multisig() noexcept
@@ -896,7 +892,7 @@ op_error_t interpreter::op_check_multisig() noexcept
     if (bip66 && verify == error::op_check_multisig_verify_parse)
         return error::op_check_multisig;
 
-    push(verify == error::op_success);
+    push_bool(verify == error::op_success);
     return error::op_success;
 }
 
@@ -904,35 +900,38 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
 {
     const auto bip147 = is_enabled(forks::bip147_rule);
 
-    int32_t count;
-    if (!pop(count))
+    size_t count;
+    if (!pop_index_four_bytes(count))
         return error::op_check_multisig_verify1;
 
-    if (!ops_increment(count))
+    if (count > max_script_public_keys)
         return error::op_check_multisig_verify2;
+
+    if (!ops_increment(count))
+        return error::op_check_multisig_verify3;
 
     chunk_cptrs keys;
     if (!pop(keys, count))
-        return error::op_check_multisig_verify3;
-
-    if (!pop(count))
         return error::op_check_multisig_verify4;
 
-    if (is_greater(count, keys.size()))
+    if (!pop_index_four_bytes(count))
         return error::op_check_multisig_verify5;
+
+    if (count > keys.size())
+        return error::op_check_multisig_verify6;
 
     chunk_cptrs endorsements;
     if (!pop(endorsements, count))
-        return error::op_check_multisig_verify6;
+        return error::op_check_multisig_verify7;
 
     if (is_empty())
-        return error::op_check_multisig_verify7;
+        return error::op_check_multisig_verify8;
 
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
     if (!pop()->empty() && bip147)
-        return error::op_check_multisig_verify8;
+        return error::op_check_multisig_verify9;
 
     uint8_t flags;
     ec_signature sig;
@@ -970,7 +969,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     }
 
     return endorsement != endorsements.end() ?
-        error::op_check_multisig_verify9 : error::op_success;
+        error::op_check_multisig_verify10 : error::op_success;
 }
 
 op_error_t interpreter::op_check_locktime_verify() const noexcept
@@ -984,26 +983,22 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
         return error::op_check_locktime_verify1;
 
     // BIP65: the stack is empty.
+    // BIP65: the top stack item is negative.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    number top;
-    if (!get_top(top, max_check_locktime_verify_number_size))
+    uint64_t stack_locktime64;
+    if (!peek_top_unsigned_five_bytes(stack_locktime64))
         return error::op_check_locktime_verify2;
 
-    // BIP65: the top stack item is negative.
-    if (top.is_negative())
-        return error::op_check_locktime_verify3;
-
-    // The top stack item is positive, so cast is safe.
-    const auto locktime = sign_cast<uint64_t>(top.int64());
-    const auto tx_locktime = transaction().locktime();
+    const auto trans_locktime32 = transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
-    if ((locktime < locktime_threshold) != (tx_locktime < locktime_threshold))
-        return error::op_check_locktime_verify4;
+    if ((stack_locktime64 < locktime_threshold) !=
+        (trans_locktime32 < locktime_threshold))
+        return error::op_check_locktime_verify3;
 
     // BIP65: the stack locktime is greater than the tx locktime.
-    return (locktime > tx_locktime) ? error::op_check_locktime_verify5 :
-        error::op_success;
+    return (stack_locktime64 > trans_locktime32) ?
+        error::op_check_locktime_verify4 : error::op_success;
 }
 
 op_error_t interpreter::op_check_sequence_verify() const noexcept
@@ -1013,40 +1008,39 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
         return op_nop(opcode::nop3);
 
     // BIP112: the stack is empty.
+    // BIP112: the top stack item is negative.
     // BIP112: extend the (signed) script number range to 5 bytes.
-    number top;
-    if (!get_top(top, max_check_sequence_verify_number_size))
+    // The top stack item is positive, and only 32 bits are ever tested.
+    uint64_t stack_sequence;
+    if (!peek_top_unsigned_five_bytes(stack_sequence))
         return error::op_check_sequence_verify1;
 
-    // BIP112: the top stack item is negative.
-    if (top.is_negative())
-        return error::op_check_sequence_verify2;
-
-    // The top stack item is positive, and only 32 bits are ever tested.
-    const auto stack_sequence = narrow_sign_cast<uint32_t>(top.int64());
-    const auto input_sequence = input().sequence();
+    // Only 32 bits are tested.
+    const auto input_sequence32 = input().sequence();
+    const auto stack_sequence32 = narrow_cast<uint32_t>(stack_sequence);
 
     // BIP112: the stack sequence is disabled, treat as nop3.
-    if (get_right(stack_sequence, relative_locktime_disabled_bit))
+    if (get_right(stack_sequence32, relative_locktime_disabled_bit))
         return op_nop(opcode::nop3);
 
     // BIP112: the stack sequence is enabled and tx version less than 2.
     if (transaction().version() < relative_locktime_min_version)
-        return error::op_check_sequence_verify3;
+        return error::op_check_sequence_verify2;
 
     // BIP112: the transaction sequence is disabled.
-    if (get_right(input_sequence, relative_locktime_disabled_bit))
-        return error::op_check_sequence_verify4;
+    if (get_right(input_sequence32, relative_locktime_disabled_bit))
+        return error::op_check_sequence_verify3;
 
     // BIP112: the stack sequence type differs from that of tx input.
-    if (get_right(stack_sequence, relative_locktime_time_locked_bit) !=
-        get_right(input_sequence, relative_locktime_time_locked_bit))
-        return error::op_check_sequence_verify5;
+    if (get_right(stack_sequence32, relative_locktime_time_locked_bit) !=
+        get_right(input_sequence32, relative_locktime_time_locked_bit))
+        return error::op_check_sequence_verify4;
 
     // BIP112: the unmasked stack sequence is greater than that of tx sequence.
-    return (mask_left(stack_sequence, relative_locktime_mask_left)) >
-        (mask_left(input_sequence, relative_locktime_mask_left)) ?
-        error::op_check_sequence_verify6 : error::op_success;
+    return
+        (mask_left(stack_sequence32, relative_locktime_mask_left)) >
+        (mask_left(input_sequence32, relative_locktime_mask_left)) ?
+        error::op_check_sequence_verify5 : error::op_success;
 }
 
 // Operation disatch.
@@ -1143,42 +1137,47 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
             return op_push_two_size(op->data_ptr());
         case opcode::push_four_size:
             return op_push_four_size(op->data_ptr());
+
+        // TODO: change to -1 in variant encoding.
         case opcode::push_negative_1:
-            return op_push_number(numbers::negative_1);
+            return op_push_numeric(numbers::negative_1);
+
         case opcode::reserved_80:
             return op_unevaluated(code);
+
         case opcode::push_positive_1:
-            return op_push_number(numbers::positive_1);
+            return op_push_numeric(numbers::positive_1);
         case opcode::push_positive_2:
-            return op_push_number(numbers::positive_2);
+            return op_push_numeric(numbers::positive_2);
         case opcode::push_positive_3:
-            return op_push_number(numbers::positive_3);
+            return op_push_numeric(numbers::positive_3);
         case opcode::push_positive_4:
-            return op_push_number(numbers::positive_4);
+            return op_push_numeric(numbers::positive_4);
         case opcode::push_positive_5:
-            return op_push_number(numbers::positive_5);
+            return op_push_numeric(numbers::positive_5);
         case opcode::push_positive_6:
-            return op_push_number(numbers::positive_6);
+            return op_push_numeric(numbers::positive_6);
         case opcode::push_positive_7:
-            return op_push_number(numbers::positive_7);
+            return op_push_numeric(numbers::positive_7);
         case opcode::push_positive_8:
-            return op_push_number(numbers::positive_8);
+            return op_push_numeric(numbers::positive_8);
         case opcode::push_positive_9:
-            return op_push_number(numbers::positive_9);
+            return op_push_numeric(numbers::positive_9);
         case opcode::push_positive_10:
-            return op_push_number(numbers::positive_10);
+            return op_push_numeric(numbers::positive_10);
         case opcode::push_positive_11:
-            return op_push_number(numbers::positive_11);
+            return op_push_numeric(numbers::positive_11);
         case opcode::push_positive_12:
-            return op_push_number(numbers::positive_12);
+            return op_push_numeric(numbers::positive_12);
         case opcode::push_positive_13:
-            return op_push_number(numbers::positive_13);
+            return op_push_numeric(numbers::positive_13);
         case opcode::push_positive_14:
-            return op_push_number(numbers::positive_14);
+            return op_push_numeric(numbers::positive_14);
         case opcode::push_positive_15:
-            return op_push_number(numbers::positive_15);
+            return op_push_numeric(numbers::positive_15);
         case opcode::push_positive_16:
-            return op_push_number(numbers::positive_16);
+            return op_push_numeric(numbers::positive_16);
+
         case opcode::nop:
             return op_nop();
         case opcode::op_ver:
@@ -1365,6 +1364,7 @@ code interpreter::run() noexcept
 
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
+    // Enforce first op not reserved (not skippable by condition).
     if (!is_valid())
         return error::invalid_script;
 

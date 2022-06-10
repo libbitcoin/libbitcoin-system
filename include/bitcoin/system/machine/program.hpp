@@ -29,6 +29,8 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number.hpp>
 
+#include <bitcoin/system/math/math.hpp>
+
 namespace libbitcoin {
 namespace system {
 namespace machine {
@@ -108,31 +110,42 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Primary stack push.
-    void push(bool value) noexcept;
-    void push(data_chunk&& item) noexcept;
+
+    /// Inherent byte vectors.
     void push(chunk_cptr&& item) noexcept;
     void push(const chunk_cptr& item) noexcept;
+    void push_chunk(data_chunk&& item) noexcept;
+
+    /// Inherent integral values.
+    void push_bool(bool value) noexcept;
+    void push_byte(uint8_t value) noexcept;
+    void push_length(size_t value) noexcept;
+    void push_number(const number& value) noexcept;
 
     /// Primary stack pop.
-    chunk_cptr pop() noexcept;
-    bool pop(int32_t& out_value) noexcept;
-    bool pop(number& out_number,
-        size_t maxiumum_size=chain::max_number_size) noexcept;
-    bool pop_index(size_t& index) noexcept;
-    bool pop_binary(number& left, number& right) noexcept;
-    bool pop_ternary(number& upper, number& lower, number& value) noexcept;
-    bool pop(chunk_cptrs& section, int32_t signed_count) noexcept;
 
-    /// Primary stack optimizations.
+    /// Inherent byte vectors.
+    chunk_cptr pop() noexcept;
+    bool pop(chunk_cptrs& items, size_t count) noexcept;
+
+    /// Inherent integral values.
+    bool pop_index_four_bytes(size_t& out_value) noexcept;
+    bool pop_signed_four_bytes(int32_t& out_value) noexcept;
+    bool pop_number_four_bytes(number& out_value) noexcept;
+    bool pop_number_five_bytes(number& out_value) noexcept;
+    bool pop_binary_four_bytes(number& left, number& right) noexcept;
+    bool pop_ternary_four_bytes(number& upper, number& lower, number& value) noexcept;
+    bool peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept;
+
+    /// Primary stack optimizations (type-independent).
     void drop() noexcept;
     void swap(size_t left, size_t right) noexcept;
     void erase(size_t index) noexcept;
 
-    /// Primary stack const functions.
+    /// Primary stack const functions (type-independent).
     size_t size() const noexcept;
     bool is_empty() const noexcept;
     bool is_stack_overflow() const noexcept;
-    bool get_top(number& out_number, size_t maxiumum_size) const noexcept;
     bool stack_to_bool(stack clean) const noexcept;
     const chunk_cptr& item(size_t index) const noexcept;
 
@@ -157,7 +170,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     bool ops_increment(const chain::operation& op) noexcept;
-    bool ops_increment(int32_t public_keys) noexcept;
+    bool ops_increment(size_t public_keys) noexcept;
 
     /// Signature validation helpers.
     /// -----------------------------------------------------------------------

@@ -835,7 +835,9 @@ bool script::is_unspendable() const noexcept
 
     const auto& code = ops_.front().code();
 
-    // There is no condition prior to the first opcode in a script.
+    // There is no condition prior to the first opcode in a script, so
+    // is_reserved must be checked. is_invalid short-circuits evaluation for
+    // scripts that fail to parse, but would otherwise be caught in evaluation.
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
 

@@ -44,9 +44,8 @@ constexpr size_t max_script_size = to_half(max_unified_script_size);
 constexpr size_t max_push_data_size = 520;
 constexpr size_t max_script_public_keys = 20;
 constexpr size_t multisig_default_sigops = 20;
-constexpr size_t max_number_size = 4;
-constexpr size_t max_check_locktime_verify_number_size = 5;
-constexpr size_t max_check_sequence_verify_number_size = 5;
+constexpr size_t max_number_size_four = 4;
+constexpr size_t max_number_size_five = 5;
 
 // Validation consensus constants.
 // ----------------------------------------------------------------------------

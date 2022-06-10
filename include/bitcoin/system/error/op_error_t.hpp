@@ -99,7 +99,6 @@ enum op_error_t : uint8_t
     op_check_sig_verify2,
     op_check_sig_verify3,
     op_check_sig_verify4,
-    op_check_sig_verify5,
     op_check_sig_verify_parse,
     op_check_sig,
     op_check_multisig_verify1,
@@ -111,19 +110,18 @@ enum op_error_t : uint8_t
     op_check_multisig_verify7,
     op_check_multisig_verify8,
     op_check_multisig_verify9,
+    op_check_multisig_verify10,
     op_check_multisig_verify_parse,
     op_check_multisig,
     op_check_locktime_verify1,
     op_check_locktime_verify2,
     op_check_locktime_verify3,
     op_check_locktime_verify4,
-    op_check_locktime_verify5,
     op_check_sequence_verify1,
     op_check_sequence_verify2,
     op_check_sequence_verify3,
     op_check_sequence_verify4,
-    op_check_sequence_verify5,
-    op_check_sequence_verify6
+    op_check_sequence_verify5
 };
 
 DECLARE_ERROR_T_CODE_CATEGORY(op_error);

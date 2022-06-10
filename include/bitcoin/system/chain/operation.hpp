@@ -125,16 +125,26 @@ public:
 
     /// Categories of opcodes.
 
-    /// opcode: [0-79, 81-96].
+    /// opcode: [0..96].
+    //*************************************************************************
+    // CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
+    // This affects the operation count in p2sh script evaluation.
+    // Presumably this was an unintended consequence of range testing enums.
+    //*************************************************************************
+    static constexpr bool is_relaxed_push(opcode code) noexcept
+    {
+        ////constexpr auto op_96 = opcode::push_positive_16;
+        return code <= opcode::push_positive_16;
+    }
+
+    /// opcode: [0..79, 81..96].
     static constexpr bool is_push(opcode code) noexcept
     {
         ////constexpr auto op_80 = opcode::reserved_80;
-        ////constexpr auto op_96 = opcode::push_positive_16;
-        return code <= opcode::push_positive_16 &&
-            code != opcode::reserved_80;
+        return is_relaxed_push(code) && code != opcode::reserved_80;
     }
 
-    /// opcode: [1-78].
+    /// opcode: [1..78].
     static constexpr bool is_payload(opcode code) noexcept
     {
         ////constexpr auto op_1 = opcode::push_size_1;
@@ -143,26 +153,14 @@ public:
             code <= opcode::push_four_size;
     }
 
-    /// opcode: [97-255].
+    /// opcode: [97..255].
     static constexpr bool is_counted(opcode code) noexcept
     {
         ////constexpr auto op_97 = opcode::nop;
         return code >= opcode::nop;
     }
 
-    /// stack: [[], 1-16].
-    static constexpr bool is_version(opcode code) noexcept
-    {
-        return code == opcode::push_size_0 || is_positive(code);
-    }
-
-    /// stack: [-1, 1-16].
-    static constexpr bool is_numeric(opcode code) noexcept
-    {
-        return is_positive(code) || code == opcode::push_negative_1;
-    }
-
-    /// stack: [1-16].
+    /// stack: [1..16].
     static constexpr bool is_positive(opcode code) noexcept
     {
         ////constexpr auto op_81 = opcode::push_positive_1;
@@ -171,22 +169,31 @@ public:
             code <= opcode::push_positive_16;
     }
 
+    /// stack: [0, 1..16].
+    static constexpr bool is_version(opcode code) noexcept
+    {
+        ////constexpr auto op_0 = opcode::push_size_0;
+        return code == opcode::push_size_0 || is_positive(code);
+    }
+
+    /// stack: [-1, 1..16].
+    static constexpr bool is_numeric(opcode code) noexcept
+    {
+        ////constexpr auto op_79 = opcode::push_negative_1;
+        return code == opcode::push_negative_1 || is_positive(code);
+    }
+
+    /// stack: [-1, 0, 1..16].
+    static constexpr bool is_number(opcode code) noexcept
+    {
+        ////constexpr auto op_79 = opcode::push_negative_1;
+        return code == opcode::push_size_0 || is_version(code);
+    }
+
     // C++14: switch in constexpr.
     static bool is_invalid(opcode code) noexcept;
     static bool is_reserved(opcode code) noexcept;
     static bool is_conditional(opcode code) noexcept;
-
-    /// opcode: [0-96].
-    //*****************************************************************************
-    // CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
-    // This affects the operation count in p2sh script evaluation.
-    // Presumably this was an unintended consequence of range testing enums.
-    //*****************************************************************************
-    static constexpr bool is_relaxed_push(opcode code) noexcept
-    {
-        ////constexpr auto op_96 = opcode::push_positive_16;
-        return code <= opcode::push_positive_16;
-    }
 
     /// Categories of operations.
     /// The is_invalid() method pertains only to opcode consensus validity.

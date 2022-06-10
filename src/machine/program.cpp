@@ -135,19 +135,6 @@ bool program::is_valid() const noexcept
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
-void program::push(bool value) noexcept
-{
-    static const auto true_ = to_shared<data_chunk>({ numbers::positive_1 });
-    static const auto false_ = to_shared<data_chunk>(data_chunk{});
-
-    push(value ? true_ : false_);
-}
-
-void program::push(data_chunk&& item) noexcept
-{
-    push(to_shared<data_chunk>(std::move(item)));
-}
-
 // Moving a shared pointer to the stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push(chunk_cptr&& item) noexcept
@@ -165,6 +152,47 @@ void program::push(const chunk_cptr& item) noexcept
     BC_POP_WARNING()
 }
 
+void program::push_chunk(data_chunk&& item) noexcept
+{
+    // TODO: retain ownership.
+    push(to_shared<data_chunk>(std::move(item)));
+}
+
+void program::push_bool(bool value) noexcept
+{
+    // TODO: change to push bool variant.
+    static const operation false_{ opcode::push_size_0 };
+    static const operation true_{ to_chunk(numbers::positive_1) };
+    push(value ? true_.data_ptr() : false_.data_ptr());
+}
+
+void program::push_byte(uint8_t value) noexcept
+{
+    BC_ASSERT_MSG(value != numbers::number_0, "zero is not byte encoded");
+
+    // TODO: change to push int64_t variant.
+    push_chunk(to_chunk(value));
+
+    //// TODO: this encoding differs, see number tests.
+    ////push_number(number{ value });
+}
+
+void program::push_length(size_t value) noexcept
+{
+    // This is guarded by stack size and push data limits.
+    BC_ASSERT_MSG(value <= max_int64, "integer overflow");
+
+    // This overload just hides the cast.
+    push_number(number{ possible_narrow_sign_cast<int64_t>(value) });
+}
+
+void program::push_number(const number& value) noexcept
+{
+    // TODO: change to int64_t variant and remove this overload.
+    ////push(value.int64());
+    push(to_shared<data_chunk>(value.data()));
+}
+
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
@@ -179,6 +207,18 @@ chunk_cptr program::pop() noexcept
     return value;
 }
 
+bool program::pop(chunk_cptrs& items, size_t count) noexcept
+{
+    if (size() < count)
+        return false;
+
+    items.reserve(count);
+    for (size_t index = 0; index < count; ++index)
+        items.push_back(pop());
+
+    return true;
+}
+
 void program::drop() noexcept
 {
     // This must be guarded (is_relaxed_push is checked in transaction).
@@ -187,61 +227,79 @@ void program::drop() noexcept
     primary_->pop_back();
 }
 
-bool program::pop(int32_t& out_value) noexcept
+bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
 {
     number value;
-    if (!pop(value))
+    if (!pop_number_four_bytes(value))
         return false;
 
     out_value = value.int32();
     return true;
 }
 
-bool program::pop(number& out_number, size_t maxiumum_size) noexcept
-{
-    return !is_empty() && out_number.set_data(*pop(), maxiumum_size);
-}
-
 // True if popped value is valid post-pop stack index (precluded if size < 2).
-bool program::pop_index(size_t& index) noexcept
+bool program::pop_index_four_bytes(size_t& out_value) noexcept
 {
-    int32_t signed_index;
-    if (!pop(signed_index))
+    int32_t signed_value;
+    if (!pop_signed_four_bytes(signed_value))
         return false;
 
-    if (is_negative(signed_index))
+    if (is_negative(signed_value))
         return false;
 
-    index = sign_cast<size_t>(signed_index);
-    return index < size();
+    out_value = sign_cast<size_t>(signed_value);
+    return out_value < size();
 }
 
-bool program::pop_binary(number& left, number& right) noexcept
+bool program::pop_number_four_bytes(number& out_value) noexcept
+{
+    return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
+}
+
+bool program::pop_number_five_bytes(number& out_value) noexcept
+{
+    return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
+}
+
+bool program::pop_binary_four_bytes(number& left, number& right) noexcept
 {
     // The right hand side operand is at the top of the stack.
-    return pop(right) && pop(left);
+    return pop_number_four_bytes(right) && pop_number_four_bytes(left);
 }
 
-bool program::pop_ternary(number& upper, number& lower, number& value) noexcept
+bool program::pop_ternary_four_bytes(number& upper, number& lower,
+    number& value) noexcept
 {
     // The upper bound is at stack top, lower bound next, value next.
-    return pop(upper) && pop(lower) && pop(value);
+    return pop_number_four_bytes(upper) && pop_number_four_bytes(lower) &&
+        pop_number_four_bytes(value);
 }
 
-bool program::pop(chunk_cptrs& section, int32_t signed_count) noexcept
+// ****************************************************************************
+// CONSENSUS:
+// Note that elsewhere numeric opcodes are limited to
+// operands in the range -2**31+1 to 2**31-1, however it is
+// legal for opcodes to produce results exceeding that
+// range. This limitation is implemented by CScriptNum's
+// default 4-byte limit.
+//
+// If we kept to that limit we'd have a year 2038 problem,
+// even though the nLockTime field in transactions
+// themselves is uint32 which only becomes meaningless
+// after the year 2106.
+//
+// Thus as a special case we tell CScriptNum to accept up
+// to 5-byte bignums, which are good until 2**39-1, well
+// beyond the 2**32-1 limit of the nLockTime field itself.
+// ****************************************************************************
+bool program::peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept
 {
-    if (is_negative(signed_count))
+    number value;
+    if (is_empty() || !value.set_data(*item(zero), max_number_size_five) ||
+        value.is_negative())
         return false;
 
-    const auto count = sign_cast<uint32_t>(signed_count);
-
-    if (size() < count)
-        return false;
-
-    section.reserve(count);
-    for (size_t index = 0; index < count; ++index)
-        section.push_back(pop());
-
+    out_value = sign_cast<uint64_t>(value.int64());
     return true;
 }
 
@@ -296,38 +354,46 @@ bool program::is_stack_overflow() const noexcept
     return size() + alternate_.size() > max_stack_size;
 }
 
-bool program::get_top(number& out_number, size_t maxiumum_size) const noexcept
+constexpr bool is_non_zero(uint8_t value) noexcept
 {
-    return !is_empty() && out_number.set_data(*item(zero), maxiumum_size);
-}
+    return value != numbers::number_0;
+};
+
+constexpr bool is_sign_byte(uint8_t value) noexcept
+{
+    return
+        value == number::positive_sign_byte ||
+        value == number::negative_sign_byte;
+};
 
 bool program::stack_to_bool(stack clean) const noexcept
 {
     // Reversed byte order in this example (big-endian).
-    // []               : false (empty)
+    // -                : false (empty stack)
+    // []               : false (empty stack top)
     // [00 00 00 00 00] : false (+zero)
     // [80 00 00 00 00] : false (-zero)
     // [42 00 00 00 00] : true
     // [00 80 00 00 00] : true
 
-    const auto& top = primary_->back();
+    // This must be guarded.
+    BC_ASSERT(!primary_->empty());
 
-    if (top->empty() || ((clean == stack::clean) && (primary_->size() != one)))
+    if ((clean == stack::clean) && (primary_->size() != one))
         return false;
 
-    const auto non_zero = [](uint8_t value) noexcept
-    {
-        return value != numbers::positive_0;
-    };
+    const auto& top = *primary_->back();
 
-    const auto zero_magnitude = [](uint8_t value) noexcept
-    {
-        constexpr auto sign_mask = bit_not<uint8_t>(numbers::negative_sign);
-        return bit_and<uint8_t>(value, sign_mask) == numbers::positive_0;
-    };
+    if (top.empty())
+        return false;
 
-    return !zero_magnitude(top->back()) ||
-        std::any_of(top->begin(), std::prev(top->end()), non_zero);
+    if (!is_sign_byte(top.back()))
+        return true;
+
+    // Given the assumption of proper encoding, the first non-sign byte of any
+    // stack number is non-zero, however chunk may have any value, so test all.
+    return std::any_of(std::next(top.begin()), std::prev(top.end()),
+        is_non_zero);
 }
 
 // Alternate stack.
@@ -447,15 +513,8 @@ bool program::ops_increment(const operation& op) noexcept
     return operation_count_ <= max_counted_ops;
 }
 
-bool program::ops_increment(int32_t public_keys) noexcept
+bool program::ops_increment(size_t public_keys) noexcept
 {
-    constexpr auto max_keys = possible_narrow_sign_cast<int32_t>(
-        max_script_public_keys);
-
-    // bit.ly/2d1bsdB
-    if (is_negative(public_keys) || public_keys > max_keys)
-        return false;
-
     // Addition is safe due to script size constraint.
     BC_ASSERT(max_size_t - public_keys >= operation_count_);
 
@@ -476,7 +535,7 @@ bool program::set_subscript(const op_iterator& op) noexcept
         return false;
 
     // Advance the offset to the op following the found code separator.
-    script_->offset = std::next(op, one);
+    script_->offset = std::next(op);
     return true;
 }
 

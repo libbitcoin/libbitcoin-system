@@ -26,27 +26,28 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// These are STACK representations of the numbers -1..16.
+// This differs from integral numbers only for negative_1.
 enum numbers : uint8_t
 {
-    positive_0 = 0,
-    positive_1 = 1,
-    positive_2 = 2,
-    positive_3 = 3,
-    positive_4 = 4,
-    positive_5 = 5,
-    positive_6 = 6,
-    positive_7 = 7,
-    positive_8 = 8,
-    positive_9 = 9,
-    positive_10 = 10,
-    positive_11 = 11,
-    positive_12 = 12,
-    positive_13 = 13,
-    positive_14 = 14,
-    positive_15 = 15,
-    positive_16 = 16,
-    negative_sign = 0x80,
-    negative_1 = bit_or<uint8_t>(negative_sign, positive_1)
+    number_0 = 0,                                   // [0x00]
+    positive_1 = 1,                                 // [0x01]
+    positive_2 = 2,                                 // [0x02]
+    positive_3 = 3,                                 // [0x03]
+    positive_4 = 4,                                 // [0x04]
+    positive_5 = 5,                                 // [0x05]
+    positive_6 = 6,                                 // [0x06]
+    positive_7 = 7,                                 // [0x07]
+    positive_8 = 8,                                 // [0x08]
+    positive_9 = 9,                                 // [0x09]
+    positive_10 = 10,                               // [0x0a]
+    positive_11 = 11,                               // [0x0b]
+    positive_12 = 12,                               // [0x0c]
+    positive_13 = 13,                               // [0x0d]
+    positive_14 = 14,                               // [0x0e]
+    positive_15 = 15,                               // [0x0f]
+    positive_16 = 16,                               // [0x10]
+    negative_1 = set_left<uint8_t>(positive_1, 0)   // [0x81]
 };
 
 } // namespace chain

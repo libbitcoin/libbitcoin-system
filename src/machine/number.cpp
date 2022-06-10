@@ -34,7 +34,7 @@ namespace machine {
 using namespace system::chain;
 
 number::number() noexcept
-  : number(numbers::positive_0)
+  : number(0)
 {
 }
 
@@ -85,11 +85,11 @@ data_chunk number::data() const noexcept
 
     // Push a 0x80 byte that will be popped off when converting to an integral.
     if (negative_bit_set && is_negative())
-        data.push_back(numbers::negative_sign);
+        data.push_back(negative_sign_byte);
 
     // Push a 0x00 byte to make the most significant byte non-negative again.
     else if (negative_bit_set)
-        data.push_back(numbers::positive_0);
+        data.push_back(positive_sign_byte);
 
     // Set the negative bit, since it will be subtracted and interpreted as
     // a negative when converting to an integral.

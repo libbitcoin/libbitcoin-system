@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,6 +42,9 @@ namespace machine {
 class BC_API number
 {
 public:
+    static const uint8_t positive_sign_byte = 0x00;
+    static const uint8_t negative_sign_byte = bit_left<uint8_t>(0);
+
     /// Construct with zero value.
     number() noexcept;
 
