@@ -31,7 +31,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_not_implemented, "opcode not implemented" },
     { op_invalid, "op_invalid" },
     { op_reserved, "op_reserved" },
-    { op_push_size, "op_push_size" },
     { op_push_data, "op_push_data" },
     { op_if, "op_if" },
     { op_notif, "op_notif" },

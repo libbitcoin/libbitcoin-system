@@ -38,7 +38,6 @@ enum op_error_t : uint8_t
     op_not_implemented = add1<int>(script_error_t::script_error_last),
     op_invalid,
     op_reserved,
-    op_push_size,
     op_push_data,
     op_if,
     op_notif,
