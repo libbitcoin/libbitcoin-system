@@ -42,18 +42,39 @@ using namespace system::chain;
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
 
-inline chunk_cptrs_ptr default_stack() noexcept
+inline program::chunk_stack_ptr default_stack() noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<chunk_cptrs>();
     BC_POP_WARNING()
 }
 
-inline chunk_cptrs_ptr copy_stack(const chunk_cptrs& stack) noexcept
+inline program::chunk_stack_ptr copy_stack(
+    const program::chunk_stack& stack) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<chunk_cptrs>(chunk_cptrs{ stack });
     BC_POP_WARNING()
+}
+
+// TODO: use to create variant_stack from chunk_stack.
+inline program::variant_stack_ptr create_stack(
+    const program::chunk_stack& stack) noexcept
+{
+    // TODO: C++17: Parallel policy for std::transform.
+    // TODO: no_fill_allocator.
+
+    ////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    auto out = std::make_shared<program::variant_stack>(stack.size());
+    std::transform(stack.begin(), stack.end(), out->begin(),
+        [](const chunk_cptr& ptr)
+        {
+            // Weak reference to witness stack element.
+            return program::variant{ &(*ptr) };
+        });
+    ////BC_POP_WARNING()
+
+    return out;
 }
 
 // Constructors.
@@ -94,7 +115,7 @@ program::program(program&& other, const script::cptr& script) noexcept
 // Witness script run (witness-initialized stack).
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& stack) noexcept
+    const chunk_stack_ptr& stack) noexcept
   : program(tx, input, script, forks, (*input)->prevout->value(), version,
       stack)
 {
@@ -103,7 +124,7 @@ program::program(const chain::transaction& tx, const input_iterator& input,
 // protected
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, uint64_t value,
-    script_version version, const chunk_cptrs_ptr& stack) noexcept
+    script_version version, const chunk_stack_ptr& stack) noexcept
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -140,6 +161,8 @@ BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push(chunk_cptr&& item) noexcept
 BC_POP_WARNING()
 {
+    // TODO: should be able to push the const data_chunk*.
+    // TODO: variant_stack_push(std::move(chunk_cptr)).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->push_back(std::move(item));
     BC_POP_WARNING()
@@ -147,6 +170,8 @@ BC_POP_WARNING()
 
 void program::push(const chunk_cptr& item) noexcept
 {
+    // TODO: should be able to push the const data_chunk*.
+    // TODO: variant_stack_push(chunk_cptr).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->push_back(item);
     BC_POP_WARNING()
@@ -154,13 +179,14 @@ void program::push(const chunk_cptr& item) noexcept
 
 void program::push_chunk(data_chunk&& item) noexcept
 {
-    // TODO: retain ownership.
+    // TODO: verify the size of shared_ptr union.
+    // TODO: variant_stack_push(chunk_cptr).
     push(to_shared<data_chunk>(std::move(item)));
 }
 
 void program::push_bool(bool value) noexcept
 {
-    // TODO: variant - push(value).
+    // TODO: variant_stack_.push(bool).
     if (value)
         push_numeric(1);
     else
@@ -172,18 +198,19 @@ void program::push_length(size_t value) noexcept
     // This is guarded by stack size and push data limits.
     BC_ASSERT_MSG(value <= max_int64, "integer overflow");
 
+    // TODO: push_number(possible_narrow_sign_cast<int64_t>(value)).
     push_numeric(possible_narrow_sign_cast<int64_t>(value));
 }
 
 void program::push_numeric(int64_t value) noexcept
 {
+    // TODO: push_number(value).
     push_number(number{ value });
 }
 
 void program::push_number(const number& value) noexcept
 {
-    // TODO: change to int64_t variant and remove this overload.
-    ////push(value.int64());
+    // TODO: variant_stack_.push(int64_t).
     push(to_shared<data_chunk>(value.data()));
 }
 

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>
+#include <variant>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -42,6 +43,14 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
+    typedef chunk_cptrs chunk_stack;
+    typedef std::shared_ptr<chunk_stack> chunk_stack_ptr;
+
+    // TODO: replace chunk_stack with variant_stack.
+    typedef std::variant<bool, int64_t, const data_chunk*, chunk_cptr> variant;
+    typedef std::vector<variant> variant_stack;
+    typedef std::shared_ptr<variant_stack> variant_stack_ptr;
+
     enum class stack
     {
         clean,
@@ -61,7 +70,7 @@ public:
     /// Witness script run (witness-initialized stack).
     program(const chain::transaction& transaction, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks,
-        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
+        chain::script_version version, const chunk_stack_ptr& stack) noexcept;
 
     /// Defaults.
     program(program&&) = delete;
@@ -76,7 +85,7 @@ public:
 protected:
     program(const chain::transaction& tx, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks, uint64_t value,
-        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
+        chain::script_version version, const chunk_stack_ptr& stack) noexcept;
 
     /// Constants.
     /// -----------------------------------------------------------------------
@@ -212,8 +221,8 @@ private:
     const chain::script_version version_;
 
     // Three stacks.
-    chunk_cptrs_ptr primary_;
-    chunk_cptrs alternate_{};
+    chunk_stack_ptr primary_; // variant_stack_ptr
+    chunk_stack alternate_{}; // variant_stack
     bool_stack condition_{};
 
     // Accumulator.
