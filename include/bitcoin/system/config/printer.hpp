@@ -69,10 +69,10 @@ public:
 
 
     /// Defaults.
-    printer(printer&&) = default;
-    printer(const printer&) = default;
-    printer& operator=(printer&&) = default;
-    printer& operator=(const printer&) = default;
+    printer(printer&&) = delete;
+    printer(const printer&) = delete;
+    printer& operator=(printer&&) = delete;
+    printer& operator=(const printer&) = delete;
     virtual ~printer() = default;
 
     /// Convert a paragraph of text into a column.
