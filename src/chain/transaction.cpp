@@ -1280,7 +1280,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         return ec;
 
     // This precludes bare witness programs of -0 (undocumented).
-    if (!prevout.is_stack_true(program::stack::dirty))
+    if (!prevout.is_true(false))
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
@@ -1309,8 +1309,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return ec;
 
                 // A v0 script must succeed with a clean true stack (bip141).
-                return witness.is_stack_true(program::stack::clean) ?
-                    error::script_success : error::stack_false;
+                return witness.is_true(true) ? error::script_success :
+                    error::stack_false;
             }
 
             // These versions are reserved for future extensions (bip141).
@@ -1330,8 +1330,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        const auto embeded_script = to_shared<script>({ *input.safe_pop(),
-            false });
+        const auto embeded_script = to_shared<script>({ *input.pop(), false });
 
         // Evaluate embedded script using stack moved from input script.
         interpreter embeded(std::move(input), embeded_script);
@@ -1339,7 +1338,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return ec;
 
         // This precludes embedded witness programs of -0 (undocumented).
-        if (!embeded.is_stack_true(program::stack::dirty))
+        if (!embeded.is_true(false))
             return error::stack_false;
 
         // Triggered by embedded push of version and witness program (bip141).
@@ -1368,7 +1367,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                         return ec;
 
                     // A v0 script must succeed with a clean true stack (bip141).
-                    return witness_program.is_stack_true(program::stack::clean) ?
+                    return witness_program.is_true(true) ?
                         error::script_success : error::stack_false;
                 }
 

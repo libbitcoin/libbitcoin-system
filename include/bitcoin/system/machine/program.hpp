@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <unordered_map>
 #include <variant>
 #include <bitcoin/system/chain/chain.hpp>
@@ -29,13 +30,14 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number.hpp>
-
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
 
+/// A set of three stacks (primary, alternate, conditional) for script state.
+/// Primary stack is optimized by peekable, swappable, and eraseable elements.
 class BC_API program
 {
 public:
@@ -47,15 +49,10 @@ public:
     typedef std::shared_ptr<chunk_stack> chunk_stack_ptr;
 
     // TODO: replace chunk_stack with variant_stack.
-    typedef std::variant<bool, int64_t, const data_chunk*, chunk_cptr> variant;
+    typedef std::variant<bool, int64_t, chunk_cptr> variant;
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
 
-    enum class stack
-    {
-        clean,
-        dirty
-    };
 
     /// Input script run (default/empty stack).
     program(const chain::transaction& transaction, const input_iterator& input,
@@ -81,6 +78,9 @@ public:
 
     /// Program validity.
     bool is_valid() const noexcept;
+
+    /// Program result.
+    bool is_true(bool clean) const noexcept;
 
 protected:
     program(const chain::transaction& tx, const input_iterator& input,
@@ -120,57 +120,60 @@ protected:
 
     /// Primary stack push.
 
-    /// Inherent byte vectors.
-    void push(chunk_cptr&& item) noexcept;
-    void push(const chunk_cptr& item) noexcept;
-    void push_chunk(data_chunk&& item) noexcept;
-
-    /// Inherent integral values.
+    /// Primary stack push (typed).
+    void push(chunk_cptr&& datum) noexcept;
+    void push(const chunk_cptr& datum) noexcept;
+    void push_chunk(data_chunk&& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_length(size_t value) noexcept;
     void push_numeric(int64_t value) noexcept;
+
     void push_number(const number& value) noexcept;
 
-    /// Primary stack pop.
+    /// Primary stack pop (typed).
+    chunk_cptr pop_unsafe() noexcept;
+    bool pop_count(chunk_cptrs& data, size_t count) noexcept;
+    bool pop_bool_unsafe() noexcept;
+    bool pop_index32(size_t& out_index) noexcept;
+    bool pop_signed32(int32_t& out_value) noexcept;
 
-    /// Inherent byte vectors.
-    chunk_cptr pop() noexcept;
-    bool pop(chunk_cptrs& items, size_t count) noexcept;
+    bool pop_number32(number& out_value) noexcept;
+    bool pop_binary32(number& left, number& right) noexcept;
+    bool pop_ternary32(number& upper, number& lower, number& value) noexcept;
 
-    /// Inherent integral values.
-    bool pop_index_four_bytes(size_t& out_value) noexcept;
-    bool pop_signed_four_bytes(int32_t& out_value) noexcept;
-    bool pop_number_four_bytes(number& out_value) noexcept;
-    bool pop_number_five_bytes(number& out_value) noexcept;
-    bool pop_binary_four_bytes(number& left, number& right) noexcept;
-    bool pop_ternary_four_bytes(number& upper, number& lower, number& value) noexcept;
-    bool peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept;
+    /// Primary stack peek (typed).
+    const chunk_cptr& peek_unsafe(size_t index) const noexcept;
+    bool peek_bool() const noexcept;
+    bool peek_bool_unsafe() const noexcept;
+    bool peek_unsigned32(uint32_t& out_value) const noexcept;
+    bool peek_unsigned39(uint64_t& out_value) const noexcept;
 
-    /// Primary stack optimizations (type-independent).
-    void drop() noexcept;
-    void swap(size_t left, size_t right) noexcept;
-    void erase(size_t index) noexcept;
+    bool peek_number40_unsafe(number& out_value) const noexcept;
 
-    /// Primary stack const functions (type-independent).
+    /// Primary stack non-const (untyped).
+    void drop_unsafe() noexcept;
+    void swap_unsafe(size_t left_index, size_t right_index) noexcept;
+    void erase_unsafe(size_t index) noexcept;
+
+    /// Primary stack const functions (untyped).
     size_t size() const noexcept;
     bool is_empty() const noexcept;
-    bool is_stack_overflow() const noexcept;
-    bool stack_to_bool(stack clean) const noexcept;
-    const chunk_cptr& item(size_t index) const noexcept;
+    bool is_clean() const noexcept;
+    bool is_overflow() const noexcept;
 
     /// Alternate stack.
     /// -----------------------------------------------------------------------
 
     bool is_alternate_empty() const noexcept;
     void push_alternate(chunk_cptr&& value) noexcept;
-    chunk_cptr pop_alternate() noexcept;
+    chunk_cptr pop_alternate_unsafe() noexcept;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
 
     void begin_if(bool value) noexcept;
-    void else_if() noexcept;
-    void end_if() noexcept;
+    void else_if_unsafe() noexcept;
+    void end_if_unsafe() noexcept;
     bool is_balanced() const noexcept;
     bool is_succeess() const noexcept;
     bool if_(const chain::operation& op) const noexcept;
@@ -206,6 +209,30 @@ private:
 
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;
+
+    // Zero-based prinary stack index.
+    // ------------------------------------------------------------------------
+
+    inline chunk_stack::iterator it_unsafe(size_t index) noexcept
+    {
+        BC_ASSERT(index < size());
+        return std::prev(primary_->end(), add1(index));
+    }
+
+    inline chunk_stack::const_iterator const_it_unsafe(
+        size_t index) const noexcept
+    {
+        BC_ASSERT(index < size());
+        return std::prev(primary_->end(), add1(index));
+    }
+
+    inline const chunk_cptr& top_unsafe() const noexcept
+    {
+        BC_ASSERT(!is_empty());
+        return primary_->back();
+    }
+
+    // ------------------------------------------------------------------------
 
     hash_digest signature_hash(const chain::script& sub,
         uint8_t flags) const noexcept;

@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/machine/program.hpp>
@@ -136,14 +137,17 @@ public:
     /// Operation loop (script execution).
     code run() noexcept;
 
-    inline chunk_cptr safe_pop() noexcept
+    /// Transaction must pop top input stack element (bip16).
+    inline chunk_cptr pop() noexcept
     {
-        return is_empty() ? to_shared<data_chunk>() : pop();
-    }
+        // Empty guard is not required, but this is a public function.
+        BC_ASSERT_MSG(!is_empty(), "pop from empty stack");
 
-    inline bool is_stack_true(stack clean) const noexcept
-    {
-        return !is_empty() && stack_to_bool(clean);
+        if (is_empty())
+            return to_shared<data_chunk>();
+
+        // Avoid ternary object return (prevents copy elision).
+        return pop_unsafe();
     }
 
 protected:

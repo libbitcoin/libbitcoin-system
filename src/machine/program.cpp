@@ -64,15 +64,16 @@ inline program::variant_stack_ptr create_stack(
     // TODO: C++17: Parallel policy for std::transform.
     // TODO: no_fill_allocator.
 
-    ////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     auto out = std::make_shared<program::variant_stack>(stack.size());
+    BC_POP_WARNING()
+
     std::transform(stack.begin(), stack.end(), out->begin(),
         [](const chunk_cptr& ptr)
         {
             // Weak reference to witness stack element.
-            return program::variant{ &(*ptr) };
+            return program::variant{ ptr };
         });
-    ////BC_POP_WARNING()
 
     return out;
 }
@@ -145,12 +146,15 @@ bool program::is_valid() const noexcept
     constexpr auto nops_rule = true;
     const auto bip141 = is_enabled(forks::bip141_rule);
 
-    return
-        // nops_rule establishes script size limit.
-        (!nops_rule || !script_->is_oversized()) &&
+    // nops_rule establishes script size limit.
+    // bip_141 introduces an initialized stack, so must validate.
+    return (!nops_rule || !script_->is_oversized()) &&
+        (!bip141 || chain::witness::is_push_size(*primary_));
+}
 
-        // bip_141 introduces an initialized stack, so must validate.
-        (!bip141    || chain::witness::is_push_size(*primary_));
+bool program::is_true(bool clean_stack) const noexcept
+{
+    return (!clean_stack || is_clean()) && peek_bool();
 }
 
 // Primary stack (push).
@@ -158,37 +162,37 @@ bool program::is_valid() const noexcept
 
 // Moving a shared pointer to the stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
-void program::push(chunk_cptr&& item) noexcept
+void program::push(chunk_cptr&& datum) noexcept
 BC_POP_WARNING()
 {
     // TODO: should be able to push the const data_chunk*.
     // TODO: variant_stack_push(std::move(chunk_cptr)).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(std::move(item));
+    primary_->push_back(std::move(datum));
     BC_POP_WARNING()
 }
 
-void program::push(const chunk_cptr& item) noexcept
+void program::push(const chunk_cptr& datum) noexcept
 {
     // TODO: should be able to push the const data_chunk*.
     // TODO: variant_stack_push(chunk_cptr).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(item);
+    primary_->push_back(datum);
     BC_POP_WARNING()
 }
 
-void program::push_chunk(data_chunk&& item) noexcept
+void program::push_chunk(data_chunk&& datum) noexcept
 {
     // TODO: verify the size of shared_ptr union.
     // TODO: variant_stack_push(chunk_cptr).
-    push(to_shared<data_chunk>(std::move(item)));
+    push(to_shared<data_chunk>(std::move(datum)));
 }
 
 void program::push_bool(bool value) noexcept
 {
     // TODO: variant_stack_.push(bool).
     if (value)
-        push_numeric(1);
+        push_numeric(to_int(value));
     else
         push_chunk({});
 }
@@ -217,56 +221,54 @@ void program::push_number(const number& value) noexcept
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
-chunk_cptr program::pop() noexcept
+chunk_cptr program::pop_unsafe() noexcept
 {
-    // This must be guarded (is_relaxed_push is checked in transaction).
-    BC_ASSERT(!is_empty());
-
     // This must be a pointer copy, as the pointer is about to be destroyed.
-    const chunk_cptr value{ primary_->back() };
-    drop();
+    const chunk_cptr value{ top_unsafe() };
+    drop_unsafe();
     return value;
 }
 
-bool program::pop(chunk_cptrs& items, size_t count) noexcept
+bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 {
     if (size() < count)
         return false;
 
-    items.reserve(count);
+    data.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        items.push_back(pop());
+        data.push_back(pop_unsafe());
 
     return true;
 }
 
-void program::drop() noexcept
+bool program::pop_bool_unsafe() noexcept
 {
-    // This must be guarded (is_relaxed_push is checked in transaction).
-    BC_ASSERT(!is_empty());
-
-    primary_->pop_back();
+    const auto value = peek_bool_unsafe();
+    drop_unsafe();
+    return value;
 }
 
 // True if popped value is valid post-pop stack index (precluded if size < 2).
-bool program::pop_index_four_bytes(size_t& out_value) noexcept
+bool program::pop_index32(size_t& out_index) noexcept
 {
-    int32_t signed_value;
-    if (!pop_signed_four_bytes(signed_value))
+    int32_t value;
+    if (!pop_signed32(value))
         return false;
 
-    if (is_negative(signed_value))
+    if (is_negative(value))
         return false;
 
-    out_value = sign_cast<size_t>(signed_value);
-    return out_value < size();
+    // Cast unsafe when sizeof(size_t) < sizeof(int64_t), guarded by stack size.
+    out_index = limit<size_t>(value);
+    return out_index < size();
 }
 
+// private???
 // TODO: variant - change to pop int32_t.
-bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
+bool program::pop_signed32(int32_t& out_value) noexcept
 {
     number value;
-    if (!pop_number_four_bytes(value))
+    if (!pop_number32(value))
         return false;
 
     // number::to_int32 presumes 4 byte pop.
@@ -275,95 +277,131 @@ bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
 }
 
 // TODO: variant - change to pop int32_t.
-bool program::pop_number_four_bytes(number& out_value) noexcept
+bool program::pop_number32(number& out_value) noexcept
 {
-    return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
-}
-
-// TODO: variant - change to pop int64_t.
-bool program::pop_number_five_bytes(number& out_value) noexcept
-{
-    return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
-}
-
-// TODO: variant - change to pop int32_t.
-bool program::pop_binary_four_bytes(number& left, number& right) noexcept
-{
-    // The right hand side operand is at the top of the stack.
-    return pop_number_four_bytes(right) && pop_number_four_bytes(left);
-}
-
-// TODO: variant - change to pop int32_t.
-bool program::pop_ternary_four_bytes(number& upper, number& lower,
-    number& value) noexcept
-{
-    // The upper bound is at stack top, lower bound next, value next.
-    return pop_number_four_bytes(upper) && pop_number_four_bytes(lower) &&
-        pop_number_four_bytes(value);
-}
-
-// ****************************************************************************
-// CONSENSUS:
-// Note that elsewhere numeric opcodes are limited to
-// operands in the range -2**31+1 to 2**31-1, however it is
-// legal for opcodes to produce results exceeding that
-// range. This limitation is implemented by CScriptNum's
-// default 4-byte limit.
-//
-// If we kept to that limit we'd have a year 2038 problem,
-// even though the nLockTime field in transactions
-// themselves is uint32 which only becomes meaningless
-// after the year 2106.
-//
-// Thus as a special case we tell CScriptNum to accept up
-// to 5-byte bignums, which are good until 2**39-1, well
-// beyond the 2**32-1 limit of the nLockTime field itself.
-// ****************************************************************************
-bool program::peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept
-{
-    number value;
-    if (is_empty() || !value.set_data(*item(zero), max_number_size_five) ||
-        value.is_negative())
+    if (is_empty())
         return false;
 
-    // number::to_int40 presumes 5 byte pop.
+    return out_value.set_data(*pop_unsafe(), max_number_size_four);
+}
+
+// TODO: variant - change to pop int32_t.
+bool program::pop_binary32(number& left, number& right) noexcept
+{
+    if (size() < 2)
+        return false;
+
+    // The right hand side operand is at the top of the stack.
+    return right.set_data(*pop_unsafe(), max_number_size_four) &&
+        left.set_data(*pop_unsafe(), max_number_size_four);
+}
+
+// TODO: variant - change to pop int32_t.
+bool program::pop_ternary32(number& upper, number& lower,
+    number& value) noexcept
+{
+    if (size() < 3)
+        return false;
+
+    // The upper bound is at stack top, lower bound next, value next.
+    return upper.set_data(*pop_unsafe(), max_number_size_four) &&
+        lower.set_data(*pop_unsafe(), max_number_size_four) &&
+        value.set_data(*pop_unsafe(), max_number_size_four);
+}
+
+// Primary stack (peek).
+// ----------------------------------------------------------------------------
+
+const chunk_cptr& program::peek_unsafe(size_t index) const noexcept
+{
+    return *const_it_unsafe(index);
+}
+
+// TODO: variant - bool, to_bool(int64_t), number(data).
+bool program::peek_bool_unsafe() const noexcept
+{
+    return number::is_stack_true(*top_unsafe());
+}
+
+bool program::peek_bool() const noexcept
+{
+    return !is_empty() && peek_bool_unsafe();
+}
+
+// ****************************************************************************
+// CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
+// input.sequence allows use of the full unsigned 32 bit domain, without use of
+// the negative range.
+// ****************************************************************************
+bool program::peek_unsigned32(uint32_t& out_value) const noexcept
+{
+    if (is_empty())
+        return false;
+
+    // Negative exclusion drops the 40th bit (inconsequential).
+    number value;
+    if (!peek_number40_unsafe(value) || value.is_negative())
+        return false;
+
+    // 32 bits are used in unsigned input.sequence compare.
+    out_value = narrow_sign_cast<uint32_t>(value.to_int40());
+    return true;
+}
+
+// ****************************************************************************
+// CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
+// input.locktime allows use of the full unsigned 32 bit domain, without use of
+// the negative range. Otherwise a 2038 limit (beyond the inherent 2106 limit)
+// would have been introduced. Since the sign bit is unused, the domain is 39.
+// ****************************************************************************
+bool program::peek_unsigned39(uint64_t& out_value) const noexcept
+{
+    if (is_empty())
+        return false;
+
+    // Negative exclusion drops the 40th bit (limits comparable domain).
+    number value;
+    if (!peek_number40_unsafe(value) || value.is_negative())
+        return false;
+
+    // 39 bits are used in unsigned tx.locktime compare.
     out_value = sign_cast<uint64_t>(value.to_int40());
     return true;
+}
+
+// private???
+// TODO: variant - change to pop int40_t.
+bool program::peek_number40_unsafe(number& out_value) const noexcept
+{
+    // number::to_int40 presumes 5 byte pop.
+    return out_value.set_data(*top_unsafe(), max_number_size_five);
 }
 
 // Primary stack push/pop non-const functions (optimizations).
 // ----------------------------------------------------------------------------
 // Stack index is zero-based, back() is element zero.
 
-void program::swap(size_t left, size_t right) noexcept
+void program::drop_unsafe() noexcept
 {
-    // This must be guarded.
-    BC_ASSERT(std::max(left, right) < size());
+    BC_ASSERT(!is_empty());
 
-    std::swap(
-        *std::prev(primary_->end(), add1(left)),
-        *std::prev(primary_->end(), add1(right)));
+    primary_->pop_back();
 }
 
-void program::erase(size_t index) noexcept
+void program::swap_unsafe(size_t left_index, size_t right_index) noexcept
 {
-    // This must be guarded.
-    BC_ASSERT(index < size());
+    // This swaps the value of each pointer, not vector positions.
+    // This is safe as all stack pointer instances are owned by program.
+    std::swap(*it_unsafe(left_index), *it_unsafe(right_index));
+}
 
-    primary_->erase(std::prev(primary_->end(), add1(index)));
+void program::erase_unsafe(size_t index) noexcept
+{
+    primary_->erase(it_unsafe(index));
 }
 
 // Primary stack push/pop const functions.
 // ----------------------------------------------------------------------------
-// Stack index is zero-based, back() is element zero.
-
-const chunk_cptr& program::item(size_t index) const noexcept
-{
-    // This must be guarded.
-    BC_ASSERT(index < size());
-
-    return *std::prev(primary_->end(), add1(index));
-}
 
 size_t program::size() const noexcept
 {
@@ -375,47 +413,16 @@ bool program::is_empty() const noexcept
     return primary_->empty();
 }
 
-bool program::is_stack_overflow() const noexcept
+bool program::is_overflow() const noexcept
 {
     // bit.ly/2cowHlP
     // Addition is safe due to script size constraints.
     return size() + alternate_.size() > max_stack_size;
 }
 
-constexpr bool is_non_zero(uint8_t value) noexcept
+bool program::is_clean() const noexcept
 {
-    return value != numbers::number_0;
-};
-
-// TODO: translate variant types.
-bool program::stack_to_bool(stack clean) const noexcept
-{
-    // Reversed byte order in this example (big-endian).
-    // -                : false (empty stack)
-    // []               : false (empty stack top)
-    // [00 00 00 00 00] : false (+zero)
-    // [80 00 00 00 00] : false (-zero)
-    // [42 00 00 00 00] : true
-    // [00 80 00 00 00] : true
-
-    // This must be guarded.
-    BC_ASSERT(!primary_->empty());
-
-    if ((clean == stack::clean) && (primary_->size() != one))
-        return false;
-
-    const auto& top = *primary_->back();
-
-    if (top.empty())
-        return false;
-
-    if (!number::is_sign_byte(top.back()))
-        return true;
-
-    // Given the assumption of proper encoding, the first non-sign byte of any
-    // stack number is non-zero, however chunk may have any value, so test all.
-    return std::any_of(std::next(top.begin()), std::prev(top.end()),
-        is_non_zero);
+    return size() == one;
 }
 
 // Alternate stack.
@@ -436,9 +443,8 @@ BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
-chunk_cptr program::pop_alternate() noexcept
+chunk_cptr program::pop_alternate_unsafe() noexcept
 {
-    // This must be guarded.
     BC_ASSERT(!alternate_.empty());
 
     // This must be a pointer copy, as the pointer is about to be destroyed.
@@ -466,25 +472,21 @@ void program::begin_if(bool value) noexcept
 // value 2 on the stack: 1 OP_IF OP_ELSE OP_ELSE 2 OP_ENDIF"
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // ****************************************************************************
-void program::else_if() noexcept
+void program::else_if_unsafe() noexcept
 {
-    // This must be guarded.
     BC_ASSERT(!is_balanced());
 
     // Optimize is_succeess().
     negative_condition_count_ += (condition_.back() ? 1 : -1);
-
     condition_.back() = !condition_.back();
 }
 
-void program::end_if() noexcept
+void program::end_if_unsafe() noexcept
 {
-    // This must be guarded.
     BC_ASSERT(!is_balanced());
 
     // Optimize is_succeess().
     negative_condition_count_ += (condition_.back() ? 0 : -1);
-
     condition_.pop_back();
 }
 
@@ -548,7 +550,7 @@ bool program::ops_increment(size_t public_keys) noexcept
 // ----------------------------------------------------------------------------
 
 // Subscripts are referenced by script.offset mutable metadata. This allows for
-// efficient subscripting with no copying. However, execution of any one given
+// efficient subscripting with no copying. However, execution of any one input
 // script instance is not safe for concurrent execution (unnecessary scenario).
 bool program::set_subscript(const op_iterator& op) noexcept
 {
@@ -557,6 +559,7 @@ bool program::set_subscript(const op_iterator& op) noexcept
         return false;
 
     // Advance the offset to the op following the found code separator.
+    // This is non-const because changes script state (despite being mutable).
     script_->offset = std::next(op);
     return true;
 }

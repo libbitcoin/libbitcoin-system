@@ -74,7 +74,7 @@ op_error_t interpreter::push_negative_1() noexcept
 
 op_error_t interpreter::op_push_positive(uint8_t value) noexcept
 {
-    BC_ASSERT_MSG(value >= 1 && value <=16, "invalid op_push_positive");
+    BC_ASSERT_MSG(value >= 1 && value <= 16, "invalid op_push_positive");
 
     push_numeric(value);
     return error::op_success;
@@ -129,8 +129,7 @@ op_error_t interpreter::op_if() noexcept
         if (is_empty())
             return error::op_if;
 
-        value = is_stack_true(program::stack::dirty);
-        drop();
+        value = pop_bool_unsafe();
     }
 
     begin_if(value);
@@ -146,8 +145,7 @@ op_error_t interpreter::op_notif() noexcept
         if (is_empty())
             return error::op_notif;
 
-        value = !is_stack_true(program::stack::dirty);
-        drop();
+        value = !pop_bool_unsafe();
     }
 
     begin_if(value);
@@ -175,7 +173,7 @@ op_error_t interpreter::op_else() noexcept
     if (is_balanced())
         return error::op_else;
 
-    else_if();
+    else_if_unsafe();
     return error::op_success;
 }
 
@@ -184,7 +182,7 @@ op_error_t interpreter::op_endif() noexcept
     if (is_balanced())
         return error::op_endif;
 
-    end_if();
+    end_if_unsafe();
     return error::op_success;
 }
 
@@ -193,10 +191,10 @@ op_error_t interpreter::op_verify() noexcept
     if (is_empty())
         return error::op_verify1;
 
-    if (!is_stack_true(program::stack::dirty))
+    if (!peek_bool_unsafe())
         return error::op_verify2;
 
-    drop();
+    drop_unsafe();
     return error::op_success;
 }
 
@@ -213,7 +211,7 @@ op_error_t interpreter::op_to_alt_stack() noexcept
     if (is_empty())
         return error::op_to_alt_stack;
 
-    push_alternate(pop());
+    push_alternate(pop_unsafe());
     return error::op_success;
 }
 
@@ -222,7 +220,7 @@ op_error_t interpreter::op_from_alt_stack() noexcept
     if (is_alternate_empty())
         return error::op_from_alt_stack;
 
-    push(pop_alternate());
+    push(pop_alternate_unsafe());
     return error::op_success;
 }
 
@@ -232,8 +230,8 @@ op_error_t interpreter::op_drop2() noexcept
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
-    drop();
-    drop();
+    drop_unsafe();
+    drop_unsafe();
     return error::op_success;
 }
 
@@ -243,8 +241,8 @@ op_error_t interpreter::op_dup2() noexcept
         return error::op_dup2;
 
     // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
-    push(item(1));
-    push(item(1));
+    push(peek_unsafe(1));
+    push(peek_unsafe(1));
     return error::op_success;
 }
 
@@ -254,9 +252,9 @@ op_error_t interpreter::op_dup3() noexcept
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    push(item(2));
-    push(item(2));
-    push(item(2));
+    push(peek_unsafe(2));
+    push(peek_unsafe(2));
+    push(peek_unsafe(2));
     return error::op_success;
 }
 
@@ -266,8 +264,8 @@ op_error_t interpreter::op_over2() noexcept
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    push(item(3));
-    push(item(3));
+    push(peek_unsafe(3));
+    push(peek_unsafe(3));
     return error::op_success;
 }
 
@@ -276,13 +274,12 @@ op_error_t interpreter::op_rot2() noexcept
     if (size() < 6)
         return error::op_rot2;
 
-
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
     // [4,5,0,3,2,1] => [4,5,0,1,2,3]
-    swap(0, 4);
-    swap(1, 5);
-    swap(2, 4);
-    swap(3, 5);
+    swap_unsafe(0, 4);
+    swap_unsafe(1, 5);
+    swap_unsafe(2, 4);
+    swap_unsafe(3, 5);
     return error::op_success;
 }
 
@@ -292,8 +289,8 @@ op_error_t interpreter::op_swap2() noexcept
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    swap(1,3);
-    swap(0,2);
+    swap_unsafe(1,3);
+    swap_unsafe(0,2);
     return error::op_success;
 }
 
@@ -303,8 +300,8 @@ op_error_t interpreter::op_if_dup() noexcept
         return error::op_if_dup;
 
     // [0,1,2] => 0,[0,1,2]
-    if (is_stack_true(program::stack::dirty))
-        push(item(0));
+    if (peek_bool_unsafe())
+        push(peek_unsafe(0));
 
     return error::op_success;
 }
@@ -322,7 +319,7 @@ op_error_t interpreter::op_drop() noexcept
         return error::op_drop;
 
     // 0,[1,2] => [1,2]
-    drop();
+    drop_unsafe();
     return error::op_success;
 }
 
@@ -332,7 +329,7 @@ op_error_t interpreter::op_dup() noexcept
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    push(item(0));
+    push(peek_unsafe(0));
     return error::op_success;
 }
 
@@ -342,8 +339,8 @@ op_error_t interpreter::op_nip() noexcept
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
-    swap(0, 1);
-    drop();
+    swap_unsafe(0, 1);
+    drop_unsafe();
     return error::op_success;
 }
 
@@ -353,7 +350,7 @@ op_error_t interpreter::op_over() noexcept
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    push(item(1));
+    push(peek_unsafe(1));
     return error::op_success;
 }
 
@@ -362,11 +359,11 @@ op_error_t interpreter::op_pick() noexcept
     size_t index;
 
     // 2,[0,1,2,3] => {2} [0,1,2,3]
-    if (!pop_index_four_bytes(index))
+    if (!pop_index32(index))
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    push(item(index));
+    push(peek_unsafe(index));
     return error::op_success;
 }
 
@@ -392,15 +389,15 @@ op_error_t interpreter::op_roll() noexcept
     size_t index;
 
     // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
-    if (!pop_index_four_bytes(index))
+    if (!pop_index32(index))
         return error::op_roll;
 
     // Copy indexed item reference, as it will be deleted.
-    chunk_cptr temporary{ item(index) };
+    chunk_cptr temporary{ peek_unsafe(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
-    erase(index);
+    erase_unsafe(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
     push(std::move(temporary));
@@ -413,8 +410,8 @@ op_error_t interpreter::op_rot() noexcept
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    swap(1,2);
-    swap(0,1);
+    swap_unsafe(1,2);
+    swap_unsafe(0,1);
     return error::op_success;
 }
 
@@ -424,7 +421,7 @@ op_error_t interpreter::op_swap() noexcept
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    swap(0,1);
+    swap_unsafe(0,1);
     return error::op_success;
 }
 
@@ -434,8 +431,8 @@ op_error_t interpreter::op_tuck() noexcept
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
-    swap(0, 1);
-    push(item(1));
+    swap_unsafe(0, 1);
+    push(peek_unsafe(1));
     return error::op_success;
 }
 
@@ -476,7 +473,7 @@ op_error_t interpreter::op_size() noexcept
     if (is_empty())
         return error::op_size;
 
-    push_length(item(0)->size());
+    push_length(peek_unsafe(0)->size());
     return error::op_success;
 }
 
@@ -517,7 +514,7 @@ op_error_t interpreter::op_equal() noexcept
     if (size() < 2)
         return error::op_equal;
 
-    push_bool(*pop() == *pop());
+    push_bool(*pop_unsafe() == *pop_unsafe());
     return error::op_success;
 }
 
@@ -526,14 +523,14 @@ op_error_t interpreter::op_equal_verify() noexcept
     if (size() < 2)
         return error::op_equal_verify1;
 
-    return (*pop() == *pop()) ? error::op_success :
+    return (*pop_unsafe() == *pop_unsafe()) ? error::op_success :
         error::op_equal_verify2;
 }
 
 op_error_t interpreter::op_add1() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_add1;
 
     number += 1;
@@ -544,7 +541,7 @@ op_error_t interpreter::op_add1() noexcept
 op_error_t interpreter::op_sub1() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_sub1;
 
     number -= 1;
@@ -571,7 +568,7 @@ op_error_t interpreter::op_div2() const noexcept
 op_error_t interpreter::op_negate() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_negate;
 
     number = -number;
@@ -582,7 +579,7 @@ op_error_t interpreter::op_negate() noexcept
 op_error_t interpreter::op_abs() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_abs;
 
     if (number < 0)
@@ -595,17 +592,17 @@ op_error_t interpreter::op_abs() noexcept
 op_error_t interpreter::op_not() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_not;
 
-    push_bool(number.is_false());
+    push_bool(!number.is_true());
     return error::op_success;
 }
 
 op_error_t interpreter::op_nonzero() noexcept
 {
     number number;
-    if (!pop_number_four_bytes(number))
+    if (!pop_number32(number))
         return error::op_nonzero;
 
     push_bool(number.is_true());
@@ -615,7 +612,7 @@ op_error_t interpreter::op_nonzero() noexcept
 op_error_t interpreter::op_add() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_add;
 
     push_number((left + right));
@@ -625,7 +622,7 @@ op_error_t interpreter::op_add() noexcept
 op_error_t interpreter::op_sub() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_sub;
 
     push_number((left - right));
@@ -675,7 +672,7 @@ op_error_t interpreter::op_rshift() const noexcept
 op_error_t interpreter::op_bool_and() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_bool_and;
 
     push_bool(left.is_true() && right.is_true());
@@ -685,7 +682,7 @@ op_error_t interpreter::op_bool_and() noexcept
 op_error_t interpreter::op_bool_or() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_bool_or;
 
     push_bool(left.is_true() || right.is_true());
@@ -695,7 +692,7 @@ op_error_t interpreter::op_bool_or() noexcept
 op_error_t interpreter::op_num_equal() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_num_equal;
 
     push_bool(left == right);
@@ -705,7 +702,7 @@ op_error_t interpreter::op_num_equal() noexcept
 op_error_t interpreter::op_num_equal_verify() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_num_equal_verify1;
 
     return (left == right) ? error::op_success : error::op_num_equal_verify2;
@@ -714,7 +711,7 @@ op_error_t interpreter::op_num_equal_verify() noexcept
 op_error_t interpreter::op_num_not_equal() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_num_not_equal;
 
     push_bool(left != right);
@@ -724,7 +721,7 @@ op_error_t interpreter::op_num_not_equal() noexcept
 op_error_t interpreter::op_less_than() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_less_than;
 
     push_bool(left < right);
@@ -734,7 +731,7 @@ op_error_t interpreter::op_less_than() noexcept
 op_error_t interpreter::op_greater_than() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_greater_than;
 
     push_bool(left > right);
@@ -744,7 +741,7 @@ op_error_t interpreter::op_greater_than() noexcept
 op_error_t interpreter::op_less_than_or_equal() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_less_than_or_equal;
 
     push_bool(left <= right);
@@ -754,7 +751,7 @@ op_error_t interpreter::op_less_than_or_equal() noexcept
 op_error_t interpreter::op_greater_than_or_equal() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_greater_than_or_equal;
 
     push_bool(left >= right);
@@ -764,7 +761,7 @@ op_error_t interpreter::op_greater_than_or_equal() noexcept
 op_error_t interpreter::op_min() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_min;
 
     push_number(left < right ? left : right);
@@ -774,7 +771,7 @@ op_error_t interpreter::op_min() noexcept
 op_error_t interpreter::op_max() noexcept
 {
     number right, left;
-    if (!pop_binary_four_bytes(left, right))
+    if (!pop_binary32(left, right))
         return error::op_max;
 
     push_number(left > right ? left : right);
@@ -784,7 +781,7 @@ op_error_t interpreter::op_max() noexcept
 op_error_t interpreter::op_within() noexcept
 {
     number upper, lower, value;
-    if (!pop_ternary_four_bytes(upper, lower, value))
+    if (!pop_ternary32(upper, lower, value))
         return error::op_within;
 
     push_bool((lower <= value) && (value < upper));
@@ -796,7 +793,7 @@ op_error_t interpreter::op_ripemd160() noexcept
     if (is_empty())
         return error::op_ripemd160;
 
-    push_chunk(ripemd160_hash_chunk(*pop()));
+    push_chunk(ripemd160_hash_chunk(*pop_unsafe()));
     return error::op_success;
 }
 
@@ -805,7 +802,7 @@ op_error_t interpreter::op_sha1() noexcept
     if (is_empty())
         return error::op_sha1;
 
-    push_chunk(sha1_hash_chunk(*pop()));
+    push_chunk(sha1_hash_chunk(*pop_unsafe()));
     return error::op_success;
 }
 
@@ -814,7 +811,7 @@ op_error_t interpreter::op_sha256() noexcept
     if (is_empty())
         return error::op_sha256;
 
-    push_chunk(sha256_hash_chunk(*pop()));
+    push_chunk(sha256_hash_chunk(*pop_unsafe()));
     return error::op_success;
 }
 
@@ -823,7 +820,7 @@ op_error_t interpreter::op_hash160() noexcept
     if (is_empty())
         return error::op_hash160;
 
-    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop())));
+    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_unsafe())));
     return error::op_success;
 }
 
@@ -832,12 +829,13 @@ op_error_t interpreter::op_hash256() noexcept
     if (is_empty())
         return error::op_hash256;
 
-    push_chunk(sha256_hash_chunk(sha256_hash(*pop())));
+    push_chunk(sha256_hash_chunk(sha256_hash(*pop_unsafe())));
     return error::op_success;
 }
 
 op_error_t interpreter::op_codeseparator(const op_iterator& op) noexcept
 {
+    // Not thread safe for the script (changes script object metadata).
     return set_subscript(op) ? error::op_success :
         error::op_code_separator;
 }
@@ -863,12 +861,12 @@ op_error_t interpreter::op_check_sig_verify() noexcept
     if (size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto key = pop();
+    const auto key = pop_unsafe();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = pop();
+    const auto endorsement = pop_unsafe();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -906,7 +904,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     const auto bip147 = is_enabled(forks::bip147_rule);
 
     size_t count;
-    if (!pop_index_four_bytes(count))
+    if (!pop_index32(count))
         return error::op_check_multisig_verify1;
 
     if (count > max_script_public_keys)
@@ -916,17 +914,17 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
         return error::op_check_multisig_verify3;
 
     chunk_cptrs keys;
-    if (!pop(keys, count))
+    if (!pop_count(keys, count))
         return error::op_check_multisig_verify4;
 
-    if (!pop_index_four_bytes(count))
+    if (!pop_index32(count))
         return error::op_check_multisig_verify5;
 
     if (count > keys.size())
         return error::op_check_multisig_verify6;
 
     chunk_cptrs endorsements;
-    if (!pop(endorsements, count))
+    if (!pop_count(endorsements, count))
         return error::op_check_multisig_verify7;
 
     if (is_empty())
@@ -935,7 +933,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    if (!pop()->empty() && bip147)
+    if (!pop_unsafe()->empty() && bip147)
         return error::op_check_multisig_verify9;
 
     uint8_t flags;
@@ -990,19 +988,20 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
     // BIP65: the stack is empty.
     // BIP65: the top stack item is negative.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    uint64_t stack_locktime64;
-    if (!peek_top_unsigned_five_bytes(stack_locktime64))
+    // The stack top is positive and 39 bits are usable (negative discarded).
+    uint64_t stack_locktime39;
+    if (!peek_unsigned39(stack_locktime39))
         return error::op_check_locktime_verify2;
 
     const auto trans_locktime32 = transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
-    if ((stack_locktime64 < locktime_threshold) !=
+    if ((stack_locktime39 < locktime_threshold) !=
         (trans_locktime32 < locktime_threshold))
         return error::op_check_locktime_verify3;
 
     // BIP65: the stack locktime is greater than the tx locktime.
-    return (stack_locktime64 > trans_locktime32) ?
+    return (stack_locktime39 > trans_locktime32) ?
         error::op_check_locktime_verify4 : error::op_success;
 }
 
@@ -1015,14 +1014,13 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
     // BIP112: the stack is empty.
     // BIP112: the top stack item is negative.
     // BIP112: extend the (signed) script number range to 5 bytes.
-    // The top stack item is positive, and only 32 bits are ever tested.
-    uint64_t stack_sequence;
-    if (!peek_top_unsigned_five_bytes(stack_sequence))
+    // The stack top is positive and 32 bits are used (33rd-40th discarded).
+    uint32_t stack_sequence32;
+    if (!peek_unsigned32(stack_sequence32))
         return error::op_check_sequence_verify1;
 
     // Only 32 bits are tested.
     const auto input_sequence32 = input().sequence();
-    const auto stack_sequence32 = narrow_cast<uint32_t>(stack_sequence);
 
     // BIP112: the stack sequence is disabled, treat as nop3.
     if (get_right(stack_sequence32, relative_locktime_disabled_bit))
@@ -1393,7 +1391,7 @@ code interpreter::run() noexcept
                 return ec;
 
             // Enforce combined stacks size limit (1,000).
-            if (is_stack_overflow())
+            if (is_overflow())
                 return error::invalid_stack_size;
         }
     }
