@@ -125,6 +125,9 @@ jobs:
           else
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefixenv/lib" >> $GITHUB_ENV
+          fi
 
       - name: Execute install.sh
         run: >
@@ -149,6 +152,37 @@ jobs:
         with:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
+
+      - name: Failure display compiler version
+        if: ${{ failure() }}
+        run: |
+          gcc -v
+          clang -v
+
+      - name: Failure display env
+        if: ${{ failure() }}
+        run: |
+          env
+
+      - name: Failure list libdir
+        if: ${{ failure() }}
+        run: |
+          ls -la ${{ github.workspace }}/prefixenv/lib
+
+      - name: Failure display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+        run: |
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+
+      - name: Failure display otool output
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
+
+      - name: Failure display DYLD_PRINT_LIBRARIES
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
 
   verify-sln:
     strategy:
