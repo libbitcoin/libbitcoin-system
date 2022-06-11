@@ -19,7 +19,7 @@
 #include "test.hpp"
 
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <bitcoin/system.hpp>
 
 namespace std {
@@ -41,21 +41,18 @@ namespace test {
 
 const std::string directory = "tests";
 
-// C++17: use std::filesystem.
-bool clear(const boost::filesystem::path& file_directory) noexcept
+bool clear(const std::filesystem::path& file_directory) noexcept
 {
-    // C++17: use std::filesystem.
     // remove_all returns count removed, and error code if fails.
     // create_directories returns true if path exists or created.
     // used for setup, with no expectations of file/directory existence.
     const auto path = to_extended_path(file_directory);
-    boost::system::error_code ec;
-    boost::filesystem::remove_all(path, ec);
-    return !ec && boost::filesystem::create_directories(path, ec);
+    code ec;
+    std::filesystem::remove_all(path, ec);
+    return !ec && std::filesystem::create_directories(path, ec);
 }
 
-// C++17: use std::filesystem.
-bool create(const boost::filesystem::path& file_path) noexcept
+bool create(const std::filesystem::path& file_path) noexcept
 {
     // Creates and returns true if file already existed (and no error).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -64,8 +61,7 @@ bool create(const boost::filesystem::path& file_path) noexcept
     BC_POP_WARNING()
 }
 
-// C++17: use std::filesystem.
-bool exists(const boost::filesystem::path& file_path) noexcept
+bool exists(const std::filesystem::path& file_path) noexcept
 {
     // Returns true only if file existed.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -74,13 +70,11 @@ bool exists(const boost::filesystem::path& file_path) noexcept
     BC_POP_WARNING()
 }
 
-// C++17: use std::filesystem.
-bool remove(const boost::filesystem::path& file_path) noexcept
+bool remove(const std::filesystem::path& file_path) noexcept
 {
-    // C++17: use std::filesystem.
     // Deletes and returns false if file did not exist (or error).
-    boost::system::error_code ec;
-    return boost::filesystem::remove(to_extended_path(file_path), ec);
+    code ec;
+    return std::filesystem::remove(to_extended_path(file_path), ec);
 }
 
 } // namespace test

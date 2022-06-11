@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_IFSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_IFSTREAM_HPP
 
+#include <filesystem>
 #include <fstream>
-#include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -33,7 +33,7 @@ class BC_API ifstream
 {
 public:
     /// This also opens the file.
-    ifstream(const boost::filesystem::path& path,
+    ifstream(const std::filesystem::path& path,
         std::ifstream::openmode mode=std::ifstream::in) noexcept(false);
 };
 

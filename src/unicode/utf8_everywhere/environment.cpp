@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <filesystem>
 #include <iostream>
 #include <locale>
 #include <mutex>
@@ -268,8 +269,8 @@ static std::string windows_config_directory() noexcept
 }
 #endif
 
-boost::filesystem::path default_config_path(
-    const boost::filesystem::path& subdirectory) noexcept
+std::filesystem::path default_config_path(
+    const std::filesystem::path& subdirectory) noexcept
 {
     static const std::string directory =
 #ifdef _MSC_VER
@@ -278,7 +279,7 @@ boost::filesystem::path default_config_path(
         SYSCONFDIR;
 #endif
 
-    return boost::filesystem::path{ directory } / subdirectory;
+    return std::filesystem::path{ directory } / subdirectory;
 }
 
 // BC_USE_LIBBITCOIN_MAIN
@@ -353,15 +354,10 @@ char** allocate_environment(wchar_t* environment[]) noexcept
 int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[])) noexcept
 {
-    // C++17: use std::filesystem.
-    // When working with boost and utf8 narrow characters on Win32 the thread
-    // must be configured for utf8. When working with boost::filesystem::path
-    // the static path object must be imbued with the utf8 locale or paths will
-    // be incorrectly translated.
+    // TODO: verify std::filesystem::path is inbued as it was with boost.
     constexpr auto utf8_locale_name = "en_US.UTF8";
     boost::locale::generator locale;
     std::locale::global(locale(utf8_locale_name));
-    boost::filesystem::path::imbue(std::locale());
 
     auto backup = environ;
     auto environment = allocate_environment(_wenviron);
@@ -388,10 +384,9 @@ int call_utf8_main(int argc, wchar_t* argv[],
     return result;
 }
 
-// C++17: use std::filesystem.
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
 std::wstring to_fully_qualified_path(
-    const boost::filesystem::path& path) noexcept
+    const std::filesystem::path& path) noexcept
 {
     const auto replace_all = [](std::string text, char from, char to) noexcept
     {
@@ -431,7 +426,7 @@ std::wstring to_fully_qualified_path(
 #endif // _MSC_VER
 
 #ifdef _MSC_VER
-// C++17: use std::filesystem.
+// TODO: update comments for std::filesystem conversion.
 // Use to_extended_path with APIs that compile to wide with _MSC_VER defined
 // and to UTF8 with _MSC_VER undefined. This includes some boost APIs - such as
 // filesystem::remove, remove_all, and create_directories, as well as some
@@ -439,7 +434,7 @@ std::wstring to_fully_qualified_path(
 // Otherwise use in any Win32 (W) APIs with _MSC_VER defined, such as we do in 
 // interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
 // calls CreateFileA. The length extension prefix requires Win32 (W) APIs.
-std::wstring to_extended_path(const boost::filesystem::path& path) noexcept
+std::wstring to_extended_path(const std::filesystem::path& path) noexcept
 {
     // The length extension prefix works only with a fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
@@ -448,7 +443,7 @@ std::wstring to_extended_path(const boost::filesystem::path& path) noexcept
     return (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full;
 }
 #else
-std::string to_extended_path(const boost::filesystem::path& path) noexcept
+std::string to_extended_path(const std::filesystem::path& path) noexcept
 {
     return path.string();
 }

@@ -47,8 +47,7 @@
 // Include boost in cpp files only from here, so exception disable works.
 // Avoid use in header includes due to warning repetition (boost/format.hpp).
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
+////#include <boost/format.hpp>
 #include <boost/json.hpp>
 #include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_int.hpp>

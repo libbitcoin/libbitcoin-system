@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_OFSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_OFSTREAM_HPP
 
+#include <filesystem>
 #include <fstream>
-#include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -33,7 +33,7 @@ class BC_API ofstream
 {
 public:
     /// This also opens the file.
-    ofstream(const boost::filesystem::path& path,
+    ofstream(const std::filesystem::path& path,
         std::ofstream::openmode mode=std::ofstream::out) noexcept(false);
 };
 

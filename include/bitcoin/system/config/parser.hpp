@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
 
+#include <filesystem>
 #include <string>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -49,7 +49,7 @@ public:
         const std::string& message) noexcept;
     static bool get_option(variables_map& variables,
         const std::string& name) noexcept;
-    static boost::filesystem::path get_config_option(variables_map& variables,
+    static std::filesystem::path get_config_option(variables_map& variables,
         const std::string& name) noexcept;
 
     virtual ~parser() noexcept;

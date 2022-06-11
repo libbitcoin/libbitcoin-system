@@ -24,6 +24,7 @@
 #include <array>
 #include <iostream>
 #include <vector>
+#include <filesystem>
 #include <bitcoin/system.hpp>
 
 #define TEST_NAME \
@@ -89,10 +90,10 @@ namespace test {
 // Total path length cannot exceed MAX_PATH in _MSC_VER builds.
 extern const std::string directory;
 
-bool clear(const boost::filesystem::path& directory) noexcept;
-bool create(const boost::filesystem::path& file_path) noexcept;
-bool exists(const boost::filesystem::path& file_path) noexcept;
-bool remove(const boost::filesystem::path& file_path) noexcept;
+bool clear(const std::filesystem::path& directory) noexcept;
+bool create(const std::filesystem::path& file_path) noexcept;
+bool exists(const std::filesystem::path& file_path) noexcept;
+bool remove(const std::filesystem::path& file_path) noexcept;
 
 } // namespace test
 

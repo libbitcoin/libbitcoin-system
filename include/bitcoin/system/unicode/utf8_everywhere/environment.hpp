@@ -20,9 +20,9 @@
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_ENVIRONMENT_HPP
 
 #include <cstddef>
+#include <filesystem>
 #include <iostream>
 #include <string>
-#include <boost/filesystem.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -58,8 +58,8 @@ BC_API void set_binary_stdout() noexcept(false);
 // ----------------------------------------------------------------------------
 
 /// Get the default configuration file path with subdirectory.
-BC_API boost::filesystem::path default_config_path(
-    const boost::filesystem::path& subdirectory) noexcept;
+BC_API std::filesystem::path default_config_path(
+    const std::filesystem::path& subdirectory) noexcept;
 
 // BC_USE_LIBBITCOIN_MAIN dependencies.
 // ----------------------------------------------------------------------------
@@ -91,10 +91,10 @@ BC_API int call_utf8_main(int argc, wchar_t* argv[],
 #ifdef _MSC_VER
 // Not thread safe.
 BC_API std::wstring to_extended_path(
-    const boost::filesystem::path& path) noexcept;
+    const std::filesystem::path& path) noexcept;
 #else
 BC_API std::string to_extended_path(
-    const boost::filesystem::path& path) noexcept;
+    const std::filesystem::path& path) noexcept;
 #endif
 
 } // namespace system

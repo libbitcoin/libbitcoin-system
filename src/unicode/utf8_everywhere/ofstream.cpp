@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/ofstream.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
@@ -25,9 +26,8 @@
 namespace libbitcoin {
 namespace system {
     
-// C++17: use std::filesystem.
 // VC++ EXTENSION: "construct with wide-named file".
-ofstream::ofstream(const boost::filesystem::path& path,
+ofstream::ofstream(const std::filesystem::path& path,
     std::ofstream::openmode mode) noexcept(false)
   : std::ofstream(to_extended_path(path), mode)
 {

@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/config/parser.hpp>
 
+#include <filesystem>
 #include <string>
 #include <sstream>
 #include <bitcoin/system/boost.hpp>
@@ -28,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::filesystem;
+using namespace std::filesystem;
 using namespace boost::program_options;
 using namespace boost::system;
 

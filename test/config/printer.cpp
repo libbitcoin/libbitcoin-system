@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_
 
 BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
 {
-    using namespace boost::filesystem;
+    using namespace std::filesystem;
     using namespace boost::program_options;
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")

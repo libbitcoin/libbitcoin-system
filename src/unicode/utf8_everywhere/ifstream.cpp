@@ -18,16 +18,16 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
-// C++17: use std::filesystem.
+ 
 // VC++ EXTENSION: "construct with wide-named file".
-ifstream::ifstream(const boost::filesystem::path& path,
+ifstream::ifstream(const std::filesystem::path& path,
     std::ifstream::openmode mode) noexcept(false)
   : std::ifstream(to_extended_path(path), mode)
 {

@@ -18,8 +18,10 @@
  */
 #include <bitcoin/system/config/printer.hpp>
 
+////#include <format>
 #include <string>
 #include <vector>
+#include <boost/format.hpp>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -83,13 +85,10 @@ printer::printer(const po::options_description& settings,
 {
 }
 
-printer::~printer() noexcept
-{
-}
+// Formatters
+// ----------------------------------------------------------------------------
 
-/* Formatters */
-
-static void enqueue_fragment(std::string& fragment,
+static void enqueue_fragment(const std::string& fragment,
     std::vector<std::string>& column) noexcept
 {
     if (!fragment.empty())
@@ -386,7 +385,7 @@ std::string printer::format_usage_parameters() noexcept
     return trim_copy(usage.str());
 }
 
-/* Initialization */
+// Initialization
 
 static void enqueue_name(int count, std::string& name,
     argument_list& names) noexcept
@@ -477,7 +476,8 @@ void printer::initialize() noexcept
     generate_parameters();
 }
 
-/* Printers */
+// Printers
+// ----------------------------------------------------------------------------
 
 void printer::commandline(std::ostream& output) noexcept
 {

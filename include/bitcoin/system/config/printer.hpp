@@ -67,8 +67,13 @@ public:
         const std::string& application, const std::string& description="",
         const std::string& command="") noexcept;
 
-    /// Destructor.
-    virtual ~printer() noexcept;
+
+    /// Defaults.
+    printer(printer&&) = default;
+    printer(const printer&) = default;
+    printer& operator=(printer&&) = default;
+    printer& operator=(const printer&) = default;
+    virtual ~printer() = default;
 
     /// Convert a paragraph of text into a column.
     /// This formats to 80 char width as: [ 23 | ' ' | 55 | '\n' ].
