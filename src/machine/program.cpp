@@ -175,7 +175,7 @@ void program::push_length(size_t value) noexcept
     push_numeric(possible_narrow_sign_cast<int64_t>(value));
 }
 
-void program::push_numeric(int_fast64_t value) noexcept
+void program::push_numeric(int64_t value) noexcept
 {
     push_number(number{ value });
 }
@@ -221,7 +221,7 @@ void program::drop() noexcept
     primary_->pop_back();
 }
 
-bool program::pop_signed_four_bytes(int_fast32_t& out_value) noexcept
+bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
 {
     number value;
     if (!pop_number_four_bytes(value))
@@ -235,7 +235,7 @@ bool program::pop_signed_four_bytes(int_fast32_t& out_value) noexcept
 // True if popped value is valid post-pop stack index (precluded if size < 2).
 bool program::pop_index_four_bytes(size_t& out_value) noexcept
 {
-    int_fast32_t signed_value;
+    int32_t signed_value;
     if (!pop_signed_four_bytes(signed_value))
         return false;
 
@@ -291,7 +291,7 @@ bool program::pop_ternary_four_bytes(number& upper, number& lower,
 // to 5-byte bignums, which are good until 2**39-1, well
 // beyond the 2**32-1 limit of the nLockTime field itself.
 // ****************************************************************************
-bool program::peek_top_unsigned_five_bytes(uint_fast64_t& out_value) const noexcept
+bool program::peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept
 {
     number value;
     if (is_empty() || !value.set_data(*item(zero), max_number_size_five) ||
@@ -299,7 +299,7 @@ bool program::peek_top_unsigned_five_bytes(uint_fast64_t& out_value) const noexc
         return false;
 
     // number::to_int40 presumes 5 byte pop.
-    out_value = sign_cast<uint_fast64_t>(value.to_int40());
+    out_value = sign_cast<uint64_t>(value.to_int40());
     return true;
 }
 

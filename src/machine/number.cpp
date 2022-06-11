@@ -38,7 +38,7 @@ number::number() noexcept
 {
 }
 
-number::number(int_fast64_t value) noexcept
+number::number(int64_t value) noexcept
   : value_(value)
 {
 }
@@ -48,7 +48,7 @@ number::number(int_fast64_t value) noexcept
 // TODO: This class can be reduced to:
 // TODO: 'data_chunk to_data<Type>(Type value)'
 // TODO: 'Type from_data<Type>(const data_chunk& data)'
-// TODO: where Type is int_fast64_t or narrower, or bool
+// TODO: where Type is int64_t or narrower, or bool
 
 // The data is interpreted as little-endian.
 bool number::set_data(const data_chunk& data, size_t max_size) noexcept
@@ -64,7 +64,7 @@ bool number::set_data(const data_chunk& data, size_t max_size) noexcept
     if (data.empty())
         return true;
 
-    value_ = from_little_endian<int_fast64_t>(data);
+    value_ = from_little_endian<int64_t>(data);
     const auto negative_bit_set = get_left(data.back());
 
     // Clear the negative bit and negate the value.
@@ -107,36 +107,33 @@ data_chunk number::data() const noexcept
 // int40_t: -2**39+1 to 2**39-1
 // int64_t: -2**63+1 to 2**63-1
 
-int_fast32_t number::to_int32() const noexcept
+int32_t number::to_int32() const noexcept
 {
     // This can be safely cast if the data was 4 byte limited.
-    // narrow_cast<int_fast32_t> fails to match integral type (clang).
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<int_fast32_t>(value_);
-    BC_POP_WARNING()
+    return narrow_cast<int32_t>(value_);
 }
 
-number::int_fast40_t number::to_int40() const noexcept
+number::int40_t number::to_int40() const noexcept
 {
-    static_assert(width<int_fast64_t>() - to_bits(5) == 24u, "");
+    static_assert(width<int64_t>() - to_bits(5u) == 24u, "");
 
     // This can be safely masked/cast if the data was 5 byte limited.
     // We are using a type alias of uint64_t for int40_t, so just mask return.
-    return mask_left(value_, width<int_fast64_t>() - to_bits(5));
+    return mask_left(value_, width<int64_t>() - to_bits(5u));
 }
 
 // deprecated
-int_fast32_t number::int32() const noexcept
+int32_t number::int32() const noexcept
 {
     // TODO: this can be simply cast if was 4 byte limited set_data.
     // TODO: however number tests have this unnecessary limit constraint.
-    return limit<int_fast32_t>(value_);
+    return limit<int32_t>(value_);
 }
 
 // deprecated
-int_fast64_t number::int64() const noexcept
+int64_t number::int64() const noexcept
 {
-    // Inherently limited by 'value_ = from_little_endian<int_fast64_t>' above.
+    // Inherently limited by 'value_ = from_little_endian<int64_t>' above.
     return value_;
 }
 
@@ -164,32 +161,32 @@ bool number::is_negative() const noexcept
 // These never overflow in script (32 bit add/subtract in 64 bit space).
 // Other than assertion this is nothing more than c++ native operators.
 
-bool number::operator>(int_fast64_t value) const noexcept
+bool number::operator>(int64_t value) const noexcept
 {
     return value_ > value;
 }
 
-bool number::operator<(int_fast64_t value) const noexcept
+bool number::operator<(int64_t value) const noexcept
 {
     return value_ < value;
 }
 
-bool number::operator>=(int_fast64_t value) const noexcept
+bool number::operator>=(int64_t value) const noexcept
 {
     return value_ >= value;
 }
 
-bool number::operator<=(int_fast64_t value) const noexcept
+bool number::operator<=(int64_t value) const noexcept
 {
     return value_ <= value;
 }
 
-bool number::operator==(int_fast64_t value) const noexcept
+bool number::operator==(int64_t value) const noexcept
 {
     return value_ == value;
 }
 
-bool number::operator!=(int_fast64_t value) const noexcept
+bool number::operator!=(int64_t value) const noexcept
 {
     return value_ != value;
 }
@@ -224,13 +221,13 @@ bool number::operator!=(const number& other) const noexcept
     return operator!=(other.value_);
 }
 
-number number::operator+(int_fast64_t value) const noexcept
+number number::operator+(int64_t value) const noexcept
 {
     BC_ASSERT(!overflows(value_, value));
     return number(value_ + value);
 }
 
-number number::operator-(int_fast64_t value) const noexcept
+number number::operator-(int64_t value) const noexcept
 {
     BC_ASSERT(!underflows(value_, value));
     return number(value_ - value);
@@ -267,14 +264,14 @@ number& number::operator-=(const number& other) noexcept
     return operator-=(other.value_);
 }
 
-number& number::operator+=(int_fast64_t value) noexcept
+number& number::operator+=(int64_t value) noexcept
 {
     BC_ASSERT(!overflows(value_, value));
     value_ += value;
     return *this;
 }
 
-number& number::operator-=(int_fast64_t value) noexcept
+number& number::operator-=(int64_t value) noexcept
 {
     BC_ASSERT(!underflows(value_, value));
     value_ -= value;

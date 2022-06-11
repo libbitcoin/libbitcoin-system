@@ -40,13 +40,13 @@ namespace machine {
 class BC_API number
 {
 public:
-    typedef int_fast64_t int_fast40_t;
+    typedef int64_t int40_t;
 
     /// Construct with zero value.
     number() noexcept;
 
     /// Construct with specified value.
-    explicit number(int_fast64_t value) noexcept;
+    explicit number(int64_t value) noexcept;
 
     /// Replace the value derived from a little-endian byte vector.
     bool set_data(const data_chunk& data, size_t max_size) noexcept;
@@ -59,19 +59,19 @@ public:
 
     /// This should compile as int64_t.
     /// Return the value cast to int40 (4 byte stack data, consensus).
-    int_fast32_t to_int32() const noexcept;
+    int32_t to_int32() const noexcept;
 
     /// This should compile as int64_t.
     /// Return the value cast to int40 (5 byte stack data, consensus).
-    int_fast40_t to_int40() const noexcept;
+    int40_t to_int40() const noexcept;
 
     /// deprecated
     /// Return the value bound by to int32 (TODO: modify unit tests).
-    int_fast32_t int32() const noexcept;
+    int32_t int32() const noexcept;
 
     /// deprecated
     /// Return the value as int64. (up to 8 bytes stack data, unused).
-    int_fast64_t int64() const noexcept;
+    int64_t int64() const noexcept;
 
     // Stack Helpers
     // ------------------------------------------------------------------------
@@ -99,12 +99,12 @@ public:
     // all operators, specifically [-, +, +=, -=].
     //*************************************************************************
 
-    bool operator>(int_fast64_t value) const noexcept;
-    bool operator<(int_fast64_t value) const noexcept;
-    bool operator>=(int_fast64_t value) const noexcept;
-    bool operator<=(int_fast64_t value) const noexcept;
-    bool operator==(int_fast64_t value) const noexcept;
-    bool operator!=(int_fast64_t value) const noexcept;
+    bool operator>(int64_t value) const noexcept;
+    bool operator<(int64_t value) const noexcept;
+    bool operator>=(int64_t value) const noexcept;
+    bool operator<=(int64_t value) const noexcept;
+    bool operator==(int64_t value) const noexcept;
+    bool operator!=(int64_t value) const noexcept;
 
     bool operator>(const number& other) const noexcept;
     bool operator<(const number& other) const noexcept;
@@ -115,13 +115,13 @@ public:
 
     number operator+() const noexcept;
     number operator-() const noexcept;
-    number operator+(int_fast64_t value) const noexcept;
-    number operator-(int_fast64_t value) const noexcept;
+    number operator+(int64_t value) const noexcept;
+    number operator-(int64_t value) const noexcept;
     number operator+(const number& other) const noexcept;
     number operator-(const number& other) const noexcept;
 
-    number& operator+=(int_fast64_t value) noexcept;
-    number& operator-=(int_fast64_t value) noexcept;
+    number& operator+=(int64_t value) noexcept;
+    number& operator-=(int64_t value) noexcept;
     number& operator+=(const number& other) noexcept;
     number& operator-=(const number& other) noexcept;
 
@@ -136,7 +136,7 @@ private:
         return bit_left<uint8_t>(0);
     }
 
-    int_fast64_t value_;
+    int64_t value_;
 };
 
 } // namespace machine

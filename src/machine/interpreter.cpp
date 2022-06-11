@@ -990,7 +990,7 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
     // BIP65: the stack is empty.
     // BIP65: the top stack item is negative.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    uint_fast64_t stack_locktime64;
+    uint64_t stack_locktime64;
     if (!peek_top_unsigned_five_bytes(stack_locktime64))
         return error::op_check_locktime_verify2;
 
@@ -1016,7 +1016,7 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
     // BIP112: the top stack item is negative.
     // BIP112: extend the (signed) script number range to 5 bytes.
     // The top stack item is positive, and only 32 bits are ever tested.
-    uint_fast64_t stack_sequence;
+    uint64_t stack_sequence;
     if (!peek_top_unsigned_five_bytes(stack_sequence))
         return error::op_check_sequence_verify1;
 

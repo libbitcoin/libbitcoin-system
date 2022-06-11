@@ -119,7 +119,7 @@ protected:
     /// Inherent integral values.
     void push_bool(bool value) noexcept;
     void push_length(size_t value) noexcept;
-    void push_numeric(int_fast64_t value) noexcept;
+    void push_numeric(int64_t value) noexcept;
     void push_number(const number& value) noexcept;
 
     /// Primary stack pop.
@@ -130,12 +130,12 @@ protected:
 
     /// Inherent integral values.
     bool pop_index_four_bytes(size_t& out_value) noexcept;
-    bool pop_signed_four_bytes(int_fast32_t& out_value) noexcept;
+    bool pop_signed_four_bytes(int32_t& out_value) noexcept;
     bool pop_number_four_bytes(number& out_value) noexcept;
     bool pop_number_five_bytes(number& out_value) noexcept;
     bool pop_binary_four_bytes(number& left, number& right) noexcept;
     bool pop_ternary_four_bytes(number& upper, number& lower, number& value) noexcept;
-    bool peek_top_unsigned_five_bytes(uint_fast64_t& out_value) const noexcept;
+    bool peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept;
 
     /// Primary stack optimizations (type-independent).
     void drop() noexcept;
