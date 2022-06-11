@@ -248,17 +248,6 @@ void program::drop() noexcept
     primary_->pop_back();
 }
 
-bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
-{
-    number value;
-    if (!pop_number_four_bytes(value))
-        return false;
-
-    // number::to_int32 presumes 4 byte pop.
-    out_value = value.to_int32();
-    return true;
-}
-
 // True if popped value is valid post-pop stack index (precluded if size < 2).
 bool program::pop_index_four_bytes(size_t& out_value) noexcept
 {
@@ -271,6 +260,18 @@ bool program::pop_index_four_bytes(size_t& out_value) noexcept
 
     out_value = sign_cast<size_t>(signed_value);
     return out_value < size();
+}
+
+// TODO: variant - change to pop int32_t.
+bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
+{
+    number value;
+    if (!pop_number_four_bytes(value))
+        return false;
+
+    // number::to_int32 presumes 4 byte pop.
+    out_value = value.to_int32();
+    return true;
 }
 
 // TODO: variant - change to pop int32_t.
@@ -386,6 +387,7 @@ constexpr bool is_non_zero(uint8_t value) noexcept
     return value != numbers::number_0;
 };
 
+// TODO: translate variant types.
 bool program::stack_to_bool(stack clean) const noexcept
 {
     // Reversed byte order in this example (big-endian).
