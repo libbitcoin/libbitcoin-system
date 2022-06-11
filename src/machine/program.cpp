@@ -160,21 +160,11 @@ void program::push_chunk(data_chunk&& item) noexcept
 
 void program::push_bool(bool value) noexcept
 {
-    // TODO: change to push bool variant.
-    static const operation false_{ opcode::push_size_0 };
-    static const operation true_{ to_chunk(numbers::positive_1) };
-    push(value ? true_.data_ptr() : false_.data_ptr());
-}
-
-void program::push_byte(uint8_t value) noexcept
-{
-    BC_ASSERT_MSG(value != numbers::number_0, "zero is not byte encoded");
-
-    // TODO: change to push int64_t variant.
-    push_chunk(to_chunk(value));
-
-    //// TODO: this encoding differs, see number tests.
-    ////push_number(number{ value });
+    // TODO: variant - push(value).
+    if (value)
+        push_numeric(1);
+    else
+        push_chunk({});
 }
 
 void program::push_length(size_t value) noexcept
@@ -182,8 +172,12 @@ void program::push_length(size_t value) noexcept
     // This is guarded by stack size and push data limits.
     BC_ASSERT_MSG(value <= max_int64, "integer overflow");
 
-    // This overload just hides the cast.
-    push_number(number{ possible_narrow_sign_cast<int64_t>(value) });
+    push_numeric(possible_narrow_sign_cast<int64_t>(value));
+}
+
+void program::push_numeric(int_fast64_t value) noexcept
+{
+    push_number(number{ value });
 }
 
 void program::push_number(const number& value) noexcept
@@ -227,13 +221,14 @@ void program::drop() noexcept
     primary_->pop_back();
 }
 
-bool program::pop_signed_four_bytes(int32_t& out_value) noexcept
+bool program::pop_signed_four_bytes(int_fast32_t& out_value) noexcept
 {
     number value;
     if (!pop_number_four_bytes(value))
         return false;
 
-    out_value = value.int32();
+    // number::to_int32 presumes 4 byte pop.
+    out_value = value.to_int32();
     return true;
 }
 
@@ -251,22 +246,26 @@ bool program::pop_index_four_bytes(size_t& out_value) noexcept
     return out_value < size();
 }
 
+// TODO: variant - change to pop int32_t.
 bool program::pop_number_four_bytes(number& out_value) noexcept
 {
     return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
 }
 
+// TODO: variant - change to pop int64_t.
 bool program::pop_number_five_bytes(number& out_value) noexcept
 {
     return !is_empty() && out_value.set_data(*pop(), max_number_size_four);
 }
 
+// TODO: variant - change to pop int32_t.
 bool program::pop_binary_four_bytes(number& left, number& right) noexcept
 {
     // The right hand side operand is at the top of the stack.
     return pop_number_four_bytes(right) && pop_number_four_bytes(left);
 }
 
+// TODO: variant - change to pop int32_t.
 bool program::pop_ternary_four_bytes(number& upper, number& lower,
     number& value) noexcept
 {
@@ -292,14 +291,15 @@ bool program::pop_ternary_four_bytes(number& upper, number& lower,
 // to 5-byte bignums, which are good until 2**39-1, well
 // beyond the 2**32-1 limit of the nLockTime field itself.
 // ****************************************************************************
-bool program::peek_top_unsigned_five_bytes(uint64_t& out_value) const noexcept
+bool program::peek_top_unsigned_five_bytes(uint_fast64_t& out_value) const noexcept
 {
     number value;
     if (is_empty() || !value.set_data(*item(zero), max_number_size_five) ||
         value.is_negative())
         return false;
 
-    out_value = sign_cast<uint64_t>(value.int64());
+    // number::to_int40 presumes 5 byte pop.
+    out_value = sign_cast<uint_fast64_t>(value.to_int40());
     return true;
 }
 
@@ -359,13 +359,6 @@ constexpr bool is_non_zero(uint8_t value) noexcept
     return value != numbers::number_0;
 };
 
-constexpr bool is_sign_byte(uint8_t value) noexcept
-{
-    return
-        value == number::positive_sign_byte ||
-        value == number::negative_sign_byte;
-};
-
 bool program::stack_to_bool(stack clean) const noexcept
 {
     // Reversed byte order in this example (big-endian).
@@ -387,7 +380,7 @@ bool program::stack_to_bool(stack clean) const noexcept
     if (top.empty())
         return false;
 
-    if (!is_sign_byte(top.back()))
+    if (!number::is_sign_byte(top.back()))
         return true;
 
     // Given the assumption of proper encoding, the first non-sign byte of any

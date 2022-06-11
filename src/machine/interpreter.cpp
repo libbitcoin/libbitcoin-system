@@ -66,12 +66,17 @@ op_error_t interpreter::op_push_no_size(const operation& op) noexcept
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_numeric(uint8_t value) noexcept
+op_error_t interpreter::push_negative_1() noexcept
 {
-    BC_ASSERT_MSG(operation::is_numeric(static_cast<opcode>(value)),
-        "invalid op_push_number");
+    push_numeric(-1);
+    return error::op_success;
+}
 
-    push_byte(value);
+op_error_t interpreter::op_push_positive(uint8_t value) noexcept
+{
+    BC_ASSERT_MSG(value >= 1 && value <=16, "invalid op_push_positive");
+
+    push_numeric(value);
     return error::op_success;
 }
 
@@ -985,7 +990,7 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
     // BIP65: the stack is empty.
     // BIP65: the top stack item is negative.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    uint64_t stack_locktime64;
+    uint_fast64_t stack_locktime64;
     if (!peek_top_unsigned_five_bytes(stack_locktime64))
         return error::op_check_locktime_verify2;
 
@@ -1011,7 +1016,7 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
     // BIP112: the top stack item is negative.
     // BIP112: extend the (signed) script number range to 5 bytes.
     // The top stack item is positive, and only 32 bits are ever tested.
-    uint64_t stack_sequence;
+    uint_fast64_t stack_sequence;
     if (!peek_top_unsigned_five_bytes(stack_sequence))
         return error::op_check_sequence_verify1;
 
@@ -1137,47 +1142,42 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
             return op_push_two_size(op->data_ptr());
         case opcode::push_four_size:
             return op_push_four_size(op->data_ptr());
-
-        // TODO: change to -1 in variant encoding.
         case opcode::push_negative_1:
-            return op_push_numeric(numbers::negative_1);
-
+            return push_negative_1();
         case opcode::reserved_80:
             return op_unevaluated(code);
-
         case opcode::push_positive_1:
-            return op_push_numeric(numbers::positive_1);
+            return op_push_positive(1);
         case opcode::push_positive_2:
-            return op_push_numeric(numbers::positive_2);
+            return op_push_positive(2);
         case opcode::push_positive_3:
-            return op_push_numeric(numbers::positive_3);
+            return op_push_positive(3);
         case opcode::push_positive_4:
-            return op_push_numeric(numbers::positive_4);
+            return op_push_positive(4);
         case opcode::push_positive_5:
-            return op_push_numeric(numbers::positive_5);
+            return op_push_positive(5);
         case opcode::push_positive_6:
-            return op_push_numeric(numbers::positive_6);
+            return op_push_positive(6);
         case opcode::push_positive_7:
-            return op_push_numeric(numbers::positive_7);
+            return op_push_positive(7);
         case opcode::push_positive_8:
-            return op_push_numeric(numbers::positive_8);
+            return op_push_positive(8);
         case opcode::push_positive_9:
-            return op_push_numeric(numbers::positive_9);
+            return op_push_positive(9);
         case opcode::push_positive_10:
-            return op_push_numeric(numbers::positive_10);
+            return op_push_positive(10);
         case opcode::push_positive_11:
-            return op_push_numeric(numbers::positive_11);
+            return op_push_positive(11);
         case opcode::push_positive_12:
-            return op_push_numeric(numbers::positive_12);
+            return op_push_positive(12);
         case opcode::push_positive_13:
-            return op_push_numeric(numbers::positive_13);
+            return op_push_positive(13);
         case opcode::push_positive_14:
-            return op_push_numeric(numbers::positive_14);
+            return op_push_positive(14);
         case opcode::push_positive_15:
-            return op_push_numeric(numbers::positive_15);
+            return op_push_positive(15);
         case opcode::push_positive_16:
-            return op_push_numeric(numbers::positive_16);
-
+            return op_push_positive(16);
         case opcode::nop:
             return op_nop();
         case opcode::op_ver:

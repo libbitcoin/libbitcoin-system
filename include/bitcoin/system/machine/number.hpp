@@ -20,36 +20,33 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
 
-/**
- * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
- * 4-byte integers. The semantics are subtle though: operands must be
- * in the range [-2^31 +1...2^31 -1], but results may overflow. This overflow
- * is valid as long as the result not used in a subsequent numeric operation in
- * a domain exceeded by the overflow.
- *
- * number enforces those semantics by storing results as an int64 and allowing
- * out-of-range values to be returned as a vector of bytes but throwing an
- * exception if arithmetic is done or the result is interpreted as an integer.
- */
+/// Numeric opcodes (OP_1ADD, etc) are restricted to operating on
+/// 4-byte integers. The semantics are subtle though: operands must be in
+/// the range [-2^31 +1...2^31 -1], but results may overflow. This overflow
+/// is valid as long as the result not used in a subsequent numeric operation
+/// in a domain exceeded by the overflow. number enforces these semantics by
+/// storing results as an int64 and allowing out-of-range values to be returned
+/// as a vector of bytes but throwing an exception if arithmetic is done or the
+/// result is interpreted as an integer.
 class BC_API number
 {
 public:
-    static const uint8_t positive_sign_byte = 0x00;
-    static const uint8_t negative_sign_byte = bit_left<uint8_t>(0);
+    typedef int_fast64_t int_fast40_t;
 
     /// Construct with zero value.
     number() noexcept;
 
     /// Construct with specified value.
-    explicit number(int64_t value) noexcept;
+    explicit number(int_fast64_t value) noexcept;
 
     /// Replace the value derived from a little-endian byte vector.
     bool set_data(const data_chunk& data, size_t max_size) noexcept;
@@ -60,14 +57,30 @@ public:
     /// Return the value as a byte vector with LSB first ordering.
     data_chunk data() const noexcept;
 
-    /// Return the value bounded by the limits of int32.
-    int32_t int32() const noexcept;
+    /// This should compile as int64_t.
+    /// Return the value cast to int40 (4 byte stack data, consensus).
+    int_fast32_t to_int32() const noexcept;
 
-    /// Return the unbounded value.
-    int64_t int64() const noexcept;
+    /// This should compile as int64_t.
+    /// Return the value cast to int40 (5 byte stack data, consensus).
+    int_fast40_t to_int40() const noexcept;
+
+    /// deprecated
+    /// Return the value bound by to int32 (TODO: modify unit tests).
+    int_fast32_t int32() const noexcept;
+
+    /// deprecated
+    /// Return the value as int64. (up to 8 bytes stack data, unused).
+    int_fast64_t int64() const noexcept;
 
     // Stack Helpers
     // ------------------------------------------------------------------------
+
+    /// Return true if byte is a sign.
+    static constexpr bool is_sign_byte(uint8_t byte) noexcept
+    {
+        return byte == positive_sign_byte() || byte == negative_sign_byte();
+    }
 
     /// Return value as stack boolean (nonzero is true).
     bool is_true() const noexcept;
@@ -86,12 +99,12 @@ public:
     // all operators, specifically [-, +, +=, -=].
     //*************************************************************************
 
-    bool operator>(int64_t value) const noexcept;
-    bool operator<(int64_t value) const noexcept;
-    bool operator>=(int64_t value) const noexcept;
-    bool operator<=(int64_t value) const noexcept;
-    bool operator==(int64_t value) const noexcept;
-    bool operator!=(int64_t value) const noexcept;
+    bool operator>(int_fast64_t value) const noexcept;
+    bool operator<(int_fast64_t value) const noexcept;
+    bool operator>=(int_fast64_t value) const noexcept;
+    bool operator<=(int_fast64_t value) const noexcept;
+    bool operator==(int_fast64_t value) const noexcept;
+    bool operator!=(int_fast64_t value) const noexcept;
 
     bool operator>(const number& other) const noexcept;
     bool operator<(const number& other) const noexcept;
@@ -102,18 +115,28 @@ public:
 
     number operator+() const noexcept;
     number operator-() const noexcept;
-    number operator+(int64_t value) const noexcept;
-    number operator-(int64_t value) const noexcept;
+    number operator+(int_fast64_t value) const noexcept;
+    number operator-(int_fast64_t value) const noexcept;
     number operator+(const number& other) const noexcept;
     number operator-(const number& other) const noexcept;
 
-    number& operator+=(int64_t value) noexcept;
-    number& operator-=(int64_t value) noexcept;
+    number& operator+=(int_fast64_t value) noexcept;
+    number& operator-=(int_fast64_t value) noexcept;
     number& operator+=(const number& other) noexcept;
     number& operator-=(const number& other) noexcept;
 
 private:
-    int64_t value_;
+    static constexpr uint8_t positive_sign_byte()
+    {
+        return 0x00;
+    }
+
+    static constexpr uint8_t negative_sign_byte()
+    {
+        return bit_left<uint8_t>(0);
+    }
+
+    int_fast64_t value_;
 };
 
 } // namespace machine

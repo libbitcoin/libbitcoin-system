@@ -51,7 +51,8 @@ public:
     error::op_error_t op_push_one_size(const chunk_cptr& data) noexcept;
     error::op_error_t op_push_two_size(const chunk_cptr& data) noexcept;
     error::op_error_t op_push_four_size(const chunk_cptr& data) noexcept;
-    error::op_error_t op_push_numeric(uint8_t value) noexcept;
+    error::op_error_t push_negative_1() noexcept;
+    error::op_error_t op_push_positive(uint8_t value) noexcept;
     error::op_error_t op_nop() const noexcept;
     error::op_error_t op_ver() const noexcept;
     error::op_error_t op_if() noexcept;
