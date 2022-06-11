@@ -235,7 +235,7 @@ bool program::pop_signed_four_bytes(int_fast32_t& out_value) noexcept
 // True if popped value is valid post-pop stack index (precluded if size < 2).
 bool program::pop_index_four_bytes(size_t& out_value) noexcept
 {
-    int32_t signed_value;
+    int_fast32_t signed_value;
     if (!pop_signed_four_bytes(signed_value))
         return false;
 
