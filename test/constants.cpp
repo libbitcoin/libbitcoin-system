@@ -23,6 +23,11 @@ static_assert(!is_zero(1u), "");
 static_assert(!is_zero(0xff), "");
 static_assert(std::is_same<decltype(is_zero<int16_t>(0)), bool>::value, "");
 
+static_assert(!is_nonzero(0), "");
+static_assert(is_nonzero(1u), "");
+static_assert(is_nonzero(0xff), "");
+static_assert(std::is_same<decltype(is_nonzero<int16_t>(0)), bool>::value, "");
+
 static_assert(is_one(1), "");
 static_assert(!is_one(0u), "");
 static_assert(!is_one(0xff), "");

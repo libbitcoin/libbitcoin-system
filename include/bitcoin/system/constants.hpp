@@ -41,6 +41,12 @@ constexpr bool is_zero(Type value) noexcept
 }
 
 template <typename Type>
+constexpr bool is_nonzero(Type value) noexcept
+{
+    return !is_zero(value);
+}
+
+template <typename Type>
 constexpr bool is_one(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
