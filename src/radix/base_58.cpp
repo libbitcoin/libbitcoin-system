@@ -90,24 +90,24 @@ void pack_value(data_chunk& indexes, size_t carry) noexcept
 
 std::string encode_base58(const data_slice& unencoded) noexcept
 {
-    size_t leading_zeros = count_leading_zeros(unencoded);
+    const auto leading_zeros = count_leading_zeros(unencoded);
 
     // size = log(256) / log(58), rounded up.
-    const size_t number_nonzero = unencoded.size() - leading_zeros;
-    const size_t indexes_size = add1(number_nonzero * 138u / 100u);
+    const auto number_nonzero = unencoded.size() - leading_zeros;
+    const auto indexes_size = add1(number_nonzero * 138u / 100u);
 
     // Allocate enough space in big-endian base58 representation.
     data_chunk indexes(indexes_size);
 
     // Process the bytes.
-    for (auto it = unencoded.begin() + leading_zeros;
+    for (auto it = std::next(unencoded.begin(), leading_zeros);
         it != unencoded.end(); ++it)
     {
         pack_value(indexes, *it);
     }
 
     // Skip leading zeros in base58 result.
-    auto first_nonzero = find_first_nonzero(indexes);
+    const auto first_nonzero = find_first_nonzero(indexes);
 
     // Translate the result into a string.
     std::string encoded;
@@ -174,7 +174,7 @@ bool decode_base58(data_chunk& out, const std::string& in) noexcept
     }
 
     // Skip leading zeros in data.
-    auto first_nonzero = find_first_nonzero(data);
+    const auto first_nonzero = find_first_nonzero(data);
 
     // Copy result into output vector.
     const size_t estimated_size = leading_zeros + (data.end() - first_nonzero);

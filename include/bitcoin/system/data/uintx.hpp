@@ -40,6 +40,7 @@ using uintx_t = mp::number<mp::cpp_int_backend<Bits, Bits,
 /// with this seam, requiring template specialization for uintx.
 typedef boost::multiprecision::cpp_int uintx;
 
+// C++11: use std::integral_constant (up to primitives limit).
 typedef uintx_t<5> uint5_t;
 typedef uintx_t<11> uint11_t;
 typedef uintx_t<48> uint48_t;

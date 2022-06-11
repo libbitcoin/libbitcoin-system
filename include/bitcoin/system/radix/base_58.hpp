@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-BC_API bool is_base58(const char ch) noexcept;
+BC_API bool is_base58(const char character) noexcept;
 BC_API bool is_base58(const std::string& text) noexcept;
 
 /// Converts a base58 string to a number of bytes.
