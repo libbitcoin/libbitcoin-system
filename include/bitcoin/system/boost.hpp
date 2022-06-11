@@ -52,7 +52,6 @@
 #include <boost/json.hpp>
 #include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-////#include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/thread.hpp>
