@@ -110,7 +110,10 @@ data_chunk number::data() const noexcept
 int_fast32_t number::to_int32() const noexcept
 {
     // This can be safely cast if the data was 4 byte limited.
-    return narrow_cast<int_fast32_t>(value_);
+    // narrow_cast<int_fast32_t> fails to match integral type (clang).
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<int_fast32_t>(value_);
+    BC_POP_WARNING()
 }
 
 number::int_fast40_t number::to_int40() const noexcept
