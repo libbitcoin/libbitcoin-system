@@ -56,13 +56,40 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_reserved__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "op_reserved");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_data__true_exected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_size__true_exected_message)
 {
-    constexpr auto value = error::op_push_data;
+    constexpr auto value = error::op_push_size;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_push_data");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_push_size");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_one_size__true_exected_message)
+{
+    constexpr auto value = error::op_push_one_size;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_push_one_size");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_two_size__true_exected_message)
+{
+    constexpr auto value = error::op_push_two_size;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_push_two_size");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_four_size__true_exected_message)
+{
+    constexpr auto value = error::op_push_four_size;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_push_four_size");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_if__true_exected_message)
