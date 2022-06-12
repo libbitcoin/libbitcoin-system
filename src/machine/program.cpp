@@ -397,9 +397,9 @@ bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
         },
         [&](const chunk_cptr& vary) noexcept
         {
-            number value{};
-            result = value.set_data(*vary, byte_width(bits));
-            value = possible_narrow_cast<Out>(value.int64());
+            number stack_number{};
+            result = stack_number.set_data(*vary, byte_width(bits));
+            value = possible_narrow_cast<Out>(stack_number.int64());
         }
     };
 
