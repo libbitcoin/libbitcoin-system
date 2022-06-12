@@ -70,7 +70,6 @@ typedef std::shared_ptr<const chunk_cptrs> chunk_cptrs_cptr;
 /// Define data_stack types.
 
 typedef std::vector<data_chunk> data_stack;
-
 typedef std::shared_ptr<data_stack> stack_ptr;
 typedef std::shared_ptr<const data_stack> stack_cptr;
 
