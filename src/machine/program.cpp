@@ -203,7 +203,7 @@ bool program::is_true(bool clean_stack) const noexcept
 
 // Moving a shared pointer to the stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
-void program::push(chunk_cptr&& datum) noexcept
+void program::push_cptr(chunk_cptr&& datum) noexcept
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -211,7 +211,7 @@ BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
-void program::push(const chunk_cptr& datum) noexcept
+void program::push_cptr(const chunk_cptr& datum) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->emplace_back(datum);
@@ -220,7 +220,7 @@ void program::push(const chunk_cptr& datum) noexcept
 
 void program::push_chunk(data_chunk&& datum) noexcept
 {
-    push(to_shared<data_chunk>(std::move(datum)));
+    push_cptr(to_shared<data_chunk>(std::move(datum)));
 }
 
 void program::push_bool(bool value) noexcept
@@ -247,9 +247,9 @@ void program::push_length(size_t value) noexcept
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
-chunk_cptr program::pop_unsafe() noexcept
+chunk_cptr program::pop_cptr_unsafe() noexcept
 {
-    const auto value = peek_unsafe();
+    const auto value = peek_cptr_unsafe();
     drop_unsafe();
     return value;
 }
@@ -318,7 +318,7 @@ bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 
     data.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        data.push_back(pop_unsafe());
+        data.push_back(pop_cptr_unsafe());
 
     return true;
 }
@@ -327,8 +327,9 @@ bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 // ----------------------------------------------------------------------------
 
 // No size limits on push (of any type) or peek chunk.
-chunk_cptr program::peek_unsafe(size_t index) const noexcept
+chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
 {
+    // Can see no way to obtain a 'const chunk_cptr&' here.
     chunk_cptr item;
     const overloaded visitor
     {
@@ -346,7 +347,7 @@ chunk_cptr program::peek_unsafe(size_t index) const noexcept
         }
     };
 
-    std::visit(visitor, *const_it_unsafe(index));
+    std::visit(visitor, peek_variant_unsafe(index));
     return item;
 }
 
@@ -401,7 +402,7 @@ bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
         }
     };
 
-    std::visit(visitor, *const_it_unsafe(index));
+    std::visit(visitor, peek_variant_unsafe(index));
     return result;
 }
 
@@ -470,14 +471,31 @@ void program::drop_unsafe() noexcept
 
 void program::swap_unsafe(size_t left_index, size_t right_index) noexcept
 {
-    // This swaps the value of each pointer, not vector positions.
-    // This is safe as all stack pointer instances are owned by program.
+    // This swaps the variant elements of the stack vector.
     std::swap(*it_unsafe(left_index), *it_unsafe(right_index));
 }
 
 void program::erase_unsafe(size_t index) noexcept
 {
     primary_->erase(it_unsafe(index));
+}
+
+void program::push_variant(const variant& vary) noexcept
+{
+    primary_->push_back(vary);
+}
+
+const program::variant& program::peek_variant_unsafe(
+    size_t index) const noexcept
+{
+    return *const_it_unsafe(index);
+}
+
+program::variant program::pop_variant_unsafe() noexcept
+{
+    variant temporary = std::move(primary_->back());
+    drop_unsafe();
+    return temporary;
 }
 
 // Primary stack push/pop const functions.
@@ -515,20 +533,19 @@ bool program::is_alternate_empty() const noexcept
 
 // Moving a shared pointer to the alternate stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
-void program::push_alternate(chunk_cptr&& value) noexcept
+void program::push_alternate(variant&& vary) noexcept
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    alternate_.push_back(std::move(value));
+    alternate_.push_back(std::move(vary));
     BC_POP_WARNING()
 }
 
-chunk_cptr program::pop_alternate_unsafe() noexcept
+program::variant program::pop_alternate_unsafe() noexcept
 {
     BC_ASSERT(!alternate_.empty());
 
-    // This must be a pointer copy, as the pointer is about to be destroyed.
-    const chunk_cptr value{ alternate_.back() };
+    variant value{ std::move(alternate_.back()) };
     alternate_.pop_back();
     return value;
 }

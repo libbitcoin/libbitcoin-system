@@ -115,8 +115,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Primary stack push (safe, typed).
-    void push(chunk_cptr&& datum) noexcept;
-    void push(const chunk_cptr& datum) noexcept;
+    void push_cptr(chunk_cptr&& datum) noexcept;
+    void push_cptr(const chunk_cptr& datum) noexcept;
     void push_chunk(data_chunk&& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_signed64(int64_t value) noexcept;
@@ -125,7 +125,7 @@ protected:
     void push_length(size_t value) noexcept;
 
     /// Primary stack pop (unsafe, typed).
-    chunk_cptr pop_unsafe() noexcept;
+    chunk_cptr pop_cptr_unsafe() noexcept;
     bool pop_bool_unsafe() noexcept;
     bool pop_signed32_unsafe(int32_t& value) noexcept;
 
@@ -137,7 +137,7 @@ protected:
     bool pop_count(chunk_cptrs& data, size_t count) noexcept;
 
     /// Primary stack peek (unsafe, typed).
-    chunk_cptr peek_unsafe(size_t index=zero) const noexcept;
+    chunk_cptr peek_cptr_unsafe(size_t index=zero) const noexcept;
     bool peek_bool_unsafe() const noexcept;
     ////bool peek_signed_unsafe<Out>(Out& value) const noexcept;
 
@@ -149,10 +149,13 @@ protected:
     bool peek_unsigned32(uint32_t& value) const noexcept;
     bool peek_unsigned39(uint64_t& value) const noexcept;
 
-    /// Primary stack non-const (untyped).
+    /// Primary stack non-const (variant).
     void drop_unsafe() noexcept;
     void swap_unsafe(size_t left_index, size_t right_index) noexcept;
     void erase_unsafe(size_t index) noexcept;
+    void push_variant(const variant& vary) noexcept;
+    const variant& peek_variant_unsafe(size_t index) const noexcept;
+    variant pop_variant_unsafe() noexcept;
 
     /// Primary stack const functions (untyped).
     size_t size() const noexcept;
@@ -164,8 +167,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     bool is_alternate_empty() const noexcept;
-    void push_alternate(chunk_cptr&& value) noexcept;
-    chunk_cptr pop_alternate_unsafe() noexcept;
+    void push_alternate(variant&& vary) noexcept;
+    variant pop_alternate_unsafe() noexcept;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
@@ -248,7 +251,7 @@ private:
 
     // Three stacks.
     variant_stack_ptr primary_; // variant_stack_ptr
-    chunk_cptrs alternate_{}; // variant_stack
+    variant_stack alternate_{}; // variant_stack
     bool_stack condition_{};
 
     // Accumulator.

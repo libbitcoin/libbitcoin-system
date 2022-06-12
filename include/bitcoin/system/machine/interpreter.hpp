@@ -48,12 +48,11 @@ public:
     /// Operation handlers.
     error::op_error_t op_unevaluated(chain::opcode) const noexcept;
     error::op_error_t op_nop(chain::opcode) const noexcept;
-    error::op_error_t op_push_no_size(const chain::operation& op) noexcept;
-    error::op_error_t op_push_one_size(const chunk_cptr& data) noexcept;
-    error::op_error_t op_push_two_size(const chunk_cptr& data) noexcept;
-    error::op_error_t op_push_four_size(const chunk_cptr& data) noexcept;
-    error::op_error_t push_negative_1() noexcept;
-    error::op_error_t op_push_positive(uint8_t value) noexcept;
+    error::op_error_t op_push_number(int8_t value) noexcept;
+    error::op_error_t op_push_size(const chain::operation& op) noexcept;
+    error::op_error_t op_push_one_size(const chain::operation& op) noexcept;
+    error::op_error_t op_push_two_size(const chain::operation& op) noexcept;
+    error::op_error_t op_push_four_size(const chain::operation& op) noexcept;
     error::op_error_t op_nop() const noexcept;
     error::op_error_t op_ver() const noexcept;
     error::op_error_t op_if() noexcept;
@@ -147,7 +146,7 @@ public:
             return to_shared<data_chunk>();
 
         // Avoid ternary object return (prevents copy elision).
-        return pop_unsafe();
+        return pop_cptr_unsafe();
     }
 
 protected:

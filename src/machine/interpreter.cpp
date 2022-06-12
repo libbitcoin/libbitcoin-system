@@ -39,6 +39,19 @@ using namespace system::error;
 // Operation handlers.
 // ----------------------------------------------------------------------------
 
+// Incorrectly-sized push data is validated upon op parse, setting an invalid
+// opcode, the underflow bit, and the op data. This invalid opcode will result
+// in script execution failure if the script is evaluated, but is otherwise
+// valid (such as for a coinbase input script). Underflow can only occur at the
+// end of a script. All bytes are valid script, but as scripts have finite
+// length, the last operation may be an undersized push data. The retention of
+// the undersized data within an invalid op allows for the script to be
+// serialized and for the proper size and hash of the transaction computed.
+// By design it is not possible to populate an op.data size that does not
+// correspond to the op.code. Size mismatch is revalidated here as final
+// insurance against derived classes that may alter this behavior. This ensures
+// that an opcode that does not push correctly-sized data here will fail.
+
 op_error_t interpreter::op_unevaluated(opcode code) const noexcept
 {
     return operation::is_invalid(code) ? error::op_invalid :
@@ -57,53 +70,52 @@ op_error_t interpreter::op_nop(opcode) const noexcept
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_no_size(const operation& op) noexcept
+op_error_t interpreter::op_push_number(int8_t value) noexcept
 {
-    BC_ASSERT_MSG(op.data().size() <= static_cast<uint8_t>(
-        opcode::push_size_75), "invalid op_push_size");
-
-    push(op.data_ptr());
-    return error::op_success;
-}
-
-op_error_t interpreter::push_negative_1() noexcept
-{
-    push_signed64(-1);
-    return error::op_success;
-}
-
-op_error_t interpreter::op_push_positive(uint8_t value) noexcept
-{
-    BC_ASSERT_MSG(value >= 1 && value <= 16, "invalid op_push_positive");
+    // run_op controls this parameterization.
+    BC_ASSERT(value >= -1 && value <= 16);
 
     push_signed64(value);
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_one_size(const chunk_cptr& data) noexcept
+op_error_t interpreter::op_push_size(const operation& op) noexcept
 {
-    if (data->size() > max_uint8)
-        return error::op_push_data;
+    // Data size must match op code declaration.
+    if (op.data().size() != static_cast<uint8_t>(op.code()))
+        return error::op_push_size;
 
-    push(data);
+    push_cptr(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_two_size(const chunk_cptr& data) noexcept
+op_error_t interpreter::op_push_one_size(const operation& op) noexcept
 {
-    if (data->size() > max_uint16)
-        return error::op_push_data;
+    // Data size must not exceed opcode declaration.
+    if (op.data().size() > max_uint8)
+        return error::op_push_one_size;
 
-    push(data);
+    push_cptr(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_four_size(const chunk_cptr& data) noexcept
+op_error_t interpreter::op_push_two_size(const operation& op) noexcept
 {
-    if (data->size() > max_uint32)
-        return error::op_push_data;
+    // Data size must not exceed opcode declaration.
+    if (op.data().size() > max_uint16)
+        return error::op_push_two_size;
 
-    push(data);
+    push_cptr(op.data_ptr());
+    return error::op_success;
+}
+
+op_error_t interpreter::op_push_four_size(const operation& op) noexcept
+{
+    // Data size must not exceed opcode declaration.
+    if (op.data().size() > max_uint32)
+        return error::op_push_four_size;
+
+    push_cptr(op.data_ptr());
     return error::op_success;
 }
 
@@ -211,7 +223,7 @@ op_error_t interpreter::op_to_alt_stack() noexcept
     if (is_empty())
         return error::op_to_alt_stack;
 
-    push_alternate(pop_unsafe());
+    push_alternate(pop_variant_unsafe());
     return error::op_success;
 }
 
@@ -220,7 +232,7 @@ op_error_t interpreter::op_from_alt_stack() noexcept
     if (is_alternate_empty())
         return error::op_from_alt_stack;
 
-    push(pop_alternate_unsafe());
+    push_variant(pop_alternate_unsafe());
     return error::op_success;
 }
 
@@ -241,8 +253,8 @@ op_error_t interpreter::op_dup2() noexcept
         return error::op_dup2;
 
     // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
-    push(peek_unsafe(1));
-    push(peek_unsafe(1));
+    push_variant(peek_variant_unsafe(1));
+    push_variant(peek_variant_unsafe(1));
     return error::op_success;
 }
 
@@ -252,9 +264,9 @@ op_error_t interpreter::op_dup3() noexcept
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    push(peek_unsafe(2));
-    push(peek_unsafe(2));
-    push(peek_unsafe(2));
+    push_variant(peek_variant_unsafe(2));
+    push_variant(peek_variant_unsafe(2));
+    push_variant(peek_variant_unsafe(2));
     return error::op_success;
 }
 
@@ -264,8 +276,8 @@ op_error_t interpreter::op_over2() noexcept
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    push(peek_unsafe(3));
-    push(peek_unsafe(3));
+    push_variant(peek_variant_unsafe(3));
+    push_variant(peek_variant_unsafe(3));
     return error::op_success;
 }
 
@@ -301,7 +313,7 @@ op_error_t interpreter::op_if_dup() noexcept
 
     // [0,1,2] => 0,[0,1,2]
     if (peek_bool_unsafe())
-        push(peek_unsafe(0));
+        push_variant(peek_variant_unsafe(0));
 
     return error::op_success;
 }
@@ -329,7 +341,7 @@ op_error_t interpreter::op_dup() noexcept
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    push(peek_unsafe(0));
+    push_variant(peek_variant_unsafe(0));
     return error::op_success;
 }
 
@@ -350,7 +362,7 @@ op_error_t interpreter::op_over() noexcept
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    push(peek_unsafe(1));
+    push_variant(peek_variant_unsafe(1));
     return error::op_success;
 }
 
@@ -363,7 +375,7 @@ op_error_t interpreter::op_pick() noexcept
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    push(peek_unsafe(index));
+    push_variant(peek_variant_unsafe(index));
     return error::op_success;
 }
 
@@ -376,13 +388,7 @@ op_error_t interpreter::op_pick() noexcept
 // 1 {999 times}, 998 OP_ROLL{ 200 times }"
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // Shifting larger chunks does not change time, as vector stores references.
-// This remains the current satoshi implementation (std::vector):
-//case OP_ROLL:
-//{
-//    valtype vch = stacktop(-n-1);
-//    stack.erase(stack.end()-n-1);
-//    stack.push_back(vch);
-//}
+// This remains the current satoshi implementation (std::vector).
 // ****************************************************************************
 op_error_t interpreter::op_roll() noexcept
 {
@@ -392,14 +398,15 @@ op_error_t interpreter::op_roll() noexcept
     if (!pop_index32(index))
         return error::op_roll;
 
-    auto temporary = peek_unsafe(index);
+    // Will this move the const referenced variant?
+    variant temporary = std::move(peek_variant_unsafe(index));
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
     erase_unsafe(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
-    push(std::move(temporary));
+    push_variant(std::move(temporary));
     return error::op_success;
 }
 
@@ -431,7 +438,7 @@ op_error_t interpreter::op_tuck() noexcept
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
     swap_unsafe(0, 1);
-    push(peek_unsafe(1));
+    push_variant(peek_variant_unsafe(1));
     return error::op_success;
 }
 
@@ -472,7 +479,7 @@ op_error_t interpreter::op_size() noexcept
     if (is_empty())
         return error::op_size;
 
-    push_length(peek_unsafe(0)->size());
+    push_length(peek_cptr_unsafe()->size());
     return error::op_success;
 }
 
@@ -513,7 +520,7 @@ op_error_t interpreter::op_equal() noexcept
     if (size() < 2)
         return error::op_equal;
 
-    push_bool(*pop_unsafe() == *pop_unsafe());
+    push_bool(*pop_cptr_unsafe() == *pop_cptr_unsafe());
     return error::op_success;
 }
 
@@ -522,8 +529,8 @@ op_error_t interpreter::op_equal_verify() noexcept
     if (size() < 2)
         return error::op_equal_verify1;
 
-    return (*pop_unsafe() == *pop_unsafe()) ? error::op_success :
-        error::op_equal_verify2;
+    return (*pop_cptr_unsafe() == *pop_cptr_unsafe()) ?
+        error::op_success : error::op_equal_verify2;
 }
 
 op_error_t interpreter::op_add1() noexcept
@@ -786,7 +793,7 @@ op_error_t interpreter::op_ripemd160() noexcept
     if (is_empty())
         return error::op_ripemd160;
 
-    push_chunk(ripemd160_hash_chunk(*pop_unsafe()));
+    push_chunk(ripemd160_hash_chunk(*pop_cptr_unsafe()));
     return error::op_success;
 }
 
@@ -795,7 +802,7 @@ op_error_t interpreter::op_sha1() noexcept
     if (is_empty())
         return error::op_sha1;
 
-    push_chunk(sha1_hash_chunk(*pop_unsafe()));
+    push_chunk(sha1_hash_chunk(*pop_cptr_unsafe()));
     return error::op_success;
 }
 
@@ -804,7 +811,7 @@ op_error_t interpreter::op_sha256() noexcept
     if (is_empty())
         return error::op_sha256;
 
-    push_chunk(sha256_hash_chunk(*pop_unsafe()));
+    push_chunk(sha256_hash_chunk(*pop_cptr_unsafe()));
     return error::op_success;
 }
 
@@ -813,7 +820,7 @@ op_error_t interpreter::op_hash160() noexcept
     if (is_empty())
         return error::op_hash160;
 
-    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_unsafe())));
+    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_cptr_unsafe())));
     return error::op_success;
 }
 
@@ -822,7 +829,7 @@ op_error_t interpreter::op_hash256() noexcept
     if (is_empty())
         return error::op_hash256;
 
-    push_chunk(sha256_hash_chunk(sha256_hash(*pop_unsafe())));
+    push_chunk(sha256_hash_chunk(sha256_hash(*pop_cptr_unsafe())));
     return error::op_success;
 }
 
@@ -854,12 +861,12 @@ op_error_t interpreter::op_check_sig_verify() noexcept
     if (size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto key = pop_unsafe();
+    const auto key = pop_cptr_unsafe();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = pop_unsafe();
+    const auto endorsement = pop_cptr_unsafe();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -926,7 +933,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    if (!pop_unsafe()->empty() && bip147)
+    if (!pop_cptr_unsafe()->empty() && bip147)
         return error::op_check_multisig_verify9;
 
     uint8_t flags;
@@ -1051,6 +1058,7 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
     switch (code)
     {
         case opcode::push_size_0:
+            return op_push_number(0);
         case opcode::push_size_1:
         case opcode::push_size_2:
         case opcode::push_size_3:
@@ -1126,49 +1134,49 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
         case opcode::push_size_73:
         case opcode::push_size_74:
         case opcode::push_size_75:
-            return op_push_no_size(*op);
+            return op_push_size(*op);
         case opcode::push_one_size:
-            return op_push_one_size(op->data_ptr());
+            return op_push_one_size(*op);
         case opcode::push_two_size:
-            return op_push_two_size(op->data_ptr());
+            return op_push_two_size(*op);
         case opcode::push_four_size:
-            return op_push_four_size(op->data_ptr());
+            return op_push_four_size(*op);
         case opcode::push_negative_1:
-            return push_negative_1();
+            return op_push_number(-1);
         case opcode::reserved_80:
             return op_unevaluated(code);
         case opcode::push_positive_1:
-            return op_push_positive(1);
+            return op_push_number(1);
         case opcode::push_positive_2:
-            return op_push_positive(2);
+            return op_push_number(2);
         case opcode::push_positive_3:
-            return op_push_positive(3);
+            return op_push_number(3);
         case opcode::push_positive_4:
-            return op_push_positive(4);
+            return op_push_number(4);
         case opcode::push_positive_5:
-            return op_push_positive(5);
+            return op_push_number(5);
         case opcode::push_positive_6:
-            return op_push_positive(6);
+            return op_push_number(6);
         case opcode::push_positive_7:
-            return op_push_positive(7);
+            return op_push_number(7);
         case opcode::push_positive_8:
-            return op_push_positive(8);
+            return op_push_number(8);
         case opcode::push_positive_9:
-            return op_push_positive(9);
+            return op_push_number(9);
         case opcode::push_positive_10:
-            return op_push_positive(10);
+            return op_push_number(10);
         case opcode::push_positive_11:
-            return op_push_positive(11);
+            return op_push_number(11);
         case opcode::push_positive_12:
-            return op_push_positive(12);
+            return op_push_number(12);
         case opcode::push_positive_13:
-            return op_push_positive(13);
+            return op_push_number(13);
         case opcode::push_positive_14:
-            return op_push_positive(14);
+            return op_push_number(14);
         case opcode::push_positive_15:
-            return op_push_positive(15);
+            return op_push_number(15);
         case opcode::push_positive_16:
-            return op_push_positive(16);
+            return op_push_number(16);
         case opcode::nop:
             return op_nop();
         case opcode::op_ver:
