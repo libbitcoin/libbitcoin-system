@@ -195,7 +195,7 @@ bool program::is_valid() const noexcept
 
 bool program::is_true(bool clean_stack) const noexcept
 {
-    return (!clean_stack || is_clean()) && peek_bool();
+    return (!clean_stack || is_clean()) && !is_empty() && peek_bool_unsafe();
 }
 
 // Primary stack (push).
@@ -417,11 +417,6 @@ bool program::peek_signed40_unsafe(int64_t& out_value) const noexcept
 {
     constexpr auto bits = width<int8_t>() + width<int32_t>();
     return peek_signed_unsafe<bits>(out_value);
-}
-
-bool program::peek_bool() const noexcept
-{
-    return !is_empty() && peek_bool_unsafe();
 }
 
 // ****************************************************************************

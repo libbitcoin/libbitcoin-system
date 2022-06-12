@@ -115,17 +115,21 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Primary stack push (typed).
-        void push(chunk_cptr&& datum) noexcept;
-        void push(const chunk_cptr& datum) noexcept;
-        void push_chunk(data_chunk&& datum) noexcept;
-        void push_bool(bool value) noexcept;
-        void push_signed64(int64_t value) noexcept;
+    void push(chunk_cptr&& datum) noexcept;
+    void push(const chunk_cptr& datum) noexcept;
+    void push_chunk(data_chunk&& datum) noexcept;
+    void push_bool(bool value) noexcept;
+    void push_signed64(int64_t value) noexcept;
+
+    /// wrappers
     void push_length(size_t value) noexcept;
 
     /// Primary stack pop (typed).
-        chunk_cptr pop_unsafe() noexcept;
-        bool pop_bool_unsafe() noexcept;
-        bool pop_signed32_unsafe(int32_t& out_value) noexcept;
+    chunk_cptr pop_unsafe() noexcept;
+    bool pop_bool_unsafe() noexcept;
+    bool pop_signed32_unsafe(int32_t& out_value) noexcept;
+
+    /// wrappers
     bool pop_signed32(int32_t& out_value) noexcept;
     bool pop_binary32(int32_t& left, int32_t& right) noexcept;
     bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) noexcept;
@@ -133,14 +137,15 @@ protected:
     bool pop_count(chunk_cptrs& data, size_t count) noexcept;
 
     /// Primary stack peek (typed).
-        chunk_cptr peek_unsafe(size_t index=zero) const noexcept;
-        bool peek_bool_unsafe() const noexcept;
-        ////bool peek_signed_unsafe<>(int32_t& out_value) const noexcept;
+    chunk_cptr peek_unsafe(size_t index=zero) const noexcept;
+    bool peek_bool_unsafe() const noexcept;
+    ////bool peek_signed_unsafe<Out>(Out& out_value) const noexcept;
+
+    /// wrappers
     bool peek_signed32_unsafe(int32_t& out_value) const noexcept;
     bool peek_signed40_unsafe(int64_t& out_value) const noexcept;
     bool peek_unsigned32(uint32_t& out_value) const noexcept;
     bool peek_unsigned39(uint64_t& out_value) const noexcept;
-    bool peek_bool() const noexcept;
 
     /// Primary stack non-const (untyped).
     void drop_unsafe() noexcept;
