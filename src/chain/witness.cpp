@@ -280,26 +280,8 @@ size_t witness::serialized_size(bool prefix) const noexcept
 // Utilities.
 // ----------------------------------------------------------------------------
 
-// static
-bool witness::is_push_size(const chunk_cptrs& stack) noexcept
-{
-    const auto push_size = [](const chunk_cptr& element) noexcept
-    {
-        return element->size() <= max_push_data_size;
-    };
-
-    return std::all_of(stack.begin(), stack.end(), push_size);
-}
-
-// static
-// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-bool witness::is_reserved_pattern(const chunk_cptrs& stack) noexcept
-{
-    return stack.size() == one && stack.front()->size() == hash_size;
-}
-
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operations to_pay_key_hash(data_chunk&& program) noexcept
+constexpr operations to_pay_key_hash(data_chunk&& program) noexcept
 {
     BC_ASSERT(program.size() == short_hash_size);
 

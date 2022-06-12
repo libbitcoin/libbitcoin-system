@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <boost/json.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -97,8 +98,22 @@ public:
     // Utilities.
     // ------------------------------------------------------------------------
 
-    static bool is_push_size(const chunk_cptrs& stack) noexcept;
-    static bool is_reserved_pattern(const chunk_cptrs& stack) noexcept;
+    static constexpr bool is_push_size(const chunk_cptrs& stack) noexcept
+    {
+        constexpr auto push_size = [](const chunk_cptr& element) noexcept
+        {
+            return element->size() <= max_push_data_size;
+        };
+
+        return std::all_of(stack.begin(), stack.end(), push_size);
+    }
+
+    // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
+    static constexpr bool is_reserved_pattern(
+        const chunk_cptrs& stack) noexcept
+    {
+        return stack.size() == one && stack.front()->size() == hash_size;
+    }
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const noexcept;
