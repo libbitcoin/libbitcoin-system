@@ -38,38 +38,38 @@ namespace system {
 /// Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true, if_integer<Base> = true, if_integer<Value> = true>
-inline Exponent ceilinged_log(Base base, Value value) noexcept;
+constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
 
 /// Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
 /// Returns 0 for undefined (value < 1).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integer<Value> = true>
-inline Exponent ceilinged_log2(Value value) noexcept;
+constexpr Exponent ceilinged_log2(Value value) noexcept;
 
 /// Obtain the floored (rounded down) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true, if_integer<Base> = true,
     if_integer<Value> = true>
-inline Exponent floored_log(Base base, Value value) noexcept;
+constexpr Exponent floored_log(Base base, Value value) noexcept;
 
 /// Obtain the floored (rounded down) integer base 2 logarithm of given value.
 /// Returns 0 for undefined (value < 1).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integer<Value> = true>
-inline Exponent floored_log2(Value value) noexcept;
+constexpr Exponent floored_log2(Value value) noexcept;
 
 /// Obtain the integer power of given base for given exponent.
 /// Returns zero if both operands are zero (undefined).
 template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true, if_integer<Base> = true,
     if_integer<Exponent> = true>
-inline Value power(Base base, Exponent exponent) noexcept;
+constexpr Value power(Base base, Exponent exponent) noexcept;
 
 /// Obtain the integer base 2 power for given exponent.
 template <typename Value = size_t, typename Exponent,
     if_integer<Value> = true, if_integer<Exponent> = true>
-inline Value power2(Exponent exponent) noexcept;
+constexpr Value power2(Exponent exponent) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

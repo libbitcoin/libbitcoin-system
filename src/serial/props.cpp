@@ -85,7 +85,7 @@ props props::from_number(int64_t number) noexcept
 {
     // datatracker.ietf.org/doc/html/rfc7159#section-6
     // limit to [-(2**53) + 1, (2**53) - 1] for interoperability.
-    static const auto power = power2<int64_t>(53);
+    constexpr auto power = power2<int64_t>(53);
 
     if (number <= -add1(power) || number >= sub1(power))
         return { type::invalid_ };

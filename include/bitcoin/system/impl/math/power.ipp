@@ -31,13 +31,10 @@ namespace system {
 
 // TODO: test all with uintx.
 
-// C++14: All functions below can be made constexpr.
-// C++11: no local variables, loops, or multiple returns.
-
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent, typename Base, typename Value,
     if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
-inline Exponent ceilinged_log(Base base, Value value) noexcept
+constexpr Exponent ceilinged_log(Base base, Value value) noexcept
 {
     if (base < 2 || value < 1)
         return 0;
@@ -49,7 +46,7 @@ inline Exponent ceilinged_log(Base base, Value value) noexcept
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_integer<Exponent>, if_integer<Value>>
-inline Exponent ceilinged_log2(Value value) noexcept
+constexpr Exponent ceilinged_log2(Value value) noexcept
 {
     if (value < 1)
         return 0;
@@ -61,7 +58,7 @@ inline Exponent ceilinged_log2(Value value) noexcept
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent, typename Base, typename Value,
     if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
-inline Exponent floored_log(Base base, Value value) noexcept
+constexpr Exponent floored_log(Base base, Value value) noexcept
 {
     if (base < 2 || value < 1)
         return 0;
@@ -74,7 +71,7 @@ inline Exponent floored_log(Base base, Value value) noexcept
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_integer<Exponent>, if_integer<Value>>
-inline Exponent floored_log2(Value value) noexcept
+constexpr Exponent floored_log2(Value value) noexcept
 {
     if (value < 1)
         return 0;
@@ -88,7 +85,7 @@ inline Exponent floored_log2(Value value) noexcept
 // Overflow is allowed behavior as this mimics a mathematical operator.
 template <typename Value, typename Base, typename Exponent,
     if_integer<Value>, if_integer<Base>, if_integer<Exponent>>
-inline Value power(Base base, Exponent exponent) noexcept
+constexpr Value power(Base base, Exponent exponent) noexcept
 {
     if (is_zero(base))
         return 0;
@@ -116,7 +113,7 @@ inline Value power(Base base, Exponent exponent) noexcept
 // Overflow is allowed behavior as this mimics a mathematical operator.
 template <typename Value, typename Exponent,
     if_integer<Value>, if_integer<Exponent>>
-inline Value power2(Exponent exponent) noexcept
+constexpr Value power2(Exponent exponent) noexcept
 {
     if (is_zero(exponent))
         return 1;

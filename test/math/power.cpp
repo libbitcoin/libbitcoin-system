@@ -615,6 +615,7 @@ BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__power_2__identity)
 }
 
 // TODO: test power return types (default to size_t).
+// TODO: change to static_assert (now constexpr).
 
 // power2
 
