@@ -207,14 +207,14 @@ void program::push(chunk_cptr&& datum) noexcept
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(variant{ std::move(datum) });
+    primary_->emplace_back(std::move(datum));
     BC_POP_WARNING()
 }
 
 void program::push(const chunk_cptr& datum) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(variant{ datum });
+    primary_->emplace_back(datum);
     BC_POP_WARNING()
 }
 
@@ -226,14 +226,14 @@ void program::push_chunk(data_chunk&& datum) noexcept
 void program::push_bool(bool value) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(variant{ value });
+    primary_->emplace_back(value);
     BC_POP_WARNING()
 }
 
 void program::push_signed64(int64_t value) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(variant{ value });
+    primary_->emplace_back(value);
     BC_POP_WARNING()
 }
 
