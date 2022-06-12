@@ -44,8 +44,7 @@ using namespace system::chain;
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
 
-// TODO: make is_push_size and this conxtexpr.
-inline bool is_valid_witness_stack(const chunk_cptrs& stack) noexcept
+constexpr bool is_valid_witness_stack(const chunk_cptrs& stack) noexcept
 {
     return witness::is_push_size(stack);
 }
