@@ -71,7 +71,7 @@ inline program::variant_stack_ptr create_stack(
     std::transform(stack.begin(), stack.end(), out->begin(),
         [](const chunk_cptr& ptr)
         {
-            // Weak reference to witness stack element.
+            // Strong reference to witness stack element.
             return program::variant{ ptr };
         });
 
@@ -197,12 +197,11 @@ void program::push_bool(bool value) noexcept
         push_chunk({});
 }
 
+// TODO: push_number(possible_narrow_sign_cast<int64_t>(value)).
 void program::push_length(size_t value) noexcept
 {
     // This is guarded by stack size and push data limits.
     BC_ASSERT_MSG(value <= max_int64, "integer overflow");
-
-    // TODO: push_number(possible_narrow_sign_cast<int64_t>(value)).
     push_numeric(possible_narrow_sign_cast<int64_t>(value));
 }
 
@@ -384,7 +383,6 @@ bool program::peek_number40_unsafe(number& out_value) const noexcept
 void program::drop_unsafe() noexcept
 {
     BC_ASSERT(!is_empty());
-
     primary_->pop_back();
 }
 
@@ -416,8 +414,8 @@ bool program::is_empty() const noexcept
 bool program::is_overflow() const noexcept
 {
     // bit.ly/2cowHlP
-    // Addition is safe due to script size constraints.
-    return size() + alternate_.size() > max_stack_size;
+    // Addition is safe due to stack size constraint.
+    return (size() + alternate_.size()) > max_stack_size;
 }
 
 bool program::is_clean() const noexcept
@@ -455,13 +453,13 @@ chunk_cptr program::pop_alternate_unsafe() noexcept
 
 // Conditional stack.
 // ----------------------------------------------------------------------------
-// Condition count additions are guarded by script size limit.
 
 void program::begin_if(bool value) noexcept
 {
-    // Optimize is_succeess().
-    negative_condition_count_ += (value ? 0 : 1);
+    // Addition is safe due to script size constraint.
+    BC_ASSERT(value || !overflows(negative_condition_count_, one));
 
+    negative_condition_count_ += (value ? 0 : 1);
     condition_.push_back(value);
 }
 
@@ -474,18 +472,21 @@ void program::begin_if(bool value) noexcept
 // ****************************************************************************
 void program::else_if_unsafe() noexcept
 {
+    // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
 
-    // Optimize is_succeess().
+    // Addition is safe due to script size constraint.
+    BC_ASSERT(condition_.back() || !overflows(negative_condition_count_, one));
+
     negative_condition_count_ += (condition_.back() ? 1 : -1);
     condition_.back() = !condition_.back();
 }
 
 void program::end_if_unsafe() noexcept
 {
+    // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
 
-    // Optimize is_succeess().
     negative_condition_count_ += (condition_.back() ? 0 : -1);
     condition_.pop_back();
 }
@@ -499,7 +500,6 @@ bool program::is_succeess() const noexcept
 {
     ////const auto is_true = [](bool value) noexcept { return value; };
     ////return std::all_of(condition_.begin(), condition_.end(), is_true);
-
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
     return is_zero(negative_condition_count_);
@@ -521,7 +521,7 @@ bool program::if_(const operation& op) const noexcept
 // later revised to make this explicit, by use of a prefix increment against a
 // limit of 201.
 // ****************************************************************************
-constexpr bool operation_overflow(size_t count) noexcept
+constexpr bool operation_count_exceeded(size_t count) noexcept
 {
     return count > max_counted_ops;
 }
@@ -529,7 +529,7 @@ constexpr bool operation_overflow(size_t count) noexcept
 bool program::ops_increment(const operation& op) noexcept
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(sub1(max_size_t) >= operation_count_);
+    BC_ASSERT(!overflows(operation_count_, one));
 
     if (operation::is_counted(op.code()))
         ++operation_count_;
@@ -540,10 +540,10 @@ bool program::ops_increment(const operation& op) noexcept
 bool program::ops_increment(size_t public_keys) noexcept
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(max_size_t - public_keys >= operation_count_);
+    BC_ASSERT(!overflows(operation_count_, public_keys));
 
     operation_count_ += public_keys;
-    return !operation_overflow(operation_count_);
+    return !operation_count_exceeded(operation_count_);
 }
 
 // Signature validation helpers.

@@ -210,7 +210,7 @@ private:
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;
 
-    // Zero-based prinary stack index.
+    // Zero-based primary stack index.
     // ------------------------------------------------------------------------
 
     inline chunk_stack::iterator it_unsafe(size_t index) noexcept
