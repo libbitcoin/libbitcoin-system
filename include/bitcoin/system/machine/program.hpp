@@ -45,14 +45,9 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
-    typedef chunk_cptrs chunk_stack;
-    typedef std::shared_ptr<chunk_stack> chunk_stack_ptr;
-
-    // TODO: replace chunk_stack with variant_stack.
     typedef std::variant<bool, int64_t, chunk_cptr> variant;
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
-
 
     /// Input script run (default/empty stack).
     program(const chain::transaction& transaction, const input_iterator& input,
@@ -67,7 +62,7 @@ public:
     /// Witness script run (witness-initialized stack).
     program(const chain::transaction& transaction, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks,
-        chain::script_version version, const chunk_stack_ptr& stack) noexcept;
+        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
 
     /// Defaults.
     program(program&&) = delete;
@@ -85,7 +80,8 @@ public:
 protected:
     program(const chain::transaction& tx, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks, uint64_t value,
-        chain::script_version version, const chunk_stack_ptr& stack) noexcept;
+        chain::script_version version, const variant_stack_ptr& stack,
+        bool valid_stack) noexcept;
 
     /// Constants.
     /// -----------------------------------------------------------------------
@@ -142,7 +138,7 @@ protected:
     bool pop_ternary32(number& upper, number& lower, number& value) noexcept;
 
     /// Primary stack peek (typed).
-    const chunk_cptr& peek_unsafe(size_t index) const noexcept;
+    chunk_cptr peek_unsafe(size_t index) const noexcept;
     bool peek_bool() const noexcept;
     bool peek_bool_unsafe() const noexcept;
     bool peek_unsigned32(uint32_t& out_value) const noexcept;
@@ -213,23 +209,50 @@ private:
     // Zero-based primary stack index.
     // ------------------------------------------------------------------------
 
-    inline chunk_stack::iterator it_unsafe(size_t index) noexcept
+    inline variant_stack::iterator it_unsafe(size_t index) noexcept
     {
         BC_ASSERT(index < size());
         return std::prev(primary_->end(), add1(index));
     }
 
-    inline chunk_stack::const_iterator const_it_unsafe(
+    inline variant_stack::const_iterator const_it_unsafe(
         size_t index) const noexcept
     {
         BC_ASSERT(index < size());
         return std::prev(primary_->end(), add1(index));
     }
 
-    inline const chunk_cptr& top_unsafe() const noexcept
+    inline chunk_cptr top_unsafe() const noexcept
     {
         BC_ASSERT(!is_empty());
-        return primary_->back();
+
+        chunk_cptr item;
+
+        // Only one statement remains, others discarded by compiler.
+        const auto visitor = [&](const auto& vary) noexcept
+        {
+            using Vary = std::decay_t<decltype(vary)>;
+
+            if constexpr (if_same<Vary, bool>::value)
+            {
+                item = to_shared(number{ to_int(vary) }.data());
+            }
+            else if constexpr (if_same<Vary, int64_t>::value)
+            {
+                item = to_shared(number{ vary }.data());
+            }
+            else if constexpr (if_same<Vary, chunk_cptr>::value)
+            {
+                item = vary;
+            }
+            else
+            {
+                static_assert(false, "non-exhaustive visitor!");
+            }
+        };
+
+        std::visit(visitor, primary_->back());
+        return item;
     }
 
     // ------------------------------------------------------------------------
@@ -246,10 +269,11 @@ private:
     const uint32_t forks_;
     const uint64_t value_;
     const chain::script_version version_;
+    const bool valid_stack_;
 
     // Three stacks.
-    chunk_stack_ptr primary_; // variant_stack_ptr
-    chunk_stack alternate_{}; // variant_stack
+    variant_stack_ptr primary_; // variant_stack_ptr
+    chunk_cptrs alternate_{}; // variant_stack
     bool_stack condition_{};
 
     // Accumulator.

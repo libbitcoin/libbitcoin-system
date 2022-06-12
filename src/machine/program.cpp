@@ -22,7 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <type_traits>
 #include <utility>
+#include <variant>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -42,28 +44,33 @@ using namespace system::chain;
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
 
-inline program::chunk_stack_ptr default_stack() noexcept
+// TODO: make is_push_size and this conxtexpr.
+inline bool is_valid_witness_stack(const chunk_cptrs& stack) noexcept
+{
+    return witness::is_push_size(stack);
+}
+
+inline program::variant_stack_ptr default_stack() noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return std::make_shared<chunk_cptrs>();
+    return std::make_shared<program::variant_stack>();
     BC_POP_WARNING()
 }
 
-inline program::chunk_stack_ptr copy_stack(
-    const program::chunk_stack& stack) noexcept
+inline program::variant_stack_ptr copy_stack(
+    const program::variant_stack& stack) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return std::make_shared<chunk_cptrs>(chunk_cptrs{ stack });
+    return std::make_shared<program::variant_stack>(
+        program::variant_stack{ stack });
     BC_POP_WARNING()
 }
 
-// TODO: use to create variant_stack from chunk_stack.
+// TODO: no_fill_allocator.
+// TODO: C++17: Parallel policy for std::transform.
 inline program::variant_stack_ptr create_stack(
-    const program::chunk_stack& stack) noexcept
+    const chunk_cptrs& stack) noexcept
 {
-    // TODO: C++17: Parallel policy for std::transform.
-    // TODO: no_fill_allocator.
-
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     auto out = std::make_shared<program::variant_stack>(stack.size());
     BC_POP_WARNING()
@@ -71,7 +78,6 @@ inline program::variant_stack_ptr create_stack(
     std::transform(stack.begin(), stack.end(), out->begin(),
         [](const chunk_cptr& ptr)
         {
-            // Strong reference to witness stack element.
             return program::variant{ ptr };
         });
 
@@ -85,7 +91,7 @@ inline program::variant_stack_ptr create_stack(
 program::program(const chain::transaction& tx, const input_iterator& input,
      uint32_t forks) noexcept
   : program(tx, input, (*input)->script_ptr(), forks, unused_value,
-      unused_version, default_stack())
+      unused_version, default_stack(), true)
 {
 }
 
@@ -97,6 +103,7 @@ program::program(const program& other, const script::cptr& script) noexcept
     forks_(other.forks_),
     value_(other.value_),
     version_(other.version_),
+    valid_stack_(true),
     primary_(copy_stack(*other.primary_))
 {
 }
@@ -109,6 +116,7 @@ program::program(program&& other, const script::cptr& script) noexcept
     forks_(other.forks_),
     value_(other.value_),
     version_(other.version_),
+    valid_stack_(true),
     primary_(std::move(other.primary_))
 {
 }
@@ -116,22 +124,24 @@ program::program(program&& other, const script::cptr& script) noexcept
 // Witness script run (witness-initialized stack).
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_stack_ptr& stack) noexcept
+    const chunk_cptrs_ptr& stack) noexcept
   : program(tx, input, script, forks, (*input)->prevout->value(), version,
-      stack)
+      create_stack(*stack), is_valid_witness_stack(*stack))
 {
 }
 
 // protected
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, uint64_t value,
-    script_version version, const chunk_stack_ptr& stack) noexcept
+    script_version version, const variant_stack_ptr& stack,
+    bool valid_stack) noexcept
   : transaction_(tx),
     input_(input),
     script_(script),
     forks_(forks),
     value_(value),
     version_(version),
+    valid_stack_(valid_stack),
     primary_(stack)
 {
 }
@@ -139,6 +149,8 @@ program::program(const chain::transaction& tx, const input_iterator& input,
 // Public.
 // ----------------------------------------------------------------------------
 
+// TODO: only perform is_push_size check on witness initialized stack.
+// TODO: others are either empty or presumed push_size from prevout script run.
 bool program::is_valid() const noexcept
 {
     // TODO: nops rule must first be enabled in tests and config.
@@ -148,8 +160,8 @@ bool program::is_valid() const noexcept
 
     // nops_rule establishes script size limit.
     // bip_141 introduces an initialized stack, so must validate.
-    return (!nops_rule || !script_->is_oversized()) &&
-        (!bip141 || chain::witness::is_push_size(*primary_));
+    return !(nops_rule && script_->is_oversized()) &&
+        !(bip141 && !valid_stack_);
 }
 
 bool program::is_true(bool clean_stack) const noexcept
@@ -168,7 +180,7 @@ BC_POP_WARNING()
     // TODO: should be able to push the const data_chunk*.
     // TODO: variant_stack_push(std::move(chunk_cptr)).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(std::move(datum));
+    primary_->push_back(variant{ std::move(datum) });
     BC_POP_WARNING()
 }
 
@@ -177,7 +189,7 @@ void program::push(const chunk_cptr& datum) noexcept
     // TODO: should be able to push the const data_chunk*.
     // TODO: variant_stack_push(chunk_cptr).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->push_back(datum);
+    primary_->push_back(variant{ datum });
     BC_POP_WARNING()
 }
 
@@ -222,8 +234,9 @@ void program::push_number(const number& value) noexcept
 
 chunk_cptr program::pop_unsafe() noexcept
 {
-    // This must be a pointer copy, as the pointer is about to be destroyed.
-    const chunk_cptr value{ top_unsafe() };
+    // Variant returns pointer instance, so is move assigned.
+    //// This must be a pointer copy, as the pointer is about to be destroyed.
+    const auto value = top_unsafe();
     drop_unsafe();
     return value;
 }
@@ -311,9 +324,53 @@ bool program::pop_ternary32(number& upper, number& lower,
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
-const chunk_cptr& program::peek_unsafe(size_t index) const noexcept
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+
+////// Explicit deduction guide (not needed as of C++20).
+////template<class... Ts>
+////overloaded(Ts...)->overloaded<Ts...>;
+////
+////const overloaded visitor
+////{
+////    [&](bool vary)
+////    {
+////        item = to_shared(number{ to_int(vary) }.data());
+////    },
+////    [&](int64_t vary)
+////    {
+////        item = to_shared(number{ vary }.data());
+////    },
+////    [&](const chunk_cptr& vary)
+////    {
+////        item = vary;
+////    }
+////};
+////std::visit(visitor, *const_it_unsafe(index));
+
+chunk_cptr program::peek_unsafe(size_t index) const noexcept
 {
-    return *const_it_unsafe(index);
+    chunk_cptr item;
+
+    // Only one overload is bound, others discarded by compiler.
+    const overloaded visitor
+    {
+        [&](bool vary) noexcept
+        {
+            item = to_shared(number{ to_int(vary) }.data());
+        },
+        [&](int64_t vary) noexcept
+        {
+            item = to_shared(number{ vary }.data());
+        },
+        [&](const chunk_cptr& vary) noexcept
+        {
+            item = vary;
+        }
+    };
+
+    std::visit(visitor, *const_it_unsafe(index));
+    return item;
 }
 
 // TODO: variant - bool, to_bool(int64_t), number(data).
