@@ -68,6 +68,32 @@ static_assert(absolute(max_int32) == max_int32, "");
 static_assert(absolute(min_int32 + 1) == max_int32, "");
 static_assert(absolute(max_uint32) == max_uint32, "");
 
+// negate
+static_assert(negate<int8_t> (int8_t{  0 })  ==   0, "");
+static_assert(negate<int8_t> (int8_t{ -0 })  ==   0, "");
+static_assert(negate<int8_t> (int8_t{  42 }) == -42, "");
+static_assert(negate<int8_t> (int8_t{ -42 }) ==  42, "");
+static_assert(negate<int16_t>(int8_t{  42 }) == -42, "");
+static_assert(negate<int16_t>(int8_t{ -42 }) ==  42, "");
+static_assert(negate<int32_t>(int8_t{  42 }) == -42, "");
+static_assert(negate<int32_t>(int8_t{ -42 }) ==  42, "");
+static_assert(negate<int64_t>(int8_t{  42 }) == -42, "");
+static_assert(negate<int64_t>(int8_t{ -42 }) ==  42, "");
+static_assert(negate<int16_t>(max_int8) == -max_int8, "");
+static_assert(negate<int32_t>(max_int16) == -max_int16, "");
+static_assert(negate<int64_t>(max_int32) == -max_int32, "");
+static_assert(negate<int64_t>(max_int64) == -max_int64, "");
+
+// This case relies on native int domain promotion.
+static_assert(negate<int16_t>(min_int8) == -min_int8, "");
+
+// This case relies on native int domain promotion.
+static_assert(negate<int32_t>(min_int16) == -min_int16, "");
+
+// This one case requires negate's promotion before negation (bitcoin).
+static_assert(negate<int64_t>(min_int32) != -min_int32, "");
+static_assert(negate<int64_t>(min_int32) == -int64_t{ min_int32 }, "");
+
 // is_negative
 static_assert(is_negative(min_int32), "");
 static_assert(is_negative(-1), "");

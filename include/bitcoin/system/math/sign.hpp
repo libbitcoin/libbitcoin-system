@@ -48,6 +48,13 @@ template <typename Integer, typename Absolute = Integer,
     if_unsigned_integer<Integer> = true>
 constexpr Absolute absolute(Integer value) noexcept;
 
+/// Negate the value of the signed integer in the result domain.
+template <typename Result, typename Integer,
+    if_signed_integer<Result> = true,
+    if_signed_integer<Integer> = true,
+    if_not_lesser_width<Result, Integer> = true>
+constexpr Result negate(Integer value) noexcept;
+
 /// Determine whether the integer is negative.
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr bool is_negative(Integer value) noexcept;

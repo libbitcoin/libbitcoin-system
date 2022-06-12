@@ -50,6 +50,13 @@ constexpr Absolute absolute(Integer value) noexcept
 {
     return value;
 }
+template <typename Result, typename Integer, if_signed_integer<Result>,
+    if_signed_integer<Integer>, if_not_lesser_width<Result, Integer>>
+constexpr Result negate(Integer value) noexcept
+{
+    // Wide cast to result domain, narrow cast in case of negate promotion.
+    return possible_narrow_cast<Result>(-possible_wide_cast<Result>(value));
+}
 
 template <typename Integer, if_signed_integer<Integer>>
 constexpr bool is_negative(Integer value) noexcept
