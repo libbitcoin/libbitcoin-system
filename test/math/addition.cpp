@@ -29,58 +29,60 @@ constexpr  int32_t zer_int32 = 0;
 constexpr  int32_t neg_int32 = -42;
 
 // add
-// Narrowing is no longer allowed, though add may still overflow.
 static_assert(add<int64_t>(min_uint32, min_uint32) == (int64_t)min_uint32 + (int64_t)min_uint32, "");
 static_assert(add<int32_t>(min_uint32, max_uint32) == (int32_t)min_uint32 + (int32_t)max_uint32, "");
-////static_assert(add<int16_t>(max_uint32, min_uint32) == (int16_t)max_uint32 + (int16_t)min_uint32, "");
-////static_assert(add< int8_t>(max_uint32, max_uint32) == ( int8_t)max_uint32 + (int8_t)max_uint32, "");
 static_assert(add<int64_t>(pos_uint32, pos_uint32) == (int64_t)pos_uint32 + (int64_t)pos_uint32, "");
 static_assert(add<int32_t>(pos_uint32, max_uint32) == (int32_t)pos_uint32 + (int32_t)max_uint32, "");
-////static_assert(add<int16_t>(max_uint32, pos_uint32) == (int16_t)max_uint32 + (int16_t)pos_uint32, "");
 static_assert(add<int64_t>(pos_uint32, min_uint32) == (int64_t)pos_uint32 + (int64_t)min_uint32, "");
 static_assert(add<int32_t>(min_uint32, pos_uint32) == (int32_t)min_uint32 + (int32_t)pos_uint32, "");
 static_assert(add<int64_t>(zer_int32, zer_int32) == (int64_t)zer_int32 + (int64_t)zer_int32, "");
 static_assert(add<int32_t>(zer_int32, max_int32) == (int32_t)zer_int32 + (int32_t)max_int32, "");
-////static_assert(add<int16_t>(max_int32, zer_int32) == (int16_t)max_int32 + (int16_t)zer_int32, "");
-////static_assert(add< int8_t>(max_int32, max_int32) == ( int8_t)max_int32 + (int8_t)max_int32, "");
 static_assert(add<int64_t>(neg_int32, neg_int32) == (int64_t)neg_int32 + (int64_t)neg_int32, "");
 static_assert(add<int32_t>(neg_int32, max_int32) == (int32_t)neg_int32 + (int32_t)max_int32, "");
-////static_assert(add<int16_t>(max_int32, neg_int32) == (int16_t)max_int32 + (int16_t)neg_int32, "");
 static_assert(add<int64_t>(neg_int32, min_int32) == (int64_t)neg_int32 + (int64_t)min_int32, "");
-////static_assert(add< int32_t>(min_int32, neg_int32) == (int32_t)min_int32 + (int32_t)neg_int32, "");
 static_assert(add<int64_t>(pos_int32, neg_int32) == (int64_t)pos_int32 + (int64_t)neg_int32, "");
 static_assert(add<int32_t>(neg_int32, pos_int32) == (int32_t)neg_int32 + (int32_t)pos_int32, "");
-////static_assert(add<int16_t>(pos_int32, pos_int32) == (int16_t)pos_int32 + (int16_t)pos_int32, "");
 static_assert(add<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 + (int64_t)min_int32, "");
 static_assert(add<int32_t>(min_int32, pos_int32) == (int32_t)min_int32 + (int32_t)pos_int32, "");
 static_assert(std::is_same<decltype(add<uint64_t>(0, 0)), uint64_t>::value, "");
 
 // subtract
-// Narrowing is no longer allowed, though subtract may still underflow.
 static_assert(subtract<int64_t>(min_uint32, min_uint32) == (int64_t)min_uint32 - (int64_t)min_uint32, "");
 static_assert(subtract<int32_t>(min_uint32, max_uint32) == (int32_t)min_uint32 - (int32_t)max_uint32, "");
-////static_assertstatic_assert(subtract<int16_t>(max_uint32, min_uint32) == (int16_t)max_uint32 - (int16_t)min_uint32, "");
-////static_assertstatic_assert(subtract< int8_t>(max_uint32, max_uint32) == ( int8_t)max_uint32 - (int8_t)max_uint32, "");
 static_assert(subtract<int64_t>(pos_uint32, pos_uint32) == (int64_t)pos_uint32 - (int64_t)pos_uint32, "");
 static_assert(subtract<int32_t>(pos_uint32, max_uint32) == (int32_t)pos_uint32 - (int32_t)max_uint32, "");
-////static_assertstatic_assert(subtract<int16_t>(max_uint32, pos_uint32) == (int16_t)max_uint32 - (int16_t)pos_uint32, "");
 static_assert(subtract<int64_t>(pos_uint32, min_uint32) == (int64_t)pos_uint32 - (int64_t)min_uint32, "");
 static_assert(subtract<int32_t>(min_uint32, pos_uint32) == (int32_t)min_uint32 - (int32_t)pos_uint32, "");
 static_assert(subtract<int64_t>(zer_int32, zer_int32) == (int64_t)zer_int32 - (int64_t)zer_int32, "");
 static_assert(subtract<int32_t>(zer_int32, max_int32) == (int32_t)zer_int32 - (int32_t)max_int32, "");
-////static_assertstatic_assert(subtract<int16_t>(max_int32, zer_int32) == (int16_t)max_int32 - (int16_t)zer_int32, "");
-////static_assertstatic_assert(subtract< int8_t>(max_int32, max_int32) == ( int8_t)max_int32 - (int8_t)max_int32, "");
 static_assert(subtract<int64_t>(neg_int32, neg_int32) == (int64_t)neg_int32 - (int64_t)neg_int32, "");
-////static_assert(subtract< int32_t>(neg_int32, max_int32) == (int32_t)neg_int32 - (int32_t)max_int32, "");
-////static_assertstatic_assert(subtract<int16_t>(max_int32, neg_int32) == (int16_t)max_int32 - (int16_t)neg_int32, "");
 static_assert(subtract<int64_t>(neg_int32, min_int32) == (int64_t)neg_int32 - (int64_t)min_int32, "");
 static_assert(subtract<int32_t>(min_int32, neg_int32) == (int32_t)min_int32 - (int32_t)neg_int32, "");
 static_assert(subtract<int64_t>(pos_int32, neg_int32) == (int64_t)pos_int32 - (int64_t)neg_int32, "");
 static_assert(subtract<int32_t>(neg_int32, pos_int32) == (int32_t)neg_int32 - (int32_t)pos_int32, "");
-////static_assertstatic_assert(subtract<int16_t>(pos_int32, pos_int32) == (int16_t)pos_int32 - (int16_t)pos_int32, "");
 static_assert(subtract<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 - (int64_t)min_int32, "");
-////static_assert(subtract<int32_t>(min_int32, pos_int32) == (int32_t)min_int32 - (int32_t)pos_int32, "");
 static_assert(std::is_same<decltype(subtract<uint64_t>(0, 0)), uint64_t>::value, "");
+
+// increment
+static_assert(increment<int64_t>(max_int32) == (int64_t)max_int32 + int64_t{ 1 }, "");
+static_assert(increment<int64_t>(min_uint32) == (int64_t)min_uint32 + int64_t{ 1 }, "");
+static_assert(increment<int64_t>(pos_uint32) == (int64_t)pos_uint32 + int64_t{ 1 }, "");
+static_assert(increment<int64_t>(zer_int32) == (int64_t)zer_int32 + int64_t{ 1 }, "");
+static_assert(increment<int64_t>(neg_int32) == (int64_t)neg_int32 + int64_t{ 1 }, "");
+static_assert(increment<int64_t>(pos_int32) == (int64_t)pos_int32 + int64_t{ 1 }, "");
+static_assert(increment<int32_t>(neg_int32) == (int32_t)neg_int32 + int32_t{ 1 }, "");
+static_assert(increment<int32_t>(min_int32) == (int32_t)min_int32 + int32_t{ 1 }, "");
+static_assert(std::is_same<decltype(increment<uint64_t>(0)), uint64_t>::value, "");
+
+// decrement
+static_assert(decrement<int64_t>(min_int32) == (int64_t)min_int32 - int64_t{ 1 }, "");
+static_assert(decrement<int64_t>(min_uint32) == (int64_t)min_uint32 - int64_t{ 1 }, "");
+static_assert(decrement<int64_t>(pos_uint32) == (int64_t)pos_uint32 - int64_t{ 1 }, "");
+static_assert(decrement<int64_t>(zer_int32) == (int64_t)zer_int32 - int64_t{ 1 }, "");
+static_assert(decrement<int64_t>(neg_int32) == (int64_t)neg_int32 - int64_t{ 1 }, "");
+static_assert(decrement<int64_t>(pos_int32) == (int64_t)pos_int32 - int64_t{ 1 }, "");
+static_assert(decrement<int32_t>(neg_int32) == (int32_t)neg_int32 - int32_t{ 1 }, "");
+static_assert(std::is_same<decltype(decrement<uint64_t>(0)), uint64_t>::value, "");
 
 constexpr uint16_t unsigned_minimum = 0;
 constexpr uint16_t unsigned_maximum = max_uint16;
