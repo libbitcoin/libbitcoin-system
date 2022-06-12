@@ -39,6 +39,8 @@ constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
 constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
 constexpr int16_t min_int16 = std::numeric_limits<int16_t>::min();
 constexpr int16_t max_int16 = std::numeric_limits<int16_t>::max();
+constexpr int8_t min_int8 = std::numeric_limits<int8_t>::min();
+constexpr int8_t max_int8 = std::numeric_limits<int8_t>::max();
 
 /// Unsigned.
 constexpr size_t max_size_t = std::numeric_limits<size_t>::max();
