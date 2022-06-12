@@ -68,7 +68,7 @@ op_error_t interpreter::op_push_no_size(const operation& op) noexcept
 
 op_error_t interpreter::push_negative_1() noexcept
 {
-    push_number(-1);
+    push_signed64(-1);
     return error::op_success;
 }
 
@@ -76,7 +76,7 @@ op_error_t interpreter::op_push_positive(uint8_t value) noexcept
 {
     BC_ASSERT_MSG(value >= 1 && value <= 16, "invalid op_push_positive");
 
-    push_number(value);
+    push_signed64(value);
     return error::op_success;
 }
 
@@ -529,23 +529,21 @@ op_error_t interpreter::op_equal_verify() noexcept
 
 op_error_t interpreter::op_add1() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_add1;
 
-    number += 1;
-    push_number(number.int64());
+    push_signed64(increment<int64_t>(number));
     return error::op_success;
 }
 
 op_error_t interpreter::op_sub1() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_sub1;
 
-    number -= 1;
-    push_number(number.int64());
+    push_signed64(decrement<int64_t>(number));
     return error::op_success;
 }
 
@@ -567,65 +565,61 @@ op_error_t interpreter::op_div2() const noexcept
 
 op_error_t interpreter::op_negate() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_negate;
 
-    number = -number;
-    push_number(number.int64());
+    push_signed64(negate<int64_t>(number));
     return error::op_success;
 }
 
 op_error_t interpreter::op_abs() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_abs;
 
-    if (number < 0)
-        number = -number;
-
-    push_number(number.int64());
+    push_signed64(absolute(number));
     return error::op_success;
 }
 
 op_error_t interpreter::op_not() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_not;
 
-    push_bool(!number.is_true());
+    push_bool(!to_bool(number));
     return error::op_success;
 }
 
 op_error_t interpreter::op_nonzero() noexcept
 {
-    number number;
-    if (!pop_number32(number))
+    int32_t number;
+    if (!pop_signed32(number))
         return error::op_nonzero;
 
-    push_bool(number.is_true());
+    push_bool(is_nonzero(number));
     return error::op_success;
 }
 
 op_error_t interpreter::op_add() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_add;
 
-    push_number((left + right).int64());
+    push_signed64(add<int64_t>(left, right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_sub() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_sub;
 
-    push_number((left - right).int64());
+    push_signed64(subtract<int64_t>(left, right));
     return error::op_success;
 }
 
@@ -671,27 +665,27 @@ op_error_t interpreter::op_rshift() const noexcept
 
 op_error_t interpreter::op_bool_and() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_bool_and;
 
-    push_bool(left.is_true() && right.is_true());
+    push_bool(to_bool(left) && to_bool(right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_bool_or() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_bool_or;
 
-    push_bool(left.is_true() || right.is_true());
+    push_bool(to_bool(left) || to_bool(right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_num_equal() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_num_equal;
 
@@ -701,7 +695,7 @@ op_error_t interpreter::op_num_equal() noexcept
 
 op_error_t interpreter::op_num_equal_verify() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_num_equal_verify1;
 
@@ -710,7 +704,7 @@ op_error_t interpreter::op_num_equal_verify() noexcept
 
 op_error_t interpreter::op_num_not_equal() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_num_not_equal;
 
@@ -720,7 +714,7 @@ op_error_t interpreter::op_num_not_equal() noexcept
 
 op_error_t interpreter::op_less_than() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_less_than;
 
@@ -730,7 +724,7 @@ op_error_t interpreter::op_less_than() noexcept
 
 op_error_t interpreter::op_greater_than() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_greater_than;
 
@@ -740,7 +734,7 @@ op_error_t interpreter::op_greater_than() noexcept
 
 op_error_t interpreter::op_less_than_or_equal() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_less_than_or_equal;
 
@@ -750,7 +744,7 @@ op_error_t interpreter::op_less_than_or_equal() noexcept
 
 op_error_t interpreter::op_greater_than_or_equal() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_greater_than_or_equal;
 
@@ -760,27 +754,27 @@ op_error_t interpreter::op_greater_than_or_equal() noexcept
 
 op_error_t interpreter::op_min() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_min;
 
-    push_number(left < right ? left.int64() : right.int64());
+    push_signed64(lesser<int64_t>(left, right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_max() noexcept
 {
-    number right, left;
+    int32_t right, left;
     if (!pop_binary32(left, right))
         return error::op_max;
 
-    push_number(left > right ? left.int64() : right.int64());
+    push_signed64(greater<int64_t>(left, right));
     return error::op_success;
 }
 
 op_error_t interpreter::op_within() noexcept
 {
-    number upper, lower, value;
+    int32_t upper, lower, value;
     if (!pop_ternary32(upper, lower, value))
         return error::op_within;
 

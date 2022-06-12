@@ -83,6 +83,36 @@ inline program::variant_stack_ptr create_stack(
     return out;
 }
 
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+
+// Explicit deduction guide (not needed as of C++20).
+////template<class... Ts>
+////overloaded(Ts...)->overloaded<Ts...>;
+
+////// Only one statement remains, others discarded by compiler.
+////const auto visitor = [&](const auto& vary) noexcept
+////{
+////    using Vary = std::decay_t<decltype(vary)>;
+////
+////    if constexpr (if_same<Vary, bool>::value)
+////    {
+////        item = to_shared(number{ to_int(vary) }.data());
+////    }
+////    else if constexpr (if_same<Vary, int64_t>::value)
+////    {
+////        item = to_shared(number{ vary }.data());
+////    }
+////    else if constexpr (if_same<Vary, chunk_cptr>::value)
+////    {
+////        item = vary;
+////    }
+////    else
+////    {
+////        static_assert(false, "non-exhaustive visitor!");
+////    }
+////};
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -200,18 +230,18 @@ void program::push_bool(bool value) noexcept
     BC_POP_WARNING()
 }
 
-void program::push_length(size_t value) noexcept
-{
-    // This is guarded by stack size and push data limits.
-    BC_ASSERT_MSG(value <= max_int64, "integer overflow");
-    push_number(possible_narrow_sign_cast<int64_t>(value));
-}
-
-void program::push_number(int64_t value) noexcept
+void program::push_signed64(int64_t value) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->push_back(variant{ value });
     BC_POP_WARNING()
+}
+
+void program::push_length(size_t value) noexcept
+{
+    // This is guarded by stack size and push data limits.
+    BC_ASSERT_MSG(value <= max_int64, "integer overflow");
+    push_signed64(possible_narrow_sign_cast<int64_t>(value));
 }
 
 // Primary stack (pop).
@@ -219,23 +249,9 @@ void program::push_number(int64_t value) noexcept
 
 chunk_cptr program::pop_unsafe() noexcept
 {
-    // Variant returns pointer instance, so is move assigned.
-    //// This must be a pointer copy, as the pointer is about to be destroyed.
-    const auto value = top_unsafe();
+    const auto value = peek_unsafe();
     drop_unsafe();
     return value;
-}
-
-bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
-{
-    if (size() < count)
-        return false;
-
-    data.reserve(count);
-    for (size_t index = 0; index < count; ++index)
-        data.push_back(pop_unsafe());
-
-    return true;
 }
 
 bool program::pop_bool_unsafe() noexcept
@@ -243,6 +259,41 @@ bool program::pop_bool_unsafe() noexcept
     const auto value = peek_bool_unsafe();
     drop_unsafe();
     return value;
+}
+
+bool program::pop_signed32_unsafe(int32_t& out_value) noexcept
+{
+    const auto result = peek_signed32_unsafe(out_value);
+    drop_unsafe();
+    return result;
+}
+
+bool program::pop_signed32(int32_t& out_value) noexcept
+{
+    if (is_empty())
+        return false;
+
+    return pop_signed32_unsafe(out_value);
+}
+
+bool program::pop_binary32(int32_t& left, int32_t& right) noexcept
+{
+    if (size() < 2)
+        return false;
+
+    // The right hand side operand is at the top of the stack.
+    return pop_signed32_unsafe(right) && pop_signed32_unsafe(left);
+}
+
+bool program::pop_ternary32(int32_t& upper, int32_t& lower,
+    int32_t& value) noexcept
+{
+    if (size() < 3)
+        return false;
+
+    // The upper bound is at stack top, lower bound next, value next.
+    return pop_signed32_unsafe(upper) && pop_signed32_unsafe(lower) &&
+        pop_signed32_unsafe(value);
 }
 
 // True if popped value is valid post-pop stack index (precluded if size < 2).
@@ -260,84 +311,25 @@ bool program::pop_index32(size_t& out_index) noexcept
     return out_index < size();
 }
 
-// private???
-// TODO: variant - change to pop int32_t.
-bool program::pop_signed32(int32_t& out_value) noexcept
+bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 {
-    number value;
-    if (!pop_number32(value))
+    if (size() < count)
         return false;
 
-    // number::to_int32 presumes 4 byte pop.
-    out_value = value.to_int32();
+    data.reserve(count);
+    for (size_t index = 0; index < count; ++index)
+        data.push_back(pop_unsafe());
+
     return true;
-}
-
-// TODO: variant - change to pop int32_t.
-bool program::pop_number32(number& out_value) noexcept
-{
-    if (is_empty())
-        return false;
-
-    return out_value.set_data(*pop_unsafe(), max_number_size_four);
-}
-
-// TODO: variant - change to pop int32_t.
-bool program::pop_binary32(number& left, number& right) noexcept
-{
-    if (size() < 2)
-        return false;
-
-    // The right hand side operand is at the top of the stack.
-    return right.set_data(*pop_unsafe(), max_number_size_four) &&
-        left.set_data(*pop_unsafe(), max_number_size_four);
-}
-
-// TODO: variant - change to pop int32_t.
-bool program::pop_ternary32(number& upper, number& lower,
-    number& value) noexcept
-{
-    if (size() < 3)
-        return false;
-
-    // The upper bound is at stack top, lower bound next, value next.
-    return upper.set_data(*pop_unsafe(), max_number_size_four) &&
-        lower.set_data(*pop_unsafe(), max_number_size_four) &&
-        value.set_data(*pop_unsafe(), max_number_size_four);
 }
 
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
-template<class... Ts>
-struct overloaded : Ts... { using Ts::operator()...; };
-
-////// Explicit deduction guide (not needed as of C++20).
-////template<class... Ts>
-////overloaded(Ts...)->overloaded<Ts...>;
-////
-////const overloaded visitor
-////{
-////    [&](bool vary)
-////    {
-////        item = to_shared(number{ to_int(vary) }.data());
-////    },
-////    [&](int64_t vary)
-////    {
-////        item = to_shared(number{ vary }.data());
-////    },
-////    [&](const chunk_cptr& vary)
-////    {
-////        item = vary;
-////    }
-////};
-////std::visit(visitor, *const_it_unsafe(index));
-
+// No size limits on push (of any type) or peek chunk.
 chunk_cptr program::peek_unsafe(size_t index) const noexcept
 {
     chunk_cptr item;
-
-    // Only one overload is bound, others discarded by compiler.
     const overloaded visitor
     {
         [&](bool vary) noexcept
@@ -358,10 +350,73 @@ chunk_cptr program::peek_unsafe(size_t index) const noexcept
     return item;
 }
 
-// TODO: variant - bool, to_bool(int64_t), number(data).
+// No chunk size limits on peek bool.
 bool program::peek_bool_unsafe() const noexcept
 {
-    return number::is_stack_true(*top_unsafe());
+    bool item{};
+    const overloaded visitor
+    {
+        [&](bool vary) noexcept
+        {
+            item = vary;
+        },
+        [&](int64_t vary) noexcept
+        {
+            item = to_bool(vary);
+        },
+        [&](const chunk_cptr& vary) noexcept
+        {
+            item = number::is_stack_true(*vary);
+        }
+    };
+
+    std::visit(visitor, primary_->back());
+    return item;
+}
+
+// private
+// Generalized integer peek for varying bit widths up to 64.
+template<size_t bits, typename Out, if_not_greater<bits, width<Out>()>>
+bool program::peek_signed_unsafe(Out& out_value, size_t index) const noexcept
+{
+    // Byte limit overflow guard.
+    bool result{};
+
+    const overloaded visitor
+    {
+        [&](bool vary) noexcept
+        {
+            result = true;
+            out_value = to_int(vary);
+        },
+        [&](int64_t vary) noexcept
+        {
+            const auto narrowed = mask_right(vary, bits);
+            result = is_zero(narrowed);
+            out_value = possible_narrow_cast<Out>(narrowed);
+        },
+        [&](const chunk_cptr& vary) noexcept
+        {
+            number value{};
+            result = value.set_data(*vary, byte_width(bits));
+            out_value = possible_narrow_cast<Out>(value.int64());
+        }
+    };
+
+    std::visit(visitor, *const_it_unsafe(index));
+    return result;
+}
+
+bool program::peek_signed32_unsafe(int32_t& out_value) const noexcept
+{
+    constexpr auto bits = width<int32_t>();
+    return peek_signed_unsafe<bits>(out_value);
+}
+
+bool program::peek_signed40_unsafe(int64_t& out_value) const noexcept
+{
+    constexpr auto bits = width<int8_t>() + width<int32_t>();
+    return peek_signed_unsafe<bits>(out_value);
 }
 
 bool program::peek_bool() const noexcept
@@ -380,12 +435,12 @@ bool program::peek_unsigned32(uint32_t& out_value) const noexcept
         return false;
 
     // Negative exclusion drops the 40th bit (inconsequential).
-    number value;
-    if (!peek_number40_unsafe(value) || value.is_negative())
+    int64_t value{};
+    if (!peek_signed40_unsafe(value) || is_negative(value))
         return false;
 
     // 32 bits are used in unsigned input.sequence compare.
-    out_value = narrow_sign_cast<uint32_t>(value.to_int40());
+    out_value = narrow_sign_cast<uint32_t>(value);
     return true;
 }
 
@@ -401,21 +456,13 @@ bool program::peek_unsigned39(uint64_t& out_value) const noexcept
         return false;
 
     // Negative exclusion drops the 40th bit (limits comparable domain).
-    number value;
-    if (!peek_number40_unsafe(value) || value.is_negative())
+    int64_t value;
+    if (!peek_signed40_unsafe(value) || is_negative(value))
         return false;
 
     // 39 bits are used in unsigned tx.locktime compare.
-    out_value = sign_cast<uint64_t>(value.to_int40());
+    out_value = sign_cast<uint64_t>(value);
     return true;
-}
-
-// private???
-// TODO: variant - change to pop int40_t.
-bool program::peek_number40_unsafe(number& out_value) const noexcept
-{
-    // number::to_int40 presumes 5 byte pop.
-    return out_value.set_data(*top_unsafe(), max_number_size_five);
 }
 
 // Primary stack push/pop non-const functions (optimizations).

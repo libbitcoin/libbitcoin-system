@@ -114,35 +114,33 @@ protected:
     /// Primary stack.
     /// -----------------------------------------------------------------------
 
-    /// Primary stack push.
-
     /// Primary stack push (typed).
-    void push(chunk_cptr&& datum) noexcept;
-    void push(const chunk_cptr& datum) noexcept;
-    void push_chunk(data_chunk&& datum) noexcept;
-    void push_bool(bool value) noexcept;
+        void push(chunk_cptr&& datum) noexcept;
+        void push(const chunk_cptr& datum) noexcept;
+        void push_chunk(data_chunk&& datum) noexcept;
+        void push_bool(bool value) noexcept;
+        void push_signed64(int64_t value) noexcept;
     void push_length(size_t value) noexcept;
-    void push_number(int64_t value) noexcept;
 
     /// Primary stack pop (typed).
-    chunk_cptr pop_unsafe() noexcept;
-    bool pop_count(chunk_cptrs& data, size_t count) noexcept;
-    bool pop_bool_unsafe() noexcept;
-    bool pop_index32(size_t& out_index) noexcept;
+        chunk_cptr pop_unsafe() noexcept;
+        bool pop_bool_unsafe() noexcept;
+        bool pop_signed32_unsafe(int32_t& out_value) noexcept;
     bool pop_signed32(int32_t& out_value) noexcept;
-
-    bool pop_number32(number& out_value) noexcept;
-    bool pop_binary32(number& left, number& right) noexcept;
-    bool pop_ternary32(number& upper, number& lower, number& value) noexcept;
+    bool pop_binary32(int32_t& left, int32_t& right) noexcept;
+    bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) noexcept;
+    bool pop_index32(size_t& out_index) noexcept;
+    bool pop_count(chunk_cptrs& data, size_t count) noexcept;
 
     /// Primary stack peek (typed).
-    chunk_cptr peek_unsafe(size_t index) const noexcept;
-    bool peek_bool() const noexcept;
-    bool peek_bool_unsafe() const noexcept;
+        chunk_cptr peek_unsafe(size_t index=zero) const noexcept;
+        bool peek_bool_unsafe() const noexcept;
+        ////bool peek_signed_unsafe<>(int32_t& out_value) const noexcept;
+    bool peek_signed32_unsafe(int32_t& out_value) const noexcept;
+    bool peek_signed40_unsafe(int64_t& out_value) const noexcept;
     bool peek_unsigned32(uint32_t& out_value) const noexcept;
     bool peek_unsigned39(uint64_t& out_value) const noexcept;
-
-    bool peek_number40_unsafe(number& out_value) const noexcept;
+    bool peek_bool() const noexcept;
 
     /// Primary stack non-const (untyped).
     void drop_unsafe() noexcept;
@@ -201,56 +199,28 @@ private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
+    template<size_t bits, typename Out, if_not_greater<bits, width<Out>()> = true>
+    bool peek_signed_unsafe(Out& out_value, size_t index = zero) const noexcept;
+
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;
 
     // Zero-based primary stack index.
     // ------------------------------------------------------------------------
 
+    // TODO: optimize using array indexing.
     inline variant_stack::iterator it_unsafe(size_t index) noexcept
     {
         BC_ASSERT(index < size());
         return std::prev(primary_->end(), add1(index));
     }
 
+    // TODO: optimize using array indexing.
     inline variant_stack::const_iterator const_it_unsafe(
         size_t index) const noexcept
     {
         BC_ASSERT(index < size());
         return std::prev(primary_->end(), add1(index));
-    }
-
-    inline chunk_cptr top_unsafe() const noexcept
-    {
-        BC_ASSERT(!is_empty());
-
-        chunk_cptr item;
-
-        // Only one statement remains, others discarded by compiler.
-        const auto visitor = [&](const auto& vary) noexcept
-        {
-            using Vary = std::decay_t<decltype(vary)>;
-
-            if constexpr (if_same<Vary, bool>::value)
-            {
-                item = to_shared(number{ to_int(vary) }.data());
-            }
-            else if constexpr (if_same<Vary, int64_t>::value)
-            {
-                item = to_shared(number{ vary }.data());
-            }
-            else if constexpr (if_same<Vary, chunk_cptr>::value)
-            {
-                item = vary;
-            }
-            else
-            {
-                static_assert(false, "non-exhaustive visitor!");
-            }
-        };
-
-        std::visit(visitor, primary_->back());
-        return item;
     }
 
     // ------------------------------------------------------------------------
