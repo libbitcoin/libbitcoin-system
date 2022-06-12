@@ -392,8 +392,7 @@ op_error_t interpreter::op_roll() noexcept
     if (!pop_index32(index))
         return error::op_roll;
 
-    // Copy indexed item reference, as it will be deleted.
-    chunk_cptr temporary{ peek_unsafe(index) };
+    auto temporary = peek_unsafe(index);
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
