@@ -339,10 +339,10 @@ bool witness::extract_sigop_script(script& out_script,
 
 // Extract script and initial execution stack.
 bool witness::extract_script(script::cptr& out_script,
-    chunk_cptrs_ptr& out_stack, const script& program_script) const noexcept
+    chunk_cptrs& out_stack, const script& program_script) const noexcept
 {
     // Copy stack of const pointers for use as mutable witness stack.
-    out_stack = std::make_shared<chunk_cptrs>(stack_);
+    out_stack = stack_;
     data_chunk program{ program_script.witness_program() };
 
     switch (program_script.version())
@@ -364,7 +364,7 @@ bool witness::extract_script(script::cptr& out_script,
 
                     // Stack must be 2 elements (bip141).
                     // Fail la
-                    return out_stack->size() == two;
+                    return out_stack.size() == two;
                 }
 
                 // p2wsh
@@ -374,11 +374,11 @@ bool witness::extract_script(script::cptr& out_script,
                 case hash_size:
                 {
                     // The stack must consist of at least 1 element (bip141).
-                    if (out_stack->empty())
+                    if (out_stack.empty())
                         return false;
 
                     // Input script is popped from the stack (bip141).
-                    out_script = to_shared(script{ *pop(*out_stack), false });
+                    out_script = to_shared(script{ *pop(out_stack), false });
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),

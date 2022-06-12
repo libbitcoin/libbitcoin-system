@@ -1295,8 +1295,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         {
             case script_version::zero:
             {
+                chunk_cptrs stack;
                 script::cptr script;
-                chunk_cptrs_ptr stack;
                 if (!in.witness().extract_script(script, stack,
                     in.prevout->script()))
                     return error::invalid_witness;
@@ -1353,8 +1353,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             {
                 case script_version::zero:
                 {
+                    chunk_cptrs stack;
                     script::cptr script;
-                    chunk_cptrs_ptr stack;
                     if (!in.witness().extract_script(script, stack,
                         *embeded_script))
                         return error::invalid_witness;

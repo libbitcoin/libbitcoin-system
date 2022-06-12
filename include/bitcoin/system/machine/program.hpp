@@ -62,7 +62,7 @@ public:
     /// Witness script run (witness-initialized stack).
     program(const chain::transaction& transaction, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks,
-        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
+        chain::script_version version, const chunk_cptrs& stack) noexcept;
 
     /// Defaults.
     program(program&&) = delete;

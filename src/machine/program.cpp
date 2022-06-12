@@ -153,9 +153,9 @@ program::program(program&& other, const script::cptr& script) noexcept
 // Witness script run (witness-initialized stack).
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& stack) noexcept
+    const chunk_cptrs& stack) noexcept
   : program(tx, input, script, forks, (*input)->prevout->value(), version,
-      create_stack(*stack), is_valid_witness_stack(*stack))
+      create_stack(stack), is_valid_witness_stack(stack))
 {
 }
 
@@ -379,9 +379,7 @@ bool program::peek_bool_unsafe() const noexcept
 template<size_t bits, typename Out, if_not_greater<bits, width<Out>()>>
 bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
 {
-    // Byte limit overflow guard.
     bool result{};
-
     const overloaded visitor
     {
         [&](bool vary) noexcept
@@ -430,7 +428,7 @@ bool program::peek_unsigned32(uint32_t& value) const noexcept
         return false;
 
     // Negative exclusion drops the 40th bit (inconsequential).
-    int64_t signed64{};
+    int64_t signed64;
     if (!peek_signed40_unsafe(signed64) || is_negative(value))
         return false;
 
