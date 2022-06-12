@@ -162,6 +162,12 @@ number::int40_t number::to_int40() const noexcept
     return mask_left(value_, width<int64_t>() - to_bits(5u));
 }
 
+int64_t number::int64() const noexcept
+{
+    // Inherently limited by 'value_ = from_little_endian<int64_t>' above.
+    return value_;
+}
+
 // Nothing more than c++ native behavior.
 bool number::is_true() const noexcept
 {
@@ -308,12 +314,6 @@ int32_t number::int32() const noexcept
     // of no consequence given 4 byte set_data, and 5 byte set_data has always
     // been read from uncast int64().
     return limit<int32_t>(value_);
-}
-
-int64_t number::int64() const noexcept
-{
-    // Inherently limited by 'value_ = from_little_endian<int64_t>' above.
-    return value_;
 }
 
 } // namespace machine

@@ -67,6 +67,9 @@ public:
     /// Return the value cast to int40 (5 byte stack data, consensus).
     int40_t to_int40() const noexcept;
 
+    /// Return the value as int64. (up to 8 bytes stack data).
+    int64_t int64() const noexcept;
+
     /// Return value as boolean (zero is false, nonzero is true).
     bool is_true() const noexcept;
 
@@ -106,10 +109,6 @@ protected:
     /// deprecated
     /// Return the value bound by to int32 (TODO: modify unit tests).
     int32_t int32() const noexcept;
-
-    /// deprecated
-    /// Return the value as int64. (up to 8 bytes stack data, unused).
-    int64_t int64() const noexcept;
 
 private:
     int64_t value_;
