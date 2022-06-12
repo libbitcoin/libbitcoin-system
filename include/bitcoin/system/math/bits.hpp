@@ -45,6 +45,7 @@ inline size_t byte_width(Value value) noexcept;
 
 /// Two's complement (~value + 1).
 /// Absolute value of an unsigned negative value.
+/// Avoid use of unsigned negation as this relies on CPU architecture.
 template <typename Value, if_integer<Value> = true>
 constexpr Value twos_complement(Value value) noexcept;
 
