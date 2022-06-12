@@ -144,7 +144,7 @@ protected:
     /// Primary stack peek (unsafe, typed).
     chunk_cptr peek_cptr_unsafe(size_t index=zero) const noexcept;
     bool peek_bool_unsafe() const noexcept;
-    ////bool peek_signed_unsafe<Out>(Out& value) const noexcept;
+    ////bool peek_signed_unsafe<Integer>(Integer& value) const noexcept;
 
     /// wrappers (unsafe)
     bool peek_signed32_unsafe(int32_t& value) const noexcept;
@@ -214,8 +214,10 @@ private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
-    template<size_t bits, typename Out, if_not_greater<bits, width<Out>()> = true>
-    bool peek_signed_unsafe(Out& value, size_t index=zero) const noexcept;
+    template<size_t bits, typename Integer,
+        if_integral_integer<Integer> = true,
+        if_not_greater<bits, width<Integer>()> = true>
+    bool peek_signed_unsafe(Integer& value, size_t index=zero) const noexcept;
 
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;

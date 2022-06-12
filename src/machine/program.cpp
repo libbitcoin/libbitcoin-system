@@ -375,10 +375,25 @@ bool program::peek_bool_unsafe() const noexcept
     return item;
 }
 
+// [-2^31...2^31-1]
+static_assert(-power2<int64_t>(sub1(32)) == min_int32, "");
+static_assert(sub1(power2<int64_t>(sub1(32))) == max_int32, "");
+static_assert(limit<int32_t>(zero, min_int32, max_int32) == zero, "");
+static_assert(limit<int32_t>(min_int64, min_int32, max_int32) == min_int32, "");
+static_assert(limit<int32_t>(max_int64, min_int32, max_int32) == max_int32, "");
+
+// [-2^31+1...2^31-1]
+// The bitcoin minimum is +1 relative to min_int32 (because negative zero).
+static_assert(add1(-power2<int64_t>(sub1(32))) == min_int32 + 1, "");
+static_assert(sub1(+power2<int64_t>(sub1(32))) == max_int32, "");
+static_assert(ceilinged_divide(32, byte_bits) == 4, "");
+static_assert(ceilinged_divide(40, byte_bits) == 5, "");
+
 // private
 // Generalized integer peek for varying bit widths up to 64.
-template<size_t bits, typename Out, if_not_greater<bits, width<Out>()>>
-bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
+template<size_t bits, typename Integer, if_integral_integer<Integer>,
+    if_not_greater<bits, width<Integer>()>>
+bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
 {
     bool result{};
     const overloaded visitor
@@ -390,15 +405,20 @@ bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
         },
         [&](int64_t vary) noexcept
         {
-            const auto narrowed = mask_right(vary, bits);
-            result = is_zero(narrowed);
-            value = possible_narrow_cast<Out>(narrowed);
+            // 4:[-2^31+1...2^31-1], 5:[-2^39+1...2^39-1]
+            constexpr auto minimum = add1(-power2<int64_t>(sub1(bits)));
+            constexpr auto maximum = sub1(+power2<int64_t>(sub1(bits)));
+
+            value = limit<Integer>(vary, minimum, maximum);
+            result = (value == vary);
         },
         [&](const chunk_cptr& vary) noexcept
         {
+            constexpr auto bytes = ceilinged_divide(bits, byte_bits);
+
             number stack_number{};
-            result = stack_number.set_data(*vary, byte_width(bits));
-            value = possible_narrow_cast<Out>(stack_number.int64());
+            result = stack_number.set_data(*vary, bytes);
+            value = possible_narrow_cast<Integer>(stack_number.int64());
         }
     };
 
