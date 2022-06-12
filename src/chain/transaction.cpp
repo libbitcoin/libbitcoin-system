@@ -1279,7 +1279,6 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     if ((ec = prevout.run()))
         return ec;
 
-    // This precludes bare witness programs of -0 (undocumented).
     if (!prevout.is_true(false))
         return error::stack_false;
 
@@ -1337,7 +1336,6 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         if ((ec = embeded.run()))
             return ec;
 
-        // This precludes embedded witness programs of -0 (undocumented).
         if (!embeded.is_true(false))
             return error::stack_false;
 

@@ -124,6 +124,7 @@ op_error_t interpreter::op_nop() const noexcept
     return error::op_success;
 }
 
+// This opcode pushed the version to the stack, a hard fork per release.
 op_error_t interpreter::op_ver() const noexcept
 {
     if (is_enabled(forks::nops_rule))
