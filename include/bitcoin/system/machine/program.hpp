@@ -22,8 +22,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+////#include <list>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -45,6 +47,9 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
+    // TODO: templatize program on std::list/vector for performance test.
+    // TODO: templatize interpreter on std::list/vector and pass to program.
+    // TODO: this will bring program and interpreter into tx compilation unit.
     typedef std::variant<bool, int64_t, chunk_cptr> variant;
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
@@ -251,7 +256,7 @@ private:
 
     // Three stacks.
     variant_stack_ptr primary_; // variant_stack_ptr
-    variant_stack alternate_{}; // variant_stack
+    std::vector<variant> alternate_{}; // variant_stack
     bool_stack condition_{};
 
     // Accumulator.
