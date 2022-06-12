@@ -114,38 +114,40 @@ protected:
     /// Primary stack.
     /// -----------------------------------------------------------------------
 
-    /// Primary stack push (typed).
+    /// Primary stack push (safe, typed).
     void push(chunk_cptr&& datum) noexcept;
     void push(const chunk_cptr& datum) noexcept;
     void push_chunk(data_chunk&& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_signed64(int64_t value) noexcept;
 
-    /// wrappers
+    /// wrappers (safe)
     void push_length(size_t value) noexcept;
 
-    /// Primary stack pop (typed).
+    /// Primary stack pop (unsafe, typed).
     chunk_cptr pop_unsafe() noexcept;
     bool pop_bool_unsafe() noexcept;
-    bool pop_signed32_unsafe(int32_t& out_value) noexcept;
+    bool pop_signed32_unsafe(int32_t& value) noexcept;
 
-    /// wrappers
-    bool pop_signed32(int32_t& out_value) noexcept;
+    /// wrappers (safe)
+    bool pop_signed32(int32_t& value) noexcept;
     bool pop_binary32(int32_t& left, int32_t& right) noexcept;
     bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) noexcept;
-    bool pop_index32(size_t& out_index) noexcept;
+    bool pop_index32(size_t& index) noexcept;
     bool pop_count(chunk_cptrs& data, size_t count) noexcept;
 
-    /// Primary stack peek (typed).
+    /// Primary stack peek (unsafe, typed).
     chunk_cptr peek_unsafe(size_t index=zero) const noexcept;
     bool peek_bool_unsafe() const noexcept;
-    ////bool peek_signed_unsafe<Out>(Out& out_value) const noexcept;
+    ////bool peek_signed_unsafe<Out>(Out& value) const noexcept;
 
-    /// wrappers
-    bool peek_signed32_unsafe(int32_t& out_value) const noexcept;
-    bool peek_signed40_unsafe(int64_t& out_value) const noexcept;
-    bool peek_unsigned32(uint32_t& out_value) const noexcept;
-    bool peek_unsigned39(uint64_t& out_value) const noexcept;
+    /// wrappers (unsafe)
+    bool peek_signed32_unsafe(int32_t& value) const noexcept;
+    bool peek_signed40_unsafe(int64_t& value) const noexcept;
+
+    /// wrappers (safe)
+    bool peek_unsigned32(uint32_t& value) const noexcept;
+    bool peek_unsigned39(uint64_t& value) const noexcept;
 
     /// Primary stack non-const (untyped).
     void drop_unsafe() noexcept;
@@ -205,7 +207,7 @@ private:
     typedef std::vector<bool> bool_stack;
 
     template<size_t bits, typename Out, if_not_greater<bits, width<Out>()> = true>
-    bool peek_signed_unsafe(Out& out_value, size_t index = zero) const noexcept;
+    bool peek_signed_unsafe(Out& value, size_t index=zero) const noexcept;
 
     static chain::operations create_strip_ops(
         const chunk_cptrs& endorsements) noexcept;

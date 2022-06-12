@@ -261,19 +261,19 @@ bool program::pop_bool_unsafe() noexcept
     return value;
 }
 
-bool program::pop_signed32_unsafe(int32_t& out_value) noexcept
+bool program::pop_signed32_unsafe(int32_t& value) noexcept
 {
-    const auto result = peek_signed32_unsafe(out_value);
+    const auto result = peek_signed32_unsafe(value);
     drop_unsafe();
     return result;
 }
 
-bool program::pop_signed32(int32_t& out_value) noexcept
+bool program::pop_signed32(int32_t& value) noexcept
 {
     if (is_empty())
         return false;
 
-    return pop_signed32_unsafe(out_value);
+    return pop_signed32_unsafe(value);
 }
 
 bool program::pop_binary32(int32_t& left, int32_t& right) noexcept
@@ -297,7 +297,7 @@ bool program::pop_ternary32(int32_t& upper, int32_t& lower,
 }
 
 // True if popped value is valid post-pop stack index (precluded if size < 2).
-bool program::pop_index32(size_t& out_index) noexcept
+bool program::pop_index32(size_t& index) noexcept
 {
     int32_t value;
     if (!pop_signed32(value))
@@ -307,8 +307,8 @@ bool program::pop_index32(size_t& out_index) noexcept
         return false;
 
     // Cast unsafe when sizeof(size_t) < sizeof(int64_t), guarded by stack size.
-    out_index = limit<size_t>(value);
-    return out_index < size();
+    index = limit<size_t>(value);
+    return index < size();
 }
 
 bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
@@ -377,7 +377,7 @@ bool program::peek_bool_unsafe() const noexcept
 // private
 // Generalized integer peek for varying bit widths up to 64.
 template<size_t bits, typename Out, if_not_greater<bits, width<Out>()>>
-bool program::peek_signed_unsafe(Out& out_value, size_t index) const noexcept
+bool program::peek_signed_unsafe(Out& value, size_t index) const noexcept
 {
     // Byte limit overflow guard.
     bool result{};
@@ -387,19 +387,19 @@ bool program::peek_signed_unsafe(Out& out_value, size_t index) const noexcept
         [&](bool vary) noexcept
         {
             result = true;
-            out_value = to_int(vary);
+            value = to_int(vary);
         },
         [&](int64_t vary) noexcept
         {
             const auto narrowed = mask_right(vary, bits);
             result = is_zero(narrowed);
-            out_value = possible_narrow_cast<Out>(narrowed);
+            value = possible_narrow_cast<Out>(narrowed);
         },
         [&](const chunk_cptr& vary) noexcept
         {
             number value{};
             result = value.set_data(*vary, byte_width(bits));
-            out_value = possible_narrow_cast<Out>(value.int64());
+            value = possible_narrow_cast<Out>(value.int64());
         }
     };
 
@@ -407,16 +407,16 @@ bool program::peek_signed_unsafe(Out& out_value, size_t index) const noexcept
     return result;
 }
 
-bool program::peek_signed32_unsafe(int32_t& out_value) const noexcept
+bool program::peek_signed32_unsafe(int32_t& value) const noexcept
 {
     constexpr auto bits = width<int32_t>();
-    return peek_signed_unsafe<bits>(out_value);
+    return peek_signed_unsafe<bits>(value);
 }
 
-bool program::peek_signed40_unsafe(int64_t& out_value) const noexcept
+bool program::peek_signed40_unsafe(int64_t& value) const noexcept
 {
     constexpr auto bits = width<int8_t>() + width<int32_t>();
-    return peek_signed_unsafe<bits>(out_value);
+    return peek_signed_unsafe<bits>(value);
 }
 
 // ****************************************************************************
@@ -424,18 +424,18 @@ bool program::peek_signed40_unsafe(int64_t& out_value) const noexcept
 // input.sequence allows use of the full unsigned 32 bit domain, without use of
 // the negative range.
 // ****************************************************************************
-bool program::peek_unsigned32(uint32_t& out_value) const noexcept
+bool program::peek_unsigned32(uint32_t& value) const noexcept
 {
     if (is_empty())
         return false;
 
     // Negative exclusion drops the 40th bit (inconsequential).
-    int64_t value{};
-    if (!peek_signed40_unsafe(value) || is_negative(value))
+    int64_t signed64{};
+    if (!peek_signed40_unsafe(signed64) || is_negative(value))
         return false;
 
     // 32 bits are used in unsigned input.sequence compare.
-    out_value = narrow_sign_cast<uint32_t>(value);
+    value = narrow_sign_cast<uint32_t>(signed64);
     return true;
 }
 
@@ -445,18 +445,18 @@ bool program::peek_unsigned32(uint32_t& out_value) const noexcept
 // the negative range. Otherwise a 2038 limit (beyond the inherent 2106 limit)
 // would have been introduced. Since the sign bit is unused, the domain is 39.
 // ****************************************************************************
-bool program::peek_unsigned39(uint64_t& out_value) const noexcept
+bool program::peek_unsigned39(uint64_t& value) const noexcept
 {
     if (is_empty())
         return false;
 
     // Negative exclusion drops the 40th bit (limits comparable domain).
-    int64_t value;
-    if (!peek_signed40_unsafe(value) || is_negative(value))
+    int64_t signed64;
+    if (!peek_signed40_unsafe(signed64) || is_negative(value))
         return false;
 
     // 39 bits are used in unsigned tx.locktime compare.
-    out_value = sign_cast<uint64_t>(value);
+    value = sign_cast<uint64_t>(signed64);
     return true;
 }
 
