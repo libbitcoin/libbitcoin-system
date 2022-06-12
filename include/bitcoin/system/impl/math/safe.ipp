@@ -67,10 +67,19 @@ constexpr To narrow_sign_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
+template <typename To, typename From,
+    if_lesser_width<From, To>,
+    if_same_signed_integer<To, From>>
+constexpr To wide_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
 /// Possible integer casts.
 
-template <typename To, typename From,
-    if_same_signed_integer<To, From>>
+template <typename To, typename From, if_same_signed_integer<To, From>>
 constexpr To possible_narrow_cast(From value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -78,8 +87,7 @@ constexpr To possible_narrow_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-template <typename To, typename From,
-    if_not_lesser_width<To, From>>
+template <typename To, typename From, if_not_lesser_width<To, From>>
 constexpr To possible_sign_cast(From value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -87,8 +95,7 @@ constexpr To possible_sign_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-template <typename To, typename From,
-    if_not_same_signed_integer<To, From>>
+template <typename To, typename From, if_not_same_signed_integer<To, From>>
 constexpr To possible_narrow_sign_cast(From value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -96,8 +103,7 @@ constexpr To possible_narrow_sign_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-template <typename To, typename From,
-    if_lesser_width<To, From>>
+template <typename To, typename From, if_lesser_width<To, From>>
 constexpr To possible_sign_narrow_cast(From value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -110,6 +116,16 @@ constexpr To possible_narrow_and_sign_cast(From value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From, if_same_signed_integer<To, From>>
+constexpr To possible_wide_cast(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_IDENTITY_CAST)
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
     BC_POP_WARNING()
 }
 

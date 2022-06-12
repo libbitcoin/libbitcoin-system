@@ -26,6 +26,13 @@ constexpr size_t minimum = 0;
 constexpr size_t maximum = max_size_t;
 constexpr size_t half = maximum / 2;
 
+// ????
+////constexpr int32_t left = static_cast<int32_t>(min_int64);
+////constexpr int32_t right = narrow_cast<int32_t>(min_int64);
+////static_assert(left == 0, "");
+////static_assert(left == right, "");
+////static_assert(right == min_int64, "");
+
 // safe_multiply
 
 BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_minimum_times_minimum__minimum)

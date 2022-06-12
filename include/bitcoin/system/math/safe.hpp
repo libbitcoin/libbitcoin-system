@@ -53,6 +53,12 @@ template <typename To, typename From,
     if_not_same_signed_integer<To, From> = true>
 constexpr To narrow_sign_cast(From value) noexcept;
 
+/// Cast integral to integral of wider bit width (precludes reassignment).
+template <typename To, typename From,
+    if_lesser_width<From, To> = true,
+    if_same_signed_integer<To, From> = true>
+constexpr To wide_cast(From value) noexcept;
+
 /// Possible integer casts.
 
 /// Possible narrowing without sign cast.
@@ -78,6 +84,10 @@ constexpr To possible_sign_narrow_cast(From value) noexcept;
 /// Possible narrowing and possible sign cast (unrestricted).
 template <typename To, typename From>
 constexpr To possible_narrow_and_sign_cast(From value) noexcept;
+
+/// Possible widening without sign cast (precludes reassignment).
+template <typename To, typename From, if_same_signed_integer<To, From> = true>
+constexpr To possible_wide_cast(From value) noexcept;
 
 /// Explicit pointer casts.
 
