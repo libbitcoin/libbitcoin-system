@@ -122,9 +122,7 @@ protected:
     void push_chunk(data_chunk&& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_length(size_t value) noexcept;
-    void push_numeric(int64_t value) noexcept;
-
-    void push_number(const number& value) noexcept;
+    void push_number(int64_t value) noexcept;
 
     /// Primary stack pop (typed).
     chunk_cptr pop_unsafe() noexcept;

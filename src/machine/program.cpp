@@ -176,8 +176,6 @@ BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 void program::push(chunk_cptr&& datum) noexcept
 BC_POP_WARNING()
 {
-    // TODO: should be able to push the const data_chunk*.
-    // TODO: variant_stack_push(std::move(chunk_cptr)).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->push_back(variant{ std::move(datum) });
     BC_POP_WARNING()
@@ -185,8 +183,6 @@ BC_POP_WARNING()
 
 void program::push(const chunk_cptr& datum) noexcept
 {
-    // TODO: should be able to push the const data_chunk*.
-    // TODO: variant_stack_push(chunk_cptr).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_->push_back(variant{ datum });
     BC_POP_WARNING()
@@ -194,38 +190,28 @@ void program::push(const chunk_cptr& datum) noexcept
 
 void program::push_chunk(data_chunk&& datum) noexcept
 {
-    // TODO: verify the size of shared_ptr union.
-    // TODO: variant_stack_push(chunk_cptr).
     push(to_shared<data_chunk>(std::move(datum)));
 }
 
 void program::push_bool(bool value) noexcept
 {
-    // TODO: variant_stack_.push(bool).
-    if (value)
-        push_numeric(to_int(value));
-    else
-        push_chunk({});
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    primary_->push_back(variant{ value });
+    BC_POP_WARNING()
 }
 
-// TODO: push_number(possible_narrow_sign_cast<int64_t>(value)).
 void program::push_length(size_t value) noexcept
 {
     // This is guarded by stack size and push data limits.
     BC_ASSERT_MSG(value <= max_int64, "integer overflow");
-    push_numeric(possible_narrow_sign_cast<int64_t>(value));
+    push_number(possible_narrow_sign_cast<int64_t>(value));
 }
 
-void program::push_numeric(int64_t value) noexcept
+void program::push_number(int64_t value) noexcept
 {
-    // TODO: push_number(value).
-    push_number(number{ value });
-}
-
-void program::push_number(const number& value) noexcept
-{
-    // TODO: variant_stack_.push(int64_t).
-    push(to_shared<data_chunk>(value.data()));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    primary_->push_back(variant{ value });
+    BC_POP_WARNING()
 }
 
 // Primary stack (pop).
