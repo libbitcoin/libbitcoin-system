@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
-#include <cstddef>
-#include <cstdint>
-#include <limits>
 #include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
@@ -104,33 +101,15 @@ template <typename To, typename From>
 constexpr To* integer_pointer_cast(From value) noexcept;
 
 /// Mathematical operations that throw on overflow.
+/// Avoid structured exception handling, use only to cause program abort.
 
-// DEPRECATED: 2 uses in libbitcoin
-/// Throws overflow_exception on overflow.
+/// Throws overflow_exception on overflow (2 uses in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_multiply(Integer left, Integer right) noexcept(false);
 
-// DEPRECATED: 1 use in libbitcoin
-/// Throws overflow_exception on overflow.
+/// Throws overflow_exception on overflow (1 use in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right) noexcept(false);
-
-/////// Throws underflow_exception on underflow.
-////template <typename Integer, if_unsigned_integer<Integer> = true>
-////Integer safe_subtract(Integer left, Integer right) noexcept(false);
-////
-/////// Throws overflow_exception on overflow.
-////template <typename Integer, if_unsigned_integer<Integer> = true>
-////void safe_increment(Integer& value) noexcept(false);
-////
-/////// Throws underflow_exception on underflow.
-////template <typename Integer, if_unsigned_integer<Integer> = true>
-////void safe_decrement(Integer& value) noexcept(false);
-////
-/////// Throws range_exception if From value is above or below To size limits.
-////template <typename To, typename From,
-////    if_integer<To> = true, if_integer<From> = true>
-////To safe_cast(From value) noexcept(false);
 
 } // namespace system
 } // namespace libbitcoin

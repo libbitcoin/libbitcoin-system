@@ -24,7 +24,6 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
-#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -157,9 +156,6 @@ constexpr To* integer_pointer_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-// DEPRECATED: avoid structured exception handling.
-// ----------------------------------------------------------------------------
-
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_multiply(Integer left, Integer right) noexcept(false)
 {
@@ -180,39 +176,6 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
 
     return left + right;
 }
-
-////template <typename Integer, if_unsigned_integer<Integer>>
-////Integer safe_subtract(Integer left, Integer right) noexcept(false)
-////{
-////    if (left < (std::numeric_limits<Integer>::min() + right))
-////        throw underflow_exception("safe subtraction underflow");
-////
-////    return left - right;
-////}
-////
-////template <typename Integer, if_unsigned_integer<Integer>>
-////void safe_increment(Integer& value) noexcept(false)
-////{
-////    value = safe_add(value, one);
-////}
-////
-////template <typename Integer, if_unsigned_integer<Integer>>
-////void safe_decrement(Integer& value)
-////{
-////    value = safe_subtract(value, one);
-////}
-////
-////template <typename To, typename From, if_integer<To>, if_integer<From>>
-////To safe_cast(From value) noexcept(false)
-////{
-////    if (is_lesser(value, std::numeric_limits<To>::min()))
-////        throw range_exception("safe cast below minimum range");
-////
-////    if (is_greater(value, std::numeric_limits<To>::max()))
-////        throw range_exception("safe cast above maximum range");
-////
-////    return static_cast<To>(value);
-////}
 
 } // namespace system
 } // namespace libbitcoin

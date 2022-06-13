@@ -22,7 +22,6 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
-#include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
