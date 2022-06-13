@@ -30,6 +30,8 @@ namespace chain {
 // This differs from integral numbers only for negative_1.
 enum numbers : uint8_t
 {
+    // b10000001 : -1 is represented as 0x01 | 0x80 sign bit.
+    negative_1 = bit_or<uint8_t>(0x80, 0x01),       // [0x81]
     number_0 = 0,                                   // [0x00]
     positive_1 = 1,                                 // [0x01]
     positive_2 = 2,                                 // [0x02]
@@ -47,7 +49,6 @@ enum numbers : uint8_t
     positive_14 = 14,                               // [0x0e]
     positive_15 = 15,                               // [0x0f]
     positive_16 = 16,                               // [0x10]
-    negative_1 = set_left<uint8_t>(positive_1, 0)   // [0x81]
 };
 
 } // namespace chain
