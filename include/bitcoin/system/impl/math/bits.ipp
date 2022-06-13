@@ -24,16 +24,12 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// C++20: std::bit_width, std::bitset.
-// C++14: constexpr may have local variables.
 
 // These functions avoid integral promotion, by recasting to the original type.
 // The native operators promote sizeof(type) < 32 operands to int, causing
@@ -45,14 +41,15 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 // See constants.hpp for width<>(), which provides the integral bit domain.
-    template <typename Value, if_integer<Value>>
-inline size_t bit_width(Value value) noexcept
+template <typename Value, if_integer<Value> = true>
+constexpr size_t bit_width(Value value) noexcept
 {
-    return add1(floored_log2(value));
+    // Same as std::bit_width (C++20) except this supports signed integers.
+    return is_zero(value) ? zero : add1(floored_log2(to_unsigned(value)));
 }
 
 template <typename Value, if_integer<Value>>
-inline size_t byte_width(Value value) noexcept
+constexpr size_t byte_width(Value value) noexcept
 {
     return ceilinged_divide(bit_width(value), byte_bits);
 }
@@ -168,36 +165,32 @@ template <typename Value, if_integer<Value>>
 constexpr Value set_left(const Value& target, size_t offset,
     bool state) noexcept
 {
-    return state ?
-        bit_or(target, bit_left<Value>(offset)) :
-        bit_and(target, bit_not(bit_left<Value>(offset)));
+    const auto bit = bit_left<Value>(offset);
+    return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
 template <typename Value, if_integer<Value>>
-inline void set_left_into(Value& target, size_t offset,
+constexpr void set_left_into(Value& target, size_t offset,
     bool state) noexcept
 {
-    state ?
-        target |= bit_left<Value>(offset) :
-        target &= bit_not(bit_left<Value>(offset));
+    const auto bit = bit_left<Value>(offset);
+    state ? target |= bit : target &= bit_not(bit);
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value set_right(const Value& target, size_t offset,
     bool state) noexcept
 {
-    return state ?
-        bit_or(target, bit_right<Value>(offset)) :
-        bit_and(target, bit_not(bit_right<Value>(offset)));
+    const auto bit = bit_right<Value>(offset);
+    return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
 template <typename Value, if_integer<Value>>
-inline void set_right_into(Value& target, size_t offset,
+constexpr void set_right_into(Value& target, size_t offset,
     bool state) noexcept
 {
-    state ?
-        target |= bit_right<Value>(offset) :
-        target &= bit_not(bit_right<Value>(offset));
+    const auto bit = bit_right<Value>(offset);
+    state ? target |= bit : target &= bit_not(bit);
 }
 
 // Mask (a field of bits from left/right).
@@ -223,7 +216,7 @@ constexpr Value mask_left(const Value& value, size_t bits) noexcept
 }
 
 template <typename Value, if_integer<Value>>
-inline void mask_left_into(Value& value, size_t bits) noexcept
+constexpr void mask_left_into(Value& value, size_t bits) noexcept
 {
     value &= mask_left<Value>(bits);
 }
@@ -241,7 +234,7 @@ constexpr Value mask_right(const Value& value, size_t bits) noexcept
 }
 
 template <typename Value, if_integer<Value>>
-inline void mask_right_into(Value& value, size_t bits) noexcept
+constexpr void mask_right_into(Value& value, size_t bits) noexcept
 {
     value &= mask_right<Value>(bits);
 }
@@ -262,7 +255,7 @@ constexpr Value unmask_left(const Value& value, size_t bits) noexcept
 }
 
 template <typename Value, if_integer<Value>>
-inline void unmask_left_into(Value& value, size_t bits) noexcept
+constexpr void unmask_left_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_left<Value>(bits);
 }
@@ -280,7 +273,7 @@ constexpr Value unmask_right(const Value& value, size_t bits) noexcept
 }
 
 template <typename Value, if_integer<Value>>
-inline void unmask_right_into(Value& value, size_t bits) noexcept
+constexpr void unmask_right_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_right<Value>(bits);
 }
@@ -302,15 +295,15 @@ template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
-    return overflow && shift >= width<Value>() ? 0 :
-        value << shift % width<Value>();
+    constexpr auto span = width<Value>();
+    return overflow && shift >= span ? 0 : value << shift % span;
 }
 template <typename Value, if_unsigned_integer<Value>>
-inline void shift_left_into(Value& value, size_t shift,
+constexpr void shift_left_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
-    overflow&& shift >= width<Value>() ? value = 0 :
-        value <<= (shift % width<Value>());
+    constexpr auto span = width<Value>();
+    overflow && shift >= span ? value = 0 : value <<= shift % span;
 }
 
 // signed overloads (shift left of negative is undefined behavior).
@@ -318,14 +311,15 @@ template <typename Value, if_signed_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
-    return overflow && shift >= width<Value>() ? 0 :
-        to_signed<Value>(to_unsigned(value) << shift % width<Value>());
+    constexpr auto span = width<Value>();
+    return overflow && shift >= span ? 0 :
+        to_signed<Value>(to_unsigned(value) << shift % span);
 }
 template <typename Value, if_signed_integer<Value>>
-inline void shift_left_into(Value& value, size_t shift,
+constexpr void shift_left_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
-    // Less efficient than =<<, but defined behavior for negative value.
+    // Defined behavior for negative value.
     value = to_signed<Value>(shift_left(to_unsigned(value), shift, overflow));
 }
 
@@ -334,15 +328,15 @@ template <typename Value, if_unsigned_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
-    return overflow && shift >= width<Value>() ? 0 :
-        value >> shift % width<Value>();
+    constexpr auto span = width<Value>();
+    return overflow && shift >= span ? 0 : value >> shift % span;
 }
 template <typename Value, if_unsigned_integer<Value>>
-inline void shift_right_into(Value& value, size_t shift,
+constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
-    overflow&& shift >= width<Value>() ? value = 0 :
-        value >>= (shift % width<Value>());
+    constexpr auto span = width<Value>();
+    overflow&& shift >= span ? value = 0 : value >>= (shift % span);
 }
 
 // signed overloads (shift right of negative is unspecified behavior).
@@ -350,11 +344,12 @@ template <typename Value, if_signed_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
-    return overflow && shift >= width<Value>() ? 0 :
-        to_signed<Value>(to_unsigned(value) >> shift % width<Value>());
+    constexpr auto span = width<Value>();
+    return overflow && shift >= span ? 0 :
+        to_signed<Value>(to_unsigned(value) >> shift % span);
 }
 template <typename Value, if_signed_integer<Value>>
-inline void shift_right_into(Value& value, size_t shift,
+constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
     // Less efficient than =>>, but defined behavior for negative value.
@@ -372,33 +367,33 @@ inline void shift_right_into(Value& value, size_t shift,
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_left(const Value& value, size_t shift) noexcept
 {
-    return bit_or(
-        shift_left(value, shift % width<Value>()),
-        shift_right(value, width<Value>() - (shift % width<Value>())));
+    constexpr auto span = width<Value>();
+    return bit_or(shift_left(value, shift % span),
+        shift_right(value, span - (shift % span)));
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-inline void rotate_left_into(Value& value, size_t shift) noexcept
+constexpr void rotate_left_into(Value& value, size_t shift) noexcept
 {
-    value = bit_or(
-        shift_left(value, shift % width<Value>()),
-        shift_right(value, width<Value>() - (shift % width<Value>())));
+    constexpr auto span = width<Value>();
+    value = bit_or(shift_left(value, shift % span),
+        shift_right(value, span - (shift % span)));
 }
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr Value rotate_right(const Value& value, size_t shift) noexcept
 {
-    return bit_or(
-        shift_right(value, shift % width<Value>()),
-        shift_left(value, width<Value>() - (shift % width<Value>())));
+    constexpr auto span = width<Value>();
+    return bit_or(shift_right(value, shift % span),
+        shift_left(value, span - (shift % span)));
 }
 
 template <typename Value, if_unsigned_integer<Value>>
-inline void rotate_right_into(Value& value, size_t shift) noexcept
+constexpr void rotate_right_into(Value& value, size_t shift) noexcept
 {
-    value = bit_or(
-        shift_right(value, shift % width<Value>()),
-        shift_left(value, width<Value>() - (shift % width<Value>())));
+    constexpr auto span = width<Value>();
+    value = bit_or(shift_right(value, shift % span),
+        shift_left(value, span - (shift % span)));
 }
 
 } // namespace system
