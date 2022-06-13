@@ -27,6 +27,14 @@
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
+// safe
+// safe<-limits, power, addition
+// power<-limits
+// sign<-limits, power, division, addition, bits
+// power<-bits
+// addition<-division
+// division<-bits
+
 // cast.hpp (rename)
 // ============================================================================
 // Explicit [required]/possible operators for narrowing and sign casting.
