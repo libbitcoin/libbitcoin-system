@@ -66,11 +66,11 @@ constexpr Result decrement(Integer value) noexcept
 template <typename Integer, if_signed_integer<Integer>>
 constexpr bool overflows(Integer left, Integer right) noexcept
 {
-    // C++14: local variables allowed in constexpr.
+    const auto negative_right = is_negative(right);
     return !is_zero(right) &&
-        (!is_negative(right) ||
+        (!negative_right ||
             (left < std::numeric_limits<Integer>::min() - right)) &&
-        (is_negative(right) ||
+        (negative_right ||
             (left > std::numeric_limits<Integer>::max() - right));
 }
 
@@ -83,11 +83,11 @@ constexpr bool overflows(Integer left, Integer right) noexcept
 template <typename Integer, if_signed_integer<Integer>>
 constexpr bool underflows(Integer left, Integer right) noexcept
 {
-    // C++14: local variables allowed in constexpr.
+    const auto negative_right = is_negative(right);
     return !is_zero(right) &&
-        (!is_negative(right) ||
+        (!negative_right ||
             (left > std::numeric_limits<Integer>::max() + right)) &&
-        (is_negative(right) ||
+        (negative_right ||
             (left < std::numeric_limits<Integer>::min() + right));
 }
 
