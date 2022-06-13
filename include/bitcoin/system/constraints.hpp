@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 #define LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <string>
@@ -135,6 +136,22 @@ using if_integral_integer = enable_if_type<is_integer<Type>() &&
 template <typename Type>
 using if_non_integral_integer = enable_if_type<is_integer<Type>() &&
     !std::is_integral<Type>::value, bool>;
+
+// Type determination by required byte width and sign.
+
+template <size_t Bytes, if_non_zero<Bytes> = true,
+    if_not_greater<Bytes, sizeof(int64_t)> = true>
+using signed_type =
+    std::conditional_t<Bytes == 1, int8_t,
+        std::conditional_t<Bytes == 2, int16_t,
+            std::conditional_t<Bytes <= 4, int32_t, int64_t>>>;
+
+template <size_t Bytes, if_non_zero<Bytes> = true,
+    if_not_greater<Bytes, sizeof(uint64_t)> = true>
+using unsigned_type =
+    std::conditional_t<Bytes == 1, uint8_t,
+        std::conditional_t<Bytes == 2, uint16_t,
+            std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>;
 
 } // namespace system
 } // namespace libbitcoin

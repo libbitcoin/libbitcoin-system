@@ -138,8 +138,73 @@ static_assert(is_true<if_byte_insertable<std::vector<uint8_t>>>(), "");
 ////static_assert(!is_true<if_byte_insertable<uint32_t>>(), "");
 
 // if_same_width
+static_assert(is_true<if_same_width<bool, bool>>(), "");
+static_assert(is_true<if_same_width<int, int>>(), "");
+static_assert(is_true<if_same_width<int, uint32_t>>(), "");
+static_assert(is_true<if_same_width<int32_t, int>>(), "");
+static_assert(is_true<if_same_width<int8_t, int8_t>>(), "");
+static_assert(is_true<if_same_width<uint8_t, uint8_t>>(), "");
+static_assert(is_true<if_same_width<int16_t, uint16_t>>(), "");
+static_assert(is_true<if_same_width<uint16_t, int16_t>>(), "");
+static_assert(is_true<if_same_width<int32_t, uint32_t>>(), "");
+static_assert(is_true<if_same_width<uint32_t, int32_t>>(), "");
+static_assert(is_true<if_same_width<int64_t, uint64_t>>(), "");
+static_assert(is_true<if_same_width<uint64_t, int64_t>>(), "");
+////static_assert(!is_true<if_same_width<bool, int>>(), "");
+////static_assert(!is_true<if_same_width<int, bool>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int16_t>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int32_t>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int64_t>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int16_t>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int32_t>>(), "");
+////static_assert(!is_true<if_same_width<int8_t, int64_t>>(), "");
+////static_assert(!is_true<if_same_width<int16_t, int32_t>>(), "");
+////static_assert(!is_true<if_same_width<int16_t, int64_t>>(), "");
+////static_assert(!is_true<if_same_width<int32_t, int64_t>>(), "");
+
 // if_lesser_width
+////static_assert(!is_true<if_lesser_width<bool, bool>>(), "");
+////static_assert(!is_true<if_lesser_width<int, int>>(), "");
+////static_assert(!is_true<if_lesser_width<int, uint32_t>>(), "");
+////static_assert(!is_true<if_lesser_width<int32_t, int>>(), "");
+////static_assert(!is_true<if_lesser_width<int8_t, int8_t>>(), "");
+////static_assert(!is_true<if_lesser_width<uint8_t, uint8_t>>(), "");
+////static_assert(!is_true<if_lesser_width<int16_t, uint16_t>>(), "");
+////static_assert(!is_true<if_lesser_width<uint16_t, int16_t>>(), "");
+////static_assert(!is_true<if_lesser_width<int32_t, uint32_t>>(), "");
+////static_assert(!is_true<if_lesser_width<uint32_t, int32_t>>(), "");
+////static_assert(!is_true<if_lesser_width<int64_t, uint64_t>>(), "");
+////static_assert(!is_true<if_lesser_width<uint64_t, int64_t>>(), "");
+static_assert(is_true<if_lesser_width<bool, int>>(), "");
+////static_assert(!is_true<if_lesser_width<int, bool>>(), "");
+static_assert(is_true<if_lesser_width<int8_t, int16_t>>(), "");
+static_assert(is_true<if_lesser_width<int8_t, int32_t>>(), "");
+static_assert(is_true<if_lesser_width<int8_t, int64_t>>(), "");
+static_assert(is_true<if_lesser_width<int16_t, int32_t>>(), "");
+static_assert(is_true<if_lesser_width<int16_t, int64_t>>(), "");
+static_assert(is_true<if_lesser_width<int32_t, int64_t>>(), "");
+
 // if_not_lesser_width
+static_assert(is_true<if_not_lesser_width<bool, bool>>(), "");
+static_assert(is_true<if_not_lesser_width<int, int>>(), "");
+static_assert(is_true<if_not_lesser_width<int, uint32_t>>(), "");
+static_assert(is_true<if_not_lesser_width<int32_t, int>>(), "");
+static_assert(is_true<if_not_lesser_width<int8_t, int8_t>>(), "");
+static_assert(is_true<if_not_lesser_width<uint8_t, uint8_t>>(), "");
+static_assert(is_true<if_not_lesser_width<int16_t, uint16_t>>(), "");
+static_assert(is_true<if_not_lesser_width<uint16_t, int16_t>>(), "");
+static_assert(is_true<if_not_lesser_width<int32_t, uint32_t>>(), "");
+static_assert(is_true<if_not_lesser_width<uint32_t, int32_t>>(), "");
+static_assert(is_true<if_not_lesser_width<int64_t, uint64_t>>(), "");
+static_assert(is_true<if_not_lesser_width<uint64_t, int64_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<bool, int>>(), "");
+////static_assert(is_true<if_not_lesser_width<int, bool>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int8_t, int16_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int8_t, int32_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int8_t, int64_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int16_t, int32_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int16_t, int64_t>>(), "");
+////static_assert(!is_true<if_not_lesser_width<int32_t, int64_t>>(), "");
 
 // integer types
 
@@ -221,7 +286,21 @@ static_assert(is_true<if_same_signed_integer<unsigned char, uint8_t>>(), "");
 ////static_assert(!is_true<if_same_signed_integer<uint16_t, bool>>(), "");
 ////static_assert(!is_true<if_same_signed_integer<char, unsigned char>>(), "");
 
-// if_not_same_signed_integer
+////static_assert(!is_true<if_not_same_signed_integer<int, char>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<uint16_t, uint8_t>>(), "");
+static_assert(is_true<if_not_same_signed_integer<uint16_t, int>>(), "");
+static_assert(is_true<if_not_same_signed_integer<size_t, int>>(), "");
+static_assert(is_true<if_not_same_signed_integer<int, uint16_t>>(), "");
+static_assert(is_true<if_not_same_signed_integer<int, size_t>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<bool, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<char, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<int, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<float, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<double, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<int16_t, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<int32_t, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<int64_t, int>>(), "");
+////static_assert(!is_true<if_not_same_signed_integer<base, int>>(), "");
 
 // integral integer types
 
@@ -247,3 +326,23 @@ static_assert(is_true<if_non_integral_integer<uint256_t>>(), "");
 ////static_assert(!is_true<if_non_integral_integer<float>>(), "");
 ////static_assert(!is_true<if_non_integral_integer<double>>(), "");
 ////static_assert(!is_true<if_non_integral_integer<base>>(), "");
+
+// Unsigned type determination by byte width.
+static_assert(std::is_same<signed_type<1>, int8_t>::value, "");
+static_assert(std::is_same<signed_type<2>, int16_t>::value, "");
+static_assert(std::is_same<signed_type<3>, int32_t>::value, "");
+static_assert(std::is_same<signed_type<4>, int32_t>::value, "");
+static_assert(std::is_same<signed_type<5>, int64_t>::value, "");
+static_assert(std::is_same<signed_type<6>, int64_t>::value, "");
+static_assert(std::is_same<signed_type<7>, int64_t>::value, "");
+static_assert(std::is_same<signed_type<8>, int64_t>::value, "");
+
+// Signed type determination by byte width.
+static_assert(std::is_same<unsigned_type<1>, uint8_t>::value, "");
+static_assert(std::is_same<unsigned_type<2>, uint16_t>::value, "");
+static_assert(std::is_same<unsigned_type<3>, uint32_t>::value, "");
+static_assert(std::is_same<unsigned_type<4>, uint32_t>::value, "");
+static_assert(std::is_same<unsigned_type<5>, uint64_t>::value, "");
+static_assert(std::is_same<unsigned_type<6>, uint64_t>::value, "");
+static_assert(std::is_same<unsigned_type<7>, uint64_t>::value, "");
+static_assert(std::is_same<unsigned_type<8>, uint64_t>::value, "");
