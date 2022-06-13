@@ -362,7 +362,7 @@ bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
         [&](bool vary) noexcept
         {
             result = true;
-            value = to_int(vary);
+            value = to_int<Integer>(vary);
         },
         [&](int64_t vary) noexcept
         {
