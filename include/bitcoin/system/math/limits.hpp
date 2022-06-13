@@ -19,17 +19,33 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 
+#include <cstddef>
 #include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+/// The value is outside of the type bounds.
+template <typename By, typename Integer,
+    if_integer<By> = true, if_integer<Integer> = true>
+constexpr bool is_limited(Integer value) noexcept;
+
+/// The value exceeds the type bound or upper limit.
+template <typename By, typename Integer,
+    if_integer<By> = true, if_integer<Integer> = true>
+constexpr bool is_limited(Integer value, By maximum) noexcept;
+
+/// The value exceeds the lower or upper limit.
+template <typename By, typename Integer,
+    if_integer<By> = true, if_integer<Integer> = true>
+constexpr bool is_limited(Integer value, By minimum, By maximum) noexcept;
 
 /// Cast a value to Result, constrained to the limits of both types.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value) noexcept;
 
-/// Cast a value to Result, constrained to the specified upper limit.
+/// Cast a value to Result, constrained to the type and upper limit.
 /// Casting positive to/from negative may change the sign of the result.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
@@ -40,6 +56,36 @@ constexpr Result limit(Integer value, Result maximum) noexcept;
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept;
+
+/// The minimum value of an integer by byte size (1-8 bytes).
+template <size_t Bytes, typename Return = signed_type<Bytes>>
+constexpr Return minimum() noexcept;
+
+/// The maximum value of an integer by byte size (1-8 bytes).
+template <size_t Bytes, typename Return = signed_type<Bytes>>
+constexpr Return maximum() noexcept;
+
+/// Bitcoin serialization imposes the following domain constraint on integers.
+/// The domains are constrained by one less negative value than C++ integrals.
+/// This is a consequence of a valid encoding for both negative zero (e.g 0x80)
+/// and positive zero (e.g. 0x00). This is a side effect of the use of variable
+/// lenth serialization (sighash/stack) encoding of integers as byte vectors.
+/// 1 byte :[-2^07+1...2^07-1]
+/// 2 bytes:[-2^15+1...2^15-1]
+/// 3 bytes:[-2^23+1...2^23-1]
+/// 4 bytes:[-2^31+1...2^31-1]
+/// 5 bytes:[-2^39+1...2^39-1]
+/// 6 bytes:[-2^47+1...2^47-1]
+/// 7 bytes:[-2^55+1...2^55-1]
+/// 8 bytes:[-2^63+1...2^63-1]
+
+/// The minimum value of a bitcoin integer by byte size (1-8 bytes).
+template <size_t Bytes, typename Return = signed_type<Bytes>>
+constexpr Return bitcoin_min() noexcept;
+
+/// The maximum value of a bitcoin integer by byte size (1-8 bytes).
+template <size_t Bytes, typename Return = signed_type<Bytes>>
+constexpr Return bitcoin_max() noexcept;
 
 } // namespace system
 } // namespace libbitcoin

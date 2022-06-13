@@ -21,11 +21,37 @@
 
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+// is_limited
+
+template <typename By, typename Integer,
+    if_integer<By>, if_integer<Integer>>
+constexpr bool is_limited(Integer value) noexcept
+{
+    return is_limited(value, std::numeric_limits<By>::max());
+}
+
+template <typename By, typename Integer,
+    if_integer<By>, if_integer<Integer>>
+constexpr bool is_limited(Integer value, By maximum) noexcept
+{
+    return is_limited(value, std::numeric_limits<By>::min(), maximum);
+}
+
+template <typename By, typename Integer,
+    if_integer<By>, if_integer<Integer>>
+constexpr bool is_limited(Integer value, By minimum, By maximum) noexcept
+{
+    return is_lesser(value, minimum) || is_greater(value, maximum);
+}
+
+// limit
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
@@ -48,6 +74,38 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
     return is_lesser(value, minimum) ? minimum :
         (is_greater(value, maximum) ? maximum :
             possible_narrow_and_sign_cast<Result>(value));
+}
+
+// minimum/maximum
+
+template <size_t Bytes, typename Return>
+constexpr Return minimum() noexcept
+{
+    // Use unsigned domain to preclude overflow of signed before negation.
+    using positive = std::make_unsigned<Return>::type;
+    return -to_signed(power2<positive>(sub1(to_bits(Bytes))));
+}
+
+template <size_t Bytes, typename Return>
+constexpr Return maximum() noexcept
+{
+    // Use unsigned domain to preclude overflow of signed before negation.
+    using positive = std::make_unsigned<Return>::type;
+    return to_signed(sub1(power2<positive>(sub1(to_bits(Bytes)))));
+}
+
+// bitcoin_minimum/bitcoin_maximum
+
+template <size_t Bytes, typename Return>
+constexpr Return bitcoin_min() noexcept
+{
+    return add1(minimum<Bytes>());
+}
+
+template <size_t Bytes, typename Return>
+constexpr Return bitcoin_max() noexcept
+{
+    return maximum<Bytes>();
 }
 
 } // namespace system
