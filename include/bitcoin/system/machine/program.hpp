@@ -214,9 +214,10 @@ private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
-    template<size_t bits, typename Integer,
+    template<size_t Bytes, typename Integer,
+        if_signed_integer<Integer> = true,
         if_integral_integer<Integer> = true,
-        if_not_greater<bits, width<Integer>()> = true>
+        if_not_greater<Bytes, sizeof(Integer)> = true>
     bool peek_signed_unsafe(Integer& value, size_t index=zero) const noexcept;
 
     static chain::operations create_strip_ops(

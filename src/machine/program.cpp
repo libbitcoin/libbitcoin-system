@@ -86,33 +86,6 @@ inline program::variant_stack_ptr create_stack(
 template<class... Ts>
 struct overloaded : Ts... { using Ts::operator()...; };
 
-// Explicit deduction guide (not needed as of C++20).
-////template<class... Ts>
-////overloaded(Ts...)->overloaded<Ts...>;
-
-////// Only one statement remains, others discarded by compiler.
-////const auto visitor = [&](const auto& vary) noexcept
-////{
-////    using Vary = std::decay_t<decltype(vary)>;
-////
-////    if constexpr (if_same<Vary, bool>::value)
-////    {
-////        item = to_shared(number{ to_int(vary) }.data());
-////    }
-////    else if constexpr (if_same<Vary, int64_t>::value)
-////    {
-////        item = to_shared(number{ vary }.data());
-////    }
-////    else if constexpr (if_same<Vary, chunk_cptr>::value)
-////    {
-////        item = vary;
-////    }
-////    else
-////    {
-////        static_assert(false, "non-exhaustive visitor!");
-////    }
-////};
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -375,27 +348,15 @@ bool program::peek_bool_unsafe() const noexcept
     return item;
 }
 
-// [-2^31...2^31-1]
-static_assert(-power2<int64_t>(sub1(32)) == min_int32, "");
-static_assert(sub1(power2<int64_t>(sub1(32))) == max_int32, "");
-static_assert(limit<int32_t>(zero, min_int32, max_int32) == zero, "");
-static_assert(limit<int32_t>(min_int64, min_int32, max_int32) == min_int32, "");
-static_assert(limit<int32_t>(max_int64, min_int32, max_int32) == max_int32, "");
-
-// [-2^31+1...2^31-1]
-// The bitcoin minimum is +1 relative to min_int32 (because negative zero).
-static_assert(add1(-power2<int64_t>(sub1(32))) == min_int32 + 1, "");
-static_assert(sub1(+power2<int64_t>(sub1(32))) == max_int32, "");
-static_assert(ceilinged_divide(32, byte_bits) == 4, "");
-static_assert(ceilinged_divide(40, byte_bits) == 5, "");
-
 // private
 // Generalized integer peek for varying bit widths up to 64.
-template<size_t bits, typename Integer, if_integral_integer<Integer>,
-    if_not_greater<bits, width<Integer>()>>
+template<size_t Bytes, typename Integer,
+    if_signed_integer<Integer>,
+    if_integral_integer<Integer>,
+    if_not_greater<Bytes, sizeof(Integer)>>
 bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
 {
-    bool result{};
+    auto result = false;
     const overloaded visitor
     {
         [&](bool vary) noexcept
@@ -405,19 +366,17 @@ bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
         },
         [&](int64_t vary) noexcept
         {
-            // 4:[-2^31+1...2^31-1], 5:[-2^39+1...2^39-1]
-            constexpr auto minimum = add1(-power2<int64_t>(sub1(bits)));
-            constexpr auto maximum = sub1(+power2<int64_t>(sub1(bits)));
-
-            value = limit<Integer>(vary, minimum, maximum);
-            result = (value == vary);
+            // TODO: move to number.
+            if (!is_limited(vary, bitcoin_min<Bytes>(), bitcoin_max<Bytes>()))
+            {
+                result = true;
+                value = possible_narrow_cast<Integer>(vary);
+            }
         },
         [&](const chunk_cptr& vary) noexcept
         {
-            constexpr auto bytes = ceilinged_divide(bits, byte_bits);
-
             number stack_number{};
-            result = stack_number.set_data(*vary, bytes);
+            result = stack_number.set_data(*vary, Bytes);
             value = possible_narrow_cast<Integer>(stack_number.int64());
         }
     };
@@ -428,14 +387,14 @@ bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
 
 bool program::peek_signed32_unsafe(int32_t& value) const noexcept
 {
-    constexpr auto bits = width<int32_t>();
-    return peek_signed_unsafe<bits>(value);
+    constexpr auto bytes4 = sizeof(int32_t);
+    return peek_signed_unsafe<bytes4>(value);
 }
 
 bool program::peek_signed40_unsafe(int64_t& value) const noexcept
 {
-    constexpr auto bits = width<int8_t>() + width<int32_t>();
-    return peek_signed_unsafe<bits>(value);
+    constexpr auto bytes5 = sizeof(int32_t) + sizeof(int8_t);
+    return peek_signed_unsafe<bytes5>(value);
 }
 
 // ****************************************************************************
