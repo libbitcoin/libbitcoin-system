@@ -40,9 +40,16 @@ namespace system {
 namespace machine {
 
 using namespace system::chain;
+using namespace system::error;
 
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
+
+template <typename Type>
+constexpr Type get(const program::variant& vary) noexcept
+{
+    return std::get<Type>(vary);
+}
 
 constexpr bool is_valid_witness_stack(const chunk_cptrs& stack) noexcept
 {
@@ -82,9 +89,6 @@ inline program::variant_stack_ptr create_stack(
 
     return out;
 }
-
-template<class... Ts>
-struct overloaded : Ts... { using Ts::operator()...; };
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -153,17 +157,22 @@ program::program(const chain::transaction& tx, const input_iterator& input,
 
 // TODO: only perform is_push_size check on witness initialized stack.
 // TODO: others are either empty or presumed push_size from prevout script run.
-bool program::is_valid() const noexcept
+script_error_t program::validate() const noexcept
 {
     // TODO: nops rule must first be enabled in tests and config.
-    ////const auto nops_rule = is_enabled(forks::nops_rule);
-    constexpr auto nops_rule = true;
     const auto bip141 = is_enabled(forks::bip141_rule);
 
-    // nops_rule establishes script size limit.
+    // The script was determined by the parser to contain an invalid opcode.
+    if (is_prefail())
+        return error::prefail_script;
+
     // bip_141 introduces an initialized stack, so must validate.
-    return !(nops_rule && script_->is_oversized()) &&
-        !(bip141 && !valid_stack_);
+    if (bip141 && !valid_stack_)
+        return error::invalid_witness_stack;
+
+    // The nops_rule establishes script size limit.
+    return script_->is_oversized() ? error::invalid_script_size :
+        error::script_success;
 }
 
 bool program::is_true(bool clean_stack) const noexcept
@@ -299,20 +308,19 @@ bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
-// No size limits on push (of any type) or peek chunk.
 chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
 {
-    // Can see no way to obtain a 'const chunk_cptr&' here.
+    using namespace number;
     chunk_cptr item;
-    const overloaded visitor
+    const overloaded chunk_visitor
     {
         [&](bool vary) noexcept
         {
-            item = to_shared(number{ to_int(vary) }.data());
+            item = pointer::from_bool(vary);
         },
         [&](int64_t vary) noexcept
         {
-            item = to_shared(number{ vary }.data());
+            item = pointer::from_int(vary);
         },
         [&](const chunk_cptr& vary) noexcept
         {
@@ -320,15 +328,15 @@ chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
         }
     };
 
-    std::visit(visitor, peek_variant_unsafe(index));
+    std::visit(chunk_visitor, peek_variant_unsafe(index));
     return item;
 }
 
-// No chunk size limits on peek bool.
 bool program::peek_bool_unsafe() const noexcept
 {
+    using namespace number;
     bool item{};
-    const overloaded visitor
+    const overloaded bool_visitor
     {
         [&](bool vary) noexcept
         {
@@ -336,52 +344,46 @@ bool program::peek_bool_unsafe() const noexcept
         },
         [&](int64_t vary) noexcept
         {
-            item = to_bool(vary);
+            item = boolean::to_bool(vary);
         },
         [&](const chunk_cptr& vary) noexcept
         {
-            item = number::is_stack_true(*vary);
+            item = boolean::from_chunk(*vary);
         }
     };
 
-    std::visit(visitor, primary_->back());
+    std::visit(bool_visitor, primary_->back());
     return item;
 }
 
 // private
 // Generalized integer peek for varying bit widths up to 64.
+// Chunk to integer conversions are constrained by caller (32 or 40 bits).
 template<size_t Bytes, typename Integer,
     if_signed_integer<Integer>,
     if_integral_integer<Integer>,
     if_not_greater<Bytes, sizeof(Integer)>>
 bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
 {
-    auto result = false;
-    const overloaded visitor
+    using namespace number;
+    auto result = true;
+    const overloaded integer_visitor
     {
         [&](bool vary) noexcept
         {
-            result = true;
-            value = to_int<Integer>(vary);
+            value = boolean::to_int<Bytes>(vary);
         },
         [&](int64_t vary) noexcept
         {
-            // TODO: move to number.
-            if (!is_limited(vary, bitcoin_min<Bytes>(), bitcoin_max<Bytes>()))
-            {
-                result = true;
-                value = possible_narrow_cast<Integer>(vary);
-            }
+            result = integer<Bytes>::from_int(value, vary);
         },
         [&](const chunk_cptr& vary) noexcept
         {
-            number stack_number{};
-            result = stack_number.set_data(*vary, Bytes);
-            value = possible_narrow_cast<Integer>(stack_number.int64());
+            result = integer<Bytes>::from_chunk(value , *vary);
         }
     };
 
-    std::visit(visitor, peek_variant_unsafe(index));
+    std::visit(integer_visitor, peek_variant_unsafe(index));
     return result;
 }
 
@@ -661,10 +663,12 @@ script::cptr program::subscript(
     const auto stop = script_->ops().end();
 
     // If none of the strip ops are found, return the subscript.
+    // Prefail is not circumvented as subscript used only for signature hash.
     if (!intersecting(script_->offset, stop, strip))
         return script_;
 
     // Create new script from stripped copy of subscript operations.
+    // Prefail is not copied to the subscript, used only for signature hash.
     BC_PUSH_WARNING(NO_NEW_DELETE)
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return to_shared(new script{ difference(script_->offset, stop, strip) });
@@ -756,6 +760,89 @@ void program::signature_hash(hash_cache& cache, const script& sub,
         cache.emplace(flags, signature_hash(sub, flags));
     BC_POP_WARNING()
 }
+
+// Invoked by op_equal and op_equal_verify only.
+// Integers are unconstrained as these are stack chunk comparisons.
+bool operator==(const program::variant& left,
+    const program::variant& right) noexcept
+{
+    using namespace number;
+    enum { variant_bool, variant_int64, variant_chunk };
+    auto result = true;
+
+    // Methods bound at compile time (free).
+    // Runtime switch on static index (cheap).
+    const program::overloaded equality_visitor
+    {
+        [&](bool vary) noexcept
+        {
+            switch (right.index())
+            {
+                // Optimal compare, no type cast (free).
+                case variant_bool:
+                    result = get<bool>(right) == vary;
+                    break;
+
+                // Optimal compare, native type cast (free).
+                case variant_int64:
+                    result = get<int64_t>(right) == boolean::to_int(vary);
+                    break;
+
+                // Conventional bitcoin compare, bool->chunk conversion (cheap).
+                case variant_chunk:
+                default:
+                    result = *get<chunk_cptr>(right) == chunk::from_bool(vary);
+                    break;
+            }
+        },
+        [&](int64_t vary) noexcept
+        {
+            switch (right.index())
+            {                    
+                // Optimal compare, native type cast (free).
+                case variant_bool:
+                    result = boolean::to_int(get<bool>(right)) == vary;
+                    break;
+
+                // Optimal compare, no type cast (free).
+                case variant_int64:
+                    result = get<int64_t>(right) == vary;
+                    break;
+
+                // Conventional bitcoin compare, int->chunk conversion (costly).
+                case variant_chunk:
+                default:
+                    result = *get<chunk_cptr>(right) == chunk::from_int(vary);
+                    break;
+            }
+        },
+        [&](const chunk_cptr& vary) noexcept
+        {
+            switch (right.index())
+            {
+                // Conventional bitcoin compare, bool->chunk conversion (cheap).
+                case variant_bool:
+                    result = *pointer::from_bool(get<bool>(right)) == *vary;
+                    break;
+
+                // Conventional bitcoin compare, int->chunk conversion (costly).
+                case variant_int64:
+                    result = *pointer::from_int(get<int64_t>(right)) == *vary;
+                    break;
+
+                // Optimal compare, no type cast (free).
+                default:
+                case variant_chunk:
+                    result = *get<chunk_cptr>(right) == *vary;
+                    break;
+            }
+        }
+    };
+
+    std::visit(equality_visitor, left);
+    return result;
+}
+
 
 } // namespace machine
 } // namespace system

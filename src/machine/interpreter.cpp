@@ -29,6 +29,22 @@
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+// Push data revalidation (op.is_underclaimed()):
+// Incorrectly-sized push data is validated upon op parse, setting an invalid
+// opcode, the underflow bit, and the op data. This invalid opcode will result
+// in script execution failure if the script is evaluated, but is otherwise
+// valid (such as for a coinbase input script). Underflow can only occur at the
+// end of a script. All bytes are valid script, but as scripts have finite
+// length, the last operation may be an undersized push data. The retention of
+// the undersized data within an invalid op allows for the script to be
+// serialized and for the proper size and hash of the transaction computed.
+// The invalid opcode with underflow data is serialized as data bytes with the
+// original opcode stored in the data member, but seen here as op_xor.
+// By design it is not possible to populate an op.data size that does not
+// correspond to the op.code. Size mismatch is revalidated here as final
+// insurance against derived classes that may alter this behavior. This ensures
+// that an opcode that does not push correctly-sized data here will fail.
+
 namespace libbitcoin {
 namespace system {
 namespace machine {
@@ -39,50 +55,33 @@ using namespace system::error;
 // Operation handlers.
 // ----------------------------------------------------------------------------
 
-// Incorrectly-sized push data is validated upon op parse, setting an invalid
-// opcode, the underflow bit, and the op data. This invalid opcode will result
-// in script execution failure if the script is evaluated, but is otherwise
-// valid (such as for a coinbase input script). Underflow can only occur at the
-// end of a script. All bytes are valid script, but as scripts have finite
-// length, the last operation may be an undersized push data. The retention of
-// the undersized data within an invalid op allows for the script to be
-// serialized and for the proper size and hash of the transaction computed.
-// By design it is not possible to populate an op.data size that does not
-// correspond to the op.code. Size mismatch is revalidated here as final
-// insurance against derived classes that may alter this behavior. This ensures
-// that an opcode that does not push correctly-sized data here will fail.
-
 op_error_t interpreter::op_unevaluated(opcode code) const noexcept
 {
     return operation::is_invalid(code) ? error::op_invalid :
         error::op_reserved;
 }
 
+// TODO: nops_rule *must* be enabled in test cases and default config.
+// TODO: cats_rule should be enabled in test cases and default config.
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
 op_error_t interpreter::op_nop(opcode) const noexcept
 {
     if (is_enabled(forks::nops_rule))
         return error::op_success;
 
-    // TODO: nops_rule *must* be enabled in test cases and default config.
-    // TODO: cats_rule should be enabled in test cases and default config.
     ////return op_unevaluated(code);
     return error::op_success;
 }
 
 op_error_t interpreter::op_push_number(int8_t value) noexcept
 {
-    // run_op controls this parameterization.
-    BC_ASSERT(value >= -1 && value <= 16);
-
     push_signed64(value);
     return error::op_success;
 }
 
 op_error_t interpreter::op_push_size(const operation& op) noexcept
 {
-    // Data size must match op code declaration.
-    if (op.data().size() != static_cast<uint8_t>(op.code()))
+    if (op.is_underclaimed())
         return error::op_push_size;
 
     push_cptr(op.data_ptr());
@@ -91,8 +90,7 @@ op_error_t interpreter::op_push_size(const operation& op) noexcept
 
 op_error_t interpreter::op_push_one_size(const operation& op) noexcept
 {
-    // Data size must not exceed opcode declaration.
-    if (op.data().size() > max_uint8)
+    if (op.is_underclaimed())
         return error::op_push_one_size;
 
     push_cptr(op.data_ptr());
@@ -101,8 +99,7 @@ op_error_t interpreter::op_push_one_size(const operation& op) noexcept
 
 op_error_t interpreter::op_push_two_size(const operation& op) noexcept
 {
-    // Data size must not exceed opcode declaration.
-    if (op.data().size() > max_uint16)
+    if (op.is_underclaimed())
         return error::op_push_two_size;
 
     push_cptr(op.data_ptr());
@@ -111,8 +108,7 @@ op_error_t interpreter::op_push_two_size(const operation& op) noexcept
 
 op_error_t interpreter::op_push_four_size(const operation& op) noexcept
 {
-    // Data size must not exceed opcode declaration.
-    if (op.data().size() > max_uint32)
+    if (op.is_underclaimed())
         return error::op_push_four_size;
 
     push_cptr(op.data_ptr());
@@ -399,8 +395,8 @@ op_error_t interpreter::op_roll() noexcept
     if (!pop_index32(index))
         return error::op_roll;
 
-    // Will this move the const referenced variant?
-    variant temporary = std::move(peek_variant_unsafe(index));
+    // Copy variant because should be deleted before push (no stack alloc).
+    variant temporary{ peek_variant_unsafe(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
@@ -521,7 +517,7 @@ op_error_t interpreter::op_equal() noexcept
     if (size() < 2)
         return error::op_equal;
 
-    push_bool(*pop_cptr_unsafe() == *pop_cptr_unsafe());
+    push_bool(pop_variant_unsafe() == pop_variant_unsafe());
     return error::op_success;
 }
 
@@ -530,7 +526,7 @@ op_error_t interpreter::op_equal_verify() noexcept
     if (size() < 2)
         return error::op_equal_verify1;
 
-    return (*pop_cptr_unsafe() == *pop_cptr_unsafe()) ?
+    return (pop_variant_unsafe() == pop_variant_unsafe()) ?
         error::op_success : error::op_equal_verify2;
 }
 
@@ -596,6 +592,7 @@ op_error_t interpreter::op_not() noexcept
     if (!pop_signed32(number))
         return error::op_not;
 
+    // Do not pop_bool() above, as number must be validated.
     push_bool(!to_bool(number));
     return error::op_success;
 }
@@ -1360,26 +1357,27 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
 
 code interpreter::run() noexcept
 {
-    error::op_error_t ec;
+    error::op_error_t operation_ec;
+    error::script_error_t script_ec;
 
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
     // Enforce first op not reserved (not skippable by condition).
-    if (!is_valid())
-        return error::invalid_script;
+    if ((script_ec = validate()))
+        return script_ec;
 
     for (auto it = begin(); it != end(); ++it)
     {
         // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
 
-        // Enforce push data limit (520) [0.3.6+].
-        if (op.is_oversized())
-            return error::invalid_push_data_size;
-
         // Enforce unconditionally invalid opcodes ("disabled").
         if (op.is_invalid())
             return error::op_invalid;
+
+        // Rule imposed by [0.3.6] soft fork.
+        if (op.is_oversized())
+            return error::invalid_push_data_size;
 
         // Enforce opcode count limit (201).
         if (!ops_increment(op))
@@ -1389,8 +1387,8 @@ code interpreter::run() noexcept
         if (if_(op))
         {
             // Evaluate opcode (switch).
-            if ((ec = run_op(it)))
-                return ec;
+            if ((operation_ec = run_op(it)))
+                return operation_ec;
 
             // Enforce combined stacks size limit (1,000).
             if (is_overflow())

@@ -54,6 +54,9 @@ public:
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
 
+    template<class... Ts>
+    struct overloaded : Ts... { using Ts::operator()...; };
+
     /// Input script run (default/empty stack).
     program(const chain::transaction& transaction, const input_iterator& input,
         uint32_t forks) noexcept;
@@ -77,7 +80,7 @@ public:
     ~program() = default;
 
     /// Program validity.
-    bool is_valid() const noexcept;
+    error::script_error_t validate() const noexcept;
 
     /// Program result.
     bool is_true(bool clean) const noexcept;
@@ -90,6 +93,11 @@ protected:
 
     /// Constants.
     /// -----------------------------------------------------------------------
+
+    inline bool is_prefail() const noexcept
+    {
+        return script_->is_prefail();
+    }
 
     inline op_iterator begin() const noexcept
     {
@@ -258,8 +266,8 @@ private:
     const bool valid_stack_;
 
     // Three stacks.
-    variant_stack_ptr primary_; // variant_stack_ptr
-    std::vector<variant> alternate_{}; // variant_stack
+    variant_stack_ptr primary_;
+    std::vector<variant> alternate_{};
     bool_stack condition_{};
 
     // Accumulator.
@@ -268,6 +276,9 @@ private:
     // Condition stack optimization.
     size_t negative_condition_count_{};
 };
+
+bool operator==(const program::variant& left,
+    const program::variant& right) noexcept;
 
 } // namespace machine
 } // namespace system
