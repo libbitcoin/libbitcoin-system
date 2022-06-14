@@ -58,7 +58,7 @@ using namespace bc::system::machine;
 // ----------------------------------------------------------------------------
 
 script::script() noexcept
-  : script(operations{}, false)
+  : script(operations{}, false, false)
 {
 }
 
@@ -67,22 +67,24 @@ script::~script() noexcept
 }
 
 script::script(script&& other) noexcept
-  : script(std::move(other.ops_), other.valid_)
+  : script(std::move(other.ops_), other.valid_, other.prefail_)
 {
 }
 
 script::script(const script& other) noexcept
-  : script(other.ops_, other.valid_)
+  : script(other.ops_, other.valid_, other.prefail_)
 {
 }
 
+// Prefail is not populated.
 script::script(operations&& ops) noexcept
-  : script(std::move(ops), true)
+  : script(std::move(ops), true, false)
 {
 }
 
+// Prefail is not populated.
 script::script(const operations& ops) noexcept
-  : script(ops, true)
+  : script(ops, true, false)
 {
 }
 
@@ -119,14 +121,14 @@ script::script(const std::string& mnemonic) noexcept
 }
 
 // protected
-script::script(operations&& ops, bool valid) noexcept
-  : ops_(std::move(ops)), valid_(valid), offset(ops_.begin())
+script::script(operations&& ops, bool valid, bool prefail) noexcept
+  : ops_(std::move(ops)), valid_(valid), prefail_(prefail), offset(ops_.begin())
 {
 }
 
 // protected
-script::script(const operations& ops, bool valid) noexcept
-  : ops_(ops), valid_(valid), offset(ops_.begin())
+script::script(const operations& ops, bool valid, bool prefail) noexcept
+  : ops_(ops), valid_(valid), prefail_(prefail), offset(ops_.begin())
 {
 }
 
@@ -137,6 +139,7 @@ script& script::operator=(script&& other) noexcept
 {
     ops_ = std::move(other.ops_);
     valid_ = other.valid_;
+    prefail_ = other.prefail_;
     offset = ops_.begin();
     return *this;
 }
@@ -145,6 +148,7 @@ script& script::operator=(const script& other) noexcept
 {
     ops_ = other.ops_;
     valid_ = other.valid_;
+    prefail_ = other.prefail_;
     offset = ops_.begin();
     return *this;
 }
@@ -181,6 +185,7 @@ script script::from_data(reader& source, bool prefix) noexcept
 {
     auto size = zero;
     auto start = zero;
+    auto prefail = false;
 
     if (prefix)
     {
@@ -195,7 +200,10 @@ script script::from_data(reader& source, bool prefix) noexcept
     ops.reserve(op_count(source));
 
     while (!source.is_exhausted())
+    {
         ops.emplace_back(source);
+        prefail |= !ops.back().is_invalid();
+    }
 
     if (prefix)
     {
@@ -207,7 +215,7 @@ script script::from_data(reader& source, bool prefix) noexcept
             source.invalidate();
     }
 
-    return { std::move(ops), source };
+    return { std::move(ops), source, prefail };
 }
 
 // static/private
@@ -215,6 +223,7 @@ script script::from_string(const std::string& mnemonic) noexcept
 {
     // There is always one operation per non-empty string token.
     auto tokens = split(mnemonic);
+    ////auto prefail = false;
 
     // Split always returns at least one token, and when trimming it will be
     // empty only if there was nothing but whitespace in the mnemonic.
@@ -228,8 +237,14 @@ script script::from_string(const std::string& mnemonic) noexcept
     for (const auto& token: tokens)
     {
         ops.emplace_back(token);
-        if (!ops.back().is_valid())
-            return {};
+
+        // Prefail is not enabled on text deserialization.
+        // This has an effect on text generated test cases.
+        ////prefail != ops.back().is_invalid();
+
+        // Allow parse of script with in opcode.is_invalid().
+        ////if (!ops.back().is_valid())
+        ////    return {};
     }
 
     return { std::move(ops) };
@@ -306,6 +321,12 @@ bool script::is_valid() const noexcept
     return valid_;
 }
 
+bool script::is_prefail() const noexcept
+{
+    // The script contains an invalid opcode and will thus fail evaluation.
+    return prefail_;
+}
+
 const operations& script::ops() const noexcept
 {
     return ops_;
@@ -373,7 +394,7 @@ bool script::is_coinbase_pattern(const operations& ops, size_t height) noexcept
 {
     return !ops.empty()
         && ops[0].is_nominal_push()
-        && ops[0].data() == number(height).data();
+        && ops[0].data() == number::chunk::from_int(to_unsigned(height));
 }
 
 ////// This is slightly more efficient because the script does not get parsed,

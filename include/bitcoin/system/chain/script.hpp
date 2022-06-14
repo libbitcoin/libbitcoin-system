@@ -59,10 +59,8 @@ public:
     /// Metadata is defaulted on copy/assign.
     script(script&& other) noexcept;
     script(const script& other) noexcept;
-
     script(operations&& ops) noexcept;
     script(const operations& ops) noexcept;
-
     script(const data_slice& data, bool prefix) noexcept;
     script(std::istream&& stream, bool prefix) noexcept;
     script(std::istream& stream, bool prefix) noexcept;
@@ -95,6 +93,7 @@ public:
 
     /// Native properties.
     bool is_valid() const noexcept;
+    bool is_prefail() const noexcept;
     const operations& ops() const noexcept;
 
     /// Computed properties.
@@ -177,8 +176,8 @@ public:
     bool is_unspendable() const noexcept;
 
 protected:
-    script(operations&& ops, bool valid) noexcept;
-    script(const operations& ops, bool valid) noexcept;
+    script(operations&& ops, bool valid, bool fails) noexcept;
+    script(const operations& ops, bool valid, bool fails) noexcept;
 
 private:
     static script from_data(reader& source, bool prefix) noexcept;
@@ -188,6 +187,7 @@ private:
     // Script should be stored as shared.
     operations ops_;
     bool valid_;
+    bool prefail_;
 
 public:
     /// Public mutable metadata access, not copied or compared for equality.
