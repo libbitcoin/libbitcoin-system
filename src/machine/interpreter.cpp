@@ -931,7 +931,9 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    if (!pop_cptr_unsafe()->empty() && bip147)
+    // This check is unique in that it requires a single "zero" on the stack.
+    // True here implies variant non-zero ('true', '!= 0', or other than '[]').
+    if (pop_strict_bool_unsafe() && bip147)
         return error::op_check_multisig_verify9;
 
     uint8_t flags;

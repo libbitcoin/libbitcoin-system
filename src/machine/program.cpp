@@ -243,6 +243,13 @@ bool program::pop_bool_unsafe() noexcept
     return value;
 }
 
+bool program::pop_strict_bool_unsafe() noexcept
+{
+    const auto value = peek_strict_bool_unsafe();
+    drop_unsafe();
+    return value;
+}
+
 bool program::pop_signed32_unsafe(int32_t& value) noexcept
 {
     const auto result = peek_signed32_unsafe(value);
@@ -353,6 +360,30 @@ bool program::peek_bool_unsafe() const noexcept
     };
 
     std::visit(bool_visitor, primary_->back());
+    return item;
+}
+
+bool program::peek_strict_bool_unsafe() const noexcept
+{
+    using namespace number;
+    bool item{};
+    const overloaded strict_bool_visitor
+    {
+        [&](bool vary) noexcept
+        {
+            item = vary;
+        },
+        [&](int64_t vary) noexcept
+        {
+            item = boolean::to_bool(vary);
+        },
+        [&](const chunk_cptr& vary) noexcept
+        {
+            item = boolean::strict_from_chunk(*vary);
+        }
+    };
+
+    std::visit(strict_bool_visitor, primary_->back());
     return item;
 }
 

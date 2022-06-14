@@ -58,7 +58,7 @@ public:
     {
         out = 0;
 
-        if (vary.empty())
+        if (strict_zero(vary))
             return true;
 
         // Disallows integers that exceed overflow constraint.
@@ -75,6 +75,11 @@ public:
     }
 
 protected:
+    static constexpr bool strict_zero(const data_chunk& vary) noexcept
+    {
+        return vary.empty();
+    }
+
     static constexpr bool is_overflow(int64_t value) noexcept
     {
         // Encoding of negative zero constricts the integer domain by one.
@@ -153,7 +158,7 @@ public:
         // Booleans not overflow constrained, so cannot be converted as int.
         // Any length of bytes is considered valid. Negative zero is false.
 
-        if (vary.empty())
+        if (strict_false(vary))
             return false;
         if (!is_sign_byte(vary.back()))
             return true;
@@ -161,7 +166,19 @@ public:
             std::prev(vary.end()), is_nonzero<uint8_t>);
     }
 
+    static constexpr bool strict_from_chunk(const data_chunk& vary) noexcept
+    {
+        // A logical zero equates to any +/- sequence of zero bytes up to 520.
+        // Strict bool tests for normal false/zero, or a single empty byte.
+        return strict_false(vary);
+    }
+
 protected:
+    static constexpr bool strict_false(const data_chunk& vary) noexcept
+    {
+        return vary.empty();
+    }
+
     static constexpr bool is_sign_byte(uint8_t byte) noexcept
     {
         return byte == positive_sign_byte || byte == negative_sign_byte;

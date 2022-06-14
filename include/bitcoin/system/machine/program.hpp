@@ -140,6 +140,7 @@ protected:
     /// Primary stack pop (unsafe, typed).
     chunk_cptr pop_cptr_unsafe() noexcept;
     bool pop_bool_unsafe() noexcept;
+    bool pop_strict_bool_unsafe() noexcept;
     bool pop_signed32_unsafe(int32_t& value) noexcept;
 
     /// wrappers (safe)
@@ -152,6 +153,7 @@ protected:
     /// Primary stack peek (unsafe, typed).
     chunk_cptr peek_cptr_unsafe(size_t index=zero) const noexcept;
     bool peek_bool_unsafe() const noexcept;
+    bool peek_strict_bool_unsafe() const noexcept;
     ////bool peek_signed_unsafe<Integer>(Integer& value) const noexcept;
 
     /// wrappers (unsafe)
