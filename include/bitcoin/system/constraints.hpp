@@ -31,127 +31,126 @@
 namespace libbitcoin {
 namespace system {
 
-// C++11: std::integral_constant
 // C++11: std::conditional
 // C++14: std::conditional_t
 // C++17: std::conjunction/conjunction_v
 // C++17: std::disjunction/disjunction_v
 // C++17: std::negation/negation_v
+// C++11: std::integral_constant
 
-// C++14: use enable_if_t
-template <bool Bool, typename Type = void>
-using enable_if_type = typename std::enable_if<Bool, Type>::type;
+/// Type alias for unsigned size_t.
+using signed_size_t = std::make_signed<size_t>::type;
 
-// values
-
-template <size_t Value>
-using if_odd = enable_if_type<is_odd(Value), bool>;
+/// Values.
 
 template <size_t Value>
-using if_even = enable_if_type<is_even(Value), bool>;
+using if_odd = std::enable_if_t<is_odd(Value), bool>;
 
 template <size_t Value>
-using if_non_zero = enable_if_type<!is_zero(Value), bool>;
+using if_even = std::enable_if_t<is_even(Value), bool>;
+
+template <size_t Value>
+using if_non_zero = std::enable_if_t<!is_zero(Value), bool>;
 
 template <size_t Value, size_t Size>
-using if_size = enable_if_type<Value == Size, bool>;
+using if_size = std::enable_if_t<Value == Size, bool>;
 
 template <size_t Left, size_t Right>
-using if_greater = enable_if_type<(Left > Right), bool>;
+using if_greater = std::enable_if_t<(Left > Right), bool>;
 
 template <size_t Left, size_t Right>
-using if_not_greater = enable_if_type<!(Left > Right), bool>;
+using if_not_greater = std::enable_if_t<!(Left > Right), bool>;
 
 template <size_t Left, size_t Right>
-using if_lesser = enable_if_type<(Left < Right), bool>;
+using if_lesser = std::enable_if_t<(Left < Right), bool>;
 
 template <size_t Left, size_t Right>
-using if_not_lesser = enable_if_type<!(Left < Right), bool>;
+using if_not_lesser = std::enable_if_t<!(Left < Right), bool>;
 
-// types
+/// Types.
 
 template <typename Left, typename Right>
 using if_same = std::is_same<Left, Right>;
 
 template <typename Type>
-using if_byte = enable_if_type<!(width<Type>() > width<uint8_t>()), bool>;
+using if_byte = std::enable_if_t<!(width<Type>() > width<uint8_t>()), bool>;
 
 template <typename Type>
-using if_bytes = enable_if_type<(width<Type>() > width<uint8_t>()), bool>;
+using if_bytes = std::enable_if_t<(width<Type>() > width<uint8_t>()), bool>;
 
 template <typename Type>
-using if_const = enable_if_type<std::is_const<Type>::value, bool>;
+using if_const = std::enable_if_t<std::is_const<Type>::value, bool>;
 
 template <typename Type>
-using if_non_const = enable_if_type<!std::is_const<Type>::value, bool>;
+using if_non_const = std::enable_if_t<!std::is_const<Type>::value, bool>;
 
 template <typename Base, typename Type>
-using if_base_of = enable_if_type<
+using if_base_of = std::enable_if_t<
     std::is_base_of<Base, Type>::value, bool>;
 
 template <typename Type>
-using if_byte_insertable = enable_if_type<
+using if_byte_insertable = std::enable_if_t<
     std::is_base_of<std::vector<uint8_t>, Type>::value ||
     std::is_base_of<std::string, Type>::value, bool>;
 
 template <typename Left, typename Right>
-using if_same_width = enable_if_type<width<Left>() == width<Right>(), bool>;
+using if_same_width = std::enable_if_t<width<Left>() == width<Right>(), bool>;
 
 template <typename Left, typename Right>
-using if_lesser_width = enable_if_type<width<Left>() < width<Right>(), bool>;
+using if_lesser_width = std::enable_if_t<width<Left>() < width<Right>(), bool>;
 
 template <typename Left, typename Right>
-using if_not_lesser_width = enable_if_type<width<Left>() >= width<Right>(),
+using if_not_lesser_width = std::enable_if_t<width<Left>() >= width<Right>(),
     bool>;
 
-// integer types
+// Integer types.
 
 template <typename Type>
-using if_integer = enable_if_type<is_integer<Type>(), bool>;
+using if_integer = std::enable_if_t<is_integer<Type>(), bool>;
 
 template <typename Type>
-using if_signed_integer = enable_if_type<is_integer<Type>() &&
+using if_signed_integer = std::enable_if_t<is_integer<Type>() &&
     std::is_signed<Type>::value, bool>;
 
 template <typename Type>
-using if_unsigned_integer = enable_if_type<is_integer<Type>() &&
+using if_unsigned_integer = std::enable_if_t<is_integer<Type>() &&
     !std::is_signed<Type>::value, bool>;
 
 template <typename Left, typename Right>
-using if_same_signed_integer = enable_if_type<
+using if_same_signed_integer = std::enable_if_t<
     is_integer<Left>() && is_integer<Right>() &&
     (std::is_signed<Left>::value == std::is_signed<Right>::value), bool>;
 
 template <typename Left, typename Right>
-using if_not_same_signed_integer = enable_if_type<
+using if_not_same_signed_integer = std::enable_if_t<
     is_integer<Left>() && is_integer<Right>() &&
     (std::is_signed<Left>::value != std::is_signed<Right>::value), bool>;
 
-// integral integer types
+// Integral integer types.
 
 template <typename Type>
-using if_integral_integer = enable_if_type<is_integer<Type>() &&
+using if_integral_integer = std::enable_if_t<is_integer<Type>() &&
     std::is_integral<Type>::value, bool>;
 
 template <typename Type>
-using if_non_integral_integer = enable_if_type<is_integer<Type>() &&
+using if_non_integral_integer = std::enable_if_t<is_integer<Type>() &&
     !std::is_integral<Type>::value, bool>;
 
-// Type determination by required byte width and sign.
+/// Type determination by required byte width and sign.
 
-template <size_t Bytes, if_non_zero<Bytes> = true,
-    if_not_greater<Bytes, sizeof(int64_t)> = true>
+template <size_t Bytes, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =
-    std::conditional_t<Bytes == 1, int8_t,
-        std::conditional_t<Bytes == 2, int16_t,
-            std::conditional_t<Bytes <= 4, int32_t, int64_t>>>;
+    std::conditional_t<Bytes == 0, signed_size_t,
+        std::conditional_t<Bytes == 1, int8_t,
+            std::conditional_t<Bytes == 2, int16_t,
+                std::conditional_t<Bytes <= 4, int32_t, int64_t>>>>;
 
-template <size_t Bytes, if_non_zero<Bytes> = true,
-    if_not_greater<Bytes, sizeof(uint64_t)> = true>
+template <size_t Bytes, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
-    std::conditional_t<Bytes == 1, uint8_t,
-        std::conditional_t<Bytes == 2, uint16_t,
-            std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>;
+    std::conditional_t < Bytes == 0, size_t,
+        std::conditional_t<Bytes == 1, uint8_t,
+            std::conditional_t<Bytes == 2, uint16_t,
+                std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>>;
 
 } // namespace system
 } // namespace libbitcoin

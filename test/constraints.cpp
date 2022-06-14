@@ -39,6 +39,9 @@ constexpr bool is_true()
     return !std::is_same<Type, std::enable_if<false, bool>>::value;
 }
 
+// Type alias.
+static_assert(std::is_same<std::make_signed<size_t>::type, signed_size_t>::value, "");
+
 // values
 
 static_assert(is_true<if_odd<1>>(), "");
@@ -328,6 +331,7 @@ static_assert(is_true<if_non_integral_integer<uint256_t>>(), "");
 ////static_assert(!is_true<if_non_integral_integer<base>>(), "");
 
 // Unsigned type determination by byte width.
+static_assert(std::is_same<signed_type<0>, signed_size_t>::value, "");
 static_assert(std::is_same<signed_type<1>, int8_t>::value, "");
 static_assert(std::is_same<signed_type<2>, int16_t>::value, "");
 static_assert(std::is_same<signed_type<3>, int32_t>::value, "");
@@ -338,6 +342,7 @@ static_assert(std::is_same<signed_type<7>, int64_t>::value, "");
 static_assert(std::is_same<signed_type<8>, int64_t>::value, "");
 
 // Signed type determination by byte width.
+static_assert(std::is_same<unsigned_type<0>, size_t>::value, "");
 static_assert(std::is_same<unsigned_type<1>, uint8_t>::value, "");
 static_assert(std::is_same<unsigned_type<2>, uint16_t>::value, "");
 static_assert(std::is_same<unsigned_type<3>, uint32_t>::value, "");
