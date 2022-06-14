@@ -315,11 +315,17 @@ bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
+// TODO: optimize this so that top calls don't require iterators.
+// peek_cptr_unsafe()
+// peek_variant_unsafe()
+// peek_signed_unsafe()
+
 chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
 {
     using namespace number;
     chunk_cptr item;
-    const overloaded chunk_visitor
+
+    std::visit(overload
     {
         [&](bool vary) noexcept
         {
@@ -333,9 +339,8 @@ chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
         {
             item = vary;
         }
-    };
+    }, peek_variant_unsafe(index));
 
-    std::visit(chunk_visitor, peek_variant_unsafe(index));
     return item;
 }
 
@@ -343,7 +348,8 @@ bool program::peek_bool_unsafe() const noexcept
 {
     using namespace number;
     bool item{};
-    const overloaded bool_visitor
+
+    std::visit(overload
     {
         [&](bool vary) noexcept
         {
@@ -357,9 +363,7 @@ bool program::peek_bool_unsafe() const noexcept
         {
             item = boolean::from_chunk(*vary);
         }
-    };
-
-    std::visit(bool_visitor, primary_->back());
+    }, primary_->back());
     return item;
 }
 
@@ -367,7 +371,8 @@ bool program::peek_strict_bool_unsafe() const noexcept
 {
     using namespace number;
     bool item{};
-    const overloaded strict_bool_visitor
+
+    std::visit(overload
     {
         [&](bool vary) noexcept
         {
@@ -381,9 +386,7 @@ bool program::peek_strict_bool_unsafe() const noexcept
         {
             item = boolean::strict_from_chunk(*vary);
         }
-    };
-
-    std::visit(strict_bool_visitor, primary_->back());
+    }, primary_->back());
     return item;
 }
 
@@ -398,7 +401,8 @@ bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
 {
     using namespace number;
     auto result = true;
-    const overloaded integer_visitor
+
+    std::visit(overload
     {
         [&](bool vary) noexcept
         {
@@ -412,9 +416,7 @@ bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
         {
             result = integer<Bytes>::from_chunk(value , *vary);
         }
-    };
-
-    std::visit(integer_visitor, peek_variant_unsafe(index));
+    }, peek_variant_unsafe(index));
     return result;
 }
 
@@ -792,88 +794,49 @@ void program::signature_hash(hash_cache& cache, const script& sub,
     BC_POP_WARNING()
 }
 
-// Invoked by op_equal and op_equal_verify only.
-// Integers are unconstrained as these are stack chunk comparisons.
+// Invoked by op_equal/op_equal_verify only.
+// Integers are unconstrained as these are stack chunk equality comparisons.
 bool operator==(const program::variant& left,
     const program::variant& right) noexcept
 {
+    static_assert(std::variant_size_v<program::variant> == 3);
     using namespace number;
-    enum { variant_bool, variant_int64, variant_chunk };
     auto result = true;
 
     // Methods bound at compile time (free).
-    // Runtime switch on static index (cheap).
-    const program::overloaded equality_visitor
+    // Runtime ternaries on static index (cheap).
+    // bool/int conversions are compile-time (free).
+    // chunk/ponter conversions reduce to conventional bitcoin design.
+    std::visit(program::overload
     {
         [&](bool vary) noexcept
         {
-            switch (right.index())
-            {
-                // Optimal compare, no type cast (free).
-                case variant_bool:
-                    result = get<bool>(right) == vary;
-                    break;
-
-                // Optimal compare, native type cast (free).
-                case variant_int64:
-                    result = get<int64_t>(right) == boolean::to_int(vary);
-                    break;
-
-                // Conventional bitcoin compare, bool->chunk conversion (cheap).
-                case variant_chunk:
-                default:
-                    result = *get<chunk_cptr>(right) == chunk::from_bool(vary);
-                    break;
-            }
+            result = std::holds_alternative<chunk_cptr>(right) ?
+                *get<chunk_cptr>(right) == chunk::from_bool(vary) :
+            std::holds_alternative<int64_t>(right) ?
+                get<int64_t>(right) == boolean::to_int(vary) :
+                get<bool>(right) == vary;
         },
         [&](int64_t vary) noexcept
         {
-            switch (right.index())
-            {                    
-                // Optimal compare, native type cast (free).
-                case variant_bool:
-                    result = boolean::to_int(get<bool>(right)) == vary;
-                    break;
-
-                // Optimal compare, no type cast (free).
-                case variant_int64:
-                    result = get<int64_t>(right) == vary;
-                    break;
-
-                // Conventional bitcoin compare, int->chunk conversion (costly).
-                case variant_chunk:
-                default:
-                    result = *get<chunk_cptr>(right) == chunk::from_int(vary);
-                    break;
-            }
+            result = std::holds_alternative<chunk_cptr>(right) ?
+                *get<chunk_cptr>(right) == chunk::from_int(vary) :
+            std::holds_alternative<int64_t>(right) ?
+                get<int64_t>(right) == vary :
+                boolean::to_int(get<bool>(right)) == vary;
         },
         [&](const chunk_cptr& vary) noexcept
         {
-            switch (right.index())
-            {
-                // Conventional bitcoin compare, bool->chunk conversion (cheap).
-                case variant_bool:
-                    result = *pointer::from_bool(get<bool>(right)) == *vary;
-                    break;
-
-                // Conventional bitcoin compare, int->chunk conversion (costly).
-                case variant_int64:
-                    result = *pointer::from_int(get<int64_t>(right)) == *vary;
-                    break;
-
-                // Optimal compare, no type cast (free).
-                default:
-                case variant_chunk:
-                    result = *get<chunk_cptr>(right) == *vary;
-                    break;
-            }
+            result = std::holds_alternative<chunk_cptr>(right) ?
+                *get<chunk_cptr>(right) == *vary :
+            std::holds_alternative<int64_t>(right) ?
+                *pointer::from_int(get<int64_t>(right)) == *vary :
+                *pointer::from_bool(get<bool>(right)) == *vary;
         }
-    };
+    }, left);
 
-    std::visit(equality_visitor, left);
     return result;
 }
-
 
 } // namespace machine
 } // namespace system

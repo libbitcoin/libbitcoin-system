@@ -47,15 +47,15 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
-    // TODO: templatize program on std::list/vector for performance test.
-    // TODO: templatize interpreter on std::list/vector and pass to program.
-    // TODO: this will bring program and interpreter into tx compilation unit.
     typedef std::variant<bool, int64_t, chunk_cptr> variant;
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
 
     template<class... Ts>
-    struct overloaded : Ts... { using Ts::operator()...; };
+    struct overload : Ts...
+    {
+        using Ts::operator()...;
+    };
 
     /// Input script run (default/empty stack).
     program(const chain::transaction& transaction, const input_iterator& input,
@@ -279,6 +279,7 @@ private:
     size_t negative_condition_count_{};
 };
 
+/// Variant comparison overloaded for type conversions.
 bool operator==(const program::variant& left,
     const program::variant& right) noexcept;
 
