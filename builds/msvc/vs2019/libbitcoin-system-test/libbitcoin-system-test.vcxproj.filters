@@ -228,7 +228,13 @@
     <ClCompile Include="..\..\..\..\test\integrals.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\program.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\main.cpp">

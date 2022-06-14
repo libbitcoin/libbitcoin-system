@@ -109,7 +109,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
     src/machine/interpreter.cpp \
-    src/machine/number.cpp \
     src/machine/program.cpp \
     src/radix/base_10.cpp \
     src/radix/base_16.cpp \
@@ -275,8 +274,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/error/op_error_t.cpp \
     test/error/script_error_t.cpp \
     test/error/transaction_error_t.cpp \
+    test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/number.hpp \
+    test/machine/program.cpp \
     test/math/addition.cpp \
     test/math/bits.cpp \
     test/math/division.cpp \

@@ -16,15 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../test.hpp"
 
-//*****************************************************************************
-// CONSENSUS: All operations except stack encoding exhibit native c++ behavior.
-//*****************************************************************************
 
-namespace libbitcoin {
-namespace system {
-namespace machine {
+BOOST_AUTO_TEST_SUITE(interpreter_tests)
 
-} // namespace machine
-} // namespace system
-} // namespace libbitcoin
+BOOST_AUTO_TEST_CASE(interpreter__construct__todo__todo)
+{
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

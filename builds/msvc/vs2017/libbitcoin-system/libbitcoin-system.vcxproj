@@ -174,7 +174,6 @@
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
-    <ClCompile Include="..\..\..\..\src\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />

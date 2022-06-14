@@ -408,9 +408,6 @@
     <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\machine\number.cpp">
-      <Filter>src\machine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\machine\program.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
