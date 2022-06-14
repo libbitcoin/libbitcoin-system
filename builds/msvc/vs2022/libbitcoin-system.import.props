@@ -18,6 +18,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin-system\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <!-- WITH_ICU always defined in Visual Studio builds. -->
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
+      <!-- BOOST_EXCEPTION_DISABLE must be set here to be captured by all includes. -->
       <!-- WIN32_LEAN_AND_MEAN avoids inclusion of certain headers, winsock.h conflicts with boost and protocol use of winsock2.h. -->
       <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>

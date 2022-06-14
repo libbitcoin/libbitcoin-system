@@ -118,9 +118,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__giant)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 {
     const auto intersection = std::any_of(language::en.begin(), language::en.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+        return std::find_if(language::es.begin(), language::es.end(),
+            [&](const char test_left[])
+            {
+                return (std::strcmp(test_left, test_right) == 0);
+            }) != std::end(language::es);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -129,9 +133,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_en__no_intersection)
 {
     const auto intersection = std::any_of(language::it.begin(), language::it.end(),
-        [&](const char* test)
+        [&](const char* test_right)
         {
-            return std::find(language::en.begin(), language::en.end(), test) != std::end(language::en);
+            return std::find_if(language::en.begin(), language::en.end(),
+            [&](const char test_left[])
+            {
+                return (std::strcmp(test_left, test_right) == 0);
+            }) != std::end(language::en);
         });
 
     BOOST_REQUIRE(!intersection);
@@ -140,9 +148,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_en__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_es__no_intersection)
 {
     const auto intersection = std::any_of(language::fr.begin(), language::fr.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+        return std::find_if(language::es.begin(), language::es.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        }) != std::end(language::es);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -151,9 +163,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_es__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_es__no_intersection)
 {
     const auto intersection = std::any_of(language::it.begin(), language::it.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::es.begin(), language::es.end(), test) != std::end(language::es);
+        return std::find_if(language::es.begin(), language::es.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        }) != std::end(language::es);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -162,9 +178,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__it_es__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_it__no_intersection)
 {
     const auto intersection = std::any_of(language::fr.begin(), language::fr.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::it.begin(), language::it.end(), test) != std::end(language::it);
+        return std::find_if(language::it.begin(), language::it.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        })!= std::end(language::it);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -173,9 +193,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__fr_it__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_pt__no_intersection)
 {
     const auto intersection = std::any_of(language::cs.begin(), language::cs.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::pt.begin(), language::pt.end(), test) != std::end(language::pt);
+        return std::find_if(language::pt.begin(), language::pt.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        }) != std::end(language::pt);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -184,9 +208,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__cs_pt__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__ko_zh_Hans__no_intersection)
 {
     const auto intersection = std::any_of(language::ko.begin(), language::ko.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::zh_Hans.begin(), language::zh_Hans.end(), test) != std::end(language::zh_Hans);
+        return std::find_if(language::zh_Hans.begin(), language::zh_Hans.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        }) != std::end(language::zh_Hans);
     });
 
     BOOST_REQUIRE(!intersection);
@@ -195,9 +223,13 @@ BOOST_AUTO_TEST_CASE(mnemonic__dictionary__ko_zh_Hans__no_intersection)
 BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__1275_intersections)
 {
     const auto intersections = std::count_if(language::zh_Hans.begin(), language::zh_Hans.end(),
-        [&](const char* test)
+        [&](const char* test_right)
     {
-        return std::find(language::zh_Hant.begin(), language::zh_Hant.end(), test) != std::end(language::zh_Hant);
+        return std::find_if(language::zh_Hant.begin(), language::zh_Hant.end(),
+        [&](const char test_left[])
+        {
+            return (std::strcmp(test_left, test_right) == 0);
+        }) != std::end(language::zh_Hant);
     });
 
     BOOST_REQUIRE_EQUAL(intersections, 1275u);
