@@ -22,7 +22,7 @@
 BOOST_AUTO_TEST_SUITE(checksum_tests)
 
 // BIP173: All examples use public key:
-const uint8_t bip173_program_version { 0 };
+constexpr uint8_t bip173_program_version { 0 };
 const std::string bip173_mainnet_prefix{ "bc" };
 const std::string bip173_testnet_prefix{ "tb" };
 const auto bip173_mainnet_p2wkh = "qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4";

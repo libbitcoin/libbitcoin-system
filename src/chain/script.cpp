@@ -220,7 +220,7 @@ script script::from_data(reader& source, bool prefix) noexcept
     while (!source.is_exhausted())
     {
         ops.emplace_back(source);
-        prefail |= !ops.back().is_invalid();
+        prefail |= ops.back().is_invalid();
     }
 
     if (prefix)
@@ -380,7 +380,10 @@ size_t script::serialized_size(bool prefix) const noexcept
 const data_chunk& script::witness_program() const noexcept
 {
     static const data_chunk empty;
+
+    BC_PUSH_WARNING(USE_GSL_AT)
     return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
+    BC_POP_WARNING()
 }
 
 script_version script::version() const noexcept
@@ -463,7 +466,7 @@ bool script::is_pay_to_script_hash(uint32_t forks) const noexcept
 }
 
 // Count 1..16 multisig accurately for embedded (bip16) and witness (bip141).
-inline size_t multisig_sigops(bool accurate, opcode code) noexcept
+constexpr size_t multisig_sigops(bool accurate, opcode code) noexcept
 {
     return accurate && operation::is_positive(code) ?
         operation::opcode_to_positive(code) : multisig_default_sigops;

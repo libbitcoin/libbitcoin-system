@@ -411,7 +411,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// The is_invalid() method pertains only to opcode consensus validity and
-    /// should not be confiused with the inversion of is_valid (serialization).
+    /// should not be confused with the inversion of is_valid (serialization).
     bool is_invalid() const noexcept;
     bool is_push() const noexcept;
     bool is_payload() const noexcept;
