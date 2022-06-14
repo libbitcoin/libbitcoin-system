@@ -71,7 +71,7 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
 # Check for baseline language coverage in the compiler for the C++11 standard.
 #------------------------------------------------------------------------------
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory])
 
 
 # Process options.
@@ -385,12 +385,6 @@ AS_CASE([${CC}], [*],
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wno-comment],
         [CXXFLAGS="$CXXFLAGS -Wno-comment"])])
-
-# Suppress warning for copy of implicitly generated copy constructor.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-copy],
-        [CFLAGS="$CFLAGS -Wno-deprecated-copy"])])
 
 # Suppress warning for copy of implicitly generated copy constructor.
 #------------------------------------------------------------------------------
