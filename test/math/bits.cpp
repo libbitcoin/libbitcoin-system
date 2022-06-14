@@ -82,19 +82,19 @@ static_assert(bit_width(-9) == 32u, "");
 static_assert(bit_width(-0x80) == 32u, "");
 static_assert(bit_width(-0x8000) == 32u, "");
 static_assert(bit_width(-0x800100) == 32u, "");
-static_assert(bit_width(-0x80000000) == 32u, "");
+////static_assert(bit_width(-0x80000000l) == 32u, "");
 static_assert(bit_width(-0x8001000000) == 64u, "");
 static_assert(bit_width(-0x800000000000) == 64u, "");
 static_assert(bit_width(-0x80010000000000) == 64u, "");
-static_assert(bit_width(-0x8000000000000000) == 64u, "");
+////static_assert(bit_width(-0x8000000000000000ll) == 64u, "");
 static_assert(bit_width<int64_t>(-0x80) == 64u, "");
 static_assert(bit_width<int64_t>(-0x8000) == 64u, "");
 static_assert(bit_width<int64_t>(-0x800100) == 64u, "");
-static_assert(bit_width<int64_t>(-0x80000000) == 32u, "");
+////static_assert(bit_width<int64_t>(-0x80000000l) == 32u, "");
 static_assert(bit_width<int64_t>(-0x8001000000) == 64u, "");
 static_assert(bit_width<int64_t>(-0x800000000000) == 64u, "");
 static_assert(bit_width<int64_t>(-0x80010000000000) == 64u, "");
-static_assert(bit_width<int64_t>(-0x8000000000000000) == 64u, "");
+////static_assert(bit_width<int64_t>(-0x8000000000000000ll) == 64u, "");
 
 // byte_width (unsigned/positive)
 static_assert(byte_width(0u) == 0u, "");
@@ -168,19 +168,19 @@ static_assert(byte_width(-9) == 4u, "");
 static_assert(byte_width(-0x80) == 4u, "");
 static_assert(byte_width(-0x8000) == 4u, "");
 static_assert(byte_width(-0x800100) == 4u, "");
-static_assert(byte_width(-0x80000000) == 4u, "");
+////static_assert(byte_width(-0x80000000l) == 4u, "");
 static_assert(byte_width(-0x8001000000) == 8u, "");
 static_assert(byte_width(-0x800000000000) == 8u, "");
 static_assert(byte_width(-0x80010000000000) == 8u, "");
-static_assert(byte_width(-0x8000000000000000) == 8u, "");
+////static_assert(byte_width(-0x8000000000000000ll) == 8u, "");
 static_assert(byte_width<int64_t>(-0x80) == 8u, "");
 static_assert(byte_width<int64_t>(-0x8000) == 8u, "");
 static_assert(byte_width<int64_t>(-0x800100) == 8u, "");
-static_assert(byte_width<int64_t>(-0x80000000) == 4u, ""); // <= int64_t but divides evenly to 32.
+////static_assert(byte_width<int64_t>(-0x80000000l) == 4u, ""); // <= int64_t but divides evenly to 32.
 static_assert(byte_width<int64_t>(-0x8001000000) == 8u, ""); 
 static_assert(byte_width<int64_t>(-0x800000000000) == 8u, "");
 static_assert(byte_width<int64_t>(-0x80010000000000) == 8u, "");
-static_assert(byte_width<int64_t>(-0x8000000000000000) == 8u, "");
+////static_assert(byte_width<int64_t>(-0x8000000000000000ll) == 8u, "");
 static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value, "");
 
 // twos_complement
