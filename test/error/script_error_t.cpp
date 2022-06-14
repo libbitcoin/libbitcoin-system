@@ -139,6 +139,15 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness__true_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness");
 }
 
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness_stack__true_exected_message)
+{
+    constexpr auto value = error::invalid_witness_stack;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness stack");
+}
+
 BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_exected_message)
 {
     constexpr auto value = error::dirty_witness;

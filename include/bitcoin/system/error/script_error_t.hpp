@@ -47,6 +47,7 @@ enum script_error_t : uint8_t
     unversioned_script,
     unexpected_witness,
     invalid_witness,
+    invalid_witness_stack,
     dirty_witness,
     stack_false,
 

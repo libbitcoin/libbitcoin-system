@@ -40,6 +40,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(script_error)
     { unversioned_script, "unversioned script" },
     { unexpected_witness, "unexpected witness" },
     { invalid_witness, "invalid witness" },
+    { invalid_witness_stack, "invalid witness stack" },
     { dirty_witness, "dirty witness" },
     { stack_false, "stack false" }
 };
