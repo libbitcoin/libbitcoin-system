@@ -19,6 +19,7 @@
  */
 #include <bitcoin/system/chain/operation.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <bitcoin/system/constants.hpp>
@@ -268,7 +269,7 @@ static bool data_from_decimal(data_chunk& out_data,
     if (!deserialize(value, token))
         return false;
 
-    out_data = machine::number(value).data();
+    out_data = machine::number::chunk::from_int(value);
     return true;
 }
 
@@ -511,229 +512,13 @@ uint32_t operation::read_data_size(opcode code, reader& source) noexcept
     }
 }
 
-//*****************************************************************************
-// CONSENSUS: non-minial encoding is consensus critical due to find_and_delete.
-//*****************************************************************************
-opcode operation::opcode_from_size(size_t size) noexcept
-{
-    BC_ASSERT(size <= max_uint32);
-    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
-
-    if (size <= op_75)
-        return static_cast<opcode>(size);
-    else if (size <= max_uint8)
-        return opcode::push_one_size;
-    else if (size <= max_uint16)
-        return opcode::push_two_size;
-    else
-        return opcode::push_four_size;
-}
-
-opcode operation::minimal_opcode_from_data(const data_chunk& data) noexcept
-{
-    const auto size = data.size();
-
-    if (size == one)
-    {
-        const auto value = data.front();
-
-        if (value == numbers::negative_1)
-            return opcode::push_negative_1;
-
-        if (value == numbers::number_0)
-            return opcode::push_size_0;
-
-        if (value >= numbers::positive_1 &&
-            value <= numbers::positive_16)
-            return opcode_from_positive(value);
-    }
-
-    // Nominal encoding is minimal for multiple bytes and non-numeric values.
-    return opcode_from_size(size);
-}
-
-opcode operation::nominal_opcode_from_data(const data_chunk& data) noexcept
-{
-    return opcode_from_size(data.size());
-}
-
-// static/private
-opcode operation::opcode_from_data(const data_chunk& data,
-    bool minimal) noexcept
-{
-    return minimal ? minimal_opcode_from_data(data) :
-        nominal_opcode_from_data(data);
-}
-
-opcode operation::opcode_from_version(uint8_t value) noexcept
-{
-    BC_ASSERT(value <= numbers::positive_16);
-    return (value == numbers::number_0) ? opcode::push_size_0 :
-        operation::opcode_from_positive(value);
-}
-
-opcode operation::opcode_from_positive(uint8_t value) noexcept
-{
-    BC_ASSERT(value >= numbers::positive_1);
-    BC_ASSERT(value <= numbers::positive_16);
-    constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<opcode>(value + sub1(op_81));
-}
-
-uint8_t operation::opcode_to_positive(opcode code) noexcept
-{
-    BC_ASSERT(is_positive(code));
-    constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-    return static_cast<uint8_t>(code) - add1(op_81);
-}
-
-// Categories of opcodes.
-// ----------------------------------------------------------------------------
-
-// opcode: [101, 102, 126..129, 131..134, 141, 142, 149..153]
-// ****************************************************************************
-// CONSENSUS: These are invalid even if evaluation is precluded by conditional.
-// ****************************************************************************
-bool operation::is_invalid(opcode code) noexcept
-{
-    // C++14: switch in constexpr.
-    switch (code)
-    {
-        // Demoted to invalid by [0.3.6] soft fork.
-        case opcode::op_verif:
-        case opcode::op_vernotif:
-
-        // Demoted to invalid by [0.3.10] soft fork.
-        case opcode::op_cat:
-        case opcode::op_substr:
-        case opcode::op_left:
-        case opcode::op_right:
-        case opcode::op_invert:
-        case opcode::op_and:
-        case opcode::op_or:
-        case opcode::op_xor:
-        case opcode::op_mul2:
-        case opcode::op_div2:
-        case opcode::op_mul:
-        case opcode::op_div:
-        case opcode::op_mod:
-        case opcode::op_lshift:
-        case opcode::op_rshift:
-            return true;
-        default:
-            return false;
-    }
-}
-
-// opcode: [80, 98, 106, 137..138, 186..255]
-// ****************************************************************************
-// CONSENSUS: These are invalid unless evaluation is precluded by conditional.
-//
-// Satoshi test cases incorrectly refer to op_ver and op_verif as "reserved".
-// Reserved refers to codes that are unused but conditionally acceptable. When
-// the conditional operator skips over them, the script may be valid. On the
-// other hand, "disabled" codes are unconditionally invalid - such as op_cat.
-// The "disabled" codes are in a group outside of the evaluation switch, which
-// makes their unconditional invalidity obvious. The other two disabled codes
-// are not so obvious in behavior, and misidentified in satoshi test vectors:
-//
-// These fail because the scripts are unconditional with both reserved and
-// disabled codes, yet they are all referred to as reserved.
-// { "1", "ver", "op_ver is reserved" }
-// { "1", "verif", "op_verif is reserved" }
-// { "1", "vernotif", "op_vernotif is reserved" }
-// { "1", "reserved", "op_reserved is reserved" }
-// { "1", "reserved1", "op_reserved1 is reserved" }
-// { "1", "reserved2", "op_reserved2 is reserved" }
-//
-// These fail because the scripts either execute conditionally invalid codes
-// (op_ver) or include unconditionally invalid codes, without execution
-// (op_verif, op_vernotif). The comments are correct, contradicting the above.
-// { "1", "if ver else 1 endif", "ver is reserved" }
-// { "0", "if verif else 1 endif", "verif illegal everywhere" }
-// { "0", "if else 1 else verif endif", "verif illegal everywhere" }
-// { "0", "if vernotif else 1 endif", "vernotif illegal everywhere" }
-// { "0", "if else 1 else vernotif endif", "vernotif illegal everywhere" }
-//
-// These fail regardless of conditional exclusion because they are also
-// disabled codes.
-// { "'a' 'b'", "cat", "cat disabled" }
-// { "'a' 'b' 0", "if cat else 1 endif", "cat disabled" }
-// { "'abc' 1 1", "substr", "substr disabled" }
-// { "'abc' 1 1 0", "if substr else 1 endif", "substr disabled" }
-// { "'abc' 2 0", "if left else 1 endif", "left disabled" }
-// { "'abc' 2 0", "if right else 1 endif", "right disabled" }
-// { "'abc'", "if invert else 1 endif", "invert disabled" }
-// { "1 2 0 if and else 1 endif", "nop", "and disabled" }
-// { "1 2 0 if or else 1 endif", "nop", "or disabled" }
-// { "1 2 0 if xor else 1 endif", "nop", "xor disabled" }
-// { "2 0 if 2mul else 1 endif", "nop", "2mul disabled" }
-// { "2 0 if 2div else 1 endif", "nop", "2div disabled" }
-// { "2 2 0 if mul else 1 endif", "nop", "mul disabled" }
-// { "2 2 0 if div else 1 endif", "nop", "div disabled" }
-// { "2 2 0 if mod else 1 endif", "nop", "mod disabled" }
-// { "2 2 0 if lshift else 1 endif", "nop", "lshift disabled" }
-// { "2 2 0 if rshift else 1 endif", "nop", "rshift disabled" }
-//
-// The reason that op_verif and op_vernotif are unconditionally invalid (and
-// therefore behave exactly as "disabled" codes is that they are conditionals.
-// Note that op_ver is not a conditional, so despite the similar name, when it
-// was disabled it became a "reserved" code. The former conditonals are not
-// excludable by remaining conditions. They pass this condition:
-//      else if (fExec || (OP_IF <= opcode && opcode <= OP_ENDIF))
-// which evaluates all codes, yet there were removed from the evaluation. They
-// were part of this switch case, but now this break is not hit by them:
-//      case OP_IF:
-//      case OP_NOTIF: {...}
-//          break;
-// So they fall through to the conditional default case, just as any reserved
-// code would, and halrt the evaluation with the bad_opcode error:
-//      default:
-//          return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
-// Yet because they do not bypass any conditional evaluation, they hit this
-// default unconditionally. So they are "disabled" codes. We use the term
-// "invalid" above because of the confusion that can cause. The only truly
-// "reserved" codes are the op_nop# codes, which were promoted by a hard fork.
-// ****************************************************************************
-bool operation::is_reserved(opcode code) noexcept
-{
-    constexpr auto op_185 = opcode::nop10;
-
-    // C++14: switch in constexpr.
-    switch (code)
-    {
-        // Demoted to reserved by [0.3.6] soft fork.
-        case opcode::op_ver:
-        case opcode::op_return:
-
-        // Unimplemented.
-        case opcode::reserved_80:
-        case opcode::reserved_137:
-        case opcode::reserved_138:
-            return true;
-        default:
-            return code > op_185;
-    }
-}
-
-// opcode: [99..100, 103..104]
-bool operation::is_conditional(opcode code) noexcept
-{
-    // C++14: switch in constexpr.
-    switch (code)
-    {
-        case opcode::if_:
-        case opcode::notif:
-        case opcode::else_:
-        case opcode::endif:
-            return true;
-        default:
-            return false;
-    }
-}
-
 // Categories of operations.
 // ----------------------------------------------------------------------------
+
+bool operation::is_invalid() const noexcept
+{
+    return is_invalid(code_);
+}
 
 bool operation::is_push() const noexcept
 {
@@ -765,11 +550,6 @@ bool operation::is_positive() const noexcept
     return is_positive(code_);
 }
 
-bool operation::is_invalid() const noexcept
-{
-    return is_invalid(code_);
-}
-
 bool operation::is_reserved() const noexcept
 {
     return is_reserved(code_);
@@ -785,12 +565,6 @@ bool operation::is_relaxed_push() const noexcept
     return is_relaxed_push(code_);
 }
 
-bool operation::is_oversized() const noexcept
-{
-    // Rule imposed by [0.3.6] soft fork.
-    return data_->size() > max_push_data_size;
-}
-
 bool operation::is_minimal_push() const noexcept
 {
     return code_ == minimal_opcode_from_data(*data_);
@@ -799,6 +573,17 @@ bool operation::is_minimal_push() const noexcept
 bool operation::is_nominal_push() const noexcept
 {
     return code_ == nominal_opcode_from_data(*data_);
+}
+
+bool operation::is_oversized() const noexcept
+{
+    // Rule max_push_data_size imposed by [0.3.6] soft fork.
+    return data_->size() > max_push_data_size;
+}
+
+bool operation::is_underclaimed() const noexcept
+{
+    return data_->size() > operation::opcode_to_maximum_size(code_);
 }
 
 // ****************************************************************************

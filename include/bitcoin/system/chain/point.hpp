@@ -43,6 +43,11 @@ public:
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
+    static constexpr size_t serialized_size() noexcept
+    {
+        return hash_size + sizeof(uint32_t);
+    }
+
     // Constructors.
     // ------------------------------------------------------------------------
 
@@ -88,7 +93,6 @@ public:
 
     /// Computed properties.
     bool is_null() const noexcept;
-    static size_t serialized_size() noexcept;
 
 protected:
     point(hash_digest&& hash, uint32_t index, bool valid) noexcept;

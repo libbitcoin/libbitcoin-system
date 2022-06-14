@@ -264,17 +264,6 @@ uint256_t header::difficulty() const noexcept
     return difficulty(bits_);
 }
 
-// static
-size_t header::serialized_size() noexcept
-{
-    return sizeof(version_)
-        + hash_size
-        + hash_size
-        + sizeof(timestamp_)
-        + sizeof(bits_)
-        + sizeof(nonce_);
-}
-
 // Check.
 // ----------------------------------------------------------------------------
 

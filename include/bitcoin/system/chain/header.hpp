@@ -44,6 +44,16 @@ class BC_API header
 public:
     typedef std::shared_ptr<const header> cptr;
 
+    static constexpr size_t serialized_size() noexcept
+    {
+        return sizeof(version_)
+            + hash_size
+            + hash_size
+            + sizeof(timestamp_)
+            + sizeof(bits_)
+            + sizeof(nonce_);
+    }
+
     // Constructors.
     // ------------------------------------------------------------------------
 
@@ -98,7 +108,6 @@ public:
     /// Computed properties.
     hash_digest hash() const noexcept;
     uint256_t difficulty() const noexcept;
-    static size_t serialized_size() noexcept;
 
     // Validation.
     // ------------------------------------------------------------------------

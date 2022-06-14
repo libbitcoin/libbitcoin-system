@@ -174,12 +174,6 @@ uint32_t point::index() const noexcept
     return index_;
 }
 
-// static
-size_t point::serialized_size() noexcept
-{
-    return hash_size + sizeof(uint32_t);
-}
-
 // Validation.
 // ----------------------------------------------------------------------------
 
