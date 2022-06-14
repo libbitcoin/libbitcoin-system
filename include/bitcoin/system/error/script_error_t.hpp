@@ -36,6 +36,7 @@ enum script_error_t : uint8_t
 {
     script_success = 0,
     inputs_overflow = add1<int>(transaction_error_t::tx_error_last),
+    prefail_script,
     invalid_script,
     invalid_script_size,
     invalid_push_data_size,
