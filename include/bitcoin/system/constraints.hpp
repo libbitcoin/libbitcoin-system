@@ -93,6 +93,11 @@ using if_byte_insertable = std::enable_if_t<
     std::is_base_of<std::vector<uint8_t>, Type>::value ||
     std::is_base_of<std::string, Type>::value, bool>;
 
+// TODO: test.
+template <typename Type>
+using if_default_constructible = std::enable_if_t<
+    std::is_default_constructible_v<Type>, bool>;
+
 template <typename Left, typename Right>
 using if_same_width = std::enable_if_t<width<Left>() == width<Right>(), bool>;
 
