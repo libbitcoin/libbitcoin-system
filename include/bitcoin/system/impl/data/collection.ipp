@@ -108,7 +108,6 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
     return out;
 }
 
-// deprecated
 // C++17: Parallel policy for std::transform.
 template <typename To, typename From>
 std::vector<To> pointer_cast(const std::vector<From>& source) noexcept
