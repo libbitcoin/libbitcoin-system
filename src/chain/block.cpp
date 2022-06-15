@@ -118,7 +118,7 @@ block::block(const chain::header::cptr& header,
 bool block::operator==(const block& other) const noexcept
 {
     // Compares transaction elements, not pointers.
-    return (*header_ == *other.header_)
+    return (header_ == other.header_ || *header_ == *other.header_)
         && equal_points(*txs_, *other.txs_);
 }
 

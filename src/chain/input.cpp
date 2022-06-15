@@ -153,9 +153,9 @@ input::input(const chain::point::cptr& point, const chain::script::cptr& script,
 bool input::operator==(const input& other) const noexcept
 {
     return (sequence_ == other.sequence_)
-        && (*point_ == *other.point_)
-        && (*script_ == *other.script_)
-        && (*witness_ == *other.witness_);
+        && (point_ == other.point_ || *point_ == *other.point_)
+        && (script_ == other.script_ || *script_ == *other.script_)
+        && (witness_ == other.witness_ || *witness_ == *other.witness_);
 }
 
 bool input::operator!=(const input& other) const noexcept

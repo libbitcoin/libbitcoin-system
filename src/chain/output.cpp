@@ -101,7 +101,7 @@ output::output(uint64_t value, const chain::script::cptr& script,
 bool output::operator==(const output& other) const noexcept
 {
     return (value_ == other.value_)
-        && (*script_ == *other.script_);
+        && (script_ == other.script_ || *script_ == *other.script_);
 }
 
 bool output::operator!=(const output& other) const noexcept

@@ -167,8 +167,10 @@ bool transaction::operator==(const transaction& other) const noexcept
     // Compares input/output elements, not pointers, cache not compared.
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
-        && equal_points(*inputs_, *other.inputs_)
-        && equal_points(*outputs_, *other.outputs_);
+        && (inputs_ == other.inputs_) ||
+            equal_points(*inputs_, *other.inputs_)
+        && (outputs_ == other.outputs_) ||
+            equal_points(*outputs_, *other.outputs_);
 }
 
 bool transaction::operator!=(const transaction& other) const noexcept
@@ -1329,7 +1331,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             return error::invalid_script_embed;
 
         // Embedded script must be at the top of the stack (bip16).
-        const auto embeded_script = to_shared<script>({ *input.pop(), false });
+        const auto embeded_script = to_shared<script>({ input.pop(), false });
 
         // Evaluate embedded script using stack moved from input script.
         interpreter embeded(std::move(input), embeded_script);

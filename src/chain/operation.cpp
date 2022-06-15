@@ -129,7 +129,7 @@ bool operation::operator==(const operation& other) const noexcept
 {
     // Ccompare data values not pointers.
     return (code_ == other.code_)
-        && (*data_ == *other.data_)
+        && (data_ == other.data_ || *data_ == *other.data_)
         && (underflow_ == other.underflow_);
 }
 
