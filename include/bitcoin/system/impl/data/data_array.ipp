@@ -30,6 +30,7 @@
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/memory.hpp>
+#include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

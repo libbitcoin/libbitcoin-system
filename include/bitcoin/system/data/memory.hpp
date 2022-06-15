@@ -85,44 +85,6 @@ template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
 to_shareds(const std::vector<Type>& values) noexcept;
 
-// bit.ly/3vdbF17
-// Convert value initialization into default initialization.
-template <typename Type, typename Allocator = std::allocator<Type>>
-class default_allocator
-  : public Allocator
-{
-public:
-    template <typename T>
-    struct rebind
-    {
-        // en.cppreference.com/w/cpp/memory/allocator_traits
-        using other = default_allocator<T, typename
-            std::allocator_traits<Allocator>::template rebind_alloc<T>>;
-    };
-
-    using Allocator::Allocator;
-
-    template <typename T>
-    void construct(T* ptr)
-        noexcept(std::is_nothrow_default_constructible<T>::value)
-    {
-        // en.cppreference.com/w/cpp/memory/allocator
-        // Base class (std::allocator) owns memory deallocation.
-        ::new(static_cast<void*>(ptr)) T;
-    }
-
-    template <typename T, typename...Args>
-    void construct(T* ptr, Args&&... args)
-        noexcept(std::is_nothrow_default_constructible<Allocator>::value)
-    {
-        std::allocator_traits<Allocator>::construct(
-            static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);
-    }
-};
-
-// C++14: std::vector(size_t, allocator) construction.
-static default_allocator<uint8_t> no_fill_byte_allocator{};
-
 } // namespace system
 } // namespace libbitcoin
 

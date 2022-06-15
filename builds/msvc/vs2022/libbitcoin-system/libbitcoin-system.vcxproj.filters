@@ -839,7 +839,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\external_ptr.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\memory.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\no_fill_allocator.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp">
@@ -1271,6 +1277,9 @@
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp">
+      <Filter>include\bitcoin\system\impl\data</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\external_ptr.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp">
