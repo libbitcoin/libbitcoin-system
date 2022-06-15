@@ -80,7 +80,9 @@ binary_search(const Collection& list, const Element& element) noexcept
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept
 {
+    // TODO: no_fill_allocator.
     std::vector<To> out(source.size());
+
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element)
         {
@@ -94,7 +96,9 @@ std::vector<To> cast(const std::vector<From>& source) noexcept
 template <typename To, typename From, size_t Size>
 std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 {
+    // TODO: no_fill_allocator.
     std::array<To, Size> out;
+
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element) noexcept
         {
@@ -104,21 +108,36 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
     return out;
 }
 
+// deprecated
+// C++17: Parallel policy for std::transform.
+template <typename To, typename From>
+std::vector<To> pointer_cast(const std::vector<From>& source) noexcept
+{
+    // TODO: no_fill_allocator.
+    std::vector<To> out(source.size());
+
+    std::transform(std::begin(source), std::end(source), std::begin(out),
+        [](const From& smart_pointer)
+        {
+            return smart_pointer.get();
+        });
+
+    return out;
+}
+
 // C++17: Parallel policy for std::any_of.
-template <typename Collection>
-bool contains(const Collection& list,
-    const typename Collection::value_type& element) noexcept
+template <typename Collection, typename Element>
+bool contains(const Collection& list, const Element& element) noexcept
 {
     return std::any_of(std::begin(list), std::end(list),
-        [&element](const typename Collection::value_type& value) noexcept
+        [&element](const Element& value) noexcept
         {
             return value == element;
         });
 }
 
 template <typename Element>
-bool equal_points(
-    const std::vector<std::shared_ptr<const Element>>& left,
+bool equal_points(const std::vector<std::shared_ptr<const Element>>& left,
     const std::vector<std::shared_ptr<const Element>>& right) noexcept
 {
     // C++14: a new std::equal overload can replace this guard.
@@ -273,51 +292,46 @@ Collection distinct_copy(const Collection& list) noexcept
 }
 
 // Collection requires size, reserve and shrink_to_fit methods (vector).
-template <typename Collection>
-Collection difference(
-    const typename Collection::const_iterator& first_minuend,
-    const typename Collection::const_iterator& end_minuend,
-    const Collection& subtrahend) noexcept
+template <typename Left, typename Right>
+Left difference(const Left& left, const Right& right) noexcept
 {
-    Collection copy{};
-    copy.reserve(std::distance(first_minuend, end_minuend));
-
-    // Linear copy since creating a copy, more efficient than multiple erases.
-    for (auto min = first_minuend; min != end_minuend; ++min)
-        if (!contains(subtrahend, *min))
-            copy.push_back(*min);
-
-    copy.shrink_to_fit();
-    return copy;
+    return difference<Left>(left.begin(), left.end(), right);
 }
 
 // Collection requires size, reserve and shrink_to_fit methods (vector).
-template <typename Collection>
-Collection difference(const Collection& minuend,
-    const Collection& subtrahend) noexcept
+template <typename Left, typename Right>
+Left difference(const typename Left::const_iterator& begin,
+    const typename Left::const_iterator& end, const Right& right) noexcept
 {
-    return difference(minuend.begin(), minuend.end(), subtrahend);
+    Left copy{};
+    copy.reserve(std::distance(begin, end));
+    
+    // Linear copy since creating a copy, more efficient than multiple erases.
+    for (auto min = begin; min != end; ++min)
+        if (!contains(right, *min))
+            copy.push_back(*min);
+    
+    copy.shrink_to_fit();
+    return copy;
+    return {};
 }
 
-template <typename Collection>
-bool intersecting(const Collection& left, const Collection& right) noexcept
+template <typename Left, typename Right>
+bool intersecting(const Left& left, const Right& right) noexcept
 {
-    return intersecting(left.begin(), left.end(), right);
+    return intersecting<Left>(left.begin(), left.end(), right);
 }
 
 // C++17: Parallel policy for std::find_first_of.
-template <typename Collection>
-bool intersecting(
-    const typename Collection::const_iterator& first_left,
-    const typename Collection::const_iterator& end_left,
-    const Collection& right) noexcept
+template <typename Left, typename Right>
+bool intersecting(const typename Left::const_iterator& begin,
+    const typename Left::const_iterator& end, const Right& right) noexcept
 {
-    return std::find_first_of(first_left, end_left, std::begin(right),
-        std::end(right)) != end_left;
+    return std::find_first_of(begin, end, std::begin(right),
+        std::end(right)) != end;
 }
 
 // C++17: Parallel policy for std::reverse.
-
 template <typename Collection>
 void reverse(Collection& list) noexcept
 {
@@ -340,7 +354,6 @@ Collection reverse_copy(const Collection& list) noexcept
 }
 
 // C++17: Parallel policy for std::sort.
-
 template <typename Collection>
 void sort(Collection& list) noexcept
 {

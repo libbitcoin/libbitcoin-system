@@ -48,15 +48,17 @@ std::vector<To> cast(const std::vector<From>& source) noexcept;
 template <typename To, typename From, size_t Size>
 std::array<To, Size> cast(const std::array<From, Size>& source) noexcept;
 
+/// Copy collection of smart pointer values to collection of pointers. 
+template <typename To, typename From>
+std::vector<To> pointer_cast(const std::vector<From>& source) noexcept;
+
 /// Determine if a collection contains the specified element.
-template <typename Collection>
-bool contains(const Collection& list,
-    const typename Collection::value_type& element) noexcept;
+template <typename Collection, typename Element>
+bool contains(const Collection& list, const Element& element) noexcept;
 
 /// Determine if a vector of shared pointers to elements have equal elements.
 template <typename Element>
-bool equal_points(
-    const std::vector<std::shared_ptr<const Element>>& left,
+bool equal_points(const std::vector<std::shared_ptr<const Element>>& left,
     const std::vector<std::shared_ptr<const Element>>& right) noexcept;
 
 /// Fill a buffer with values.
@@ -109,24 +111,21 @@ Collection distinct(Collection&& list) noexcept;
 template <typename Collection>
 Collection distinct_copy(const Collection& list) noexcept;
 
-/// Obtain the set difference of minuend less subtrahend.
-template <typename Collection>
-Collection difference(const Collection& minuend,
-    const Collection& subtrahend) noexcept;
-template <typename Collection>
-Collection difference(
-    const typename Collection::const_iterator& first_minuend,
-    const typename Collection::const_iterator& end_minuend,
-    const Collection& subtrahend) noexcept;
+/// Obtain the set difference of left less right.
+template <typename Left, typename Right>
+Left difference(const Left& left, const Right& right) noexcept;
+
+template <typename Left, typename Right>
+Left difference(const typename Left::const_iterator& begin,
+    const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Determing if the sets have an intersection.
-template <typename Collection>
-bool intersecting(const Collection& left, const Collection& right) noexcept;
-template <typename Collection>
-bool intersecting(
-    const typename Collection::const_iterator& first_left,
-    const typename Collection::const_iterator& end_left,
-    const Collection& right) noexcept;
+template <typename Left, typename Right>
+bool intersecting(const Left& left, const Right& right) noexcept;
+
+template <typename Left, typename Right>
+bool intersecting(const typename Left::const_iterator& begin,
+    const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
@@ -147,8 +146,7 @@ Collection sort_copy(const Collection& list) noexcept;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>
-bool starts_with(
-    const typename Collection::const_iterator& begin,
+bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept;
 
