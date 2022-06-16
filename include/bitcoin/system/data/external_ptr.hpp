@@ -37,14 +37,14 @@ namespace system {
 // The address of the default value remains consistent for a given type T.
 // The bool cast is false only if the pointer is initialized to default.
 // external_ptr<data_chunk>{} models bitcoin value zero (data_chunk{}).
+// T must be constexpr default constructible.
 template <typename Type, if_default_constructible<Type> = true>
 class external_ptr
 {
 public:
-    external_ptr() noexcept
+    constexpr external_ptr() noexcept
+      : pointer_(get_unassigned())
     {
-        static const auto default_= Type{};
-        pointer_ = &default_;
     }
 
     /// Defaults (nullptr may be copied/moved).
@@ -63,18 +63,14 @@ public:
     {
     }
 
-    // Abort if nullptr construct.
     constexpr external_ptr(const Type* pointer) noexcept
-      : pointer_(pointer)
+      : pointer_(is_null(pointer) ? get_unassigned() : pointer)
     {
-        if (is_null(pointer)) std::abort();
     }
 
-    /// False if default-valued pointer (models nullptr).
     constexpr operator bool() const noexcept
     {
-        static const auto unassigned = external_ptr<Type>{}.get();
-        return pointer_ != unassigned;
+        return pointer_ != get_unassigned();
     }
 
     constexpr const Type& operator*() const noexcept
@@ -99,11 +95,18 @@ public:
 
     constexpr void reset() const noexcept
     {
-        pointer_ = external_ptr{};
+        pointer_ = get_unassigned();
     }
 
 private:
     const Type* pointer_{};
+
+    constexpr const Type* get_unassigned() const noexcept
+    {
+        // Type must be constexpr default constructible.
+        static constexpr auto unassigned = Type{};
+        return &unassigned;
+    }
 };
 
 template <typename Type, if_default_constructible<Type> = true>
