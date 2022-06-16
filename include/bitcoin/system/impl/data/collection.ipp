@@ -129,7 +129,7 @@ template <typename Collection, typename Element>
 bool contains(const Collection& list, const Element& element) noexcept
 {
     return std::any_of(std::begin(list), std::end(list),
-        [&element](const Element& value) noexcept
+        [&element](const auto& value) noexcept
         {
             return value == element;
         });
