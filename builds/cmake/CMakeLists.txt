@@ -537,6 +537,7 @@ if (with-tests)
         "../../test/chain/satoshi_words.cpp"
         "../../test/chain/script.cpp"
         "../../test/chain/script.hpp"
+        "../../test/chain/stripper.cpp"
         "../../test/chain/transaction.cpp"
         "../../test/chain/witness.cpp"
         "../../test/chain/enums/opcode.cpp"

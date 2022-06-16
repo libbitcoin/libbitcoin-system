@@ -683,6 +683,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>

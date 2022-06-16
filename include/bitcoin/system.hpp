@@ -36,6 +36,7 @@
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/stripper.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>

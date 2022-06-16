@@ -281,6 +281,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp" />
