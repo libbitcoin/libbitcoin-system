@@ -47,7 +47,7 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
-    typedef std::variant<bool, int64_t, chunk_cptr> variant;
+    typedef std::variant<bool, int64_t, chunk_xptr> variant;
     typedef std::vector<variant> variant_stack;
     typedef std::shared_ptr<variant_stack> variant_stack_ptr;
 
@@ -70,7 +70,7 @@ public:
     /// Witness script run (witness-initialized stack).
     program(const chain::transaction& transaction, const input_iterator& input,
         const chain::script::cptr& script, uint32_t forks,
-        chain::script_version version, const chunk_cptrs& stack) noexcept;
+        chain::script_version version, const chunk_cptrs_ptr& stack) noexcept;
 
     /// Defaults.
     program(program&&) = delete;
@@ -86,11 +86,6 @@ public:
     bool is_true(bool clean) const noexcept;
 
 protected:
-    program(const chain::transaction& tx, const input_iterator& input,
-        const chain::script::cptr& script, uint32_t forks, uint64_t value,
-        chain::script_version version, const variant_stack_ptr& stack,
-        bool valid_stack) noexcept;
-
     /// Constants.
     /// -----------------------------------------------------------------------
 
@@ -128,9 +123,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Primary stack push (safe, typed).
-    void push_cptr(chunk_cptr&& datum) noexcept;
-    void push_cptr(const chunk_cptr& datum) noexcept;
     void push_chunk(data_chunk&& datum) noexcept;
+    void push_chunk(const chunk_cptr& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_signed64(int64_t value) noexcept;
 
@@ -138,44 +132,36 @@ protected:
     void push_length(size_t value) noexcept;
 
     /// Primary stack pop (unsafe, typed).
-    chunk_cptr pop_cptr_unsafe() noexcept;
+    chunk_xptr pop_chunk_unsafe() noexcept;
     bool pop_bool_unsafe() noexcept;
     bool pop_strict_bool_unsafe() noexcept;
-    bool pop_signed32_unsafe(int32_t& value) noexcept;
 
     /// wrappers (safe)
     bool pop_signed32(int32_t& value) noexcept;
     bool pop_binary32(int32_t& left, int32_t& right) noexcept;
     bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) noexcept;
     bool pop_index32(size_t& index) noexcept;
-    bool pop_count(chunk_cptrs& data, size_t count) noexcept;
+    bool pop_count(chunk_xptrs& data, size_t count) noexcept;
 
     /// Primary stack peek (unsafe, typed).
-    chunk_cptr peek_cptr_unsafe(size_t index=zero) const noexcept;
     bool peek_bool_unsafe() const noexcept;
-    bool peek_strict_bool_unsafe() const noexcept;
-    ////bool peek_signed_unsafe<Integer>(Integer& value) const noexcept;
-
-    /// wrappers (unsafe)
-    bool peek_signed32_unsafe(int32_t& value) const noexcept;
-    bool peek_signed40_unsafe(int64_t& value) const noexcept;
 
     /// wrappers (safe)
     bool peek_unsigned32(uint32_t& value) const noexcept;
-    bool peek_unsigned39(uint64_t& value) const noexcept;
+    bool peek_unsigned40(uint64_t& value) const noexcept;
 
     /// Primary stack non-const (variant).
     void drop_unsafe() noexcept;
     void swap_unsafe(size_t left_index, size_t right_index) noexcept;
     void erase_unsafe(size_t index) noexcept;
     void push_variant(const variant& vary) noexcept;
-    const variant& peek_variant_unsafe(size_t index) const noexcept;
     variant pop_variant_unsafe() noexcept;
+    const variant& peek_variant_unsafe() const noexcept;
+    const variant& peek_variant_unsafe(size_t peek_index) const noexcept;
 
     /// Primary stack const functions (untyped).
     size_t size() const noexcept;
     bool is_empty() const noexcept;
-    bool is_clean() const noexcept;
     bool is_overflow() const noexcept;
 
     /// Alternate stack.
@@ -209,11 +195,11 @@ protected:
 
     /// Strip endorsement and code_separator opcodes from returned subscript.
     chain::script::cptr subscript(
-        const chunk_cptrs& endorsements) const noexcept;
+        const chunk_xptrs& endorsements) const noexcept;
 
     /// Prepare signature (enables generalized signing).
     bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_digest& hash, const chunk_cptr& endorsement) const noexcept;
+        hash_digest& hash, const chunk_xptr& endorsement) const noexcept;
 
     /// Prepare signature, with caching for multisig with same flags.
     bool prepare(ec_signature& signature, const data_chunk& key,
@@ -228,19 +214,24 @@ private:
         if_signed_integer<Integer> = true,
         if_integral_integer<Integer> = true,
         if_not_greater<Bytes, sizeof(Integer)> = true>
-    bool peek_signed_unsafe(Integer& value, size_t index=zero) const noexcept;
+    bool peek_signed_unsafe(Integer& value) const noexcept;
 
-    static chain::operations create_strip_ops(
-        const chunk_cptrs& endorsements) noexcept;
+    chunk_xptr peek_chunk_unsafe() const noexcept;
+    bool peek_strict_bool_unsafe() const noexcept;
+    bool peek_signed32_unsafe(int32_t& value) const noexcept;
+    bool peek_signed40_unsafe(int64_t& value) const noexcept;
+    void push_chunk(const chunk_xptr& datum) noexcept;
+    bool pop_signed32_unsafe(int32_t& value) noexcept;
+    bool is_clean() const noexcept;
 
-    // Zero-based primary stack index.
+    // Zero-basing of primary stack index.
     // ------------------------------------------------------------------------
 
     // TODO: optimize using array indexing.
     inline variant_stack::iterator it_unsafe(size_t index) noexcept
     {
         BC_ASSERT(index < size());
-        return std::prev(primary_->end(), add1(index));
+        return std::prev(primary_.end(), add1(index));
     }
 
     // TODO: optimize using array indexing.
@@ -248,7 +239,7 @@ private:
         size_t index) const noexcept
     {
         BC_ASSERT(index < size());
-        return std::prev(primary_->end(), add1(index));
+        return std::prev(primary_.end(), add1(index));
     }
 
     // ------------------------------------------------------------------------
@@ -265,10 +256,33 @@ private:
     const uint32_t forks_;
     const uint64_t value_;
     const chain::script_version version_;
-    const bool valid_stack_;
+    const chunk_cptrs_ptr witness_;
+
+    // Tether computed data chunks to collection of shared_ptr.
+    // The tether is not garbage-collected (until destruct) as this is a space-
+    // time performance tradeoff. The maximum number of constructable chunks is
+    // bound by the script size limit. The following script operations will
+    // always tether chunks, as the result of a computed hash is pushed.
+    // op_ripemd160         (1)
+    // op_sha1              (1)
+    // op_sha256            (1)
+    // op_hash160           (1)
+    // op_hash256           (1)
+    // The following script operations will tether (additional) chunks, only
+    // in the case where the popped element was originally bool or int64_t.
+    // This is never the case in standard scripts.
+    // op_ripemd160         (0..1)
+    // op_sha1              (0..1)
+    // op_sha256            (0..1)
+    // op_hash160           (0..1)
+    // op_hash256           (0..1)
+    // op_size              (0..1)
+    // op_check_sig         (0..2)
+    // op_check_sig_verify  (0..2)
+    mutable tether<data_chunk> tether_;
 
     // Three stacks.
-    variant_stack_ptr primary_;
+    variant_stack primary_;
     std::vector<variant> alternate_{};
     bool_stack condition_{};
 

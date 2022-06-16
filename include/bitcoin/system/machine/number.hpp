@@ -123,20 +123,6 @@ public:
     }
 };
 
-class pointer
-{
-public:
-    static inline chunk_cptr from_bool(bool vary) noexcept
-    {
-        return to_shared(data_chunk{ chunk::from_bool(vary) });
-    }
-
-    static inline chunk_cptr from_int(int64_t vary) noexcept
-    {
-        return to_shared(data_chunk{ chunk::from_int(vary) });
-    }
-};
-
 class boolean
 {
 public:

@@ -137,16 +137,11 @@ public:
     code run() noexcept;
 
     /// Transaction must pop top input stack element (bip16).
-    inline chunk_cptr pop() noexcept
+    inline const data_chunk& pop() noexcept
     {
-        // Empty guard is not required, but this is a public function.
         BC_ASSERT_MSG(!is_empty(), "pop from empty stack");
 
-        if (is_empty())
-            return to_shared<data_chunk>();
-
-        // Avoid ternary object return (prevents copy elision).
-        return pop_cptr_unsafe();
+        return *pop_chunk_unsafe();
     }
 
 protected:

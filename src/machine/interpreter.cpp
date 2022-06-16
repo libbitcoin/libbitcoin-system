@@ -84,7 +84,7 @@ op_error_t interpreter::op_push_size(const operation& op) noexcept
     if (op.is_underclaimed())
         return error::op_push_size;
 
-    push_cptr(op.data_ptr());
+    push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -93,7 +93,7 @@ op_error_t interpreter::op_push_one_size(const operation& op) noexcept
     if (op.is_underclaimed())
         return error::op_push_one_size;
 
-    push_cptr(op.data_ptr());
+    push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -102,7 +102,7 @@ op_error_t interpreter::op_push_two_size(const operation& op) noexcept
     if (op.is_underclaimed())
         return error::op_push_two_size;
 
-    push_cptr(op.data_ptr());
+    push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -111,7 +111,7 @@ op_error_t interpreter::op_push_four_size(const operation& op) noexcept
     if (op.is_underclaimed())
         return error::op_push_four_size;
 
-    push_cptr(op.data_ptr());
+    push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -310,7 +310,7 @@ op_error_t interpreter::op_if_dup() noexcept
 
     // [0,1,2] => 0,[0,1,2]
     if (peek_bool_unsafe())
-        push_variant(peek_variant_unsafe(0));
+        push_variant(peek_variant_unsafe());
 
     return error::op_success;
 }
@@ -338,7 +338,7 @@ op_error_t interpreter::op_dup() noexcept
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    push_variant(peek_variant_unsafe(0));
+    push_variant(peek_variant_unsafe());
     return error::op_success;
 }
 
@@ -476,7 +476,7 @@ op_error_t interpreter::op_size() noexcept
     if (is_empty())
         return error::op_size;
 
-    push_length(peek_cptr_unsafe()->size());
+    push_length(pop_chunk_unsafe()->size());
     return error::op_success;
 }
 
@@ -791,7 +791,7 @@ op_error_t interpreter::op_ripemd160() noexcept
     if (is_empty())
         return error::op_ripemd160;
 
-    push_chunk(ripemd160_hash_chunk(*pop_cptr_unsafe()));
+    push_chunk(ripemd160_hash_chunk(*pop_chunk_unsafe()));
     return error::op_success;
 }
 
@@ -800,7 +800,7 @@ op_error_t interpreter::op_sha1() noexcept
     if (is_empty())
         return error::op_sha1;
 
-    push_chunk(sha1_hash_chunk(*pop_cptr_unsafe()));
+    push_chunk(sha1_hash_chunk(*pop_chunk_unsafe()));
     return error::op_success;
 }
 
@@ -809,7 +809,7 @@ op_error_t interpreter::op_sha256() noexcept
     if (is_empty())
         return error::op_sha256;
 
-    push_chunk(sha256_hash_chunk(*pop_cptr_unsafe()));
+    push_chunk(sha256_hash_chunk(*pop_chunk_unsafe()));
     return error::op_success;
 }
 
@@ -818,7 +818,7 @@ op_error_t interpreter::op_hash160() noexcept
     if (is_empty())
         return error::op_hash160;
 
-    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_cptr_unsafe())));
+    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_chunk_unsafe())));
     return error::op_success;
 }
 
@@ -827,7 +827,7 @@ op_error_t interpreter::op_hash256() noexcept
     if (is_empty())
         return error::op_hash256;
 
-    push_chunk(sha256_hash_chunk(sha256_hash(*pop_cptr_unsafe())));
+    push_chunk(sha256_hash_chunk(sha256_hash(*pop_chunk_unsafe())));
     return error::op_success;
 }
 
@@ -859,12 +859,12 @@ op_error_t interpreter::op_check_sig_verify() noexcept
     if (size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto key = pop_cptr_unsafe();
+    const auto key = pop_chunk_unsafe();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = pop_cptr_unsafe();
+    const auto endorsement = pop_chunk_unsafe();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -911,7 +911,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     if (!ops_increment(count))
         return error::op_check_multisig_verify3;
 
-    chunk_cptrs keys;
+    chunk_xptrs keys;
     if (!pop_count(keys, count))
         return error::op_check_multisig_verify4;
 
@@ -921,7 +921,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     if (count > keys.size())
         return error::op_check_multisig_verify6;
 
-    chunk_cptrs endorsements;
+    chunk_xptrs endorsements;
     if (!pop_count(endorsements, count))
         return error::op_check_multisig_verify7;
 
@@ -988,20 +988,20 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
     // BIP65: the stack is empty.
     // BIP65: the top stack item is negative.
     // BIP65: extend the (signed) script number range to 5 bytes.
-    // The stack top is positive and 39 bits are usable (negative discarded).
-    uint64_t stack_locktime39;
-    if (!peek_unsigned39(stack_locktime39))
+    // The stack top is positive and 40 bits are usable.
+    uint64_t stack_locktime40;
+    if (!peek_unsigned40(stack_locktime40))
         return error::op_check_locktime_verify2;
 
     const auto trans_locktime32 = transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
-    if ((stack_locktime39 < locktime_threshold) !=
+    if ((stack_locktime40 < locktime_threshold) !=
         (trans_locktime32 < locktime_threshold))
         return error::op_check_locktime_verify3;
 
     // BIP65: the stack locktime is greater than the tx locktime.
-    return (stack_locktime39 > trans_locktime32) ?
+    return (stack_locktime40 > trans_locktime32) ?
         error::op_check_locktime_verify4 : error::op_success;
 }
 

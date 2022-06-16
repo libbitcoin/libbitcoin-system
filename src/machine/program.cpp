@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <execution>
 #include <iterator>
 #include <type_traits>
 #include <utility>
@@ -45,63 +46,33 @@ using namespace system::error;
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
 
-template <typename Type>
-constexpr Type get(const program::variant& vary) noexcept
-{
-    return std::get<Type>(vary);
-}
-
-constexpr bool is_valid_witness_stack(const chunk_cptrs& stack) noexcept
-{
-    return witness::is_push_size(stack);
-}
-
-inline program::variant_stack_ptr default_stack() noexcept
-{
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return std::make_shared<program::variant_stack>();
-    BC_POP_WARNING()
-}
-
-inline program::variant_stack_ptr copy_stack(
-    const program::variant_stack& stack) noexcept
-{
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return std::make_shared<program::variant_stack>(
-        program::variant_stack{ stack });
-    BC_POP_WARNING()
-}
-
-// TODO: no_fill_allocator.
-// TODO: C++17: Parallel policy for std::transform.
-inline program::variant_stack_ptr create_stack(
-    const chunk_cptrs& stack) noexcept
-{
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    auto out = std::make_shared<program::variant_stack>(stack.size());
-    BC_POP_WARNING()
-
-    std::transform(stack.begin(), stack.end(), out->begin(),
-        [](const chunk_cptr& ptr)
-        {
-            return program::variant{ ptr };
-        });
-
-    return out;
-}
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
 // Input script run (default/empty stack).
+// 'tx' must remain in scope, this holds state referenced by weak pointers.
+// This expecation is guaranteed by the retained tx reference.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 program::program(const chain::transaction& tx, const input_iterator& input,
      uint32_t forks) noexcept
-  : program(tx, input, (*input)->script_ptr(), forks, unused_value,
-      unused_version, default_stack(), true)
+  : transaction_(tx),
+    input_(input),
+    script_((*input)->script_ptr()),
+    forks_(forks),
+    value_(unused_value),
+    version_(unused_version),
+    tether_(),
+    witness_(to_shared<chunk_cptrs>()),
+    primary_()
 {
 }
+BC_POP_WARNING()
 
 // Legacy p2sh or prevout script run (copied input stack - use first).
+// 'other' must remain in scope, this holds state referenced by weak pointers.
+// This expecation is guaranteed by the retained transaction_ member reference
+// and copy of other.tether_ (not tx state).
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 program::program(const program& other, const script::cptr& script) noexcept
   : transaction_(other.transaction_),
     input_(other.input_),
@@ -109,10 +80,12 @@ program::program(const program& other, const script::cptr& script) noexcept
     forks_(other.forks_),
     value_(other.value_),
     version_(other.version_),
-    valid_stack_(true),
-    primary_(copy_stack(*other.primary_))
+    tether_(other.tether_),
+    witness_(to_shared<chunk_cptrs>()),
+    primary_(other.primary_)
 {
 }
+BC_POP_WARNING()
 
 // Legacy p2sh or prevout script run (moved input stack - use last).
 program::program(program&& other, const script::cptr& script) noexcept
@@ -122,35 +95,33 @@ program::program(program&& other, const script::cptr& script) noexcept
     forks_(other.forks_),
     value_(other.value_),
     version_(other.version_),
-    valid_stack_(true),
+    tether_(std::move(other.tether_)),
+    witness_(std::move(other.witness_)),
     primary_(std::move(other.primary_))
 {
 }
 
 // Witness script run (witness-initialized stack).
+// 'tx', 'input' (and iterated chain::input), and 'witness' must remain in
+// scope, as these hold chunk state referenced by weak pointers. This
+// expecation is guaranteed by the retained tx and input reference. A reference
+// to witness is explicitly retained to guarantee the lifetime of its elements.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 program::program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs& stack) noexcept
-  : program(tx, input, script, forks, (*input)->prevout->value(), version,
-      create_stack(stack), is_valid_witness_stack(stack))
-{
-}
-
-// protected
-program::program(const chain::transaction& tx, const input_iterator& input,
-    const script::cptr& script, uint32_t forks, uint64_t value,
-    script_version version, const variant_stack_ptr& stack,
-    bool valid_stack) noexcept
+    const chunk_cptrs_ptr& witness) noexcept
   : transaction_(tx),
     input_(input),
     script_(script),
     forks_(forks),
-    value_(value),
+    value_((*input)->prevout->value()),
     version_(version),
-    valid_stack_(valid_stack),
-    primary_(stack)
+    tether_(),
+    witness_(witness),
+    primary_(pointer_cast<variant>(*witness))
 {
 }
+BC_POP_WARNING()
 
 // Public.
 // ----------------------------------------------------------------------------
@@ -167,7 +138,7 @@ script_error_t program::validate() const noexcept
         return error::prefail_script;
 
     // bip_141 introduces an initialized stack, so must validate.
-    if (bip141 && !valid_stack_)
+    if (bip141 && !witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
 
     // The nops_rule establishes script size limit.
@@ -183,39 +154,44 @@ bool program::is_true(bool clean_stack) const noexcept
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
-// Moving a shared pointer to the stack is optimal and acceptable.
-BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
-void program::push_cptr(chunk_cptr&& datum) noexcept
-BC_POP_WARNING()
-{
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->emplace_back(std::move(datum));
-    BC_POP_WARNING()
-}
-
-void program::push_cptr(const chunk_cptr& datum) noexcept
-{
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->emplace_back(datum);
-    BC_POP_WARNING()
-}
-
 void program::push_chunk(data_chunk&& datum) noexcept
 {
-    push_cptr(to_shared<data_chunk>(std::move(datum)));
+    primary_.push_back(make_external<data_chunk>(std::move(datum), tether_));
+}
+
+// Passing data_chunk& would be poor interface design, as it would allow
+// derived callers to (unsafely) store raw pointers to unshared data_chunk.
+// While a shared pointer could be removed from scope after this call, the
+// design expects that all shared pointers have the lifetime of this class,
+// While data_chunks are constructed as a consequence of hashing operations.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+void program::push_chunk(const chunk_cptr& datum) noexcept
+BC_POP_WARNING()
+BC_POP_WARNING()
+{
+    primary_.emplace_back(datum.get());
+}
+
+// private
+void program::push_chunk(const chunk_xptr& datum) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    primary_.emplace_back(datum);
+    BC_POP_WARNING()
 }
 
 void program::push_bool(bool value) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->emplace_back(value);
+    primary_.emplace_back(value);
     BC_POP_WARNING()
 }
 
 void program::push_signed64(int64_t value) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    primary_->emplace_back(value);
+    primary_.emplace_back(value);
     BC_POP_WARNING()
 }
 
@@ -229,9 +205,9 @@ void program::push_length(size_t value) noexcept
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
-chunk_cptr program::pop_cptr_unsafe() noexcept
+chunk_xptr program::pop_chunk_unsafe() noexcept
 {
-    const auto value = peek_cptr_unsafe();
+    const auto value = peek_chunk_unsafe();
     drop_unsafe();
     return value;
 }
@@ -250,6 +226,7 @@ bool program::pop_strict_bool_unsafe() noexcept
     return value;
 }
 
+// private
 bool program::pop_signed32_unsafe(int32_t& value) noexcept
 {
     const auto result = peek_signed32_unsafe(value);
@@ -300,14 +277,14 @@ bool program::pop_index32(size_t& index) noexcept
     return index < size();
 }
 
-bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
+bool program::pop_count(chunk_xptrs& data, size_t count) noexcept
 {
     if (size() < count)
         return false;
 
     data.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        data.push_back(pop_cptr_unsafe());
+        data.push_back(pop_chunk_unsafe());
 
     return true;
 }
@@ -315,31 +292,29 @@ bool program::pop_count(chunk_cptrs& data, size_t count) noexcept
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
-// TODO: optimize this so that top calls don't require iterators.
-// peek_cptr_unsafe()
-// peek_variant_unsafe()
-// peek_signed_unsafe()
-
-chunk_cptr program::peek_cptr_unsafe(size_t index) const noexcept
+chunk_xptr program::peek_chunk_unsafe() const noexcept
 {
     using namespace number;
-    chunk_cptr item;
+    chunk_xptr item{};
 
     std::visit(overload
     {
-        [&](bool vary) noexcept
+        [&, this](bool vary) noexcept
         {
-            item = pointer::from_bool(vary);
+            // This is never executed in standard scripts.
+            item = make_external(chunk::from_bool(vary), tether_);
         },
         [&](int64_t vary) noexcept
         {
-            item = pointer::from_int(vary);
+            // This is never executed in standard scripts.
+            item = make_external(chunk::from_int(vary), tether_);
         },
-        [&](const chunk_cptr& vary) noexcept
+        [&](const chunk_xptr& vary) noexcept
         {
+            // This is the canonical use case.
             item = vary;
         }
-    }, peek_variant_unsafe(index));
+    }, peek_variant_unsafe());
 
     return item;
 }
@@ -353,20 +328,24 @@ bool program::peek_bool_unsafe() const noexcept
     {
         [&](bool vary) noexcept
         {
+            // This is the canonical use case.
             item = vary;
         },
         [&](int64_t vary) noexcept
         {
+            // This is never executed in standard scripts.
             item = boolean::to_bool(vary);
         },
-        [&](const chunk_cptr& vary) noexcept
+        [&](const chunk_xptr& vary) noexcept
         {
+            // This is never executed in standard scripts.
             item = boolean::from_chunk(*vary);
         }
-    }, primary_->back());
+    }, peek_variant_unsafe());
     return item;
 }
 
+// private
 bool program::peek_strict_bool_unsafe() const noexcept
 {
     using namespace number;
@@ -376,17 +355,20 @@ bool program::peek_strict_bool_unsafe() const noexcept
     {
         [&](bool vary) noexcept
         {
+            // This is the canonical use case (after bip147).
             item = vary;
         },
         [&](int64_t vary) noexcept
         {
+            // This may be executed in standard scripts (before bip147).
             item = boolean::to_bool(vary);
         },
-        [&](const chunk_cptr& vary) noexcept
+        [&](const chunk_xptr& vary) noexcept
         {
+            // This may be executed in standard scripts (before bip147).
             item = boolean::strict_from_chunk(*vary);
         }
-    }, primary_->back());
+    }, peek_variant_unsafe());
     return item;
 }
 
@@ -397,35 +379,40 @@ template<size_t Bytes, typename Integer,
     if_signed_integer<Integer>,
     if_integral_integer<Integer>,
     if_not_greater<Bytes, sizeof(Integer)>>
-bool program::peek_signed_unsafe(Integer& value, size_t index) const noexcept
+bool program::peek_signed_unsafe(Integer& value) const noexcept
 {
     using namespace number;
-    auto result = true;
+    bool result{ true };
 
     std::visit(overload
     {
         [&](bool vary) noexcept
         {
+            // This is never executed in standard scripts.
             value = boolean::to_int<Bytes>(vary);
         },
         [&](int64_t vary) noexcept
         {
+            // This is the canonical use case (bounds check only).
             result = integer<Bytes>::from_int(value, vary);
         },
-        [&](const chunk_cptr& vary) noexcept
+        [&](const chunk_xptr& vary) noexcept
         {
+            // This is never executed in standard scripts.
             result = integer<Bytes>::from_chunk(value , *vary);
         }
-    }, peek_variant_unsafe(index));
+    }, peek_variant_unsafe());
     return result;
 }
 
+// private
 bool program::peek_signed32_unsafe(int32_t& value) const noexcept
 {
     constexpr auto bytes4 = sizeof(int32_t);
     return peek_signed_unsafe<bytes4>(value);
 }
 
+// private
 bool program::peek_signed40_unsafe(int64_t& value) const noexcept
 {
     constexpr auto bytes5 = sizeof(int32_t) + sizeof(int8_t);
@@ -456,19 +443,18 @@ bool program::peek_unsigned32(uint32_t& value) const noexcept
 // CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
 // input.locktime allows use of the full unsigned 32 bit domain, without use of
 // the negative range. Otherwise a 2038 limit (beyond the inherent 2106 limit)
-// would have been introduced. Since the sign bit is unused, the domain is 39.
+// would have been introduced.
 // ****************************************************************************
-bool program::peek_unsigned39(uint64_t& value) const noexcept
+bool program::peek_unsigned40(uint64_t& value) const noexcept
 {
     if (is_empty())
         return false;
 
-    // Negative exclusion drops the 40th bit (limits comparable domain).
     int64_t signed64;
     if (!peek_signed40_unsafe(signed64) || is_negative(value))
         return false;
 
-    // 39 bits are used in unsigned tx.locktime compare.
+    // 40 bits are usable in unsigned tx.locktime compare.
     value = sign_cast<uint64_t>(signed64);
     return true;
 }
@@ -480,7 +466,7 @@ bool program::peek_unsigned39(uint64_t& value) const noexcept
 void program::drop_unsafe() noexcept
 {
     BC_ASSERT(!is_empty());
-    primary_->pop_back();
+    primary_.pop_back();
 }
 
 void program::swap_unsafe(size_t left_index, size_t right_index) noexcept
@@ -491,23 +477,28 @@ void program::swap_unsafe(size_t left_index, size_t right_index) noexcept
 
 void program::erase_unsafe(size_t index) noexcept
 {
-    primary_->erase(it_unsafe(index));
+    primary_.erase(it_unsafe(index));
 }
 
 void program::push_variant(const variant& vary) noexcept
 {
-    primary_->push_back(vary);
+    primary_.push_back(vary);
+}
+
+const program::variant& program::peek_variant_unsafe() const noexcept
+{
+    return primary_.back();
 }
 
 const program::variant& program::peek_variant_unsafe(
-    size_t index) const noexcept
+    size_t peek_index) const noexcept
 {
-    return *const_it_unsafe(index);
+    return *const_it_unsafe(peek_index);
 }
 
 program::variant program::pop_variant_unsafe() noexcept
 {
-    variant temporary = std::move(primary_->back());
+    variant temporary = std::move(primary_.back());
     drop_unsafe();
     return temporary;
 }
@@ -517,12 +508,12 @@ program::variant program::pop_variant_unsafe() noexcept
 
 size_t program::size() const noexcept
 {
-    return primary_->size();
+    return primary_.size();
 }
 
 bool program::is_empty() const noexcept
 {
-    return primary_->empty();
+    return primary_.empty();
 }
 
 bool program::is_overflow() const noexcept
@@ -532,6 +523,7 @@ bool program::is_overflow() const noexcept
     return (size() + alternate_.size()) > max_stack_size;
 }
 
+// private
 bool program::is_clean() const noexcept
 {
     return size() == one;
@@ -677,41 +669,57 @@ bool program::set_subscript(const op_iterator& op) noexcept
     return true;
 }
 
+inline strippers create_strip_ops(const chunk_xptrs& endorsements) noexcept
+{
+    strippers strip;
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    strip.reserve(add1(endorsements.size()));
+
+    for (const auto& endorsement: endorsements)
+        strip.emplace_back(endorsement);
+
+    strip.emplace_back(opcode::codeseparator);
+    BC_POP_WARNING()
+
+    return strip;
+}
+
 // ****************************************************************************
 // CONSENSUS: Endorsement and code separator stripping are always performed in
 // conjunction and are limited to non-witness signature hash subscripts.
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-script::cptr program::subscript(
-    const chunk_cptrs& endorsements) const noexcept
+script::cptr program::subscript(const chunk_xptrs& endorsements) const noexcept
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
     if (is_enabled(forks::bip143_rule) && version_ == script_version::zero)
         return script_;
 
-    // Transform endorsements into the set of operators, and op_codeseparator.
+    // Transform into a set of endorsement push ops and one op_codeseparator.
     const auto strip = create_strip_ops(endorsements);
     const auto stop = script_->ops().end();
+    const op_iterator offset{ script_->offset };
 
     // If none of the strip ops are found, return the subscript.
     // Prefail is not circumvented as subscript used only for signature hash.
-    if (!intersecting(script_->offset, stop, strip))
+    if (!intersecting<operations>(offset, stop, strip))
         return script_;
 
     // Create new script from stripped copy of subscript operations.
     // Prefail is not copied to the subscript, used only for signature hash.
     BC_PUSH_WARNING(NO_NEW_DELETE)
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return to_shared(new script{ difference(script_->offset, stop, strip) });
+    return to_shared(new script{ difference<operations>(offset, stop, strip) });
     BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
 bool program::prepare(ec_signature& signature, const data_chunk&,
-    hash_digest& hash, const chunk_cptr& endorsement) const noexcept
+    hash_digest& hash, const chunk_xptr& endorsement) const noexcept
 {
     uint8_t flags;
     data_slice distinguished;
@@ -750,28 +758,6 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
 // Private.
 // ----------------------------------------------------------------------------
 
-// ****************************************************************************
-// CONSENSUS: nominal endorsement operation encoding required.
-// ****************************************************************************
-chain::operations program::create_strip_ops(
-    const chunk_cptrs& endorsements) noexcept
-{
-    constexpr auto non_mininal = false;
-    operations strip;
-
-    // Subsequent emplaces are non-allocating, but still noexcept(false).
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    strip.reserve(add1(endorsements.size()));
-
-    for (const auto& push: endorsements)
-        strip.emplace_back(push, non_mininal);
-
-    strip.emplace_back(opcode::codeseparator);
-    BC_POP_WARNING()
-
-    return strip;
-}
-
 hash_digest program::signature_hash(const script& sub,
     uint8_t flags) const noexcept
 {
@@ -794,48 +780,82 @@ void program::signature_hash(hash_cache& cache, const script& sub,
     BC_POP_WARNING()
 }
 
+// Operators.
+// ----------------------------------------------------------------------------
+
 // Invoked by op_equal/op_equal_verify only.
 // Integers are unconstrained as these are stack chunk equality comparisons.
 bool operator==(const program::variant& left,
     const program::variant& right) noexcept
 {
     static_assert(std::variant_size_v<program::variant> == 3);
+
     using namespace number;
-    auto result = true;
+    enum { bool_, int64_, pchunk_ };
+    bool out = true;
 
     // Methods bound at compile time (free).
-    // Runtime ternaries on static index (cheap).
+    // One runtime switch on variant index (cheap).
     // bool/int conversions are compile-time (free).
-    // chunk/ponter conversions reduce to conventional bitcoin design.
+    // chunk conversions reduce to conventional bitcoin design.
     std::visit(program::overload
     {
+        // This is never executed in standard scripts.
         [&](bool vary) noexcept
         {
-            result = std::holds_alternative<chunk_cptr>(right) ?
-                *get<chunk_cptr>(right) == chunk::from_bool(vary) :
-            std::holds_alternative<int64_t>(right) ?
-                get<int64_t>(right) == boolean::to_int(vary) :
-                get<bool>(right) == vary;
+            switch (right.index())
+            {
+                case bool_:
+                    out = std::get<bool>(right) == vary;
+                    break;
+                case int64_:
+                    out = std::get<int64_t>(right) == boolean::to_int(vary);
+                    break;
+                default:
+                case pchunk_:
+                    out = *std::get<chunk_xptr>(right) == chunk::from_bool(vary);
+            }
         },
+
+        // This is never executed in standard scripts.
         [&](int64_t vary) noexcept
         {
-            result = std::holds_alternative<chunk_cptr>(right) ?
-                *get<chunk_cptr>(right) == chunk::from_int(vary) :
-            std::holds_alternative<int64_t>(right) ?
-                get<int64_t>(right) == vary :
-                boolean::to_int(get<bool>(right)) == vary;
+            switch (right.index())
+            {
+                case bool_:
+                    out = boolean::to_int(std::get<bool>(right)) == vary;
+                    break;
+                case int64_:
+                    out = std::get<int64_t>(right) == vary;
+                    break;
+                default:
+                case pchunk_:
+                    out = *std::get<chunk_xptr>(right) == chunk::from_int(vary);
+            }
         },
-        [&](const chunk_cptr& vary) noexcept
+
+        // This is the canonical use case.
+        [&](chunk_xptr vary) noexcept
         {
-            result = std::holds_alternative<chunk_cptr>(right) ?
-                *get<chunk_cptr>(right) == *vary :
-            std::holds_alternative<int64_t>(right) ?
-                *pointer::from_int(get<int64_t>(right)) == *vary :
-                *pointer::from_bool(get<bool>(right)) == *vary;
+            switch (right.index())
+            {
+                case bool_:
+                    // This is never executed in standard scripts.
+                    out = chunk::from_bool(std::get<bool>(right)) == *vary;
+                    break;
+                case int64_:
+                    // This is never executed in standard scripts.
+                    out = chunk::from_int(std::get<int64_t>(right)) == *vary;
+                    break;
+                default:
+                case pchunk_:
+                    // This is the canonical use case.
+                    out = *std::get<chunk_xptr>(right) == *vary;
+            }
         }
     }, left);
 
-    return result;
+    return out;
 }
 
 } // namespace machine
