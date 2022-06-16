@@ -110,14 +110,14 @@ private:
 };
 
 template <typename Type, if_default_constructible<Type> = true>
-bool operator==(const external_ptr<Type>& left,
+constexpr bool operator==(const external_ptr<Type>& left,
     const external_ptr<Type>& right) noexcept
 {
     return *left == *right;
 }
 
 template <typename Type, if_default_constructible<Type> = true>
-bool operator!=(const external_ptr<Type>& left,
+constexpr bool operator!=(const external_ptr<Type>& left,
     const external_ptr<Type>& right) noexcept
 {
     return !(left == right);
@@ -138,14 +138,14 @@ inline external_ptr<Type> make_external(Type&& instance,
 
 /// Same as external_ptr{}.
 template <typename Type, if_default_constructible<Type> = true>
-inline external_ptr<Type> make_external() noexcept
+constexpr external_ptr<Type> make_external() noexcept
 {
     return {};
 }
 
 /// Same as external_ptr{ pointer }.
 template <typename Type, if_default_constructible<Type> = true>
-inline external_ptr<Type> make_external(const Type* pointer) noexcept
+constexpr external_ptr<Type> make_external(const Type* pointer) noexcept
 {
     return { pointer };
 }
