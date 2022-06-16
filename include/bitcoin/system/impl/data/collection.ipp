@@ -80,8 +80,8 @@ binary_search(const Collection& list, const Element& element) noexcept
 template <typename To, typename From>
 std::vector<To> cast(const std::vector<From>& source) noexcept
 {
-    // TODO: no_fill_allocator.
-    std::vector<To> out(source.size());
+    static no_fill_allocator<To> no_fill_to_allocator{};
+    std::vector<To> out(source.size(), no_fill_to_allocator);
 
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const From& element)

@@ -156,8 +156,7 @@ short_hash ripemd160_hash(const data_slice& data) noexcept
 
 data_chunk ripemd160_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(no_fill_byte_allocator);
-    hash.resize(short_hash_size);
+    data_chunk hash(short_hash_size, no_fill_byte_allocator);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -171,8 +170,7 @@ short_hash sha1_hash(const data_slice& data) noexcept
 
 data_chunk sha1_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(no_fill_byte_allocator);
-    hash.resize(short_hash_size);
+    data_chunk hash(short_hash_size, no_fill_byte_allocator);
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -186,8 +184,7 @@ hash_digest sha256_hash(const data_slice& data) noexcept
 
 data_chunk sha256_hash_chunk(const data_slice& data) noexcept
 {
-    data_chunk hash(no_fill_byte_allocator);
-    hash.resize(hash_size);
+    data_chunk hash(hash_size, no_fill_byte_allocator);
     intrinsics::sha256(data.data(), data.size(), hash.data());
     return hash;
 }
@@ -216,8 +213,7 @@ hash_digest hmac_sha256_hash(const data_slice& data,
 data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length)noexcept
 {
-    data_chunk hash(no_fill_byte_allocator);
-    hash.resize(length);
+    data_chunk hash(length, no_fill_byte_allocator);
     pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
         salt.size(), iterations, hash.data(), length);
     return hash;

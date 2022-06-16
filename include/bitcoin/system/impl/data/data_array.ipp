@@ -47,8 +47,7 @@ data_array<Size> to_array(const data_slice& bytes) noexcept
 template <size_t Size>
 data_stack to_stack(const std::vector<data_array<Size>>& values) noexcept
 {
-    data_stack chunks(no_fill_byte_allocator);
-    chunks.resize(values.size());
+    data_stack chunks(values.size(), no_fill_byte_allocator);
     std::transform(values.begin(), values.end(), chunks.begin(),
         [](const data_array<Size>& value) noexcept
         {

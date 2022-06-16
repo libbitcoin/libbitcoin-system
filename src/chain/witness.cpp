@@ -201,8 +201,7 @@ witness witness::from_string(const std::string& mnemonic) noexcept
 
 data_chunk witness::to_data(bool prefix) const noexcept
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(prefix));
+    data_chunk data(serialized_size(prefix), no_fill_byte_allocator);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);

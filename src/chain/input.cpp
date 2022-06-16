@@ -186,8 +186,7 @@ input input::from_data(reader& source) noexcept
 
 data_chunk input::to_data() const noexcept
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(false));
+    data_chunk data(serialized_size(false), no_fill_byte_allocator);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);

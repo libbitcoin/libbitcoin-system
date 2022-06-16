@@ -271,8 +271,7 @@ data_chunk transaction::to_data(bool witness) const noexcept
 {
     witness &= segregated_;
 
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(witness));
+    data_chunk data(serialized_size(witness), no_fill_byte_allocator);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
@@ -427,8 +426,7 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const noexcept
 chain::points transaction::points() const noexcept
 {
     static no_fill_allocator<point> no_fill_point_allocator{};
-    chain::points out(no_fill_point_allocator);
-    out.resize(inputs_->size());
+    chain::points out(inputs_->size(), no_fill_point_allocator);
 
     const auto point = [](const input::cptr& input) noexcept
     {

@@ -48,8 +48,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -167,8 +165,7 @@ block block::from_data(reader& source, bool witness) noexcept
 
 data_chunk block::to_data(bool witness) const noexcept
 {
-    data_chunk data(no_fill_byte_allocator);
-    data.resize(serialized_size(witness));
+    data_chunk data(serialized_size(witness), no_fill_byte_allocator);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
@@ -220,11 +217,16 @@ const transactions_cptr& block::transactions_ptr() const noexcept
 
 hash_list block::transaction_hashes(bool witness) const noexcept
 {
+    static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
-    hash_list out(no_fill_hash_allocator);
 
-    // Single allocation, accounts for generate_merkle_root addition.
-    out.reserve(is_odd(count) && !is_one(count) ? add1(count) : count);
+    // Addition is guarded by block size limit.
+    const auto space = count + (is_odd(count) && !is_one(count) ? one : zero);
+
+    // Excess reservation accounts for generate_merkle_root addition.
+    hash_list out(space, no_fill_hash_allocator);
+
+    // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
     const auto hash = [witness](const transaction::cptr& tx) noexcept

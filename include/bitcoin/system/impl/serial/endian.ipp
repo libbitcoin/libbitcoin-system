@@ -197,9 +197,10 @@ data_array<Size> to_little_endian_array(Integer value) noexcept
 template <typename Integer, if_integer<Integer>>
 data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 {
-    data_chunk chunk(no_fill_byte_allocator);
     const auto size = byte_width(value);
-    chunk.reserve(size + excess);
+    data_chunk chunk(size + excess, no_fill_byte_allocator);
+
+    // Vector capacity is never reduced when resizing to smaller size.
     chunk.resize(size);
     return to_big(std::move(chunk), value);
 }
@@ -207,9 +208,10 @@ data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 template <typename Integer, if_integer<Integer>>
 data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
 {
-    data_chunk chunk(no_fill_byte_allocator);
     const auto size = byte_width(value);
-    chunk.reserve(size + excess);
+    data_chunk chunk(size + excess, no_fill_byte_allocator);
+
+    // Vector capacity is never reduced when resizing to smaller size.
     chunk.resize(size);
     return to_little(std::move(chunk), value);
 }

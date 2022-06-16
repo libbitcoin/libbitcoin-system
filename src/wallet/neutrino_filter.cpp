@@ -156,8 +156,7 @@ bool match_filter(const block_filter& filter,
         return false;
 
     static no_fill_allocator<chain::script> no_fill_script_allocator{};
-    chain::scripts stack(no_fill_script_allocator);
-    stack.resize(addresses.size());
+    chain::scripts stack(addresses.size(), no_fill_script_allocator);
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
         [](const wallet::payment_address& address) noexcept
