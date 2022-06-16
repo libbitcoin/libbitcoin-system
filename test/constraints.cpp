@@ -30,6 +30,12 @@ typedef const bool is_constant;
 class base {};
 class not_derived {};
 class derived : base {};
+////class not_default_constructible
+////{
+////    not_default_constructible(int)
+////    {
+////    }
+////};
 
 template <typename Type>
 constexpr bool is_true()
@@ -139,6 +145,12 @@ static_assert(is_true<if_byte_insertable<std::vector<uint8_t>>>(), "");
 ////static_assert(!is_true<if_byte_insertable<std::u32string>>(), "");
 ////static_assert(!is_true<if_byte_insertable<std::vector<uint32_t>>>(), "");
 ////static_assert(!is_true<if_byte_insertable<uint32_t>>(), "");
+
+static_assert(is_true<if_default_constructible<bool>>(), "");
+static_assert(is_true<if_default_constructible<std::string>>(), "");
+static_assert(is_true<if_default_constructible<std::vector<bool>>>(), "");
+static_assert(is_true<if_default_constructible<std::array<bool, 42>>>(), "");
+////static_assert(!is_true<if_default_constructible<not_default_constructible>>(), "");
 
 // if_same_width
 static_assert(is_true<if_same_width<bool, bool>>(), "");
