@@ -30,6 +30,9 @@ BOOST_AUTO_TEST_SUITE_END()
 // Performance considerations.
 // ----------------------------------------------------------------------------
 
+// stdlib object sizes are subjsct to implementation (including debug builds).
+#if defined(_MSC_VER) && defined(NDEBUG)
+
 // std::vector<uint8_t> requires 3 pointers (front/back/size).
 constexpr auto a1_ = sizeof(std::vector<uint8_t>*);
 constexpr auto b1_ = sizeof(std::vector<uint8_t>&);
@@ -128,6 +131,8 @@ static_assert(a11 == 2 * sizeof(size_t));
 // lifetimes must be externally controlled.
 constexpr auto a0 = sizeof(std::weak_ptr<data_chunk>);
 static_assert(a0 == 2 * sizeof(size_t));
+
+#endif // MSC_VER_ && NDEBUG
 
 // copy/move restrictions of unique_ptr:
 ////auto foo()

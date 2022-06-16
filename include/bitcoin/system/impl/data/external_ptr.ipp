@@ -26,18 +26,6 @@
 namespace libbitcoin {
 namespace system {
 
-// std::unique_ptr owns storage, deleting the referenced object on destruct.
-static_assert(sizeof(std::unique_ptr<std::vector<uint8_t>>) == 1 * sizeof(size_t));
-
-// std::shared_ptr owns storage, deleting the referenced object on destruct.
-static_assert(sizeof(std::shared_ptr<std::vector<uint8_t>>) == 2 * sizeof(size_t));
-
-// std::weak_ptr doubles storage cost and is overly restrictive.
-static_assert(sizeof(std::weak_ptr<std::vector<uint8_t>>) == 2 * sizeof(size_t));
-
-// external_ptr is safer and more flexible than a raw pointer, at same cost.
-static_assert(sizeof(external_ptr<std::vector<uint8_t>>) == 1 * sizeof(size_t));
-
 } // namespace system
 } // namespace libbitcoin
 
