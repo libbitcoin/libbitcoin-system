@@ -23,8 +23,6 @@
 #include <type_traits>
 #include <utility>
 
-// TODO: test.
-
 namespace libbitcoin {
 namespace system {
 
@@ -63,7 +61,6 @@ public:
     }
 };
 
-// C++14: std::vector(size_t, allocator) construction.
 static no_fill_allocator<uint8_t> no_fill_byte_allocator{};
 
 } // namespace system
