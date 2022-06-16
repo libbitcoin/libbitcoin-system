@@ -172,8 +172,13 @@ input input::from_data(reader& source) noexcept
     // Witness is deserialized by transaction.
     return
     {
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::point{ source }),
         to_shared(new chain::script{ source, true }),
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+
         to_shared<chain::witness>(),
         source.read_4_bytes_little_endian(),
         source,
