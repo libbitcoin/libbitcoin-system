@@ -312,7 +312,6 @@ Left difference(const typename Left::const_iterator& begin,
     
     copy.shrink_to_fit();
     return copy;
-    return {};
 }
 
 template <typename Left, typename Right>
