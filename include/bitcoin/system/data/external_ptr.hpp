@@ -46,17 +46,15 @@ public:
     {
     }
 
-    /// Defaults (nullptr may be copied/moved).
+    /// Defaults.
     external_ptr(external_ptr&&) = default;
     external_ptr(const external_ptr&) = default;
     external_ptr& operator=(external_ptr&&) = default;
     external_ptr& operator=(const external_ptr&) = default;
     ~external_ptr() = default;
 
-    /// Deleteds (external ownership is required).
+    /// External ownership is required.
     constexpr external_ptr(Type&&) = delete;
-    constexpr external_ptr(std::shared_ptr<Type>&&) = delete;
-
     constexpr explicit external_ptr(const Type& instance) noexcept
       : pointer_(&instance)
     {
