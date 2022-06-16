@@ -912,7 +912,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
         return error::op_check_multisig_verify3;
 
     chunk_xptrs keys;
-    if (!pop_count(keys, count))
+    if (!pop_chunks(keys, count))
         return error::op_check_multisig_verify4;
 
     if (!pop_index32(count))
@@ -922,7 +922,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
         return error::op_check_multisig_verify6;
 
     chunk_xptrs endorsements;
-    if (!pop_count(endorsements, count))
+    if (!pop_chunks(endorsements, count))
         return error::op_check_multisig_verify7;
 
     if (is_empty())

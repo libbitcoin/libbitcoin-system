@@ -122,35 +122,29 @@ protected:
     /// Primary stack.
     /// -----------------------------------------------------------------------
 
-    /// Primary stack push (safe, typed).
+    /// Primary stack (push).
     void push_chunk(data_chunk&& datum) noexcept;
     void push_chunk(const chunk_cptr& datum) noexcept;
     void push_bool(bool value) noexcept;
     void push_signed64(int64_t value) noexcept;
-
-    /// wrappers (safe)
     void push_length(size_t value) noexcept;
 
-    /// Primary stack pop (unsafe, typed).
+    /// Primary stack (pop).
     chunk_xptr pop_chunk_unsafe() noexcept;
     bool pop_bool_unsafe() noexcept;
     bool pop_strict_bool_unsafe() noexcept;
-
-    /// wrappers (safe)
+    bool pop_chunks(chunk_xptrs& data, size_t count) noexcept;
     bool pop_signed32(int32_t& value) noexcept;
     bool pop_binary32(int32_t& left, int32_t& right) noexcept;
     bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) noexcept;
     bool pop_index32(size_t& index) noexcept;
-    bool pop_count(chunk_xptrs& data, size_t count) noexcept;
 
-    /// Primary stack peek (unsafe, typed).
+    /// Primary stack (peek).
     bool peek_bool_unsafe() const noexcept;
-
-    /// wrappers (safe)
     bool peek_unsigned32(uint32_t& value) const noexcept;
     bool peek_unsigned40(uint64_t& value) const noexcept;
 
-    /// Primary stack non-const (variant).
+    /// Primary stack (variant).
     void drop_unsafe() noexcept;
     void swap_unsafe(size_t left_index, size_t right_index) noexcept;
     void erase_unsafe(size_t index) noexcept;
@@ -159,7 +153,7 @@ protected:
     const variant& peek_variant_unsafe() const noexcept;
     const variant& peek_variant_unsafe(size_t peek_index) const noexcept;
 
-    /// Primary stack const functions (untyped).
+    /// Primary stack state (untyped).
     size_t size() const noexcept;
     bool is_empty() const noexcept;
     bool is_overflow() const noexcept;
@@ -210,40 +204,21 @@ private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
 
+    // Private stack helpers.
     template<size_t Bytes, typename Integer,
         if_signed_integer<Integer> = true,
         if_integral_integer<Integer> = true,
         if_not_greater<Bytes, sizeof(Integer)> = true>
     bool peek_signed_unsafe(Integer& value) const noexcept;
-
+    void push_chunk(const chunk_xptr& datum) noexcept;
+    bool pop_signed32_unsafe(int32_t& value) noexcept;
     chunk_xptr peek_chunk_unsafe() const noexcept;
     bool peek_strict_bool_unsafe() const noexcept;
     bool peek_signed32_unsafe(int32_t& value) const noexcept;
     bool peek_signed40_unsafe(int64_t& value) const noexcept;
-    void push_chunk(const chunk_xptr& datum) noexcept;
-    bool pop_signed32_unsafe(int32_t& value) noexcept;
     bool is_clean() const noexcept;
 
-    // Zero-basing of primary stack index.
-    // ------------------------------------------------------------------------
-
-    // TODO: optimize using array indexing.
-    inline variant_stack::iterator it_unsafe(size_t index) noexcept
-    {
-        BC_ASSERT(index < size());
-        return std::prev(primary_.end(), add1(index));
-    }
-
-    // TODO: optimize using array indexing.
-    inline variant_stack::const_iterator const_it_unsafe(
-        size_t index) const noexcept
-    {
-        BC_ASSERT(index < size());
-        return std::prev(primary_.end(), add1(index));
-    }
-
-    // ------------------------------------------------------------------------
-
+    // Signature hashing.
     hash_digest signature_hash(const chain::script& sub,
         uint8_t flags) const noexcept;
     void signature_hash(hash_cache& cache, const chain::script& sub,
@@ -258,27 +233,7 @@ private:
     const chain::script_version version_;
     const chunk_cptrs_ptr witness_;
 
-    // Tether computed data chunks to collection of shared_ptr.
-    // The tether is not garbage-collected (until destruct) as this is a space-
-    // time performance tradeoff. The maximum number of constructable chunks is
-    // bound by the script size limit. The following script operations will
-    // always tether chunks, as the result of a computed hash is pushed.
-    // op_ripemd160         (1)
-    // op_sha1              (1)
-    // op_sha256            (1)
-    // op_hash160           (1)
-    // op_hash256           (1)
-    // The following script operations will tether (additional) chunks, only
-    // in the case where the popped element was originally bool or int64_t.
-    // This is never the case in standard scripts.
-    // op_ripemd160         (0..1)
-    // op_sha1              (0..1)
-    // op_sha256            (0..1)
-    // op_hash160           (0..1)
-    // op_hash256           (0..1)
-    // op_size              (0..1)
-    // op_check_sig         (0..2)
-    // op_check_sig_verify  (0..2)
+    // Mutable as this may be updated on peeks.
     mutable tether<data_chunk> tether_;
 
     // Three stacks.

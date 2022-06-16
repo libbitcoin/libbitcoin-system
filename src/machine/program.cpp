@@ -46,6 +46,34 @@ using namespace system::error;
 constexpr auto unused_value = max_uint64;
 constexpr auto unused_version = script_version::unversioned;
 
+// Hash results and int/bool->chunks are saved using a shared_ptr vector.
+// The tether is not garbage-collected (until destruct) as this is a space-
+// time performance tradeoff. The maximum number of constructable chunks is
+// bound by the script size limit. A standard in/out script pair tethers
+// only one chunk, the computed hash.
+//
+// The following script operations will ALWAYS tether chunks, as the result
+// of a computed hash is *pushed* to the weak pointer (xptr) variant stack.
+//
+// op_ripemd160         (1)
+// op_sha1              (1)
+// op_sha256            (1)
+// op_hash160           (1)
+// op_hash256           (1)
+//
+// The following script operations will ONLY tether chunks in the case where
+// the *popped* element was originally bool/int64_t but required as chunk.
+// This is never the case in standard scripts.
+//
+// op_ripemd160         (0..1)
+// op_sha1              (0..1)
+// op_sha256            (0..1)
+// op_hash160           (0..1)
+// op_hash256           (0..1)
+// op_size              (0..1)
+// op_check_sig         (0..2, and m (endorsements) + n (keys))
+// op_check_sig_verify  (0..2, and m (endorsements) + n (keys))
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -154,9 +182,10 @@ bool program::is_true(bool clean_stack) const noexcept
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
+// This is the only source of push (write) tethering.
 void program::push_chunk(data_chunk&& datum) noexcept
 {
-    primary_.push_back(make_external<data_chunk>(std::move(datum), tether_));
+    primary_.push_back(make_external(std::move(datum), tether_));
 }
 
 // Passing data_chunk& would be poor interface design, as it would allow
@@ -205,11 +234,25 @@ void program::push_length(size_t value) noexcept
 // Primary stack (pop).
 // ----------------------------------------------------------------------------
 
+// This tethers a chunk if the stack value is not chunk.
 chunk_xptr program::pop_chunk_unsafe() noexcept
 {
     const auto value = peek_chunk_unsafe();
     drop_unsafe();
     return value;
+}
+
+// This tethers chunks if the stack values are not chunk.
+bool program::pop_chunks(chunk_xptrs& data, size_t count) noexcept
+{
+    if (size() < count)
+        return false;
+
+    data.reserve(count);
+    for (size_t index = 0; index < count; ++index)
+        data.push_back(pop_chunk_unsafe());
+
+    return true;
 }
 
 bool program::pop_bool_unsafe() noexcept
@@ -272,26 +315,15 @@ bool program::pop_index32(size_t& index) noexcept
     if (is_negative(value))
         return false;
 
-    // Cast unsafe when sizeof(size_t) < sizeof(int64_t), guarded by stack size.
+    // Cast guarded by stack size.
     index = limit<size_t>(value);
     return index < size();
-}
-
-bool program::pop_count(chunk_xptrs& data, size_t count) noexcept
-{
-    if (size() < count)
-        return false;
-
-    data.reserve(count);
-    for (size_t index = 0; index < count; ++index)
-        data.push_back(pop_chunk_unsafe());
-
-    return true;
 }
 
 // Primary stack (peek).
 // ----------------------------------------------------------------------------
 
+// This is the only source of peek/pop (read) tethering.
 chunk_xptr program::peek_chunk_unsafe() const noexcept
 {
     using namespace number;
@@ -429,7 +461,6 @@ bool program::peek_unsigned32(uint32_t& value) const noexcept
     if (is_empty())
         return false;
 
-    // Negative exclusion drops the 40th bit (inconsequential).
     int64_t signed64;
     if (!peek_signed40_unsafe(signed64) || is_negative(value))
         return false;
@@ -459,7 +490,7 @@ bool program::peek_unsigned40(uint64_t& value) const noexcept
     return true;
 }
 
-// Primary stack push/pop non-const functions (optimizations).
+// Primary stack (variant).
 // ----------------------------------------------------------------------------
 // Stack index is zero-based, back() is element zero.
 
@@ -469,15 +500,18 @@ void program::drop_unsafe() noexcept
     primary_.pop_back();
 }
 
+// This swaps the variant elements of the stack vector.
 void program::swap_unsafe(size_t left_index, size_t right_index) noexcept
 {
-    // This swaps the variant elements of the stack vector.
-    std::swap(*it_unsafe(left_index), *it_unsafe(right_index));
+    BC_ASSERT(index < size());
+    std::swap(
+        primary_.at(sub1(size()) - left_index),
+        primary_.at(sub1(size()) - right_index));
 }
 
 void program::erase_unsafe(size_t index) noexcept
 {
-    primary_.erase(it_unsafe(index));
+    primary_.erase(std::prev(primary_.end(), add1(index)));
 }
 
 void program::push_variant(const variant& vary) noexcept
@@ -493,7 +527,7 @@ const program::variant& program::peek_variant_unsafe() const noexcept
 const program::variant& program::peek_variant_unsafe(
     size_t peek_index) const noexcept
 {
-    return *const_it_unsafe(peek_index);
+    return *std::prev(primary_.end(), add1(peek_index));
 }
 
 program::variant program::pop_variant_unsafe() noexcept
@@ -503,7 +537,7 @@ program::variant program::pop_variant_unsafe() noexcept
     return temporary;
 }
 
-// Primary stack push/pop const functions.
+// Primary stack state (untyped).
 // ----------------------------------------------------------------------------
 
 size_t program::size() const noexcept
@@ -616,7 +650,7 @@ bool program::if_(const operation& op) const noexcept
     return op.is_conditional() || is_succeess();
 }
 
-//  Accumulators.
+//  Accumulator.
 // ----------------------------------------------------------------------------
 
 // ****************************************************************************
@@ -755,7 +789,7 @@ bool program::prepare(ec_signature& signature, const data_chunk&,
     return parse_signature(signature, distinguished, bip66);
 }
 
-// Private.
+// Signature hashing.
 // ----------------------------------------------------------------------------
 
 hash_digest program::signature_hash(const script& sub,
