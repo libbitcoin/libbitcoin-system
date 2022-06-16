@@ -24,6 +24,7 @@
 #include <memory>
 #include <vector>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/data/external_ptr.hpp>
 #include <bitcoin/system/define.hpp>
 
 // C++ now allows only vectors of "any non-const object type".
@@ -47,6 +48,8 @@
 // [name]_ptrs_ptr implies a ptr<[name]s_ptr>.
 // [name]_cptrs_ptr implies a ptr<[name]s_cptr>.
 // [name]_cptrs_cptr implies a ptr<const [name]s_cptr>.
+//
+// [name]_xptr implies external_ptr<T>.
 
 namespace libbitcoin {
 namespace system {
@@ -72,6 +75,11 @@ typedef std::shared_ptr<const chunk_cptrs> chunk_cptrs_cptr;
 typedef std::vector<data_chunk> data_stack;
 typedef std::shared_ptr<data_stack> stack_ptr;
 typedef std::shared_ptr<const data_stack> stack_cptr;
+
+// Define chunk_xptr types.
+
+typedef external_ptr<data_chunk> chunk_xptr;
+typedef std::vector<chunk_xptr> chunk_xptrs;
 
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) noexcept;

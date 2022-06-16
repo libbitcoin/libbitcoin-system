@@ -19,9 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_EXTERNAL_PTR_HPP
 #define LIBBITCOIN_SYSTEM_DATA_EXTERNAL_PTR_HPP
 
-#include <cstdlib>
 #include <iterator>
 #include <memory>
+#include <utility>
+#include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
@@ -29,19 +30,21 @@
 namespace libbitcoin {
 namespace system {
     
-// external_ptr<T> wraps const T* with externally-guaranteed lifetime.
-// external_ptr models C pointer with the exception of non-nullability.
-// Its default value is T* to a static T{}, allowing deferred assignment.
-// external_ptr<data_chunk>{} models bitcoin value zero (data_chunk{}).
+// Smart pointer of const T*, where T has an externally-guaranteed lifetime.
 // Copy/assignable, non-nullable, does not create/destroy its reference.
+// This models C pointer with the exception of non-nullability.
+// The default value is T* to a static T{}, allowing deferred assignment.
+// The address of the default value remains consistent for a given type T.
+// The bool cast is false only if the pointer is initialized to default.
+// external_ptr<data_chunk>{} models bitcoin value zero (data_chunk{}).
 template <typename Type, if_default_constructible<Type> = true>
 class external_ptr
 {
 public:
     external_ptr() noexcept
     {
-        static const auto default_value = Type{};
-        pointer_ = &default_value;
+        static const auto default_= Type{};
+        pointer_ = &default_;
     }
 
     /// Defaults (nullptr may be copied/moved).
@@ -51,11 +54,11 @@ public:
     external_ptr& operator=(const external_ptr&) = default;
     ~external_ptr() = default;
 
-    /// External ownership is required.
+    /// Deleteds (external ownership is required).
     constexpr external_ptr(Type&&) = delete;
     constexpr external_ptr(std::shared_ptr<Type>&&) = delete;
 
-    constexpr external_ptr(const Type& instance) noexcept
+    constexpr explicit external_ptr(const Type& instance) noexcept
       : pointer_(&instance)
     {
     }
@@ -67,25 +70,16 @@ public:
         if (is_null(pointer)) std::abort();
     }
 
-    // Abort if nullptr construct.
-    constexpr external_ptr(const std::shared_ptr<Type>& shared) noexcept
-      : external_ptr(shared.get())
+    /// False if default-valued pointer (models nullptr).
+    constexpr operator bool() const noexcept
     {
+        static const auto unassigned = external_ptr<Type>{}.get();
+        return pointer_ != unassigned;
     }
 
-    external_ptr& operator=(const std::shared_ptr<Type>& shared) const noexcept
+    constexpr const Type& operator*() const noexcept
     {
-        pointer_ = external_ptr(shared);
-    }
-
-    constexpr const Type* operator*() const noexcept
-    {
-        return get();
-    }
-
-    constexpr const Type* get() const noexcept
-    {
-        return pointer_;
+        return *get();
     }
 
     constexpr const Type* operator->() const noexcept
@@ -93,12 +87,17 @@ public:
         return get();
     }
 
-    constexpr const Type& at() const noexcept
+    constexpr const Type* operator[](size_t index) const noexcept
     {
-        return *get();
+        return std::next(get(), index);
     }
 
-    constexpr Type* reset() const noexcept
+    constexpr const Type* get() const noexcept
+    {
+        return pointer_;
+    }
+
+    constexpr void reset() const noexcept
     {
         pointer_ = external_ptr{};
     }
@@ -106,6 +105,47 @@ public:
 private:
     const Type* pointer_{};
 };
+
+template <typename Type, if_default_constructible<Type> = true>
+bool operator==(const external_ptr<Type>& left,
+    const external_ptr<Type>& right) noexcept
+{
+    return *left == *right;
+}
+
+template <typename Type, if_default_constructible<Type> = true>
+bool operator!=(const external_ptr<Type>& left,
+    const external_ptr<Type>& right) noexcept
+{
+    return !(left == right);
+}
+
+/// Form of external store required by make_external.
+template <typename Type, if_default_constructible<Type> = true>
+using tether = std::vector<std::shared_ptr<Type>>;
+
+/// Move instance to shared_ptr external ownership and return external_ptr.
+template <typename Type, if_default_constructible<Type> = true>
+inline external_ptr<Type> make_external(Type&& instance,
+    tether<Type>& external) noexcept
+{
+    external.push_back(std::make_shared<Type>(std::forward<Type>(instance)));
+    return { external.back().get() };
+}
+
+/// Same as external_ptr{}.
+template <typename Type, if_default_constructible<Type> = true>
+inline external_ptr<Type> make_external() noexcept
+{
+    return {};
+}
+
+/// Same as external_ptr{ pointer }.
+template <typename Type, if_default_constructible<Type> = true>
+inline external_ptr<Type> make_external(const Type* pointer) noexcept
+{
+    return { pointer };
+}
 
 } // namespace system
 } // namespace libbitcoin
