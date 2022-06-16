@@ -43,13 +43,13 @@ public:
     // ************************************************************************
     // CONSENSUS: nominal endorsement operation encoding is required.
     // ************************************************************************
-    inline stripper(const chunk_xptr& push_data) noexcept
+    inline explicit stripper(const chunk_xptr& push_data) noexcept
       : code_(operation::nominal_opcode_from_data(*push_data)),
         data_(push_data)
     {
     }
 
-    inline stripper(opcode code) noexcept
+    inline explicit stripper(opcode code) noexcept
       : code_(code), data_()
     {
     }
