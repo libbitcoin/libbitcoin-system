@@ -116,8 +116,10 @@
     <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slab.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\external_ptr.cpp" />
     <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />

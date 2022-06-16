@@ -265,8 +265,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/data_reference.cpp \
     test/data/data_slab.cpp \
     test/data/data_slice.cpp \
+    test/data/external_ptr.cpp \
     test/data/integer.cpp \
     test/data/memory.cpp \
+    test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
     test/error/block_error_t.cpp \
     test/error/error.cpp \

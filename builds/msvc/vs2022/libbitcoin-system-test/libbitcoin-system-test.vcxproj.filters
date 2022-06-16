@@ -198,10 +198,16 @@
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\external_ptr.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\integer.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\memory.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\string.cpp">

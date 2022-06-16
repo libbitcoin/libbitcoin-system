@@ -48,7 +48,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-static default_allocator<hash_digest> no_fill_hash_allocator{};
+static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -117,7 +117,6 @@ block::block(const chain::header::cptr& header,
 
 bool block::operator==(const block& other) const noexcept
 {
-    // Compares transaction elements, not pointers.
     return (header_ == other.header_ || *header_ == *other.header_)
         && equal_points(*txs_, *other.txs_);
 }

@@ -426,8 +426,8 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const noexcept
 
 chain::points transaction::points() const noexcept
 {
-    static default_allocator<point> no_fill_allocator{};
-    chain::points out(no_fill_allocator);
+    static no_fill_allocator<point> no_fill_point_allocator{};
+    chain::points out(no_fill_point_allocator);
     out.resize(inputs_->size());
 
     const auto point = [](const input::cptr& input) noexcept
@@ -1296,15 +1296,15 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         {
             case script_version::zero:
             {
-                chunk_cptrs stack;
                 script::cptr script;
-                if (!in.witness().extract_script(script, stack,
+                chunk_cptrs_ptr witness_stack;
+                if (!in.witness().extract_script(script, witness_stack,
                     in.prevout->script()))
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
                 interpreter witness(*this, it, script, state.forks,
-                    in.prevout->script().version(), stack);
+                    in.prevout->script().version(), witness_stack);
 
                 if ((ec = witness.run()))
                     return ec;
@@ -1353,15 +1353,15 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
             {
                 case script_version::zero:
                 {
-                    chunk_cptrs stack;
                     script::cptr script;
-                    if (!in.witness().extract_script(script, stack,
+                    chunk_cptrs_ptr witness_stack;
+                    if (!in.witness().extract_script(script, witness_stack,
                         *embeded_script))
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
                     interpreter witness_program(*this, it, script, state.forks,
-                        embeded_script->version(), stack);
+                        embeded_script->version(), witness_stack);
 
                     if ((ec = witness_program.run()))
                         return ec;

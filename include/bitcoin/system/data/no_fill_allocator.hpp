@@ -31,7 +31,7 @@ namespace system {
 // bit.ly/3vdbF17
 // Convert value initialization into default initialization.
 template <typename Type, typename Allocator = std::allocator<Type>>
-class default_allocator
+class no_fill_allocator
   : public Allocator
 {
 public:
@@ -39,7 +39,7 @@ public:
     struct rebind
     {
         // en.cppreference.com/w/cpp/memory/allocator_traits
-        using other = default_allocator<T, typename
+        using other = no_fill_allocator<T, typename
             std::allocator_traits<Allocator>::template rebind_alloc<T>>;
     };
 
@@ -64,7 +64,7 @@ public:
 };
 
 // C++14: std::vector(size_t, allocator) construction.
-static default_allocator<uint8_t> no_fill_byte_allocator{};
+static no_fill_allocator<uint8_t> no_fill_byte_allocator{};
 
 } // namespace system
 } // namespace libbitcoin

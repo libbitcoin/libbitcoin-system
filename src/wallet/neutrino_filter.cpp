@@ -155,8 +155,8 @@ bool match_filter(const block_filter& filter,
     if (addresses.empty())
         return false;
 
-    static default_allocator<chain::script> no_fill_allocator{};
-    chain::scripts stack(no_fill_allocator);
+    static no_fill_allocator<chain::script> no_fill_script_allocator{};
+    chain::scripts stack(no_fill_script_allocator);
     stack.resize(addresses.size());
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
