@@ -37,7 +37,6 @@ namespace system {
 // The address of the default value remains consistent for a given type T.
 // The bool cast is false only if the pointer is initialized to default.
 // external_ptr<data_chunk>{} models bitcoin value zero (data_chunk{}).
-// T must be constexpr default constructible.
 template <typename Type, if_default_constructible<Type> = true>
 class external_ptr
 {
@@ -103,8 +102,7 @@ private:
 
     constexpr const Type* get_unassigned() const noexcept
     {
-        // Type must be constexpr default constructible.
-        static constexpr auto unassigned = Type{};
+        static Type unassigned{};
         return &unassigned;
     }
 };
