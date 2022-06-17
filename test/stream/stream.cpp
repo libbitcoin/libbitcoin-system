@@ -46,18 +46,18 @@ constexpr bool is_set(int state, int flag)
 // iostream flag behavior is inconsistent (despite documentation).
 
 // no error, standardized.
-static_assert(std::ios_base::goodbit == 0, "");
+static_assert(std::ios_base::goodbit == 0);
 
 #ifdef _MSC_VER
 
 // associated input sequence has reached eof, implementation-defined.
-static_assert(std::ios_base::eofbit == 1, "");
+static_assert(std::ios_base::eofbit == 1);
 
 // operation failed (formatting or extraction error), implementation-defined.
-static_assert(std::ios_base::failbit == 2, "");
+static_assert(std::ios_base::failbit == 2);
 
 // irrecoverable stream error, implementation-defined.
-static_assert(std::ios_base::badbit == 4, "");
+static_assert(std::ios_base::badbit == 4);
 
 #endif // _MSC_VER
 

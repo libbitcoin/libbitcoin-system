@@ -25,122 +25,122 @@ template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr bool is_unsigned(Integer) { return true; }
 
 // to_signed
-static_assert(!is_unsigned(to_signed(-1)), "");
-static_assert(!is_unsigned(to_signed(0)), "");
-static_assert(!is_unsigned(to_signed(0u)), "");
-static_assert(!is_unsigned(to_signed(1)), "");
-static_assert(!is_unsigned(to_signed(1u)), "");
-static_assert(to_signed(-2) == -2, "");
-static_assert(to_signed(-1) == -1, "");
-static_assert(to_signed(0) == 0, "");
-static_assert(to_signed(0u) == 0, "");
-static_assert(to_signed(1) == 1, "");
-static_assert(to_signed(1u) == 1, "");
-static_assert(to_signed(2u) == 2, "");
+static_assert(!is_unsigned(to_signed(-1)));
+static_assert(!is_unsigned(to_signed(0)));
+static_assert(!is_unsigned(to_signed(0u)));
+static_assert(!is_unsigned(to_signed(1)));
+static_assert(!is_unsigned(to_signed(1u)));
+static_assert(to_signed(-2) == -2);
+static_assert(to_signed(-1) == -1);
+static_assert(to_signed(0) == 0);
+static_assert(to_signed(0u) == 0);
+static_assert(to_signed(1) == 1);
+static_assert(to_signed(1u) == 1);
+static_assert(to_signed(2u) == 2);
 
 // to_unsigned
-static_assert(is_unsigned(to_unsigned(-1)), "");
-static_assert(is_unsigned(to_unsigned(0)), "");
-static_assert(is_unsigned(to_unsigned(0u)), "");
-static_assert(is_unsigned(to_unsigned(1)), "");
-static_assert(is_unsigned(to_unsigned(1u)), "");
-static_assert(to_unsigned(-2) == 0xfffffffe, "");
-static_assert(to_unsigned(-1) == 0xffffffff, "");
-static_assert(to_unsigned(0) == 0u, "");
-static_assert(to_unsigned(0u) == 0u, "");
-static_assert(to_unsigned(1) == 1u, "");
-static_assert(to_unsigned(1u) == 1u, "");
-static_assert(to_unsigned(2u) == 2u, "");
+static_assert(is_unsigned(to_unsigned(-1)));
+static_assert(is_unsigned(to_unsigned(0)));
+static_assert(is_unsigned(to_unsigned(0u)));
+static_assert(is_unsigned(to_unsigned(1)));
+static_assert(is_unsigned(to_unsigned(1u)));
+static_assert(to_unsigned(-2) == 0xfffffffe);
+static_assert(to_unsigned(-1) == 0xffffffff);
+static_assert(to_unsigned(0) == 0u);
+static_assert(to_unsigned(0u) == 0u);
+static_assert(to_unsigned(1) == 1u);
+static_assert(to_unsigned(1u) == 1u);
+static_assert(to_unsigned(2u) == 2u);
 
 // absolute
-static_assert(is_unsigned(absolute(-1)), "");
-static_assert(is_unsigned(absolute(0)), "");
-static_assert(is_unsigned(absolute(1u)), "");
-static_assert(absolute(-1) == 1u, "");
-static_assert(absolute(-42) == 42u, "");
-static_assert(absolute(0) == 0u, "");
-static_assert(absolute(0u) == 0u, "");
-static_assert(absolute(1) == 1u, "");
-static_assert(absolute(1u) == 1u, "");
-static_assert(absolute(42) == 42, "");
-static_assert(absolute(42u) == 42, "");
-static_assert(absolute(max_int32) == max_int32, "");
-static_assert(absolute(min_int32 + 1) == max_int32, "");
-static_assert(absolute(max_uint32) == max_uint32, "");
+static_assert(is_unsigned(absolute(-1)));
+static_assert(is_unsigned(absolute(0)));
+static_assert(is_unsigned(absolute(1u)));
+static_assert(absolute(-1) == 1u);
+static_assert(absolute(-42) == 42u);
+static_assert(absolute(0) == 0u);
+static_assert(absolute(0u) == 0u);
+static_assert(absolute(1) == 1u);
+static_assert(absolute(1u) == 1u);
+static_assert(absolute(42) == 42);
+static_assert(absolute(42u) == 42);
+static_assert(absolute(max_int32) == max_int32);
+static_assert(absolute(min_int32 + 1) == max_int32);
+static_assert(absolute(max_uint32) == max_uint32);
 
 // negate
-static_assert(negate<int8_t> (int8_t{  0 })  ==   0, "");
-static_assert(negate<int8_t> (int8_t{ -0 })  ==   0, "");
-static_assert(negate<int8_t> (int8_t{  42 }) == -42, "");
-static_assert(negate<int8_t> (int8_t{ -42 }) ==  42, "");
-static_assert(negate<int16_t>(int8_t{  42 }) == -42, "");
-static_assert(negate<int16_t>(int8_t{ -42 }) ==  42, "");
-static_assert(negate<int32_t>(int8_t{  42 }) == -42, "");
-static_assert(negate<int32_t>(int8_t{ -42 }) ==  42, "");
-static_assert(negate<int64_t>(int8_t{  42 }) == -42, "");
-static_assert(negate<int64_t>(int8_t{ -42 }) ==  42, "");
-static_assert(negate<int16_t>(max_int8) == -max_int8, "");
-static_assert(negate<int32_t>(max_int16) == -max_int16, "");
-static_assert(negate<int64_t>(max_int32) == -max_int32, "");
-static_assert(negate<int64_t>(max_int64) == -max_int64, "");
+static_assert(negate<int8_t> (int8_t{  0 })  ==   0);
+static_assert(negate<int8_t> (int8_t{ -0 })  ==   0);
+static_assert(negate<int8_t> (int8_t{  42 }) == -42);
+static_assert(negate<int8_t> (int8_t{ -42 }) ==  42);
+static_assert(negate<int16_t>(int8_t{  42 }) == -42);
+static_assert(negate<int16_t>(int8_t{ -42 }) ==  42);
+static_assert(negate<int32_t>(int8_t{  42 }) == -42);
+static_assert(negate<int32_t>(int8_t{ -42 }) ==  42);
+static_assert(negate<int64_t>(int8_t{  42 }) == -42);
+static_assert(negate<int64_t>(int8_t{ -42 }) ==  42);
+static_assert(negate<int16_t>(max_int8) == -max_int8);
+static_assert(negate<int32_t>(max_int16) == -max_int16);
+static_assert(negate<int64_t>(max_int32) == -max_int32);
+static_assert(negate<int64_t>(max_int64) == -max_int64);
 
 // This case relies on native int domain promotion.
-static_assert(negate<int16_t>(min_int8) == -min_int8, "");
+static_assert(negate<int16_t>(min_int8) == -min_int8);
 
 // This case relies on native int domain promotion.
-static_assert(negate<int32_t>(min_int16) == -min_int16, "");
+static_assert(negate<int32_t>(min_int16) == -min_int16);
 
 // This one case requires negate's promotion before negation (bitcoin).
-static_assert(negate<int64_t>(min_int32) != -min_int32, "");
-static_assert(negate<int64_t>(min_int32) == -int64_t{ min_int32 }, "");
+static_assert(negate<int64_t>(min_int32) != -min_int32);
+static_assert(negate<int64_t>(min_int32) == -int64_t{ min_int32 });
 
 // is_negative
-static_assert(is_negative(min_int32), "");
-static_assert(is_negative(-1), "");
-static_assert(is_negative(-42), "");
-static_assert(!is_negative(0u), "");
-static_assert(!is_negative(1u), "");
-static_assert(!is_negative(42u), "");
-static_assert(!is_negative(max_int32), "");
-static_assert(!is_negative(max_uint32), "");
+static_assert(is_negative(min_int32));
+static_assert(is_negative(-1));
+static_assert(is_negative(-42));
+static_assert(!is_negative(0u));
+static_assert(!is_negative(1u));
+static_assert(!is_negative(42u));
+static_assert(!is_negative(max_int32));
+static_assert(!is_negative(max_uint32));
 
 // to_unsigned (C++14: required for constexpr of differing signs)
-static_assert(is_greater(1, 0), "");
-////static_assert(is_greater(1u, 0), "");
-static_assert(is_greater(1u, 0u), "");
-static_assert(is_greater(0, -1), "");
-////static_assert(is_greater(0u, -1), "");
-static_assert(!is_greater(-1, -1), "");
-////static_assert(!is_greater(0u, 0), "");
-static_assert(!is_greater(0u, 0u), "");
-////static_assert(!is_greater(0, 0u), "");
-static_assert(!is_greater(1, 1), "");
-////static_assert(!is_greater(1u, 1), "");
-static_assert(!is_greater(1u, 1u), "");
-////static_assert(!is_greater(1, 1u), "");
-static_assert(!is_greater(0, 1), "");
-static_assert(!is_greater(-1, 0), "");
+static_assert(is_greater(1, 0));
+////static_assert(is_greater(1u, 0));
+static_assert(is_greater(1u, 0u));
+static_assert(is_greater(0, -1));
+////static_assert(is_greater(0u, -1));
+static_assert(!is_greater(-1, -1));
+////static_assert(!is_greater(0u, 0));
+static_assert(!is_greater(0u, 0u));
+////static_assert(!is_greater(0, 0u));
+static_assert(!is_greater(1, 1));
+////static_assert(!is_greater(1u, 1));
+static_assert(!is_greater(1u, 1u));
+////static_assert(!is_greater(1, 1u));
+static_assert(!is_greater(0, 1));
+static_assert(!is_greater(-1, 0));
 
 // to_unsigned (C++14: required for constexpr of differing signs)
-static_assert(!is_lesser(1, 0), "");
-////static_assert(!is_lesser(1u, 0), "");
-static_assert(!is_lesser(1u, 0u), "");
-static_assert(!is_lesser(0, -1), "");
-////static_assert(!is_lesser(0u, -1), "");
-static_assert(!is_lesser(-1, -1), "");
-////static_assert(!is_lesser(0u, 0), "");
-static_assert(!is_lesser(0u, 0u), "");
-////static_assert(!is_lesser(0, 0u), "");
-static_assert(!is_lesser(1, 1), "");
-////static_assert(!is_lesser(1u, 1), "");
-static_assert(!is_lesser(1u, 1u), "");
-////static_assert(!is_lesser(1, 1u), "");
-static_assert(is_lesser(0, 1), "");
-static_assert(is_lesser(-1, 0), "");
+static_assert(!is_lesser(1, 0));
+////static_assert(!is_lesser(1u, 0));
+static_assert(!is_lesser(1u, 0u));
+static_assert(!is_lesser(0, -1));
+////static_assert(!is_lesser(0u, -1));
+static_assert(!is_lesser(-1, -1));
+////static_assert(!is_lesser(0u, 0));
+static_assert(!is_lesser(0u, 0u));
+////static_assert(!is_lesser(0, 0u));
+static_assert(!is_lesser(1, 1));
+////static_assert(!is_lesser(1u, 1));
+static_assert(!is_lesser(1u, 1u));
+////static_assert(!is_lesser(1, 1u));
+static_assert(is_lesser(0, 1));
+static_assert(is_lesser(-1, 0));
 
 // greater
 
-static_assert(greater<signed>(1, 0) == 1, "");
+static_assert(greater<signed>(1, 0) == 1);
 
 BOOST_AUTO_TEST_CASE(greater__signed__different__expected)
 {

@@ -43,7 +43,7 @@ public:
     typedef std::vector<size_t> search;
     typedef std::vector<int32_t> result;
     typedef struct { bool sorted; std::array<const char*, Size> word; } words;
-    static_assert(Size <= possible_narrow_sign_cast<size_t>(max_int32), "");
+    static_assert(Size <= possible_narrow_sign_cast<size_t>(max_int32));
 
     /// The number of words in the dictionary.
     static constexpr size_t size() noexcept { return Size; };

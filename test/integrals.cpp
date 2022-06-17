@@ -18,31 +18,33 @@
  */
 #include "test.hpp"
 
- /// Signed.
-static_assert(min_int64 == std::numeric_limits<int64_t>::min(), "");
-static_assert(max_int64 == std::numeric_limits<int64_t>::max(), "");
-static_assert(min_int32 == std::numeric_limits<int32_t>::min(), "");
-static_assert(max_int32 == std::numeric_limits<int32_t>::max(), "");
-static_assert(min_int16 == std::numeric_limits<int16_t>::min(), "");
-static_assert(max_int16 == std::numeric_limits<int16_t>::max(), "");
-static_assert(min_int8 == std::numeric_limits<int8_t>::min(), "");
-static_assert(max_int8 == std::numeric_limits<int8_t>::max(), "");
+static_assert(min_int64 == std::numeric_limits<int64_t>::min());
+static_assert(max_int64 == std::numeric_limits<int64_t>::max());
+static_assert(min_int32 == std::numeric_limits<int32_t>::min());
+static_assert(max_int32 == std::numeric_limits<int32_t>::max());
+static_assert(min_int16 == std::numeric_limits<int16_t>::min());
+static_assert(max_int16 == std::numeric_limits<int16_t>::max());
+static_assert(min_int8 == std::numeric_limits<int8_t>::min());
+static_assert(max_int8 == std::numeric_limits<int8_t>::max());
 
-/// Unsigned.
-static_assert(max_size_t == std::numeric_limits<size_t>::max(), "");
-static_assert(max_uint64 == std::numeric_limits<uint64_t>::max(), "");
-static_assert(max_uint32 == std::numeric_limits<uint32_t>::max(), "");
-static_assert(max_uint16 == std::numeric_limits<uint16_t>::max(), "");
-static_assert(max_uint8 == std::numeric_limits<uint8_t>::max(), "");
+static_assert(max_size_t == std::numeric_limits<size_t>::max());
+static_assert(max_uint64 == std::numeric_limits<uint64_t>::max());
+static_assert(max_uint32 == std::numeric_limits<uint32_t>::max());
+static_assert(max_uint16 == std::numeric_limits<uint16_t>::max());
+static_assert(max_uint8 == std::numeric_limits<uint8_t>::max());
 
-static_assert(zero == 0u, "");
-static_assert(one == 1u, "");
-static_assert(two == 2u, "");
+static_assert(zero == 0u);
+static_assert(one == 1u);
+static_assert(two == 2u);
 
-static_assert(byte_bits == 8u, "");
+static_assert(byte_bits == 8u);
 
-static_assert(negative_one == -1, "");
+static_assert(negative_one == -1);
 
-static_assert(varint_two_bytes == 0xfd, "");
-static_assert(varint_four_bytes == 0xfe, "");
-static_assert(varint_eight_bytes == 0xff, "");
+static_assert(varint_two_bytes == 0xfd);
+static_assert(varint_four_bytes == 0xfe);
+static_assert(varint_eight_bytes == 0xff);
+
+static_assert(!(is_big_endian_representation() && is_little_endian_representation()));
+static_assert(!(is_big_endian_representation() && is_unknown_representation()));
+static_assert(!(is_little_endian_representation() && is_unknown_representation()));
