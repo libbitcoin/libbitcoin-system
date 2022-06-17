@@ -200,21 +200,25 @@ jobs:
             configuration: "StaticRelease"
             platform: "Win32"
             version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticDebug"
             platform: "Win32"
             version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticRelease"
             platform: "x64"
             version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2022"
+            tests: "*"
 
     runs-on: ${{ matrix.os }}
 
@@ -263,7 +267,7 @@ jobs:
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
           Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
           }
           catch {
             $ERR = $_;
