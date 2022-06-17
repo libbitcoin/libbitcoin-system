@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_t
     std::string passphrase(encoded_password.begin(), encoded_password.end());
 
     // This confirms that the passphrase decodes as expected in BIP38.
-    auto normal = passphrase;
+    std::string normal{ passphrase };
     BOOST_REQUIRE(to_canonical_composition(normal));
     data_chunk normalized(normal.size());
     std::copy_n(normal.begin(), normal.size(), normalized.begin());
@@ -52,21 +52,21 @@ BOOST_AUTO_TEST_SUITE(encrypted__create_token_lot)
 
 BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__lot_overlow__false)
 {
-    const size_t lot = 1048575 + 1;
+    const size_t lot = add1(1048575u);
     const size_t sequence = 0;
     const auto passphrase = "";
     const auto salt = base16_array("baadf00d");
-    encrypted_token out_token;
+    encrypted_token out_token{};
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
 BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
 {
     const size_t lot = 0;
-    const size_t sequence = 4095 + 1;
+    const size_t sequence = add1(4095u);
     const auto passphrase = "";
     const auto salt = base16_array("baadf00d");
-    encrypted_token out_token;
+    encrypted_token out_token{};
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
@@ -452,8 +452,8 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
     const uint8_t version = 0x00;
     const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
-    ec_compressed out_point;
-    encrypted_private out_private;
+    ec_compressed out_point{};
+    encrypted_private out_private{};
     BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, version, compression));
 }
 
@@ -467,7 +467,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_8__expected)
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
 
-    ec_uncompressed decompressed;
+    ec_uncompressed decompressed{};
     BOOST_REQUIRE(decompress(decompressed, out_point));
     BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
 }
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9__expected)
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
 
-    ec_uncompressed decompressed;
+    ec_uncompressed decompressed{};
     BOOST_REQUIRE(decompress(decompressed, out_point));
     BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
 }
@@ -529,9 +529,9 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum_
 {
     const auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
-    ec_compressed out_point;
-    encrypted_public out_public;
-    encrypted_private out_private;
+    ec_compressed out_point{};
+    encrypted_public out_public{};
+    encrypted_private out_private{};
     BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
 }
 
@@ -546,7 +546,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_8__exp
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
     BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
 
-    ec_uncompressed decompressed;
+    ec_uncompressed decompressed{};
     BOOST_REQUIRE(decompress(decompressed, out_point));
     BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
 }
@@ -562,7 +562,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9__exp
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
     BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
 
-    ec_uncompressed decompressed;
+    ec_uncompressed decompressed{};
     BOOST_REQUIRE(decompress(decompressed, out_point));
     BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
 }
@@ -607,14 +607,14 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_vers
     const auto passphrase = "passphrase";
 
     // Encrypt the secret as a private key.
-    encrypted_private out_private_key;
+    encrypted_private out_private_key{};
     const uint8_t version = 111;
     const auto is_compressed = true;
     BOOST_REQUIRE(encrypt(out_private_key, secret, passphrase, version, is_compressed));
 
     // Decrypt the secret from the private key.
     const auto& private_key = out_private_key;
-    ec_secret out_secret;
+    ec_secret out_secret{};
     uint8_t out_version = 42;
     bool out_is_compressed = false;
     BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
@@ -626,7 +626,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_vers
 BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
-    encrypted_token out_token;
+    encrypted_token out_token{};
     const auto passphrase = "passphrase";
     const auto entropy = base16_array("baadf00dbaadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, entropy));
@@ -634,8 +634,8 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
 
     // Create the private key.
     const auto& token = out_token;
-    ec_compressed out_point;
-    encrypted_private out_private_key;
+    ec_compressed out_point{};
+    encrypted_private out_private_key{};
     const uint8_t version = 111;
     const auto is_compressed = false;
     const auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -643,7 +643,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
 
     // Extract the secret from the private key.
     const auto& private_key = out_private_key;
-    ec_secret out_secret;
+    ec_secret out_secret{};
     uint8_t out_version = 42;
     bool out_is_compressed = true;
     BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
@@ -652,7 +652,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
 
     // Validate the point derived from key creation against the secret-derived point.
     // The out point is always compressed, since the user can always decompress it.
-    ec_compressed compressed;
+    ec_compressed compressed{};
     BOOST_REQUIRE(secret_to_public(compressed, out_secret));
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 }
@@ -662,7 +662,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
 BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
-    encrypted_token out_token;
+    encrypted_token out_token{};
     const auto passphrase = "passphrase";
     const auto salt = base16_array("baadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
@@ -670,9 +670,9 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
 
     // Create the public/private key pair.
     const auto& token = out_token;
-    ec_compressed out_point;
-    encrypted_private out_private_key;
-    encrypted_public out_public_key;
+    ec_compressed out_point{};
+    encrypted_private out_private_key{};
+    encrypted_public out_public_key{};
     const uint8_t version = 111;
     const auto is_compressed = true;
     const auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -680,10 +680,10 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
 
     // Extract the secret from the private key.
     const auto& private_key = out_private_key;
-    ec_secret out_secret1;
+    ec_secret out_secret1{};
     uint8_t out_version1 = 42;
     bool out_is_compressed1 = false;
-    ec_compressed compressed;
+    ec_compressed compressed{};
     BOOST_REQUIRE(decrypt(out_secret1, out_version1, out_is_compressed1, private_key, passphrase));
     BOOST_REQUIRE_EQUAL(out_is_compressed1, is_compressed);
     BOOST_REQUIRE_EQUAL(out_version1, version);
@@ -692,7 +692,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
 
     // Extract the point from the public key.
     const auto& public_key = out_public_key;
-    ec_compressed out_point2;
+    ec_compressed out_point2{};
     uint8_t out_version2 = 42;
     bool out_is_compressed2 = false;
     BOOST_REQUIRE(decrypt(out_point2, out_version2, out_is_compressed2, public_key, passphrase));

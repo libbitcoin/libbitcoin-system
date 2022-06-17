@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 BOOST_AUTO_TEST_CASE(limits__binary_search_native__empty__not_found)
 {
     const std::string empty = "";
-    const auto value = 'a';
+    constexpr auto value = 'a';
     BOOST_REQUIRE_EQUAL(binary_search(empty, value), negative_one);
 }
 

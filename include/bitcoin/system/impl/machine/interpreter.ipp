@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/machine/interpreter.hpp>
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
+#define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
 #include <cstddef>
 #include <cstdint>
@@ -55,7 +56,9 @@ using namespace system::error;
 // Operation handlers.
 // ----------------------------------------------------------------------------
 
-op_error_t interpreter::op_unevaluated(opcode code) const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_unevaluated(opcode code) const noexcept
 {
     return operation::is_invalid(code) ? error::op_invalid :
         error::op_reserved;
@@ -64,315 +67,377 @@ op_error_t interpreter::op_unevaluated(opcode code) const noexcept
 // TODO: nops_rule *must* be enabled in test cases and default config.
 // TODO: cats_rule should be enabled in test cases and default config.
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
-op_error_t interpreter::op_nop(opcode) const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_nop(opcode) const noexcept
 {
-    if (is_enabled(forks::nops_rule))
+    if (state::is_enabled(forks::nops_rule))
         return error::op_success;
 
     ////return op_unevaluated(code);
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_number(int8_t value) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_push_number(int8_t value) noexcept
 {
-    push_signed64(value);
+    state::push_signed64(value);
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_size(const operation& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_push_size(const operation& op) noexcept
 {
     if (op.is_underclaimed())
         return error::op_push_size;
 
-    push_chunk(op.data_ptr());
+    state::push_chunk(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_one_size(const operation& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_push_one_size(const operation& op) noexcept
 {
     if (op.is_underclaimed())
         return error::op_push_one_size;
 
-    push_chunk(op.data_ptr());
+    state::push_chunk(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_two_size(const operation& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_push_two_size(const operation& op) noexcept
 {
     if (op.is_underclaimed())
         return error::op_push_two_size;
 
-    push_chunk(op.data_ptr());
+    state::push_chunk(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_push_four_size(const operation& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_push_four_size(const operation& op) noexcept
 {
     if (op.is_underclaimed())
         return error::op_push_four_size;
 
-    push_chunk(op.data_ptr());
+    state::push_chunk(op.data_ptr());
     return error::op_success;
 }
 
-op_error_t interpreter::op_nop() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_nop() const noexcept
 {
     return error::op_success;
 }
 
 // This opcode pushed the version to the stack, a hard fork per release.
-op_error_t interpreter::op_ver() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_ver() const noexcept
 {
-    if (is_enabled(forks::nops_rule))
+    if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_if() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_if() noexcept
 {
     auto value = false;
 
-    if (is_succeess())
+    if (state::is_succeess())
     {
-        if (is_empty())
+        if (state::is_stack_empty())
             return error::op_if;
 
-        value = pop_bool_unsafe();
+        value = state::pop_bool_unsafe();
     }
 
-    begin_if(value);
+    state::begin_if(value);
     return error::op_success;
 }
 
-op_error_t interpreter::op_notif() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_notif() noexcept
 {
     auto value = false;
 
-    if (is_succeess())
+    if (state::is_succeess())
     {
-        if (is_empty())
+        if (state::is_stack_empty())
             return error::op_notif;
 
-        value = !pop_bool_unsafe();
+        value = !state::pop_bool_unsafe();
     }
 
-    begin_if(value);
+    state::begin_if(value);
     return error::op_success;
 }
 
-op_error_t interpreter::op_verif() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_verif() const noexcept
 {
-    if (is_enabled(forks::nops_rule))
+    if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_vernotif() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_vernotif() const noexcept
 {
-    if (is_enabled(forks::nops_rule))
+    if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_else() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_else() noexcept
 {
-    if (is_balanced())
+    if (state::is_balanced())
         return error::op_else;
 
-    else_if_unsafe();
+    state::else_if_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_endif() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_endif() noexcept
 {
-    if (is_balanced())
+    if (state::is_balanced())
         return error::op_endif;
 
-    end_if_unsafe();
+    state::end_if_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_verify() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_verify() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_verify1;
 
-    if (!peek_bool_unsafe())
+    if (!state::peek_bool_unsafe())
         return error::op_verify2;
 
-    drop_unsafe();
+    state::drop_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_return() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_return() const noexcept
 {
-    if (is_enabled(forks::nops_rule))
+    if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_return);
         
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_to_alt_stack() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_to_alt_stack() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_to_alt_stack;
 
-    push_alternate(pop_variant_unsafe());
+    state::push_alternate(state::pop_variant_unsafe());
     return error::op_success;
 }
 
-op_error_t interpreter::op_from_alt_stack() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_from_alt_stack() noexcept
 {
-    if (is_alternate_empty())
+    if (state::is_alternate_empty())
         return error::op_from_alt_stack;
 
-    push_variant(pop_alternate_unsafe());
+    state::push_variant(state::pop_alternate_unsafe());
     return error::op_success;
 }
 
-op_error_t interpreter::op_drop2() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_drop2() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
-    drop_unsafe();
-    drop_unsafe();
+    state::drop_unsafe();
+    state::drop_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_dup2() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_dup2() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_dup2;
 
     // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
-    push_variant(peek_variant_unsafe(1));
-    push_variant(peek_variant_unsafe(1));
+    state::push_variant(state::peek_variant_unsafe(1));
+    state::push_variant(state::peek_variant_unsafe(1));
     return error::op_success;
 }
 
-op_error_t interpreter::op_dup3() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_dup3() noexcept
 {
-    if (size() < 3)
+    if (state::stack_size() < 3)
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    push_variant(peek_variant_unsafe(2));
-    push_variant(peek_variant_unsafe(2));
-    push_variant(peek_variant_unsafe(2));
+    state::push_variant(state::peek_variant_unsafe(2));
+    state::push_variant(state::peek_variant_unsafe(2));
+    state::push_variant(state::peek_variant_unsafe(2));
     return error::op_success;
 }
 
-op_error_t interpreter::op_over2() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_over2() noexcept
 {
-    if (size() < 4)
+    if (state::stack_size() < 4)
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    push_variant(peek_variant_unsafe(3));
-    push_variant(peek_variant_unsafe(3));
+    state::push_variant(state::peek_variant_unsafe(3));
+    state::push_variant(state::peek_variant_unsafe(3));
     return error::op_success;
 }
 
-op_error_t interpreter::op_rot2() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_rot2() noexcept
 {
-    if (size() < 6)
+    if (state::stack_size() < 6)
         return error::op_rot2;
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
     // [4,5,0,3,2,1] => [4,5,0,1,2,3]
-    swap_unsafe(0, 4);
-    swap_unsafe(1, 5);
-    swap_unsafe(2, 4);
-    swap_unsafe(3, 5);
+    state::swap_unsafe(0, 4);
+    state::swap_unsafe(1, 5);
+    state::swap_unsafe(2, 4);
+    state::swap_unsafe(3, 5);
     return error::op_success;
 }
 
-op_error_t interpreter::op_swap2() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_swap2() noexcept
 {
-    if (size() < 4)
+    if (state::stack_size() < 4)
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    swap_unsafe(1,3);
-    swap_unsafe(0,2);
+    state::swap_unsafe(1,3);
+    state::swap_unsafe(0,2);
     return error::op_success;
 }
 
-op_error_t interpreter::op_if_dup() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_if_dup() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_if_dup;
 
     // [0,1,2] => 0,[0,1,2]
-    if (peek_bool_unsafe())
-        push_variant(peek_variant_unsafe());
+    if (state::peek_bool_unsafe())
+        state::push_variant(state::peek_variant_unsafe());
 
     return error::op_success;
 }
 
-op_error_t interpreter::op_depth() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_depth() noexcept
 {
     // [0,1,2] => 3,[0,1,2]
-    push_length(size());
+    state::push_length(state::stack_size());
     return error::op_success;
 }
 
-op_error_t interpreter::op_drop() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_drop() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_drop;
 
     // 0,[1,2] => [1,2]
-    drop_unsafe();
+    state::drop_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_dup() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_dup() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    push_variant(peek_variant_unsafe());
+    state::push_variant(state::peek_variant_unsafe());
     return error::op_success;
 }
 
-op_error_t interpreter::op_nip() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_nip() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
-    swap_unsafe(0, 1);
-    drop_unsafe();
+    state::swap_unsafe(0, 1);
+    state::drop_unsafe();
     return error::op_success;
 }
 
-op_error_t interpreter::op_over() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_over() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    push_variant(peek_variant_unsafe(1));
+    state::push_variant(state::peek_variant_unsafe(1));
     return error::op_success;
 }
 
-op_error_t interpreter::op_pick() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_pick() noexcept
 {
     size_t index;
 
     // 2,[0,1,2,3] => {2} [0,1,2,3]
-    if (!pop_index32(index))
+    if (!state::pop_index32(index))
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    push_variant(peek_variant_unsafe(index));
+    state::push_variant(state::peek_variant_unsafe(index));
     return error::op_success;
 }
 
@@ -387,484 +452,591 @@ op_error_t interpreter::op_pick() noexcept
 // Shifting larger chunks does not change time, as vector stores references.
 // This remains the current satoshi implementation (std::vector).
 // ****************************************************************************
-op_error_t interpreter::op_roll() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_roll() noexcept
 {
     size_t index;
 
     // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
-    if (!pop_index32(index))
+    if (!state::pop_index32(index))
         return error::op_roll;
 
     // Copy variant because should be deleted before push (no stack alloc).
-    variant temporary{ peek_variant_unsafe(index) };
+    typename state::variant temporary{ state::peek_variant_unsafe(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
-    erase_unsafe(index);
+    state::erase_unsafe(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
-    push_variant(std::move(temporary));
+    state::push_variant(std::move(temporary));
     return error::op_success;
 }
 
-op_error_t interpreter::op_rot() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_rot() noexcept
 {
-    if (size() < 3)
+    if (state::stack_size() < 3)
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    swap_unsafe(1,2);
-    swap_unsafe(0,1);
+    state::swap_unsafe(1,2);
+    state::swap_unsafe(0,1);
     return error::op_success;
 }
 
-op_error_t interpreter::op_swap() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_swap() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    swap_unsafe(0,1);
+    state::swap_unsafe(0,1);
     return error::op_success;
 }
 
-op_error_t interpreter::op_tuck() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_tuck() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
-    swap_unsafe(0, 1);
-    push_variant(peek_variant_unsafe(1));
+    state::swap_unsafe(0, 1);
+    state::push_variant(state::peek_variant_unsafe(1));
     return error::op_success;
 }
 
-op_error_t interpreter::op_cat() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_cat() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_substr() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_substr() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_left() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_left() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_left);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_right() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_right() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_right);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_size() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_size() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_size;
 
-    push_length(pop_chunk_unsafe()->size());
+    state::push_length(state::pop_chunk_unsafe()->size());
     return error::op_success;
 }
 
-op_error_t interpreter::op_invert() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_invert() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_and() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_and() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_and);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_or() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_or() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_or);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_xor() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_xor() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_equal() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_equal() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_equal;
 
-    push_bool(pop_variant_unsafe() == pop_variant_unsafe());
+    state::push_bool(state::equal_chunks(
+        state::pop_variant_unsafe(),
+        state::pop_variant_unsafe()));
     return error::op_success;
 }
 
-op_error_t interpreter::op_equal_verify() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_equal_verify() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_equal_verify1;
 
-    return (pop_variant_unsafe() == pop_variant_unsafe()) ?
+    return state::equal_chunks(
+        state::pop_variant_unsafe(),
+        state::pop_variant_unsafe()) ?
         error::op_success : error::op_equal_verify2;
 }
 
-op_error_t interpreter::op_add1() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_add1() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_add1;
 
-    push_signed64(increment<int64_t>(number));
+    state::push_signed64(increment<int64_t>(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_sub1() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_sub1() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_sub1;
 
-    push_signed64(decrement<int64_t>(number));
+    state::push_signed64(decrement<int64_t>(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_mul2() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_mul2() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_div2() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_div2() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_negate() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_negate() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_negate;
 
-    push_signed64(negate<int64_t>(number));
+    state::push_signed64(negate<int64_t>(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_abs() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_abs() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_abs;
 
-    push_signed64(absolute(number));
+    state::push_signed64(absolute(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_not() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_not() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_not;
 
     // Do not pop_bool() above, as number must be validated.
-    push_bool(!to_bool(number));
+    state::push_bool(!to_bool(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_nonzero() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_nonzero() noexcept
 {
     int32_t number;
-    if (!pop_signed32(number))
+    if (!state::pop_signed32(number))
         return error::op_nonzero;
 
-    push_bool(is_nonzero(number));
+    state::push_bool(is_nonzero(number));
     return error::op_success;
 }
 
-op_error_t interpreter::op_add() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_add() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_add;
 
-    push_signed64(add<int64_t>(left, right));
+    state::push_signed64(add<int64_t>(left, right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_sub() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_sub() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_sub;
 
-    push_signed64(subtract<int64_t>(left, right));
+    state::push_signed64(subtract<int64_t>(left, right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_mul() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_mul() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_div() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_div() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_mod() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_mod() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_lshift() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_lshift() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_rshift() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_rshift() const noexcept
 {
-    if (is_enabled(forks::cats_rule))
+    if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
 
     return error::op_not_implemented;
 }
 
-op_error_t interpreter::op_bool_and() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_bool_and() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_bool_and;
 
-    push_bool(to_bool(left) && to_bool(right));
+    state::push_bool(to_bool(left) && to_bool(right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_bool_or() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_bool_or() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_bool_or;
 
-    push_bool(to_bool(left) || to_bool(right));
+    state::push_bool(to_bool(left) || to_bool(right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_num_equal() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_num_equal() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_num_equal;
 
-    push_bool(left == right);
+    state::push_bool(left == right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_num_equal_verify() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_num_equal_verify() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_num_equal_verify1;
 
-    return (left == right) ? error::op_success : error::op_num_equal_verify2;
+    return (left == right) ? error::op_success : 
+        error::op_num_equal_verify2;
 }
 
-op_error_t interpreter::op_num_not_equal() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_num_not_equal() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_num_not_equal;
 
-    push_bool(left != right);
+    state::push_bool(left != right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_less_than() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_less_than() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_less_than;
 
-    push_bool(left < right);
+    state::push_bool(left < right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_greater_than() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_greater_than() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_greater_than;
 
-    push_bool(left > right);
+    state::push_bool(left > right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_less_than_or_equal() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_less_than_or_equal() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_less_than_or_equal;
 
-    push_bool(left <= right);
+    state::push_bool(left <= right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_greater_than_or_equal() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_greater_than_or_equal() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_greater_than_or_equal;
 
-    push_bool(left >= right);
+    state::push_bool(left >= right);
     return error::op_success;
 }
 
-op_error_t interpreter::op_min() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_min() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_min;
 
-    push_signed64(lesser<int64_t>(left, right));
+    state::push_signed64(lesser<int64_t>(left, right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_max() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_max() noexcept
 {
     int32_t right, left;
-    if (!pop_binary32(left, right))
+    if (!state::pop_binary32(left, right))
         return error::op_max;
 
-    push_signed64(greater<int64_t>(left, right));
+    state::push_signed64(greater<int64_t>(left, right));
     return error::op_success;
 }
 
-op_error_t interpreter::op_within() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_within() noexcept
 {
     int32_t upper, lower, value;
-    if (!pop_ternary32(upper, lower, value))
+    if (!state::pop_ternary32(upper, lower, value))
         return error::op_within;
 
-    push_bool((lower <= value) && (value < upper));
+    state::push_bool((lower <= value) && (value < upper));
     return error::op_success;
 }
 
-op_error_t interpreter::op_ripemd160() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_ripemd160() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_ripemd160;
 
-    push_chunk(ripemd160_hash_chunk(*pop_chunk_unsafe()));
+    state::push_chunk(ripemd160_hash_chunk(*state::pop_chunk_unsafe()));
     return error::op_success;
 }
 
-op_error_t interpreter::op_sha1() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_sha1() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_sha1;
 
-    push_chunk(sha1_hash_chunk(*pop_chunk_unsafe()));
+    state::push_chunk(sha1_hash_chunk(*state::pop_chunk_unsafe()));
     return error::op_success;
 }
 
-op_error_t interpreter::op_sha256() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_sha256() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_sha256;
 
-    push_chunk(sha256_hash_chunk(*pop_chunk_unsafe()));
+    state::push_chunk(sha256_hash_chunk(*state::pop_chunk_unsafe()));
     return error::op_success;
 }
 
-op_error_t interpreter::op_hash160() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_hash160() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_hash160;
 
-    push_chunk(ripemd160_hash_chunk(sha256_hash(*pop_chunk_unsafe())));
+    state::push_chunk(ripemd160_hash_chunk(sha256_hash(
+        *state::pop_chunk_unsafe())));
     return error::op_success;
 }
 
-op_error_t interpreter::op_hash256() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_hash256() noexcept
 {
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_hash256;
 
-    push_chunk(sha256_hash_chunk(sha256_hash(*pop_chunk_unsafe())));
+    state::push_chunk(sha256_hash_chunk(sha256_hash(
+        *state::pop_chunk_unsafe())));
     return error::op_success;
 }
 
-op_error_t interpreter::op_codeseparator(const op_iterator& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_codeseparator(const op_iterator& op) noexcept
 {
     // Not thread safe for the script (changes script object metadata).
-    return set_subscript(op) ? error::op_success :
+    return state::set_subscript(op) ? error::op_success :
         error::op_code_separator;
 }
 
-op_error_t interpreter::op_check_sig() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_sig() noexcept
 {
     const auto verify = op_check_sig_verify();
-    const auto bip66 = is_enabled(forks::bip66_rule);
+    const auto bip66 = state::is_enabled(forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
-    push_bool(verify == error::op_success);
+    state::push_bool(verify == error::op_success);
     return error::op_success;
 }
 
 // In signing mode, prepare_signature converts key from a private key to
 // a public key and generates the signature from key and hash. The signature is
 // then verified against the key and hash as if obtained from the script.
-op_error_t interpreter::op_check_sig_verify() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_sig_verify() noexcept
 {
-    if (size() < 2)
+    if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto key = pop_chunk_unsafe();
+    const auto key = state::pop_chunk_unsafe();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = pop_chunk_unsafe();
+    const auto endorsement = state::pop_chunk_unsafe();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -876,7 +1048,7 @@ op_error_t interpreter::op_check_sig_verify() noexcept
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
-    if (!prepare(sig, *key, hash, endorsement))
+    if (!state::prepare(sig, *key, hash, endorsement))
         return error::op_check_sig_verify_parse;
 
     // TODO: for signing mode - make key mutable and return above.
@@ -884,48 +1056,52 @@ op_error_t interpreter::op_check_sig_verify() noexcept
         error::op_success : error::op_check_sig_verify4;
 }
 
-op_error_t interpreter::op_check_multisig() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_multisig() noexcept
 {
     const auto verify = op_check_multisig_verify();
-    const auto bip66 = is_enabled(forks::bip66_rule);
+    const auto bip66 = state::is_enabled(forks::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_multisig_verify_parse)
         return error::op_check_multisig;
 
-    push_bool(verify == error::op_success);
+    state::push_bool(verify == error::op_success);
     return error::op_success;
 }
 
-op_error_t interpreter::op_check_multisig_verify() noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_multisig_verify() noexcept
 {
-    const auto bip147 = is_enabled(forks::bip147_rule);
+    const auto bip147 = state::is_enabled(forks::bip147_rule);
 
     size_t count;
-    if (!pop_index32(count))
+    if (!state::pop_index32(count))
         return error::op_check_multisig_verify1;
 
     if (count > max_script_public_keys)
         return error::op_check_multisig_verify2;
 
-    if (!ops_increment(count))
+    if (!state::ops_increment(count))
         return error::op_check_multisig_verify3;
 
     chunk_xptrs keys;
-    if (!pop_chunks(keys, count))
+    if (!state::pop_chunks(keys, count))
         return error::op_check_multisig_verify4;
 
-    if (!pop_index32(count))
+    if (!state::pop_index32(count))
         return error::op_check_multisig_verify5;
 
     if (count > keys.size())
         return error::op_check_multisig_verify6;
 
     chunk_xptrs endorsements;
-    if (!pop_chunks(endorsements, count))
+    if (!state::pop_chunks(endorsements, count))
         return error::op_check_multisig_verify7;
 
-    if (is_empty())
+    if (state::is_stack_empty())
         return error::op_check_multisig_verify8;
 
     //*************************************************************************
@@ -933,15 +1109,15 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
     //*************************************************************************
     // This check is unique in that it requires a single "zero" on the stack.
     // True here implies variant non-zero ('true', '!= 0', or other than '[]').
-    if (pop_strict_bool_unsafe() && bip147)
+    if (state::pop_strict_bool_unsafe() && bip147)
         return error::op_check_multisig_verify9;
 
     uint8_t flags;
     ec_signature sig;
-    program::hash_cache cache;
+    typename state::hash_cache cache;
 
     // Subscript is the same for all signatures.
-    const auto sub = subscript(endorsements);
+    const auto sub = state::subscript(endorsements);
     auto endorsement = endorsements.begin();
 
     // Keys may be empty, endorsements is an ordered subset of corresponding
@@ -958,7 +1134,7 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
         {
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
-            if (!prepare(sig, *key, cache, flags, **endorsement, *sub))
+            if (!state::prepare(sig, *key, cache, flags, **endorsement, *sub))
                 return error::op_check_multisig_verify_parse;
 
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -975,14 +1151,16 @@ op_error_t interpreter::op_check_multisig_verify() noexcept
         error::op_check_multisig_verify10 : error::op_success;
 }
 
-op_error_t interpreter::op_check_locktime_verify() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_locktime_verify() const noexcept
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
-    if (!is_enabled(forks::bip65_rule))
+    if (!state::is_enabled(forks::bip65_rule))
         return op_nop(opcode::nop2);
 
     // BIP65: the tx sequence is 0xffffffff.
-    if (input().is_final())
+    if (state::input().is_final())
         return error::op_check_locktime_verify1;
 
     // BIP65: the stack is empty.
@@ -990,10 +1168,10 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
     // BIP65: extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 40 bits are usable.
     uint64_t stack_locktime40;
-    if (!peek_unsigned40(stack_locktime40))
+    if (!state::peek_unsigned40(stack_locktime40))
         return error::op_check_locktime_verify2;
 
-    const auto trans_locktime32 = transaction().locktime();
+    const auto trans_locktime32 = state::transaction().locktime();
 
     // BIP65: the stack locktime type differs from that of tx.
     if ((stack_locktime40 < locktime_threshold) !=
@@ -1005,10 +1183,12 @@ op_error_t interpreter::op_check_locktime_verify() const noexcept
         error::op_check_locktime_verify4 : error::op_success;
 }
 
-op_error_t interpreter::op_check_sequence_verify() const noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+op_check_sequence_verify() const noexcept
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
-    if (!is_enabled(forks::bip112_rule))
+    if (!state::is_enabled(forks::bip112_rule))
         return op_nop(opcode::nop3);
 
     // BIP112: the stack is empty.
@@ -1016,18 +1196,18 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
     // BIP112: extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 32 bits are used (33rd-40th discarded).
     uint32_t stack_sequence32;
-    if (!peek_unsigned32(stack_sequence32))
+    if (!state::peek_unsigned32(stack_sequence32))
         return error::op_check_sequence_verify1;
 
     // Only 32 bits are tested.
-    const auto input_sequence32 = input().sequence();
+    const auto input_sequence32 = state::input().sequence();
 
     // BIP112: the stack sequence is disabled, treat as nop3.
     if (get_right(stack_sequence32, relative_locktime_disabled_bit))
         return op_nop(opcode::nop3);
 
     // BIP112: the stack sequence is enabled and tx version less than 2.
-    if (transaction().version() < relative_locktime_min_version)
+    if (state::transaction().version() < relative_locktime_min_version)
         return error::op_check_sequence_verify2;
 
     // BIP112: the transaction sequence is disabled.
@@ -1051,7 +1231,9 @@ op_error_t interpreter::op_check_sequence_verify() const noexcept
 // It is expected that the compiler will produce a very efficient jump table.
 
 // private:
-op_error_t interpreter::run_op(const op_iterator& op) noexcept
+template <typename Stack>
+inline op_error_t interpreter<Stack>::
+run_op(const op_iterator& op) noexcept
 {
     const auto code = op->code();
 
@@ -1354,10 +1536,12 @@ op_error_t interpreter::run_op(const op_iterator& op) noexcept
     }
 }
 
-// Operation loop (script execution).
+// Run the program.
 // ----------------------------------------------------------------------------
 
-code interpreter::run() noexcept
+template <typename Stack>
+inline code interpreter<Stack>::
+run() noexcept
 {
     error::op_error_t operation_ec;
     error::script_error_t script_ec;
@@ -1365,10 +1549,10 @@ code interpreter::run() noexcept
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
     // Enforce first op not reserved (not skippable by condition).
-    if ((script_ec = validate()))
+    if ((script_ec = state::validate()))
         return script_ec;
 
-    for (auto it = begin(); it != end(); ++it)
+    for (auto it = state::begin(); it != state::end(); ++it)
     {
         // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
@@ -1382,27 +1566,29 @@ code interpreter::run() noexcept
             return error::invalid_push_data_size;
 
         // Enforce opcode count limit (201).
-        if (!ops_increment(op))
+        if (!state::ops_increment(op))
             return error::invalid_operation_count;
 
         // Conditional evaluation scope.
-        if (if_(op))
+        if (state::if_(op))
         {
             // Evaluate opcode (switch).
             if ((operation_ec = run_op(it)))
                 return operation_ec;
 
             // Enforce combined stacks size limit (1,000).
-            if (is_overflow())
+            if (state::is_stack_overflow())
                 return error::invalid_stack_size;
         }
     }
 
     // Guard against unbalanced evaluation scope.
-    return is_balanced() ? error::script_success :
+    return state::is_balanced() ? error::script_success :
         error::invalid_stack_scope;
 }
 
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
+
+#endif

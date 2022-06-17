@@ -22,11 +22,13 @@
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/division.hpp>
+#include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
+// bytes
 // safe
 // safe<-limits, power, addition
 // power<-limits
@@ -35,11 +37,11 @@
 // addition<-division
 // division<-bits
 
-// cast.hpp (rename)
+// safe.hpp
 // ============================================================================
 // Explicit [required]/possible operators for narrowing and sign casting.
 //
-// bitwise.hpp (rename)
+// bits.hpp
 // ============================================================================
 // follow established return type (not standardized).
 // sizes are all size_t (width, offset, bits, shift).

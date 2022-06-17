@@ -108,8 +108,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
-    src/machine/interpreter.cpp \
-    src/machine/program.cpp \
     src/radix/base_10.cpp \
     src/radix/base_16.cpp \
     src/radix/base_2048.cpp \
@@ -283,6 +281,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/machine/program.cpp \
     test/math/addition.cpp \
     test/math/bits.cpp \
+    test/math/bytes.cpp \
     test/math/division.cpp \
     test/math/limits.cpp \
     test/math/power.cpp \
@@ -512,10 +511,17 @@ include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/external_ptr.ipp \
     include/bitcoin/system/impl/data/memory.ipp
 
+include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
+include_bitcoin_system_impl_machine_HEADERS = \
+    include/bitcoin/system/impl/machine/interpreter.ipp \
+    include/bitcoin/system/impl/machine/number.ipp \
+    include/bitcoin/system/impl/machine/program.ipp
+
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/addition.ipp \
     include/bitcoin/system/impl/math/bits.ipp \
+    include/bitcoin/system/impl/math/bytes.ipp \
     include/bitcoin/system/impl/math/division.ipp \
     include/bitcoin/system/impl/math/limits.ipp \
     include/bitcoin/system/impl/math/power.ipp \
@@ -566,6 +572,7 @@ include_bitcoin_system_mathdir = ${includedir}/bitcoin/system/math
 include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/addition.hpp \
     include/bitcoin/system/math/bits.hpp \
+    include/bitcoin/system/math/bytes.hpp \
     include/bitcoin/system/math/division.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/math.hpp \

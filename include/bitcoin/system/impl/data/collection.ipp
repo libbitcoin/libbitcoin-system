@@ -49,7 +49,8 @@ namespace system {
 // Collection requires size and empty methods.
 template <typename Collection, typename Element>
 typename Collection::difference_type
-binary_search(const Collection& list, const Element& element) noexcept
+constexpr binary_search(const Collection& list,
+    const Element& element) noexcept
 {
     // C++17: std::size.
     const auto size = list.size();
@@ -78,7 +79,7 @@ binary_search(const Collection& list, const Element& element) noexcept
 
 // C++17: Parallel policy for std::transform.
 template <typename To, typename From>
-std::vector<To> cast(const std::vector<From>& source) noexcept
+constexpr std::vector<To> cast(const std::vector<From>& source) noexcept
 {
     static no_fill_allocator<To> no_fill_to_allocator{};
     std::vector<To> out(source.size(), no_fill_to_allocator);
@@ -94,7 +95,7 @@ std::vector<To> cast(const std::vector<From>& source) noexcept
 
 // C++17: Parallel policy for std::transform.
 template <typename To, typename From, size_t Size>
-std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
+constexpr std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 {
     // TODO: no_fill_allocator.
     std::array<To, Size> out;
@@ -110,7 +111,8 @@ std::array<To, Size> cast(const std::array<From, Size>& source) noexcept
 
 // C++17: Parallel policy for std::transform.
 template <typename To, typename From>
-std::vector<To> pointer_cast(const std::vector<From>& source) noexcept
+constexpr std::vector<To> pointer_cast(
+    const std::vector<From>& source) noexcept
 {
     // TODO: no_fill_allocator.
     std::vector<To> out(source.size());
@@ -126,7 +128,8 @@ std::vector<To> pointer_cast(const std::vector<From>& source) noexcept
 
 // C++17: Parallel policy for std::any_of.
 template <typename Collection, typename Element>
-bool contains(const Collection& list, const Element& element) noexcept
+constexpr bool contains(const Collection& list,
+    const Element& element) noexcept
 {
     return std::any_of(std::begin(list), std::end(list),
         [&element](const auto& value) noexcept
@@ -136,7 +139,8 @@ bool contains(const Collection& list, const Element& element) noexcept
 }
 
 template <typename Element>
-bool equal_points(const std::vector<std::shared_ptr<const Element>>& left,
+constexpr bool equal_points(
+    const std::vector<std::shared_ptr<const Element>>& left,
     const std::vector<std::shared_ptr<const Element>>& right) noexcept
 {
     // C++14: a new std::equal overload can replace this guard.
@@ -153,7 +157,8 @@ bool equal_points(const std::vector<std::shared_ptr<const Element>>& left,
 }
 
 template <typename Iterator, typename Value>
-void filler(Iterator begin, const Iterator& end, const Value& value) noexcept
+constexpr void filler(Iterator begin, const Iterator& end,
+    const Value& value) noexcept
 {
     // C++17: Parallel policy for std::for_each.
     // std::fill warns on msvc and cannot be suppressed.
@@ -168,7 +173,7 @@ void filler(Iterator begin, const Iterator& end, const Value& value) noexcept
 // Collection requires std::pair elements.
 template <typename Collection>
 typename Collection::difference_type
-find_pair_position(const Collection& list,
+constexpr find_pair_position(const Collection& list,
     const typename Collection::value_type::first_type& key) noexcept
 {
     const auto position = std::find_if(std::begin(list), std::end(list),
@@ -184,7 +189,7 @@ find_pair_position(const Collection& list,
 // C++17: Parallel policy for std::find.
 template <typename Collection>
 typename Collection::difference_type
-find_position(const Collection& list,
+constexpr find_position(const Collection& list,
     const typename Collection::value_type& element) noexcept
 {
     const auto position = std::find(std::begin(list), std::end(list), element);
@@ -196,7 +201,7 @@ find_position(const Collection& list,
 // Collection requires insert method (vector).
 template <typename Collection, typename Predicate>
 typename Collection::iterator
-insert_sorted(Collection& list, typename Collection::value_type& element,
+constexpr insert_sorted(Collection& list, typename Collection::value_type& element,
     Predicate predicate) noexcept
 {
     return list.insert(std::upper_bound(std::begin(list),
@@ -206,7 +211,7 @@ insert_sorted(Collection& list, typename Collection::value_type& element,
 // TODO: specialize vector and generalize on element type.
 // Collection requires reserve and size methods (vector).
 template <typename Collection>
-void move_append(Collection& target, Collection& source) noexcept
+constexpr void move_append(Collection& target, Collection& source) noexcept
 {
     // C++17: std::size.
     target.reserve(target.size() + source.size());
@@ -217,7 +222,7 @@ void move_append(Collection& target, Collection& source) noexcept
 // Collection requires empty, back and pop_back methods (vector).
 template <typename Collection>
 typename Collection::value_type
-pop(Collection& stack) noexcept
+constexpr pop(Collection& stack) noexcept
 {
     if (stack.empty())
         return {};
@@ -229,14 +234,14 @@ pop(Collection& stack) noexcept
 
 // C++17: Parallel policy for std::sort, std::unique.
 template <typename Collection>
-bool is_distinct(Collection&& list) noexcept
+constexpr bool is_distinct(Collection&& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     return std::unique(std::begin(list), std::end(list)) == std::end(list);
 }
 
 template <typename Collection>
-bool is_distinct(const Collection& list) noexcept
+constexpr bool is_distinct(const Collection& list) noexcept
 {
     // A single move function would require a move and a copy (least ideal).
     // This is necessary because the argument will be const if not moved.
@@ -258,7 +263,7 @@ bool is_distinct(const Collection& list) noexcept
 // TODO: provide optional comparison function
 // C++17: Parallel policy for std::is_sorted.
 template <typename Collection>
-bool is_sorted(const Collection& list) noexcept
+constexpr bool is_sorted(const Collection& list) noexcept
 {
     return std::is_sorted(std::begin(list), std::end(list));
 }
@@ -268,7 +273,7 @@ bool is_sorted(const Collection& list) noexcept
 // Collection requires erase and shrink_to_fit methods (vector).
 
 template <typename Collection>
-void distinct(Collection& list) noexcept
+constexpr void distinct(Collection& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
@@ -276,14 +281,14 @@ void distinct(Collection& list) noexcept
 }
 
 template <typename Collection>
-Collection distinct(Collection&& list) noexcept
+constexpr Collection distinct(Collection&& list) noexcept
 {
     distinct(list);
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-Collection distinct_copy(const Collection& list) noexcept
+constexpr Collection distinct_copy(const Collection& list) noexcept
 {
     auto copy = list;
     distinct(copy);
@@ -292,14 +297,14 @@ Collection distinct_copy(const Collection& list) noexcept
 
 // Collection requires size, reserve and shrink_to_fit methods (vector).
 template <typename Left, typename Right>
-Left difference(const Left& left, const Right& right) noexcept
+constexpr Left difference(const Left& left, const Right& right) noexcept
 {
     return difference<Left>(left.begin(), left.end(), right);
 }
 
 // Collection requires size, reserve and shrink_to_fit methods (vector).
 template <typename Left, typename Right>
-Left difference(const typename Left::const_iterator& begin,
+constexpr Left difference(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept
 {
     Left copy{};
@@ -315,14 +320,14 @@ Left difference(const typename Left::const_iterator& begin,
 }
 
 template <typename Left, typename Right>
-bool intersecting(const Left& left, const Right& right) noexcept
+constexpr bool intersecting(const Left& left, const Right& right) noexcept
 {
     return intersecting<Left>(left.begin(), left.end(), right);
 }
 
 // C++17: Parallel policy for std::find_first_of.
 template <typename Left, typename Right>
-bool intersecting(const typename Left::const_iterator& begin,
+constexpr bool intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept
 {
     return std::find_first_of(begin, end, std::begin(right),
@@ -331,20 +336,20 @@ bool intersecting(const typename Left::const_iterator& begin,
 
 // C++17: Parallel policy for std::reverse.
 template <typename Collection>
-void reverse(Collection& list) noexcept
+constexpr void reverse(Collection& list) noexcept
 {
     std::reverse(std::begin(list), std::end(list));
 }
 
 template <typename Collection>
-Collection reverse(Collection&& list) noexcept
+constexpr Collection reverse(Collection&& list) noexcept
 {
     reverse(list);
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-Collection reverse_copy(const Collection& list) noexcept
+constexpr Collection reverse_copy(const Collection& list) noexcept
 {
     auto copy = list;
     reverse(copy);
@@ -353,20 +358,20 @@ Collection reverse_copy(const Collection& list) noexcept
 
 // C++17: Parallel policy for std::sort.
 template <typename Collection>
-void sort(Collection& list) noexcept
+constexpr void sort(Collection& list) noexcept
 {
     std::sort(std::begin(list), std::end(list));
 }
 
 template <typename Collection>
-Collection sort(Collection&& list) noexcept
+constexpr Collection sort(Collection&& list) noexcept
 {
     sort(list);
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-Collection sort_copy(const Collection& list) noexcept
+constexpr Collection sort_copy(const Collection& list) noexcept
 {
     auto copy = list;
     sort(copy);
@@ -374,7 +379,7 @@ Collection sort_copy(const Collection& list) noexcept
 }
 
 template <typename Collection>
-bool starts_with(
+constexpr bool starts_with(
     const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept

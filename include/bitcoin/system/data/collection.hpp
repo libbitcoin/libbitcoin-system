@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -40,113 +41,120 @@ namespace system {
 /// Returns the position or negative if not found or list size > max_int32.
 template <typename Collection, typename Element>
 typename Collection::difference_type
-binary_search(const Collection& list, const Element& element) noexcept;
+constexpr binary_search(const Collection& list,
+    const Element& element) noexcept;
 
 /// Copy/move collection of From members to a new collection of To members.
 template <typename To, typename From>
-std::vector<To> cast(const std::vector<From>& source) noexcept;
+constexpr std::vector<To> cast(const std::vector<From>& source) noexcept;
 template <typename To, typename From, size_t Size>
-std::array<To, Size> cast(const std::array<From, Size>& source) noexcept;
+constexpr std::array<To, Size> cast(
+    const std::array<From, Size>& source) noexcept;
 
 /// Copy collection of smart pointer values to collection of pointers. 
 template <typename To, typename From>
-std::vector<To> pointer_cast(const std::vector<From>& source) noexcept;
+constexpr std::vector<To> pointer_cast(
+    const std::vector<From>& source) noexcept;
 
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>
-bool contains(const Collection& list, const Element& element) noexcept;
+constexpr bool contains(const Collection& list,
+    const Element& element) noexcept;
 
 /// Determine if a vector of shared pointers to elements have equal elements.
 template <typename Element>
-bool equal_points(const std::vector<std::shared_ptr<const Element>>& left,
+constexpr bool equal_points(
+    const std::vector<std::shared_ptr<const Element>>& left,
     const std::vector<std::shared_ptr<const Element>>& right) noexcept;
 
 /// Fill a buffer with values.
 template <typename Iterator, typename Value>
-void filler(Iterator begin, const Iterator& end, const Value& value) noexcept;
+constexpr void filler(Iterator begin, const Iterator& end,
+    const Value& value) noexcept;
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
 typename Collection::difference_type
-find_pair_position(const Collection& list,
+constexpr find_pair_position(const Collection& list,
     const typename Collection::value_type::first_type& key) noexcept;
 
 /// Find the position of an element in an ordered collection.
 template <typename Collection>
 typename Collection::difference_type
-find_position(const Collection& list,
+constexpr find_position(const Collection& list,
     const typename Collection::value_type& value) noexcept;
 
 /// Facilitate a list insertion sort by inserting into a sorted position.
 template <typename Collection, typename Predicate>
 typename Collection::iterator
-insert_sorted(Collection& list, const typename Collection::value_type& element,
+constexpr insert_sorted(Collection& list,
+    const typename Collection::value_type& element,
     Predicate predicate) noexcept;
 
 /// Move members of a source list to end of a target list. Source members are 
 /// undefined upon return.
 template <typename Collection>
-void move_append(Collection& target, Collection& source) noexcept;
+constexpr void move_append(Collection& target, Collection& source) noexcept;
 
 /// Pop an element from the stack and return its value.
 template <typename Collection>
 typename Collection::value_type
-pop(Collection& stack) noexcept;
+constexpr pop(Collection& stack) noexcept;
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>
-bool is_distinct(Collection&& list) noexcept;
+constexpr bool is_distinct(Collection&& list) noexcept;
 template <typename Collection>
-bool is_distinct(const Collection& list) noexcept;
+constexpr bool is_distinct(const Collection& list) noexcept;
 
 /// Determine if a collection is lexically sorted.
 template <typename Collection>
-bool is_sorted(const Collection& list) noexcept;
+constexpr bool is_sorted(const Collection& list) noexcept;
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
-void distinct(Collection& list) noexcept;
+constexpr void distinct(Collection& list) noexcept;
 template <typename Collection>
-Collection distinct(Collection&& list) noexcept;
+constexpr Collection distinct(Collection&& list) noexcept;
 template <typename Collection>
-Collection distinct_copy(const Collection& list) noexcept;
+constexpr Collection distinct_copy(const Collection& list) noexcept;
 
 /// Obtain the set difference of left less right.
 template <typename Left, typename Right>
-Left difference(const Left& left, const Right& right) noexcept;
+constexpr Left difference(const Left& left, const Right& right) noexcept;
 
 template <typename Left, typename Right>
-Left difference(const typename Left::const_iterator& begin,
+constexpr Left difference(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Determing if the sets have an intersection.
 template <typename Left, typename Right>
-bool intersecting(const Left& left, const Right& right) noexcept;
+constexpr bool intersecting(const Left& left, const Right& right) noexcept;
 
 template <typename Left, typename Right>
-bool intersecting(const typename Left::const_iterator& begin,
+constexpr bool intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use boost::adaptors::reverse for reverse iteration.
 template <typename Collection>
-void reverse(Collection& list) noexcept;
+constexpr void reverse(Collection& list) noexcept;
 template <typename Collection>
-Collection reverse(Collection&& list) noexcept;
+constexpr Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
-Collection reverse_copy(const Collection& list) noexcept;
+constexpr Collection reverse_copy(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>
-void sort(Collection& list) noexcept;
+constexpr void sort(Collection& list) noexcept;
 template <typename Collection>
-Collection sort(Collection&& list) noexcept;
+constexpr Collection sort(Collection&& list) noexcept;
 template <typename Collection>
-Collection sort_copy(const Collection& list) noexcept;
+constexpr Collection sort_copy(const Collection& list) noexcept;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>
-bool starts_with(const typename Collection::const_iterator& begin,
+constexpr bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
     const Collection& value) noexcept;
 

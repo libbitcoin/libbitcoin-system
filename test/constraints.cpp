@@ -71,12 +71,12 @@ static_assert(is_true<if_even<0xfe>>(), "");
 static_assert(is_true<if_non_zero<1>>(), "");
 ////static_assert(!is_true<if_non_zero<0>>(), "");
 
-static_assert(is_true<if_size<0, 0>>(), "");
-static_assert(is_true<if_size<1, 1>>(), "");
-static_assert(is_true<if_size<42, 42>>(), "");
-////static_assert(!is_true<if_size<0, 1>>(), "");
-////static_assert(!is_true<if_size<1, 42>>(), "");
-////static_assert(!is_true<if_size<42, 1>>(), "");
+static_assert(is_true<if_equal<0, 0>>(), "");
+static_assert(is_true<if_equal<1, 1>>(), "");
+static_assert(is_true<if_equal<42, 42>>(), "");
+////static_assert(!is_true<if_equal<0, 1>>(), "");
+////static_assert(!is_true<if_equal<1, 42>>(), "");
+////static_assert(!is_true<if_equal<42, 1>>(), "");
 
 static_assert(is_true<if_greater<1, 0>>(), "");
 ////static_assert(!is_true<if_greater<0, 0>>(), "");

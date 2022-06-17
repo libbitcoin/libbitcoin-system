@@ -173,8 +173,6 @@
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
-    <ClCompile Include="..\..\..\..\src\machine\interpreter.cpp" />
-    <ClCompile Include="..\..\..\..\src\machine\program.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -355,6 +353,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\program.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\addition.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bits.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bytes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\division.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />
@@ -484,8 +483,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\external_ptr.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bits.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\bytes.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />

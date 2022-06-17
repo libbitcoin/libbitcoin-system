@@ -131,6 +131,9 @@ static_assert(sub1(-42) == -42 - 1, "");
 static_assert(sub1(0xff) == 0xff - 1, "");
 static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value, "");
 
+// Other endianness is not supported, so bail if this fails.
+static_assert(is_native_little_endian != is_native_big_endian);
+
 constexpr uint32_t value42 = 42;
 static_assert(width<bool>() == to_bits(sizeof(char)), "");
 static_assert(width<char>() == to_bits(sizeof(char)), "");

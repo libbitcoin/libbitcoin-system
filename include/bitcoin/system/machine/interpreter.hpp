@@ -31,126 +31,125 @@ namespace system {
 namespace machine {
 
 /// Class to isolate operation iteration, dispatch, and handlers from state.
-class BC_API interpreter
-  : public program
+template <typename Stack>
+class interpreter
+  : public program<Stack>
 {
 public:
+    /// Alises for base template.
+    using state = typename program<Stack>::program;
+    using op_iterator = state::op_iterator;
+
     /// Use program constructors.
-    using program::program;
+    using program<Stack>::program;
 
     /// Defaults.
     interpreter(interpreter&&) = delete;
     interpreter(const interpreter&) = delete;
     interpreter& operator=(interpreter&&) = delete;
     interpreter& operator=(const interpreter&) = delete;
-    ~interpreter() = default;
+    inline ~interpreter() = default;
 
-    /// Operation handlers.
-    error::op_error_t op_unevaluated(chain::opcode) const noexcept;
-    error::op_error_t op_nop(chain::opcode) const noexcept;
-    error::op_error_t op_push_number(int8_t value) noexcept;
-    error::op_error_t op_push_size(const chain::operation& op) noexcept;
-    error::op_error_t op_push_one_size(const chain::operation& op) noexcept;
-    error::op_error_t op_push_two_size(const chain::operation& op) noexcept;
-    error::op_error_t op_push_four_size(const chain::operation& op) noexcept;
-    error::op_error_t op_nop() const noexcept;
-    error::op_error_t op_ver() const noexcept;
-    error::op_error_t op_if() noexcept;
-    error::op_error_t op_notif() noexcept;
-    error::op_error_t op_verif() const noexcept;
-    error::op_error_t op_vernotif() const noexcept;
-    error::op_error_t op_else() noexcept;
-    error::op_error_t op_endif() noexcept;
-    error::op_error_t op_verify() noexcept;
-    error::op_error_t op_return() const noexcept;
-    error::op_error_t op_to_alt_stack() noexcept;
-    error::op_error_t op_from_alt_stack() noexcept;
-    error::op_error_t op_drop2() noexcept;
-    error::op_error_t op_dup2() noexcept;
-    error::op_error_t op_dup3() noexcept;
-    error::op_error_t op_over2() noexcept;
-    error::op_error_t op_rot2() noexcept;
-    error::op_error_t op_swap2() noexcept;
-    error::op_error_t op_if_dup() noexcept;
-    error::op_error_t op_depth() noexcept;
-    error::op_error_t op_drop() noexcept;
-    error::op_error_t op_dup() noexcept;
-    error::op_error_t op_nip() noexcept;
-    error::op_error_t op_over() noexcept;
-    error::op_error_t op_pick() noexcept;
-    error::op_error_t op_roll() noexcept;
-    error::op_error_t op_rot() noexcept;
-    error::op_error_t op_swap() noexcept;
-    error::op_error_t op_tuck() noexcept;
-    error::op_error_t op_cat() const noexcept;
-    error::op_error_t op_substr() const noexcept;
-    error::op_error_t op_left() const noexcept;
-    error::op_error_t op_right() const noexcept;
-    error::op_error_t op_size() noexcept;
-    error::op_error_t op_invert() const noexcept;
-    error::op_error_t op_and() const noexcept;
-    error::op_error_t op_or() const noexcept;
-    error::op_error_t op_xor() const noexcept;
-    error::op_error_t op_equal() noexcept;
-    error::op_error_t op_equal_verify() noexcept;
-    error::op_error_t op_add1() noexcept;
-    error::op_error_t op_sub1() noexcept;
-    error::op_error_t op_mul2() const noexcept;
-    error::op_error_t op_div2() const noexcept;
-    error::op_error_t op_negate() noexcept;
-    error::op_error_t op_abs() noexcept;
-    error::op_error_t op_not() noexcept;
-    error::op_error_t op_nonzero() noexcept;
-    error::op_error_t op_add() noexcept;
-    error::op_error_t op_sub() noexcept;
-    error::op_error_t op_mul() const noexcept;
-    error::op_error_t op_div() const noexcept;
-    error::op_error_t op_mod() const noexcept;
-    error::op_error_t op_lshift() const noexcept;
-    error::op_error_t op_rshift() const noexcept;
-    error::op_error_t op_bool_and() noexcept;
-    error::op_error_t op_bool_or() noexcept;
-    error::op_error_t op_num_equal() noexcept;
-    error::op_error_t op_num_equal_verify() noexcept;
-    error::op_error_t op_num_not_equal() noexcept;
-    error::op_error_t op_less_than() noexcept;
-    error::op_error_t op_greater_than() noexcept;
-    error::op_error_t op_less_than_or_equal() noexcept;
-    error::op_error_t op_greater_than_or_equal() noexcept;
-    error::op_error_t op_min() noexcept;
-    error::op_error_t op_max() noexcept;
-    error::op_error_t op_within() noexcept;
-    error::op_error_t op_ripemd160() noexcept;
-    error::op_error_t op_sha1() noexcept;
-    error::op_error_t op_sha256() noexcept;
-    error::op_error_t op_hash160() noexcept;
-    error::op_error_t op_hash256() noexcept;
-    error::op_error_t op_codeseparator(const op_iterator& op) noexcept;
-    error::op_error_t op_check_sig_verify() noexcept;
-    error::op_error_t op_check_sig() noexcept;
-    error::op_error_t op_check_multisig_verify() noexcept;
-    error::op_error_t op_check_multisig() noexcept;
-    error::op_error_t op_check_locktime_verify() const noexcept;
-    error::op_error_t op_check_sequence_verify() const noexcept;
-
-    /// Operation loop (script execution).
-    code run() noexcept;
-
-    /// Transaction must pop top input stack element (bip16).
-    inline const data_chunk& pop() noexcept
-    {
-        BC_ASSERT_MSG(!is_empty(), "pop from empty stack");
-
-        return *pop_chunk_unsafe();
-    }
+    /// Run the program.
+    inline code run() noexcept;
 
 protected:
     /// Operation disatch.
-    error::op_error_t run_op(const op_iterator& op) noexcept;
+    inline error::op_error_t run_op(const op_iterator& op) noexcept;
+
+    /// Operation handlers.
+    inline error::op_error_t op_unevaluated(chain::opcode) const noexcept;
+    inline error::op_error_t op_nop(chain::opcode) const noexcept;
+    inline error::op_error_t op_push_number(int8_t value) noexcept;
+    inline error::op_error_t op_push_size(const chain::operation& op) noexcept;
+    inline error::op_error_t op_push_one_size(const chain::operation& op) noexcept;
+    inline error::op_error_t op_push_two_size(const chain::operation& op) noexcept;
+    inline error::op_error_t op_push_four_size(const chain::operation& op) noexcept;
+    inline error::op_error_t op_nop() const noexcept;
+    inline error::op_error_t op_ver() const noexcept;
+    inline error::op_error_t op_if() noexcept;
+    inline error::op_error_t op_notif() noexcept;
+    inline error::op_error_t op_verif() const noexcept;
+    inline error::op_error_t op_vernotif() const noexcept;
+    inline error::op_error_t op_else() noexcept;
+    inline error::op_error_t op_endif() noexcept;
+    inline error::op_error_t op_verify() noexcept;
+    inline error::op_error_t op_return() const noexcept;
+    inline error::op_error_t op_to_alt_stack() noexcept;
+    inline error::op_error_t op_from_alt_stack() noexcept;
+    inline error::op_error_t op_drop2() noexcept;
+    inline error::op_error_t op_dup2() noexcept;
+    inline error::op_error_t op_dup3() noexcept;
+    inline error::op_error_t op_over2() noexcept;
+    inline error::op_error_t op_rot2() noexcept;
+    inline error::op_error_t op_swap2() noexcept;
+    inline error::op_error_t op_if_dup() noexcept;
+    inline error::op_error_t op_depth() noexcept;
+    inline error::op_error_t op_drop() noexcept;
+    inline error::op_error_t op_dup() noexcept;
+    inline error::op_error_t op_nip() noexcept;
+    inline error::op_error_t op_over() noexcept;
+    inline error::op_error_t op_pick() noexcept;
+    inline error::op_error_t op_roll() noexcept;
+    inline error::op_error_t op_rot() noexcept;
+    inline error::op_error_t op_swap() noexcept;
+    inline error::op_error_t op_tuck() noexcept;
+    inline error::op_error_t op_cat() const noexcept;
+    inline error::op_error_t op_substr() const noexcept;
+    inline error::op_error_t op_left() const noexcept;
+    inline error::op_error_t op_right() const noexcept;
+    inline error::op_error_t op_size() noexcept;
+    inline error::op_error_t op_invert() const noexcept;
+    inline error::op_error_t op_and() const noexcept;
+    inline error::op_error_t op_or() const noexcept;
+    inline error::op_error_t op_xor() const noexcept;
+    inline error::op_error_t op_equal() noexcept;
+    inline error::op_error_t op_equal_verify() noexcept;
+    inline error::op_error_t op_add1() noexcept;
+    inline error::op_error_t op_sub1() noexcept;
+    inline error::op_error_t op_mul2() const noexcept;
+    inline error::op_error_t op_div2() const noexcept;
+    inline error::op_error_t op_negate() noexcept;
+    inline error::op_error_t op_abs() noexcept;
+    inline error::op_error_t op_not() noexcept;
+    inline error::op_error_t op_nonzero() noexcept;
+    inline error::op_error_t op_add() noexcept;
+    inline error::op_error_t op_sub() noexcept;
+    inline error::op_error_t op_mul() const noexcept;
+    inline error::op_error_t op_div() const noexcept;
+    inline error::op_error_t op_mod() const noexcept;
+    inline error::op_error_t op_lshift() const noexcept;
+    inline error::op_error_t op_rshift() const noexcept;
+    inline error::op_error_t op_bool_and() noexcept;
+    inline error::op_error_t op_bool_or() noexcept;
+    inline error::op_error_t op_num_equal() noexcept;
+    inline error::op_error_t op_num_equal_verify() noexcept;
+    inline error::op_error_t op_num_not_equal() noexcept;
+    inline error::op_error_t op_less_than() noexcept;
+    inline error::op_error_t op_greater_than() noexcept;
+    inline error::op_error_t op_less_than_or_equal() noexcept;
+    inline error::op_error_t op_greater_than_or_equal() noexcept;
+    inline error::op_error_t op_min() noexcept;
+    inline error::op_error_t op_max() noexcept;
+    inline error::op_error_t op_within() noexcept;
+    inline error::op_error_t op_ripemd160() noexcept;
+    inline error::op_error_t op_sha1() noexcept;
+    inline error::op_error_t op_sha256() noexcept;
+    inline error::op_error_t op_hash160() noexcept;
+    inline error::op_error_t op_hash256() noexcept;
+    inline error::op_error_t op_codeseparator(const op_iterator& op) noexcept;
+    inline error::op_error_t op_check_sig_verify() noexcept;
+    inline error::op_error_t op_check_sig() noexcept;
+    inline error::op_error_t op_check_multisig_verify() noexcept;
+    inline error::op_error_t op_check_multisig() noexcept;
+    inline error::op_error_t op_check_locktime_verify() const noexcept;
+    inline error::op_error_t op_check_sequence_verify() const noexcept;
 };
 
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/machine/interpreter.ipp>
 
 #endif

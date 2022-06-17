@@ -319,7 +319,7 @@ bool block::is_forward_reference() const noexcept
     };
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (const auto& tx: boost::adaptors::reverse(*txs_))
+    for (const auto& tx: std::ranges::reverse_view(*txs_))
     BC_POP_WARNING()
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -478,7 +478,7 @@ bool block::is_invalid_witness_commitment() const noexcept
         const auto& outputs = *coinbase->outputs_ptr();
 
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        for (const auto& output: boost::adaptors::reverse(outputs))
+        for (const auto& output: std::ranges::reverse_view(outputs))
         BC_POP_WARNING()
         {
             if (output->committed_hash(committed))

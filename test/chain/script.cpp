@@ -476,9 +476,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
+        ////BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
         BOOST_CHECK_MESSAGE(tx.connect({ forks::bip65_rule }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip112_rule }, 0) == error::script_success, name);
+        ////BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip112_rule }, 0) == error::script_success, name);
     }
 }
 

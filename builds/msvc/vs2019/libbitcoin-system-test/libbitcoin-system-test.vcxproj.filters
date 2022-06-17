@@ -255,6 +255,9 @@
     <ClCompile Include="..\..\..\..\test\math\bits.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\bytes.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\division.cpp">
       <Filter>src\math</Filter>
     </ClCompile>

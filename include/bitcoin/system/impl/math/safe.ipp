@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Explicit integral casts.
+// Explicit integral casts.
 
 template <typename To, typename From,
     if_lesser_width<To, From>,
@@ -76,7 +76,7 @@ constexpr To wide_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-/// Possible integer casts.
+// Possible integer casts.
 
 template <typename To, typename From, if_same_signed_integer<To, From>>
 constexpr To possible_narrow_cast(From value) noexcept
@@ -128,7 +128,7 @@ constexpr To possible_wide_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
-/// Explicit pointer casts.
+// Explicit pointer casts.
 
 template <typename To, typename From>
 constexpr To* pointer_cast(From* value) noexcept

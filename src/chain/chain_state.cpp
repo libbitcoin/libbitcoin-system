@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/checkpoint.hpp>
@@ -410,7 +409,7 @@ uint32_t chain_state::easy_work_required(const data& values,
 
     // Reverse iterate the ordered-by-height list of header bits.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (auto bit: boost::adaptors::reverse(bits))
+    for (auto bit: std::ranges::reverse_view(bits))
     BC_POP_WARNING()
     {
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,

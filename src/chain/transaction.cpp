@@ -1270,12 +1270,12 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
     code ec;
 
     // Evaluate input script.
-    interpreter input(*this, it, state.forks);
+    interpreter<vector_stack> input(*this, it, state.forks);
     if ((ec = input.run()))
         return ec;
 
     // Evaluate output script using stack copied from input script.
-    interpreter prevout(input, in.prevout->script_ptr());
+    interpreter<vector_stack> prevout(input, in.prevout->script_ptr());
     if ((ec = prevout.run()))
         return ec;
 
@@ -1301,8 +1301,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
-                interpreter witness(*this, it, script, state.forks,
-                    in.prevout->script().version(), witness_stack);
+                interpreter<vector_stack> witness(*this, it, script,
+                    state.forks, in.prevout->script().version(), witness_stack);
 
                 if ((ec = witness.run()))
                     return ec;
@@ -1332,7 +1332,7 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
         const auto embeded_script = to_shared<script>({ input.pop(), false });
 
         // Evaluate embedded script using stack moved from input script.
-        interpreter embeded(std::move(input), embeded_script);
+        interpreter<vector_stack> embeded(std::move(input), embeded_script);
         if ((ec = embeded.run()))
             return ec;
 
@@ -1358,8 +1358,8 @@ code transaction::connect(const context& state, uint32_t index) const noexcept
                         return error::invalid_witness;
 
                     // A defined version indicates bip141 is active (not bip143).
-                    interpreter witness_program(*this, it, script, state.forks,
-                        embeded_script->version(), witness_stack);
+                    interpreter<vector_stack> witness_program(*this, it, script,
+                        state.forks, embeded_script->version(), witness_stack);
 
                     if ((ec = witness_program.run()))
                         return ec;

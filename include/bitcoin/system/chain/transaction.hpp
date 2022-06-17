@@ -238,8 +238,6 @@ private:
     mutable std::unique_ptr<hash_cache> cache_;
 };
 
-// TODO: rename inputs_ptr => inputs_cptr
-// TODO: rename outputs_ptr => outputs_cptr
 typedef std::vector<transaction> transactions;
 typedef std::vector<transaction::cptr> transaction_ptrs;
 typedef std::shared_ptr<const transaction_ptrs> transactions_cptr;

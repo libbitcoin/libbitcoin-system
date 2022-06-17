@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__array_to_integer_long__expected
 
 const auto alpha_forward = "BITCOIN!";
 const auto alpha_reverse = "!NIOCTIB";
-const uint64_t value_alpha64 = 0x424954434f494e21;
+constexpr uint64_t value_alpha64 = 0x424954434f494e21;
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__stream_to_integer__expected)
 {
