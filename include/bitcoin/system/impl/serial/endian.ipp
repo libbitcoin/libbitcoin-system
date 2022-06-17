@@ -159,7 +159,7 @@ constexpr Integer from_little(size_t, const data_slice& data) noexcept
 }
 
 template <typename Data, typename Integer, if_byte<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) noexcept
+inline Data to_big(Data&& bytes, Integer value) noexcept
 {
     if (!bytes.empty())
         bytes.front() = possible_sign_cast<uint8_t>(value);
@@ -168,7 +168,7 @@ constexpr Data to_big(Data&& bytes, Integer value) noexcept
 }
 
 template <typename Data, typename Integer, if_byte<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) noexcept
+inline Data to_little(Data&& bytes, Integer value) noexcept
 {
     if (!bytes.empty())
         bytes.front() = possible_sign_cast<uint8_t>(value);
@@ -237,7 +237,7 @@ constexpr Integer from_little(size_t size, const data_slice& data) noexcept
 }
 
 template <typename Data, typename Integer, if_bytes<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) noexcept
+inline Data to_big(Data&& bytes, Integer value) noexcept
 {
     // read and shift out lsb, set byte in reverse order
     // data[0] is most significant
@@ -261,7 +261,7 @@ constexpr Data to_big(Data&& bytes, Integer value) noexcept
 }
 
 template <typename Data, typename Integer, if_bytes<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) noexcept
+inline Data to_little(Data&& bytes, Integer value) noexcept
 {
     // read and shift out lsb, set byte in forward order
     // data[0] is least significant
@@ -286,19 +286,19 @@ constexpr Data to_little(Data&& bytes, Integer value) noexcept
 // These allocate the to-endian outgoing buffer and forward the call.
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_big_endian_array(Integer value) noexcept
+inline data_array<Size> to_big_endian_array(Integer value) noexcept
 {
     return to_big(data_array<Size>{}, value);
 }
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_little_endian_array(Integer value) noexcept
+inline data_array<Size> to_little_endian_array(Integer value) noexcept
 {
     return to_little(data_array<Size>{}, value);
 }
 
 template <typename Integer, if_integer<Integer>>
-constexpr data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
+inline data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -310,7 +310,7 @@ constexpr data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 }
 
 template <typename Integer, if_integer<Integer>>
-constexpr data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
+inline data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -337,13 +337,13 @@ constexpr Integer from_little_endian(const data_slice& data) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
+inline data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
     return to_big_endian_array<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
+inline data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
     return to_little_endian_array<sizeof(Integer)>(value);
 }
@@ -368,13 +368,13 @@ constexpr  Integer from_little_endian(const data_slice& data) noexcept
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-constexpr data_chunk to_big_endian(const Integer& value) noexcept
+inline data_chunk to_big_endian(const Integer& value) noexcept
 {
     return to_big_endian_chunk(value);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-constexpr data_chunk to_little_endian(const Integer& value) noexcept
+inline data_chunk to_little_endian(const Integer& value) noexcept
 {
     return to_little_endian_chunk(value);
 }
@@ -384,25 +384,25 @@ constexpr data_chunk to_little_endian(const Integer& value) noexcept
 // ----------------------------------------------------------------------------
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept
+inline uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept
 {
     return from_big<uintx_t<to_bits(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
+inline uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
 {
     return from_little<uintx_t<to_bits(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-constexpr data_array<Bytes> to_big_endian(const Integer& value) noexcept
+inline data_array<Bytes> to_big_endian(const Integer& value) noexcept
 {
     return to_big_endian_array<Bytes>(value);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-constexpr data_array<Bytes> to_little_endian(const Integer& value) noexcept
+inline data_array<Bytes> to_little_endian(const Integer& value) noexcept
 {
     return to_little_endian_array<Bytes>(value);
 }

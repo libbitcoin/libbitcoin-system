@@ -41,56 +41,56 @@ template <typename Type, if_default_constructible<Type> = true>
 class external_ptr
 {
 public:
-    constexpr external_ptr() noexcept
+    inline external_ptr() noexcept
       : pointer_(get_unassigned())
     {
     }
 
     /// Defaults.
-    external_ptr(external_ptr&&) = default;
-    external_ptr(const external_ptr&) = default;
-    external_ptr& operator=(external_ptr&&) = default;
-    external_ptr& operator=(const external_ptr&) = default;
-    ~external_ptr() = default;
+    inline external_ptr(external_ptr&&) = default;
+    inline external_ptr(const external_ptr&) = default;
+    inline external_ptr& operator=(external_ptr&&) = default;
+    inline external_ptr& operator=(const external_ptr&) = default;
+    inline ~external_ptr() = default;
 
     /// External ownership is required.
-    constexpr external_ptr(Type&&) = delete;
-    constexpr explicit external_ptr(const Type& instance) noexcept
+    inline external_ptr(Type&&) = delete;
+    inline explicit external_ptr(const Type& instance) noexcept
       : pointer_(&instance)
     {
     }
 
-    constexpr external_ptr(const Type* pointer) noexcept
+    inline external_ptr(const Type* pointer) noexcept
       : pointer_(is_null(pointer) ? get_unassigned() : pointer)
     {
     }
 
-    constexpr operator bool() const noexcept
+    inline operator bool() const noexcept
     {
         return pointer_ != get_unassigned();
     }
 
-    constexpr const Type& operator*() const noexcept
+    inline const Type& operator*() const noexcept
     {
         return *get();
     }
 
-    constexpr const Type* operator->() const noexcept
+    inline const Type* operator->() const noexcept
     {
         return get();
     }
 
-    constexpr const Type* operator[](size_t index) const noexcept
+    inline const Type* operator[](size_t index) const noexcept
     {
         return std::next(get(), index);
     }
 
-    constexpr const Type* get() const noexcept
+    inline const Type* get() const noexcept
     {
         return pointer_;
     }
 
-    constexpr void reset() const noexcept
+    inline void reset() const noexcept
     {
         pointer_ = get_unassigned();
     }
@@ -98,7 +98,7 @@ public:
 private:
     const Type* pointer_{};
 
-    constexpr const Type* get_unassigned() const noexcept
+    inline const Type* get_unassigned() const noexcept
     {
         static Type unassigned{};
         return &unassigned;
@@ -106,14 +106,14 @@ private:
 };
 
 template <typename Type, if_default_constructible<Type> = true>
-constexpr bool operator==(const external_ptr<Type>& left,
+inline bool operator==(const external_ptr<Type>& left,
     const external_ptr<Type>& right) noexcept
 {
     return *left == *right;
 }
 
 template <typename Type, if_default_constructible<Type> = true>
-constexpr bool operator!=(const external_ptr<Type>& left,
+inline bool operator!=(const external_ptr<Type>& left,
     const external_ptr<Type>& right) noexcept
 {
     return !(left == right);
@@ -134,14 +134,14 @@ inline external_ptr<Type> make_external(Type&& instance,
 
 /// Same as external_ptr{}.
 template <typename Type, if_default_constructible<Type> = true>
-constexpr external_ptr<Type> make_external() noexcept
+inline external_ptr<Type> make_external() noexcept
 {
     return {};
 }
 
 /// Same as external_ptr{ pointer }.
 template <typename Type, if_default_constructible<Type> = true>
-constexpr external_ptr<Type> make_external(const Type* pointer) noexcept
+inline external_ptr<Type> make_external(const Type* pointer) noexcept
 {
     return { pointer };
 }
