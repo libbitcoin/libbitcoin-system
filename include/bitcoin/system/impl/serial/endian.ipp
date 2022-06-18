@@ -26,7 +26,6 @@
 #include <iterator>
 #include <string>
 #include <utility>
-#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
@@ -248,10 +247,7 @@ inline Data to_big(Data&& bytes, Integer value) noexcept
     // 0x0001 >> 8 => 0x0000
 
     // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    // std::ranges::reverse_view does not supprt std::array.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (auto& byte: boost::adaptors::reverse(bytes))
-    BC_POP_WARNING()
+    for (auto& byte: std::views::reverse(bytes))
     {
         byte = possible_sign_narrow_cast<uint8_t>(value);
         value >>= byte_bits;

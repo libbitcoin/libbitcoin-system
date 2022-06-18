@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 
 // TODO:
 // contains
-// equal_points
+// pointeds_equal
 // find_pair_position
 // find_position
 // insert_sorted
@@ -162,17 +162,6 @@ BOOST_AUTO_TEST_CASE(collection__cast_vector__distinct_types__same)
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
 }
 
-// Narrowing is now precluded by type constraints.
-////BOOST_AUTO_TEST_CASE(collection__cast_vector__narrowing__same)
-////{
-////    // Implicit narrowing cast doesn't warn.
-////    const std::vector<uint32_t> value{ 42, 24 };
-////    const auto result = cast<uint8_t>(value);
-////    BOOST_REQUIRE_EQUAL(value.size(), result.size());
-////    BOOST_REQUIRE_EQUAL(result[0], value[0]);
-////    BOOST_REQUIRE_EQUAL(result[1], value[1]);
-////}
-
 // cast (array)
 
 BOOST_AUTO_TEST_CASE(collection__cast_array__empty__empty)
@@ -194,42 +183,6 @@ BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], value[0]);
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
-}
-
-// Narrowing is now precluded by type constraints.
-////BOOST_AUTO_TEST_CASE(collection__cast_array__narrowing__same)
-////{
-////    // Implicit narrowing cast doesn't warn.
-////    const std::array<uint32_t, 2> value{ 42, 24 };
-////    const auto result = cast<uint8_t>(value);
-////    BOOST_REQUIRE_EQUAL(value.size(), result.size());
-////    BOOST_REQUIRE_EQUAL(result[0], value[0]);
-////    BOOST_REQUIRE_EQUAL(result[1], value[1]);
-////}
-
-// filler
-
-BOOST_AUTO_TEST_CASE(collection__filler__empty__empty)
-{
-    data_chunk buffer;
-    filler(buffer.begin(), buffer.end(), uint8_t{ 0x42 });
-    BOOST_REQUIRE(buffer.empty());
-}
-
-BOOST_AUTO_TEST_CASE(collection__filler__partial__expected)
-{
-    data_chunk buffer{ 0x01, 0x02, 0x03, 0x04, 0x05 };
-    const data_chunk expected{ 0x01, 0x42, 0x42, 0x42, 0x05 };
-    filler(std::next(buffer.begin()), std::prev(buffer.end()), uint8_t{ 0x42 });
-    BOOST_REQUIRE_EQUAL(buffer, expected);
-}
-
-BOOST_AUTO_TEST_CASE(collection__filler__full__expected)
-{
-    data_chunk buffer(42, 0x00);
-    const data_chunk expected(42, 0x42);
-    filler(buffer.begin(), buffer.end(), uint8_t{ 0x42 });
-    BOOST_REQUIRE_EQUAL(buffer, expected);
 }
 
 // move_append

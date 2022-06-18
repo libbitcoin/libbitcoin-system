@@ -408,9 +408,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (auto bit: std::ranges::reverse_view(bits))
-    BC_POP_WARNING()
+    for (auto bit: std::views::reverse(bits))
     {
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
             proof_of_work_limit))

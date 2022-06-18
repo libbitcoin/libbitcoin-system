@@ -72,8 +72,9 @@ constexpr data_array<Size> build_array(const data_loaf& slices) noexcept
         std::advance(position, size);
     }
 
+    // C++17: Parallel policy for std::fill.
     // Pad any unfilled remainder of the array with zeros.
-    filler(position, out.end(), uint8_t{ 0x00 });
+    std::fill(position, out.end(), uint8_t{ 0x00 });
     return out;
 }
 

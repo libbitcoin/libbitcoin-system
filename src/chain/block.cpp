@@ -116,7 +116,7 @@ block::block(const chain::header::cptr& header,
 bool block::operator==(const block& other) const noexcept
 {
     return (header_ == other.header_ || *header_ == *other.header_)
-        && equal_points(*txs_, *other.txs_);
+        && pointeds_equal(*txs_, *other.txs_);
 }
 
 bool block::operator!=(const block& other) const noexcept
@@ -318,9 +318,7 @@ bool block::is_forward_reference() const noexcept
         return !is_zero(hashes.count(input->point().hash()));
     };
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (const auto& tx: std::ranges::reverse_view(*txs_))
-    BC_POP_WARNING()
+    for (const auto& tx: std::views::reverse(*txs_))
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.emplace(tx->hash(false), false);
@@ -477,9 +475,7 @@ bool block::is_invalid_witness_commitment() const noexcept
     {
         const auto& outputs = *coinbase->outputs_ptr();
 
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        for (const auto& output: std::ranges::reverse_view(outputs))
-        BC_POP_WARNING()
+        for (const auto& output: std::views::reverse(outputs))
         {
             if (output->committed_hash(committed))
                 return committed == bitcoin_hash(generate_merkle_root(true),

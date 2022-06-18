@@ -46,31 +46,25 @@ constexpr binary_search(const Collection& list,
 
 /// Copy/move collection of From members to a new collection of To members.
 template <typename To, typename From>
-constexpr std::vector<To> cast(const std::vector<From>& source) noexcept;
+inline std::vector<To> cast(const std::vector<From>& source) noexcept;
 template <typename To, typename From, size_t Size>
-constexpr std::array<To, Size> cast(
+inline std::array<To, Size> cast(
     const std::array<From, Size>& source) noexcept;
 
 /// Copy collection of smart pointer values to collection of pointers. 
 template <typename To, typename From>
-constexpr std::vector<To> pointer_cast(
-    const std::vector<From>& source) noexcept;
+inline std::vector<To> pointer_cast(const std::vector<From>& source) noexcept;
+
+/// Determine if a vector of shared pointers to elements have equal elements.
+template <typename Element>
+constexpr bool pointeds_equal(
+    const std::vector<std::shared_ptr<const Element>>& left,
+    const std::vector<std::shared_ptr<const Element>>& right) noexcept;
 
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) noexcept;
-
-/// Determine if a vector of shared pointers to elements have equal elements.
-template <typename Element>
-constexpr bool equal_points(
-    const std::vector<std::shared_ptr<const Element>>& left,
-    const std::vector<std::shared_ptr<const Element>>& right) noexcept;
-
-/// Fill a buffer with values.
-template <typename Iterator, typename Value>
-constexpr void filler(Iterator begin, const Iterator& end,
-    const Value& value) noexcept;
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
@@ -91,15 +85,15 @@ constexpr insert_sorted(Collection& list,
     const typename Collection::value_type& element,
     Predicate predicate) noexcept;
 
-/// Move members of a source list to end of a target list. Source members are 
-/// undefined upon return.
+/// Move members of a source list to end of a target list.
+/// Source elements are undefined upon return.
 template <typename Collection>
 constexpr void move_append(Collection& target, Collection& source) noexcept;
 
 /// Pop an element from the stack and return its value.
 template <typename Collection>
 typename Collection::value_type
-constexpr pop(Collection& stack) noexcept;
+inline pop(Collection& stack) noexcept;
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>
@@ -115,16 +109,16 @@ constexpr bool is_sorted(const Collection& list) noexcept;
 template <typename Collection>
 constexpr void distinct(Collection& list) noexcept;
 template <typename Collection>
-constexpr Collection distinct(Collection&& list) noexcept;
+inline Collection distinct(Collection&& list) noexcept;
 template <typename Collection>
-constexpr Collection distinct_copy(const Collection& list) noexcept;
+inline Collection distinct_copy(const Collection& list) noexcept;
 
 /// Obtain the set difference of left less right.
 template <typename Left, typename Right>
-constexpr Left difference(const Left& left, const Right& right) noexcept;
+inline Left difference(const Left& left, const Right& right) noexcept;
 
 template <typename Left, typename Right>
-constexpr Left difference(const typename Left::const_iterator& begin,
+inline Left difference(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Determing if the sets have an intersection.
@@ -136,21 +130,21 @@ constexpr bool intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Reverse the order of collection elements.
-/// Use boost::adaptors::reverse for reverse iteration.
+/// Use std::views::reverse for reverse iteration.
 template <typename Collection>
 constexpr void reverse(Collection& list) noexcept;
 template <typename Collection>
-constexpr Collection reverse(Collection&& list) noexcept;
+inline Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
-constexpr Collection reverse_copy(const Collection& list) noexcept;
+inline Collection reverse_copy(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>
 constexpr void sort(Collection& list) noexcept;
 template <typename Collection>
-constexpr Collection sort(Collection&& list) noexcept;
+inline Collection sort(Collection&& list) noexcept;
 template <typename Collection>
-constexpr Collection sort_copy(const Collection& list) noexcept;
+inline Collection sort_copy(const Collection& list) noexcept;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>
