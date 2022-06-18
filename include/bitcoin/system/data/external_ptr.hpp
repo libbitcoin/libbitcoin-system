@@ -32,7 +32,7 @@ namespace system {
     
 // Smart pointer of const T*, where T has an externally-guaranteed lifetime.
 // Copy/assignable, non-nullable, does not create/destroy its reference.
-// This models C pointer with the exception of non-nullability.
+// This models C const pointer with the exception of non-nullability.
 // The default value is T* to a static T{}, allowing deferred assignment.
 // The address of the default value remains consistent for a given type T.
 // The bool cast is false only if the pointer is initialized to default.
@@ -55,14 +55,26 @@ public:
 
     /// External ownership is required.
     inline external_ptr(Type&&) = delete;
+
     inline explicit external_ptr(const Type& instance) noexcept
-      : pointer_(&instance)
+      : external_ptr(&instance)
     {
     }
 
     inline external_ptr(const Type* pointer) noexcept
       : pointer_(is_null(pointer) ? get_unassigned() : pointer)
     {
+    }
+
+    inline external_ptr(const std::shared_ptr<const Type>& shared) noexcept
+      : pointer_(shared ? shared.get() : get_unassigned())
+    {
+    }
+
+    inline external_ptr& operator=(const std::shared_ptr<const Type>& shared)
+    {
+        pointer_ = shared ? shared.get() : get_unassigned();
+        return *this;
     }
 
     inline operator bool() const noexcept
