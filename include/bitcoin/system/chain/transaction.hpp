@@ -188,10 +188,6 @@ protected:
     bool is_unconfirmed_spend(size_t height) const noexcept;
     bool is_confirmed_double_spend(size_t height) const noexcept;
 
-    // Connect (contextual).
-    // ------------------------------------------------------------------------
-
-    code connect(const context& state, uint32_t index) const noexcept;
 
 private:
     static transaction from_data(reader& source, bool witness) noexcept;

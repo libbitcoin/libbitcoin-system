@@ -150,7 +150,7 @@ program(const chain::transaction& tx, const input_iterator& input,
     version_(version),
     tether_(),
     witness_(witness),
-    primary_(pointer_cast<variant>(*witness))
+    primary_(witness_to_primary<Stack>(*witness))
 {
 }
 
@@ -674,17 +674,9 @@ peek_unsigned40(uint64_t& value) const noexcept
     return true;
 }
 
-// Primary stack (variant).
+// Primary stack (variant - index).
 // ----------------------------------------------------------------------------
 // Stack index is zero-based, back() is element zero.
-
-template <typename Stack>
-inline void program<Stack>::
-drop_unsafe() noexcept
-{
-    BC_ASSERT(!is_stack_empty());
-    primary_.pop_back();
-}
 
 // This swaps the variant elements of the stack vector.
 template <typename Stack>
@@ -693,8 +685,8 @@ swap_unsafe(size_t left_index, size_t right_index) noexcept
 {
     BC_ASSERT(left_index < stack_size() && right_index < stack_size());
     std::swap(
-        primary_.at(sub1(stack_size()) - left_index),
-        primary_.at(sub1(stack_size()) - right_index));
+        *std::prev(primary_.end(), add1(left_index)),
+        *std::prev(primary_.end(), add1(right_index)));
 }
 
 template <typename Stack>
@@ -702,6 +694,24 @@ inline void program<Stack>::
 erase_unsafe(size_t index) noexcept
 {
     primary_.erase(std::prev(primary_.end(), add1(index)));
+}
+
+template <typename Stack>
+inline const typename program<Stack>::variant& program<Stack>::
+peek_variant_unsafe(size_t peek_index) const noexcept
+{
+    return *std::prev(primary_.end(), add1(peek_index));
+}
+
+// Primary stack (variant - top).
+// ----------------------------------------------------------------------------
+
+template <typename Stack>
+inline void program<Stack>::
+drop_unsafe() noexcept
+{
+    BC_ASSERT(!is_stack_empty());
+    primary_.pop_back();
 }
 
 template <typename Stack>
@@ -716,13 +726,6 @@ inline const typename program<Stack>::variant& program<Stack>::
 peek_variant_unsafe() const noexcept
 {
     return primary_.back();
-}
-
-template <typename Stack>
-inline const typename program<Stack>::variant& program<Stack>::
-peek_variant_unsafe(size_t peek_index) const noexcept
-{
-    return *std::prev(primary_.end(), add1(peek_index));
 }
 
 template <typename Stack>

@@ -39,6 +39,7 @@ public:
     /// Alises for base template.
     using state = typename program<Stack>::program;
     using op_iterator = state::op_iterator;
+    using input_iterator = input_cptrs::const_iterator;
 
     /// Use program constructors.
     using program<Stack>::program;
@@ -50,8 +51,16 @@ public:
     interpreter& operator=(const interpreter&) = delete;
     inline ~interpreter() = default;
 
-    /// Run the program.
+    /// Run a program.
     inline code run() noexcept;
+
+    /// Connect tx.input[#].script to tx.input[#].prevout.script.
+    static code connect(const context& state, const transaction& tx,
+        uint32_t index) noexcept;
+
+    /// Connect tx.input[*].script to tx.input[*].prevout.script.
+    static code connect(const context& state, const transaction& tx,
+        const input_iterator& it) noexcept;
 
 protected:
     /// Operation disatch.

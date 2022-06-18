@@ -142,7 +142,7 @@ public:
 
     code connect(const context& state, uint32_t index) const noexcept
     {
-        return transaction::connect(state, index);
+        return interpreter<contiguous_stack>::connect(state, *this, index);
     }
 };
 

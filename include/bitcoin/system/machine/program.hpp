@@ -21,8 +21,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <list>
+#include <iterator>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -38,9 +38,10 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
+// forward_list more efficient than list but requires 'front' vs. 'back'.
 typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
-typedef std::vector<stack_variant> vector_stack;
-typedef std::list<stack_variant> list_stack;
+typedef std::vector<stack_variant> contiguous_stack;
+typedef std::list<stack_variant> linked_stack;
 
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
@@ -131,14 +132,16 @@ protected:
     inline bool peek_unsigned32(uint32_t& value) const noexcept;
     inline bool peek_unsigned40(uint64_t& value) const noexcept;
 
-    /// Primary stack (variant).
-    inline void drop_unsafe() noexcept;
+    /// Primary stack (variant - index).
     inline void swap_unsafe(size_t left_index, size_t right_index) noexcept;
     inline void erase_unsafe(size_t index) noexcept;
-    inline void push_variant(const variant& vary) noexcept;
-    inline variant pop_variant_unsafe() noexcept;
     inline const variant& peek_variant_unsafe() const noexcept;
     inline const variant& peek_variant_unsafe(size_t peek_index) const noexcept;
+
+    /// Primary stack (variant - top).
+    inline void drop_unsafe() noexcept;
+    inline void push_variant(const variant& vary) noexcept;
+    inline variant pop_variant_unsafe() noexcept;
 
     /// Primary stack state (untyped).
     inline size_t stack_size() const noexcept;
@@ -190,6 +193,19 @@ protected:
 private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
+
+    template <typename Stack>
+    inline Stack witness_to_primary(const chunk_cptrs& source) noexcept
+    {
+        Stack out(std::size(source));
+        std::transform(std::begin(source), std::end(source), std::begin(out),
+            [](const auto& pointer) noexcept
+            {
+                return pointer.get();
+            });
+
+        return out;
+    }
 
     // Private stack helpers.
     template<size_t Bytes, typename Integer,

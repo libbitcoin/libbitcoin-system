@@ -168,9 +168,9 @@ bool transaction::operator==(const transaction& other) const noexcept
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
         && (inputs_ == other.inputs_) ||
-            equal_points(*inputs_, *other.inputs_)
+            pointeds_equal(*inputs_, *other.inputs_)
         && (outputs_ == other.outputs_) ||
-            equal_points(*outputs_, *other.outputs_);
+            pointeds_equal(*outputs_, *other.outputs_);
 }
 
 bool transaction::operator!=(const transaction& other) const noexcept
@@ -1239,152 +1239,40 @@ code transaction::accept(const context& state) const noexcept
     return error::transaction_success;
 }
 
+// Connect (contextual).
+// ------------------------------------------------------------------------
+
 code transaction::connect(const context& state) const noexcept
 {
     code ec;
 
     // Cache witness hash components that don't change per input.
     initialize_hash_cache();
+    
+    const auto is_roller = [](const chain::input& input) noexcept
+    {
+        static const auto roll = operation{ opcode::roll };
+
+        // Naive implementation, any op_roll in either script, late-counted.
+        // TODO: precompute on script parse, tune using performance profiling.
+        return contains(input.script().ops(), roll)
+            || contains(input.prevout->script().ops(), roll);
+    };
 
     // Validate scripts, skip coinbase.
-    for (uint32_t input = one; input < inputs_->size(); ++input)
-        if ((ec = connect(state, input)))
+    for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
+    {
+        using namespace machine;
+
+        // Evaluate rolling scripts with linear search but constant erase.
+        // Evaluate non-rolling scripts with constant search but linear erase.
+        if ((ec = is_roller(**input) ?
+            interpreter<linked_stack>::connect(state, *this, input) :
+            interpreter<contiguous_stack>::connect(state, *this, input)))
             return ec;
+    }
 
     return error::transaction_success;
-}
-
-// TODO: Implement original op_codeseparator concatentaion [< 0.3.6].
-// TODO: Implement combined script size limit soft fork (20,000) [0.3.6+].
-code transaction::connect(const context& state, uint32_t index) const noexcept
-{
-    using namespace system::machine;
-
-    if (index >= inputs_->size())
-        return error::inputs_overflow;
-
-    // Iterator and reference to the input (constant time with std::vector).
-    const auto it = std::next(inputs_->begin(), index);
-    const auto& in = **it;
-    bool witnessed;
-    code ec;
-
-    // Evaluate input script.
-    interpreter<vector_stack> input(*this, it, state.forks);
-    if ((ec = input.run()))
-        return ec;
-
-    // Evaluate output script using stack copied from input script.
-    interpreter<vector_stack> prevout(input, in.prevout->script_ptr());
-    if ((ec = prevout.run()))
-        return ec;
-
-    if (!prevout.is_true(false))
-        return error::stack_false;
-
-    // Triggered by output script push of version and witness program (bip141).
-    if ((witnessed = in.prevout->script().is_pay_to_witness(state.forks)))
-    {
-        // The input script must be empty (bip141).
-        if (!in.script().ops().empty())
-            return error::dirty_witness;
-
-        // Validate the native script.
-        switch (in.prevout->script().version())
-        {
-            case script_version::zero:
-            {
-                script::cptr script;
-                chunk_cptrs_ptr witness_stack;
-                if (!in.witness().extract_script(script, witness_stack,
-                    in.prevout->script()))
-                    return error::invalid_witness;
-
-                // A defined version indicates bip141 is active (not bip143).
-                interpreter<vector_stack> witness(*this, it, script,
-                    state.forks, in.prevout->script().version(), witness_stack);
-
-                if ((ec = witness.run()))
-                    return ec;
-
-                // A v0 script must succeed with a clean true stack (bip141).
-                return witness.is_true(true) ? error::script_success :
-                    error::stack_false;
-            }
-
-            // These versions are reserved for future extensions (bip141).
-            case script_version::reserved:
-                return error::script_success;
-
-            case script_version::unversioned:
-            default:
-                return error::unversioned_script;
-        }
-    }
-
-    // p2sh and p2w are mutually exclusive.
-    else if (in.prevout->script().is_pay_to_script_hash(state.forks))
-    {
-        if (!script::is_relaxed_push(in.script().ops()))
-            return error::invalid_script_embed;
-
-        // Embedded script must be at the top of the stack (bip16).
-        const auto embeded_script = to_shared<script>({ input.pop(), false });
-
-        // Evaluate embedded script using stack moved from input script.
-        interpreter<vector_stack> embeded(std::move(input), embeded_script);
-        if ((ec = embeded.run()))
-            return ec;
-
-        if (!embeded.is_true(false))
-            return error::stack_false;
-
-        // Triggered by embedded push of version and witness program (bip141).
-        if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
-        {
-            // The input script must be a push of the embedded_script (bip141).
-            if (in.script().ops().size() != one)
-                return error::dirty_witness;
-
-            // Validate the non-native script.
-            switch (embeded_script->version())
-            {
-                case script_version::zero:
-                {
-                    script::cptr script;
-                    chunk_cptrs_ptr witness_stack;
-                    if (!in.witness().extract_script(script, witness_stack,
-                        *embeded_script))
-                        return error::invalid_witness;
-
-                    // A defined version indicates bip141 is active (not bip143).
-                    interpreter<vector_stack> witness_program(*this, it, script,
-                        state.forks, embeded_script->version(), witness_stack);
-
-                    if ((ec = witness_program.run()))
-                        return ec;
-
-                    // A v0 script must succeed with a clean true stack (bip141).
-                    return witness_program.is_true(true) ?
-                        error::script_success : error::stack_false;
-                }
-
-                // These versions are reserved for future extensions (bip141).
-                case script_version::reserved:
-                    return error::script_success;
-
-                case script_version::unversioned:
-                default:
-                    return error::unversioned_script;
-            }
-        }
-    }
-
-    // Witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !in.witness().stack().empty())
-        return error::unexpected_witness;
-
-    return error::script_success;
 }
 
 // JSON value convertors.
