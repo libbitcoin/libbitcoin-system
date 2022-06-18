@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONSTANTS_HPP
 #define LIBBITCOIN_SYSTEM_CONSTANTS_HPP
 
-#include <bit>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -162,12 +160,6 @@ constexpr size_t width(Type value) noexcept
     // This is not always a logical size for non-integral types.
     return to_bits(sizeof(value));
 }
-
-constexpr auto is_native_big_endian =
-    to_bool(std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one).back());
-
-constexpr auto is_native_little_endian =
-    to_bool(std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one).front());
 
 /// Determine the bitcoin variable-serialized size of a given value.
 constexpr size_t variable_size(uint64_t value) noexcept

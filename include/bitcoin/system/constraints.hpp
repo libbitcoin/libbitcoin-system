@@ -78,7 +78,6 @@ using if_byte = std::enable_if_t<!(width<Type>() > width<uint8_t>()), bool>;
 template <typename Type>
 using if_bytes = std::enable_if_t<(width<Type>() > width<uint8_t>()), bool>;
 
-// TODO: test.
 template <typename Type, size_t Size>
 using if_size_of = std::enable_if_t<sizeof(Type) == Size, bool>;
 
@@ -101,7 +100,6 @@ template <typename Type>
 using if_default_constructible = std::enable_if_t<
     std::is_default_constructible_v<Type>, bool>;
 
-// TODO: test.
 template <typename Type>
 using if_unique_object_representations = std::enable_if_t<
     std::has_unique_object_representations_v<Type>, bool>;
