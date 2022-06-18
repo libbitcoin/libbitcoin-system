@@ -218,7 +218,6 @@ is_enabled(chain::forks rule) const noexcept
     return to_bool(forks_ & rule);
 }
 
-
 // TODO: only perform is_push_size check on witness initialized stack.
 // TODO: others are either empty or presumed push_size from prevout script run.
 template <typename Stack>
@@ -249,7 +248,9 @@ template <typename Stack>
 inline void program<Stack>::
 push_chunk(data_chunk&& datum) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_.push_back(make_external(std::move(datum), tether_));
+    BC_POP_WARNING()
 }
 
 // Passing data_chunk& would be poor interface design, as it would allow
