@@ -31,8 +31,8 @@ static constexpr uint8_t max_recovery_id = 3;
 static constexpr uint8_t magic_compressed = 31;
 static constexpr uint8_t magic_uncompressed = 27;
 static constexpr uint8_t magic_differential = magic_compressed - magic_uncompressed;
-static_assert(magic_differential > max_recovery_id, "oops!");
-static_assert(max_uint8 - max_recovery_id >= magic_uncompressed, "oops!");
+static_assert(magic_differential > max_recovery_id);
+static_assert(max_uint8 - max_recovery_id >= magic_uncompressed);
 
 hash_digest hash_message(const data_slice& message) noexcept
 {

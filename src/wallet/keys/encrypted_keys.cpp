@@ -47,7 +47,7 @@ static constexpr auto half = half_hash_size;
 static constexpr auto quarter = quarter_hash_size;
 
 // Ensure that hash sizes are aligned with AES block size.
-static_assert(2 * quarter == aes256_block_size, "oops!");
+static_assert(2 * quarter == aes256_block_size);
 
 // address_
 // ----------------------------------------------------------------------------
