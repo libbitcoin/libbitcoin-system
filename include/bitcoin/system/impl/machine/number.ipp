@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <execution>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
 ////#include <bitcoin/system/constraints.hpp>
@@ -125,8 +124,8 @@ constexpr bool boolean::from_chunk(const data_chunk& vary) noexcept
         return false;
     if (!is_sign_byte(vary.back()))
         return true;
-    return std::any_of(std::execution::par_unseq, vary.begin(),
-        std::prev(vary.end()), is_nonzero<uint8_t>);
+    return std::any_of(parallel, vary.begin(), std::prev(vary.end()),
+        is_nonzero<uint8_t>);
 }
 
 constexpr bool boolean::strict_from_chunk(const data_chunk& vary) noexcept

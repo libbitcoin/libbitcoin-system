@@ -420,6 +420,7 @@ array_props& array_props::add(const props& value) noexcept
 
 array_props& array_props::add(std::initializer_list<props> values) noexcept
 {
+    // ordered
     std::for_each(values.begin(), values.end(), [&](const props& value)
     {
         add(value);
@@ -451,6 +452,7 @@ object_props& object_props::add(const named_props& value) noexcept
 object_props& object_props::add(
     std::initializer_list<named_props> values) noexcept
 {
+    // ordered
     std::for_each(values.begin(), values.end(), [&](const named_props& value)
     {
         add(value);

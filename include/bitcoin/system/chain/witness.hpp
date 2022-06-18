@@ -100,12 +100,12 @@ public:
 
     static constexpr bool is_push_size(const chunk_cptrs& stack) noexcept
     {
-        constexpr auto push_size = [](const chunk_cptr& element) noexcept
-        {
-            return element->size() <= max_push_data_size;
-        };
-
-        return std::all_of(stack.begin(), stack.end(), push_size);
+        // C++17: parallel policy for std::all_of.
+        return std::all_of(stack.begin(), stack.end(),
+            [](const auto& element) noexcept
+            {
+                return element->size() <= max_push_data_size;
+            });
     }
 
     // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).

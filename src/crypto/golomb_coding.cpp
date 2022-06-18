@@ -57,7 +57,7 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent) noexcept
     return ((quotient << modulo_exponent) + remainder);
 }
 
-static uint64_t hash_to_range(const data_slice& item, uint64_t bound,
+inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key) noexcept
 {
     const auto product = uint128_t(siphash(key, item)) * uint128_t(bound);
@@ -76,6 +76,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     static no_fill_allocator<uint64_t> no_fill_uint64_allocator{};
     std::vector<uint64_t> hashes(items.size(), no_fill_uint64_allocator);
 
+    // C++17: parallel policy for std::transform.
     std::transform(items.begin(), items.end(), hashes.begin(),
         [&](const data_chunk& item) noexcept
         {

@@ -23,10 +23,13 @@
 #include <string>
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+// TODO: move to .ipp and make constexpr/inline.
 
 // char32_t functions.
 
@@ -69,52 +72,56 @@ bool is_ascii_numeric(const std::string& text) noexcept
 
 std::string ascii_to_lower(const std::string& text) noexcept
 {
-    auto copy = text;
+    std::string copy{ text};
 
-    const auto to_lower = [](char value) noexcept
-    {
-        return static_cast<uint8_t>(
-            'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value);
-    };
-
-    std::transform(text.begin(), text.end(), copy.begin(), to_lower);
+    // C++17: parallel policy for std::transform.
+    std::transform(text.begin(), text.end(), copy.begin(),
+        [](char value) noexcept
+        {
+            return narrow_sign_cast<uint8_t>(
+                'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value);
+        });
     return copy;
 }
 
 std::string ascii_to_upper(const std::string& text) noexcept
 {
-    auto copy = text;
+    std::string copy{ text };
 
-    const auto to_upper = [](char value) noexcept
-    {
-        return static_cast<uint8_t>(
-            'a' <= value && value <= 'z' ? value + ('A' - 'a') : value);
-    };
+    // C++17: parallel policy for std::transform.
+    std::transform(text.begin(), text.end(), copy.begin(),
+        [](char value) noexcept
+        {
+            return narrow_sign_cast<uint8_t>(
+                'a' <= value && value <= 'z' ? value + ('A' - 'a') : value);
+        });
 
-    std::transform(text.begin(), text.end(), copy.begin(), to_upper);
     return copy;
 }
 
 bool has_ascii_whitespace(const std::string& text) noexcept
 {
-    return std::any_of(text.begin(), text.end(), [](char character) noexcept
-    {
-        return is_ascii_whitespace(character);
-    });
+    // C++17: parallel policy for std::any_of.
+    return std::any_of(text.begin(), text.end(),
+        [](char character) noexcept
+        {
+            return is_ascii_whitespace(character);
+        });
 }
 
 bool has_mixed_ascii_case(const std::string& text) noexcept
 {
     auto lower = false;
     auto upper = false;
-    
-    const auto set_lower_and_upper = [&](char character) noexcept
-    {
-        lower |= ('a' <= character && character <= 'z');
-        upper |= ('A' <= character && character <= 'Z');
-    };
 
-    std::for_each(text.begin(), text.end(), set_lower_and_upper);
+    // non-parallel (side effect).
+    std::for_each(text.begin(), text.end(),
+        [&](char character) noexcept
+        {
+            lower |= ('a' <= character && character <= 'z');
+            upper |= ('A' <= character && character <= 'Z');
+        });
+
     return lower && upper;
 }
 

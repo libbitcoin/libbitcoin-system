@@ -58,7 +58,7 @@ int parameter::position(const po::option_description& option,
 // 100% unit coverage, all three scenarios (long, short, both)
 char parameter::short_name(const po::option_description& option) const noexcept
 {
-    const auto name = split(option.format_name()).front();
+    std::string name{ split(option.format_name()).front() };
     const auto is_short_name = 
         name[0] == option_prefix_char &&
         name[1] != option_prefix_char;

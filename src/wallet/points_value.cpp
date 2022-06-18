@@ -47,7 +47,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
     }
 
     // Copy the points list for safe manipulation.
-    auto points = unspent.points;
+    point_value::list points{ unspent.points };
 
     const auto below = [minimum_value](
         const point_value& point) noexcept
@@ -67,9 +67,11 @@ void points_value::greedy(points_value& out, const points_value& unspent,
             return left.value() > right.value();
         };
 
+    // C++17: Parallel policy for std::partition.
     // Reorder list between values that exceed minimum and those that do not.
     const auto sufficient = std::partition(points.begin(), points.end(), below);
 
+    // C++17: Parallel policy for std::min_element.
     // If there are values large enough, return the smallest (of the largest).
     const auto minimum = std::min_element(sufficient, points.end(), lesser);
 
@@ -79,6 +81,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
         return;
     }
 
+    // C++17: Parallel policy for std::sort.
     // Sort all by descending value in order to use the fewest inputs possible.
     std::sort(points.begin(), points.end(), greater);
 
@@ -111,6 +114,7 @@ void points_value::individual(points_value& out, const points_value& unspent,
             return left.value() < right.value();
         };
 
+    // C++17: Parallel policy for std::sort.
     // Return in ascending order by value.
     std::sort(out.points.begin(), out.points.end(), lesser);
 }
@@ -141,7 +145,7 @@ uint64_t points_value::value() const noexcept
         return ceilinged_add(total, point.value());
     };
 
-    return std::accumulate(points.begin(), points.end(), uint64_t(0), sum);
+    return std::accumulate(points.begin(), points.end(), min_uint64, sum);
 }
 
 } // namespace wallet

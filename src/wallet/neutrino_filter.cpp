@@ -27,6 +27,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/stream/stream.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -75,11 +76,17 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) noexcept
     // Order and remove duplicates.
     distinct(scripts);
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::data stream(out_filter);
+    BC_POP_WARNING()
+
     write::bytes::ostream writer(stream);
     writer.write_variable(scripts.size());
     golomb::construct(stream, scripts, golomb_bits, key, rate);
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.flush();
+    BC_POP_WARNING()
 
     return true;
 }
@@ -96,7 +103,10 @@ bool match_filter(const block_filter& filter,
     if (script.ops().empty())
         return false;
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::in::copy stream(filter.filter);
+    BC_POP_WARNING()
+
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
@@ -119,8 +129,9 @@ bool match_filter(const block_filter& filter,
     data_stack stack;
     stack.reserve(scripts.size());
 
+    // ordered
     std::for_each(scripts.begin(), scripts.end(),
-        [&](const chain::script& script) noexcept
+        [&](const auto& script) noexcept
         {
             if (!script.ops().empty())
                 stack.push_back(script.to_data(false));
@@ -129,7 +140,10 @@ bool match_filter(const block_filter& filter,
     if (stack.empty())
         return false;
 
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::in::copy stream(filter.filter);
+    BC_POP_WARNING()
+
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
