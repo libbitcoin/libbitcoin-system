@@ -22,7 +22,6 @@
 // Suppress C4310: cast truncates constant value (intended behavior).
 BC_PUSH_WARNING(TRUNCATED_CONSTANT)
 
-constexpr uint32_t min_uint32 = 0;
 constexpr uint32_t pos_uint32 = 42;
 constexpr  int32_t pos_int32 = 42;
 constexpr  int32_t zer_int32 = 0;

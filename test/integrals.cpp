@@ -18,20 +18,31 @@
  */
 #include "test.hpp"
 
-static_assert(min_int64 == std::numeric_limits<int64_t>::min());
+static_assert(std::is_same<std::make_signed<size_t>::type, signed_size_t>::value);
+
+static_assert(max_signed_size_t == std::numeric_limits<signed_size_t>::max());
 static_assert(max_int64 == std::numeric_limits<int64_t>::max());
-static_assert(min_int32 == std::numeric_limits<int32_t>::min());
 static_assert(max_int32 == std::numeric_limits<int32_t>::max());
-static_assert(min_int16 == std::numeric_limits<int16_t>::min());
 static_assert(max_int16 == std::numeric_limits<int16_t>::max());
-static_assert(min_int8 == std::numeric_limits<int8_t>::min());
 static_assert(max_int8 == std::numeric_limits<int8_t>::max());
+
+static_assert(min_signed_size_t == std::numeric_limits<signed_size_t>::min());
+static_assert(min_int64 == std::numeric_limits<int64_t>::min());
+static_assert(min_int32 == std::numeric_limits<int32_t>::min());
+static_assert(min_int16 == std::numeric_limits<int16_t>::min());
+static_assert(min_int8 == std::numeric_limits<int8_t>::min());
 
 static_assert(max_size_t == std::numeric_limits<size_t>::max());
 static_assert(max_uint64 == std::numeric_limits<uint64_t>::max());
 static_assert(max_uint32 == std::numeric_limits<uint32_t>::max());
 static_assert(max_uint16 == std::numeric_limits<uint16_t>::max());
 static_assert(max_uint8 == std::numeric_limits<uint8_t>::max());
+
+static_assert(min_size_t == std::numeric_limits<size_t>::min());
+static_assert(min_uint64 == std::numeric_limits<uint64_t>::min());
+static_assert(min_uint32 == std::numeric_limits<uint32_t>::min());
+static_assert(min_uint16 == std::numeric_limits<uint16_t>::min());
+static_assert(min_uint8 == std::numeric_limits<uint8_t>::min());
 
 static_assert(zero == 0u);
 static_assert(one == 1u);

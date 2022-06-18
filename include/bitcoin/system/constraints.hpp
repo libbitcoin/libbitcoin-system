@@ -38,9 +38,6 @@ namespace system {
 // C++17: std::negation/negation_v
 // C++11: std::integral_constant
 
-/// Type alias for unsigned size_t.
-using signed_size_t = std::make_signed<size_t>::type;
-
 /// Values.
 
 template <size_t Value>
@@ -98,11 +95,11 @@ using if_byte_insertable = std::enable_if_t<
 
 template <typename Type>
 using if_default_constructible = std::enable_if_t<
-    std::is_default_constructible_v<Type>, bool>;
+    std::is_default_constructible<Type>::value, bool>;
 
 template <typename Type>
 using if_unique_object_representations = std::enable_if_t<
-    std::has_unique_object_representations_v<Type>, bool>;
+    std::has_unique_object_representations<Type>::value, bool>;
 
 template <typename Left, typename Right>
 using if_same_width = std::enable_if_t<width<Left>() == width<Right>(), bool>;

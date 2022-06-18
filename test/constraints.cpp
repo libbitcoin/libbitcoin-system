@@ -56,9 +56,6 @@ constexpr bool is_true() noexcept
 ////
 ////static_assert(!is_false<if_odd<0>>());
 
-// Type alias.
-static_assert(std::is_same<std::make_signed<size_t>::type, signed_size_t>::value);
-
 // values
 
 static_assert(is_true<if_odd<1>>());
@@ -227,6 +224,7 @@ static_assert(is_true<if_lesser_width<int16_t, int64_t>>());
 static_assert(is_true<if_lesser_width<int32_t, int64_t>>());
 
 // if_not_lesser_width
+static_assert(is_true<if_not_lesser_width<char, uint8_t>>());
 static_assert(is_true<if_not_lesser_width<bool, bool>>());
 static_assert(is_true<if_not_lesser_width<int, int>>());
 static_assert(is_true<if_not_lesser_width<int, uint32_t>>());
@@ -330,6 +328,7 @@ static_assert(is_true<if_same_signed_integer<unsigned char, uint8_t>>());
 
 ////static_assert(!is_true<if_not_same_signed_integer<int, char>>());
 ////static_assert(!is_true<if_not_same_signed_integer<uint16_t, uint8_t>>());
+static_assert(is_true<if_not_same_signed_integer<uint8_t, char>>());
 static_assert(is_true<if_not_same_signed_integer<uint16_t, int>>());
 static_assert(is_true<if_not_same_signed_integer<size_t, int>>());
 static_assert(is_true<if_not_same_signed_integer<int, uint16_t>>());

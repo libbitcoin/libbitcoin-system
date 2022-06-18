@@ -32,24 +32,38 @@ namespace libbitcoin {
 static_assert(sizeof(size_t) == sizeof(uint32_t) ||
     sizeof(size_t) == sizeof(uint64_t), "unsupported size_t");
 
+/// Type alias for unsigned size_t.
+using signed_size_t = std::make_signed<size_t>::type;
+
 /// Integral value limits.
 
-/// Signed.
-constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
-constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
-constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
-constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
-constexpr int16_t min_int16 = std::numeric_limits<int16_t>::min();
-constexpr int16_t max_int16 = std::numeric_limits<int16_t>::max();
-constexpr int8_t min_int8 = std::numeric_limits<int8_t>::min();
-constexpr int8_t max_int8 = std::numeric_limits<int8_t>::max();
+/// Signed max.
+constexpr auto max_signed_size_t = std::numeric_limits<signed_size_t>::max();
+constexpr auto max_int64 = std::numeric_limits<int64_t>::max();
+constexpr auto max_int32 = std::numeric_limits<int32_t>::max();
+constexpr auto max_int16 = std::numeric_limits<int16_t>::max();
+constexpr auto max_int8 = std::numeric_limits<int8_t>::max();
 
-/// Unsigned.
-constexpr size_t max_size_t = std::numeric_limits<size_t>::max();
-constexpr uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
-constexpr uint32_t max_uint32 = std::numeric_limits<uint32_t>::max();
-constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
-constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
+/// Signed min.
+constexpr auto min_signed_size_t = std::numeric_limits<signed_size_t>::min();
+constexpr auto min_int64 = std::numeric_limits<int64_t>::min();
+constexpr auto min_int32 = std::numeric_limits<int32_t>::min();
+constexpr auto min_int16 = std::numeric_limits<int16_t>::min();
+constexpr auto min_int8 = std::numeric_limits<int8_t>::min();
+
+/// Unsigned max.
+constexpr auto max_size_t = std::numeric_limits<size_t>::max();
+constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
+constexpr auto max_uint32 = std::numeric_limits<uint32_t>::max();
+constexpr auto max_uint16 = std::numeric_limits<uint16_t>::max();
+constexpr auto max_uint8 = std::numeric_limits<uint8_t>::max();
+
+/// Unsigned min.
+constexpr auto min_size_t = std::numeric_limits<size_t>::min();
+constexpr auto min_uint64 = std::numeric_limits<uint64_t>::min();
+constexpr auto min_uint32 = std::numeric_limits<uint32_t>::min();
+constexpr auto min_uint16 = std::numeric_limits<uint16_t>::min();
+constexpr auto min_uint8 = std::numeric_limits<uint8_t>::min();
 
 /// Use zero, one, two when the unsigned value is required.
 /// Literals are used below to prevent sign (unsigned) promotion.

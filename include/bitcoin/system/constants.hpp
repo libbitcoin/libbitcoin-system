@@ -21,12 +21,16 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <execution>
 #include <limits>
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/integrals.hpp>
 
 namespace libbitcoin {
+
+/// Parallel and unsequenced execution policy.
+constexpr auto parallel = std::execution::par_unseq;
 
 // Avoid typed casts due to circular header inclusion.
 // Avoid integral constants due to pre-cast integral conversion.

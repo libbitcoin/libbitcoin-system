@@ -20,8 +20,6 @@
 #include <cstddef>
 #include <cstdint>
 
-constexpr uint64_t min_uint64 = 0;
-
 static_assert(limit< uint8_t>(min_uint64) == 0u);
 static_assert(limit< int16_t>(min_uint64) == 0);
 static_assert(limit<uint16_t>(min_uint64) == 0u);
