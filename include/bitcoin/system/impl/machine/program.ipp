@@ -718,7 +718,9 @@ template <typename Stack>
 inline void program<Stack>::
 push_variant(const variant& vary) noexcept
 {
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     primary_.push_back(vary);
+    BC_POP_WARNING()
 }
 
 template <typename Stack>
