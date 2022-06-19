@@ -501,8 +501,11 @@ private:
 
     // Script should be stored as shared.
     operations ops_;
+
+    // TODO: pack these flags.
     bool valid_;
     bool prefail_;
+    bool roller_{ false };
 
 public:
     /// Public mutable metadata access, not copied or compared for equality.

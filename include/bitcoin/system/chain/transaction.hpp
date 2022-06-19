@@ -217,6 +217,8 @@ private:
     chain::inputs_cptr inputs_;
     chain::outputs_cptr outputs_;
     uint32_t locktime_;
+
+    // TODO: pack these flags.
     bool segregated_;
     bool valid_;
 
