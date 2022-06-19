@@ -47,6 +47,29 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Precompute fixed elements of signature hashing.
+// ----------------------------------------------------------------------------
+
+constexpr auto prefixed = true;
+
+static const auto& null_output() noexcept
+{
+    static const auto null = output{}.to_data();
+    return null;
+}
+
+static const auto& empty_script() noexcept
+{
+    static const auto empty = script{}.to_data(prefixed);
+    return empty;
+}
+
+static const auto& zero_sequence() noexcept
+{
+    static const auto sequence = to_little_endian<uint32_t>(0);
+    return sequence;
+}
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -488,16 +511,6 @@ hash_digest transaction::sequences_hash() const noexcept
 // Signing (unversioned).
 // ----------------------------------------------------------------------------
 
-// Precompute fixed elements of signature hashing.
-static constexpr auto prefixed = true;
-
-// TODO: output may be subject to static init race.
-BC_PUSH_WARNING(NO_GLOBAL_INIT_CALLS)
-static const auto null_output = output{}.to_data();
-static const auto empty_script = script{}.to_data(prefixed);
-static const auto zero_sequence = to_little_endian<uint32_t>(0);
-BC_POP_WARNING()
-
 // private
 transaction::input_iterator transaction::input_at(
     uint32_t index) const noexcept
@@ -554,8 +567,8 @@ void transaction::signature_hash_single(writer& sink,
         for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
-            sink.write_bytes(zero_sequence);
+            sink.write_bytes(empty_script());
+            sink.write_bytes(zero_sequence());
         }
 
         self.point().to_data(sink);
@@ -565,8 +578,8 @@ void transaction::signature_hash_single(writer& sink,
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
-            sink.write_bytes(zero_sequence);
+            sink.write_bytes(empty_script());
+            sink.write_bytes(zero_sequence());
         }
     };
 
@@ -579,7 +592,7 @@ void transaction::signature_hash_single(writer& sink,
         sink.write_variable(add1(index));
 
         for (size_t output = 0; output < index; ++output)
-            sink.write_bytes(null_output);
+            sink.write_bytes(null_output());
 
         outputs_->at(index)->to_data(sink);
     };
@@ -607,8 +620,8 @@ void transaction::signature_hash_none(writer& sink,
         for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
-            sink.write_bytes(zero_sequence);
+            sink.write_bytes(empty_script());
+            sink.write_bytes(zero_sequence());
         }
 
         self.point().to_data(sink);
@@ -618,8 +631,8 @@ void transaction::signature_hash_none(writer& sink,
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
-            sink.write_bytes(zero_sequence);
+            sink.write_bytes(empty_script());
+            sink.write_bytes(zero_sequence());
         }
     };
 
@@ -646,7 +659,7 @@ void transaction::signature_hash_all(writer& sink,
         for (in = inputs_->begin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
+            sink.write_bytes(empty_script());
             sink.write_4_bytes_little_endian((*in)->sequence());
         }
 
@@ -657,7 +670,7 @@ void transaction::signature_hash_all(writer& sink,
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
             (*in)->point().to_data(sink);
-            sink.write_bytes(empty_script);
+            sink.write_bytes(empty_script());
             sink.write_4_bytes_little_endian((*in)->sequence());
         }
     };
@@ -1005,7 +1018,7 @@ bool transaction::is_non_final(size_t height, uint32_t timestamp,
     // timestamps, rather than the timestamp of the block including the tx.
     const auto time = bip113 ? median_time_past : timestamp;
 
-    const auto finalized = [](const input::cptr& input) noexcept
+    const auto finalized = [](const auto& input) noexcept
     {
         return input->is_final();
     };
@@ -1021,7 +1034,7 @@ bool transaction::is_missing_prevouts() const noexcept
     BC_ASSERT(!is_coinbase());
 
     // Invalidity indicates not found.
-    const auto missing = [](const input::cptr& input) noexcept
+    const auto missing = [](const auto& input) noexcept
     {
         return !input->prevout->is_valid();
     };
@@ -1032,7 +1045,7 @@ bool transaction::is_missing_prevouts() const noexcept
 uint64_t transaction::claim() const noexcept
 {
     // Overflow returns max_uint64.
-    const auto sum = [](uint64_t total, const output::cptr& output) noexcept
+    const auto sum = [](uint64_t total, const auto& output) noexcept
     {
         return ceilinged_add(total, output->value());
     };
@@ -1044,7 +1057,7 @@ uint64_t transaction::claim() const noexcept
 uint64_t transaction::value() const noexcept
 {
     // Overflow and coinbase (default) return max_uint64.
-    const auto sum = [](uint64_t total, const input::cptr& input) noexcept
+    const auto sum = [](uint64_t total, const auto& input) noexcept
     {
         return ceilinged_add(total, input->prevout->value());
     };
