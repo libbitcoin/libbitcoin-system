@@ -159,7 +159,7 @@ op_if() noexcept
         if (state::is_stack_empty())
             return error::op_if;
 
-        value = state::pop_bool_unsafe();
+        value = state::pop_bool_();
     }
 
     state::begin_if(value);
@@ -177,7 +177,7 @@ op_notif() noexcept
         if (state::is_stack_empty())
             return error::op_notif;
 
-        value = !state::pop_bool_unsafe();
+        value = !state::pop_bool_();
     }
 
     state::begin_if(value);
@@ -211,7 +211,7 @@ op_else() noexcept
     if (state::is_balanced())
         return error::op_else;
 
-    state::else_if_unsafe();
+    state::else_if_();
     return error::op_success;
 }
 
@@ -222,7 +222,7 @@ op_endif() noexcept
     if (state::is_balanced())
         return error::op_endif;
 
-    state::end_if_unsafe();
+    state::end_if_();
     return error::op_success;
 }
 
@@ -233,10 +233,10 @@ op_verify() noexcept
     if (state::is_stack_empty())
         return error::op_verify1;
 
-    if (!state::peek_bool_unsafe())
+    if (!state::peek_bool_())
         return error::op_verify2;
 
-    state::drop_unsafe();
+    state::drop_();
     return error::op_success;
 }
 
@@ -257,7 +257,7 @@ op_to_alt_stack() noexcept
     if (state::is_stack_empty())
         return error::op_to_alt_stack;
 
-    state::push_alternate(state::pop_variant_unsafe());
+    state::push_alternate(state::pop_());
     return error::op_success;
 }
 
@@ -268,7 +268,7 @@ op_from_alt_stack() noexcept
     if (state::is_alternate_empty())
         return error::op_from_alt_stack;
 
-    state::push_variant(state::pop_alternate_unsafe());
+    state::push_variant(state::pop_alternate_());
     return error::op_success;
 }
 
@@ -280,8 +280,8 @@ op_drop2() noexcept
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
-    state::drop_unsafe();
-    state::drop_unsafe();
+    state::drop_();
+    state::drop_();
     return error::op_success;
 }
 
@@ -293,8 +293,8 @@ op_dup2() noexcept
         return error::op_dup2;
 
     // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
-    state::push_variant(state::peek_variant_unsafe(1));
-    state::push_variant(state::peek_variant_unsafe(1));
+    state::push_variant(state::peek_(1));
+    state::push_variant(state::peek_(1));
     return error::op_success;
 }
 
@@ -306,9 +306,9 @@ op_dup3() noexcept
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    state::push_variant(state::peek_variant_unsafe(2));
-    state::push_variant(state::peek_variant_unsafe(2));
-    state::push_variant(state::peek_variant_unsafe(2));
+    state::push_variant(state::peek_(2));
+    state::push_variant(state::peek_(2));
+    state::push_variant(state::peek_(2));
     return error::op_success;
 }
 
@@ -320,8 +320,8 @@ op_over2() noexcept
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    state::push_variant(state::peek_variant_unsafe(3));
-    state::push_variant(state::peek_variant_unsafe(3));
+    state::push_variant(state::peek_(3));
+    state::push_variant(state::peek_(3));
     return error::op_success;
 }
 
@@ -334,10 +334,10 @@ op_rot2() noexcept
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
     // [4,5,0,3,2,1] => [4,5,0,1,2,3]
-    state::swap_unsafe(0, 4);
-    state::swap_unsafe(1, 5);
-    state::swap_unsafe(2, 4);
-    state::swap_unsafe(3, 5);
+    state::swap_(0, 4);
+    state::swap_(1, 5);
+    state::swap_(2, 4);
+    state::swap_(3, 5);
     return error::op_success;
 }
 
@@ -349,8 +349,8 @@ op_swap2() noexcept
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    state::swap_unsafe(1,3);
-    state::swap_unsafe(0,2);
+    state::swap_(1,3);
+    state::swap_(0,2);
     return error::op_success;
 }
 
@@ -362,8 +362,8 @@ op_if_dup() noexcept
         return error::op_if_dup;
 
     // [0,1,2] => 0,[0,1,2]
-    if (state::peek_bool_unsafe())
-        state::push_variant(state::peek_variant_unsafe());
+    if (state::peek_bool_())
+        state::push_variant(state::peek_());
 
     return error::op_success;
 }
@@ -385,7 +385,7 @@ op_drop() noexcept
         return error::op_drop;
 
     // 0,[1,2] => [1,2]
-    state::drop_unsafe();
+    state::drop_();
     return error::op_success;
 }
 
@@ -397,7 +397,7 @@ op_dup() noexcept
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    state::push_variant(state::peek_variant_unsafe());
+    state::push_variant(state::peek_());
     return error::op_success;
 }
 
@@ -409,8 +409,8 @@ op_nip() noexcept
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
-    state::swap_unsafe(0, 1);
-    state::drop_unsafe();
+    state::swap_(0, 1);
+    state::drop_();
     return error::op_success;
 }
 
@@ -422,7 +422,7 @@ op_over() noexcept
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    state::push_variant(state::peek_variant_unsafe(1));
+    state::push_variant(state::peek_(1));
     return error::op_success;
 }
 
@@ -437,7 +437,7 @@ op_pick() noexcept
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    state::push_variant(state::peek_variant_unsafe(index));
+    state::push_variant(state::peek_(index));
     return error::op_success;
 }
 
@@ -463,11 +463,11 @@ op_roll() noexcept
         return error::op_roll;
 
     // Copy variant because should be deleted before push (no stack alloc).
-    stack_variant temporary{ state::peek_variant_unsafe(index) };
+    stack_variant temporary{ state::peek_(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
-    state::erase_unsafe(index);
+    state::erase_(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
     state::push_variant(std::move(temporary));
@@ -482,8 +482,8 @@ op_rot() noexcept
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    state::swap_unsafe(1,2);
-    state::swap_unsafe(0,1);
+    state::swap_(1,2);
+    state::swap_(0,1);
     return error::op_success;
 }
 
@@ -495,7 +495,7 @@ op_swap() noexcept
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    state::swap_unsafe(0,1);
+    state::swap_(0,1);
     return error::op_success;
 }
 
@@ -507,8 +507,8 @@ op_tuck() noexcept
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
-    state::swap_unsafe(0, 1);
-    state::push_variant(state::peek_variant_unsafe(1));
+    state::swap_(0, 1);
+    state::push_variant(state::peek_(1));
     return error::op_success;
 }
 
@@ -559,7 +559,7 @@ op_size() noexcept
     if (state::is_stack_empty())
         return error::op_size;
 
-    state::push_length(state::pop_chunk_unsafe()->size());
+    state::push_length(state::pop_chunk_()->size());
     return error::op_success;
 }
 
@@ -611,8 +611,8 @@ op_equal() noexcept
         return error::op_equal;
 
     state::push_bool(state::equal_chunks(
-        state::pop_variant_unsafe(),
-        state::pop_variant_unsafe()));
+        state::pop_(),
+        state::pop_()));
     return error::op_success;
 }
 
@@ -624,8 +624,8 @@ op_equal_verify() noexcept
         return error::op_equal_verify1;
 
     return state::equal_chunks(
-        state::pop_variant_unsafe(),
-        state::pop_variant_unsafe()) ?
+        state::pop_(),
+        state::pop_()) ?
         error::op_success : error::op_equal_verify2;
 }
 
@@ -947,7 +947,7 @@ op_ripemd160() noexcept
     if (state::is_stack_empty())
         return error::op_ripemd160;
 
-    state::push_chunk(ripemd160_hash_chunk(*state::pop_chunk_unsafe()));
+    state::push_chunk(ripemd160_hash_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -958,7 +958,7 @@ op_sha1() noexcept
     if (state::is_stack_empty())
         return error::op_sha1;
 
-    state::push_chunk(sha1_hash_chunk(*state::pop_chunk_unsafe()));
+    state::push_chunk(sha1_hash_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -969,7 +969,7 @@ op_sha256() noexcept
     if (state::is_stack_empty())
         return error::op_sha256;
 
-    state::push_chunk(sha256_hash_chunk(*state::pop_chunk_unsafe()));
+    state::push_chunk(sha256_hash_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -980,8 +980,7 @@ op_hash160() noexcept
     if (state::is_stack_empty())
         return error::op_hash160;
 
-    state::push_chunk(ripemd160_hash_chunk(sha256_hash(
-        *state::pop_chunk_unsafe())));
+    state::push_chunk(ripemd160_hash_chunk(sha256_hash(*state::pop_chunk_())));
     return error::op_success;
 }
 
@@ -992,8 +991,7 @@ op_hash256() noexcept
     if (state::is_stack_empty())
         return error::op_hash256;
 
-    state::push_chunk(sha256_hash_chunk(sha256_hash(
-        *state::pop_chunk_unsafe())));
+    state::push_chunk(sha256_hash_chunk(sha256_hash(*state::pop_chunk_())));
     return error::op_success;
 }
 
@@ -1031,12 +1029,12 @@ op_check_sig_verify() noexcept
     if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
-    const auto key = state::pop_chunk_unsafe();
+    const auto key = state::pop_chunk_();
 
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = state::pop_chunk_unsafe();
+    const auto endorsement = state::pop_chunk_();
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -1109,7 +1107,7 @@ op_check_multisig_verify() noexcept
     //*************************************************************************
     // This check is unique in that it requires a single "zero" on the stack.
     // True here implies variant non-zero ('true', '!= 0', or other than '[]').
-    if (state::pop_strict_bool_unsafe() && bip147)
+    if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
     uint8_t flags;

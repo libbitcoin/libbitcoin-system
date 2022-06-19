@@ -100,9 +100,9 @@ protected:
     inline void push_length(size_t value) noexcept;
 
     /// Primary stack (pop).
-    inline chunk_xptr pop_chunk_unsafe() noexcept;
-    inline bool pop_bool_unsafe() noexcept;
-    inline bool pop_strict_bool_unsafe() noexcept;
+    inline chunk_xptr pop_chunk_() noexcept;
+    inline bool pop_bool_() noexcept;
+    inline bool pop_strict_bool_() noexcept;
     inline bool pop_chunks(chunk_xptrs& data, size_t count) noexcept;
     inline bool pop_signed32(int32_t& value) noexcept;
     inline bool pop_binary32(int32_t& left, int32_t& right) noexcept;
@@ -111,20 +111,20 @@ protected:
     inline bool pop_index32(size_t& index) noexcept;
 
     /// Primary stack (peek).
-    inline bool peek_bool_unsafe() const noexcept;
+    inline bool peek_bool_() const noexcept;
     inline bool peek_unsigned32(uint32_t& value) const noexcept;
     inline bool peek_unsigned40(uint64_t& value) const noexcept;
 
     /// Primary stack (variant - index).
-    inline void swap_unsafe(size_t left_index, size_t right_index) noexcept;
-    inline void erase_unsafe(size_t index) noexcept;
-    inline const stack_variant& peek_variant_unsafe() const noexcept;
-    inline const stack_variant& peek_variant_unsafe(size_t index) const noexcept;
+    inline void swap_(size_t left_index, size_t right_index) noexcept;
+    inline void erase_(size_t index) noexcept;
+    inline const stack_variant& peek_() const noexcept;
+    inline const stack_variant& peek_(size_t index) const noexcept;
 
     /// Primary stack (variant - top).
-    inline void drop_unsafe() noexcept;
+    inline void drop_() noexcept;
     inline void push_variant(const stack_variant& vary) noexcept;
-    inline stack_variant pop_variant_unsafe() noexcept;
+    inline stack_variant pop_() noexcept;
 
     /// Primary stack state (untyped).
     inline size_t stack_size() const noexcept;
@@ -136,14 +136,14 @@ protected:
 
     inline bool is_alternate_empty() const noexcept;
     inline void push_alternate(stack_variant&& vary) noexcept;
-    inline stack_variant pop_alternate_unsafe() noexcept;
+    inline stack_variant pop_alternate_() noexcept;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
 
     inline void begin_if(bool value) noexcept;
-    inline void else_if_unsafe() noexcept;
-    inline void end_if_unsafe() noexcept;
+    inline void else_if_() noexcept;
+    inline void end_if_() noexcept;
     inline bool is_balanced() const noexcept;
     inline bool is_succeess() const noexcept;
     inline bool if_(const chain::operation& op) const noexcept;
@@ -181,12 +181,12 @@ private:
         if_signed_integer<Integer> = true,
         if_integral_integer<Integer> = true,
         if_not_greater<Bytes, sizeof(Integer)> = true>
-    inline bool peek_signed_unsafe(Integer& value) const noexcept;
+    inline bool peek_signed_(Integer& value) const noexcept;
     inline void push_chunk(const chunk_xptr& datum) noexcept;
-    inline bool pop_signed32_unsafe(int32_t& value) noexcept;
-    inline chunk_xptr peek_chunk_unsafe() const noexcept;
-    inline bool peek_signed32_unsafe(int32_t& value) const noexcept;
-    inline bool peek_signed40_unsafe(int64_t& value) const noexcept;
+    inline bool pop_signed32_(int32_t& value) noexcept;
+    inline chunk_xptr peek_chunk_() const noexcept;
+    inline bool peek_signed32_(int32_t& value) const noexcept;
+    inline bool peek_signed40_(int64_t& value) const noexcept;
     inline bool is_stack_clean() const noexcept;
 
     // Signature hashing.

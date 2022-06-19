@@ -122,15 +122,16 @@ inline bool program<Stack>::
 is_true(bool clean_stack) const noexcept
 {
     return (!clean_stack || is_stack_clean()) && !is_stack_empty() &&
-        peek_bool_unsafe();
+        peek_bool_();
 }
 
 template <typename Stack>
-inline const data_chunk& program<Stack>::pop() noexcept
+inline const data_chunk& program<Stack>::
+pop() noexcept
 {
     BC_ASSERT_MSG(!is_stack_empty(), "pop from empty stack");
 
-    return *pop_chunk_unsafe();
+    return *pop_chunk_();
 }
 
 // Non-public.
@@ -213,14 +214,14 @@ equal_chunks(const stack_variant& left, const stack_variant& right) noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-peek_bool_unsafe() const noexcept
+peek_bool_() const noexcept
 {
     return primary_.peek_bool();
 }
 
 template <typename Stack>
 inline chunk_xptr program<Stack>::
-peek_chunk_unsafe() const noexcept
+peek_chunk_() const noexcept
 {
     return primary_.peek_chunk();
 }
@@ -287,10 +288,10 @@ push_length(size_t value) noexcept
 // This tethers a chunk if the stack value is not chunk.
 template <typename Stack>
 inline chunk_xptr program<Stack>::
-pop_chunk_unsafe() noexcept
+pop_chunk_() noexcept
 {
-    const auto value = peek_chunk_unsafe();
-    drop_unsafe();
+    const auto value = peek_chunk_();
+    drop_();
     return value;
 }
 
@@ -304,36 +305,36 @@ pop_chunks(chunk_xptrs& data, size_t count) noexcept
 
     data.reserve(count);
     for (size_t index = 0; index < count; ++index)
-        data.push_back(pop_chunk_unsafe());
+        data.push_back(pop_chunk_());
 
     return true;
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_bool_unsafe() noexcept
+pop_bool_() noexcept
 {
-    const auto value = peek_bool_unsafe();
-    drop_unsafe();
+    const auto value = peek_bool_();
+    drop_();
     return value;
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_strict_bool_unsafe() noexcept
+pop_strict_bool_() noexcept
 {
     const auto value = primary_.peek_strict_bool();
-    drop_unsafe();
+    drop_();
     return value;
 }
 
 // private
 template <typename Stack>
 inline bool program<Stack>::
-pop_signed32_unsafe(int32_t& value) noexcept
+pop_signed32_(int32_t& value) noexcept
 {
-    const auto result = peek_signed32_unsafe(value);
-    drop_unsafe();
+    const auto result = peek_signed32_(value);
+    drop_();
     return result;
 }
 
@@ -344,7 +345,7 @@ pop_signed32(int32_t& value) noexcept
     if (is_stack_empty())
         return false;
 
-    return pop_signed32_unsafe(value);
+    return pop_signed32_(value);
 }
 
 template <typename Stack>
@@ -355,7 +356,7 @@ pop_binary32(int32_t& left, int32_t& right) noexcept
         return false;
 
     // The right hand side operand is at the top of the stack.
-    return pop_signed32_unsafe(right) && pop_signed32_unsafe(left);
+    return pop_signed32_(right) && pop_signed32_(left);
 }
 
 template <typename Stack>
@@ -367,10 +368,9 @@ pop_ternary32(int32_t& upper, int32_t& lower,
         return false;
 
     // The upper bound is at stack top, lower bound next, value next.
-    return pop_signed32_unsafe(upper) && pop_signed32_unsafe(lower) &&
-        pop_signed32_unsafe(value);
+    return pop_signed32_(upper) && pop_signed32_(lower) &&
+        pop_signed32_(value);
 }
-
 
 // ************************************************************************
 // CONSENSUS: Satoshi limits this value to the int32_t domain (getint()).
@@ -400,7 +400,7 @@ pop_index32(size_t& index) noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-peek_signed32_unsafe(int32_t& value) const noexcept
+peek_signed32_(int32_t& value) const noexcept
 {
     return primary_.peek_signed<4>(value);
 }
@@ -408,7 +408,7 @@ peek_signed32_unsafe(int32_t& value) const noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-peek_signed40_unsafe(int64_t& value) const noexcept
+peek_signed40_(int64_t& value) const noexcept
 {
     return primary_.peek_signed<5>(value);
 }
@@ -426,7 +426,7 @@ peek_unsigned32(uint32_t& value) const noexcept
         return false;
 
     int64_t signed64;
-    if (!peek_signed40_unsafe(signed64) || is_negative(value))
+    if (!peek_signed40_(signed64) || is_negative(value))
         return false;
 
     // 32 bits are used in unsigned input.sequence compare.
@@ -448,7 +448,7 @@ peek_unsigned40(uint64_t& value) const noexcept
         return false;
 
     int64_t signed64;
-    if (!peek_signed40_unsafe(signed64) || is_negative(value))
+    if (!peek_signed40_(signed64) || is_negative(value))
         return false;
 
     // 40 bits are usable in unsigned tx.locktime compare.
@@ -463,21 +463,21 @@ peek_unsigned40(uint64_t& value) const noexcept
 // This swaps the variant elements of the stack vector.
 template <typename Stack>
 inline void program<Stack>::
-swap_unsafe(size_t left_index, size_t right_index) noexcept
+swap_(size_t left_index, size_t right_index) noexcept
 {
     primary_.swap(left_index, right_index);
 }
 
 template <typename Stack>
 inline void program<Stack>::
-erase_unsafe(size_t index) noexcept
+erase_(size_t index) noexcept
 {
     primary_.erase(index);
 }
 
 template <typename Stack>
 inline const stack_variant& program<Stack>::
-peek_variant_unsafe(size_t index) const noexcept
+peek_(size_t index) const noexcept
 {
     return primary_.peek(index);
 }
@@ -487,7 +487,7 @@ peek_variant_unsafe(size_t index) const noexcept
 
 template <typename Stack>
 inline void program<Stack>::
-drop_unsafe() noexcept
+drop_() noexcept
 {
     primary_.drop();
 }
@@ -501,14 +501,14 @@ push_variant(const stack_variant& vary) noexcept
 
 template <typename Stack>
 inline const stack_variant& program<Stack>::
-peek_variant_unsafe() const noexcept
+peek_() const noexcept
 {
     return primary_.top();
 }
 
 template <typename Stack>
 inline stack_variant program<Stack>::
-pop_variant_unsafe() noexcept
+pop_() noexcept
 {
     return primary_.pop();
 }
@@ -534,7 +534,6 @@ template <typename Stack>
 inline bool program<Stack>::
 is_stack_overflow() const noexcept
 {
-    // bit.ly/2cowHlP
     // Addition is safe due to stack size constraint.
     return (stack_size() + alternate_.size()) > max_stack_size;
 }
@@ -571,7 +570,7 @@ BC_POP_WARNING()
 
 template <typename Stack>
 inline stack_variant program<Stack>::
-pop_alternate_unsafe() noexcept
+pop_alternate_() noexcept
 {
     BC_ASSERT(!alternate_.empty());
 
@@ -603,7 +602,7 @@ begin_if(bool value) noexcept
 // ****************************************************************************
 template <typename Stack>
 inline void program<Stack>::
-else_if_unsafe() noexcept
+else_if_() noexcept
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
@@ -617,7 +616,7 @@ else_if_unsafe() noexcept
 
 template <typename Stack>
 inline void program<Stack>::
-end_if_unsafe() noexcept
+end_if_() noexcept
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
@@ -693,8 +692,8 @@ ops_increment(size_t public_keys) noexcept
 // ----------------------------------------------------------------------------
 
 // Subscripts are referenced by script.offset mutable metadata. This allows for
-// efficient subscripting with no copying. However, execution of any one input
-// script instance is not safe for concurrent execution (unnecessary scenario).
+// efficient subscripting with no copying. However, concurrent execution of any
+// one input script instance is not thread safe (unnecessary scenario).
 template <typename Stack>
 inline bool program<Stack>::
 set_subscript(const op_iterator& op) noexcept
@@ -711,7 +710,8 @@ set_subscript(const op_iterator& op) noexcept
 
 inline strippers create_strip_ops(const chunk_xptrs& endorsements) noexcept
 {
-    strippers strip;
+    static no_fill_allocator<stripper> no_fill_stripper_allocator{};
+    strippers strip(no_fill_stripper_allocator);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     strip.reserve(add1(endorsements.size()));
