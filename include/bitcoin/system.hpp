@@ -112,6 +112,7 @@
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/program.hpp>
+#include <bitcoin/system/machine/stack.hpp>
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/bytes.hpp>

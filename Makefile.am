@@ -515,7 +515,8 @@ include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machi
 include_bitcoin_system_impl_machine_HEADERS = \
     include/bitcoin/system/impl/machine/interpreter.ipp \
     include/bitcoin/system/impl/machine/number.ipp \
-    include/bitcoin/system/impl/machine/program.ipp
+    include/bitcoin/system/impl/machine/program.ipp \
+    include/bitcoin/system/impl/machine/stack.ipp
 
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \
@@ -566,7 +567,8 @@ include_bitcoin_system_machine_HEADERS = \
     include/bitcoin/system/machine/interpreter.hpp \
     include/bitcoin/system/machine/machine.hpp \
     include/bitcoin/system/machine/number.hpp \
-    include/bitcoin/system/machine/program.hpp
+    include/bitcoin/system/machine/program.hpp \
+    include/bitcoin/system/machine/stack.hpp
 
 include_bitcoin_system_mathdir = ${includedir}/bitcoin/system/math
 include_bitcoin_system_math_HEADERS = \

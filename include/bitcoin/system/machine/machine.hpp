@@ -22,5 +22,6 @@
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/program.hpp>
+#include <bitcoin/system/machine/stack.hpp>
 
 #endif
