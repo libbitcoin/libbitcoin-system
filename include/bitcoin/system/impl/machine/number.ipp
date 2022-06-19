@@ -124,7 +124,7 @@ constexpr bool boolean::from_chunk(const data_chunk& vary) noexcept
         return false;
     if (!is_sign_byte(vary.back()))
         return true;
-    return std::any_of(parallel, vary.begin(), std::prev(vary.end()),
+    return std::any_of(/*parallel,*/ vary.begin(), std::prev(vary.end()),
         is_nonzero<uint8_t>);
 }
 
