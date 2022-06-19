@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -192,8 +193,9 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     const auto narrow = to_utf8(wide);
     const auto bytes = narrow.size();
 
+    // C++17: parallel policy for copy_n.
     if (bytes <= to_bytes)
-        std::memcpy(out_to, narrow.data(), bytes);
+        std::copy_n(narrow.data(), bytes, out_to);
 
     return bytes > to_bytes ? 0 : bytes;
 }
@@ -215,8 +217,9 @@ size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const auto wide = to_utf16(narrow);
     const auto chars = wide.size();
 
+    // C++17: parallel policy for copy_n.
     if (chars <= to_chars)
-        std::wmemcpy(out_to, wide.data(), chars);
+        std::copy_n(wide.data(), chars, out_to);
 
     return chars > to_chars ? 0 : chars;
 }

@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <iostream>
@@ -136,9 +137,10 @@ std::streambuf::int_type unicode_streambuf::overflow(
             return traits_type::eof();
     }
 
+    // C++17: parallel policy for copy_n.
     // write is necessarily no greater than unwritten.
     // Copy the fractional character to the beginning of the buffer.
-    memcpy(narrow_, &narrow_[write - unwritten], unwritten);
+    std::copy_n(&narrow_[write - unwritten], unwritten, narrow_);
 
     // narrow_size_ is necessarily greater than 1 (constructor guard).
     // Reset the pptr to the buffer start, leave pbase and epptr.
