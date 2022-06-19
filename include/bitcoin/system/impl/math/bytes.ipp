@@ -74,8 +74,6 @@ constexpr Integer byteswap(Integer value) noexcept
         byte_swap64(to_unsigned(value)));
 }
 
-// C++23: constexpr std::byteswap<T>.
-
 } // namespace system
 } // namespace libbitcoin
 

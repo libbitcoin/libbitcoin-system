@@ -371,7 +371,15 @@ pop_ternary32(int32_t& upper, int32_t& lower,
         pop_signed32_unsafe(value);
 }
 
-// True if popped value is valid post-pop stack index (precluded if size < 2).
+
+// ************************************************************************
+// CONSENSUS: Satoshi limits this value to the int32_t domain (getint()).
+// This value is only used for stack indexing (key/sig counts & pick/roll).
+// The upper bound of int32_t always exceeds the possible stack size, which
+// is checked downstream. Similarly, a negative causes a downstream script
+// failure. As such it is sufficient to fail on non-idexability here,
+// allowing the value to be returned as a valid and unsigned stack index.
+// ************************************************************************
 template <typename Stack>
 inline bool program<Stack>::
 pop_index32(size_t& index) noexcept
@@ -382,9 +390,10 @@ pop_index32(size_t& index) noexcept
 
     if (is_negative(value))
         return false;
-
     // Cast guarded by stack size.
     index = limit<size_t>(value);
+
+    // True if popped value valid post-pop stack index (precluded if size < 2).
     return index < stack_size();
 }
 
