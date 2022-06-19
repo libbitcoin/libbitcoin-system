@@ -153,16 +153,18 @@ constexpr void stack<Container>::swap(size_t left_index,
 
     if constexpr (vector_)
     {
+        const auto back = sub1(size());
         std::swap(
-            container_[sub1(size()) - left_index],
-            container_[sub1(size()) - right_index]);
+            container_[back - left_index],
+            container_[back - right_index]);
     }
 
     if constexpr (linked_)
     {
+        const auto end = container_.end();
         std::swap(
-            *std::prev(container_.end(), add1(left_index)),
-            *std::prev(container_.end(), add1(right_index)));
+            *std::prev(end, add1(left_index)),
+            *std::prev(end, add1(right_index)));
     }
 }
 
