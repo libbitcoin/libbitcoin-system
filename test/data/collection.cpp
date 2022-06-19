@@ -25,14 +25,13 @@ BOOST_AUTO_TEST_SUITE(collection_tests)
 
 // TODO:
 // contains
-// pointeds_equal
+// deep_equal
 // find_pair_position
 // find_position
 // insert_sorted
-
 // binary_search:
-// Collection must implement [] and .size().
-// Either list members or the search key must implement lexical compare (<, >).
+//  Collection must implement [].
+//  Either list members or the search key must implement lexical compare (<, >).
 
 // binary_search (native byte comparison operators)
 
@@ -139,88 +138,27 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
 
-// cast (vector)
+// projection
 
-BOOST_AUTO_TEST_CASE(collection__cast_vector__empty__empty)
+BOOST_AUTO_TEST_CASE(collection__projection_vector__empty__empty)
 {
-    BOOST_REQUIRE(cast<char>(data_chunk{}).empty());
+    BOOST_REQUIRE(projection<std::vector<uint16_t>>(data_chunk{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast_vector__one_element__same)
+BOOST_AUTO_TEST_CASE(collection__projection_vector__move__same)
 {
-    const auto result = cast<char>(data_chunk{ 42 });
+    const auto result = projection<std::vector<uint32_t>>(data_chunk{ 42u });
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result.front(), 42);
+    BOOST_REQUIRE_EQUAL(result.front(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(collection__cast_vector__distinct_types__same)
+BOOST_AUTO_TEST_CASE(collection__projection_vector__copy__same)
 {
-    const data_chunk value{ 42, 24 };
-    const auto result = cast<uint32_t>(value);
+    const data_chunk value{ 42u, 24u };
+    const auto result = projection<std::vector<size_t>>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], value[0]);
     BOOST_REQUIRE_EQUAL(result[1], value[1]);
-}
-
-// cast (array)
-
-BOOST_AUTO_TEST_CASE(collection__cast_array__empty__empty)
-{
-    BOOST_REQUIRE(cast<char>(data_array<0>{}).empty());
-}
-
-BOOST_AUTO_TEST_CASE(collection__cast_array__one_element__same)
-{
-    const auto result = cast<char>(data_array<1>{ 42 });
-    BOOST_REQUIRE_EQUAL(result.size(), 1u);
-    BOOST_REQUIRE_EQUAL(result.front(), 42);
-}
-
-BOOST_AUTO_TEST_CASE(collection__cast_array__distinct_types__same)
-{
-    const data_array<2> value{ 42, 24 };
-    const auto result = cast<uint32_t>(value);
-    BOOST_REQUIRE_EQUAL(value.size(), result.size());
-    BOOST_REQUIRE_EQUAL(result[0], value[0]);
-    BOOST_REQUIRE_EQUAL(result[1], value[1]);
-}
-
-// move_append
-
-BOOST_AUTO_TEST_CASE(collection__move_append__both_empty__empty)
-{
-    data_chunk source;
-    data_chunk target;
-    move_append(target, source);
-    BOOST_REQUIRE(source.empty());
-    BOOST_REQUIRE(target.empty());
-}
-
-BOOST_AUTO_TEST_CASE(collection__move_append__source_empty__expected)
-{
-    data_chunk source;
-    data_chunk target{ 0, 2, 4, 6, 8 };
-    const data_chunk expected = target;
-    move_append(target, source);
-    BOOST_REQUIRE_EQUAL(target, expected);
-}
-
-BOOST_AUTO_TEST_CASE(collection__move_append__target_empty__expected)
-{
-    data_chunk source{ 0, 2, 4, 6, 8 };
-    data_chunk target;
-    const data_chunk expected = source;
-    move_append(target, source);
-    BOOST_REQUIRE_EQUAL(target, expected);
-}
-
-BOOST_AUTO_TEST_CASE(collection__move_append__neither_empty__expected)
-{
-    data_chunk source{ 10, 12, 14, 16, 18 };
-    data_chunk target{ 0, 2, 4, 6, 8 };
-    const data_chunk expected{ 0, 2, 4, 6, 8, 10, 12, 14, 16, 18 };
-    move_append(target, source);
-    BOOST_REQUIRE_EQUAL(target, expected);
 }
 
 // pop
@@ -343,62 +281,62 @@ BOOST_AUTO_TEST_CASE(collection__distinct_copy__distinct_unsorted_duplicates__so
     BOOST_REQUIRE_EQUAL(distinct_copy(set), expected);
 }
 
-// intersecting
+// is_intersecting
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__empty_sets__false)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__empty_sets__false)
 {
     const data_chunk left;
     const data_chunk right;
-    BOOST_REQUIRE(!intersecting(left, right));
+    BOOST_REQUIRE(!is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__left_set_empty__false)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__left_set_empty__false)
 {
     const data_chunk left;
     const data_chunk right{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(!intersecting(left, right));
+    BOOST_REQUIRE(!is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__right_set_empty__false)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__right_set_empty__false)
 {
     const data_chunk left{ 2, 0, 0, 8, 6, 4 };
     const data_chunk right;
-    BOOST_REQUIRE(!intersecting(left, right));
+    BOOST_REQUIRE(!is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__distinct_sets__false)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__distinct_sets__false)
 {
     const data_chunk left{ 0, 2, 4, 6, 8 };
     const data_chunk right{ 1, 3, 5, 7, 9 };
-    BOOST_REQUIRE(!intersecting(left, right));
+    BOOST_REQUIRE(!is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__same_sets__true)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__same_sets__true)
 {
     const data_chunk left{ 0, 2, 4, 6, 8 };
     const data_chunk right{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(intersecting(left, right));
+    BOOST_REQUIRE(is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__consistent_sets__true)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__consistent_sets__true)
 {
     const data_chunk left{ 2, 0, 0, 8, 6, 4 };
     const data_chunk right{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(intersecting(left, right));
+    BOOST_REQUIRE(is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__left_subset__true)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__left_subset__true)
 {
     const data_chunk left{ 8, 6 };
     const data_chunk right{ 0, 2, 4, 6, 8 };
-    BOOST_REQUIRE(intersecting(left, right));
+    BOOST_REQUIRE(is_intersecting(left, right));
 }
 
-BOOST_AUTO_TEST_CASE(collection__intersecting__right_subset__true)
+BOOST_AUTO_TEST_CASE(collection__is_intersecting__right_subset__true)
 {
     const data_chunk left{ 2, 0, 0, 8, 6, 4 };
     const data_chunk right{ 0, 8 };
-    BOOST_REQUIRE(intersecting(left, right));
+    BOOST_REQUIRE(is_intersecting(left, right));
 }
 
 // difference

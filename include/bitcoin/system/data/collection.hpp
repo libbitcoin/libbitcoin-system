@@ -31,35 +31,19 @@ namespace libbitcoin {
 namespace system {
 
 /// Find the position of an element in a *lexically sorted* collection.
-/// It is the responsibility of the caller to ensure that parameters implement
-/// sufficient comparison operator overloads (LT and GT). Either the 'list' 
-/// elements must implement (at least) member comparison operator overloads or
-/// the 'value' parameter must implement binary comparison operator overloads.
-/// Be aware that C-style arrays/strings are compared by pointers, not values.
-/// A 'list' of C-style arrays of char may be seached with std::string 'value'.
-/// std::string comparisons are not locale aware.
 /// Returns the position or negative if not found or list size > max_int32.
 template <typename Collection, typename Element>
 typename Collection::difference_type
 constexpr binary_search(const Collection& list,
     const Element& element) noexcept;
 
-/// Copy/move collection of From members to a new collection of To members.
+/// Copy a collection of From members to a new collection of To members.
 template <typename To, typename From>
-inline std::vector<To> cast(const std::vector<From>& source) noexcept;
-template <typename To, typename From, size_t Size>
-inline std::array<To, Size> cast(
-    const std::array<From, Size>& source) noexcept;
+inline To projection(const From& source) noexcept;
 
-/// Copy collection of smart pointer values to collection of pointers. 
-template <typename To, typename From>
-inline std::vector<To> pointer_cast(const std::vector<From>& source) noexcept;
-
-/// Determine if a vector of shared pointers to elements have equal elements.
-template <typename Element>
-constexpr bool pointeds_equal(
-    const std::vector<std::shared_ptr<const Element>>& left,
-    const std::vector<std::shared_ptr<const Element>>& right) noexcept;
+/// Determine if collection of pointers to elements have equal elements.
+template <typename Left, typename Right>
+constexpr bool deep_equal(const Left& left, const Right& right) noexcept;
 
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>
@@ -84,11 +68,6 @@ typename Collection::iterator
 constexpr insert_sorted(Collection& list,
     const typename Collection::value_type& element,
     Predicate predicate) noexcept;
-
-/// Move members of a source list to end of a target list.
-/// Source elements are undefined upon return.
-template <typename Collection>
-constexpr void move_append(Collection& target, Collection& source) noexcept;
 
 /// Pop an element from the stack and return its value.
 template <typename Collection>
@@ -116,23 +95,19 @@ inline Collection distinct_copy(const Collection& list) noexcept;
 /// Obtain the set difference of left less right.
 template <typename Left, typename Right>
 inline Left difference(const Left& left, const Right& right) noexcept;
-
 template <typename Left, typename Right>
 inline Left difference(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Determing if the sets have an intersection.
 template <typename Left, typename Right>
-constexpr bool intersecting(const Left& left, const Right& right) noexcept;
-
+constexpr bool is_intersecting(const Left& left, const Right& right) noexcept;
 template <typename Left, typename Right>
-constexpr bool intersecting(const typename Left::const_iterator& begin,
+constexpr bool is_intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Reverse the order of collection elements.
 /// Use std::views::reverse for reverse iteration.
-template <typename Collection>
-constexpr void reverse(Collection& list) noexcept;
 template <typename Collection>
 inline Collection reverse(Collection&& list) noexcept;
 template <typename Collection>

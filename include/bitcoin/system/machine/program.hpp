@@ -38,7 +38,8 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-// forward_list more efficient than list but requires 'front' vs. 'back'.
+// TODO: use std::stack<std::vector<stack_variant>>
+// TODO: use std::stack<std::forward_list<stack_variant>>
 typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
 typedef std::vector<stack_variant> contiguous_stack;
 typedef std::list<stack_variant> linked_stack;
@@ -54,11 +55,8 @@ public:
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
-    template<class... Ts>
-    struct overload : Ts...
-    {
-        using Ts::operator()...;
-    };
+    template<class... Overload>
+    struct overload: Overload... { using Overload::operator()...; };
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
@@ -193,19 +191,6 @@ protected:
 private:
     // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
     typedef std::vector<bool> bool_stack;
-
-    template <typename Stack>
-    inline Stack witness_to_primary(const chunk_cptrs& source) noexcept
-    {
-        Stack out(std::size(source));
-        std::transform(std::begin(source), std::end(source), std::begin(out),
-            [](const auto& pointer) noexcept
-            {
-                return pointer.get();
-            });
-
-        return out;
-    }
 
     // Private stack helpers.
     template<size_t Bytes, typename Integer,

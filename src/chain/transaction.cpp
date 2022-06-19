@@ -168,9 +168,9 @@ bool transaction::operator==(const transaction& other) const noexcept
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
         && (inputs_ == other.inputs_) ||
-            pointeds_equal(*inputs_, *other.inputs_)
+            deep_equal(*inputs_, *other.inputs_)
         && (outputs_ == other.outputs_) ||
-            pointeds_equal(*outputs_, *other.outputs_);
+            deep_equal(*outputs_, *other.outputs_);
 }
 
 bool transaction::operator!=(const transaction& other) const noexcept

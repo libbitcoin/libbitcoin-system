@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <execution>
 #include <iterator>
 #include <type_traits>
 #include <utility>
@@ -150,7 +149,7 @@ program(const chain::transaction& tx, const input_iterator& input,
     version_(version),
     tether_(),
     witness_(witness),
-    primary_(witness_to_primary<Stack>(*witness))
+    primary_(projection<Stack>(*witness))
 {
 }
 
@@ -422,7 +421,7 @@ template <typename Stack>
 constexpr bool program<Stack>::equal_chunks(const variant& left,
     const variant& right) noexcept
 {
-    static_assert(std::variant_size_v<program<Stack>::variant> == 3);
+    static_assert(std::variant_size<program<Stack>::variant>::value == 3);
 
     using namespace number;
     enum { bool_, int64_, pchunk_ };
@@ -976,7 +975,7 @@ subscript(const chunk_xptrs& endorsements) const noexcept
 
     // If none of the strip ops are found, return the subscript.
     // Prefail is not circumvented as subscript used only for signature hash.
-    if (!intersecting<operations>(offset, stop, strip))
+    if (!is_intersecting<operations>(offset, stop, strip))
         return script_;
 
     // Create new script from stripped copy of subscript operations.

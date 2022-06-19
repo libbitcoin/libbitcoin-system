@@ -116,7 +116,7 @@ block::block(const chain::header::cptr& header,
 bool block::operator==(const block& other) const noexcept
 {
     return (header_ == other.header_ || *header_ == *other.header_)
-        && pointeds_equal(*txs_, *other.txs_);
+        && deep_equal(*txs_, *other.txs_);
 }
 
 bool block::operator!=(const block& other) const noexcept

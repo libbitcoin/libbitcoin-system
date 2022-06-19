@@ -120,7 +120,7 @@ witness::witness(const chunk_cptrs& stack, bool valid) noexcept
 
 bool witness::operator==(const witness& other) const noexcept
 {
-    return pointeds_equal(stack_, other.stack_);
+    return deep_equal(stack_, other.stack_);
 }
 
 bool witness::operator!=(const witness& other) const noexcept
