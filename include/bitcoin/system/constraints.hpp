@@ -111,7 +111,7 @@ template <typename Left, typename Right>
 using if_not_lesser_width = std::enable_if_t<width<Left>() >= width<Right>(),
     bool>;
 
-// Integer types.
+// Integer types (specializable, non-floating math, no bool).
 
 template <typename Type>
 using if_integer = std::enable_if_t<is_integer<Type>(), bool>;
@@ -134,7 +134,7 @@ using if_not_same_signed_integer = std::enable_if_t<
     is_integer<Left>() && is_integer<Right>() &&
     (std::is_signed<Left>::value != std::is_signed<Right>::value), bool>;
 
-// Integral integer types.
+// Integral integer types (native, non-floating math, no bool).
 
 template <typename Type>
 using if_integral_integer = std::enable_if_t<is_integer<Type>() &&
@@ -155,7 +155,7 @@ using signed_type =
 
 template <size_t Bytes, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
-    std::conditional_t < Bytes == 0, size_t,
+    std::conditional_t< Bytes == 0, size_t,
         std::conditional_t<Bytes == 1, uint8_t,
             std::conditional_t<Bytes == 2, uint16_t,
                 std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>>;

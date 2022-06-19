@@ -77,6 +77,7 @@ constexpr bool is_odd(Type value) noexcept
     return !is_even(value);
 }
 
+// This constant is meaningful for all specializations (non-integrals).
 template <typename Type>
 constexpr bool is_integer()
 {

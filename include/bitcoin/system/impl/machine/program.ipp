@@ -393,8 +393,7 @@ template <typename Stack>
 inline bool program<Stack>::
 peek_signed32_unsafe(int32_t& value) const noexcept
 {
-    constexpr auto bytes4 = sizeof(int32_t);
-    return primary_.peek_signed<bytes4>(value);
+    return primary_.peek_signed<4>(value);
 }
 
 // private
@@ -402,8 +401,7 @@ template <typename Stack>
 inline bool program<Stack>::
 peek_signed40_unsafe(int64_t& value) const noexcept
 {
-    constexpr auto bytes5 = sizeof(int32_t) + sizeof(int8_t);
-    return primary_.peek_signed<bytes5>(value);
+    return primary_.peek_signed<5>(value);
 }
 
 // ****************************************************************************
