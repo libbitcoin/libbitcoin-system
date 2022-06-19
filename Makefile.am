@@ -582,6 +582,10 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/safe.hpp \
     include/bitcoin/system/math/sign.hpp
 
+include_bitcoin_system_math_externaldir = ${includedir}/bitcoin/system/math/external
+include_bitcoin_system_math_external_HEADERS = \
+    include/bitcoin/system/math/external/byte_swap.hpp
+
 include_bitcoin_system_radixdir = ${includedir}/bitcoin/system/radix
 include_bitcoin_system_radix_HEADERS = \
     include/bitcoin/system/radix/base_10.hpp \

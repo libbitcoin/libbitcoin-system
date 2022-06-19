@@ -19,57 +19,62 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 
-#include <algorithm>
-#include <array>
-#include <array>
 #include <cstdint>
-#include <ranges>
+#include <type_traits>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/safe.hpp>
-
-////#ifdef _MSC_VER
-////    #include <stdlib.h>
-////    #define bswap_08(x) (x)
-////    #define bswap_16(x) _byteswap_ushort(x)
-////    #define bswap_32(x) _byteswap_ulong(x)
-////    #define bswap_64(x) _byteswap_uint64(x)
-////#endif
+#include <bitcoin/system/math/external/byte_swap.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// C++23: std::byteswap.
 template <typename Integer,
     if_integral_integer<Integer>,
+    if_size_of<Integer, sizeof(uint8_t)>,
     if_unique_object_representations<Integer>>
 constexpr Integer byteswap(Integer value) noexcept
 {
-    auto out = std::bit_cast<std::array<std::byte, sizeof(Integer)>>(value);
-    std::ranges::reverse(out);
-    return std::bit_cast<Integer>(out);
+    // no-op for calling consistency.
+    return value;
 }
 
-////// Intrinsics (non-constexpr).
-////template <typename Integer,
-////    if_integral_integer<Integer>,
-////    if_unique_object_representations<Integer>,
-////    if_not_greater<sizeof(Integer), sizeof(uint64_t)>>
-////inline Integer byte_swap_intrinsic(Integer value) noexcept
-////{
-////#ifdef _MSC_VER
-////    constexpr auto uvalue = to_unsigned(value);
-////    if constexpr (sizeof<Integer> == sizeof(uint8_t))
-////        return possible_sign_cast<Integer>(bswap_08(uvalue));
-////    if constexpr (sizeof<Integer> == sizeof(uint16_t)
-////        return possible_sign_cast<Integer>(bswap_16(uvalue));
-////    if constexpr (sizeof<Integer> == sizeof(uint32_t)
-////        return possible_sign_cast<Integer>(bswap_32(uvalue));
-////    if constexpr (sizeof<Integer> == sizeof(uint64_t)
-////        return possible_sign_cast<Integer>(bswap_64(uvalue));
-////#else
-////    static_assert(false), "not implemented");
-////#endif // _MSC_VER
-////}
+template <typename Integer,
+    if_integral_integer<Integer>,
+    if_size_of<Integer, sizeof(uint16_t)>,
+    if_unique_object_representations<Integer>>
+constexpr Integer byteswap(Integer value) noexcept
+{
+    // Compiles away to direct API call for non-constexpr.
+    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
+        byte_swap16_native(to_unsigned(value)) :
+        byte_swap16(to_unsigned(value)));
+}
+
+template <typename Integer,
+    if_integral_integer<Integer>,
+    if_size_of<Integer, sizeof(uint32_t)>,
+    if_unique_object_representations<Integer>>
+constexpr Integer byteswap(Integer value) noexcept
+{
+    // Compiles away to direct API call for non-constexpr.
+    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
+        byte_swap32_native(to_unsigned(value)) :
+        byte_swap32(to_unsigned(value)));
+}
+
+template <typename Integer,
+    if_integral_integer<Integer>,
+    if_size_of<Integer, sizeof(uint64_t)>,
+    if_unique_object_representations<Integer>>
+constexpr Integer byteswap(Integer value) noexcept
+{
+    // Compiles away to direct API call for non-constexpr.
+    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
+        byte_swap64_native(to_unsigned(value)) :
+        byte_swap64(to_unsigned(value)));
+}
+
+// C++23: constexpr std::byteswap<T>.
 
 } // namespace system
 } // namespace libbitcoin
