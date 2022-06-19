@@ -343,13 +343,13 @@ size_t transaction::serialized_size(bool witness) const noexcept
 {
     witness &= segregated_;
 
-    const auto ins = [=](size_t total, const input::cptr& input) noexcept
+    const auto ins = [=](size_t total, const auto& input) noexcept
     {
         // Inputs account for witness bytes. 
         return total + input->serialized_size(witness);
     };
 
-    const auto outs = [](size_t total, const output::cptr& output) noexcept
+    const auto outs = [](size_t total, const auto& output) noexcept
     {
         return total + output->serialized_size();
     };
@@ -420,7 +420,7 @@ hash_digest transaction::hash(bool witness) const noexcept
 
 bool transaction::is_dusty(uint64_t minimum_output_value) const noexcept
 {
-    const auto dusty = [=](const output::cptr& output) noexcept
+    const auto dusty = [=](const auto& output) noexcept
     {
         return output->is_dust(minimum_output_value);
     };
@@ -431,12 +431,12 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const noexcept
 size_t transaction::signature_operations(bool bip16, bool bip141) const noexcept
 {
     // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
-    const auto in = [=](size_t total, const input::cptr& input) noexcept
+    const auto in = [=](size_t total, const auto& input) noexcept
     {
         return ceilinged_add(total, input->signature_operations(bip16, bip141));
     };
 
-    const auto out = [=](size_t total, const output::cptr& output) noexcept
+    const auto out = [=](size_t total, const auto& output) noexcept
     {
         return ceilinged_add(total, output->signature_operations(bip141));
     };
@@ -451,7 +451,7 @@ chain::points transaction::points() const noexcept
     static no_fill_allocator<point> no_fill_point_allocator{};
     chain::points out(inputs_->size(), no_fill_point_allocator);
 
-    const auto point = [](const input::cptr& input) noexcept
+    const auto point = [](const auto& input) noexcept
     {
         return input->point();
     };
@@ -930,7 +930,7 @@ bool transaction::is_oversized() const noexcept
 // static/private
 bool transaction::segregated(const chain::inputs& inputs) noexcept
 {
-    const auto witnessed = [](const input& input) noexcept
+    const auto witnessed = [](const auto& input) noexcept
     {
         return !input.witness().stack().empty();
     };
@@ -941,7 +941,7 @@ bool transaction::segregated(const chain::inputs& inputs) noexcept
 // static/private
 bool transaction::segregated(const chain::input_cptrs& inputs) noexcept
 {
-    const auto witnessed = [](const input::cptr& input) noexcept
+    const auto witnessed = [](const auto& input) noexcept
     {
         return !input->witness().stack().empty();
     };
@@ -990,7 +990,7 @@ bool transaction::is_null_non_coinbase() const noexcept
 {
     BC_ASSERT(!is_coinbase());
 
-    const auto invalid = [](const input::cptr& input) noexcept
+    const auto invalid = [](const auto& input) noexcept
     {
         return input->point().is_null();
     };
@@ -1083,7 +1083,7 @@ bool transaction::is_immature(size_t height) const noexcept
     // Overflow returns max_size_t.
     // Zero is either genesis or not found, either is immature.
     // Spends internal to a block are handled by block validation.
-    const auto immature = [=](const input::cptr& input) noexcept
+    const auto immature = [=](const auto& input) noexcept
     {
         return input->prevout->coinbase && (is_zero(input->prevout->height) ||
             height < ceilinged_add(input->prevout->height, coinbase_maturity));
@@ -1103,7 +1103,7 @@ bool transaction::is_locked(size_t height,
         return false;
 
     // BIP68: references to median time past are as defined by bip113.
-    const auto locked = [=](const input::cptr& input) noexcept
+    const auto locked = [=](const auto& input) noexcept
     {
         return input->is_locked(height, median_time_past);
     };
@@ -1121,7 +1121,7 @@ bool transaction::is_unconfirmed_spend(size_t height) const noexcept
     // Zero is either genesis or not found.
     // Test maturity first to obtain proper error code.
     // Spends internal to a block are handled by block validation.
-    const auto unconfirmed = [=](const input::cptr& input) noexcept
+    const auto unconfirmed = [=](const auto& input) noexcept
     {
         return is_zero(input->prevout->height) &&
             !(height > input->prevout->height);
@@ -1135,7 +1135,7 @@ bool transaction::is_confirmed_double_spend(size_t height) const noexcept
     BC_ASSERT(!is_coinbase());
 
     // Spends internal to a block are handled by block validation.
-    const auto spent = [=](const input::cptr& input) noexcept
+    const auto spent = [=](const auto& input) noexcept
     {
         return input->prevout->spent && height > input->prevout->height;
     };
@@ -1262,7 +1262,7 @@ code transaction::connect(const context& state) const noexcept
     // Cache witness hash components that don't change per input.
     initialize_hash_cache();
     
-    const auto is_roller = [](const chain::input& input) noexcept
+    const auto is_roller = [](const auto& input) noexcept
     {
         static const auto roll = operation{ opcode::roll };
 
