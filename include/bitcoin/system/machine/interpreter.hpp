@@ -36,7 +36,6 @@ class interpreter
   : public program<Stack>
 {
 public:
-    /// Alises for base template.
     using state = typename program<Stack>::program;
     using op_iterator = state::op_iterator;
     using input_iterator = input_cptrs::const_iterator;

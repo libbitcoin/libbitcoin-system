@@ -21,28 +21,17 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <list>
-#include <iterator>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/number.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/machine/stack.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
-
-// TODO: use std::stack<std::vector<stack_variant>>
-// TODO: use std::stack<std::forward_list<stack_variant>>
-typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
-typedef std::vector<stack_variant> contiguous_stack;
-typedef std::list<stack_variant> linked_stack;
 
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
@@ -50,13 +39,9 @@ template <typename Stack>
 class program
 {
 public:
-    using variant = stack_variant;
     typedef chain::operations::const_iterator op_iterator;
     typedef chain::input_cptrs::const_iterator input_iterator;
     typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
-
-    template<class... Overload>
-    struct overload: Overload... { using Overload::operator()...; };
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
@@ -90,8 +75,8 @@ public:
     inline const data_chunk& pop() noexcept;
 
 protected:
-    static constexpr bool equal_chunks(const variant& left,
-        const variant& right) noexcept;
+    static constexpr bool equal_chunks(const stack_variant& left,
+        const stack_variant& right) noexcept;
 
     /// Constants.
     /// -----------------------------------------------------------------------
@@ -133,13 +118,13 @@ protected:
     /// Primary stack (variant - index).
     inline void swap_unsafe(size_t left_index, size_t right_index) noexcept;
     inline void erase_unsafe(size_t index) noexcept;
-    inline const variant& peek_variant_unsafe() const noexcept;
-    inline const variant& peek_variant_unsafe(size_t peek_index) const noexcept;
+    inline const stack_variant& peek_variant_unsafe() const noexcept;
+    inline const stack_variant& peek_variant_unsafe(size_t index) const noexcept;
 
     /// Primary stack (variant - top).
     inline void drop_unsafe() noexcept;
-    inline void push_variant(const variant& vary) noexcept;
-    inline variant pop_variant_unsafe() noexcept;
+    inline void push_variant(const stack_variant& vary) noexcept;
+    inline stack_variant pop_variant_unsafe() noexcept;
 
     /// Primary stack state (untyped).
     inline size_t stack_size() const noexcept;
@@ -150,8 +135,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     inline bool is_alternate_empty() const noexcept;
-    inline void push_alternate(variant&& vary) noexcept;
-    inline variant pop_alternate_unsafe() noexcept;
+    inline void push_alternate(stack_variant&& vary) noexcept;
+    inline stack_variant pop_alternate_unsafe() noexcept;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
@@ -189,8 +174,7 @@ protected:
         const chain::script& sub) const noexcept;
 
 private:
-    // A possibly space-efficient dynamic bitset (specialized by C++ std lib).
-    typedef std::vector<bool> bool_stack;
+    using primary_stack = stack<Stack>;
 
     // Private stack helpers.
     template<size_t Bytes, typename Integer,
@@ -201,7 +185,6 @@ private:
     inline void push_chunk(const chunk_xptr& datum) noexcept;
     inline bool pop_signed32_unsafe(int32_t& value) noexcept;
     inline chunk_xptr peek_chunk_unsafe() const noexcept;
-    inline bool peek_strict_bool_unsafe() const noexcept;
     inline bool peek_signed32_unsafe(int32_t& value) const noexcept;
     inline bool peek_signed40_unsafe(int64_t& value) const noexcept;
     inline bool is_stack_clean() const noexcept;
@@ -221,13 +204,10 @@ private:
     const chain::script_version version_;
     const chunk_cptrs_ptr witness_;
 
-    // Mutable as this may be updated on peeks.
-    mutable tether<data_chunk> tether_;
-
     // Three stacks.
-    Stack primary_;
-    std::vector<variant> alternate_{};
-    bool_stack condition_{};
+    primary_stack primary_;
+    alternate_stack alternate_{};
+    condition_stack condition_{};
 
     // Accumulator.
     size_t operation_count_{};
