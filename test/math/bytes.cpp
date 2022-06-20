@@ -18,7 +18,15 @@
  */
 #include "../test.hpp"
 
- // std::is_constant_evaluated
+static_assert(to_big_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
+static_assert(to_big_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0201));
+static_assert(to_big_end(0x01020304ul) == 0x04030201ul);
+static_assert(to_big_end(0x0102030405060708ull) == 0x0807060504030201ull);
+
+static_assert(to_little_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
+static_assert(to_little_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0102));
+static_assert(to_little_end(0x01020304ul) == 0x01020304ul);
+static_assert(to_little_end(0x0102030405060708ull) == 0x0102030405060708ull);
 
  // Beware of type promotion (use explicit argument).
 static_assert(byteswap(0x01u) == 0x01000000u);
@@ -53,7 +61,21 @@ static_assert(byteswap<int64_t>(0xffffffffffffff00ll) == 0x00ffffffffffffffll);
 
 BOOST_AUTO_TEST_SUITE(bytes_tests)
 
-// !std::is_constant_evaluated
+BOOST_AUTO_TEST_CASE(to_big_end__not_constant_evaluated__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
+    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0201));
+    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304ul), 0x04030201ul);
+    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708ull), 0x0807060504030201ull);
+}
+
+BOOST_AUTO_TEST_CASE(to_little_end__not_constant_evaluated__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
+    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0102));
+    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304ul), 0x01020304ul);
+    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708ull), 0x0102030405060708ull);
+}
 
 BOOST_AUTO_TEST_CASE(byteswap__not_constant_evaluated__always__swapped)
 {
@@ -82,4 +104,5 @@ BOOST_AUTO_TEST_CASE(byteswap__not_constant_evaluated__always__swapped)
     BOOST_REQUIRE_EQUAL(byteswap<int32_t>(0xffffff00l), 0x00ffffff);
     BOOST_REQUIRE_EQUAL(byteswap<int64_t>(0xffffffffffffff00ll), 0x00ffffffffffffff);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

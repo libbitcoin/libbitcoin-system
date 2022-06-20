@@ -20,13 +20,35 @@
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 
 #include <cstdint>
-#include <type_traits>
 #include <bitcoin/system/constraints.hpp>
-#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+template <typename Integer, if_big_endian_integral_integer<Integer>>
+constexpr Integer to_big_end(Integer from) noexcept
+{
+    return from;
+}
+
+template <typename Integer, if_little_endian_integral_integer<Integer>>
+constexpr Integer to_big_end(Integer from) noexcept
+{
+    return byteswap(from);
+}
+
+template <typename Integer, if_big_endian_integral_integer<Integer>>
+constexpr Integer to_little_end(Integer from) noexcept
+{
+    return byteswap(from);
+}
+
+template <typename Integer, if_little_endian_integral_integer<Integer>>
+constexpr Integer to_little_end(Integer from) noexcept
+{
+    return from;
+}
 
 template <typename Integer,
     if_integral_integer<Integer>,
