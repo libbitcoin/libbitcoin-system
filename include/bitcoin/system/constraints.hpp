@@ -142,7 +142,7 @@ using if_not_same_signed_integer = std::enable_if_t<
 
 template <typename Type>
 using if_integral_integer = std::enable_if_t<is_integer<Type>() &&
-    std::is_integral<Type>::value, bool>;
+    std::is_integral<Type>::value && is_integral_size<Type>(), bool>;
 
 template <typename Type>
 using if_non_integral_integer = std::enable_if_t<is_integer<Type>() &&
@@ -166,27 +166,15 @@ using unsigned_type =
 
 /// Endianness.
 
-// C++20: replace with std::bit_cast.
-// This should be in math/bytes but required here for representations.
-template <typename Result, typename Integer,
-    if_integral_integer<Integer> = true,
-    if_trivially_constructible<Result> = true>
-constexpr Result bit_cast(Integer value) noexcept
-{
-    Result result;
-    std::copy_n(&value, sizeof(Result), &result);
-    return result;
-}
-
 constexpr bool is_big_endian_representation() noexcept
 {
-    union foo { uint8_t u1[2]; uint16_t u2; } volatile const bar{ 0x0001 };
+    union foo { uint8_t u1[2]; uint16_t u2; } constexpr bar{ 0x0001 };
     return to_bool(bar.u1[1]);
 }
 
 constexpr bool is_little_endian_representation() noexcept
 {
-    union foo { uint8_t u1[2]; uint16_t u2; } volatile const bar{ 0x0001 };
+    union foo { uint8_t u1[2]; uint16_t u2; } constexpr bar{ 0x0001 };
     return to_bool(bar.u1[0]);
 }
 
@@ -203,11 +191,13 @@ static_assert(!is_unknown_endian, "unsupported integer representation");
 
 template <typename Integer>
 using if_big_endian_integral_integer = std::enable_if_t<is_big_endian &&
-    is_integer<Integer>() && std::is_integral<Integer>::value, bool>;
+    is_integer<Integer>() && is_integral_size<Integer>() &&
+    std::is_integral<Integer>::value, bool>;
 
 template <typename Integer>
 using if_little_endian_integral_integer = std::enable_if_t<is_little_endian &&
-    is_integer<Integer>() && std::is_integral<Integer>::value, bool>;
+    is_integer<Integer>() && is_integral_size<Integer>() &&
+    std::is_integral<Integer>::value, bool>;
 
 } // namespace system
 } // namespace libbitcoin
