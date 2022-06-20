@@ -86,7 +86,7 @@ constexpr uint8_t varint_eight_bytes = 0xff;
 
 // Bogus compiler warning.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
-consteval auto is_big_endian_representation() noexcept
+consteval bool is_big_endian_representation() noexcept
 BC_POP_WARNING()
 {
     return std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one)
@@ -95,14 +95,14 @@ BC_POP_WARNING()
 
 // Bogus compiler warning.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
-consteval auto is_little_endian_representation() noexcept
+consteval bool is_little_endian_representation() noexcept
 BC_POP_WARNING()
 {
     return std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one)
         .front() != zero;
 }
 
-consteval auto is_unknown_representation() noexcept
+consteval bool is_unknown_representation() noexcept
 {
     return !is_big_endian_representation() &&
         !is_little_endian_representation();
