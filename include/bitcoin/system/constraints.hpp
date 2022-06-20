@@ -184,14 +184,14 @@ constexpr Result bit_cast(Integer value) noexcept
 
 constexpr bool is_big_endian_representation() noexcept
 {
-    union foo { uint8_t u8[2]; uint16_t u16; } constexpr bar = { 0x0001 };
-    return to_bool(bar.u8[1]);
+    union foo { uint8_t u1[2]; uint16_t u2; } volatile const bar{ 0x0001 };
+    return to_bool(bar.u1[1]);
 }
 
 constexpr bool is_little_endian_representation() noexcept
 {
-    union foo { uint8_t u8[2]; uint16_t u16; } constexpr bar = { 0x0001 };
-    return to_bool(bar.u8[0]);
+    union foo { uint8_t u1[2]; uint16_t u2; } volatile const bar{ 0x0001 };
+    return to_bool(bar.u1[0]);
 }
 
 constexpr bool is_unknown_endian_representation() noexcept
