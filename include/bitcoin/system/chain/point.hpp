@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <istream>
 #include <memory>
-#include <string>
 #include <vector>
 #include <boost/json.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>

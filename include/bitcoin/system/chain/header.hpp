@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <string>
 #include <memory>
 #include <vector>
 #include <boost/json.hpp>

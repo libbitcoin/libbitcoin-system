@@ -56,6 +56,7 @@ public:
     checkpoint(const hash_digest& hash, size_t height) noexcept;
     explicit checkpoint(const std::string& hash, size_t height) noexcept;
 
+    // TODO: move to config serialization wrapper (?).
     template <size_t Size, if_equal<Size, add1(two * hash_size)> = true>
     checkpoint(const char(&string)[Size], size_t height) noexcept
       : checkpoint(std::string(string), height)
@@ -65,6 +66,7 @@ public:
     // Deserialization.
     // ------------------------------------------------------------------------
 
+    // TODO: move to config serialization wrapper.
     ////bool from_string(const std::string& text) noexcept;
     ////bool from_string(std::istream& stream) noexcept;
     ////bool from_string(reader& source) noexcept;
@@ -74,6 +76,7 @@ public:
     // Serialization.
     // ------------------------------------------------------------------------
 
+    // TODO: move to config serialization wrapper.
     std::string to_string() const noexcept;
     ////bool to_string(std::ostream& stream) const noexcept;
     ////bool to_string(writer& sink) const noexcept;
@@ -89,6 +92,7 @@ protected:
     checkpoint(const hash_digest& hash, size_t height, bool valid) noexcept;
 
 private:
+    // TODO: move to config serialization wrapper.
     static checkpoint from_string(const std::string& hash,
         size_t height) noexcept;
 

@@ -438,6 +438,7 @@ public:
     script(reader&& source, bool prefix) noexcept;
     script(reader& source, bool prefix) noexcept;
 
+    // TODO: move to config serialization wrapper.
     script(const std::string& mnemonic) noexcept;
 
     // Operators.
@@ -457,6 +458,7 @@ public:
     void to_data(std::ostream& stream, bool prefix) const noexcept;
     void to_data(writer& sink, bool prefix) const noexcept;
 
+    // TODO: move to config serialization wrapper.
     std::string to_string(uint32_t active_forks) const noexcept;
 
     // Properties.
@@ -495,8 +497,9 @@ protected:
     script(const operations& ops, bool valid, bool fails) noexcept;
 
 private:
-    static script from_data(reader& source, bool prefix) noexcept;
+    // TODO: move to config serialization wrapper.
     static script from_string(const std::string& mnemonic) noexcept;
+    static script from_data(reader& source, bool prefix) noexcept;
     static size_t op_count(reader& source) noexcept;
 
     // Script should be stored as shared.

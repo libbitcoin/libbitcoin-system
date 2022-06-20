@@ -68,6 +68,7 @@ public:
     witness(reader&& source, bool prefix) noexcept;
     witness(reader& source, bool prefix) noexcept;
 
+    // TODO: move to config serialization wrapper.
     witness(const std::string& mnemonic) noexcept;
 
     // Operators.
@@ -83,6 +84,7 @@ public:
     void to_data(std::ostream& stream, bool prefix) const noexcept;
     void to_data(writer& sink, bool prefix) const noexcept;
 
+    // TODO: move to config serialization wrapper.
     std::string to_string() const noexcept;
 
     // Properties.
@@ -121,8 +123,9 @@ public:
         const script& program_script) const noexcept;
 
 private:
-    static witness from_data(reader& source, bool prefix) noexcept;
+    // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) noexcept;
+    static witness from_data(reader& source, bool prefix) noexcept;
     size_t serialized_size() const noexcept;
 
     witness(chunk_cptrs&& stack, bool valid) noexcept;

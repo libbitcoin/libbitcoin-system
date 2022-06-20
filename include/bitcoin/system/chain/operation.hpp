@@ -376,8 +376,12 @@ public:
     operation(reader&& source) noexcept;
     operation(reader& source) noexcept;
 
+    // TODO: move to config serialization wrapper.
+    // TODO: a byte-deserialized operation cannot be invalid unless empty.
+    // TODO: byte size cannot overflow, but can underflow (remains valid).
+    // TODO: but mnemonic decoding may be invalid. moving this to config
+    // TODO: allows string decoding to throw, consistent with other config.
     /// Literal string is disallowed, as it conflicts with const data_slice&.
-    /// An invalid serialization returns op(any_invalid
     explicit operation(const std::string& mnemonic) noexcept;
 
     // Operators.
@@ -393,6 +397,7 @@ public:
     void to_data(std::ostream& stream) const noexcept;
     void to_data(writer& sink) const noexcept;
 
+    // TODO: move to config serialization wrapper.
     std::string to_string(uint32_t active_forks) const noexcept;
 
     // Properties.
@@ -439,6 +444,8 @@ private:
     static operation from_data(reader& source) noexcept;
     static operation from_push_data(const chunk_cptr& data,
         bool minimal) noexcept;
+
+    // TODO: move to config serialization wrapper.
     static operation from_string(const std::string& mnemonic) noexcept;
 
     static chunk_cptr no_data_ptr() noexcept;
