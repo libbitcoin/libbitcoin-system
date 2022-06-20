@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <iostream>
 #include <iterator>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
