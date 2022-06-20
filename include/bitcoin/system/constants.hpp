@@ -86,6 +86,16 @@ constexpr bool is_integer()
         !std::is_same<bool, Type>::value;
 }
 
+// This is future-proofing against larger integrals or language features that
+// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
+template <typename Type>
+constexpr bool is_integral_size()
+{
+    constexpr auto size = sizeof(Type);
+    return size == sizeof(uint8_t) || size == sizeof(uint16_t) ||
+        size == sizeof(uint32_t) || size == sizeof(uint64_t);
+}
+
 template <typename Type>
 constexpr bool is_null(Type value) noexcept
 {

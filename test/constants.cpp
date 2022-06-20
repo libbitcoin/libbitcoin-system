@@ -77,6 +77,24 @@ static_assert(is_integer<wchar_t>());
 static_assert(!is_integer<bool>());
 static_assert(!is_integer<std::string> ());
 
+static_assert(is_integral_size<bool>());
+static_assert(is_integral_size<uint8_t>());
+static_assert(is_integral_size<uint16_t>());
+static_assert(is_integral_size<uint32_t>());
+static_assert(is_integral_size<uint64_t>());
+static_assert(is_integral_size<size_t>());
+static_assert(is_integral_size<int8_t>());
+static_assert(is_integral_size<int16_t>());
+static_assert(is_integral_size<int32_t>());
+static_assert(is_integral_size<int64_t>());
+static_assert(is_integral_size<signed_size_t>());
+////static_assert(!is_integral_size<std::string>());
+////static_assert(!is_integral_size<std::array<uint8_t, 0>>());
+////static_assert(!is_integral_size<std::array<uint8_t, 1>>());
+////static_assert(!is_integral_size<std::array<uint8_t, 2>>());
+////static_assert(!is_integral_size<std::array<uint8_t, 4>>());
+////static_assert(!is_integral_size<std::array<uint8_t, 8>>());
+
 ////constexpr void* pointer = "";
 ////constexpr void* null_pointer = nullptr;
 static_assert(is_null(nullptr));
