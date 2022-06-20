@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 #define LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 
-#include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -81,35 +79,6 @@ constexpr int32_t negative_one = -1;
 constexpr uint8_t varint_two_bytes = 0xfd;
 constexpr uint8_t varint_four_bytes = 0xfe;
 constexpr uint8_t varint_eight_bytes = 0xff;
-
-/// consteval may only be assigned to constexpr.
-
-// Bogus compiler warning.
-BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
-consteval bool is_big_endian_representation() noexcept
-BC_POP_WARNING()
-{
-    return std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one)
-        .back() != zero;
-}
-
-// Bogus compiler warning.
-BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
-consteval bool is_little_endian_representation() noexcept
-BC_POP_WARNING()
-{
-    return std::bit_cast<std::array<uint8_t, sizeof(size_t)>>(one)
-        .front() != zero;
-}
-
-consteval bool is_unknown_representation() noexcept
-{
-    return !is_big_endian_representation() &&
-        !is_little_endian_representation();
-}
-
-static_assert(!is_unknown_representation(),
-    "unsupported integer representation");
 
 } // namespace libbitcoin
 

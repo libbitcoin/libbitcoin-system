@@ -160,15 +160,22 @@ static_assert(is_true<if_base_of<base, derived>>());
 
 static_assert(is_true<if_byte_insertable<std::string>>());
 static_assert(is_true<if_byte_insertable<std::vector<uint8_t>>>());
+////static_assert(is_true<if_byte_insertable<std::array<uint8_t, 42>>>());
 ////static_assert(!is_true<if_byte_insertable<std::u32string>>());
 ////static_assert(!is_true<if_byte_insertable<std::vector<uint32_t>>>());
 ////static_assert(!is_true<if_byte_insertable<uint32_t>>());
 
 static_assert(is_true<if_default_constructible<bool>>());
-static_assert(is_true<if_default_constructible<std::string>>());
 static_assert(is_true<if_default_constructible<std::vector<bool>>>());
+static_assert(is_true<if_default_constructible<std::string>>());
 static_assert(is_true<if_default_constructible<std::array<bool, 42>>>());
 ////static_assert(!is_true<if_default_constructible<not_default_constructible>>());
+
+static_assert(is_true<if_trivially_constructible<uint32_t>>());
+////static_assert(is_true<if_trivially_constructible<std::vector<uint8_t>>>());
+////static_assert(!is_true<if_trivially_constructible<std::string>>());
+static_assert(is_true<if_trivially_constructible<std::array<uint8_t, 42>>>());
+////static_assert(!is_true<if_trivially_constructible<not_default_constructible>>());
 
 static_assert(is_true<if_unique_object_representations<bool>>());
 static_assert(is_true<if_unique_object_representations<size_t>>());
@@ -389,3 +396,14 @@ static_assert(std::is_same<unsigned_type<5>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<6>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<7>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<8>, uint64_t>::value);
+
+static_assert(!(is_big_endian_representation() && is_little_endian_representation()));
+static_assert(!(is_big_endian_representation() && is_unknown_endian_representation()));
+static_assert(!(is_little_endian_representation() && is_unknown_endian_representation()));
+static_assert(!(is_big_endian&& is_little_endian));
+static_assert(!(is_big_endian&& is_unknown_endian));
+static_assert(!(is_little_endian&& is_unknown_endian));
+
+static_assert(is_little_endian == is_true<if_little_endian_integral_integer<size_t>>());
+////static_assert(is_big_endian == is_true<if_big_endian_integral_integer<size_t>>());
+////static_assert(is_little_endian == is_true<if_big_endian_integral_integer<bool>>());
