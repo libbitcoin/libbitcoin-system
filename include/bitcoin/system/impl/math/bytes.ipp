@@ -34,7 +34,7 @@ template <typename Integer,
     if_unique_object_representations<Integer>>
 constexpr Integer byteswap(Integer value) noexcept
 {
-    // no-op for calling consistency.
+    // no-op for calling consistency across all integral integer types.
     return value;
 }
 
