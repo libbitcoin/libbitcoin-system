@@ -48,7 +48,6 @@ public:
     uint32_t minimum_timespan() const noexcept;
     uint32_t maximum_timespan() const noexcept;
     size_t retargeting_interval() const noexcept;
-    uint256_t work_limit() const noexcept;
 
     // Consensus settings.
     // -------------------------------------------------------------------------

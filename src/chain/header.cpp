@@ -245,7 +245,7 @@ uint256_t header::difficulty(uint32_t bits) noexcept
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
 
-    uint256_t target(header_bits);
+    uint256_t target(header_bits.to_uint32());
     const auto divisor = add1(target);
 
     //*************************************************************************
@@ -269,16 +269,16 @@ uint256_t header::difficulty() const noexcept
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     bool scrypt) const noexcept
 {
+    static const auto limit = compact(proof_of_work_limit).to_uint256();
     const auto bits = compact(bits_);
-    static const uint256_t pow_limit(compact{ proof_of_work_limit });
 
     if (bits.is_overflowed())
         return true;
 
-    uint256_t target(bits);
+    uint256_t target(bits.to_uint32());
 
     // Ensure claimed work is within limits.
-    if (target < one || target > pow_limit)
+    if (target < one || target > limit)
         return true;
 
     // Conditionally use scrypt proof of work (e.g. Litecoin).

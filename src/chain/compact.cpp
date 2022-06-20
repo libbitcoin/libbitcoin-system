@@ -24,6 +24,8 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+// TODO: move to .ipp and make all constexpr.
+
 namespace libbitcoin {
 namespace system {
 namespace chain {
@@ -44,17 +46,17 @@ BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
 // Inlines.
 // ----------------------------------------------------------------------------
 
-constexpr bool is_negated(uint32_t compact) noexcept
+bool is_negated(uint32_t compact) noexcept
 {
     return to_bool(compact & sign_bit);
 }
 
-constexpr bool is_nonzero(uint32_t compact) noexcept
+bool is_nonzero(uint32_t compact) noexcept
 {
     return to_bool(compact & mantissa_max);
 }
 
-constexpr uint8_t log_256(uint32_t mantissa) noexcept
+uint8_t log_256(uint32_t mantissa) noexcept
 {
     ////BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
 
@@ -64,25 +66,25 @@ constexpr uint8_t log_256(uint32_t mantissa) noexcept
         (mantissa > 0x00000000 ? 1 : 0)));
 }
 
-constexpr uint32_t shift_low(uint8_t exponent) noexcept
+uint32_t shift_low(uint8_t exponent) noexcept
 {
     ////BC_ASSERT(exponent <= 3);
     return to_bits(3 - exponent);
 }
 
-constexpr uint32_t shift_high(uint8_t exponent) noexcept
+uint32_t shift_high(uint8_t exponent) noexcept
 {
     ////BC_ASSERT(exponent > 3);
     return to_bits(exponent - 3);
 }
 
-constexpr bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
+bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
 {
     // Overflow if exponent would shift the mantissa more than 32 bytes.
     return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
 }
 
-inline size_t logical_size(uint256_t value) noexcept
+size_t logical_size(uint256_t value) noexcept
 {
     auto byte = zero;
 
@@ -115,12 +117,12 @@ bool compact::is_overflowed() const noexcept
     return overflowed_;
 }
 
-uint32_t compact::normal() const noexcept
+uint32_t compact::to_uint32() const noexcept
 {
     return normal_;
 }
 
-compact::operator const uint256_t&() const noexcept
+uint256_t compact::to_uint256() const noexcept
 {
     return big_;
 }

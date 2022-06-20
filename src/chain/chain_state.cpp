@@ -317,7 +317,6 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
     // Mainnet and testnet retarget on interval.
     if (is_retarget_height(values.height, settings.retargeting_interval()))
         return work_required_retarget(values, forks,
-            settings.work_limit(),
             settings.proof_of_work_limit,
             settings.minimum_timespan(),
             settings.maximum_timespan(),
@@ -349,24 +348,29 @@ uint32_t chain_state::retarget_timespan(const data& values,
     return limit<uint32_t>(timespan, minimum_timespan, maximum_timespan);
 }
 
+static inline bool patch_timewarp(uint32_t forks, const uint256_t& limit,
+    const uint256_t& target) noexcept
+{
+    return script::is_enabled(forks, forks::retarget_overflow_patch) &&
+        floored_log2(target) >= floored_log2(limit);
+}
+
 uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
-    uint256_t limit, uint32_t proof_of_work_limit, uint32_t minimum_timespan,
+    uint32_t proof_of_work_limit, uint32_t minimum_timespan,
     uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept
 {
-    uint256_t target(compact(bits_high(values)));
+    static const auto limit = compact(proof_of_work_limit).to_uint256();
+    auto target = compact(bits_high(values)).to_uint256();
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
-    // limit precomputed from config as uint256_t(compact(proof_of_work_limit))
-    const auto patch = script::is_enabled(forks, forks::retarget_overflow_patch);
-    const auto shift = to_int(patch && (floored_log2(target) >= floored_log2(limit)));
+    const auto timewarp = to_int(patch_timewarp(forks, limit, target));
 
-    target >>= shift;
+    target >>= timewarp;
     target *= retarget_timespan(values, minimum_timespan, maximum_timespan);
     target /= retargeting_interval_seconds;
-    target <<= shift;
+    target <<= timewarp;
 
-    // The proof_of_work_limit constant is pre-normalized.
-    return target > limit ? proof_of_work_limit : compact(target).normal();
+    return target > limit ? proof_of_work_limit : compact(target).to_uint32();
 }
 
 inline uint32_t easy_time_limit(const chain_state::data& values,

@@ -43,13 +43,13 @@ static uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantis
 BOOST_AUTO_TEST_CASE(compact__constructor1__proof_of_work_limit__normalizes_unchanged)
 {
     const auto pow_limit = settings(chain::selection::mainnet).proof_of_work_limit;
-    BOOST_REQUIRE_EQUAL(compact(pow_limit).normal(), pow_limit);
+    BOOST_REQUIRE_EQUAL(compact(pow_limit).to_uint32(), pow_limit);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__no_retarget_proof_of_work_limit__normalizes_unchanged)
 {
     const auto no_pow_limit = settings(chain::selection::regtest).proof_of_work_limit;
-    BOOST_REQUIRE_EQUAL(compact(no_pow_limit).normal(), no_pow_limit);
+    BOOST_REQUIRE_EQUAL(compact(no_pow_limit).to_uint32(), no_pow_limit);
 }
 
 // constructor1/normal
@@ -57,168 +57,168 @@ BOOST_AUTO_TEST_CASE(compact__constructor1__no_retarget_proof_of_work_limit__nor
 BOOST_AUTO_TEST_CASE(compact__constructor1__negative3_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-3, false, 0x7fffff)).to_uint32(), 0x00000000u);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__negative2_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0x7fffff)).normal(), 0x017f0000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-2, false, 0x7fffff)).to_uint32(), 0x017f0000u);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__negative1_exponent_normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0xffff)).normal(), 0x0200ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0x7fffff)).normal(), 0x027fff00u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0xffff)).to_uint32(), 0x0200ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(-1, false, 0x7fffff)).to_uint32(), 0x027fff00u);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__zero_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0xff)).normal(), 0x0200ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0xffff)).normal(), 0x0300ffffu); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0x7fffff)).normal(), 0x037fffffu);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0xff)).to_uint32(), 0x0200ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0xffff)).to_uint32(), 0x0300ffffu); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(0, false, 0x7fffff)).to_uint32(), 0x037fffffu);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive1_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0xff)).normal(), 0x0300ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0xffff)).normal(), 0x0400ffffu); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0x7fffff)).normal(), 0x047fffffu);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0xff)).to_uint32(), 0x0300ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0xffff)).to_uint32(), 0x0400ffffu); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(1, false, 0x7fffff)).to_uint32(), 0x047fffffu);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive29_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive
-    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0xff)).normal(), 0x1f00ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0xffff)).normal(), 0x2000ffffu); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0x7fffff)).normal(), 0x207fffffu);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0xff)).to_uint32(), 0x1f00ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0xffff)).to_uint32(), 0x2000ffffu); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(29, false, 0x7fffff)).to_uint32(), 0x207fffffu);
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive30_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(30, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive, overflow above 0xffff
-    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0xff)).normal(), 0x2000ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0xffff)).normal(), 0x2100ffffu); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0x7fffff)).normal(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0xff)).to_uint32(), 0x2000ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0xffff)).to_uint32(), 0x2100ffffu); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(30, false, 0x7fffff)).to_uint32(), 0x00000000u); // is_overflowed
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive31_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(31, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive, overflow above 0xff
-    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0xff)).normal(), 0x2100ff00u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0xffff)).normal(), 0x00000000u); // is_negated
-    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0x7fffff)).normal(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0xff)).to_uint32(), 0x2100ff00u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0xffff)).to_uint32(), 0x00000000u); // is_negated
+    BOOST_REQUIRE_EQUAL(compact(factory(31, false, 0x7fffff)).to_uint32(), 0x00000000u); // is_overflowed
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive32_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(32, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive, always overflow
-    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0xff)).normal(), 0x00000000u); // is_overflowed
-    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0xffff)).normal(), 0x00000000u); // is_overflowed
-    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0x7fffff)).normal(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0xff)).to_uint32(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0xffff)).to_uint32(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(32, false, 0x7fffff)).to_uint32(), 0x00000000u); // is_overflowed
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor1__positive252_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0xff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0xffff)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0x7fffff)).normal(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0xff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0xffff)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(252, true, 0x7fffff)).to_uint32(), 0x00000000u);
 
     // positive, always overflow
-    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0)).normal(), 0x00000000u);
-    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0xff)).normal(), 0x00000000u); // is_overflowed
-    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0xffff)).normal(), 0x00000000u); // is_overflowed
-    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0x7fffff)).normal(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0)).to_uint32(), 0x00000000u);
+    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0xff)).to_uint32(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0xffff)).to_uint32(), 0x00000000u); // is_overflowed
+    BOOST_REQUIRE_EQUAL(compact(factory(252, false, 0x7fffff)).to_uint32(), 0x00000000u); // is_overflowed
 }
 
 // constructor2/uint256_t
 
 BOOST_AUTO_TEST_CASE(compact__constructor2__zero__round_trips)
 {
-    BOOST_REQUIRE(uint256_t(0) == compact(uint256_t(0)));
+    BOOST_REQUIRE(uint256_t(0) == compact(uint256_t(0)).to_uint256());
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor2__big_value__round_trips)
 {
-    BOOST_REQUIRE(uint256_t(42) == compact(uint256_t(42)));
+    BOOST_REQUIRE(uint256_t(42) == compact(uint256_t(42)).to_uint256());
 }
 
 BOOST_AUTO_TEST_CASE(compact__constructor2__hash__round_trips)
 {
-    BOOST_REQUIRE(to_uint256(primes) == compact(to_uint256(primes)));
+    BOOST_REQUIRE(to_uint256(primes) == compact(to_uint256(primes)).to_uint256());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

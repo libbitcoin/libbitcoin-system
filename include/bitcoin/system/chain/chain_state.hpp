@@ -241,9 +241,8 @@ private:
         const system::settings& settings) noexcept;
 
     static uint32_t work_required_retarget(const data& values, uint32_t forks,
-        uint256_t work_limit, uint32_t proof_of_work_limit,
-        uint32_t minimum_timespan, uint32_t maximum_timespan,
-        uint32_t retargeting_interval_seconds) noexcept;
+        uint32_t proof_of_work_limit, uint32_t minimum_timespan,
+        uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept;
     static uint32_t retarget_timespan(const chain_state::data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan) noexcept;
     static uint32_t easy_work_required(const data& values,

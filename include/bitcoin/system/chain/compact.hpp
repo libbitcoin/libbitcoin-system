@@ -42,11 +42,11 @@ public:
 
     /// Consensus-normalized compact number value.
     /// This is derived from the construction parameter.
-    uint32_t normal() const noexcept;
+    uint32_t to_uint32() const noexcept;
 
     /// Big number that the compact number represents.
     /// This is either saved or generated from the construction parameter.
-    operator const uint256_t&() const noexcept;
+    uint256_t to_uint256() const noexcept;
 
 private:
     static bool from_compact(uint256_t& out, uint32_t compact) noexcept;

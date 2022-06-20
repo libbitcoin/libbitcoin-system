@@ -309,11 +309,5 @@ size_t settings::retargeting_interval() const noexcept
         retargeting_interval_seconds, block_spacing_seconds);
 }
 
-uint256_t settings::work_limit() const noexcept
-{
-    // Warns on multiple implicit conversions without explicit construct.
-    return uint256_t{ chain::compact(proof_of_work_limit) };
-}
-
 } // namespace system
 } // namespace libbitcoin
