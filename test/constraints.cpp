@@ -387,6 +387,16 @@ static_assert(is_true<if_unsigned_integral_integer<uint8_t>>());
 ////static_assert(!is_true<if_unsigned_integral_integer<bool>>());
 ////static_assert(!is_true<if_unsigned_integral_integer<uintx>>());
 
+static_assert(std::is_same<to_signed_type<int8_t>, int8_t>::value);
+static_assert(std::is_same<to_signed_type<uint8_t>, int8_t>::value);
+static_assert(std::is_same<to_signed_type<size_t>, signed_size_t>::value);
+static_assert(std::is_same<to_signed_type<signed_size_t>, signed_size_t>::value);
+
+static_assert(std::is_same<to_unsigned_type<int8_t>, uint8_t>::value);
+static_assert(std::is_same<to_unsigned_type<uint8_t>, uint8_t>::value);
+static_assert(std::is_same<to_unsigned_type<size_t>, size_t>::value);
+static_assert(std::is_same<to_unsigned_type<signed_size_t>, size_t>::value);
+
 // Unsigned type determination by byte width.
 static_assert(std::is_same<signed_type<0>, signed_size_t>::value);
 static_assert(std::is_same<signed_type<1>, int8_t>::value);
