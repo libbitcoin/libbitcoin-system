@@ -40,12 +40,17 @@ namespace system {
 // Bit field width determinations.
 // ----------------------------------------------------------------------------
 
-// See constants.hpp for width<>(), which provides the integral bit domain.
-template <typename Value, if_integer<Value> = true>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
-    // Same as std::bit_width (C++20) except this supports signed integers.
-    return is_zero(value) ? zero : add1(floored_log2(to_unsigned(value)));
+    return is_zero(value) ? zero : add1(floored_log2(value));
+}
+
+// Negtiave *values* always return width<Value>() as the high order bit is set.
+template <typename Value, if_signed_integer<Value>>
+constexpr size_t bit_width(Value value) noexcept
+{
+    return bit_width(to_unsigned(value));
 }
 
 template <typename Value, if_integer<Value>>
@@ -104,7 +109,7 @@ constexpr Value bit_all() noexcept
     return bit_not<Value>(0);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value bit_hi() noexcept
 {
     // a << b is undefined for negative a, but shift into a negative is valid.
@@ -117,7 +122,7 @@ constexpr Value bit_lo() noexcept
     return to_int<Value>(true);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value bit_left(size_t offset) noexcept
 {
     // a >> b is implementation-dependent for negative a:
@@ -132,7 +137,7 @@ constexpr Value bit_left(size_t offset) noexcept
         bit_right<Value>(sub1(width<Value>() - offset));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value bit_right(size_t offset) noexcept
 {
     // a << b is undefined for negative a, but shift into a negative is valid:
@@ -146,13 +151,13 @@ constexpr Value bit_right(size_t offset) noexcept
 // Get (a bit).
 // ----------------------------------------------------------------------------
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr bool get_left(Value value, size_t offset) noexcept
 {
     return to_bool(bit_and(value, bit_left<Value>(offset)));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr bool get_right(Value value, size_t offset) noexcept
 {
     return to_bool(bit_and(value, bit_right<Value>(offset)));
@@ -161,7 +166,7 @@ constexpr bool get_right(Value value, size_t offset) noexcept
 // Set (a bit).
 // ----------------------------------------------------------------------------
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value set_left(const Value& target, size_t offset,
     bool state) noexcept
 {
@@ -169,7 +174,7 @@ constexpr Value set_left(const Value& target, size_t offset,
     return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void set_left_into(Value& target, size_t offset,
     bool state) noexcept
 {
@@ -177,7 +182,7 @@ constexpr void set_left_into(Value& target, size_t offset,
     state ? target |= bit : target &= bit_not(bit);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value set_right(const Value& target, size_t offset,
     bool state) noexcept
 {
@@ -185,7 +190,7 @@ constexpr Value set_right(const Value& target, size_t offset,
     return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void set_right_into(Value& target, size_t offset,
     bool state) noexcept
 {
@@ -203,37 +208,37 @@ constexpr void set_right_into(Value& target, size_t offset,
 // a << b is undefined for negative a.
 // a >> b is implementation-dependent for negative a.
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_left(size_t bits) noexcept
 {
     return shift_right(bit_all<Value>(), bits, true);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_left(const Value& value, size_t bits) noexcept
 {
     return bit_and(value, mask_left<Value>(bits));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void mask_left_into(Value& value, size_t bits) noexcept
 {
     value &= mask_left<Value>(bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_right(size_t bits) noexcept
 {
     return shift_left<Value>(bit_all<Value>(), bits, true);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_right(const Value& value, size_t bits) noexcept
 {
     return bit_and(value, mask_right<Value>(bits));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void mask_right_into(Value& value, size_t bits) noexcept
 {
     value &= mask_right<Value>(bits);
@@ -242,37 +247,37 @@ constexpr void mask_right_into(Value& value, size_t bits) noexcept
 // Unmask (~mask).
 // ----------------------------------------------------------------------------
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_left(size_t bits) noexcept
 {
     return bit_not(mask_left<Value>(bits));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_left(const Value& value, size_t bits) noexcept
 {
     return bit_or(unmask_left<Value>(bits), value);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void unmask_left_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_left<Value>(bits);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_right(size_t bits) noexcept
 {
     return bit_not(mask_right<Value>(bits));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_right(const Value& value, size_t bits) noexcept
 {
     return bit_or(unmask_right<Value>(bits), value);
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void unmask_right_into(Value& value, size_t bits) noexcept
 {
     value |= unmask_right<Value>(bits);
@@ -291,14 +296,14 @@ constexpr void unmask_right_into(Value& value, size_t bits) noexcept
 // signed Value transits unsigned, as native -<</->> is undefined/unspecified.
 
 // OPERATOR <<
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : value << shift % span;
 }
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
@@ -307,7 +312,7 @@ constexpr void shift_left_into(Value& value, size_t shift,
 }
 
 // signed overloads (shift left of negative is undefined behavior).
-template <typename Value, if_signed_integer<Value>>
+template <typename Value, if_signed_integral_integer<Value>>
 constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
@@ -315,7 +320,7 @@ constexpr Value shift_left(const Value& value, size_t shift,
     return overflow && shift >= span ? 0 :
         to_signed<Value>(to_unsigned(value) << shift % span);
 }
-template <typename Value, if_signed_integer<Value>>
+template <typename Value, if_signed_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
@@ -324,23 +329,23 @@ constexpr void shift_left_into(Value& value, size_t shift,
 }
 
 // OPERATOR >>
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : value >> shift % span;
 }
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    overflow&& shift >= span ? value = 0 : value >>= (shift % span);
+    overflow && shift >= span ? value = 0 : value >>= (shift % span);
 }
 
 // signed overloads (shift right of negative is unspecified behavior).
-template <typename Value, if_signed_integer<Value>>
+template <typename Value, if_signed_integral_integer<Value>>
 constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
@@ -348,7 +353,7 @@ constexpr Value shift_right(const Value& value, size_t shift,
     return overflow && shift >= span ? 0 :
         to_signed<Value>(to_unsigned(value) >> shift % span);
 }
-template <typename Value, if_signed_integer<Value>>
+template <typename Value, if_signed_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
@@ -364,7 +369,7 @@ constexpr void shift_right_into(Value& value, size_t shift,
 // Subtraction is between size_t operands and guarded by modulo.
 // Shift left/right of negative is undefined/unspecified, so these are unsigned.
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value rotate_left(const Value& value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();
@@ -372,7 +377,7 @@ constexpr Value rotate_left(const Value& value, size_t shift) noexcept
         shift_right(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void rotate_left_into(Value& value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();
@@ -380,7 +385,7 @@ constexpr void rotate_left_into(Value& value, size_t shift) noexcept
         shift_right(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value rotate_right(const Value& value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();
@@ -388,7 +393,7 @@ constexpr Value rotate_right(const Value& value, size_t shift) noexcept
         shift_left(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integer<Value>>
+template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void rotate_right_into(Value& value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();

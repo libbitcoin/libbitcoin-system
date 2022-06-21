@@ -40,11 +40,16 @@ template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true, if_integer<Base> = true, if_integer<Value> = true>
 constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
 
-/// Obtain the ceilinged (rounded up) integer base 2 logarithm of given value.
-/// Returns 0 for undefined (value < 1).
+/// Optimization for ceilinged_log(2, Value).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integer<Value> = true>
 constexpr Exponent ceilinged_log2(Value value) noexcept;
+
+/// Optimizations for ceilinged_log(unsigned, 256).
+constexpr size_t ceilinged_log256(uint8_t value) noexcept;
+constexpr size_t ceilinged_log256(uint16_t value) noexcept;
+constexpr size_t ceilinged_log256(uint32_t value) noexcept;
+constexpr size_t ceilinged_log256(uint64_t value) noexcept;
 
 /// Obtain the floored (rounded down) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
@@ -53,8 +58,7 @@ template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Value> = true>
 constexpr Exponent floored_log(Base base, Value value) noexcept;
 
-/// Obtain the floored (rounded down) integer base 2 logarithm of given value.
-/// Returns 0 for undefined (value < 1).
+/// Optimization for floored_log(2, Value).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integer<Value> = true>
 constexpr Exponent floored_log2(Value value) noexcept;
@@ -66,7 +70,7 @@ template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Exponent> = true>
 constexpr Value power(Base base, Exponent exponent) noexcept;
 
-/// Obtain the integer base 2 power for given exponent.
+/// Optimization for power(2, Exponent).
 template <typename Value = size_t, typename Exponent,
     if_integer<Value> = true, if_integer<Exponent> = true>
 constexpr Value power2(Exponent exponent) noexcept;

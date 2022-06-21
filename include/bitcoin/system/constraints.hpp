@@ -141,6 +141,16 @@ using if_not_same_signed_integer = std::enable_if_t<
 /// Integral integer types (native, non-floating math, no bool).
 
 template <typename Type>
+using if_signed_integral_integer = std::enable_if_t<is_integer<Type>() &&
+    std::is_signed<Type>::value && std::is_integral<Type>::value &&
+    is_integral_size<Type>(), bool>;
+
+template <typename Type>
+using if_unsigned_integral_integer = std::enable_if_t<is_integer<Type>() &&
+    !std::is_signed<Type>::value && std::is_integral<Type>::value &&
+    is_integral_size<Type>(), bool>;
+
+template <typename Type>
 using if_integral_integer = std::enable_if_t<is_integer<Type>() &&
     std::is_integral<Type>::value && is_integral_size<Type>(), bool>;
 
@@ -166,27 +176,9 @@ using unsigned_type =
 
 /// Endianness.
 
-constexpr bool is_big_endian_representation() noexcept
-{
-    union foo { uint8_t u1[2]; uint16_t u2; } constexpr bar{ 0x0001 };
-    return to_bool(bar.u1[1]);
-}
-
-constexpr bool is_little_endian_representation() noexcept
-{
-    union foo { uint8_t u1[2]; uint16_t u2; } constexpr bar{ 0x0001 };
-    return to_bool(bar.u1[0]);
-}
-
-constexpr bool is_unknown_endian_representation() noexcept
-{
-    return !is_big_endian_representation() &&
-        !is_little_endian_representation();
-}
-
-constexpr auto is_big_endian = is_big_endian_representation();
-constexpr auto is_little_endian = is_little_endian_representation();
-constexpr auto is_unknown_endian = is_unknown_endian_representation();
+constexpr auto is_big_endian = std::endian::native == std::endian::big;
+constexpr auto is_little_endian = std::endian::native == std::endian::little;
+constexpr auto is_unknown_endian = !is_big_endian && !is_little_endian;
 static_assert(!is_unknown_endian, "unsupported integer representation");
 
 template <typename Integer>

@@ -375,6 +375,16 @@ static_assert(is_true<if_non_integral_integer<uint256_t>>());
 ////static_assert(!is_true<if_non_integral_integer<double>>());
 ////static_assert(!is_true<if_non_integral_integer<base>>());
 
+static_assert(is_true<if_signed_integral_integer<char>>());
+////static_assert(!is_true<if_signed_integral_integer<uint8_t>>());
+////static_assert(!is_true<if_signed_integral_integer<bool>>());
+////static_assert(!is_true<if_signed_integral_integer<uintx>>());
+
+static_assert(is_true<if_unsigned_integral_integer<uint8_t>>());
+////static_assert(!is_true<if_unsigned_integral_integer<char>>());
+////static_assert(!is_true<if_unsigned_integral_integer<bool>>());
+////static_assert(!is_true<if_unsigned_integral_integer<uintx>>());
+
 // Unsigned type determination by byte width.
 static_assert(std::is_same<signed_type<0>, signed_size_t>::value);
 static_assert(std::is_same<signed_type<1>, int8_t>::value);
@@ -397,9 +407,6 @@ static_assert(std::is_same<unsigned_type<6>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<7>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<8>, uint64_t>::value);
 
-static_assert(!(is_big_endian_representation() && is_little_endian_representation()));
-static_assert(!(is_big_endian_representation() && is_unknown_endian_representation()));
-static_assert(!(is_little_endian_representation() && is_unknown_endian_representation()));
 static_assert(!(is_big_endian&& is_little_endian));
 static_assert(!(is_big_endian&& is_unknown_endian));
 static_assert(!(is_little_endian&& is_unknown_endian));

@@ -55,6 +55,41 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
     return exponent + ((power2<Value>(exponent) == value) ? 0 : 1);
 }
 
+constexpr size_t ceilinged_log256(uint8_t value) noexcept
+{
+    return
+        (value > 0x0000u ? 1 : 0);
+}
+
+constexpr size_t ceilinged_log256(uint16_t value) noexcept
+{
+    return
+        (value > 0x00ffu ? 2 :
+        (value > 0x0000u ? 1 : 0));
+}
+
+constexpr size_t ceilinged_log256(uint32_t value) noexcept
+{
+    return
+        (value > 0x00fffffful ? 4 :
+        (value > 0x0000fffful ? 3 :
+        (value > 0x000000fful ? 2 :
+        (value > 0x00000000ul ? 1 : 0))));
+}
+
+constexpr size_t ceilinged_log256(uint64_t value) noexcept
+{
+    return
+        (value > 0x00ffffffffffffffull ? 8 :
+        (value > 0x0000ffffffffffffull ? 7 :
+        (value > 0x000000ffffffffffull ? 6 :
+        (value > 0x00000000ffffffffull ? 5 :
+        (value > 0x0000000000ffffffull ? 4 :
+        (value > 0x000000000000ffffull ? 3 :
+        (value > 0x00000000000000ffull ? 2 :
+        (value > 0x0000000000000000ull ? 1 : 0))))))));
+}
+
 // Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent, typename Base, typename Value,
     if_integer<Exponent>, if_integer<Base>, if_integer<Value>>

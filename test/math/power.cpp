@@ -359,6 +359,17 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__power_2__identity)
     BOOST_REQUIRE_EQUAL(ceilinged_log2<unsigned>(uintx(power(2u, 15u))), 15u);
 }
 
+// ceilinged_log256
+static_assert(ceilinged_log256(0x0100000000000000ull) == 8);
+static_assert(ceilinged_log256(0x01000000000000ull) == 7);
+static_assert(ceilinged_log256(0x010000000000ull) == 6);
+static_assert(ceilinged_log256(0x0100000000ull) == 5);
+static_assert(ceilinged_log256(0x01000000ull) == 4);
+static_assert(ceilinged_log256(0x010000ull) == 3);
+static_assert(ceilinged_log256(0x0100ull) == 2);
+static_assert(ceilinged_log256(0x01ull) == 1);
+static_assert(ceilinged_log256(0x00ull) == 0);
+
 // floored_log2
 
 // power__floored_log2__zero__undefined
@@ -560,7 +571,6 @@ BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__power_2__identity)
 }
 
 // TODO: test power return types (default to size_t).
-// TODO: change to static_assert (now constexpr).
 
 // power2
 

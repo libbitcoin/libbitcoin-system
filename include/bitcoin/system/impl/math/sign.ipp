@@ -31,7 +31,7 @@ constexpr Signed to_signed(Integer value) noexcept
 {
     return possible_sign_cast<Signed>(value);
 }
-    
+
 template <typename Integer, typename Unsigned, if_integer<Integer>>
 constexpr Unsigned to_unsigned(Integer value) noexcept
 {
