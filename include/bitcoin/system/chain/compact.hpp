@@ -29,18 +29,16 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// TODO: move implementation to .ipp.
 class BC_API compact
 {
 public:
-    // Used only for chain_state assertion against previous block bits.
-    static constexpr bool is_valid(uint32_t compact) noexcept
-    {
-        const auto mantissa = bit_and(compact, mantissa_bits);
-        const size_t exponent = shift_right(compact, mantissa_width);
-        return is_valid(exponent, mantissa);
-    }
+    static bool is_valid(uint32_t compact) noexcept;
 
+    // TODO: constexpr.
     static uint32_t compress(const uint256_t& big) noexcept;
+
+    // TODO: constexpr/inline.
     static bool expand(uint256_t& big, uint32_t small) noexcept;
     static uint256_t expand(uint32_t small) noexcept;
 
@@ -51,41 +49,14 @@ private:
 
     static constexpr auto exponent_bits = unmask_left<uint32_t>(exponent_width);
     static constexpr auto mantissa_bits = unmask_right<uint32_t>(mantissa_width);
+    static_assert((exponent_bits + mantissa_bits) == sub1(power2(bit_width)));
 
     // The inflection point is a function of the mantissa domain.
     static constexpr auto point = ceilinged_log256(bit_and(max_uint32, mantissa_bits));
-    static_assert((exponent_bits + mantissa_bits) == sub1(power2(bit_width)));
     static_assert(point == 3u);
 
-    static constexpr bool is_signed(size_t compact) noexcept
-    {
-        return get_right(compact, sub1(mantissa_width));
-    }
-
-    static constexpr bool is_valid(size_t exponent, uint32_t mantissa) noexcept
-    {
-        //*********************************************************************
-        // CONSENSUS: High mantissa bit (sign) set returns zero (invalid).
-        // Zero mantissa would not be shifted and would return zero (invalid).
-        // Presumably these were originally caused by "if (mantissa > 0)..."
-        //*********************************************************************
-        if (is_zero(mantissa) || is_signed(mantissa))
-            return false;
-
-        // Nothing to shift (above), or no left shift to cause an overflow.
-        if (!(exponent > point))
-            return true;
-
-        // If (<< bits) > (256 - mantissa width) then would shift to zero.
-        return !((exponent - point) > (bit_width - ceilinged_log256(mantissa)));
-    }
-
-    static bool from_compact(uint256_t& out, uint32_t compact) noexcept;
-    static uint32_t from_big(const uint256_t& big) noexcept;
-
-    uint256_t big_;
-    uint32_t normal_;
-    bool overflowed_;
+    static bool is_signed(size_t compact) noexcept;
+    static bool is_valid(size_t exponent, uint32_t mantissa) noexcept;
 };
 
 } // namespace chain

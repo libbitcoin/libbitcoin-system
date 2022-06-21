@@ -21,12 +21,46 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+// private
+bool compact::is_signed(size_t compact) noexcept
+{
+    return get_right(compact, sub1(mantissa_width));
+}
+
+// private
+bool compact::is_valid(size_t exponent, uint32_t mantissa) noexcept
+{
+    //*************************************************************************
+    // CONSENSUS: High mantissa bit (sign) set returns zero (invalid).
+    // Zero mantissa would not be shifted and would return zero (invalid).
+    // Presumably these were originally caused by "if (mantissa > 0)..."
+    //*************************************************************************
+    if (is_zero(mantissa) || is_signed(mantissa))
+        return false;
+
+    // Nothing to shift (above), or no left shift to cause an overflow.
+    if (!(exponent > point))
+        return true;
+
+    // If (<< bits) > (256 - mantissa width) then would shift to zero.
+    return !((exponent - point) > (bit_width - ceilinged_log256(mantissa)));
+}
+
+// Used only for chain_state assertion against previous block bits.
+bool compact::is_valid(uint32_t compact) noexcept
+{
+    const auto mantissa = bit_and(compact, mantissa_bits);
+    const size_t exponent = shift_right(compact, mantissa_width);
+    return is_valid(exponent, mantissa);
+}
 
 uint32_t compact::compress(const uint256_t& big) noexcept
 {
@@ -35,7 +69,7 @@ uint32_t compact::compress(const uint256_t& big) noexcept
     auto mantissa = static_cast<size_t>
     (
         exponent > point ?
-            big >> to_bits(exponent - point) : // / 2^(8*(255..253))
+            big >> to_bits(exponent - point) : // / 2^(8*(004..255))
             big << to_bits(point - exponent)   // * 2^(8*(000..003))
     );
 
@@ -50,13 +84,6 @@ uint32_t compact::compress(const uint256_t& big) noexcept
     // Assemble the exponential representation.
     return narrow_cast<uint32_t>(bit_or(shift_left(exponent, mantissa_width),
         mantissa));
-}
-
-uint256_t compact::expand(uint32_t small) noexcept
-{
-    uint256_t big;
-    expand(big, small);
-    return big;
 }
 
 bool compact::expand(uint256_t& big, uint32_t small) noexcept
@@ -80,10 +107,17 @@ bool compact::expand(uint256_t& big, uint32_t small) noexcept
     big = mantissa;
 
     exponent > point ?
-        big <<= to_bits(exponent - point) :    // * 2^(8*(255..253))
+        big <<= to_bits(exponent - point) :    // * 2^(8*(004..255))
         big >>= to_bits(point - exponent);     // / 2^(8*(000..003))
 
     return true;
+}
+
+uint256_t compact::expand(uint32_t small) noexcept
+{
+    uint256_t big;
+    expand(big, small);
+    return big;
 }
 
 } // namespace chain
