@@ -235,9 +235,8 @@ hash_digest header::hash() const noexcept
 // static/private
 uint256_t header::difficulty(uint32_t bits) noexcept
 {
-    const compact header_bits(bits);
-
-    if (header_bits.is_overflowed())
+    uint256_t target;
+    if (!compact::expand(target, bits))
         return zero;
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
@@ -245,20 +244,17 @@ uint256_t header::difficulty(uint32_t bits) noexcept
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
 
-    const auto target = header_bits.to_uint256();
-    const auto divisor = add1(target);
-
     //*************************************************************************
-    // CONSENSUS: satoshi will throw division by zero in the case where the
-    // target is (2^256)-1 as the overflow will result in a zero divisor.
-    // TODO: determine if this is obtainable from compact.to_uint256().
+    // CONSENSUS: If target is (2^256)-1 this would fail, however compact
+    // cannot expand bits into a value of (2^256)-1 (see comments in compact).
     //*************************************************************************
-    return is_zero(divisor) ? zero : add1(~target / divisor);
+    return add1(bit_not(target) / add1(target));
 }
 
 // computed
 uint256_t header::difficulty() const noexcept
 {
+    // Returns zero if bits_ mantissa is less than one or bits_ is overflowed.
     return difficulty(bits_);
 }
 
@@ -268,25 +264,21 @@ uint256_t header::difficulty() const noexcept
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     bool scrypt) const noexcept
 {
-    static const auto limit = compact(proof_of_work_limit).to_uint256();
-    const auto bits = compact(bits_);
+    static const auto limit = compact::expand(proof_of_work_limit);
 
-    // TODO: bool compact::is_overflow(bits_).
-    if (bits.is_overflowed())
+    //*************************************************************************
+    // CONSENSUS: Compact may also be overflowed, which is guarded here.
+    // A target of zero is disallowed due to unfortunate sign check in compact.
+    //*************************************************************************
+    uint256_t target;
+    if (!compact::expand(target, bits_))
         return true;
 
-    // TODO: incorporate overflow in return.
-    // TODO: bool compact::from_compact(compact).
-    const auto target = bits.to_uint256();
-
-    // A lower numeric value is greater work.
-    // Ensure claimed work is at or above minimum configured.
-    // Zero disallowed as it implies signed mantissa in compact representation.
-    if (target < one || target > limit)
+    // Ensure claimed work is at or above minimum (less is more).
+    if (target > limit)
         return true;
 
     // Conditionally use scrypt proof of work (e.g. Litecoin).
-    // Ensure actual work is at least claimed amount (smaller is more work).
     return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) > target;
 }
 

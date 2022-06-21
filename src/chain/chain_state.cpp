@@ -303,9 +303,8 @@ size_t chain_state::bip9_bit1_height(size_t height,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) noexcept
 {
-    // TODO: compact::is_overflow(bits_high(values)).
-    BC_ASSERT_MSG(!compact(bits_high(values)).is_overflowed(),
-        "previous block has bad bits");
+    BC_ASSERT_MSG(compact::is_valid(bits_high(values)),
+        "previous block has invalid bits value");
 
     // Invalid parameter via public interface, test is_valid for results.
     if (is_zero(values.height))
@@ -360,10 +359,8 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     uint32_t proof_of_work_limit, uint32_t minimum_timespan,
     uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept
 {
-    // TODO: compact::from_compact(proof_of_work_limit).
-    // TODO: compact::from_compact(bits_high(values)).
-    static const auto limit = compact(proof_of_work_limit).to_uint256();
-    auto target = compact(bits_high(values)).to_uint256();
+    static const auto limit = compact::expand(proof_of_work_limit);
+    auto target = compact::expand(bits_high(values));
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
     const auto timewarp = to_int(patch_timewarp(forks, limit, target));
@@ -373,9 +370,8 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     target /= retargeting_interval_seconds;
     target <<= timewarp;
 
-    // TODO: compact::to_compact(target).
     // Disallow target from falling below minimum configured.
-    return target > limit ? proof_of_work_limit : compact(target).to_uint32();
+    return target > limit ? proof_of_work_limit : compact::compress(target);
 }
 
 inline uint32_t easy_time_limit(const chain_state::data& values,

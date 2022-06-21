@@ -19,36 +19,67 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// A signed but zero-floored scientific notation in 32 bits.
 class BC_API compact
 {
 public:
-    /// Construct a normal form compact number from a 32 bit compact number.
-    explicit compact(uint32_t compact) noexcept;
+    // Used only for chain_state assertion against previous block bits.
+    static constexpr bool is_valid(uint32_t compact) noexcept
+    {
+        const auto mantissa = bit_and(compact, mantissa_bits);
+        const size_t exponent = shift_right(compact, mantissa_width);
+        return is_valid(exponent, mantissa);
+    }
 
-    /// Construct a normal form compact number from a 256 bit number
-    explicit compact(const uint256_t& big) noexcept;
-
-    /// True if construction overflowed.
-    bool is_overflowed() const noexcept;
-
-    /// Consensus-normalized compact number value.
-    /// This is derived from the construction parameter.
-    uint32_t to_uint32() const noexcept;
-
-    /// Big number that the compact number represents.
-    /// This is either saved or generated from the construction parameter.
-    uint256_t to_uint256() const noexcept;
+    static uint32_t compress(const uint256_t& big) noexcept;
+    static bool expand(uint256_t& big, uint32_t small) noexcept;
+    static uint256_t expand(uint32_t small) noexcept;
 
 private:
+    static constexpr size_t exponent_width = 8u;
+    static constexpr auto bit_width = width<uint32_t>();
+    static constexpr auto mantissa_width = bit_width - exponent_width;
+
+    static constexpr auto exponent_bits = unmask_left<uint32_t>(exponent_width);
+    static constexpr auto mantissa_bits = unmask_right<uint32_t>(mantissa_width);
+
+    // The inflection point is a function of the mantissa domain.
+    static constexpr auto point = ceilinged_log256(bit_and(max_uint32, mantissa_bits));
+    static_assert((exponent_bits + mantissa_bits) == sub1(power2(bit_width)));
+    static_assert(point == 3u);
+
+    static constexpr bool is_signed(size_t compact) noexcept
+    {
+        return get_right(compact, sub1(mantissa_width));
+    }
+
+    static constexpr bool is_valid(size_t exponent, uint32_t mantissa) noexcept
+    {
+        //*********************************************************************
+        // CONSENSUS: High mantissa bit (sign) set returns zero (invalid).
+        // Zero mantissa would not be shifted and would return zero (invalid).
+        // Presumably these were originally caused by "if (mantissa > 0)..."
+        //*********************************************************************
+        if (is_zero(mantissa) || is_signed(mantissa))
+            return false;
+
+        // Nothing to shift (above), or no left shift to cause an overflow.
+        if (!(exponent > point))
+            return true;
+
+        // If (<< bits) > (256 - mantissa width) then would shift to zero.
+        return !((exponent - point) > (bit_width - ceilinged_log256(mantissa)));
+    }
+
     static bool from_compact(uint256_t& out, uint32_t compact) noexcept;
     static uint32_t from_big(const uint256_t& big) noexcept;
 

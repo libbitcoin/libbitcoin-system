@@ -18,183 +18,72 @@
  */
 #include <bitcoin/system/chain/compact.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/uintx.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
-
-// TODO: move to .ipp and make all constexpr.
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Bitcoin compact for represents a value in base 256 notation as follows:
-// value = (-1^sign) * mantissa * 256^(exponent-3)
-
-// [exponent:8 | sign:1 | mantissa:31]
-static constexpr uint32_t exp_byte = 0xff000000;
-static constexpr uint32_t sign_bit = 0x00800000;
-static constexpr uint32_t mantissa_max = ~(exp_byte | sign_bit);
-static constexpr size_t mantissa_bits = to_bits(sub1(sizeof(uint32_t)));
-
-// Assertions.
-BC_DEBUG_ONLY(static constexpr uint32_t mantissa_mask = ~mantissa_max;)
-BC_DEBUG_ONLY(static constexpr uint32_t first_byte_mask = 0xffffff00;)
-
-// Inlines.
-// ----------------------------------------------------------------------------
-
-bool is_negated(uint32_t compact) noexcept
+uint32_t compact::compress(const uint256_t& big) noexcept
 {
-    return to_bool(compact & sign_bit);
-}
+    // Create the exponential components.
+    auto exponent = ceilinged_log256(big);
+    auto mantissa = static_cast<size_t>
+    (
+        exponent > point ?
+            big >> to_bits(exponent - point) : // / 2^(8*(255..253))
+            big << to_bits(point - exponent)   // * 2^(8*(000..003))
+    );
 
-bool is_nonzero(uint32_t compact) noexcept
-{
-    return to_bool(compact & mantissa_max);
-}
-
-uint8_t log_256(uint32_t mantissa) noexcept
-{
-    ////BC_ASSERT_MSG(mantissa <= 0x00ffffff, "mantissa log256 is 4");
-
-    return
-        (mantissa > 0x0000ffff ? 3 :
-        (mantissa > 0x000000ff ? 2 :
-        (mantissa > 0x00000000 ? 1 : 0)));
-}
-
-uint32_t shift_low(uint8_t exponent) noexcept
-{
-    ////BC_ASSERT(exponent <= 3);
-    return to_bits(3 - exponent);
-}
-
-uint32_t shift_high(uint8_t exponent) noexcept
-{
-    ////BC_ASSERT(exponent > 3);
-    return to_bits(exponent - 3);
-}
-
-bool is_overflow(uint8_t exponent, uint32_t mantissa) noexcept
-{
-    // Overflow if exponent would shift the mantissa more than 32 bytes.
-    return to_bool(mantissa) && (exponent > (32 + 3 - log_256(mantissa)));
-}
-
-size_t logical_size(uint256_t value) noexcept
-{
-    auto byte = zero;
-
-    for (; !is_zero(value); ++byte)
-        value >>= byte_bits;
-
-    return byte;
-}
-
-// Constructors.
-// ----------------------------------------------------------------------------
-
-compact::compact(uint32_t compact) noexcept
-{
-    overflowed_ = !from_compact(big_, compact);
-    normal_ = from_big(big_);
-}
-
-compact::compact(const uint256_t& value) noexcept
-  : big_(value), overflowed_(false)
-{
-    normal_ = from_big(big_);
-}
-
-// Properties.
-// ----------------------------------------------------------------------------
-
-bool compact::is_overflowed() const noexcept
-{
-    return overflowed_;
-}
-
-uint32_t compact::to_uint32() const noexcept
-{
-    return normal_;
-}
-
-uint256_t compact::to_uint256() const noexcept
-{
-    return big_;
-}
-
-// Conversions.
-// ----------------------------------------------------------------------------
-
-// Returns false on overflow, negatives are converted to zero.
-bool compact::from_compact(uint256_t& out, uint32_t compact) noexcept
-{
-    //*************************************************************************
-    // CONSENSUS: The sign bit is not honored and it instead produces zero.
-    // This results from having used a signed data structure for unsigned data.
-    //*************************************************************************
-    if (is_negated(compact))
+    // Drop high mantissa bit into exponent (precision loss).
+    // Presumably neccesitated by unfortunate negative guard in from_compact.
+    if (is_signed(mantissa))
     {
-        out = 0;
-        return true;
+        ++exponent;
+        mantissa >>= to_bits(one);             // / 2^(8*1)
     }
 
-    // Mask off the exponent byte and sign to get the mantissa.
-    auto mantissa = compact & mantissa_max;
+    // Assemble the exponential representation.
+    return narrow_cast<uint32_t>(bit_or(shift_left(exponent, mantissa_width),
+        mantissa));
+}
 
-    // Shift off the mantissa and sign to get the exponent byte.
-    const auto exponent = narrow_cast<uint8_t>(compact >> mantissa_bits);
+uint256_t compact::expand(uint32_t small) noexcept
+{
+    uint256_t big;
+    expand(big, small);
+    return big;
+}
 
-    // Shift the mantissa into the big number.
-    if (exponent <= 3)
+bool compact::expand(uint256_t& big, uint32_t small) noexcept
+{
+    // Parse the exponential representation.
+    const auto mantissa = bit_and(small, mantissa_bits);
+    const auto exponent = shift_right(small, mantissa_width);
+
+    //*************************************************************************
+    // CONSENSUS: Only an invalid compact number could produce a -1 big number.
+    // This is precluded (at least) because mantissa high bit cannot be set.
+    // This assures that `add1(bit_not(target) / add1(target))` in header will
+    // not result in a division-by-zero condition.
+    //*************************************************************************
+    if (!is_valid(exponent, mantissa))
     {
-        mantissa >>= shift_low(exponent);
-        out = mantissa;
-        return true;
-    }
-
-    // Compact has space for more exponent bits than can be represented in a
-    // base 256 number represented in 32 bytes, so we trap overflow here.
-    if (is_overflow(exponent, mantissa))
+        big = zero;
         return false;
-
-    out = mantissa;
-    out <<= shift_high(exponent);
-    return true;
-}
-
-uint32_t compact::from_big(const uint256_t& big) noexcept
-{
-    // This value is limited to 32, so exponent cannot overflow.
-    auto exponent = narrow_cast<uint8_t>(logical_size(big));
-
-    // Shift the big number significant digits into the mantissa.
-    const auto mantissa64 = exponent <= 3 ?
-        static_cast<uint64_t>(big) << shift_low(exponent) :
-        static_cast<uint64_t>(big >> shift_high(exponent));
-
-    auto mantissa = narrow_cast<uint32_t>(mantissa64);
-
-    //*************************************************************************
-    // CONSENSUS: Satoshi used a signed implementation to represent unsigned.
-    // If the sign bit is set drop it from the mantissa into the exponent.
-    // This is intended to prevent the appearance of a negative sign bit.
-    //*************************************************************************
-    if (is_negated(mantissa))
-    {
-        exponent++;
-        mantissa >>= byte_bits;
     }
 
-    BC_ASSERT_MSG(is_zero(exponent & first_byte_mask), "size excess");
-    BC_ASSERT_MSG(is_zero(mantissa & mantissa_mask), "value excess");
+    big = mantissa;
 
-    // Assemble the compact notation.
-    return (exponent << mantissa_bits) | mantissa;
+    exponent > point ?
+        big <<= to_bits(exponent - point) :    // * 2^(8*(255..253))
+        big >>= to_bits(point - exponent);     // / 2^(8*(000..003))
+
+    return true;
 }
 
 } // namespace chain
