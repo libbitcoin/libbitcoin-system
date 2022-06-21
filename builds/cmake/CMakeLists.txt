@@ -30,7 +30,7 @@ else ()
   set( libdir "\${exec_prefix}/lib" )
   set( includedir "\${exec_prefix}/include" )
 
-  set( PACKAGE_VERSION "4.0.0" )
+  set( PACKAGE_VERSION "3.7.0" )
   set( VERSION "${PACKAGE_VERSION}" )
 endif ()
 
@@ -59,6 +59,9 @@ add_compile_options( "-Wno-missing-braces" )
 
 # Ignore comments within comments or commenting of backslash extended lines.
 add_compile_options( "-Wno-comment" )
+
+# Suppress warning for copy of implicitly generated copy constructor.
+add_compile_options( "-Wno-deprecated-copy" )
 
 # Allow use of C99 'long long' type.
 add_compile_options( "-Wno-long-long" )
@@ -423,11 +426,6 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/wallet/ek_token.cpp"
     "../../src/wallet/electrum.cpp"
     "../../src/wallet/electrum_dictionary.cpp"
-    "../../src/wallet/electrum_dictionary_en.cpp"
-    "../../src/wallet/electrum_dictionary_es.cpp"
-    "../../src/wallet/electrum_dictionary_ja.cpp"
-    "../../src/wallet/electrum_dictionary_pt.cpp"
-    "../../src/wallet/electrum_dictionary_zh_Hans.cpp"
     "../../src/wallet/encrypted_keys.cpp"
     "../../src/wallet/hd_private.cpp"
     "../../src/wallet/hd_public.cpp"
