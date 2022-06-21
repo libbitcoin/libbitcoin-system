@@ -27,8 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-// Uses typed add/substract functions to preclude integer promotions.
-
 // helpers
 // ----------------------------------------------------------------------------
 

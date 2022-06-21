@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
+#include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -28,14 +29,15 @@
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
-// bytes
-// safe
-// safe<-limits, power, addition
-// power<-limits
-// sign<-limits, power, division, addition, bits
-// power<-bits
-// addition<-division
-// division<-bits
+// Inclusion dependencies:
+// bits     <-
+// bytes    <-
+// limits   <-
+// addition <-
+// division <- [bits]
+// power    <- [bits, limits]
+// safe     <- [bits, limits, addition], sign, power
+// sign     <- [bits, limits, addition, division], power
 
 // safe.hpp
 // ============================================================================
