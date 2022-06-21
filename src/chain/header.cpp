@@ -245,14 +245,13 @@ uint256_t header::difficulty(uint32_t bits) noexcept
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
 
-    const uint256_t target(header_bits.to_uint32());
+    const auto target = header_bits.to_uint256();
     const auto divisor = add1(target);
 
     //*************************************************************************
     // CONSENSUS: satoshi will throw division by zero in the case where the
     // target is (2^256)-1 as the overflow will result in a zero divisor.
-    // While actually achieving this work is improbable, this method operates
-    // on a public method and therefore must be guarded.
+    // TODO: determine if this is obtainable from compact.to_uint256().
     //*************************************************************************
     return is_zero(divisor) ? zero : add1(~target / divisor);
 }
@@ -278,7 +277,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 
     // TODO: incorporate overflow in return.
     // TODO: bool compact::from_compact(compact).
-    const uint256_t target(bits.to_uint32());
+    const auto target = bits.to_uint256();
 
     // A lower numeric value is greater work.
     // Ensure claimed work is at or above minimum configured.
