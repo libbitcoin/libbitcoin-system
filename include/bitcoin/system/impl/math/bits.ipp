@@ -43,7 +43,7 @@ namespace system {
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
-    return is_zero(value) ? zero : add1(floored_log2(value));
+    return ceilinged_log2(value);
 }
 
 // Negtiave *values* always return width<Value>() as the high order bit is set.
