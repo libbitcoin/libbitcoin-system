@@ -59,6 +59,7 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
     return possible_sign_cast<Exponent>(std::bit_width(from));
 }
 
+// TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_integer<Exponent>, if_non_integral_integer<Value>>
@@ -106,6 +107,7 @@ constexpr size_t ceilinged_log256(Value value) noexcept
     return (compare > 0x00u) ? 1 : 0;
 }
     
+// TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_bytes<Exponent>, if_integer<Exponent>, if_non_integral_integer<Value>>
@@ -116,7 +118,7 @@ constexpr size_t ceilinged_log256(Value value) noexcept
 
     // Shift is undefined if >= to the width of the promoted left operand.
     Exponent exponent = 0;
-    while (value > 0) { ++exponent; value >> 8; }
+    while (value > 0) { ++exponent; value >>= 8; }
     return exponent;
 }
 
@@ -149,6 +151,7 @@ constexpr Exponent floored_log2(Value value) noexcept
     return possible_sign_cast<Exponent>(sub1(std::bit_width(from)));
 }
 
+// TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_integer<Exponent>, if_non_integral_integer<Value>>
@@ -195,6 +198,7 @@ constexpr Exponent floored_log256(Value value) noexcept
     return (compare > 0xffu) ? 1 : 0;
 }
 
+// TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
     if_bytes<Exponent>, if_integer<Exponent>, if_non_integral_integer<Value>>
@@ -250,6 +254,7 @@ constexpr Value power2(Exponent exponent) noexcept
     return to_int<Value>(true) << to_unsigned(exponent);
 }
 
+// TODO: test (uintx).
 // Returns 0 for undefined (0^0).
 template <typename Value, typename Exponent,
     if_non_integral_integer<Value>, if_integer<Exponent>>
