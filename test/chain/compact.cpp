@@ -25,7 +25,7 @@ using namespace system::chain;
 #define PRIMES "020305070b0d1113171d1f25292b2f353b3d4347494f53596165676b6d717f83"
 static const auto primes = base16_hash(PRIMES);
 
-static uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa)
+static uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa) noexcept
 {
     // The exponent of a non-zero mantissa is valid from -3 to +29.
     BC_ASSERT(logical_exponent >= -3 && logical_exponent <= 252);

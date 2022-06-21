@@ -235,7 +235,7 @@ hash_digest header::hash() const noexcept
 // static/private
 uint256_t header::difficulty(uint32_t bits) noexcept
 {
-    const auto header_bits = compact(bits);
+    const compact header_bits(bits);
 
     if (header_bits.is_overflowed())
         return zero;
@@ -245,7 +245,7 @@ uint256_t header::difficulty(uint32_t bits) noexcept
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
 
-    uint256_t target(header_bits.to_uint32());
+    const uint256_t target(header_bits.to_uint32());
     const auto divisor = add1(target);
 
     //*************************************************************************
@@ -272,12 +272,17 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     static const auto limit = compact(proof_of_work_limit).to_uint256();
     const auto bits = compact(bits_);
 
+    // TODO: bool compact::is_overflow(bits_).
     if (bits.is_overflowed())
         return true;
 
-    uint256_t target(bits.to_uint32());
+    // TODO: incorporate overflow in return.
+    // TODO: bool compact::from_compact(compact).
+    const uint256_t target(bits.to_uint32());
 
-    // Ensure claimed work is within limits.
+    // A lower numeric value is greater work.
+    // Ensure claimed work is at or above minimum configured.
+    // Zero disallowed as it implies signed mantissa in compact representation.
     if (target < one || target > limit)
         return true;
 

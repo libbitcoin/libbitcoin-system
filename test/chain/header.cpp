@@ -61,7 +61,7 @@ public:
 
 BOOST_AUTO_TEST_CASE(header__constructor__default__invalid)
 {
-    header instance;
+    const header instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
@@ -82,12 +82,12 @@ BOOST_AUTO_TEST_CASE(header__constructor__copy__expected)
 
 BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
 {
-    const uint32_t version = 10;
     const auto previous = hash1;
     const auto merkle = hash2;
-    const uint32_t timestamp = 531234;
-    const uint32_t bits = 6523454;
-    const uint32_t nonce = 68644;
+    constexpr uint32_t version = 10;
+    constexpr uint32_t timestamp = 531234;
+    constexpr uint32_t bits = 6523454;
+    constexpr uint32_t nonce = 68644;
 
     auto merkle_copy = merkle;
     auto previous_copy = previous;
@@ -103,12 +103,12 @@ BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
 {
-    const uint32_t version = 10;
     const auto previous = hash1;
     const auto merkle = hash2;
-    const uint32_t timestamp = 531234;
-    const uint32_t bits = 6523454;
-    const uint32_t nonce = 68644;
+    constexpr uint32_t version = 10;
+    constexpr uint32_t timestamp = 531234;
+    constexpr uint32_t bits = 6523454;
+    constexpr uint32_t nonce = 68644;
 
     const header instance(version, previous, merkle, timestamp, bits, nonce);
     BOOST_REQUIRE(instance.is_valid());
@@ -152,39 +152,39 @@ BOOST_AUTO_TEST_CASE(header__constructor__reader__expected)
 BOOST_AUTO_TEST_CASE(header__assign__move__expected)
 {
     const auto& alpha = expected_header;
-    auto gamma = alpha;
-    const auto beta = std::move(gamma);
+    const header gamma{ alpha };
+    const header beta = std::move(gamma);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(header__assign__copy__expected)
 {
     const auto& alpha = expected_header;
-    const auto beta = alpha;
+    const header beta{ alpha };
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(header__equality__same__true)
 {
-    header instance(expected_header);
+    const header instance(expected_header);
     BOOST_REQUIRE(instance == expected_header);
 }
 
 BOOST_AUTO_TEST_CASE(header__equality__different__false)
 {
-    header instance;
+    const header instance;
     BOOST_REQUIRE(!(instance == expected_header));
 }
 
 BOOST_AUTO_TEST_CASE(header__inequality__same__true)
 {
-    header instance(expected_header);
+    const header instance(expected_header);
     BOOST_REQUIRE(!(instance != expected_header));
 }
 
 BOOST_AUTO_TEST_CASE(header__inequality__different__false)
 {
-    header instance;
+    const header instance;
     BOOST_REQUIRE(instance != expected_header);
 }
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(header__to_data__writer__expected)
 
 BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
 {
-    const auto block = settings(selection::mainnet).genesis_block;
+    const chain::block block{ settings(selection::mainnet).genesis_block };
     BOOST_REQUIRE_EQUAL(block.header().difficulty(), 0x0000000100010001);
 }
 
@@ -321,8 +321,8 @@ BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits_
 BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_less_than_2_hours_from_now__false)
 {
     const auto now = std::chrono::system_clock::now();
-    const auto now_time = std::chrono::system_clock::to_time_t(now);
-    const accessor instance{ {}, hash_digest{}, {}, static_cast<uint32_t>(now_time), {}, {} };
+    const auto now_time = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now));
+    const accessor instance{ {}, hash_digest{}, {}, now_time, {}, {} };
     BOOST_REQUIRE(!instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
 }
 
@@ -330,8 +330,8 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_greater_than_2_hour
 {
     const auto now = std::chrono::system_clock::now();
     const auto duration = std::chrono::hours(3);
-    const auto future = std::chrono::system_clock::to_time_t(now + duration);
-    const accessor instance{ {}, hash_digest{}, {}, static_cast<uint32_t>(future), {}, {} };
+    const auto future = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now + duration));
+    const accessor instance{ {}, hash_digest{}, {}, future, {}, {} };
     BOOST_REQUIRE(instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
 }
 
