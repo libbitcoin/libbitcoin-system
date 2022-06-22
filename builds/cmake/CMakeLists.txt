@@ -114,6 +114,12 @@ if (BUILD_SHARED_LIBS)
     add_definitions( -DBOOST_ALL_DYN_LINK )
 endif()
 
+if (BUILD_SHARED_LIBS)
+    set( Boost_USE_STATIC_LIBS "off" )
+else()
+    set( Boost_USE_STATIC_LIBS "on" )
+endif()
+
 # Find boost
 #------------------------------------------------------------------------------
 find_package( Boost 1.72.0 REQUIRED COMPONENTS
