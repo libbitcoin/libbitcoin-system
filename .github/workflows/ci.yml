@@ -10,7 +10,7 @@ name: Continuous Integration Build
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-  verify-installsh:
+  autotools:
 
     strategy:
       fail-fast: false
@@ -195,7 +195,7 @@ jobs:
         run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
 
-  verify-install-cmake:
+  cmake:
 
     strategy:
       fail-fast: false
@@ -342,7 +342,7 @@ jobs:
           cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
           ls ${{ github.workspace }}/prefixenv/lib/cmake
 
-  verify-sln:
+  msbuild:
     strategy:
       fail-fast: false
 
