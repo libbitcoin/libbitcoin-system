@@ -44,7 +44,7 @@ namespace system {
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) noexcept
-  : stream_(source), remaining_(std::numeric_limits<size_t>::max())
+  : stream_(source), remaining_(system::maximum<size_t>())
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
     ////    "Input stream must not be configured to throw exceptions.");

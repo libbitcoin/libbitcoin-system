@@ -34,14 +34,14 @@ template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
 constexpr bool is_limited(Integer value) noexcept
 {
-    return is_limited(value, std::numeric_limits<By>::max());
+    return is_limited(value, maximum<By>());
 }
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
 constexpr bool is_limited(Integer value, By maximum) noexcept
 {
-    return is_limited(value, std::numeric_limits<By>::min(), maximum);
+    return is_limited(value, minimum<By>(), maximum);
 }
 
 template <typename By, typename Integer,
@@ -57,14 +57,14 @@ template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value) noexcept
 {
-    return limit(value, std::numeric_limits<Result>::max());
+    return limit(value, maximum<Result>());
 }
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value, Result maximum) noexcept
 {
-    return limit(value, std::numeric_limits<Result>::min(), maximum);
+    return limit(value, minimum<Result>(), maximum);
 }
 
 template <typename Result, typename Integer,
@@ -77,6 +77,18 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 }
 
 // minimum/maximum
+
+template <typename Integer, if_integral_integer<Integer>>
+constexpr Integer minimum() noexcept
+{
+    return std::numeric_limits<Integer>::min();
+}
+
+template <typename Integer, if_integral_integer<Integer>>
+constexpr Integer maximum() noexcept
+{
+    return std::numeric_limits<Integer>::max();
+}
 
 template <size_t Bytes, typename Return>
 constexpr Return minimum() noexcept
@@ -94,7 +106,7 @@ constexpr Return maximum() noexcept
     return to_signed(sub1(power2<positive>(sub1(to_bits(Bytes)))));
 }
 
-// bitcoin_minimum/bitcoin_maximum
+// bitcoin_minimum/bitcoin_maximum (stack_number)
 
 template <size_t Bytes, typename Return>
 constexpr Return bitcoin_min() noexcept

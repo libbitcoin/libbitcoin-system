@@ -25,6 +25,7 @@
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -44,8 +45,7 @@ void pseudo_random::fill(data_chunk& out) noexcept
 
 uint8_t pseudo_random::next() noexcept
 {
-    return next(std::numeric_limits<uint8_t>::min(),
-        std::numeric_limits<uint8_t>::max());
+    return next(minimum<uint8_t>(), maximum<uint8_t>());
 }
 
 uint8_t pseudo_random::next(uint8_t begin, uint8_t end) noexcept

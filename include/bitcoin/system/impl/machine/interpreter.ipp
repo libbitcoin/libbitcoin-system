@@ -637,7 +637,7 @@ op_add1() noexcept
     if (!state::pop_signed32(number))
         return error::op_add1;
 
-    state::push_signed64(increment<int64_t>(number));
+    state::push_signed64(add1<int64_t>(number));
     return error::op_success;
 }
 
@@ -649,7 +649,7 @@ op_sub1() noexcept
     if (!state::pop_signed32(number))
         return error::op_sub1;
 
-    state::push_signed64(decrement<int64_t>(number));
+    state::push_signed64(sub1<int64_t>(number));
     return error::op_success;
 }
 

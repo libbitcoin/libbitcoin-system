@@ -21,7 +21,6 @@
 
 #include <cstddef>
 #include <cstdint>
-////#include <execution>
 #include <limits>
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
@@ -29,18 +28,15 @@
 
 namespace libbitcoin {
 
-// C++17:
-/// Parallel and unsequenced execution policy.
-///constexpr auto parallel = std::execution::par_unseq;
-
-// Avoid typed casts due to circular header inclusion.
-// Avoid integral constants due to pre-cast integral conversion.
+/// Avoid typed casts due to circular header inclusion.
+/// All values converted and specified domain and reconverted to domain.
+/// This isolates integral promotion, and caller controls operating domain.
 
 template <typename Type>
 constexpr bool is_zero(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return value == static_cast<Type>(0);
+    return value == static_cast<Type>(zero);
     BC_POP_WARNING()
 }
 
@@ -54,7 +50,7 @@ template <typename Type>
 constexpr bool is_one(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return value == static_cast<Type>(1);
+    return value == static_cast<Type>(one);
     BC_POP_WARNING()
 }
 
@@ -62,7 +58,7 @@ template <typename Type>
 constexpr Type lo_bit(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value % 2);
+    return static_cast<Type>(static_cast<Type>(value) % two);
     BC_POP_WARNING()
 }
 
@@ -106,7 +102,7 @@ template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(bytes * 8);
+    return static_cast<Type>(static_cast<Type>(bytes) * byte_bits);
     BC_POP_WARNING()
 }
 
@@ -121,7 +117,7 @@ template <typename Type>
 constexpr Type to_bytes(Type bits) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(bits / 8);
+    return static_cast<Type>(static_cast<Type>(bits) / byte_bits);
     BC_POP_WARNING()
 }
 
@@ -129,7 +125,7 @@ template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value / 2);
+    return static_cast<Type>(static_cast<Type>(value) / two);
     BC_POP_WARNING()
 }
 
@@ -137,7 +133,7 @@ template <typename Type = int>
 constexpr Type to_int(bool value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value ? 1 : 0);
+    return static_cast<Type>(value ? one : zero);
     BC_POP_WARNING()
 }
 
@@ -151,7 +147,7 @@ template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value + 1);
+    return static_cast<Type>(static_cast<Type>(value) + one);
     BC_POP_WARNING()
 }
 
@@ -159,7 +155,7 @@ template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value - 1);
+    return static_cast<Type>(static_cast<Type>(value) - one);
     BC_POP_WARNING()
 }
 

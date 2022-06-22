@@ -32,7 +32,7 @@
 // Inclusion dependencies:
 // bits     <-
 // bytes    <-
-// limits   <-
+// limits   <- addition
 // addition <-
 // division <- [bits]
 // power    <- [bits, limits]

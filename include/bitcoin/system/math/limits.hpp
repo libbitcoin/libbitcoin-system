@@ -57,11 +57,19 @@ template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept;
 
-/// The minimum value of an integer by byte size (1-8 bytes).
+/// The minimum value of a integral integer type (std::numeric_limits).
+template <typename Integer, if_integral_integer<Integer> = true>
+constexpr Integer minimum() noexcept;
+
+/// The maximum value of a integral integer type (std::numeric_limits).
+template <typename Integer, if_integral_integer<Integer> = true>
+constexpr Integer maximum() noexcept;
+
+/// The minimum value of a type by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
 constexpr Return minimum() noexcept;
 
-/// The maximum value of an integer by byte size (1-8 bytes).
+/// The maximum value of a type by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
 constexpr Return maximum() noexcept;
 

@@ -92,7 +92,7 @@ static bool normal_form(std::string& out, const std::string& in,
     const auto norm = to_win32_normal_form(form);
 
     // Guard cast to int.
-    if (is_greater(size, std::numeric_limits<int>::max()))
+    if (is_limited<int>(size))
         return false;
 
     const auto length = static_cast<int>(size);
@@ -123,7 +123,7 @@ bool to_lower(std::string& out, const std::string& in) noexcept
     const auto size = wide.size();
 
     // Guard against DWORD overflow.
-    if (size > std::numeric_limits<DWORD>::max())
+    if (is_limited<DWORD>(size))
         return false;
 
     // std::vector ensures contiguous bytes.
@@ -147,7 +147,7 @@ bool to_upper(std::string& out, const std::string& in) noexcept
     const auto size = wide.size();
 
     // Guard against DWORD overflow.
-    if (size > std::numeric_limits<DWORD>::max())
+    if (is_limited<DWORD>(size))
         return false;
 
     // std::vector ensures contiguous bytes.

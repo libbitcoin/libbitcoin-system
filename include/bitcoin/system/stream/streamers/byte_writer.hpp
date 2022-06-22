@@ -112,7 +112,7 @@ protected:
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum()
     {
-        return std::numeric_limits<size_t>::max();
+        return system::maximum<size_t>();
     };
 
     virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;

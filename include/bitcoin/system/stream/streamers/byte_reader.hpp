@@ -148,7 +148,7 @@ protected:
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum() noexcept
     {
-        return std::numeric_limits<size_t>::max();
+        return system::maximum<size_t>();
     };
 
     virtual uint8_t do_peek_byte() noexcept;

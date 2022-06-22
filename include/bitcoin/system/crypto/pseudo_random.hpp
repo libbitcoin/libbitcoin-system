@@ -27,6 +27,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -60,8 +61,7 @@ class BC_API pseudo_random
     template<typename Type, if_integer<Type> = true>
     static Type next() noexcept
     {
-        return next(std::numeric_limits<Type>::min(),
-            std::numeric_limits<Type>::max());
+        return next(minimum<Type>(), maximum<Type>());
     }
 
     /// Generate a pseudo random integer value within [begin, end].

@@ -178,6 +178,20 @@ static_assert( is_limited(-75, -60, 50));
 
 static_assert(std::is_same<decltype(limit<uint8_t>(0, 0, 0)), uint8_t>::value);
 
+static_assert(minimum<int8_t>() == min_int8);
+static_assert(minimum<int16_t>() == min_int16);
+static_assert(minimum<int32_t>() == min_int32);
+static_assert(minimum<int64_t>() == min_int64);
+////static_assert(minimum<float>() == 0);
+////static_assert(minimum<bool>() == 0);
+
+static_assert(maximum<uint8_t>() == max_uint8);
+static_assert(maximum<uint16_t>() == max_uint16);
+static_assert(maximum<uint32_t>() == max_uint32);
+static_assert(maximum<uint64_t>() == max_uint64);
+////static_assert(maximum<bool>() == 0);
+////static_assert(maximum<float>() == 0);
+
 constexpr auto min_int24 = -0x800000l;
 constexpr auto min_int40 = -0x8000000000ll;
 constexpr auto min_int48 = -0x800000000000ll;

@@ -162,6 +162,7 @@ Integer safe_multiply(Integer left, Integer right) noexcept(false)
     if (is_zero(left) || is_zero(right))
         return 0;
 
+    // Use std lib to avoid cicularity with limits.hpp.
     if (left > (std::numeric_limits<Integer>::max() / right))
         throw overflow_exception("safe multiplication overflow");
 
@@ -171,6 +172,7 @@ Integer safe_multiply(Integer left, Integer right) noexcept(false)
 template <typename Integer, if_unsigned_integer<Integer>>
 Integer safe_add(Integer left, Integer right) noexcept(false)
 {
+    // Use std lib to avoid cicularity with limits.hpp.
     if (left > (std::numeric_limits<Integer>::max() - right))
         throw overflow_exception("safe addition overflow");
 
