@@ -303,7 +303,7 @@ size_t chain_state::bip9_bit1_height(size_t height,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) noexcept
 {
-    BC_ASSERT_MSG(compact::is_valid(bits_high(values)),
+    BC_ASSERT_MSG(compact::is_compact(bits_high(values)),
         "previous block has invalid bits value");
 
     // Invalid parameter via public interface, test is_valid for results.

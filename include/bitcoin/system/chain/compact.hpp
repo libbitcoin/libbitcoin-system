@@ -19,9 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 
-#include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -29,38 +28,75 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// TODO: move implementation to .ipp.
-class BC_API compact
+struct compact1
+{
+};
+
+/// A base 256 exponential form representation of 32 byte (uint256_t) values.
+/// The zero value is used as an invalid value sentinel. Otherwise it is not
+/// possible to create an invalid compact form from 32 bytes.
+
+struct compact
 {
 public:
-    static bool is_valid(uint32_t compact) noexcept;
+    using exponent_type = uint8_t;
+    using mantissa_type = uint32_t;
 
-    // TODO: constexpr.
-    static uint32_t compress(const uint256_t& big) noexcept;
+    /// An overflow or zero/negative mantissa returns zero (invalid).
+    static inline uint256_t expand(uint32_t small) noexcept;
 
-    // TODO: constexpr/inline.
-    static bool expand(uint256_t& big, uint32_t small) noexcept;
-    static uint256_t expand(uint32_t small) noexcept;
+    /// Always a valid compact result (unless parameter is zero).
+    static inline uint32_t compress(const uint256_t& big) noexcept;
+
+    /// Same as !is_zero(expand(small)) without the conversion cost.
+    static constexpr bool is_compact(uint32_t small) noexcept;
+
+    bool negative;
+    exponent_type exponent;
+    mantissa_type mantissa;
+
+protected:
+    template <typename Integer>
+    static constexpr Integer ratio(Integer value) noexcept;
+    static constexpr compact to_compact(uint32_t small) noexcept;
+    static constexpr uint32_t from_compact(const compact& compact) noexcept;
+    static constexpr bool is_valid(const compact& compact) noexcept;
 
 private:
-    static constexpr size_t exponent_width = 8u;
-    static constexpr auto bit_width = width<uint32_t>();
-    static constexpr auto mantissa_width = bit_width - exponent_width;
+    // All parameters are derived, no magic numbers.
 
-    static constexpr auto exponent_bits = unmask_left<uint32_t>(exponent_width);
-    static constexpr auto mantissa_bits = unmask_right<uint32_t>(mantissa_width);
-    static_assert((exponent_bits + mantissa_bits) == sub1(power2(bit_width)));
+    // base256 <=> base32 for bitcoin_hash compression.
+    static constexpr auto hash_base = to_bits(hash_size);
+    static constexpr auto compact_base = width<uint32_t>();
+    static_assert(compact_base == 32u);
+    static_assert(hash_base == 256u);
 
-    // The inflection point is a function of the mantissa domain.
-    static constexpr auto point = ceilinged_log256(bit_and(max_uint32, mantissa_bits));
+    // exponent domain (stored [0..32] vs. logical [-3..29] exponent)
+    static constexpr auto stored_exponent_width = ceilinged_log2(compact_base);
+    static constexpr auto alignment = byte_bits - stored_exponent_width;
+    static constexpr auto exponent_width = stored_exponent_width + alignment;
+    static_assert(width<exponent_type>() == exponent_width);
+    static_assert(exponent_width == 8u);
+    static_assert(alignment == 2u);
+
+    // mantissa domain
+    static constexpr auto mantissa_width = compact_base - exponent_width;
+    static_assert(width<mantissa_type>() == compact_base);
+    static_assert(mantissa_width == 24u);
+
+    // shifting exponent reduces mantissa domain by the aligned exponent width
+    static constexpr auto point = mantissa_width / (hash_base / compact_base);
+    static constexpr auto maximum_positive_exponent = compact_base - point;
+    static constexpr auto maximum_negative_exponent = point;
+    static_assert(maximum_positive_exponent == 29u);
+    static_assert(maximum_negative_exponent == 3u);
     static_assert(point == 3u);
-
-    static bool is_signed(size_t compact) noexcept;
-    static bool is_valid(size_t exponent, uint32_t mantissa) noexcept;
 };
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/compact.ipp>
 
 #endif

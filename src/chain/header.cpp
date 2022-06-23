@@ -235,20 +235,25 @@ hash_digest header::hash() const noexcept
 // static/private
 uint256_t header::difficulty(uint32_t bits) noexcept
 {
-    uint256_t target;
-    if (!compact::expand(target, bits))
-        return zero;
+    auto target = compact::expand(bits);
+
+    //*************************************************************************
+    // CONSENSUS: bits may be overflowed, which is guarded here.
+    // A target of zero is disallowed so is useful as a sentinel value.
+    //*************************************************************************
+    if (is_zero(target))
+        return target;
+
+    //*************************************************************************
+    // CONSENSUS: If target is (2^256)-1, division will fail, however compact
+    // cannot expand bits into a value of (2^256)-1 (see comments in compact).
+    //*************************************************************************
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
     // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
     // (~target / (target + 1)) + 1.
-
-    //*************************************************************************
-    // CONSENSUS: If target is (2^256)-1 this would fail, however compact
-    // cannot expand bits into a value of (2^256)-1 (see comments in compact).
-    //*************************************************************************
-    return add1(bit_not(target) / add1(target));
+    return ++(bit_not(target) / add1(target));
 }
 
 // computed
@@ -265,13 +270,13 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     bool scrypt) const noexcept
 {
     static const auto limit = compact::expand(proof_of_work_limit);
+    const auto target = compact::expand(bits_);
 
     //*************************************************************************
-    // CONSENSUS: Compact may also be overflowed, which is guarded here.
-    // A target of zero is disallowed due to unfortunate sign check in compact.
+    // CONSENSUS: bits_ may be overflowed, which is guarded here.
+    // A target of zero is disallowed so is useful as a sentinel value.
     //*************************************************************************
-    uint256_t target;
-    if (!compact::expand(target, bits_))
+    if (is_zero(target))
         return true;
 
     // Ensure claimed work is at or above minimum (less is more).
