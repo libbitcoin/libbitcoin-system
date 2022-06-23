@@ -1051,7 +1051,7 @@ uint64_t transaction::claim() const noexcept
     };
 
     // The amount claimed by outputs.
-    return std::accumulate(outputs_->begin(), outputs_->end(), zero, sum);
+    return std::accumulate(outputs_->begin(), outputs_->end(), min_uint64, sum);
 }
 
 uint64_t transaction::value() const noexcept
