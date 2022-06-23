@@ -50,7 +50,7 @@ template <typename Type>
 constexpr bool is_one(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return value == static_cast<Type>(one);
+    return value == static_cast<Type>(1);
     BC_POP_WARNING()
 }
 
@@ -58,7 +58,7 @@ template <typename Type>
 constexpr Type lo_bit(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) % two);
+    return static_cast<Type>(static_cast<Type>(value) % 2);
     BC_POP_WARNING()
 }
 
@@ -102,7 +102,7 @@ template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(bytes) * byte_bits);
+    return static_cast<Type>(static_cast<Type>(bytes) * 8);
     BC_POP_WARNING()
 }
 
@@ -117,7 +117,7 @@ template <typename Type>
 constexpr Type to_bytes(Type bits) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(bits) / byte_bits);
+    return static_cast<Type>(static_cast<Type>(bits) / 8);
     BC_POP_WARNING()
 }
 
@@ -125,7 +125,7 @@ template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) / two);
+    return static_cast<Type>(static_cast<Type>(value) / 2);
     BC_POP_WARNING()
 }
 
@@ -133,7 +133,7 @@ template <typename Type = int>
 constexpr Type to_int(bool value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(value ? one : zero);
+    return static_cast<Type>(value ? 1 : 0);
     BC_POP_WARNING()
 }
 
@@ -147,7 +147,7 @@ template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) + one);
+    return static_cast<Type>(static_cast<Type>(value) + 1);
     BC_POP_WARNING()
 }
 
@@ -155,7 +155,7 @@ template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) - one);
+    return static_cast<Type>(static_cast<Type>(value) - 1);
     BC_POP_WARNING()
 }
 
