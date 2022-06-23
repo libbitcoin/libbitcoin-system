@@ -43,21 +43,17 @@ static_assert(c1_ == 3 * sizeof(size_t));
 
 // std::vector<std::vector<uint8_t>> does not increase this (per element) cost.
 constexpr auto a2_ = sizeof(std::vector<std::vector<uint8_t>*>::value_type);
-////constexpr auto b2_ = sizeof(std::vector<std::vector<uint8_t>&>::value_type);
 constexpr auto c2_ = sizeof(std::vector<std::vector<uint8_t>>::value_type);
 constexpr auto d2_ = sizeof(std::vector<std::shared_ptr<std::vector<uint8_t>>>::value_type);
 static_assert(a2_ == 1 * sizeof(size_t));
-////static_assert(b2_ == 3 * sizeof(size_t));
 static_assert(c2_ == 3 * sizeof(size_t));
 static_assert(d2_ == 2 * sizeof(size_t));
 
 // std::vector<std::vector<uint8_t>> requires 3 pointers (singular cost).
 constexpr auto a3 = sizeof(std::vector<std::vector<uint8_t>*>);
-////constexpr auto b3 = sizeof(std::vector<std::vector<uint8_t>&>);
 constexpr auto c3 = sizeof(std::vector<std::vector<uint8_t>>);
 constexpr auto d3 = sizeof(std::vector<std::shared_ptr<std::vector<uint8_t>>>);
 static_assert(a3 == 3 * sizeof(size_t));
-////static_assert(b3 == 3 * sizeof(size_t));
 static_assert(c3 == 3 * sizeof(size_t));
 static_assert(d3 == 3 * sizeof(size_t));
 
@@ -65,41 +61,33 @@ static_assert(d3 == 3 * sizeof(size_t));
 
 // std::variant<bool, int64_t, std::vector<uint8_t>> object reference requires 4 pointers (max element + 1).
 constexpr auto a4 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>*>);
-////constexpr auto b4 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>&>);
 constexpr auto c4 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>>);
-static_assert(a4 == 2 * sizeof(size_t));
-////static_assert(b4 == 2 * sizeof(size_t));
-static_assert(c4 == 4 * sizeof(size_t));
+static_assert(a4 == 1 * sizeof(size_t) + sizeof(int64_t));
+static_assert(c4 == 3 * sizeof(size_t) + sizeof(int64_t));
 
 // std::vector<std::variant<bool, int64_t, std::vector<uint8_t>>> does not increase this (per element) cost.
 constexpr auto a5 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>*>>::value_type);
-////constexpr auto b5 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>&>>::value_type);
 constexpr auto c5 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>>>::value_type);
-static_assert(a5 == 2 * sizeof(size_t));
-////static_assert(b5 == 2 * sizeof(size_t));
-static_assert(c5 == 4 * sizeof(size_t));
+static_assert(a5 == 1 * sizeof(size_t) + sizeof(int64_t));
+static_assert(c5 == 3 * sizeof(size_t) + sizeof(int64_t));
 
 // std::vector<std::variant<bool, int64_t, std::vector<uint8_t>>> requires 3 pointers (singular cost).
 constexpr auto a6 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>*>>);
-////constexpr auto b6 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>&>>);
 constexpr auto c6 = sizeof(std::vector<std::variant<bool, int64_t, std::vector<uint8_t>>>);
-static_assert(a6 == 3 * sizeof(size_t));
-////static_assert(b6 == 3 * sizeof(size_t));
-static_assert(c6 == 3 * sizeof(size_t));
+static_assert(a6 == 2 * sizeof(size_t) + sizeof(int64_t));
+static_assert(c6 == 2 * sizeof(size_t) + sizeof(int64_t));
 
 // ----------------------------------------------------------------------------
 
 // std::shared_ptr<std::vector<uint8_t>> requires 2 pointers (ptr/refcount).
 constexpr auto a7 = sizeof(std::shared_ptr<std::vector<uint8_t>>::element_type*);
 constexpr auto b7 = sizeof(std::shared_ptr<std::vector<uint8_t>>);
-////constexpr auto c7 = sizeof(std::shared_ptr<std::vector<uint8_t>&>);
 static_assert(a7 == 1 * sizeof(size_t));
 static_assert(b7 == 2 * sizeof(size_t));
-////static_assert(c7 == 2 * sizeof(size_t));
 
 // std::variant<bool, int64_t, std::shared_ptr<std::vector<uint8_t>>> requires 3 pointers (max element + 1).
 constexpr auto a8 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std::vector<uint8_t>>>);
-static_assert(a8 == 3 * sizeof(size_t));
+static_assert(a8 == 2 * sizeof(size_t) + sizeof(int64_t));
 
 // std::variant<bool, int64_t, const std::vector<uint8_t>*> requires 2 pointers (max element + 1).
 // This would be possible in the case where all stack data_chunks are externally owned.
@@ -107,13 +95,11 @@ static_assert(a8 == 3 * sizeof(size_t));
 // The program may need to hold a shared_ptr to the witness and script, though (like the tx) it
 // could be made a requirement of the caller to retain the passed-by-reference objects in scope.
 constexpr auto a9 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>*>);
-////constexpr auto b9 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>&>);
 constexpr auto c9 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std::vector<uint8_t>>>);
 constexpr auto d9 = sizeof(std::variant<bool, int64_t, std::vector<uint8_t>>);
-static_assert(a9 == 2 * sizeof(size_t));
-////static_assert(b9 == 2 * sizeof(size_t));
-static_assert(c9 == 3 * sizeof(size_t));
-static_assert(d9 == 4 * sizeof(size_t));
+static_assert(a9 == 1 * sizeof(size_t) + sizeof(int64_t));
+static_assert(c9 == 2 * sizeof(size_t) + sizeof(int64_t));
+static_assert(d9 == 3 * sizeof(size_t) + sizeof(int64_t));
 
 // Computed hashes can be maintained in the variant by std::unique_ptr<std::vector<uint8_t>>.
 // This constrols their lifetime without increasing the size of the union. But
@@ -121,8 +107,8 @@ static_assert(d9 == 4 * sizeof(size_t));
 // so that's all that is needed.
 constexpr auto a10 = sizeof(std::variant<bool, int64_t, std::unique_ptr<std::vector<uint8_t>>, std::vector<uint8_t>*>);
 constexpr auto a11 = sizeof(std::variant<bool, int64_t, std::unique_ptr<std::vector<uint8_t>>>);
-static_assert(a10 == 2 * sizeof(size_t));
-static_assert(a11 == 2 * sizeof(size_t));
+static_assert(a10 == 1 * sizeof(size_t) + sizeof(int64_t));
+static_assert(a11 == 1 * sizeof(size_t) + sizeof(int64_t));
 
 // Use of std::weak_ptr<data_chunk> vs. std::vector<uint8_t>* would expand the
 // variant size, and use of std::unique_ptr<std::vector<uint8_t>> with the shared
