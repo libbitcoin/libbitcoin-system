@@ -571,17 +571,22 @@ static_assert(ceilinged_log256(0x007ffffful) == 3);
 // Since the exponent and the mantissa are provided in block headers (as the
 // bits field), they can be anything - this code validates them.
 //
-//The code that generates a compact number takes any value generated from the
+// The code that generates a compact number takes any value generated from the
 // block hash and masks this sign bit, so it should never be set. Bit it is
 // possible to set it and with a negative exponent, shift it away before it's
 // tested.
 //
-//smaller values are higher work, but I haven't taken the time to figure out
+// smaller values are higher work, but I haven't taken the time to figure out
 // exactly where the inflection point comes in terms of block hashes, with the
 // exponent going negative. It would be in the lowest order 3 bytes of a hash.
 // I don't think we're there yet.
 //
 //000000000000000000058e6712450d2abc7d5aa413d21692e4fcb6ad5cb91273 (big-endian)
+//
+// However, if the mantissa is zero the result will be zero, and the effect is
+// the same - despite possible unexpected negative/overflow conditions. Since
+// these values are effectively only used as test hooks, a false
+// negative/overflow due to a zero matissa will result in zero (equivalent).
 
 ////inline uint256_t compact::expand(uint32_t small) noexcept
 ////{
@@ -601,11 +606,9 @@ static_assert(ceilinged_log256(0x007ffffful) == 3);
 ////        big <<= ratio(compact.exponent - point);
 ////    }
 ////
-////    // returned by reference.
 ////    // -0 is not discared here.
 ////    bool negative = !is_zero(compact.mantissa) && compact.negative;
 ////
-////    // returned by reference.
 ////    // -0 is not discared here.
 ////    bool overflow = !is_zero(compact.mantissa) &&
 ////    (
@@ -637,6 +640,7 @@ static_assert(ceilinged_log256(0x007ffffful) == 3);
 ////        compact >>= 8;
 ////        exponent++;
 ////    }
+////
 ////    // This is a test hook (parameterized).
 ////    const auto negative = false;
 ////

@@ -74,7 +74,7 @@ constexpr bool compact::is_valid(const compact& compact) noexcept
     static_assert(hash_size >= ceilinged_log256(maximum<mantissa_type>()));
     static_assert(ratio(one) == to_bits(one));
 
-    // See comments in test regarding unpatched Satoshi bug.
+    // See comments in test regarding these checks against shifted matissa.
     if (is_zero(compact.mantissa) || compact.negative)
         return false;
 
