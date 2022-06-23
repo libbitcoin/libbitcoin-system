@@ -34,7 +34,7 @@ else ()
   set( VERSION "${PACKAGE_VERSION}" )
 endif ()
 
-set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 # Add compiler options
@@ -65,9 +65,6 @@ add_compile_options( "-Wno-deprecated-copy" )
 
 # Allow use of C99 'long long' type.
 add_compile_options( "-Wno-long-long" )
-
-# Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw.
-add_compile_options( "-DBOOST_EXCEPTION_DISABLE" )
 
 # Conflict in stdlib under clang.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -285,7 +282,6 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/chain/block.cpp"
     "../../src/chain/chain_state.cpp"
     "../../src/chain/checkpoint.cpp"
-    "../../src/chain/compact.cpp"
     "../../src/chain/context.cpp"
     "../../src/chain/header.cpp"
     "../../src/chain/input.cpp"
@@ -531,7 +527,7 @@ if (with-tests)
         "../../test/chain/block.cpp"
         "../../test/chain/chain_state.cpp"
         "../../test/chain/checkpoint.cpp"
-        "../../test/chain/compact.cpp"
+        "../../test/chain/compact_number.cpp"
         "../../test/chain/context.cpp"
         "../../test/chain/header.cpp"
         "../../test/chain/input.cpp"

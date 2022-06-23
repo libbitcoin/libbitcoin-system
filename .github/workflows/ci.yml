@@ -17,74 +17,74 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-latest
-            cxx: "clang++"
+          - os: ubuntu-22.04
+            cxx: "clang++-14"
             link: "dynamic"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
-            packages: "clang"
+            packages: ""
 
-          - os: ubuntu-latest
-            cxx: "clang++"
+          - os: ubuntu-22.04
+            cxx: "clang++-14"
             link: "static"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
-            packages: "clang"
+            packages: ""
 
-          - os: ubuntu-latest
-            cxx: "g++"
+          - os: ubuntu-22.04
+            cxx: "g++-11"
             link: "dynamic"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "gcc"
+            cc: "gcc-11"
             flags: "-Os -fPIE"
             packager: "apt"
-            packages: "gcc"
+            packages: ""
 
-          - os: ubuntu-latest
-            cxx: "g++"
+          - os: ubuntu-22.04
+            cxx: "g++-11"
             link: "static"
             assert: "ndebug"
             coverage: "cov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "gcc"
+            cc: "gcc-11"
             flags: "-Og -g --coverage -fPIE"
             packager: "apt"
-            packages: "gcc lcov"
+            packages: "lcov"
 
           - os: macos-latest
-            cxx: "clang++"
+            cxx: "clang++-14"
             link: "dynamic"
             assert: "ndebug"
             coverage: "nocov"
             boost: ""
             icu: "--with-icu"
-            cc: "clang"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "brew"
             packages: "boost icu4c"
 
           - os: macos-latest
-            cxx: "clang++"
+            cxx: "clang++-14"
             link: "static"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang"
+            cc: "clang-14"
             flags: "-Os -fvisibility=hidden -fPIE"
             packager: "brew"
             packages: ""
@@ -153,6 +153,11 @@ jobs:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
+      - name: Failure display available binaries
+        if: ${{ failure() }}
+        run: |
+          ls -la /usr/bin
+
       - name: Failure display selected compiler version
         if: ${{ failure() }}
         run: |
@@ -190,165 +195,6 @@ jobs:
         run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
 
-  verify-install-cmake:
-
-    strategy:
-      fail-fast: false
-
-      matrix:
-        include:
-          - os: ubuntu-latest
-            cxx: "clang++"
-            link: "dynamic"
-            assert: "debug"
-            coverage: "nocov"
-            boost: "--build-boost"
-            icu: ""
-            cc: "clang"
-            flags: "-Os -fPIE"
-            packager: "apt"
-            packages: "clang"
-
-          - os: ubuntu-latest
-            cxx: "clang++"
-            link: "static"
-            assert: "ndebug"
-            coverage: "nocov"
-            boost: "--build-boost"
-            icu: "--build-icu --with-icu"
-            cc: "clang"
-            flags: "-Os -fPIE"
-            packager: "apt"
-            packages: "clang"
-
-          - os: ubuntu-latest
-            cxx: "g++"
-            link: "dynamic"
-            assert: "ndebug"
-            coverage: "nocov"
-            boost: "--build-boost"
-            icu: ""
-            cc: "gcc"
-            flags: "-Os -fPIE"
-            packager: "apt"
-            packages: "gcc"
-
-          - os: ubuntu-latest
-            cxx: "g++"
-            link: "static"
-            assert: "ndebug"
-            coverage: "nocov"
-            boost: "--build-boost"
-            icu: "--build-icu --with-icu"
-            cc: "gcc"
-            flags: "-Og -fPIE"
-            packager: "apt"
-            packages: "gcc"
-
-          - os: macos-latest
-            cxx: "clang++"
-            link: "dynamic"
-            assert: "ndebug"
-            coverage: "nocov"
-            boost: ""
-            icu: "--with-icu"
-            cc: "clang"
-            flags: "-Os -fPIE"
-            packager: "brew"
-            packages: "boost icu4c"
-
-          - os: macos-latest
-            cxx: "clang++"
-            link: "static"
-            assert: "ndebug"
-            coverage: "nocov"
-            boost: "--build-boost"
-            icu: "--build-icu --with-icu"
-            cc: "clang"
-            flags: "-Os -fvisibility=hidden -fPIE"
-            packager: "brew"
-            packages: ""
-
-    runs-on: ${{ matrix.os }}
-
-    env:
-      CC: '${{ matrix.cc }}'
-      CXX: '${{ matrix.cxx }}'
-      CFLAGS: '${{ matrix.flags }}'
-      CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
-
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
-        run: |
-          brew install autoconf automake libtool pkg-config ${{ matrix.packages }}
-
-      - name: Denormalize parameterization
-        run: |
-          if [[ ${{ matrix.packager }} == 'brew' ]]; then
-            echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--enable-ndebug -Denable-ndebug=yes" >> $GITHUB_ENV
-          else
-            echo "ASSERT_NDEBUG=--disable-ndebug -Denable-ndebug=no" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
-          else
-            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefixenv/lib" >> $GITHUB_ENV
-          fi
-
-      - name: Execute install-cmake.sh
-        run: >
-          ./install-cmake.sh
-          --build-dir=${{ github.workspace }}/build
-          --prefix=${{ github.workspace }}/prefixenv
-          ${{ env.LINKAGE }}
-          ${{ env.ASSERT_NDEBUG }}
-          ${{ matrix.boost }}
-          ${{ matrix.icu }}
-
-      - name: Coveralls Calculation
-        if: ${{ matrix.coverage == 'cov' }}
-        run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode" --output-file coverage.info
-          lcov --list coverage.info
-
-      - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@master
-        with:
-          path-to-lcov: "./coverage.info"
-          github-token: ${{ secrets.github_token }}
-
-      - name: Failure Display cmake test output
-        if: ${{failure() }}
-        run: |
-          gcc -v
-          clang -v
-          echo "--- ENVIRONMENT ---"
-          env
-          echo "--- END ENVIRONMENT ---"
-          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
-          ls ${{ github.workspace }}/prefixenv/lib/cmake
-
   verify-sln:
     strategy:
       fail-fast: false
@@ -358,22 +204,26 @@ jobs:
           - os: windows-latest
             configuration: "StaticRelease"
             platform: "Win32"
-            version: "vs2017"
+            version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticDebug"
             platform: "Win32"
-            version: "vs2017"
+            version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticRelease"
             platform: "x64"
-            version: "vs2017"
+            version: "vs2022"
+            tests: "*"
 
           - os: windows-latest
             configuration: "StaticDebug"
             platform: "x64"
-            version: "vs2017"
+            version: "vs2022"
+            tests: "*"
 
     runs-on: ${{ matrix.os }}
 
@@ -422,7 +272,7 @@ jobs:
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
           Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
           }
           catch {
             $ERR = $_;

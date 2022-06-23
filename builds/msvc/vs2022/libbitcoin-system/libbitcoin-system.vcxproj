@@ -78,7 +78,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\context.cpp">
       <ObjectFileName>$(IntDir)src_chain_context.obj</ObjectFileName>
     </ClCompile>
@@ -476,6 +475,7 @@
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

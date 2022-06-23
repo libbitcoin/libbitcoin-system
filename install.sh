@@ -37,27 +37,9 @@
 
 # Define constants.
 #==============================================================================
-# Sentinel for comparison of sequential build.
-#------------------------------------------------------------------------------
-SEQUENTIAL=1
-
-# Git clone parameters.
-#------------------------------------------------------------------------------
-if [[ $GIT_CLONE_PARAMS ]]; then
-    display_message "Using shell-defined GIT_CLONE_PARAMS value."
-else
-    GIT_CLONE_PARAMS=""
-fi
-
 # The default build directory.
 #------------------------------------------------------------------------------
 BUILD_DIR="build-libbitcoin-system"
-
-# Git clone parameters.
-#------------------------------------------------------------------------------
-GIT_CLONE_PARAMS="--depth 1 --single-branch"
-
-PRESUMED_CI_PROJECT_PATH=$(pwd)
 
 # ICU archive.
 #------------------------------------------------------------------------------
@@ -124,30 +106,17 @@ initialize_git()
     git config user.name anonymous
 }
 
-# make_project_directory project_name jobs [configure_options]
-make_project_directory()
+# make_current_directory jobs [configure_options]
+make_current_directory()
 {
-    local PROJ_NAME=$1
-    local JOBS=$2
-    local TEST=$3
-    shift 3
-
-    push_directory "$PROJ_NAME"
-    local PROJ_CONFIG_DIR
-    PROJ_CONFIG_DIR=$(pwd)
+    local JOBS=$1
+    shift 1
 
     ./autogen.sh
-
     configure_options "$@"
     make_jobs "$JOBS"
-
-    if [[ $TEST == true ]]; then
-        make_tests "$JOBS"
-    fi
-
     make install
     configure_links
-    pop_directory
 }
 
 # make_jobs jobs [make_options]
@@ -350,17 +319,7 @@ set_prefix()
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
     else
         # Incorporate the custom libdir into each object, for link time resolution.
-        if [[ ! ($LD_RUN_PATH) ]]; then
-            export LD_RUN_PATH="$LD_RUN_PATH:$PREFIX/lib"
-        else
-            export LD_RUN_PATH="$PREFIX/lib"
-        fi
-
-        if [[ ! ($LD_LIBRARY_PATH) ]]; then
-            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PREFIX/lib"
-        else
-            export LD_LIBRARY_PATH="$PREFIX/lib"
-        fi
+        export LD_RUN_PATH="$PREFIX/lib"
     fi
 }
 
@@ -435,85 +394,45 @@ initialize_icu_packages()
     fi
 }
 
-extract_from_tarball()
-{
-    local TARGET_DIR=$1
-    local URL=$2
-    local ARCHIVE=$3
-    local COMPRESSION=$4
-
-    create_directory "$TARGET_DIR"
-    push_directory "$TARGET_DIR"
-
-    # Extract the source locally.
-    wget --output-document "$ARCHIVE" "$URL"
-    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
-
-    pop_directory
-}
-
-unpack_from_tarball()
-{
-    local ARCHIVE=$1
-    local URL=$2
-    local COMPRESSION=$3
-    local BUILD=$4
-
-    display_heading_message "Prepairing to aquire $ARCHIVE"
-
-    if [[ ! ($BUILD) ]]; then
-        display_message "Skipping unpack of $ARCHIVE..."
-        return
-    fi
-
-    local TARGET_DIR="build-$ARCHIVE"
-
-    if [[ -d "$TARGET_DIR" ]]; then
-        if [[ true ]]; then
-            display_message "Re-downloading $ARCHIVE..."
-            rm -rf "$TARGET_DIR"
-            extract_from_tarball "$TARGET_DIR" "$URL" "$ARCHIVE" "$COMPRESSION"
-        else
-            display_message "Reusing existing archive $ARCHIVE..."
-        fi
-    else
-        display_message "Downloading $ARCHIVE..."
-        extract_from_tarball "$TARGET_DIR" "$URL" "$ARCHIVE" "$COMPRESSION"
-    fi
-}
-
 # Standard build from tarball.
 build_from_tarball()
 {
-    local ARCHIVE=$1
-    local PUSH_DIR=$2
-    local JOBS=$3
-    local BUILD=$4
-    local OPTIONS=$5
-    shift 5
+    local URL=$1
+    local ARCHIVE=$2
+    local COMPRESSION=$3
+    local PUSH_DIR=$4
+    local JOBS=$5
+    local BUILD=$6
+    local OPTIONS=$7
+    shift 7
 
     local SAVE_LDFLAGS="$LDFLAGS"
     local SAVE_CPPFLAGS="$CPPFLAGS"
 
     # For some platforms we need to set ICU pkg-config path.
-    # TODO: clean this up?
     if [[ ! ($BUILD) ]]; then
         if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
-            display_heading_message "Rationalize ICU detection."
             initialize_icu_packages
         fi
         return
     fi
-
-    display_heading_message "Prepairing to build $ARCHIVE"
 
     # Because ICU tools don't know how to locate internal dependencies.
     if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
-    local TARGET="build-$ARCHIVE"
-    push_directory "$TARGET"
+    display_heading_message "Download $ARCHIVE"
+
+    # Use the suffixed archive name as the extraction directory.
+    local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
+    create_directory "$EXTRACT"
+    push_directory "$EXTRACT"
+
+    # Extract the source locally.
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
 
     # Join generated and command line options.
@@ -536,61 +455,8 @@ build_from_tarball()
     # Restore flags to prevent side effects.
     export LDFLAGS=$SAVE_LDFLAGS
     export CPPFLAGS=$SAVE_CPPFLAGS
-}
-
-clone_from_github()
-{
-    local FORK=$1
-    local BRANCH=$2
-
-    # Clone the repository locally.
-    git clone $GIT_CLONE_PARAMS --branch "$BRANCH" "https://github.com/$FORK"
-}
-
-create_from_github()
-{
-    push_directory "$BUILD_SRC_DIR"
-
-    local ACCOUNT=$1
-    local REPO=$2
-    local BRANCH=$3
-
-    FORK="$ACCOUNT/$REPO"
-
-    display_heading_message "Prepairing to aquire $FORK/$BRANCH"
-
-    if [[ -d "$REPO" ]]; then
-        if [[ true ]]; then
-            display_message "Re-cloning $FORK/$BRANCH..."
-            rm -rf "$REPO"
-            clone_from_github "$FORK" "$BRANCH"
-        else
-            display_message "Reusing existing clone of $FORK, Branch may not match $BRANCH..."
-        fi
-    else
-        display_message "Cloning $FORK/$BRANCH..."
-        clone_from_github "$FORK" "$BRANCH"
-    fi
 
     pop_directory
-}
-
-# Standard build from github.
-build_from_github()
-{
-    local REPO=$1
-    local JOBS=$2
-    local TEST=$3
-    local OPTIONS=$4
-    shift 4
-
-    # Join generated and command line options.
-    local CONFIGURATION=("${OPTIONS[@]}" "$@")
-
-    display_heading_message "Prepairing to build $REPO"
-
-    # Build the local repository clone.
-    make_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
 # Because boost ICU static lib detection assumes in incorrect ICU path.
@@ -664,20 +530,29 @@ build_from_tarball_boost()
     local SAVE_IFS="$IFS"
     IFS=' '
 
-    local ARCHIVE=$1
-    local JOBS=$2
-    local BUILD=$3
-    shift 3
+    local URL=$1
+    local ARCHIVE=$2
+    local COMPRESSION=$3
+    local PUSH_DIR=$4
+    local JOBS=$5
+    local BUILD=$6
+    shift 6
 
     if [[ ! ($BUILD) ]]; then
         return
     fi
 
-    display_heading_message "Prepairing to build $ARCHIVE"
+    display_heading_message "Download $ARCHIVE"
 
-    local TARGET="build-$ARCHIVE"
+    # Use the suffixed archive name as the extraction directory.
+    local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
+    create_directory "$EXTRACT"
+    push_directory "$EXTRACT"
 
-    push_directory "$TARGET"
+    # Extract the source locally.
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
 
     initialize_boost_configuration
     initialize_boost_icu_configuration
@@ -693,7 +568,6 @@ build_from_tarball_boost()
     display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
-    display_message "-sNO_ZSTD             : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
@@ -725,7 +599,6 @@ build_from_tarball_boost()
         "boost.locale.iconv=$BOOST_ICU_ICONV" \
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
-        "-sNO_ZSTD=1" \
         "-sICU_PATH=$ICU_PREFIX" \
         "-j $JOBS" \
         "-d0" \
@@ -735,8 +608,78 @@ build_from_tarball_boost()
         "$@"
 
     pop_directory
+    pop_directory
 
     IFS="$SAVE_IFS"
+}
+
+# Standard build from github.
+build_from_github()
+{
+    push_directory "$BUILD_DIR"
+
+    local ACCOUNT=$1
+    local REPO=$2
+    local BRANCH=$3
+    local JOBS=$4
+    local OPTIONS=$5
+    shift 5
+
+    FORK="$ACCOUNT/$REPO"
+    display_heading_message "Download $FORK/$BRANCH"
+
+    # Clone the repository locally.
+    git clone --depth 1 --branch "$BRANCH" --single-branch "https://github.com/$FORK"
+
+    # Join generated and command line options.
+    local CONFIGURATION=("${OPTIONS[@]}" "$@")
+
+    # Build the local repository clone.
+    push_directory "$REPO"
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
+    pop_directory
+    pop_directory
+}
+
+# Standard build of current directory.
+build_from_local()
+{
+    local MESSAGE="$1"
+    local JOBS=$2
+    local OPTIONS=$3
+    shift 3
+
+    display_heading_message "$MESSAGE"
+
+    # Join generated and command line options.
+    local CONFIGURATION=("${OPTIONS[@]}" "$@")
+
+    # Build the current directory.
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
+}
+
+# Because continuous integration services has downloaded the primary repository.
+build_from_ci()
+{
+    local ACCOUNT=$1
+    local REPO=$2
+    local BRANCH=$3
+    local JOBS=$4
+    local OPTIONS=$5
+    shift 5
+
+    # The primary build is not downloaded if we are running on a continuous integration system.
+    if [[ $CI == true ]]; then
+        build_from_local "Local $CI_REPOSITORY" "$JOBS" "${OPTIONS[@]}" "$@"
+        make_tests "$JOBS"
+    else
+        build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
+        push_directory "$BUILD_DIR"
+        push_directory "$REPO"
+        make_tests "$JOBS"
+        pop_directory
+        pop_directory
+    fi
 }
 
 
@@ -744,22 +687,10 @@ build_from_tarball_boost()
 #==============================================================================
 build_all()
 {
-    unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
-    build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
-    build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    create_from_github evoskuil secp256k1 version8
-    build_from_github secp256k1 "$PARALLEL" false "${SECP256K1_OPTIONS[@]}" "$@"
-    if [[ ! ($CI == true) ]]; then
-        create_from_github evoskuil libbitcoin-system master
-        build_from_github libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
-    else
-        push_directory "$PRESUMED_CI_PROJECT_PATH"
-        push_directory ".."
-        build_from_github libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
-        pop_directory
-        pop_directory
-    fi
+    build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
+    build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+    build_from_github evoskuil secp256k1 version8 "$PARALLEL" "${SECP256K1_OPTIONS[@]}" "$@"
+    build_from_ci evoskuil libbitcoin-system master "$PARALLEL" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
 }
 
 
@@ -831,5 +762,5 @@ display_configuration
 create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
 initialize_git
-time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
+time build_all "${CONFIGURE_OPTIONS[@]}"

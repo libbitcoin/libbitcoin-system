@@ -64,7 +64,7 @@ IF %ERRORLEVEL% NEQ 0 (
   exit /b 1
 )
 call cd /d "%path_base%\%~1\builds\msvc\%proj_version%"
-call "%msbuild_exe%" %msbuild_args% %~1.sln
+call "%msbuild_exe%" %msbuild_args% %~1.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false
 IF %ERRORLEVEL% NEQ 0 (
   call :failure "%msbuild_exe% %msbuild_args% %~1.sln failed."
   exit /b 1
@@ -81,7 +81,7 @@ IF %ERRORLEVEL% NEQ 0 (
   exit /b 1
 )
 call cd /d "%path_base%\%~1\builds\msvc\%proj_version%"
-call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln
+call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false
 IF %ERRORLEVEL% NEQ 0 (
   call :failure "%msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln"
   exit /b 1

@@ -40,7 +40,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
     src/chain/checkpoint.cpp \
-    src/chain/compact.cpp \
     src/chain/context.cpp \
     src/chain/header.cpp \
     src/chain/input.cpp \
@@ -225,7 +224,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/checkpoint.cpp \
-    test/chain/compact.cpp \
+    test/chain/compact_number.cpp \
     test/chain/context.cpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
@@ -393,7 +392,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/chain.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
     include/bitcoin/system/chain/checkpoint.hpp \
-    include/bitcoin/system/chain/compact.hpp \
+    include/bitcoin/system/chain/compact_number.hpp \
     include/bitcoin/system/chain/context.hpp \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
@@ -495,6 +494,10 @@ include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/op_error_t.hpp \
     include/bitcoin/system/error/script_error_t.hpp \
     include/bitcoin/system/error/transaction_error_t.hpp
+
+include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
+include_bitcoin_system_impl_chain_HEADERS = \
+    include/bitcoin/system/impl/chain/compact_number.ipp
 
 include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
