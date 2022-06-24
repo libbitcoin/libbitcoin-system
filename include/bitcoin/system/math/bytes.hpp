@@ -71,6 +71,17 @@ template <typename Integer,
     if_unique_object_representations<Integer> = true>
 constexpr Integer byteswap(Integer value) noexcept;
 
+/// Bits to bytes utilities.
+
+template <size_t Bits, if_byte_width<Bits> = true>
+constexpr size_t to_bytes() noexcept;
+
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr Integer to_ceilinged_bytes(Integer bits) noexcept;
+
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr Integer to_floored_bytes(Integer bits) noexcept;
+
 } // namespace system
 } // namespace libbitcoin
 

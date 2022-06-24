@@ -26,6 +26,9 @@
 namespace libbitcoin {
 namespace system {
 
+// native-to-endian integral conversions
+// ----------------------------------------------------------------------------
+
 template <typename Integer,
     if_big_endian_integral_integer<Integer>>
 constexpr Integer to_big_end(Integer from) noexcept
@@ -53,6 +56,9 @@ constexpr Integer to_little_end(Integer from) noexcept
 {
     return from;
 }
+
+// endianness reversals
+// ----------------------------------------------------------------------------
 
 template <typename Integer,
     if_integral_integer<Integer>,
@@ -98,6 +104,27 @@ constexpr Integer byteswap(Integer value) noexcept
     return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
         byte_swap64_native(to_unsigned(value)) :
         byte_swap64(to_unsigned(value)));
+}
+
+// bits to bytes
+// ----------------------------------------------------------------------------
+
+template <size_t Bits, if_byte_width<Bits>>
+constexpr size_t to_bytes() noexcept
+{
+    return Bits / byte_bits;
+}
+
+template <typename Integer, if_unsigned_integer<Integer>>
+constexpr Integer to_ceilinged_bytes(Integer bits) noexcept
+{
+    return ceilinged_divide(bits, byte_bits);
+}
+
+template <typename Integer, if_unsigned_integer<Integer>>
+constexpr Integer to_floored_bytes(Integer bits) noexcept
+{
+    return floored_divide(bits, byte_bits);
 }
 
 } // namespace system

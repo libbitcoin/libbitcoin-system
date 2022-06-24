@@ -31,6 +31,5 @@
 #include <bitcoin/system/data/memory.hpp>
 #include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/data/string.hpp>
-#include <bitcoin/system/data/uintx.hpp>
 
 #endif

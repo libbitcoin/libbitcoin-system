@@ -336,7 +336,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\memory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\no_fill_allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\uintx.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error.hpp" />

@@ -354,6 +354,19 @@ static_assert(is_true<if_not_same_signed_integer<int, size_t>>());
 
 // integral integer types
 
+static_assert(is_true<if_byte_width<8>>());
+static_assert(is_true<if_byte_width<16>>());
+static_assert(is_true<if_byte_width<24>>());
+static_assert(is_true<if_byte_width<32>>());
+static_assert(is_true<if_byte_width<40>>());
+static_assert(is_true<if_byte_width<48>>());
+static_assert(is_true<if_byte_width<56>>());
+static_assert(is_true<if_byte_width<64>>());
+static_assert(is_true<if_byte_width<128>>());
+static_assert(is_true<if_byte_width<256>>());
+//static_assert(is_true<if_byte_width<0>>());
+//static_assert(is_true<if_byte_width<42>>());
+
 static_assert(is_true<if_integral_integer<char>>());
 static_assert(is_true<if_integral_integer<int>>());
 static_assert(is_true<if_integral_integer<uint8_t>>());

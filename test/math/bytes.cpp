@@ -59,6 +59,31 @@ static_assert(byteswap<int16_t>(narrow_cast<int8_t>(0xfffe)) == narrow_cast<int1
 static_assert(byteswap<int32_t>(0xffffff00) == 0x00ffffff);
 static_assert(byteswap<int64_t>(0xffffffffffffff00ll) == 0x00ffffffffffffffll);
 
+static_assert(to_ceilinged_bytes(0u) == 0);
+static_assert(to_ceilinged_bytes(1u) == 1);
+static_assert(to_ceilinged_bytes(42u) == (42 + 7)/ 8);
+static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7) / 8);
+static_assert(std::is_same<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>::value);
+
+static_assert(to_floored_bytes(0u) == 0);
+static_assert(to_floored_bytes(1u) == 0);
+static_assert(to_floored_bytes(42u) == 42 / 8);
+static_assert(to_floored_bytes(0xffu) == 0xff / 8);
+static_assert(std::is_same<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>::value);
+
+////static_assert(to_bytes<0u>() == 0u);
+static_assert(to_bytes<8u>() == 1u);
+static_assert(to_bytes<16u>() == 2u);
+static_assert(to_bytes<24u>() == 3u);
+static_assert(to_bytes<32u>() == 4u);
+static_assert(to_bytes<40u>() == 5u);
+static_assert(to_bytes<48u>() == 6u);
+static_assert(to_bytes<56u>() == 7u);
+static_assert(to_bytes<64u>() == 8u);
+static_assert(to_bytes<128u>() == 16u);
+static_assert(to_bytes<256u>() == 32u);
+static_assert(std::is_same<decltype(to_bytes<8u>()), size_t>::value);
+
 BOOST_AUTO_TEST_SUITE(bytes_tests)
 
 BOOST_AUTO_TEST_CASE(to_big_end__not_constant_evaluated__always__expected)

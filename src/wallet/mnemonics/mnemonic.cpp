@@ -144,7 +144,7 @@ size_t mnemonic::entropy_bits(const string_list& words) noexcept
 
 size_t mnemonic::entropy_size(const string_list& words) noexcept
 {
-    return to_bytes(entropy_bits(words));
+    return to_floored_bytes(entropy_bits(words));
 }
 
 size_t mnemonic::word_count(const data_slice& entropy) noexcept

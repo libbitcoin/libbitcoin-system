@@ -268,7 +268,7 @@ uint8_t electrum::unused_bits(const data_slice& entropy) noexcept
 uint8_t electrum::unused_bytes(const data_slice& entropy) noexcept
 {
     // 0..10 unused bits implies we can discard up to one byte.
-    return to_bytes(unused_bits(entropy));
+    return to_floored_bytes(unused_bits(entropy));
 }
 
 size_t electrum::usable_size(const data_slice& entropy) noexcept

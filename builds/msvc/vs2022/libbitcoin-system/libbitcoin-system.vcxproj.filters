@@ -854,9 +854,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\uintx.hpp">
-      <Filter>include\bitcoin\system\data</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>

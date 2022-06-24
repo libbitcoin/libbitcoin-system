@@ -25,6 +25,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -70,10 +71,10 @@ template <typename Left, typename Right>
 using if_same = std::is_same<Left, Right>;
 
 template <typename Type>
-using if_byte = std::enable_if_t<!(width<Type>() > width<uint8_t>()), bool>;
+using if_byte = std::enable_if_t<!(sizeof(Type) > sizeof(uint8_t)), bool>;
 
 template <typename Type>
-using if_bytes = std::enable_if_t<(width<Type>() > width<uint8_t>()), bool>;
+using if_bytes = std::enable_if_t<(sizeof(Type) > sizeof(uint8_t)), bool>;
 
 template <typename Type, size_t Size>
 using if_size_of = std::enable_if_t<sizeof(Type) == Size, bool>;
@@ -140,6 +141,9 @@ using if_not_same_signed_integer = std::enable_if_t<
 
 /// Integral integer types (native, non-floating math, no bool).
 
+template <size_t Bits>
+using if_byte_width = std::enable_if_t<is_byte_width<Bits>(), bool>;
+
 template <typename Type>
 using if_signed_integral_integer = std::enable_if_t<is_integer<Type>() &&
     std::is_signed<Type>::value && std::is_integral<Type>::value &&
@@ -202,6 +206,32 @@ template <typename Integer>
 using if_little_endian_integral_integer = std::enable_if_t<is_little_endian &&
     is_integer<Integer>() && is_integral_size<Integer>() &&
     std::is_integral<Integer>::value, bool>;
+
+/// uintx_t.
+
+/// Template for constructing uintx types.
+/// There is no dynamic memory allocation when minBits == maxBits.
+template <uint32_t Bits>
+using uintx_t = boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<Bits, Bits,
+    boost::multiprecision::unsigned_magnitude,
+    boost::multiprecision::unchecked, void>>;
+
+/// Cannot generalize because no boost support for unsigned arbitrary precision.
+/// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
+/// but is not a base type. Use of signed types here would also not generalize
+/// as boost uses a different allocator for arbitrary precision. So we are stuck
+/// with this seam, requiring template specialization for uintx.
+typedef boost::multiprecision::cpp_int uintx;
+
+// C++11: use std::integral_constant (up to primitives limit).
+typedef uintx_t<5> uint5_t;
+typedef uintx_t<11> uint11_t;
+typedef uintx_t<48> uint48_t;
+typedef uintx_t<128> uint128_t;
+typedef uintx_t<160> uint160_t;
+typedef uintx_t<256> uint256_t;
+typedef uintx_t<512> uint512_t;
 
 } // namespace system
 } // namespace libbitcoin

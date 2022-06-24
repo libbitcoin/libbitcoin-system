@@ -238,7 +238,7 @@ size_t electrum_v1::entropy_bits(const string_list& words) noexcept
 
 size_t electrum_v1::entropy_size(const string_list& words) noexcept
 {
-    return to_bytes(entropy_bits(words));
+    return to_floored_bytes(entropy_bits(words));
 }
 
 size_t electrum_v1::word_count(const data_slice& entropy) noexcept

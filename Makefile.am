@@ -484,8 +484,7 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/external_ptr.hpp \
     include/bitcoin/system/data/memory.hpp \
     include/bitcoin/system/data/no_fill_allocator.hpp \
-    include/bitcoin/system/data/string.hpp \
-    include/bitcoin/system/data/uintx.hpp
+    include/bitcoin/system/data/string.hpp
 
 include_bitcoin_system_errordir = ${includedir}/bitcoin/system/error
 include_bitcoin_system_error_HEADERS = \

@@ -284,7 +284,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
         return true;
 
     // Conditionally use scrypt proof of work (e.g. Litecoin).
-    return to_uint256(scrypt ? scrypt_hash(to_data()) : hash()) > target;
+    return to_uintx(scrypt ? scrypt_hash(to_data()) : hash()) > target;
 }
 
 // ****************************************************************************
