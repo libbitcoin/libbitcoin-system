@@ -259,6 +259,26 @@ inline Collection reverse_copy(const Collection& list) noexcept
     return reverse(Collection{ list });
 }
 
+template <typename Collection>
+inline auto reverse_view(Collection& list) noexcept
+{
+#ifdef HAVE_STD_RANGES
+    return std::views::reverse(list);
+#else
+    return boost::adaptors::reverse(list);
+#endif
+}
+
+template <typename Collection>
+inline auto reverse_view(const Collection& list) noexcept
+{
+#ifdef HAVE_STD_RANGES
+    return std::views::reverse(list);
+#else
+    return boost::adaptors::reverse(list);
+#endif
+}
+
 // C++17: Parallel policy for std::sort.
 template <typename Collection>
 constexpr void sort(Collection& list) noexcept

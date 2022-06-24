@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include <boost/range/adaptor/reversed.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -170,6 +171,14 @@ BC_API bool operator==(const data_slice& left, const data_slice& right) noexcept
 BC_API bool operator!=(const data_slice& left, const data_slice& right) noexcept;
 
 typedef std::initializer_list<data_slice> data_loaf;
+
+// data_slice is still not a true iterator, so boost required.
+inline auto reverse_slice(const data_slice& list) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return boost::adaptors::reverse(list);
+    BC_POP_WARNING()
+}
 
 } // namespace system
 } // namespace libbitcoin

@@ -23,6 +23,12 @@
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/warnings.hpp>
 
+// C++20 suport for ranges not yet available on other platforms.
+#ifdef _MSC_VER
+    #include <ranges>
+    #define HAVE_STD_RANGES
+#endif
+
 // Create bc namespace alias.
 namespace libbitcoin {
 namespace system {

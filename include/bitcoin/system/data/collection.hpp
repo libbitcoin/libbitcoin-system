@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
-#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -107,11 +106,17 @@ constexpr bool is_intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) noexcept;
 
 /// Reverse the order of collection elements.
-/// Use std::views::reverse for reverse iteration.
+/// Use reverse_view for reverse iteration.
 template <typename Collection>
 inline Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
 inline Collection reverse_copy(const Collection& list) noexcept;
+
+/// Reverse iterator to a collection of elements.
+template <typename Collection, typename View>
+inline auto reverse_view(Collection& list) noexcept;
+template <typename Collection, typename View>
+inline auto reverse_view(const Collection& list) noexcept;
 
 /// Sort collection elements.
 template <typename Collection>

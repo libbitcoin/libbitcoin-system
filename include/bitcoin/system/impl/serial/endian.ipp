@@ -24,7 +24,6 @@
 #include <cstdint>
 #include <iostream>
 #include <iterator>
-#include <ranges>
 #include <string>
 #include <utility>
 #include <bitcoin/system/constants.hpp>
@@ -248,7 +247,7 @@ inline Data to_big(Data&& bytes, Integer value) noexcept
     // 0x0001 >> 8 => 0x0000
 
     // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (auto& byte: std::views::reverse(bytes))
+    for (auto& byte: reverse_view(bytes))
     {
         byte = possible_sign_narrow_cast<uint8_t>(value);
         value >>= byte_bits;
