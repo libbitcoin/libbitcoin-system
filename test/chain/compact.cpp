@@ -145,13 +145,13 @@ constexpr uint32_t factory(int32_t logical_exponent, bool negative,
 BOOST_AUTO_TEST_CASE(compact__expand__negative3_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, false, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, false, 0x00000000))), 0x00000000u);  // shift to zero...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, false, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, false, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-3, false, 0x007fffff))), 0x00000000u);
@@ -160,120 +160,118 @@ BOOST_AUTO_TEST_CASE(compact__expand__negative3_exponent__normalizes_as_expected
 BOOST_AUTO_TEST_CASE(compact__expand__negative2_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x000000ff))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x0000ffff))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x007fffff))), 0x017f0000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x000000ff))), 0x00000000u);  // shift to zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x0000ffff))), 0x00000000u);  // shift to zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-2, false, 0x007fffff))), 0x017f0000u);  // valid
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__negative1_exponent_normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x000000ff))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x0000ffff))), 0x0200ff00u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x007fffff))), 0x027fff00u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x000000ff))), 0x00000000u);  // shift to zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x0000ffff))), 0x0200ff00u);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(-1, false, 0x007fffff))), 0x027fff00u);  // valid
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__zero_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x000000ff))), 0x0200ff00u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x0000ffff))), 0x0300ffffu);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x007fffff))), 0x037fffffu);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x000000ff))), 0x0200ff00u);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x0000ffff))), 0x0300ffffu);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(0, false, 0x007fffff))), 0x037fffffu);  // valid
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__positive1_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x000000ff))), 0x0300ff00u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x0000ffff))), 0x0400ffffu);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x007fffff))), 0x047fffffu);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x000000ff))), 0x0300ff00u);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x0000ffff))), 0x0400ffffu);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(1, false, 0x007fffff))), 0x047fffffu);  // valid
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__positive29_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, true, 0x007fffff))), 0x00000000u);
 
     // positive
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x000000ff))), 0x1f00ff00u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x0000ffff))), 0x2000ffffu);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x007fffff))), 0x207fffffu);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x000000ff))), 0x1f00ff00u);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x0000ffff))), 0x2000ffffu);  // valid
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(29, false, 0x007fffff))), 0x207fffffu);  // valid
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__positive30_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, true, 0x007fffff))), 0x00000000u);
 
     // positive, overflow above 0x0000ffff
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x000000ff))), 0x00000000u); // strict
-////BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x000000ff))), 0x2000ff00u); // lax
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x0000ffff))), 0x00000000u); // n^32->0
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x007fffff))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x00000000))), 0x00000000u); // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x000000ff))), 0x00000000u); // requires lax (^33)
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x0000ffff))), 0x2100ffffu); // strict (valid)
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(30, false, 0x007fffff))), 0x00000000u); // overflow
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__positive31_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, true, 0x007fffff))), 0x00000000u);
 
     // positive, overflow above 0x000000ff
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x00000000))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x000000ff))), 0x00000000u); // strict
-////BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x000000ff))), 0x2100ff00u); // lax
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x0000ffff))), 0x00000000u);
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x007fffff))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x00000000))), 0x00000000u);  // zero
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x000000ff))), 0x00000000u);  // requires lax (^34)
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x0000ffff))), 0x00000000u);  // overflow
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(31, false, 0x007fffff))), 0x00000000u);  // overflow
 }
 
 BOOST_AUTO_TEST_CASE(compact__expand__positive32_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, true, 0x007fffff))), 0x00000000u);
 
     // positive, always overflow
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, false, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, false, 0x00000000))), 0x00000000u);  // overflow...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, false, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, false, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(32, false, 0x007fffff))), 0x00000000u);
@@ -282,13 +280,13 @@ BOOST_AUTO_TEST_CASE(compact__expand__positive32_exponent__normalizes_as_expecte
 BOOST_AUTO_TEST_CASE(compact__expand__positive252_exponent__normalizes_as_expected)
 {
     // negative, always zero
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, true, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, true, 0x00000000))), 0x00000000u);  // negative...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, true, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, true, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, true, 0x007fffff))), 0x00000000u);
 
     // positive, always overflow.
-    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, false, 0x00000000))), 0x00000000u);
+    BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, false, 0x00000000))), 0x00000000u);  // overflow...
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, false, 0x000000ff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, false, 0x0000ffff))), 0x00000000u);
     BOOST_CHECK_EQUAL(compact::compress(compact::expand(factory(252, false, 0x007fffff))), 0x00000000u);
