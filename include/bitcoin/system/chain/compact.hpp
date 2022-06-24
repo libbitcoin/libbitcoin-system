@@ -28,10 +28,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-struct compact1
-{
-};
-
 /// A base 256 exponential form representation of 32 byte (uint256_t) values.
 /// The zero value is used as an invalid value sentinel. Otherwise it is not
 /// possible to create an invalid compact form from 32 bytes. The compression
