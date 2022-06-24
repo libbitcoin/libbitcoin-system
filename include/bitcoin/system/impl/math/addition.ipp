@@ -49,20 +49,6 @@ constexpr Result subtract(Left left, Right right) noexcept
         possible_sign_cast<Result>(right);
 }
 
-////template <typename Result, typename Integer,
-////    if_not_lesser_width<Result, Integer>>
-////constexpr Result increment(Integer value) noexcept
-////{
-////    return add<Result>(value, Integer{ 1 });
-////}
-////
-////template <typename Result, typename Integer,
-////    if_not_lesser_width<Result, Integer>>
-////constexpr Result decrement(Integer value) noexcept
-////{
-////    return subtract<Result>(value, Integer{ 1 });
-////}
-
 template <typename Integer, if_signed_integer<Integer>>
 constexpr bool overflows(Integer left, Integer right) noexcept
 {
