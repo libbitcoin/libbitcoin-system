@@ -20,51 +20,27 @@
 
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace base256e {
 
-// Derivation.
-// ----------------------------------------------------------------------------
-
-using exponent_type = uint8_t;
-using mantissa_type = uint32_t;
-
-// All parameters are derived, no magic numbers.
-constexpr auto bits = 256u;
-constexpr auto bytes = to_bytes(bits);
-static_assert(bytes == 32u);
-
-// exponent domain (stored [0..32] vs. logical [-3..29] exponent)
-constexpr auto exponent_bits = ceilinged_log2(bytes);
-constexpr auto alignment = width<exponent_type>() - exponent_bits;
-constexpr auto exponent_width = alignment + exponent_bits;
-static_assert(width<exponent_type>() == exponent_width);
-static_assert(exponent_width == 8u);
-static_assert(alignment == 2u);
-
-// mantissa domain
-// storage of the exponent reduces mantissa domain by aligned exponent width.
-// this results in a reduced precision (e.g. 24 high order bits vs. 32).
-static constexpr auto mantissa_width = bytes - exponent_width;
-static_assert(width<mantissa_type>() == bytes);
-static_assert(mantissa_width == 24u);
-
-// exponentiation
 template <typename Integer>
 constexpr Integer raise(Integer value) noexcept
 {
-    return value * (bits / bytes);
+    return value * (from / to);
+}
+
+template <typename Integer>
+constexpr Integer lower(Integer value) noexcept
+{
+    return value / (from / to);
 }
 
 static_assert(raise(one) == to_bits(one));
-
-// logical exponent
-// there is no reason for this.
-static constexpr auto point = mantissa_width / exponent_width;
-static_assert(point == 3u);
+static_assert(lower(to_bits(one)) == one);
 
 // Implementation.
 // ----------------------------------------------------------------------------
@@ -74,45 +50,46 @@ static_assert(point == 3u);
 // exponent   32 implies +29 shift, which produces max value (3 bytes left).
 // exponent > 32 exponent is out of bounds, and produces a zero value.
 // Note that the logical zero exponent (3) does not produce 1.
-uint256_t expand_base256e(uint32_t small) noexcept
+number_type expand(compact_type exponential) noexcept
 {
-    const auto exponent = shift_right(small, mantissa_width);
-    const auto mantissa = mask_left<mantissa_type>(small, exponent_width);
+    const auto exponent = raise(shift_right(exponential, precision));
+    const auto mantissa = mask_left<compact_type>(exponential, exponent_width);
 
     // Zero returned if unsigned exponent is out of bounds [0..32].
-    if (is_limited(exponent, bytes))
+    if (is_limited(exponent, from))
         return 0;
 
-    uint256_t big{ mantissa };
+    number_type number{ mantissa };
 
-    exponent > point ?
-        big <<= raise(exponent - point) :
-        big >>= raise(point - exponent);
+    exponent > precision ?
+        number <<= exponent - precision :
+        number >>= precision - exponent;
 
-    return big;
+    return number;
 }
 
 // Only a zero value returns zero exponent and value (log(0) is undefined).
 // Any other value produces a non-zero exponent and non-zero value.
 // Where more than one representation may be possible (and allowed by expand),
 // this compression produces a normal form, with minimal exponent selection.
-uint32_t compress_base256e(const uint256_t& big) noexcept
+compact_type compress(const number_type& number) noexcept
 {
-    if (is_zero(big))
+    if (is_zero(number))
         return 0;
 
     // This can only produce an exponent from [0..32] (zero excluded above).
-    const auto exponent = ceilinged_log256(big);
-    const auto mantissa = static_cast<mantissa_type>
+    const auto exponent = raise(ceilinged_log256(number));
+    const auto mantissa = static_cast<compact_type>
     (
-        exponent > point ?
-            big >> raise(exponent - point) :
-            big << raise(point - exponent)
+        exponent > precision ?
+            number >> exponent - precision :
+            number << precision - exponent
     );
 
-    return bit_or(shift_left(possible_narrow_cast<mantissa_type>(exponent),
-        mantissa_width), mantissa);
+    return bit_or(shift_left(possible_narrow_cast<compact_type>(
+        lower(exponent)), precision), mantissa);
 }
 
+} // namespace base256e
 } // namespace system
 } // namespace libbitcoin
