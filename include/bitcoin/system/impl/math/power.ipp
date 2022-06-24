@@ -21,6 +21,7 @@
 
 #include <bit>
 #include <cstddef>
+#include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
@@ -54,9 +55,8 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
     if (is_negative(value))
         return 0;
 
-    using exponent = to_unsigned_type<Exponent>;
-    const auto from = possible_narrow_and_sign_cast<exponent>(value);
-    return possible_sign_cast<Exponent>(std::bit_width(from));
+    return possible_narrow_and_sign_cast<Exponent>(
+        std::bit_width(to_unsigned(value)));
 }
 
 // TODO: test (uintx).
@@ -146,9 +146,8 @@ constexpr Exponent floored_log2(Value value) noexcept
     if (value < 1)
         return 0;
 
-    using exponent = to_unsigned_type<Exponent>;
-    const auto from = possible_narrow_and_sign_cast<exponent>(value);
-    return possible_sign_cast<Exponent>(sub1(std::bit_width(from)));
+    return possible_narrow_and_sign_cast<Exponent>(
+        sub1(std::bit_width(to_unsigned(value))));
 }
 
 // TODO: test (uintx).

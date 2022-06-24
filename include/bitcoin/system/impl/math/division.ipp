@@ -78,7 +78,7 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> typename std::make_signed<decltype(dividend % divisor)>::type
+    -> typename to_signed_type<decltype(dividend % divisor)>
 {
     return truncated_modulo(dividend, divisor) -
         (is_ceilinged(dividend, divisor) ? 0 : divisor);

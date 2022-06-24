@@ -43,7 +43,7 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> typename std::make_signed<decltype(dividend % divisor)>::type;
+    -> typename to_signed_type<decltype(dividend % divisor)>;
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to C++ % for positive quotients.

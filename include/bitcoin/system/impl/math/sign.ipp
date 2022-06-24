@@ -26,51 +26,60 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename Integer, typename Signed, if_integer<Integer>>
+template <typename Integer, typename Signed,
+    if_integer<Integer>>
 constexpr Signed to_signed(Integer value) noexcept
 {
     return possible_sign_cast<Signed>(value);
 }
 
-template <typename Integer, typename Unsigned, if_integer<Integer>>
+template <typename Integer, typename Unsigned,
+    if_integer<Integer>>
 constexpr Unsigned to_unsigned(Integer value) noexcept
 {
     return possible_sign_cast<Unsigned>(value);
 }
 
-template <typename Integer, typename Absolute, if_signed_integer<Integer>>
+template <typename Integer, typename Absolute,
+    if_signed_integer<Integer>>
 constexpr Absolute absolute(Integer value) noexcept
 {
     // std::abs is limited to signed types.
     return to_unsigned(is_negative(value) ? -value : value);
 }
 
-template <typename Integer, typename Absolute, if_unsigned_integer<Integer>>
+template <typename Integer, typename Absolute,
+    if_unsigned_integer<Integer>>
 constexpr Absolute absolute(Integer value) noexcept
 {
     return value;
 }
-template <typename Result, typename Integer, if_signed_integer<Result>,
-    if_signed_integer<Integer>, if_not_lesser_width<Result, Integer>>
+template <typename Result, typename Integer,
+    if_signed_integer<Result>,
+    if_signed_integer<Integer>,
+    if_not_lesser_width<Result, Integer>>
 constexpr Result negate(Integer value) noexcept
 {
     // Wide cast to result domain, narrow cast in case of negate promotion.
     return possible_narrow_cast<Result>(-possible_wide_cast<Result>(value));
 }
 
-template <typename Integer, if_signed_integer<Integer>>
+template <typename Integer,
+    if_signed_integer<Integer>>
 constexpr bool is_negative(Integer value) noexcept
 {
     return value < 0;
 }
 
-template <typename Integer, if_unsigned_integer<Integer>>
+template <typename Integer,
+    if_unsigned_integer<Integer>>
 constexpr bool is_negative(Integer) noexcept
 {
     return false;
 }
 
-template <typename Left, typename Right, if_same_signed_integer<Left, Right>>
+template <typename Left, typename Right,
+    if_same_signed_integer<Left, Right>>
 constexpr bool is_greater(Left left, Right right) noexcept
 {
     return left > right;
@@ -90,7 +99,8 @@ constexpr bool is_greater(Left left, Right right) noexcept
      return !is_negative(left) && (right < to_unsigned(left));
 }
 
-template <typename Left, typename Right, if_same_signed_integer<Left, Right>>
+template <typename Left, typename Right,
+    if_same_signed_integer<Left, Right>>
 constexpr bool is_lesser(Left left, Right right) noexcept
 {
     return left < right;

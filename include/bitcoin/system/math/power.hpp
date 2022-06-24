@@ -39,7 +39,8 @@ namespace system {
 /// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 template <typename Exponent = size_t, typename Base, typename Value,
-    if_integer<Exponent> = true, if_integer<Base> = true, if_integer<Value> = true>
+    if_integer<Exponent> = true, if_integer<Base> = true,
+    if_integer<Value> = true>
 constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
 
 /// Optimizations for ceilinged_log(2, Value).

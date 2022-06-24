@@ -160,12 +160,6 @@ using if_non_integral_integer = std::enable_if_t<is_integer<Type>() &&
 
 /// Type determination by required byte width and sign.
 
-template <typename Type>
-using to_signed_type = std::make_signed<Type>::type;
-
-template <typename Type>
-using to_unsigned_type = std::make_unsigned<Type>::type;
-
 template <size_t Bytes, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =
     std::conditional_t<Bytes == 0, signed_size_t,
@@ -179,6 +173,14 @@ using unsigned_type =
         std::conditional_t<Bytes == 1, uint8_t,
             std::conditional_t<Bytes == 2, uint16_t,
                 std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>>;
+
+/// Use instead of std::make_signed.
+template <typename Type>
+using to_signed_type = signed_type<sizeof(Type)>;
+
+/// Use instead of std::make_unsigned.
+template <typename Type>
+using to_unsigned_type = unsigned_type<sizeof(Type)>;
 
 /// Endianness.
 

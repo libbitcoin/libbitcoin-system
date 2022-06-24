@@ -29,19 +29,16 @@ namespace system {
 
 /// Cast to smallest signed integer type to hold the maximum unsigned value.
 template <typename Integer,
-    typename Signed = typename std::make_signed<Integer>::type,
-    if_integer<Integer> = true>
+    typename Signed = to_signed_type<Integer>, if_integer<Integer> = true>
 constexpr Signed to_signed(Integer value) noexcept;
 
 /// Cast to smallest unsigned integer type to hold the maximum signed value.
 template <typename Integer,
-    typename Unsigned = typename std::make_unsigned<Integer>::type,
-    if_integer<Integer> = true>
+    typename Unsigned = to_unsigned_type<Integer>, if_integer<Integer> = true>
 constexpr Unsigned to_unsigned(Integer value) noexcept;
 
 /// Obtain the absolute value of the integer.
-template <typename Integer,
-    typename Absolute = typename std::make_unsigned<Integer>::type,
+template <typename Integer, typename Absolute = to_unsigned_type<Integer>,
     if_signed_integer<Integer> = true>
 constexpr Absolute absolute(Integer value) noexcept;
 template <typename Integer, typename Absolute = Integer,
@@ -56,9 +53,11 @@ template <typename Result, typename Integer,
 constexpr Result negate(Integer value) noexcept;
 
 /// Determine whether the integer is negative.
-template <typename Integer, if_signed_integer<Integer> = true>
+template <typename Integer,
+    if_signed_integer<Integer> = true>
 constexpr bool is_negative(Integer value) noexcept;
-template <typename Integer, if_unsigned_integer<Integer> = true>
+template <typename Integer,
+    if_unsigned_integer<Integer> = true>
 constexpr bool is_negative(Integer) noexcept;
 
 /// Use !is_lesser(left, right) for (left >= right).
