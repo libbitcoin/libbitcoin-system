@@ -73,15 +73,15 @@ public:
     /// Uses non-minimal exponent encoding to avoid high mantissa bit (hack).
     static inline compact_type compress(const number_type& number) noexcept;
 
+    bool negative;
+    exponent_type exponent;
+    compact_type mantissa;
+
 protected:
     template <typename Integer>
     static constexpr Integer ratio(Integer value) noexcept;
     static constexpr compact to_compact(compact_type small) noexcept;
     static constexpr compact_type from_compact(const compact& compact) noexcept;
-
-    bool negative;
-    exponent_type exponent;
-    compact_type mantissa;
 };
 
 } // namespace chain
