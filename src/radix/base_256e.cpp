@@ -46,6 +46,8 @@ static_assert(exponent_width == 8u);
 static_assert(alignment == 2u);
 
 // mantissa domain
+// storage of the exponent reduces mantissa domain by aligned exponent width.
+// this results in a reduced precision (e.g. 24 high order bits vs. 32).
 static constexpr auto mantissa_width = bytes - exponent_width;
 static_assert(width<mantissa_type>() == bytes);
 static_assert(mantissa_width == 24u);
@@ -59,8 +61,9 @@ constexpr Integer raise(Integer value) noexcept
 
 static_assert(raise(one) == to_bits(one));
 
-// shifting exponent reduces mantissa domain by aligned exponent width
-static constexpr auto point = mantissa_width / raise(one);
+// logical exponent
+// there is no reason for this.
+static constexpr auto point = mantissa_width / exponent_width;
 static_assert(point == 3u);
 
 // Implementation.

@@ -303,7 +303,7 @@ size_t chain_state::bip9_bit1_height(size_t height,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) noexcept
 {
-    BC_ASSERT_MSG(compact::is_compact(bits_high(values)),
+    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
         "previous block has invalid bits value");
 
     // Invalid parameter via public interface, test is_valid for results.
@@ -329,7 +329,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
             settings.proof_of_work_limit,
             settings.block_spacing_seconds);
 
-    // Mainnet not retargeting.
+    // Mainnet not retargeting, must exact match the previous block bits value.
     return bits_high(values);
 }
 
@@ -371,6 +371,7 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     target <<= timewarp;
 
     // Disallow target from falling below minimum configured.
+    // All targets are a bits value normalized by compress here.
     return target > limit ? proof_of_work_limit : compact::compress(target);
 }
 

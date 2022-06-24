@@ -326,6 +326,8 @@ code header::accept(const chain_state& state) const noexcept
     if (timestamp_ <= state.median_time_past())
         return error::timestamp_too_early;
 
+    // This is the only consensus direct comparison of the header.bits value.
+    // All other work comparisons performed on expanded/normalized bits values.
     if (bits_ != state.work_required())
         return error::incorrect_proof_of_work;
 
