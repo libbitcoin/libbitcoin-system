@@ -22,7 +22,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/program_options.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/define.hpp>
 

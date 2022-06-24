@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/json.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>

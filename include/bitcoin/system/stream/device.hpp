@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <utility>
-#include <boost/iostreams/stream.hpp>
+#include <bitcoin/system/boost.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -24,7 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <boost/json.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>

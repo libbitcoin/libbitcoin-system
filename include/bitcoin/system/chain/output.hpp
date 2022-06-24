@@ -24,7 +24,7 @@
 #include <istream>
 #include <memory>
 #include <vector>
-#include <boost/json.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>

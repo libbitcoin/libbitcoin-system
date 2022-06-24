@@ -25,7 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/json.hpp>
+#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
