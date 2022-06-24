@@ -114,20 +114,12 @@ constexpr long_hash null_long_hash
 };
 
 /// Hash conversions of corresponding integers.
-BC_API mini_hash to_hash(const uint48_t& value) noexcept;
-BC_API quarter_hash to_hash(const uint64_t& value) noexcept;
-BC_API half_hash to_hash(const uint128_t& value) noexcept;
-BC_API short_hash to_hash(const uint160_t& value) noexcept;
-BC_API hash_digest to_hash(const uint256_t& value) noexcept;
-BC_API long_hash to_hash(const uint512_t& value) noexcept;
+template <size_t Bits, size_t Bytes = to_ceilinged_bytes(Bits)>
+inline data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept;
 
 /// Integer conversions of corresponding hashes.
-BC_API uint48_t to_uint48(const mini_hash& hash) noexcept;
-BC_API uint64_t to_uint64(const quarter_hash& hash) noexcept;
-BC_API uint128_t to_uint128(const half_hash& hash) noexcept;
-BC_API uint160_t to_uint160(const short_hash& hash) noexcept;
-BC_API uint256_t to_uint256(const hash_digest& hash) noexcept;
-BC_API uint512_t to_uint512(const long_hash& hash) noexcept;
+template <size_t Bytes, size_t Bits = to_bits(Bytes)>
+inline uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept;
 
 /// Generate a scrypt hash to fill a byte array.
 /// Memory required (bytes) = 2 * 64 * work * resources.

@@ -22,9 +22,22 @@
 #include <algorithm>
 #include <cstddef>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+template <size_t Bits, size_t Bytes>
+inline data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept
+{
+    return to_little_endian<Bytes>(value);
+}
+
+template <size_t Bytes, size_t Bits>
+inline uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept
+{
+    return from_little_endian<Bytes>(hash);
+}
 
 template<size_t Size>
 data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
