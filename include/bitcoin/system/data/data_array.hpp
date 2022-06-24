@@ -54,7 +54,7 @@ constexpr data_array<Size> to_array(const data_slice& bytes) noexcept;
 
 /// Create a data stack from vector of data array.
 template <size_t Size>
-constexpr data_stack to_stack(
+const data_stack to_stack(
     const std::vector<data_array<Size>>& values) noexcept;
 
 /// Concatenate several data slices into a single array.

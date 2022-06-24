@@ -45,7 +45,7 @@ constexpr data_array<Size> to_array(const data_slice& bytes) noexcept
 
 // TODO: test.
 template <size_t Size>
-constexpr data_stack to_stack(
+const data_stack to_stack(
     const std::vector<data_array<Size>>& values) noexcept
 {
     data_stack chunks(values.size(), no_fill_byte_allocator);

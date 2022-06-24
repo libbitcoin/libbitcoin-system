@@ -299,7 +299,7 @@ public:
             && !ops.back().data().empty();
     }
 
-    static constexpr operations to_pay_null_data_pattern(
+    static const operations to_pay_null_data_pattern(
         const data_slice& data) noexcept
     {
         return data.size() > max_null_data_size ? operations{} : operations
@@ -309,7 +309,7 @@ public:
         };
     }
 
-    static constexpr operations to_pay_public_key_pattern(
+    static const operations to_pay_public_key_pattern(
         const data_slice& point) noexcept
     {
         return !is_public_key(point) ? operations{} : operations
@@ -319,7 +319,7 @@ public:
         };
     }
 
-    static constexpr operations to_pay_key_hash_pattern(
+    static const operations to_pay_key_hash_pattern(
         const short_hash& hash) noexcept
     {
         return operations
@@ -332,7 +332,7 @@ public:
         };
     }
 
-    static constexpr operations to_pay_script_hash_pattern(
+    static const operations to_pay_script_hash_pattern(
         const short_hash& hash) noexcept
     {
         return operations
@@ -388,7 +388,7 @@ public:
         return ops;
     }
 
-    static constexpr operations to_pay_witness_pattern(uint8_t version,
+    static const operations to_pay_witness_pattern(uint8_t version,
         const data_slice& data) noexcept
     {
         return
@@ -398,7 +398,7 @@ public:
         };
     }
 
-    static constexpr operations to_pay_witness_key_hash_pattern(
+    static const operations to_pay_witness_key_hash_pattern(
         const short_hash& hash) noexcept
     {
         return
@@ -408,7 +408,7 @@ public:
         };
     }
 
-    static constexpr operations to_pay_witness_script_hash_pattern(
+    static const operations to_pay_witness_script_hash_pattern(
         const hash_digest& hash) noexcept
     {
         return
