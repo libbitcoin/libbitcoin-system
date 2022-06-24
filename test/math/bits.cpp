@@ -51,46 +51,49 @@ static_assert(bit_width(7) == 3);
 static_assert(bit_width(8) == 4);
 static_assert(bit_width(9) == 4);
 static_assert(bit_width(9) == 4);
-static_assert(bit_width(0x80) == 8);
-static_assert(bit_width(0x8000) == 16);
+static_assert(bit_width(0x80) == 8); // negative
+static_assert(bit_width(0x8000) == 16); // negative
 static_assert(bit_width(0x800100l) == 24);
-static_assert(bit_width(0x80000000l) == 32);
+static_assert(bit_width(0x80000000l) == 32); // negative
 static_assert(bit_width(0x8001000000ll) == 40);
 static_assert(bit_width(0x800000000000ll) == 48);
 static_assert(bit_width(0x80010000000000ll) == 56);
-static_assert(bit_width(0x8000000000000000ll) == 64);
-static_assert(bit_width<int64_t>(0x80) == 8);
-static_assert(bit_width<int64_t>(0x8000) == 16);
+static_assert(bit_width(0x8000000000000000ll) == 64); // negative
+static_assert(bit_width<int64_t>(0x80) == 8); // negative
+static_assert(bit_width<int64_t>(0x8000) == 16); // negative
 static_assert(bit_width<int64_t>(0x800100l) == 24);
-static_assert(bit_width<int64_t>(0x80000000l) == 32);
+static_assert(bit_width<int64_t>(0x80000000l) == 32); // negative
 static_assert(bit_width<int64_t>(0x8001000000ll) == 40);
 static_assert(bit_width<int64_t>(0x800000000000ll) == 48);
 static_assert(bit_width<int64_t>(0x80010000000000ll) == 56);
-static_assert(bit_width<int64_t>(0x8000000000000000ll) == 64);
+static_assert(bit_width<int64_t>(0x8000000000000000ll) == 64); // negative
 
-// bit_width (signed/negative)
-// negative always sets the high order bit of the domain
-static_assert(bit_width(-1) == 32u);
-static_assert(bit_width(-2) == 32u);
-static_assert(bit_width(-3) == 32u);
-static_assert(bit_width(-4) == 32u);
-static_assert(bit_width(-5) == 32u);
-static_assert(bit_width(-6) == 32u);
-static_assert(bit_width(-7) == 32u);
-static_assert(bit_width(-8) == 32u);
-static_assert(bit_width(-9) == 32u);
-static_assert(bit_width(-0x80) == 32u);
-static_assert(bit_width(-0x8000) == 32u);
-static_assert(bit_width(-0x800100l) == 32u);
-////static_assert(bit_width(-0x80000000l) == 32u);
+// bit_width (signed/negated)
+static_assert(bit_width(-1) == 32u); // promoted to int by negation
+static_assert(bit_width(-2) == 32u); // promoted to int by negation
+static_assert(bit_width(-3) == 32u); // promoted to int by negation
+static_assert(bit_width(-4) == 32u); // promoted to int by negation
+static_assert(bit_width(-5) == 32u); // promoted to int by negation
+static_assert(bit_width(-6) == 32u); // promoted to int by negation
+static_assert(bit_width(-7) == 32u); // promoted to int by negation
+static_assert(bit_width(-8) == 32u); // promoted to int by negation
+static_assert(bit_width(-9) == 32u); // promoted to int by negation
+
+// 32 bit (signed/negated)
+static_assert(bit_width(-0x80) == 32u); // promoted to int by negation
+static_assert(bit_width(-0x8000) == 32u); // promoted to int by negation
+static_assert(bit_width(-0x800100l) == 32u); // promoted to int by negation
+////static_assert(bit_width(-0x80000000l) == 32u); // max_int32 (sign inverted by negation)
+
+// 64 bit (signed/negated)
 static_assert(bit_width(-0x8001000000ll) == 64u);
 static_assert(bit_width(-0x800000000000ll) == 64u);
 static_assert(bit_width(-0x80010000000000ll) == 64u);
 ////static_assert(bit_width(-0x8000000000000000ll) == 64u);
-static_assert(bit_width<int64_t>(-0x80) == 64u);
-static_assert(bit_width<int64_t>(-0x8000) == 64u);
-static_assert(bit_width<int64_t>(-0x800100l) == 64u);
-////static_assert(bit_width<int64_t>(-0x80000000l) == 32u);
+static_assert(bit_width<int64_t>(-0x80) == 64u); // promoted to int by negation
+static_assert(bit_width<int64_t>(-0x8000) == 64u); // promoted to int by negation
+static_assert(bit_width<int64_t>(-0x800100l) == 64u); // promoted to int by negation
+////static_assert(bit_width<int64_t>(-0x80000000l) == 32u); // max_int32 (sign inverted by negation)
 static_assert(bit_width<int64_t>(-0x8001000000ll) == 64u);
 static_assert(bit_width<int64_t>(-0x800000000000ll) == 64u);
 static_assert(bit_width<int64_t>(-0x80010000000000ll) == 64u);
@@ -116,14 +119,16 @@ static_assert(byte_width(0x8001000000ull) == 5u);
 static_assert(byte_width(0x800000000000ull) == 6u);
 static_assert(byte_width(0x80010000000000ull) == 7u);
 static_assert(byte_width(0x8000000000000000ull) == 8u);
-static_assert(byte_width<int64_t>(0x80u) == 1u);
-static_assert(byte_width<int64_t>(0x8000u) == 2u);
+
+// 64 bit (unsigned/positive)
+static_assert(byte_width<int64_t>(0x80u) == 1u); // negative
+static_assert(byte_width<int64_t>(0x8000u) == 2u); // negative
 static_assert(byte_width<int64_t>(0x800100ul) == 3u);
-static_assert(byte_width<int64_t>(0x80000000ul) == 4u);
+static_assert(byte_width<int64_t>(0x80000000ul) == 4u); // negative
 static_assert(byte_width<int64_t>(0x8001000000ull) == 5u);
 static_assert(byte_width<int64_t>(0x800000000000ull) == 6u);
 static_assert(byte_width<int64_t>(0x80010000000000ull) == 7u);
-static_assert(byte_width<int64_t>(0x8000000000000000ull) == 8u);
+static_assert(byte_width<int64_t>(0x8000000000000000ull) == 8u); // negative
 
 // byte_width (signed/positive)
 static_assert(byte_width(0) == 0u);
@@ -145,42 +150,46 @@ static_assert(byte_width(0x8001000000ll) == 5u);
 static_assert(byte_width(0x800000000000ll) == 6u);
 static_assert(byte_width(0x80010000000000ll) == 7u);
 static_assert(byte_width(0x8000000000000000ll) == 8u);
-static_assert(byte_width<int64_t>(0x80) == 1u);
-static_assert(byte_width<int64_t>(0x8000) == 2u);
-static_assert(byte_width<int64_t>(0x800100l) == 3u);
-static_assert(byte_width<int64_t>(0x80000000l) == 4u);
-static_assert(byte_width<int64_t>(0x8001000000ll) == 5u);
-static_assert(byte_width<int64_t>(0x800000000000ll) == 6u);
-static_assert(byte_width<int64_t>(0x80010000000000ll) == 7u);
-static_assert(byte_width<int64_t>(0x8000000000000000ll) == 8u);
+static_assert(byte_width<int64_t>(0x80u) == 1u);
+static_assert(byte_width<int64_t>(0x8000u) == 2u);
+static_assert(byte_width<int64_t>(0x800100ul) == 3u);
+static_assert(byte_width<int64_t>(0x80000000ul) == 4u);
+static_assert(byte_width<int64_t>(0x8001000000ull) == 5u);
+static_assert(byte_width<int64_t>(0x800000000000ull) == 6u);
+static_assert(byte_width<int64_t>(0x80010000000000ull) == 7u);
+static_assert(byte_width<int64_t>(0x8000000000000000ull) == 8u);
 
 // byte_width (signed/negative)
-// negative always sets the high order bit of the domain
-static_assert(byte_width(-1) == 4u);
-static_assert(byte_width(-2) == 4u);
-static_assert(byte_width(-3) == 4u);
-static_assert(byte_width(-4) == 4u);
-static_assert(byte_width(-5) == 4u);
-static_assert(byte_width(-6) == 4u);
-static_assert(byte_width(-7) == 4u);
-static_assert(byte_width(-8) == 4u);
-static_assert(byte_width(-9) == 4u);
-static_assert(byte_width(-0x80) == 4u);
-static_assert(byte_width(-0x8000) == 4u);
-static_assert(byte_width(-0x800100l) == 4u);
-////static_assert(byte_width(-0x80000000l) == 4u);
+
+// 32 bit (signed/negated)
+static_assert(byte_width(-1) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-2) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-3) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-4) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-5) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-6) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-7) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-8) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-9) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x80) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x8000) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x800100l) == 4u); // promoted to 32 bit by negation
+////static_assert(byte_width(-0x80000000l) == 4u); // max_int32 (sign inverted by negation)
+
+// 64 bit (signed/negated)
 static_assert(byte_width(-0x8001000000ll) == 8u);
 static_assert(byte_width(-0x800000000000ll) == 8u);
 static_assert(byte_width(-0x80010000000000ll) == 8u);
 ////static_assert(byte_width(-0x8000000000000000ll) == 8u);
-static_assert(byte_width<int64_t>(-0x80) == 8u);
-static_assert(byte_width<int64_t>(-0x8000) == 8u);
-static_assert(byte_width<int64_t>(-0x800100) == 8ul);
-////static_assert(byte_width<int64_t>(-0x80000000l) == 4u); // <= int64_t but divides evenly to 32.
+static_assert(byte_width<int64_t>(-0x80) == 8u); // promoted to 32 bit by negation
+static_assert(byte_width<int64_t>(-0x8000) == 8u); // promoted to 32 bit by negation
+static_assert(byte_width<int64_t>(-0x800100) == 8u); // promoted to 32 bit by negation
+////static_assert(byte_width<int64_t>(-0x80000000l) == 4u); // max_int32 (sign inverted by negation)
 static_assert(byte_width<int64_t>(-0x8001000000ll) == 8u); 
 static_assert(byte_width<int64_t>(-0x800000000000ll) == 8u);
 static_assert(byte_width<int64_t>(-0x80010000000000ll) == 8u);
 ////static_assert(byte_width<int64_t>(-0x8000000000000000ll) == 8u);
+
 static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value);
 
 // twos_complement

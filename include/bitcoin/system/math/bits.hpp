@@ -34,6 +34,7 @@ namespace system {
     
 /// Same as std::bit_width (C++20) except this supports signed and unitx.
 /// See constants.hpp for width<>(), which provides the integral bit domain.
+/// A negative value always returns width<Value>().
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr size_t bit_width(Value value) noexcept;
 template <typename Value, if_signed_integer<Value> = true>
@@ -41,7 +42,10 @@ constexpr size_t bit_width(Value value) noexcept;
 
 /// See also std::bit_width (C++20).
 /// The number of bytes required to store value, byte_width(0) returns zero.
-template <typename Value, if_integer<Value> = true>
+/// A negative value always returns sizeof(Value).
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t byte_width(Value value) noexcept;
+template <typename Value, if_signed_integer<Value> = true>
 constexpr size_t byte_width(Value value) noexcept;
 
 /// Bitwise logical operations.

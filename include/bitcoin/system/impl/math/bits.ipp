@@ -46,17 +46,22 @@ constexpr size_t bit_width(Value value) noexcept
     return ceilinged_log2(value);
 }
 
-// Negtiave *values* always return width<Value>() as the high order bit is set.
 template <typename Value, if_signed_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
-    return bit_width(to_unsigned(value));
+    return is_negative(value) ? width<Value>() : bit_width(to_unsigned(value));
 }
 
-template <typename Value, if_integer<Value>>
+template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t byte_width(Value value) noexcept
 {
     return ceilinged_divide(bit_width(value), byte_bits);
+}
+
+template <typename Value, if_signed_integer<Value>>
+constexpr size_t byte_width(Value value) noexcept
+{
+    return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
 
 // Bitwise logical operations.
