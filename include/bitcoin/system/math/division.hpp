@@ -32,8 +32,8 @@ namespace system {
 /// This is equivalent to C++ % for negative quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor);
+constexpr to_common_type<Dividend, Divisor>
+ceilinged_divide(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
@@ -42,36 +42,36 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 /// complement representation, which is not generally useful as the negative.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> typename to_signed_type<decltype(dividend % divisor)>;
+constexpr to_signed_type<to_common_type<Dividend, Divisor>>
+ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor);
+constexpr to_common_type<Dividend, Divisor>
+floored_divide(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the floorded (rounded down) integer modulo quotient.
 /// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend % divisor);
+constexpr to_common_type<Dividend, Divisor>
+floored_modulo(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the truncated (rounded toward zero) integer quotient.
 /// This is equivalent to C++ /.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto truncated_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor);
+constexpr to_common_type<Dividend, Divisor>
+truncated_divide(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the truncated (rounded toward zero) integer divide remainder.
 /// This is equivalent to C++ %.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr auto truncated_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend % divisor);
+constexpr to_common_type<Dividend, Divisor>
+truncated_modulo(Dividend dividend, Divisor divisor) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

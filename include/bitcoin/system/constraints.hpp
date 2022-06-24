@@ -182,6 +182,10 @@ using to_signed_type = signed_type<sizeof(Type)>;
 template <typename Type>
 using to_unsigned_type = unsigned_type<sizeof(Type)>;
 
+/// Alias for -> decltype(dividend / divisor).
+template <typename Left, typename Right>
+using to_common_type = std::common_type<Left, Right>::type;
+
 /// Endianness.
 
 constexpr auto is_big_endian = std::endian::native == std::endian::big;

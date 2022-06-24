@@ -419,6 +419,18 @@ static_assert(std::is_same<unsigned_type<6>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<7>, uint64_t>::value);
 static_assert(std::is_same<unsigned_type<8>, uint64_t>::value);
 
+// Signed type determination by byte width.
+static_assert(std::is_same<to_common_type<bool, int>, int>::value);
+static_assert(std::is_same<to_common_type<int, bool>, int>::value);
+static_assert(std::is_same<to_common_type<uint8_t, int>, int>::value);
+static_assert(std::is_same<to_common_type<uint16_t, int>, int>::value);
+static_assert(std::is_same<to_common_type<uint32_t, int>, uint32_t>::value);
+static_assert(std::is_same<to_common_type<int, uint32_t>, uint32_t>::value);
+static_assert(std::is_same<to_common_type<uint32_t, int>, uint32_t>::value);
+static_assert(std::is_same<to_common_type<uint32_t, uint64_t>, uint64_t>::value);
+static_assert(std::is_same<to_common_type<uint32_t, int64_t>, int64_t>::value);
+static_assert(std::is_same<to_common_type<uint32_t, uint64_t>, uint64_t>::value);
+
 static_assert(!(is_big_endian&& is_little_endian));
 static_assert(!(is_big_endian&& is_unknown_endian));
 static_assert(!(is_little_endian&& is_unknown_endian));

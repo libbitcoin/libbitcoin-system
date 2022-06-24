@@ -66,8 +66,8 @@ constexpr bool is_floored(Dividend dividend, Divisor divisor) noexcept
 
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor)
+constexpr to_common_type<Dividend, Divisor>
+ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 {
     return truncated_divide(dividend, divisor) + 
         (is_ceilinged(dividend, divisor) ? 0 : 1);
@@ -77,8 +77,8 @@ constexpr auto ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 // So convert the result to unsigned type of the same size.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> typename to_signed_type<decltype(dividend % divisor)>
+constexpr to_signed_type<to_common_type<Dividend, Divisor>>
+ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
 {
     return truncated_modulo(dividend, divisor) -
         (is_ceilinged(dividend, divisor) ? 0 : divisor);
@@ -86,8 +86,8 @@ constexpr auto ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
 
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor)
+constexpr to_common_type<Dividend, Divisor>
+floored_divide(Dividend dividend, Divisor divisor) noexcept
 {
     return truncated_divide(dividend, divisor) -
         (is_floored(dividend, divisor) ? 0 : 1);
@@ -96,8 +96,8 @@ constexpr auto floored_divide(Dividend dividend, Divisor divisor) noexcept
 // Always positive result.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend % divisor)
+constexpr to_common_type<Dividend, Divisor>
+floored_modulo(Dividend dividend, Divisor divisor) noexcept
 {
     return truncated_modulo(dividend, divisor) +
         (is_floored(dividend, divisor) ? 0 : divisor);
@@ -105,16 +105,16 @@ constexpr auto floored_modulo(Dividend dividend, Divisor divisor) noexcept
 
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto truncated_divide(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend / divisor)
+constexpr to_common_type<Dividend, Divisor>
+truncated_divide(Dividend dividend, Divisor divisor) noexcept
 {
     return dividend / divisor;
 }
 
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
-constexpr auto truncated_modulo(Dividend dividend, Divisor divisor) noexcept
-    -> decltype(dividend % divisor)
+constexpr to_common_type<Dividend, Divisor>
+truncated_modulo(Dividend dividend, Divisor divisor) noexcept
 {
     return dividend % divisor;
 }
