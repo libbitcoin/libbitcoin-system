@@ -65,13 +65,11 @@ BOOST_AUTO_TEST_CASE(base_256e__both__zero_exponent__expected)
     constexpr auto exponent = precision;
     constexpr auto mantissa = 0x00ffffffu;
     constexpr auto compressed = (exponent << 24u) | mantissa;
-    ////constexpr auto raise = exponent - precision;
 
     // This shift is a no-op.
     const uint256_t expanded{ mantissa };
-    ////expanded <<= to_bits(raise);
 
-    // A 0 (3 - 3) exponent reporduces the mantissa.
+    // A 0 (3 - 3) exponent reproduces the mantissa.
     BOOST_CHECK_EQUAL(expand(compressed), expanded);
     BOOST_CHECK_EQUAL(compress(expanded), compressed);
 }
@@ -98,7 +96,6 @@ BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__minimum_value__expected)
     constexpr auto exponent = 0u;
     constexpr auto mantissa = 0x00000000u;
     constexpr auto compressed = (exponent << 24u) | mantissa;
-    ////constexpr auto raise = exponent - precision;
 
     // no bits set (min value)
     const auto minimum = uint256_t{ 0 };
@@ -110,11 +107,9 @@ BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__minimum_value__expected)
 
 BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__maximum_value__expected)
 {
-    ////constexpr auto precision = 3u;
     constexpr auto exponent = 32u;
     constexpr auto mantissa = 0x00ffffffu;
     constexpr auto compressed = (exponent << 24u) | mantissa;
-    ////constexpr auto raise = exponent - precision;
 
     // all bits set (max value)
     const auto maximum = ~uint256_t{ 0 };
@@ -123,7 +118,57 @@ BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__maximum_value__expected)
     BOOST_CHECK_EQUAL(compress(maximum), compressed);
 }
 
-BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__values__expected)
+BOOST_AUTO_TEST_CASE(compact__compress__positive_values__expected)
+{
+    // zero => zero.
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000"))), 0x00000000ul);
+
+    // small values are left-shifted with negative (1..2) exponent.
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000007"))), 0x01070000ul);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000000000000000000000000000007b"))), 0x017b0000ul);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000000000000000000000000000000007bc"))), 0x0207bc00ul);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000007bcd"))), 0x027bcd00ul);
+
+    // 3 byte values values are not shifted zero exponent (3) exponent.
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000000000000000000000000007bcde"))), 0x0307bcdeul);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000000000000000000000000000007bcdef"))), 0x037bcdeful);
+
+
+    // > 3 byte values are right-shifted with positive (4..32) exponent, losing the precision of all bytes of order > 3.
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000000000000000000000007bcdefaa"))), 0x047bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000007bcdefa7bb"))), 0x057bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000000000000000000000007bcdefa7bbcc"))), 0x067bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000000000000000007bcdefa7bbccdd"))), 0x077bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000007bcdefa7bbccddee"))), 0x087bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000000000000000007bcdefa7bbccddeeff"))), 0x097bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000000000007bcdefa7bbccddeeff00"))), 0x0a7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000007bcdefa7bbccddeeff0011"))), 0x0b7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000000000007bcdefa7bbccddeeff001122"))), 0x0c7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000000000007bcdefa7bbccddeeff00112233"))), 0x0d7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000007bcdefa7bbccddeeff0011223344"))), 0x0e7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000000000007bcdefa7bbccddeeff001122334455"))), 0x0f7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000000000007bcdefa7bbccddeeff00112233445566"))), 0x107bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000007bcdefa7bbccddeeff0011223344556677"))), 0x117bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000000000007bcdefa7bbccddeeff001122334455667788"))), 0x127bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000000000007bcdefa7bbccddeeff00112233445566778899"))), 0x137bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000007bcdefa7bbccddeeff00112233445566778899aa"))), 0x147bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000000000007bcdefa7bbccddeeff00112233445566778899a7bb"))), 0x157bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000000000007bcdefa7bbccddeeff00112233445566778899a7bbcc"))), 0x167bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000007bcdefa7bbccddeeff00112233445566778899a7bbccdd"))), 0x177bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000000000007bcdefa7bbccddeeff00112233445566778899a7bbccddee"))), 0x187bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000000000007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff"))), 0x197bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff00"))), 0x1a7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00000000007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff0011"))), 0x1b7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("000000007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff001122"))), 0x1c7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff00112233"))), 0x1d7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("00007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff0011223344"))), 0x1e7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("007bcdefa7bbccddeeff00112233445566778899a7bbccddeeff001122334455"))), 0x1f7bcdeful);
+    BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("7bcdefa7bbccddeeff00112233445566778899a7bbccddeeff00112233445566"))), 0x207bcdeful);
+
+    // A shift of >32 cannot be produced, since there are only 32 bytes of input.
+}
+
+BOOST_AUTO_TEST_CASE(base_256e__base256e_compress__negative_values__expected)
 {
     // zero => zero.
     BOOST_CHECK_EQUAL(compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000"))), 0x00000000ul);

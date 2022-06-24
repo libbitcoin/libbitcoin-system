@@ -23,6 +23,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,70 +35,28 @@ namespace chain {
 template <typename Integer>
 constexpr Integer compact::ratio(Integer value) noexcept
 {
-    return value * (hash_base / compact_base);
+    return value * (from / to);
 }
 
-constexpr compact compact::to_compact(uint32_t small) noexcept
+constexpr compact compact::to_compact(compact_type small) noexcept
 {
-    const auto mantissa = mask_left<mantissa_type>(small, add1(exponent_width));
+    const auto mantissa = mask_left<compact_type>(small, exponent_width);
 
     return compact
     {
-        // not negative if mantissa is zero.
-        get_right(small, sub1(mantissa_width)) && !is_zero(mantissa),
-        narrow_cast<exponent_type>(shift_right(small, mantissa_width)),
+        get_right(small, sub1(precision)),
+        narrow_cast<exponent_type>(shift_right(small, precision)),
         mantissa
     };
 }
 
-constexpr uint32_t compact::from_compact(const compact& compact) noexcept
+constexpr compact::compact_type compact::from_compact(const compact& compact) noexcept
 {
     return bit_or
     (
-        // exponent |
-        shift_left(wide_cast<uint32_t>(compact.exponent), mantissa_width),
-
-        // negative | mantissa
-        set_right(compact.mantissa, sub1(mantissa_width), compact.negative)
+        shift_left(wide_cast<uint32_t>(compact.exponent), precision),
+        compact.mantissa
     );
-}
-
-//*****************************************************************************
-// CONSENSUS: The sign guard is an unnecessary complication, presumably a
-// result of using signed integrals for unsigned concepts. Exclusion of zero is
-// presumably the result of its use as a sentinel value. Otherwise the only
-// logically necessary guard here would be for overflow.
-//*****************************************************************************
-constexpr bool compact::is_valid(const compact& compact) noexcept
-{
-    // Subtraction is guarded (and verify ratio member here).
-    static_assert(hash_size >= ceilinged_log256(maximum<mantissa_type>()));
-    static_assert(ratio(one) == to_bits(one));
-
-    // See comments in test regarding these checks against shifted matissa.
-    if (is_zero(compact.mantissa) || compact.negative)
-        return false;
-
-    // Overflow guard.
-    if (compact.exponent > point)
-    {
-        // compact.exponent range of [4..32].
-        const auto exponent = compact.exponent - point;
-
-        // Decompression shift of positive logical exponent [1..29].
-        return !(exponent > hash_size - ceilinged_log256(compact.mantissa));
-    }
-
-    // Negative exponent guard is a no-op.
-    ////{
-    ////    // compact.exponent range of [0..3].
-    ////    const auto exponent = point - compact.exponent;
-    ////
-    ////    // Decompression shift of negative logical exponent [3..0].
-    ////    return !(exponent > maximum_negative_exponent);
-    ////}
-
-    return true;
 }
 
 // public
@@ -111,21 +70,26 @@ constexpr bool compact::is_valid(const compact& compact) noexcept
 // CONSENSUS: Zero is a sufficient negative/zero/overflow sentinel:
 // "if (negative || overflow || big == 0) return 0;" and only if the mantissa
 // is zero can a logical shift within the domain produce a zero (fail early).
+// CONSENSUS: Satoshi is more permissive, allowing a 34 exponent with a single
+// byte mantissa, however this is not necessary to validate any value produced
+// by compression, nor is it possible for any such value to affect consensus.
 //*****************************************************************************
-inline uint256_t compact::expand(uint32_t small) noexcept
+inline compact::number_type compact::expand(compact_type exponential) noexcept
 {
-    const auto compact = to_compact(small);
+    auto compact = to_compact(exponential);
+    
+    if (compact.negative)
+        return 0;
 
-    if (!is_valid(compact))
-        return zero;
-
-    uint256_t big{ compact.mantissa };
-
-    compact.exponent > point ?
-        big <<= ratio(compact.exponent - point) : // * 2^(8*(1..29)) = 256*2^(1..29)
-        big >>= ratio(point - compact.exponent);  // * 2^(8*(-3..0)) = 256*2^(-3..0)
-
-    return big;
+    if (compact.exponent == add1(to) &&
+        ceilinged_log256(compact.mantissa) == sub1(mantissa_bytes) &&
+        get_right(compact.mantissa, sub1(to_bits(sub1(mantissa_bytes)))))
+    {
+        compact.exponent--;
+        compact.mantissa <<= ratio(one);
+    }
+    
+    return base256e::expand(from_compact(compact));
 }
 
 //*************************************************************************
@@ -135,31 +99,20 @@ inline uint256_t compact::expand(uint32_t small) noexcept
 // by one  bit (an order of magnitude). Precision is naturally lost in
 // compression, but the loss is not uniform due to this shifting out of the
 // "sign" bit. There is of course never an actual negative mantissa sign in
-// exponential notation of an unsigned number, so this wasa a mistake.
+// exponential notation of an unsigned number, so this was a mistake.
 //*************************************************************************
-inline uint32_t compact::compress(const uint256_t& big) noexcept
+inline compact::compact_type compact::compress(const number_type& number) noexcept
 {
-    auto exponent = narrow_cast<exponent_type>(ceilinged_log256(big));
-    auto mantissa = static_cast<mantissa_type>
-    (
-        exponent > point ?
-            big >> ratio(exponent - point) :      // / 2^(8*(1..29)) = 256*2^(1..29)
-            big << ratio(point - exponent)        // / 2^(8*(-3..0)) = 256*2^(-3..0)
-    );
+    auto compact = to_compact(base256e::compress(number));
 
-    // Get rid of the sign bit (hack).
-    if (get_right(mantissa, sub1(mantissa_width)))
+    if (compact.negative)
     {
-        ++exponent; 
-        mantissa >>= ratio(one);                  // / 2^(8*(1)) = 256
+        compact.exponent++;
+        compact.mantissa >>= ratio(one);
+        compact.negative = false;
     }
 
-    return from_compact({ false, exponent, mantissa });
-}
-
-constexpr bool compact::is_compact(uint32_t small) noexcept
-{
-    return is_valid(to_compact(small));
+    return from_compact(compact);
 }
 
 } // namespace chain

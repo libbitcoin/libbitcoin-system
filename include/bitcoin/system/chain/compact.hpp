@@ -33,61 +33,55 @@ namespace chain {
 /// possible to create an invalid compact form from 32 bytes. The compression
 /// loses all but the highest 29 or 30 significant bits of precision.
 
+/// TODO: Inherit from base256e static template with compact parameters.
+/// TODO: Provide only sign bug compensation. Add lax overflow option.
+
 struct compact
 {
 public:
-    using exponent_type = uint8_t;
-    using mantissa_type = uint32_t;
+    // All parameters are derived, no magic numbers.
 
-    /// An overflow or zero/negative mantissa returns zero (invalid).
-    static inline uint256_t expand(uint32_t small) noexcept;
+    // Parameters
+    static constexpr auto to = 32u;
+    static constexpr auto from = 256u;
+    static constexpr auto precision = 24u;
 
-    /// Always a valid compact result (unless parameter is zero).
-    static inline uint32_t compress(const uint256_t& big) noexcept;
+    // Sizes
+    static constexpr auto mantissa_bytes = to_bytes<precision>();
+    static constexpr auto exponent_bits = ceilinged_log2(to_bytes<from>());
+    static constexpr auto exponent_bytes = to_ceilinged_bytes(exponent_bits);
+    static constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
 
-    /// Same as !is_zero(expand(small)) without the conversion cost.
-    static constexpr bool is_compact(uint32_t small) noexcept;
+    // Types
+    using number_type = uintx_t<from>;
+    static_assert(std::is_same<number_type, uint256_t>::value);
+    using compact_type = unsigned_type<compact_bytes>;
+    static_assert(std::is_same<compact_type, uint32_t>::value);
+    using exponent_type = unsigned_type<exponent_bytes>;
+    static_assert(std::is_same<exponent_type, uint8_t>::value);
 
-    bool negative;
-    exponent_type exponent;
-    mantissa_type mantissa;
+    // Widths
+    static constexpr auto compact_width = width<compact_type>();
+    static constexpr auto exponent_width = width<exponent_type>();
+    static_assert(exponent_width - exponent_bits == 2u);
+
+    /// A zero value implies an invalid (including zero) parameter.
+    /// Non-minimal exponent encoding allowed only for high bit hack.
+    static inline number_type expand(compact_type exponential) noexcept;
+
+    /// (m * 256^e) bit-encoded as [0eeeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
+    /// Uses non-minimal exponent encoding to avoid high mantissa bit (hack).
+    static inline compact_type compress(const number_type& number) noexcept;
 
 protected:
     template <typename Integer>
     static constexpr Integer ratio(Integer value) noexcept;
-    static constexpr compact to_compact(uint32_t small) noexcept;
-    static constexpr uint32_t from_compact(const compact& compact) noexcept;
-    static constexpr bool is_valid(const compact& compact) noexcept;
+    static constexpr compact to_compact(compact_type small) noexcept;
+    static constexpr compact_type from_compact(const compact& compact) noexcept;
 
-private:
-    // All parameters are derived, no magic numbers.
-
-    // base256 <=> base32 for bitcoin_hash compression.
-    static constexpr auto hash_base = to_bits(hash_size);
-    static constexpr auto compact_base = width<uint32_t>();
-    static_assert(compact_base == 32u);
-    static_assert(hash_base == 256u);
-
-    // exponent domain (stored [0..32] vs. logical [-3..29] exponent)
-    static constexpr auto stored_exponent_width = ceilinged_log2(compact_base);
-    static constexpr auto alignment = byte_bits - stored_exponent_width;
-    static constexpr auto exponent_width = stored_exponent_width + alignment;
-    static_assert(width<exponent_type>() == exponent_width);
-    static_assert(exponent_width == 8u);
-    static_assert(alignment == 2u);
-
-    // mantissa domain
-    static constexpr auto mantissa_width = compact_base - exponent_width;
-    static_assert(width<mantissa_type>() == compact_base);
-    static_assert(mantissa_width == 24u);
-
-    // shifting exponent reduces mantissa domain by the aligned exponent width
-    static constexpr auto point = mantissa_width / (hash_base / compact_base);
-    static constexpr auto maximum_positive_exponent = compact_base - point;
-    static constexpr auto maximum_negative_exponent = point;
-    static_assert(maximum_positive_exponent == 29u);
-    static_assert(maximum_negative_exponent == 3u);
-    static_assert(point == 3u);
+    bool negative;
+    exponent_type exponent;
+    compact_type mantissa;
 };
 
 } // namespace chain

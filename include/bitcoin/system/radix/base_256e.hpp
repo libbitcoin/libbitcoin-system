@@ -32,7 +32,7 @@ namespace base256e {
 /// A base 256 exponential form representation of 32 byte (uint256_t) values,
 /// with 24 bits of precision. Two bits wasted in exponential representation.
 
-// TODO: templatize on parameters.
+// TODO: templatize on parameters (and strict).
 
 /// All derived from parameters, no magic numbers.
 
