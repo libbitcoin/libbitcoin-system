@@ -282,6 +282,9 @@
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\radix\base_256e.cpp">
+      <Filter>src\radix</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_32.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>

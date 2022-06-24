@@ -126,6 +126,7 @@
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
+#include <bitcoin/system/radix/base_256e.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
 #include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/radix/base_64.hpp>
