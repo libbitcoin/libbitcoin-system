@@ -26,19 +26,23 @@ namespace libbitcoin {
 namespace system {
 
 /// Convert a native integral integer to big-endian.
-template <typename Integer, if_big_endian_integral_integer<Integer> = true>
+template <typename Integer,
+    if_big_endian_integral_integer<Integer> = true>
 constexpr Integer to_big_end(Integer from) noexcept;
 
 /// Convert a native integral integer to big-endian.
-template <typename Integer, if_little_endian_integral_integer<Integer> = true>
+template <typename Integer,
+    if_little_endian_integral_integer<Integer> = true>
 constexpr Integer to_big_end(Integer from) noexcept;
 
 /// Convert a native integral integer to little-endian.
-template <typename Integer, if_little_endian_integral_integer<Integer> = true>
+template <typename Integer,
+    if_little_endian_integral_integer<Integer> = true>
 constexpr Integer to_little_end(Integer from) noexcept;
 
 /// Convert a native integral integer to little-endian.
-template <typename Integer, if_big_endian_integral_integer<Integer> = true>
+template <typename Integer,
+    if_big_endian_integral_integer<Integer> = true>
 constexpr Integer to_little_end(Integer from) noexcept;
 
 /// C++23: std::byteswap implementation (but also allows signed integrals).

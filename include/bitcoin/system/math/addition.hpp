@@ -42,18 +42,6 @@ template <typename Result, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr Result subtract(Left left, Right right) noexcept;
 
-/////// value + 1 after cast to Result type.
-/////// Use overflows<Result>(left, right) to guard.
-////template <typename Result, typename Integer,
-////    if_not_lesser_width<Result, Integer> = true>
-////constexpr Result increment(Integer value) noexcept;
-////
-/////// value - 1 after cast to Result type.
-/////// Use overflows<Result>(left, right) to guard.
-////template <typename Result, typename Integer,
-////    if_not_lesser_width<Result, Integer> = true>
-////constexpr Result decrement(Integer value) noexcept;
-
 /// The term 'overflow' is used here to describe a sum that is above the
 /// maximum or below the minimum of the integer domain. Similarly, 'underflow'
 /// is used here to describe a difference that is above the maximum or below

@@ -26,25 +26,29 @@
 namespace libbitcoin {
 namespace system {
 
-template <typename Integer, if_big_endian_integral_integer<Integer>>
+template <typename Integer,
+    if_big_endian_integral_integer<Integer>>
 constexpr Integer to_big_end(Integer from) noexcept
 {
     return from;
 }
 
-template <typename Integer, if_little_endian_integral_integer<Integer>>
+template <typename Integer,
+    if_little_endian_integral_integer<Integer>>
 constexpr Integer to_big_end(Integer from) noexcept
 {
     return byteswap(from);
 }
 
-template <typename Integer, if_big_endian_integral_integer<Integer>>
+template <typename Integer,
+    if_big_endian_integral_integer<Integer>>
 constexpr Integer to_little_end(Integer from) noexcept
 {
     return byteswap(from);
 }
 
-template <typename Integer, if_little_endian_integral_integer<Integer>>
+template <typename Integer,
+    if_little_endian_integral_integer<Integer>>
 constexpr Integer to_little_end(Integer from) noexcept
 {
     return from;
