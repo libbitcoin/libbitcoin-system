@@ -70,8 +70,8 @@ public:
     }
 
 private:
-    const opcode code_;
-    const chunk_xptr data_;
+    opcode code_;
+    chunk_xptr data_;
 };
 
 inline bool operator==(const operation& op, const stripper& strip) noexcept

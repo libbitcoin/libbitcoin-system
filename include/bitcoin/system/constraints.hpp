@@ -188,7 +188,7 @@ using to_unsigned_type = unsigned_type<sizeof(Type)>;
 
 /// Alias for -> decltype(dividend / divisor).
 template <typename Left, typename Right>
-using to_common_type = std::common_type<Left, Right>::type;
+using to_common_type = typename std::common_type<Left, Right>::type;
 
 /// Endianness.
 
