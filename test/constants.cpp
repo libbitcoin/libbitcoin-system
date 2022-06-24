@@ -114,12 +114,6 @@ static_assert(to_byte('x') == uint8_t{ 'x' });
 static_assert(to_byte('\xff') == uint8_t{ 255 });
 static_assert(std::is_same<decltype(to_byte('\0')), uint8_t>::value);
 
-static_assert(to_bytes(0) == 0 / 8);
-static_assert(to_bytes(1u) == 1u / 8u);
-static_assert(to_bytes(-42) == -42 / 8);
-static_assert(to_bytes(0xff) == 0xff / 8);
-static_assert(std::is_same<decltype(to_bytes<int16_t>(0)), int16_t>::value);
-
 static_assert(to_half(0) == 0 / 2);
 static_assert(to_half(1u) == 1u / 2u);
 static_assert(to_half(-42) == -42 / 2);
@@ -177,6 +171,19 @@ static_assert(width<int64_t>() == 64u);
 static_assert(width<uint64_t>() == 64u);
 static_assert(width(value42) == to_bits(sizeof(value42)));
 static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value);
+
+static_assert(!is_byte_width<0>());
+static_assert(is_byte_width<8>());
+static_assert(is_byte_width<16>());
+static_assert(is_byte_width<24>());
+static_assert(is_byte_width<32>());
+static_assert(is_byte_width<40>());
+static_assert(!is_byte_width<42>());
+static_assert(is_byte_width<48>());
+static_assert(is_byte_width<56>());
+static_assert(is_byte_width<64>());
+static_assert(is_byte_width<128>());
+static_assert(is_byte_width<256>());
 
 static_assert(variable_size(zero) == 1u);
 static_assert(variable_size(1) == 1u);

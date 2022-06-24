@@ -76,7 +76,7 @@ constexpr bool is_odd(Type value) noexcept
 
 // This constant is meaningful for all specializations (non-integrals).
 template <typename Type>
-constexpr bool is_integer()
+constexpr bool is_integer() noexcept
 {
     return std::numeric_limits<Type>::is_integer &&
         !std::is_same<bool, Type>::value;
@@ -85,11 +85,21 @@ constexpr bool is_integer()
 // This is future-proofing against larger integrals or language features that
 // promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
 template <typename Type>
-constexpr bool is_integral_size()
+constexpr bool is_integral_size() noexcept
 {
     constexpr auto size = sizeof(Type);
-    return size == sizeof(uint8_t) || size == sizeof(uint16_t) ||
-        size == sizeof(uint32_t) || size == sizeof(uint64_t);
+    return size == sizeof(uint8_t)
+        || size == sizeof(uint16_t)
+        || size == sizeof(uint32_t)
+        || size == sizeof(uint64_t);
+}
+
+// This is future-proofing against larger integrals or language features that
+// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
+template <size_t Bits>
+constexpr bool is_byte_width() noexcept
+{
+    return !is_zero(Bits) && is_zero(Bits % byte_bits);
 }
 
 template <typename Type>
@@ -113,14 +123,7 @@ constexpr uint8_t to_byte(char character) noexcept
     BC_POP_WARNING()
 }
 
-template <typename Type>
-constexpr Type to_bytes(Type bits) noexcept
-{
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(bits) / 8);
-    BC_POP_WARNING()
-}
-
+// floored
 template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
