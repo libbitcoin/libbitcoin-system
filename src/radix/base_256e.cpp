@@ -49,7 +49,6 @@ static_assert(lower(to_bits(one)) == one);
 // exponent    3 implies   0 shift, which is the identity (n * 256^0 == n).
 // exponent   32 implies +29 shift, which produces max value (3 bytes left).
 // exponent > 32 exponent is out of bounds, and produces a zero value.
-// Note that the logical zero exponent (3) does not produce 1.
 number_type expand(compact_type exponential) noexcept
 {
     const auto exponent = raise(shift_right(exponential, precision));
