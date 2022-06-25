@@ -36,14 +36,14 @@ data_reference::data_reference(const data_array<Size>& data) noexcept
 }
 
 /// Byte array constructor (casts Byte to uint8_t).
-template <data_reference::size_type Size, typename Byte, if_byte<Byte>>
+template <data_reference::size_type Size, typename Byte, if_one_byte<Byte>>
 data_reference::data_reference(const std::array<Byte, Size>& data) noexcept
   : data_slice(data)
 {
 }
 
 /// Byte vector constructor (casts Byte to uint8_t).
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_reference::data_reference(const std::vector<Byte>& data) noexcept
   : data_slice(data)
 {
@@ -58,7 +58,7 @@ data_reference::data_reference(const Iterator& begin,
 }
 
 /// Byte pointer to const constructor (casts Byte to uint8_t).
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_reference::data_reference(const Byte* begin, const Byte* end) noexcept
   : data_slice(begin, end)
 {

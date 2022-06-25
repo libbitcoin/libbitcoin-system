@@ -145,19 +145,19 @@ inline void to_little_endian(std::ostream& stream, Integer value) noexcept
 // integers. This also presents a performance optimization for byte conversion,
 // which is close to a no-op. Empty vector returns zero and zero returns empty.
 
-template <typename Integer, if_byte<Integer> = true>
+template <typename Integer, if_one_byte<Integer> = true>
 constexpr Integer from_big(size_t, const data_slice& data) noexcept
 {
     return data.empty() ? 0 : data.front();
 }
 
-template <typename Integer, if_byte<Integer> = true>
+template <typename Integer, if_one_byte<Integer> = true>
 constexpr Integer from_little(size_t, const data_slice& data) noexcept
 {
     return data.empty() ? 0 : data.front();
 }
 
-template <typename Data, typename Integer, if_byte<Integer> = true>
+template <typename Data, typename Integer, if_one_byte<Integer> = true>
 inline Data to_big(Data&& bytes, Integer value) noexcept
 {
     if (!bytes.empty())
@@ -166,7 +166,7 @@ inline Data to_big(Data&& bytes, Integer value) noexcept
     return std::move(bytes);
 }
 
-template <typename Data, typename Integer, if_byte<Integer> = true>
+template <typename Data, typename Integer, if_one_byte<Integer> = true>
 inline Data to_little(Data&& bytes, Integer value) noexcept
 {
     if (!bytes.empty())
@@ -181,7 +181,7 @@ inline Data to_little(Data&& bytes, Integer value) noexcept
 // shift, which performs sign-extension". In other words, repeatedly shifting
 // -1 of any integer width will produce "1" bits, indefinitely.
 
-template <typename Integer, if_bytes<Integer> = true>
+template <typename Integer, if_not_one_byte<Integer> = true>
 constexpr Integer from_big(size_t size, const data_slice& data) noexcept
 {
     // read msb (forward), shift in the byte (no shift on first)
@@ -208,7 +208,7 @@ constexpr Integer from_big(size_t size, const data_slice& data) noexcept
     return value;
 }
 
-template <typename Integer, if_bytes<Integer> = true>
+template <typename Integer, if_not_one_byte<Integer> = true>
 constexpr Integer from_little(size_t size, const data_slice& data) noexcept
 {
     // read msb (reverse), shift in the byte (no shift on first)
@@ -235,7 +235,7 @@ constexpr Integer from_little(size_t size, const data_slice& data) noexcept
     return value;
 }
 
-template <typename Data, typename Integer, if_bytes<Integer> = true>
+template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
 inline Data to_big(Data&& bytes, Integer value) noexcept
 {
     // read and shift out lsb, set byte in reverse order
@@ -256,7 +256,7 @@ inline Data to_big(Data&& bytes, Integer value) noexcept
     return std::move(bytes);
 }
 
-template <typename Data, typename Integer, if_bytes<Integer> = true>
+template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
 inline Data to_little(Data&& bytes, Integer value) noexcept
 {
     // read and shift out lsb, set byte in forward order

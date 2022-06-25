@@ -32,13 +32,13 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
-template <data_slab::size_type Size, typename Byte, if_byte<Byte>>
+template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
 data_slab::data_slab(std::array<Byte, Size>& data) noexcept
   : data_slab(from_size(data.begin(), Size))
 {
 }
 
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_slab::data_slab(std::vector<Byte>& data) noexcept
   : data_slab(from_size(data.begin(), data.size()))
 {
@@ -50,7 +50,7 @@ data_slab::data_slab(const Iterator& begin, const Iterator& end) noexcept
 {
 }
 
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_slab::data_slab(const Byte* begin, const Byte* end) noexcept
   : data_slab(from_iterators(begin, end))
 {

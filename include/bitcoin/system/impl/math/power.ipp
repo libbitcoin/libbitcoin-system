@@ -110,7 +110,8 @@ constexpr size_t ceilinged_log256(Value value) noexcept
 // TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
-    if_bytes<Exponent>, if_integer<Exponent>, if_non_integral_integer<Value>>
+    if_not_one_byte<Exponent>, if_integer<Exponent>,
+    if_non_integral_integer<Value>>
 constexpr size_t ceilinged_log256(Value value) noexcept
 {
     if (value < 1)
@@ -200,7 +201,8 @@ constexpr Exponent floored_log256(Value value) noexcept
 // TODO: test (uintx).
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
-    if_bytes<Exponent>, if_integer<Exponent>, if_non_integral_integer<Value>>
+    if_not_one_byte<Exponent>, if_integer<Exponent>,
+    if_non_integral_integer<Value>>
 constexpr Exponent floored_log256(Value value) noexcept
 {
     if (value < 1)

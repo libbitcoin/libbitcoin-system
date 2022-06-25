@@ -73,7 +73,7 @@ constexpr Integer byteswap(Integer value) noexcept;
 
 /// Bits to bytes utilities.
 
-template <size_t Bits, if_byte_width<Bits> = true>
+template <size_t Bits, if_bytes_width<Bits> = true>
 constexpr size_t to_bytes() noexcept;
 
 template <typename Integer, if_unsigned_integer<Integer> = true>

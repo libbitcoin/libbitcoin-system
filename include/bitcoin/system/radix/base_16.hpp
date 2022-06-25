@@ -35,7 +35,7 @@ namespace system {
 constexpr size_t octet_width = 2;
 
 /// True if the character is a hexadecimal digit.
-template <typename Byte, if_byte<Byte> = true>
+template <typename Byte, if_one_byte<Byte> = true>
 constexpr bool is_base16(Byte character) noexcept;
 
 /// Byte value of the literal octet, undefined (but safe) if not base16.

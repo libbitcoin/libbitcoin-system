@@ -38,13 +38,13 @@ data_slice::data_slice(const char(&bytes)[Size]) noexcept
 {
 }
 
-template <data_slice::size_type Size, typename Byte, if_byte<Byte>>
+template <data_slice::size_type Size, typename Byte, if_one_byte<Byte>>
 data_slice::data_slice(const std::array<Byte, Size>& data) noexcept
   : data_slice(from_size(data.begin(), Size))
 {
 }
 
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_slice::data_slice(const std::vector<Byte>& data) noexcept
   : data_slice(from_size(data.begin(), data.size()))
 {
@@ -56,7 +56,7 @@ data_slice::data_slice(const Iterator& begin, const Iterator& end) noexcept
 {
 }
 
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 data_slice::data_slice(const Byte* begin, const Byte* end) noexcept
   : data_slice(from_iterators(begin, end))
 {

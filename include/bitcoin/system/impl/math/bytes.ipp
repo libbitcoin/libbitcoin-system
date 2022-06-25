@@ -109,7 +109,7 @@ constexpr Integer byteswap(Integer value) noexcept
 // bits to bytes
 // ----------------------------------------------------------------------------
 
-template <size_t Bits, if_byte_width<Bits>>
+template <size_t Bits, if_bytes_width<Bits>>
 constexpr size_t to_bytes() noexcept
 {
     return Bits / byte_bits;

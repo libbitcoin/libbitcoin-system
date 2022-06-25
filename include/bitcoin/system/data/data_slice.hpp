@@ -88,11 +88,11 @@ public:
     data_slice(const char(&text)[Size]) noexcept;
 
     /// Byte array constructor (casts Byte to uint8_t).
-    template <size_type Size, typename Byte, if_byte<Byte> = true>
+    template <size_type Size, typename Byte, if_one_byte<Byte> = true>
     data_slice(const std::array<Byte, Size>& data) noexcept;
 
     /// Byte vector constructor (casts Byte to uint8_t).
-    template <typename Byte, if_byte<Byte> = true>
+    template <typename Byte, if_one_byte<Byte> = true>
     data_slice(const std::vector<Byte>& data) noexcept;
 
     // TODO: restrict to iterator-to-const references.
@@ -102,7 +102,7 @@ public:
 
     // TODO: change to begin/size construction.
     /// Byte pointer to const constructor (casts Byte to uint8_t).
-    template <typename Byte, if_byte<Byte> = true>
+    template <typename Byte, if_one_byte<Byte> = true>
     data_slice(const Byte* begin, const Byte* end) noexcept;
 
     /// String constructor (casts char to uint8_t).

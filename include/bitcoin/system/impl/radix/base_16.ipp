@@ -63,7 +63,7 @@ inline uint8_t from_base16_characters(char high, char low) noexcept
 // to unsigned char... Similarly, they should not be directly used with standard
 // algorithms when the iterator's value type is char." [e.g. std::string]
 // en.cppreference.com/w/cpp/string/byte/isxdigit
-template <typename Byte, if_byte<Byte>>
+template <typename Byte, if_one_byte<Byte>>
 constexpr bool is_base16(Byte character) noexcept
 {
     return

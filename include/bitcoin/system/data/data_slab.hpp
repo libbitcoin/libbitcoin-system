@@ -71,12 +71,12 @@ public:
     ~data_slab() = default;
 
     /// Byte array constructor (casts Byte to uint8_t).
-    template <size_type Size, typename Byte, if_byte<Byte> = true>
+    template <size_type Size, typename Byte, if_one_byte<Byte> = true>
     data_slab(std::array<Byte, Size>& data) noexcept;
 
     // TODO: test.
     /// Byte vector constructor (casts Byte to uint8_t).
-    template <typename Byte, if_byte<Byte> = true>
+    template <typename Byte, if_one_byte<Byte> = true>
     data_slab(std::vector<Byte>& data) noexcept;
 
     // TODO: restrict to iterator-to-non-const references.
@@ -86,7 +86,7 @@ public:
 
     // TODO: change to begin/size construction.
     /// Byte pointer to non-const constructor (casts Byte to uint8_t).
-    template <typename Byte, if_byte<Byte> = true>
+    template <typename Byte, if_one_byte<Byte> = true>
     data_slab(const Byte* begin, const Byte* end) noexcept;
 
     // TODO: test.
