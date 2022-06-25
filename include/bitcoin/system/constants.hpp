@@ -74,34 +74,6 @@ constexpr bool is_odd(Type value) noexcept
     return !is_even(value);
 }
 
-// This constant is meaningful for all specializations (non-integrals).
-template <typename Type>
-constexpr bool is_integer() noexcept
-{
-    return std::numeric_limits<Type>::is_integer &&
-        !std::is_same<bool, Type>::value;
-}
-
-// This is future-proofing against larger integrals or language features that
-// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
-template <typename Type>
-constexpr bool is_integral_size() noexcept
-{
-    constexpr auto size = sizeof(Type);
-    return size == sizeof(uint8_t)
-        || size == sizeof(uint16_t)
-        || size == sizeof(uint32_t)
-        || size == sizeof(uint64_t);
-}
-
-// This is future-proofing against larger integrals or language features that
-// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
-template <size_t Bits>
-constexpr bool is_byte_width() noexcept
-{
-    return !is_zero(Bits) && is_zero(Bits % byte_bits);
-}
-
 template <typename Type>
 constexpr bool is_null(Type value) noexcept
 {
@@ -184,6 +156,56 @@ constexpr size_t variable_size(uint64_t value) noexcept
         ((value <= max_uint16) ? sizeof(uint8_t) + sizeof(uint16_t) :
             ((value <= max_uint32) ? sizeof(uint8_t) + sizeof(uint32_t) :
                 sizeof(uint8_t) + sizeof(uint64_t)));
+}
+
+template <typename Left, typename Right>
+constexpr bool is_same() noexcept
+{
+    return std::is_same_v<Left, Right>;
+}
+
+template <typename Type>
+constexpr bool is_signed() noexcept
+{
+    return std::is_signed_v<Type>;
+}
+
+// This constant is meaningful for all specializations (non-integrals).
+template <typename Type>
+constexpr bool is_integer() noexcept
+{
+    return std::numeric_limits<Type>::is_integer && !is_same<Type, bool>();
+}
+
+constexpr bool is_integral_size(size_t bytes) noexcept
+{
+    return bytes == sizeof(uint8_t)
+        || bytes == sizeof(uint16_t)
+        || bytes == sizeof(uint32_t)
+        || bytes == sizeof(uint64_t);
+}
+
+// This is future-proofing against larger integrals or language features that
+// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
+template <typename Type>
+constexpr bool is_integral_size() noexcept
+{
+    return is_integral_size(sizeof(Type));
+}
+
+template <typename Type>
+constexpr bool is_integral() noexcept
+{
+    return std::is_integral_v<Type>
+        && is_integral_size<Type>()
+        && !is_same<Type, bool>();
+}
+
+// This is future-proofing against larger integrals or language features that
+// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
+constexpr bool is_bytes_width(size_t bits) noexcept
+{
+    return !is_zero(bits) && is_zero(bits % byte_bits);
 }
 
 } // namespace libbitcoin

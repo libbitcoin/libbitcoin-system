@@ -63,44 +63,12 @@ static_assert(!is_odd(10));
 static_assert(!is_odd(max_uint32 - 1u));
 static_assert(std::is_same<decltype(is_odd<int16_t>(0)), bool>::value);
 
-static_assert(is_integer<uint8_t>());
-static_assert(is_integer<uint16_t>());
-static_assert(is_integer<uint32_t>());
-static_assert(is_integer<uint64_t>());
-static_assert(is_integer<size_t>());
-static_assert(is_integer<int8_t>());
-static_assert(is_integer<int16_t>());
-static_assert(is_integer<int32_t>());
-static_assert(is_integer<int64_t>());
-static_assert(is_integer<char>());
-static_assert(is_integer<wchar_t>());
-static_assert(!is_integer<bool>());
-static_assert(!is_integer<std::string> ());
-
-static_assert(is_integral_size<bool>());
-static_assert(is_integral_size<uint8_t>());
-static_assert(is_integral_size<uint16_t>());
-static_assert(is_integral_size<uint32_t>());
-static_assert(is_integral_size<uint64_t>());
-static_assert(is_integral_size<size_t>());
-static_assert(is_integral_size<int8_t>());
-static_assert(is_integral_size<int16_t>());
-static_assert(is_integral_size<int32_t>());
-static_assert(is_integral_size<int64_t>());
-static_assert(is_integral_size<signed_size_t>());
-////static_assert(!is_integral_size<std::string>());
-////static_assert(!is_integral_size<std::array<uint8_t, 0>>());
-////static_assert(!is_integral_size<std::array<uint8_t, 1>>());
-////static_assert(!is_integral_size<std::array<uint8_t, 2>>());
-////static_assert(!is_integral_size<std::array<uint8_t, 4>>());
-////static_assert(!is_integral_size<std::array<uint8_t, 8>>());
-
 ////constexpr void* pointer = "";
 ////constexpr void* null_pointer = nullptr;
-static_assert(is_null(nullptr));
 ////static_assert(is_null(null_pointer));
-static_assert(is_null(std::nullptr_t{}));
 ////static_assert(!is_null(pointer));
+static_assert(is_null(nullptr));
+static_assert(is_null(std::nullptr_t{}));
 static_assert(std::is_same<decltype(is_null(nullptr)), bool>::value);
 
 static_assert(to_bits(0) == 0 * 8);
@@ -172,19 +140,6 @@ static_assert(width<uint64_t>() == 64u);
 static_assert(width(value42) == to_bits(sizeof(value42)));
 static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value);
 
-static_assert(!is_byte_width<0>());
-static_assert(is_byte_width<8>());
-static_assert(is_byte_width<16>());
-static_assert(is_byte_width<24>());
-static_assert(is_byte_width<32>());
-static_assert(is_byte_width<40>());
-static_assert(!is_byte_width<42>());
-static_assert(is_byte_width<48>());
-static_assert(is_byte_width<56>());
-static_assert(is_byte_width<64>());
-static_assert(is_byte_width<128>());
-static_assert(is_byte_width<256>());
-
 static_assert(variable_size(zero) == 1u);
 static_assert(variable_size(1) == 1u);
 static_assert(variable_size(0xfe) == 3u);
@@ -195,6 +150,115 @@ static_assert(variable_size(max_uint16) == 3u);
 static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint64) == 9u);
+
+class base {};
+class not_derived {};
+class derived : base {};
+
+static_assert(is_same<uint8_t, uint8_t>());
+static_assert(is_same<unsigned char, uint8_t>());
+static_assert(is_same<signed char, int8_t>());
+static_assert(is_same<int, int32_t>());
+static_assert(is_same<unsigned int, uint32_t>());
+static_assert(!is_same<char, int8_t>());
+static_assert(!is_same<int8_t, uint8_t>());
+static_assert(!is_same<uint8_t, int8_t>());
+static_assert(!is_same<uint16_t, int8_t>());
+static_assert(!is_same<uint32_t, int8_t>());
+static_assert(!is_same<uint64_t, int8_t>());
+static_assert(!is_same<size_t, int8_t>());
+static_assert(!is_same<int32_t, int8_t>());
+static_assert(!is_same<int32_t, int8_t>());
+static_assert(!is_same<int64_t, int8_t>());
+static_assert(!is_same<char, int8_t>());
+static_assert(!is_same<wchar_t, int8_t>());
+static_assert(!is_same<bool, int8_t>());
+static_assert(!is_same<std::string, int8_t>());
+static_assert(!is_same<std::string, int>());
+static_assert(!is_same<base, derived>());
+static_assert(!is_same<base, not_derived>());
+
+static_assert(is_signed<int8_t>());
+static_assert(is_signed<int16_t>());
+static_assert(is_signed<int32_t>());
+static_assert(is_signed<int64_t>());
+static_assert(is_signed<char>());
+static_assert(is_signed<signed char>());
+static_assert(!is_signed<unsigned char>());
+static_assert(!is_signed<uint8_t>());
+static_assert(!is_signed<uint16_t>());
+static_assert(!is_signed<uint32_t>());
+static_assert(!is_signed<uint64_t>());
+static_assert(!is_signed<size_t>());
+static_assert(!is_signed<wchar_t>());
+static_assert(!is_signed<bool>());
+static_assert(!is_signed<std::string>());
+
+static_assert(is_integer<uint8_t>());
+static_assert(is_integer<uint16_t>());
+static_assert(is_integer<uint32_t>());
+static_assert(is_integer<uint64_t>());
+static_assert(is_integer<size_t>());
+static_assert(is_integer<int8_t>());
+static_assert(is_integer<int16_t>());
+static_assert(is_integer<int32_t>());
+static_assert(is_integer<int64_t>());
+static_assert(is_integer<char>());
+static_assert(is_integer<wchar_t>());
+static_assert(!is_integer<bool>());
+static_assert(!is_integer<std::string>());
+
+static_assert(is_integral<uint8_t>());
+static_assert(is_integral<uint16_t>());
+static_assert(is_integral<uint32_t>());
+static_assert(is_integral<uint64_t>());
+static_assert(is_integral<size_t>());
+static_assert(is_integral<int8_t>());
+static_assert(is_integral<int16_t>());
+static_assert(is_integral<int32_t>());
+static_assert(is_integral<int64_t>());
+static_assert(is_integral<char>());
+static_assert(is_integral<wchar_t>());
+static_assert(!is_integral<bool>());
+static_assert(!is_integral<std::string>());
+
+static_assert(!is_integral_size(0));
+static_assert(is_integral_size(1));
+static_assert(is_integral_size(2));
+static_assert(!is_integral_size(3));
+static_assert(is_integral_size(4));
+static_assert(!is_integral_size(5));
+static_assert(!is_integral_size(6));
+static_assert(!is_integral_size(7));
+static_assert(is_integral_size(8));
+static_assert(!is_integral_size(9));
+static_assert(!is_integral_size(64));
+
+struct two_bytes { uint8_t foo; uint8_t bar; };
+union four_bytes { uint32_t foo; uint8_t bar; };
+
+static_assert(is_integral_size<uint8_t>());
+static_assert(is_integral_size<uint16_t>());
+static_assert(is_integral_size<uint32_t>());
+static_assert(is_integral_size<uint64_t>());
+static_assert(is_integral_size<two_bytes>());
+static_assert(is_integral_size<four_bytes>());
+////static_assert(!is_integral_size<uint128_t>());
+////static_assert(!is_integral_size<uint256_t>());
+////static_assert(!is_integral_size<uint512_t>());
+
+static_assert(!is_bytes_width(0));
+static_assert(is_bytes_width(8));
+static_assert(is_bytes_width(16));
+static_assert(is_bytes_width(24));
+static_assert(is_bytes_width(32));
+static_assert(is_bytes_width(40));
+static_assert(!is_bytes_width(42));
+static_assert(is_bytes_width(48));
+static_assert(is_bytes_width(56));
+static_assert(is_bytes_width(64));
+static_assert(is_bytes_width(128));
+static_assert(is_bytes_width(256));
 
 // These results are inconsistent across platforms.
 ////BOOST_AUTO_TEST_SUITE(constants_tests)
