@@ -63,12 +63,7 @@ static_assert(!is_odd(10));
 static_assert(!is_odd(max_uint32 - 1u));
 static_assert(std::is_same_v<decltype(is_odd<int16_t>(0)), bool>);
 
-constexpr void* pointer = "";
-constexpr void* null_pointer = nullptr;
-
-static_assert(!is_null(pointer));
 static_assert(is_null(nullptr));
-static_assert(is_null(null_pointer));
 static_assert(is_null(std::nullptr_t{}));
 static_assert(std::is_same_v<decltype(is_null(nullptr)), bool>);
 

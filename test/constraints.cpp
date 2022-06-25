@@ -91,27 +91,20 @@ static_assert(is_defined<if_bytes_width<16>>());
 static_assert(is_defined<if_bytes_width<24>>());
 static_assert(is_defined<if_bytes_width<32>>());
 static_assert(is_defined<if_bytes_width<40>>());
-static_assert(is_defined<if_bytes_width<42>>());
 static_assert(is_defined<if_bytes_width<48>>());
 static_assert(is_defined<if_bytes_width<56>>());
 static_assert(is_defined<if_bytes_width<64>>());
 static_assert(is_defined<if_bytes_width<128>>());
 static_assert(is_defined<if_bytes_width<256>>());
-////static_assert(is_defined<if_bytes_width<0>>());
-////static_assert(is_defined<if_bytes_width<42>>());
+////static_assert(!is_defined<if_bytes_width<0>>());
+////static_assert(!is_defined<if_bytes_width<42>>());
 
 static_assert(is_defined<if_integral_size<1>>());
-static_assert(is_defined<if_integral_size<16>>());
-static_assert(is_defined<if_integral_size<24>>());
-static_assert(is_defined<if_integral_size<32>>());
-static_assert(is_defined<if_integral_size<40>>());
-static_assert(is_defined<if_integral_size<48>>());
-static_assert(is_defined<if_integral_size<56>>());
-static_assert(is_defined<if_integral_size<64>>());
-static_assert(is_defined<if_integral_size<128>>());
-static_assert(is_defined<if_integral_size<256>>());
-static_assert(is_defined<if_integral_size<0>>());
-static_assert(is_defined<if_integral_size<42>>());
+static_assert(is_defined<if_integral_size<2>>());
+static_assert(is_defined<if_integral_size<4>>());
+static_assert(is_defined<if_integral_size<8>>());
+////static_assert(!is_defined<if_integral_size<0>>());
+////static_assert(!is_defined<if_integral_size<16>>());
 
 // types
 
@@ -127,11 +120,11 @@ static_assert(is_defined<if_same<base, base>>());
 static_assert(is_defined<if_not_same<base, derived>>());
 static_assert(is_defined<if_not_same<bool, char>>());
 static_assert(is_defined<if_not_same<char, bool>>());
-////static_assert(is_defined<if_not_same<bool, bool>>());
-////static_assert(is_defined<if_not_same<uint8_t, uint8_t>>());
-////static_assert(is_defined<if_not_same<uint8_t, unsigned char>>());
-////static_assert(is_defined<if_not_same<unsigned char, uint8_t>>());
-////static_assert(is_defined<if_not_same<base, base>>());
+////static_assert(!is_defined<if_not_same<bool, bool>>());
+////static_assert(!is_defined<if_not_same<uint8_t, uint8_t>>());
+////static_assert(!is_defined<if_not_same<uint8_t, unsigned char>>());
+////static_assert(!is_defined<if_not_same<unsigned char, uint8_t>>());
+////static_assert(!is_defined<if_not_same<base, base>>());
 
 static_assert(is_defined<if_one_byte<bool>>());
 static_assert(is_defined<if_one_byte<char>>());
