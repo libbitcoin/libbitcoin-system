@@ -318,7 +318,7 @@ bool block::is_forward_reference() const noexcept
         return !is_zero(hashes.count(input->point().hash()));
     };
 
-    for (const auto& tx: reverse_view(*txs_))
+    for (const auto& tx: views_reverse(*txs_))
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.emplace(tx->hash(false), false);
@@ -475,7 +475,7 @@ bool block::is_invalid_witness_commitment() const noexcept
     {
         const auto& outputs = *coinbase->outputs_ptr();
 
-        for (const auto& output: reverse_view(outputs))
+        for (const auto& output: views_reverse(outputs))
         {
             if (output->committed_hash(committed))
                 return committed == bitcoin_hash(generate_merkle_root(true),

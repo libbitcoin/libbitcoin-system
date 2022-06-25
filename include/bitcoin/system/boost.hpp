@@ -58,10 +58,10 @@
 // C++20 suport for ranges not yet available on other platforms.
 #ifdef _MSC_VER
     #include <ranges>
-    #define reverse_view std::views::reverse
+    #define views_reverse std::views::reverse
 #else
     #include <boost/range/adaptor/reversed.hpp>
-    #define reverse_view boost::adaptors::reverse
+    #define views_reverse boost::adaptors::reverse
 #endif
 
 // ADL free functions for use with boost-json.

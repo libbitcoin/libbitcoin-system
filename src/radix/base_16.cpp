@@ -64,7 +64,7 @@ std::string encode_hash(const data_slice& hash) noexcept
     out.resize(hash.size() * octet_width);
     auto digit = out.begin();
 
-    for (const auto byte: reverse_view(hash))
+    for (const auto byte: views_reverse(hash))
     {
         *digit++ = to_base16_character(byte >> to_half(byte_bits));
         *digit++ = to_base16_character(byte & 0x0f);

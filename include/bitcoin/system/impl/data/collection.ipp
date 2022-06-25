@@ -245,11 +245,11 @@ constexpr bool is_intersecting(const typename Left::const_iterator& begin,
         std::end(right)) != end;
 }
 
+// C++17: Parallel policy for std::reverse.
 template <typename Collection>
 inline Collection reverse(Collection&& list) noexcept
 {
-    // Returns iterator to last element, implementations may vectorize.
-    std::ranges::reverse(list);
+    std::reverse(std::begin(list), std::end(list));
     return std::forward<Collection>(list);
 }
 

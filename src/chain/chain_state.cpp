@@ -414,7 +414,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
-    for (auto bit: reverse_view(bits))
+    for (auto bit: views_reverse(bits))
     {
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
             proof_of_work_limit))

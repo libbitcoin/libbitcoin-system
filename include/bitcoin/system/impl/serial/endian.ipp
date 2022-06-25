@@ -247,7 +247,7 @@ inline Data to_big(Data&& bytes, Integer value) noexcept
     // 0x0001 >> 8 => 0x0000
 
     // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (auto& byte: reverse_view(bytes))
+    for (auto& byte: views_reverse(bytes))
     {
         byte = possible_sign_narrow_cast<uint8_t>(value);
         value >>= byte_bits;
