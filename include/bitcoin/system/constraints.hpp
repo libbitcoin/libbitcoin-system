@@ -208,14 +208,16 @@ using signed_type =
     std::conditional_t<Bytes == 0, signed_size_t,
         std::conditional_t<Bytes == 1, int8_t,
             std::conditional_t<Bytes == 2, int16_t,
-                std::conditional_t<Bytes <= 4, int32_t, int64_t>>>>;
+                std::conditional_t<Bytes <= 4, int32_t,
+                    int64_t>>>>;
 
 template <size_t Bytes, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
     std::conditional_t<Bytes == 0, size_t,
         std::conditional_t<Bytes == 1, uint8_t,
             std::conditional_t<Bytes == 2, uint16_t,
-                std::conditional_t<Bytes <= 4, uint32_t, uint64_t>>>>;
+                std::conditional_t<Bytes <= 4, uint32_t,
+                    uint64_t>>>>;
 
 /// Use instead of std::make_signed.
 template <typename Type>
@@ -273,6 +275,15 @@ typedef uintx_t<128> uint128_t;
 typedef uintx_t<160> uint160_t;
 typedef uintx_t<256> uint256_t;
 typedef uintx_t<512> uint512_t;
+
+template <size_t Bytes>
+using unsigned_extended_type =
+    std::conditional_t<Bytes == 0, size_t,
+        std::conditional_t<Bytes == 1, uint8_t,
+            std::conditional_t<Bytes == 2, uint16_t,
+                std::conditional_t<Bytes <= 4, uint32_t,
+                    std::conditional_t<Bytes <= 8, uint64_t,
+                        uintx_t<Bytes>>>>>>;
 
 } // namespace system
 } // namespace libbitcoin
