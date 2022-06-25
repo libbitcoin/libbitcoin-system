@@ -36,7 +36,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Undefined (but safe) behavior if characters are not base16. 
+// Unspecified (but safe/defined) behavior if characters are not base16. 
 uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept
 {
     return from_base16_characters(string[0], string[1]);
