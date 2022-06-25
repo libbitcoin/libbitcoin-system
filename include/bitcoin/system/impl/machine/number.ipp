@@ -35,8 +35,11 @@ namespace system {
 namespace machine {
 namespace number {
 
-static constexpr uint8_t positive_sign_byte = 0x00;
-static constexpr uint8_t negative_sign_byte = bit_hi<uint8_t>();
+constexpr uint8_t positive_sign_byte = 0x00;
+constexpr uint8_t negative_sign_byte = bit_hi<uint8_t>();
+
+// integer
+// ----------------------------------------------------------------------------
 
 template <size_t Size>
 constexpr bool integer<Size>::from_int(Integer& out, int64_t vary) noexcept
@@ -56,7 +59,7 @@ constexpr bool integer<Size>::from_chunk(Integer& out,
     if (strict_zero(vary))
         return true;
 
-    // Disallows integers that exceed overflow constraint.
+    // Disallow integers exceeding overflow constraint (causes domain reduction).
     if (vary.size() > Size)
         return false;
 
@@ -74,26 +77,45 @@ constexpr bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
     return vary.empty();
 }
 
+// ****************************************************************************
+// CONSENSUS: Due to compression, a leading sign byte is required if high bit
+// is set. This produces two zero representations (+/-0). The subsequent byte-
+// based overflow constraint thereby restricts the stack's 64-bit integer
+// domain by one value. An implementation that either avoided vectorization or
+// vector compression in the first place, or later implemented the overflow
+// guard over the converted integeral would have avoided this seam. These were
+// both premature optimizations, as a variant stack is more efficient than
+// variably-lengthed byte vector integral storage. The resulting integer domain
+// reduction is captured by the is_overflow function below.
+// ****************************************************************************
 template <size_t Size>
 constexpr bool integer<Size>::is_overflow(int64_t value) noexcept
 {
+    static_assert(bitcoin_min<Size>() == add1(minimum<Size>()));
+
     // Encoding of negative zero constricts the integer domain by one.
     return is_limited(value, bitcoin_min<Size>(), bitcoin_max<Size>());
 }
 
-constexpr data_chunk chunk::from_bool(bool vary) noexcept
+// chunk
+// ----------------------------------------------------------------------------
+
+inline data_chunk chunk::from_bool(bool vary) noexcept
 {
     return { bc::to_int<uint8_t>(vary) };
 }
 
-constexpr data_chunk chunk::from_int(int64_t vary) noexcept
+inline data_chunk chunk::from_int(int64_t vary) noexcept
 {
+    // Empty chunk is constexpr (stack allocated).
     if (is_zero(vary))
         return {};
 
+    // Variably-sized (compressed) encoding of absolute value.
     auto bytes = to_little_endian_chunk(absolute(vary), one);
     const auto hi_bit = get_left(bytes.back());
 
+    // Due to compression a leading sign byte is required if high bit is set.
     if (hi_bit && is_negative(vary))
         bytes.push_back(negative_sign_byte);
     else if (hi_bit)
@@ -104,33 +126,32 @@ constexpr data_chunk chunk::from_int(int64_t vary) noexcept
     return bytes;
 }
 
+// boolean
+// ----------------------------------------------------------------------------
+
 template <size_t Size>
 constexpr signed_type<Size> boolean::to_int(bool vary) noexcept
 {
     static_assert(Size <= sizeof(int64_t), "type constraint");
 
-    // This just casts one bit to the integer domain for type consistency.
     // The cast can safely be ignored, which is why Size is defaulted.
     return bc::to_int<signed_type<Size>>(vary);
 }
 
 constexpr bool boolean::from_chunk(const data_chunk& vary) noexcept
 {
-    // Booleans not overflow constrained, so cannot be converted as int.
+    // Booleans are not overflow constrained, so cannot be converted as int.
     // Any length of bytes is considered valid. Negative zero is false.
-
-    if (strict_false(vary))
-        return false;
-    if (!is_sign_byte(vary.back()))
-        return true;
-    return std::any_of(/*parallel,*/ vary.begin(), std::prev(vary.end()),
-        is_nonzero<uint8_t>);
+    return !strict_false(vary)
+        || !is_sign_byte(vary.back())
+        || std::any_of(vary.begin(), std::prev(vary.end()),
+            is_nonzero<uint8_t>);
 }
 
 constexpr bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
 {
     // A logical zero equates to any +/- sequence of zero bytes up to 520.
-    // Strict bool tests for normal false/zero, or a single empty byte.
+    // Strict bool tests for integral false/zero, or a single empty byte.
     return strict_false(vary);
 }
 

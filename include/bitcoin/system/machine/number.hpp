@@ -51,8 +51,8 @@ protected:
 class BC_API chunk
 {
 public:
-    static constexpr data_chunk from_bool(bool vary) noexcept;
-    static constexpr data_chunk from_int(int64_t vary) noexcept;
+    static inline data_chunk from_bool(bool vary) noexcept;
+    static inline data_chunk from_int(int64_t vary) noexcept;
 };
 
 class BC_API boolean
