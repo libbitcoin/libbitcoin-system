@@ -39,8 +39,7 @@ static constexpr uint8_t positive_sign_byte = 0x00;
 static constexpr uint8_t negative_sign_byte = bit_hi<uint8_t>();
 
 template <size_t Size>
-constexpr bool integer<Size>::from_int(typename Integer& out,
-    int64_t vary) noexcept
+constexpr bool integer<Size>::from_int(Integer& out, int64_t vary) noexcept
 {
     out = possible_narrow_cast<Integer>(vary);
 
@@ -49,7 +48,7 @@ constexpr bool integer<Size>::from_int(typename Integer& out,
 }
 
 template <size_t Size>
-constexpr bool integer<Size>::from_chunk(typename Integer& out,
+constexpr bool integer<Size>::from_chunk(Integer& out,
     const data_chunk& vary) noexcept
 {
     out = 0;
