@@ -148,8 +148,8 @@ using if_unique_object_representations = bool_unless<
 
 template <typename Type>
 using if_byte_insertable = bool_unless<
-    std::is_base_of<std::vector<uint8_t>, Type>::value ||
-    std::is_base_of<std::string, Type>::value>;
+    std::is_base_of<std::string, Type>::value ||
+    std::is_base_of<std::vector<uint8_t>, Type>::value>;
 
 /// Integer types (specializable, non-floating math, non-bool).
 
