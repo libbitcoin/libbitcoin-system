@@ -190,10 +190,10 @@ bool transaction::operator==(const transaction& other) const noexcept
     // Compares input/output elements, not pointers, cache not compared.
     return (version_ == other.version_)
         && (locktime_ == other.locktime_)
-        && (inputs_ == other.inputs_) ||
-            deep_equal(*inputs_, *other.inputs_)
-        && (outputs_ == other.outputs_) ||
-            deep_equal(*outputs_, *other.outputs_);
+        && ((inputs_ == other.inputs_) || 
+            deep_equal(*inputs_, *other.inputs_))
+        && ((outputs_ == other.outputs_) ||
+            deep_equal(*outputs_, *other.outputs_));
 }
 
 bool transaction::operator!=(const transaction& other) const noexcept
