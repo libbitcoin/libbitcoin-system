@@ -187,9 +187,8 @@ inline const stack_variant& stack<Container>::peek(size_t index) const noexcept
 // Chunk to integer conversions are constrained by caller (4 or 5 bytes).
 template <typename Container>
 template<size_t Bytes, typename Integer,
-    if_signed_integer<Integer>,
-    if_integral_integer<Integer>,
-    if_not_greater<Bytes, sizeof(Integer)>>
+    if_not_greater<Bytes, sizeof(Integer)>,
+    if_signed_integral_integer<Integer>>
     constexpr bool stack<Container>::peek_signed(Integer& value) const noexcept
 {
     using namespace number;
@@ -310,7 +309,7 @@ constexpr bool stack<Container>::equal_chunks(const stack_variant& left,
     const stack_variant& right) noexcept
 {
     enum stack_type { bool_, int64_, pchunk_ };
-    static_assert(std::variant_size<stack_variant>::value == 3);
+    static_assert(std::variant_size<stack_variant>::value == 3u);
     const auto right_type = static_cast<stack_type>(right.index());
 
     using namespace number;

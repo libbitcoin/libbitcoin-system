@@ -79,9 +79,8 @@ public:
 
     /// Variant data conversions.
     template<size_t Bytes, typename Integer,
-        if_signed_integer<Integer> = true,
-        if_integral_integer<Integer> = true,
-        if_not_greater<Bytes, sizeof(Integer)> = true>
+        if_not_greater<Bytes, sizeof(Integer)> = true,
+        if_signed_integral_integer<Integer> = true>
     constexpr bool peek_signed(Integer& value) const noexcept;
     constexpr bool peek_bool() const noexcept;
     constexpr bool peek_strict_bool() const noexcept;
