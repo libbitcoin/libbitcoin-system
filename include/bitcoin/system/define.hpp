@@ -23,15 +23,6 @@
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/warnings.hpp>
 
-// C++20 suport for ranges not yet available on other platforms.
-#ifdef _MSC_VER
-    #include <ranges>
-    #define reverse_view std::views::reverse
-#else
-    #include <boost/range/adaptor/reversed.hpp>
-    #define reverse_view boost::adaptors::reverse
-#endif
-
 // Create bc namespace alias.
 namespace libbitcoin {
 namespace system {
@@ -143,13 +134,6 @@ namespace bc = libbitcoin;
 #if _MSC_VER >= 1930
     #define BC_VS2022
 #endif
-
-// These are ADL free functions for use with boost-json.
-#define DECLARE_JSON_VALUE_CONVERTORS(name) \
-BC_API name tag_invoke(boost::json::value_to_tag<name>, \
-    const boost::json::value& value) noexcept; \
-BC_API void tag_invoke(boost::json::value_from_tag, \
-    boost::json::value& value, const name& instance) noexcept
 
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
