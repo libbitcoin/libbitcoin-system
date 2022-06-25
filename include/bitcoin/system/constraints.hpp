@@ -40,7 +40,7 @@ namespace system {
 // C++11: std::integral_constant
 
 template <bool Condition>
-using bool_unless = std::enable_if_t<Condition>;
+using bool_unless = std::enable_if_t<Condition, bool>;
 
 /// Sizes.
 
@@ -62,11 +62,11 @@ using if_nonzero = bool_unless<
 
 template <size_t Left, size_t Right>
 using if_equal = bool_unless<
-    Left == Right>;
+    (Left == Right)>;
 
 template <size_t Left, size_t Right>
 using if_greater = bool_unless<
-    Left > Right>;
+    (Left > Right)>;
 
 template <size_t Left, size_t Right>
 using if_not_greater = bool_unless<
@@ -74,7 +74,7 @@ using if_not_greater = bool_unless<
 
 template <size_t Left, size_t Right>
 using if_lesser = bool_unless<
-    Left < Right>;
+    (Left < Right)>;
 
 template <size_t Left, size_t Right>
 using if_not_lesser = bool_unless<
@@ -132,7 +132,7 @@ using if_lesser_width = bool_unless<
 
 template <typename Left, typename Right>
 using if_not_lesser_width = bool_unless<
-    width<Left>() >= width<Right>(), bool>;
+    width<Left>() >= width<Right>()>;
 
 template <typename Type>
 using if_default_constructible = bool_unless<
