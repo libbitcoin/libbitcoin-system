@@ -45,7 +45,7 @@
 #include <bitcoin/system/define.hpp>
 
 // Include boost in cpp files only from here, so exception disable works.
-// Avoid use in header includes due to warning repetition (boost/format.hpp).
+// Avoid format.hpp here due to warning repetition (include in printer.cpp).
 #include <boost/algorithm/string.hpp>
 ////#include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -54,9 +54,5 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
-
-#ifndef HAVE_STD_RANGES
-#include <boost/range/adaptor/reversed.hpp>
-#endif
 
 #endif

@@ -112,12 +112,6 @@ inline Collection reverse(Collection&& list) noexcept;
 template <typename Collection>
 inline Collection reverse_copy(const Collection& list) noexcept;
 
-/// Reverse iterator to a collection of elements.
-template <typename Collection, typename View>
-inline auto reverse_view(Collection& list) noexcept;
-template <typename Collection, typename View>
-inline auto reverse_view(const Collection& list) noexcept;
-
 /// Sort collection elements.
 template <typename Collection>
 constexpr void sort(Collection& list) noexcept;

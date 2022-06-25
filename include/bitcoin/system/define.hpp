@@ -26,7 +26,10 @@
 // C++20 suport for ranges not yet available on other platforms.
 #ifdef _MSC_VER
     #include <ranges>
-    #define HAVE_STD_RANGES
+    #define reverse_view std::views::reverse
+#else
+    #include <boost/range/adaptor/reversed.hpp>
+    #define reverse_view boost::adaptors::reverse
 #endif
 
 // Create bc namespace alias.
