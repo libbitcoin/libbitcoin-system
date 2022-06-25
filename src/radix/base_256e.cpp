@@ -27,20 +27,21 @@ namespace libbitcoin {
 namespace system {
 namespace base256e {
 
+// In [m * 256^e] the base is divided into 2 * 8 where 8 is the "factor".
+// The mantissa is shifted (8 * factor * exponent) times, where each shift
+// multiplies or divides the mantissa by 2. [m <<= (8 * e)] is [m * (2 * 8)^e].
+
 template <typename Integer>
-constexpr Integer raise(Integer value) noexcept
+constexpr Integer raise(Integer exponent) noexcept
 {
-    return value * (from / to);
+    return exponent * factor;
 }
 
 template <typename Integer>
-constexpr Integer lower(Integer value) noexcept
+constexpr Integer lower(Integer exponent) noexcept
 {
-    return value / (from / to);
+    return exponent / factor;
 }
-
-static_assert(raise(one) == to_bits(one));
-static_assert(lower(to_bits(one)) == one);
 
 // Implementation.
 // ----------------------------------------------------------------------------
@@ -51,18 +52,18 @@ static_assert(lower(to_bits(one)) == one);
 // exponent > 32 exponent is out of bounds, and produces a zero value.
 number_type expand(compact_type exponential) noexcept
 {
-    const auto exponent = raise(shift_right(exponential, precision));
+    const auto shift = raise(shift_right(exponential, precision));
     const auto mantissa = mask_left<compact_type>(exponential, exponent_width);
 
     // Zero returned if unsigned exponent is out of bounds [0..32].
-    if (is_limited(exponent, from))
+    if (is_limited(shift, source_bits))
         return 0;
 
     number_type number{ mantissa };
 
-    exponent > precision ?
-        number <<= exponent - precision :
-        number >>= precision - exponent;
+    shift > precision ?
+        number <<= shift - precision :
+        number >>= precision - shift;
 
     return number;
 }
@@ -77,16 +78,16 @@ compact_type compress(const number_type& number) noexcept
         return 0;
 
     // This can only produce an exponent from [0..32] (zero excluded above).
-    const auto exponent = raise(ceilinged_log256(number));
+    const auto shift = raise(ceilinged_log256(number));
     const auto mantissa = static_cast<compact_type>
     (
-        exponent > precision ?
-            number >> exponent - precision :
-            number << precision - exponent
+        shift > precision ?
+            number >> shift - precision :
+            number << precision - shift
     );
 
-    return bit_or(shift_left(possible_narrow_cast<compact_type>(
-        lower(exponent)), precision), mantissa);
+    return bit_or(shift_left(possible_narrow_cast<compact_type>(lower(shift)),
+        precision), mantissa);
 }
 
 } // namespace base256e

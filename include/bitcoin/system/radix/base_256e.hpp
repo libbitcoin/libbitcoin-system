@@ -36,29 +36,57 @@ namespace base256e {
 
 /// All derived from parameters, no magic numbers.
 
+// Compact type is limited to integrals, number is not.
+// Possible exponent-mantissa alignments:
+
+//  8 =>  8 +  0
+// 16 =>  8 +  8
+// 32 =>  8 + 24
+// 64 =>  8 + 56
+// ...
+// 16 =>  9 +  7
+// 32 =>  9 + 13
+// 64 =>  9 + 55
+// ...
+// 16 => 10 +  6
+// 32 => 10 + 22
+// 64 => 10 + 54
+// ...
+
+/// Inherent
+constexpr auto base = power2(8);
+
 /// Parameters
-constexpr auto to = 32u;
-constexpr auto from = 256u;
 constexpr auto precision = 24u;
+constexpr auto source_bits = 256u;
 
 /// Sizes
-constexpr auto mantissa_bytes = to_bytes<precision>();
-constexpr auto exponent_bits = ceilinged_log2(to_bytes<from>());
+constexpr auto factor = ceilinged_log2(sub1(base));
+constexpr auto mantissa_bytes = precision / factor;
+constexpr auto exponent_bits = ceilinged_log2(source_bits / factor);
 constexpr auto exponent_bytes = to_ceilinged_bytes(exponent_bits);
 constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
 
 /// Types
-using number_type = uintx_t<from>;
-static_assert(is_same<number_type, uint256_t>());
 using compact_type = unsigned_type<compact_bytes>;
-static_assert(is_same<compact_type, uint32_t>());
-using exponent_type = unsigned_type<exponent_bytes>;
-static_assert(is_same<exponent_type, uint8_t>());
+using number_type = unsigned_extended_type<source_bits>;
 
 /// Widths
 constexpr auto compact_width = width<compact_type>();
-constexpr auto exponent_width = width<exponent_type>();
-static_assert(exponent_width - exponent_bits == 2u);
+constexpr auto exponent_width = to_bits(exponent_bytes);
+
+/// Constraints (avoid byte and bit padding respectively)
+static_assert(sizeof(compact_type) == compact_bytes);
+static_assert(is_bytes_width(source_bits) && is_bytes_width(precision));
+
+/// Verification
+
+static_assert(!is_limited(exponent_width - exponent_bits, sub1(byte_bits)));
+static_assert(is_integral<compact_type>());
+static_assert(is_integral<number_type>() ||
+    is_same<number_type, uintx_t<source_bits>>());
+
+/// Functions
 
 /// A zero value implies an invalid (including zero) parameter.
 /// Invalid if either padding bit is set. Allows non-minimal exponent encoding.
