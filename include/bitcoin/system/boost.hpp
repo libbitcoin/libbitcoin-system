@@ -56,7 +56,7 @@
 #include <boost/thread.hpp>
 
 // C++20 suport for ranges not yet available on other platforms.
-#ifndef _MSC_VER
+#ifdef _MSC_VER
     #include <ranges>
     #define reverse_view std::views::reverse
 #else
