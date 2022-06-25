@@ -115,7 +115,7 @@ constexpr Type to_int(bool value) noexcept
 template <typename Type>
 constexpr bool to_bool(Type value) noexcept
 {
-    return !is_zero(value);
+    return is_nonzero(value);
 }
 
 template <typename Type>
