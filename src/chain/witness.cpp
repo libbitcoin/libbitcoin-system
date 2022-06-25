@@ -280,7 +280,7 @@ size_t witness::serialized_size(bool prefix) const noexcept
 // ----------------------------------------------------------------------------
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-constexpr operations to_pay_key_hash(data_chunk&& program) noexcept
+inline operations to_pay_key_hash(data_chunk&& program) noexcept
 {
     BC_ASSERT(program.size() == short_hash_size);
 
