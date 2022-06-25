@@ -508,7 +508,7 @@ private:
     // TODO: pack these flags.
     bool valid_;
     bool prefail_;
-    bool roller_{ false };
+    ////bool roller_{ false };
 
 public:
     /// Public mutable metadata access, not copied or compared for equality.
