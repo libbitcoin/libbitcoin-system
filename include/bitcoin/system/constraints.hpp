@@ -180,6 +180,16 @@ using if_not_same_signed_integer = bool_unless<
 /// Integral integer types (native, non-floating math, non-bool).
 
 template <typename Type>
+using if_integral_integer = bool_unless<
+    is_integral<Type>() &&
+    is_integer<Type>()>;
+
+template <typename Type>
+using if_non_integral_integer = bool_unless<
+    !is_integral<Type>() &&
+    is_integer<Type>()>;
+
+template <typename Type>
 using if_signed_integral_integer = bool_unless<
     is_signed<Type>() &&
     is_integral<Type>() &&
@@ -189,16 +199,6 @@ template <typename Type>
 using if_unsigned_integral_integer = bool_unless<
     !is_signed<Type>() &&
     is_integral<Type>() &&
-    is_integer<Type>()>;
-
-template <typename Type>
-using if_integral_integer = bool_unless<
-    is_integral<Type>() &&
-    is_integer<Type>()>;
-
-template <typename Type>
-using if_non_integral_integer = bool_unless<
-    !is_integral<Type>() &&
     is_integer<Type>()>;
 
 /// Type determination by required byte width and sign.
