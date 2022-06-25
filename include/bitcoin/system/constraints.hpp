@@ -39,128 +39,167 @@ namespace system {
 // C++17: std::negation/negation_v
 // C++11: std::integral_constant
 
-/// Values.
+template <bool Condition>
+using bool_unless = std::enable_if_t<Condition>;
+
+/// Sizes.
 
 template <size_t Value>
-using if_odd = std::enable_if_t<is_odd(Value), bool>;
+using if_odd = bool_unless<
+    is_odd(Value)>;
 
 template <size_t Value>
-using if_even = std::enable_if_t<is_even(Value), bool>;
+using if_even = bool_unless<
+    is_even(Value)>;
 
 template <size_t Value>
-using if_non_zero = std::enable_if_t<!is_zero(Value), bool>;
+using if_zero = bool_unless<
+    is_zero(Value)>;
 
-template <size_t Value, size_t Size>
-using if_equal = std::enable_if_t<Value == Size, bool>;
-
-template <size_t Left, size_t Right>
-using if_greater = std::enable_if_t<(Left > Right), bool>;
-
-template <size_t Left, size_t Right>
-using if_not_greater = std::enable_if_t<!(Left > Right), bool>;
+template <size_t Value>
+using if_nonzero = bool_unless<
+    is_nonzero(Value)>;
 
 template <size_t Left, size_t Right>
-using if_lesser = std::enable_if_t<(Left < Right), bool>;
+using if_equal = bool_unless<
+    Left == Right>;
 
 template <size_t Left, size_t Right>
-using if_not_lesser = std::enable_if_t<!(Left < Right), bool>;
+using if_greater = bool_unless<
+    Left > Right>;
+
+template <size_t Left, size_t Right>
+using if_not_greater = bool_unless<
+    !(Left > Right)>;
+
+template <size_t Left, size_t Right>
+using if_lesser = bool_unless<
+    Left < Right>;
+
+template <size_t Left, size_t Right>
+using if_not_lesser = bool_unless<
+    !(Left < Right)>;
+
+template <size_t Bits>
+using if_bytes_width = bool_unless<
+    is_bytes_width(Bits)>;
+
+template <size_t Bytes>
+using if_integral_size = bool_unless<
+    is_integral_size(Bytes)>;
 
 /// Types.
 
 template <typename Left, typename Right>
-using if_same = std::is_same<Left, Right>;
+using if_same = bool_unless<
+    is_same<Left, Right>()>;
+
+template <typename Left, typename Right>
+using if_not_same = bool_unless<
+    !is_same<Left, Right>()>;
 
 template <typename Type>
-using if_byte = std::enable_if_t<!(sizeof(Type) > sizeof(uint8_t)), bool>;
+using if_one_byte = bool_unless<
+    sizeof(Type) == sizeof(uint8_t)>;
 
 template <typename Type>
-using if_bytes = std::enable_if_t<(sizeof(Type) > sizeof(uint8_t)), bool>;
+using if_not_one_byte = bool_unless<
+    sizeof(Type) != sizeof(uint8_t)>;
 
 template <typename Type, size_t Size>
-using if_size_of = std::enable_if_t<sizeof(Type) == Size, bool>;
+using if_size_of = bool_unless<
+    sizeof(Type) == Size>;
 
 template <typename Type>
-using if_const = std::enable_if_t<std::is_const<Type>::value, bool>;
+using if_const = bool_unless<
+    std::is_const<Type>::value>;
 
 template <typename Type>
-using if_non_const = std::enable_if_t<!std::is_const<Type>::value, bool>;
+using if_non_const = bool_unless<
+    !std::is_const<Type>::value>;
 
 template <typename Base, typename Type>
-using if_base_of = std::enable_if_t<
-    std::is_base_of<Base, Type>::value, bool>;
+using if_base_of = bool_unless<
+    std::is_base_of<Base, Type>::value>;
+
+template <typename Left, typename Right>
+using if_same_width = bool_unless<
+    width<Left>() == width<Right>()>;
+
+template <typename Left, typename Right>
+using if_lesser_width = bool_unless<
+    width<Left>() < width<Right>()>;
+
+template <typename Left, typename Right>
+using if_not_lesser_width = bool_unless<
+    width<Left>() >= width<Right>(), bool>;
 
 template <typename Type>
-using if_byte_insertable = std::enable_if_t<
+using if_default_constructible = bool_unless<
+    std::is_default_constructible<Type>::value>;
+
+template <typename Type>
+using if_trivially_constructible = bool_unless<
+    std::is_trivially_constructible<Type>::value>;
+
+template <typename Type>
+using if_unique_object_representations = bool_unless<
+    std::has_unique_object_representations<Type>::value>;
+
+template <typename Type>
+using if_byte_insertable = bool_unless<
     std::is_base_of<std::vector<uint8_t>, Type>::value ||
-    std::is_base_of<std::string, Type>::value, bool>;
+    std::is_base_of<std::string, Type>::value>;
+
+/// Integer types (specializable, non-floating math, non-bool).
 
 template <typename Type>
-using if_default_constructible = std::enable_if_t<
-    std::is_default_constructible<Type>::value, bool>;
+using if_integer = bool_unless<
+    is_integer<Type>()>;
 
 template <typename Type>
-using if_trivially_constructible = std::enable_if_t<
-    std::is_trivially_constructible<Type>::value, bool>;
+using if_signed_integer = bool_unless<
+    is_signed<Type>() &&
+    is_integer<Type>()>;
 
 template <typename Type>
-using if_unique_object_representations = std::enable_if_t<
-    std::has_unique_object_representations<Type>::value, bool>;
+using if_unsigned_integer = bool_unless<
+    !is_signed<Type>() &&
+    is_integer<Type>()>;
 
 template <typename Left, typename Right>
-using if_same_width = std::enable_if_t<width<Left>() == width<Right>(), bool>;
+using if_same_signed_integer = bool_unless<
+    (is_signed<Left>() == is_signed<Right>()) &&
+    (is_integer<Left>() && is_integer<Right>())>;
 
 template <typename Left, typename Right>
-using if_lesser_width = std::enable_if_t<width<Left>() < width<Right>(), bool>;
+using if_not_same_signed_integer = bool_unless<
+    (is_signed<Left>() != is_signed<Right>()) &&
+    (is_integer<Left>() && is_integer<Right>())>;
 
-template <typename Left, typename Right>
-using if_not_lesser_width = std::enable_if_t<width<Left>() >= width<Right>(),
-    bool>;
-
-/// Integer types (specializable, non-floating math, no bool).
+/// Integral integer types (native, non-floating math, non-bool).
 
 template <typename Type>
-using if_integer = std::enable_if_t<is_integer<Type>(), bool>;
+using if_signed_integral_integer = bool_unless<
+    is_signed<Type>() &&
+    is_integral<Type>() &&
+    is_integer<Type>()>;
 
 template <typename Type>
-using if_signed_integer = std::enable_if_t<is_integer<Type>() &&
-    std::is_signed<Type>::value, bool>;
+using if_unsigned_integral_integer = bool_unless<
+    !is_signed<Type>() &&
+    is_integral<Type>() &&
+    is_integer<Type>()>;
 
 template <typename Type>
-using if_unsigned_integer = std::enable_if_t<is_integer<Type>() &&
-    !std::is_signed<Type>::value, bool>;
-
-template <typename Left, typename Right>
-using if_same_signed_integer = std::enable_if_t<
-    is_integer<Left>() && is_integer<Right>() &&
-    (std::is_signed<Left>::value == std::is_signed<Right>::value), bool>;
-
-template <typename Left, typename Right>
-using if_not_same_signed_integer = std::enable_if_t<
-    is_integer<Left>() && is_integer<Right>() &&
-    (std::is_signed<Left>::value != std::is_signed<Right>::value), bool>;
-
-/// Integral integer types (native, non-floating math, no bool).
-
-template <size_t Bits>
-using if_byte_width = std::enable_if_t<is_byte_width<Bits>(), bool>;
+using if_integral_integer = bool_unless<
+    is_integral<Type>() &&
+    is_integer<Type>()>;
 
 template <typename Type>
-using if_signed_integral_integer = std::enable_if_t<is_integer<Type>() &&
-    std::is_signed<Type>::value && std::is_integral<Type>::value &&
-    is_integral_size<Type>(), bool>;
-
-template <typename Type>
-using if_unsigned_integral_integer = std::enable_if_t<is_integer<Type>() &&
-    !std::is_signed<Type>::value && std::is_integral<Type>::value &&
-    is_integral_size<Type>(), bool>;
-
-template <typename Type>
-using if_integral_integer = std::enable_if_t<is_integer<Type>() &&
-    std::is_integral<Type>::value && is_integral_size<Type>(), bool>;
-
-template <typename Type>
-using if_non_integral_integer = std::enable_if_t<is_integer<Type>() &&
-    !std::is_integral<Type>::value, bool>;
+using if_non_integral_integer = bool_unless<
+    !is_integral<Type>() &&
+    is_integer<Type>()>;
 
 /// Type determination by required byte width and sign.
 
@@ -198,14 +237,16 @@ constexpr auto is_unknown_endian = !is_big_endian && !is_little_endian;
 static_assert(!is_unknown_endian, "unsupported integer representation");
 
 template <typename Integer>
-using if_big_endian_integral_integer = std::enable_if_t<is_big_endian &&
-    is_integer<Integer>() && is_integral_size<Integer>() &&
-    std::is_integral<Integer>::value, bool>;
+using if_big_endian_integral_integer = bool_unless<
+    is_big_endian &&
+    is_integral<Integer>() &&
+    is_integer<Integer>()>;
 
 template <typename Integer>
-using if_little_endian_integral_integer = std::enable_if_t<is_little_endian &&
-    is_integer<Integer>() && is_integral_size<Integer>() &&
-    std::is_integral<Integer>::value, bool>;
+using if_little_endian_integral_integer = bool_unless<
+    is_little_endian &&
+    is_integral<Integer>() &&
+    is_integer<Integer>()>;
 
 /// uintx_t.
 
