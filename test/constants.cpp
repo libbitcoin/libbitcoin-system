@@ -21,17 +21,17 @@
 static_assert(is_zero(0));
 static_assert(!is_zero(1u));
 static_assert(!is_zero(0xff));
-static_assert(std::is_same<decltype(is_zero<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(is_zero<int16_t>(0)), bool>);
 
 static_assert(!is_nonzero(0));
 static_assert(is_nonzero(1u));
 static_assert(is_nonzero(0xff));
-static_assert(std::is_same<decltype(is_nonzero<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(is_nonzero<int16_t>(0)), bool>);
 
 static_assert(is_one(1));
 static_assert(!is_one(0u));
 static_assert(!is_one(0xff));
-static_assert(std::is_same<decltype(is_one<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(is_one<int16_t>(0)), bool>);
 
 static_assert(lo_bit(0) == 0);
 static_assert(lo_bit(2u) == 0);
@@ -41,7 +41,7 @@ static_assert(lo_bit(1) == 1);
 static_assert(lo_bit(3u) == 1);
 static_assert(lo_bit(5) == 1);
 static_assert(lo_bit(max_uint32) == 1);
-static_assert(std::is_same<decltype(lo_bit<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(lo_bit<int16_t>(0)), int16_t>);
 
 static_assert(is_even(0));
 static_assert(is_even(2u));
@@ -51,7 +51,7 @@ static_assert(!is_even(1));
 static_assert(!is_even(3u));
 static_assert(!is_even(0xff));
 static_assert(!is_even(max_uint32));
-static_assert(std::is_same<decltype(is_even<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(is_even<int16_t>(0)), bool>);
 
 static_assert(is_odd(1));
 static_assert(is_odd(3u));
@@ -61,55 +61,56 @@ static_assert(!is_odd(0u));
 static_assert(!is_odd(2));
 static_assert(!is_odd(10));
 static_assert(!is_odd(max_uint32 - 1u));
-static_assert(std::is_same<decltype(is_odd<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(is_odd<int16_t>(0)), bool>);
 
-////constexpr void* pointer = "";
-////constexpr void* null_pointer = nullptr;
-////static_assert(is_null(null_pointer));
-////static_assert(!is_null(pointer));
+constexpr void* pointer = "";
+constexpr void* null_pointer = nullptr;
+
+static_assert(!is_null(pointer));
 static_assert(is_null(nullptr));
+static_assert(is_null(null_pointer));
 static_assert(is_null(std::nullptr_t{}));
-static_assert(std::is_same<decltype(is_null(nullptr)), bool>::value);
+static_assert(std::is_same_v<decltype(is_null(nullptr)), bool>);
 
 static_assert(to_bits(0) == 0 * 8);
 static_assert(to_bits(1u) == 1u * 8u);
 static_assert(to_bits(-42) == -42 * 8);
 static_assert(to_bits(0xff) == 0xff * 8);
-static_assert(std::is_same<decltype(to_bits<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(to_bits<int16_t>(0)), int16_t>);
 
 static_assert(to_byte('\0') == uint8_t{ 0 });
 static_assert(to_byte('x') == uint8_t{ 'x' });
 static_assert(to_byte('\xff') == uint8_t{ 255 });
-static_assert(std::is_same<decltype(to_byte('\0')), uint8_t>::value);
+static_assert(std::is_same_v<decltype(to_byte('\0')), uint8_t>);
 
 static_assert(to_half(0) == 0 / 2);
 static_assert(to_half(1u) == 1u / 2u);
 static_assert(to_half(-42) == -42 / 2);
 static_assert(to_half(0xff) == 0xff / 2);
-static_assert(std::is_same<decltype(to_half<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(to_half<int16_t>(0)), int16_t>);
 
 static_assert(to_int(true) == 1);
 static_assert(to_int(false) == 0);
-static_assert(std::is_same<decltype(to_int<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(to_int<int16_t>(0)), int16_t>);
 
 static_assert(to_bool(1));
 static_assert(to_bool(-1));
 static_assert(to_bool(-42));
 static_assert(to_bool(42));
 static_assert(!to_bool(0));
-static_assert(std::is_same<decltype(to_bool<int16_t>(0)), bool>::value);
+static_assert(std::is_same_v<decltype(to_bool<int16_t>(0)), bool>);
 
 static_assert(add1(0) == 0 + 1);
 static_assert(add1(1u) == 1u + 1u);
 static_assert(add1(-42) == -42 + 1);
 static_assert(add1(0xff) == 0xff + 1);
-static_assert(std::is_same<decltype(add1<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(add1<int16_t>(0)), int16_t>);
 
 static_assert(sub1(0xff) == 0xff - 1);
 static_assert(sub1(1u) == 1u - 1u);
 static_assert(sub1(-42) == -42 - 1);
 static_assert(sub1(0xff) == 0xff - 1);
-static_assert(std::is_same<decltype(sub1<int16_t>(0)), int16_t>::value);
+static_assert(std::is_same_v<decltype(sub1<int16_t>(0)), int16_t>);
 
 constexpr uint32_t value42 = 42;
 static_assert(width<bool>() == to_bits(sizeof(char)));
@@ -138,7 +139,7 @@ static_assert(width<uint32_t>() == 32u);
 static_assert(width<int64_t>() == 64u);
 static_assert(width<uint64_t>() == 64u);
 static_assert(width(value42) == to_bits(sizeof(value42)));
-static_assert(std::is_same<decltype(width<int32_t>()), size_t>::value);
+static_assert(std::is_same_v<decltype(width<int32_t>()), size_t>);
 
 static_assert(variable_size(zero) == 1u);
 static_assert(variable_size(1) == 1u);
@@ -150,6 +151,7 @@ static_assert(variable_size(max_uint16) == 3u);
 static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint64) == 9u);
+static_assert(std::is_same_v<decltype(variable_size(zero)), size_t>);
 
 class base {};
 class not_derived {};
@@ -177,6 +179,7 @@ static_assert(!is_same<std::string, int8_t>());
 static_assert(!is_same<std::string, int>());
 static_assert(!is_same<base, derived>());
 static_assert(!is_same<base, not_derived>());
+static_assert(std::is_same_v<decltype(is_same<int32_t, int32_t>()), bool>);
 
 static_assert(is_signed<int8_t>());
 static_assert(is_signed<int16_t>());
@@ -193,6 +196,7 @@ static_assert(!is_signed<size_t>());
 static_assert(!is_signed<wchar_t>());
 static_assert(!is_signed<bool>());
 static_assert(!is_signed<std::string>());
+static_assert(std::is_same_v<decltype(is_signed<int32_t>()), bool>);
 
 static_assert(is_integer<uint8_t>());
 static_assert(is_integer<uint16_t>());
@@ -207,6 +211,7 @@ static_assert(is_integer<char>());
 static_assert(is_integer<wchar_t>());
 static_assert(!is_integer<bool>());
 static_assert(!is_integer<std::string>());
+static_assert(std::is_same_v<decltype(is_integer<int32_t>()), bool>);
 
 static_assert(is_integral<uint8_t>());
 static_assert(is_integral<uint16_t>());
@@ -221,6 +226,7 @@ static_assert(is_integral<char>());
 static_assert(is_integral<wchar_t>());
 static_assert(!is_integral<bool>());
 static_assert(!is_integral<std::string>());
+static_assert(std::is_same_v<decltype(is_integral<int32_t>()), bool>);
 
 static_assert(!is_integral_size(0));
 static_assert(is_integral_size(1));
@@ -233,6 +239,7 @@ static_assert(!is_integral_size(7));
 static_assert(is_integral_size(8));
 static_assert(!is_integral_size(9));
 static_assert(!is_integral_size(64));
+static_assert(std::is_same_v<decltype(is_integral_size(0)), bool>);
 
 struct two_bytes { uint8_t foo; uint8_t bar; };
 union four_bytes { uint32_t foo; uint8_t bar; };
@@ -243,9 +250,10 @@ static_assert(is_integral_size<uint32_t>());
 static_assert(is_integral_size<uint64_t>());
 static_assert(is_integral_size<two_bytes>());
 static_assert(is_integral_size<four_bytes>());
-////static_assert(!is_integral_size<uint128_t>());
-////static_assert(!is_integral_size<uint256_t>());
-////static_assert(!is_integral_size<uint512_t>());
+static_assert(!is_integral_size<uint128_t>());
+static_assert(!is_integral_size<uint256_t>());
+static_assert(!is_integral_size<uint512_t>());
+static_assert(std::is_same_v<decltype(is_integral_size<int>()), bool>);
 
 static_assert(!is_bytes_width(0));
 static_assert(is_bytes_width(8));
@@ -259,24 +267,4 @@ static_assert(is_bytes_width(56));
 static_assert(is_bytes_width(64));
 static_assert(is_bytes_width(128));
 static_assert(is_bytes_width(256));
-
-// These results are inconsistent across platforms.
-////BOOST_AUTO_TEST_SUITE(constants_tests)
-////
-////BOOST_AUTO_TEST_CASE(constants__width__uintx__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(width<uintx>(), 192u);
-////}
-////
-////BOOST_AUTO_TEST_CASE(constants__width__uintx_t__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(width<uint5_t>(), 8u);
-////    BOOST_REQUIRE_EQUAL(width<uint11_t>(), 16u);
-////    BOOST_REQUIRE_EQUAL(width<uint48_t>(), 64u);
-////    BOOST_REQUIRE_EQUAL(width<uint128_t>(), 192u);
-////    BOOST_REQUIRE_EQUAL(width<uint160_t>(), 256u);
-////    BOOST_REQUIRE_EQUAL(width<uint256_t>(), 320u);
-////    BOOST_REQUIRE_EQUAL(width<uint512_t>(), 576u);
-////}
-////
-////BOOST_AUTO_TEST_SUITE_END()
+static_assert(std::is_same_v<decltype(is_bytes_width(0)), bool>);
