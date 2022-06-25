@@ -49,11 +49,11 @@ constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
 
 /// Types
 using number_type = uintx_t<from>;
-static_assert(std::is_same<number_type, uint256_t>::value);
+static_assert(is_same<number_type, uint256_t>());
 using compact_type = unsigned_type<compact_bytes>;
-static_assert(std::is_same<compact_type, uint32_t>::value);
+static_assert(is_same<compact_type, uint32_t>());
 using exponent_type = unsigned_type<exponent_bytes>;
-static_assert(std::is_same<exponent_type, uint8_t>::value);
+static_assert(is_same<exponent_type, uint8_t>());
 
 /// Widths
 constexpr auto compact_width = width<compact_type>();

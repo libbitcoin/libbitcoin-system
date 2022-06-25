@@ -93,8 +93,8 @@ private:
     template<class... Overload>
     struct overload : Overload... { using Overload::operator()...; };
 
-    static constexpr auto linked_ = std::is_same_v<Container, linked_stack>;
-    static constexpr auto vector_ = std::is_same_v<Container, contiguous_stack>;
+    static constexpr auto linked_ = is_same<Container, linked_stack>();
+    static constexpr auto vector_ = is_same<Container, contiguous_stack>();
     static_assert(linked_ || vector_, "unsupported stack container");
 
     Container container_;
