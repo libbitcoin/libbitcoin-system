@@ -37,8 +37,8 @@ class interpreter
 {
 public:
     using state = typename program<Stack>::program;
-    using op_iterator = state::op_iterator;
-    using input_iterator = input_cptrs::const_iterator;
+    using op_iterator = typename state::op_iterator;
+    using input_iterator = typename input_cptrs::const_iterator;
 
     /// Use program constructors.
     using program<Stack>::program;
