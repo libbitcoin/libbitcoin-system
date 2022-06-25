@@ -276,14 +276,15 @@ typedef uintx_t<160> uint160_t;
 typedef uintx_t<256> uint256_t;
 typedef uintx_t<512> uint512_t;
 
+// No integral type rounding, all types exact byte size.
 template <size_t Bytes>
-using unsigned_extended_type =
+using unsigned_exact_type =
     std::conditional_t<Bytes == 0, size_t,
         std::conditional_t<Bytes == 1, uint8_t,
             std::conditional_t<Bytes == 2, uint16_t,
-                std::conditional_t<Bytes <= 4, uint32_t,
-                    std::conditional_t<Bytes <= 8, uint64_t,
-                        uintx_t<Bytes>>>>>>;
+                std::conditional_t<Bytes == 4, uint32_t,
+                    std::conditional_t<Bytes == 8, uint64_t,
+                        uintx_t<to_bits(Bytes)>>>>>>;
 
 } // namespace system
 } // namespace libbitcoin

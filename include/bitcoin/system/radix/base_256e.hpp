@@ -36,23 +36,6 @@ namespace base256e {
 
 /// All derived from parameters, no magic numbers.
 
-// Compact type is limited to integrals, number is not.
-// Possible exponent-mantissa alignments:
-
-//  8 =>  8 +  0
-// 16 =>  8 +  8
-// 32 =>  8 + 24
-// 64 =>  8 + 56
-// ...
-// 16 =>  9 +  7
-// 32 =>  9 + 13
-// 64 =>  9 + 55
-// ...
-// 16 => 10 +  6
-// 32 => 10 + 22
-// 64 => 10 + 54
-// ...
-
 /// Inherent
 constexpr auto base = power2(8);
 
@@ -69,7 +52,7 @@ constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
 
 /// Types
 using compact_type = unsigned_type<compact_bytes>;
-using number_type = unsigned_extended_type<source_bits>;
+using number_type = unsigned_exact_type<to_bytes<source_bits>()>;
 
 /// Widths
 constexpr auto compact_width = width<compact_type>();
@@ -80,7 +63,6 @@ static_assert(sizeof(compact_type) == compact_bytes);
 static_assert(is_bytes_width(source_bits) && is_bytes_width(precision));
 
 /// Verification
-
 static_assert(!is_limited(exponent_width - exponent_bits, sub1(byte_bits)));
 static_assert(is_integral<compact_type>());
 static_assert(is_integral<number_type>() ||

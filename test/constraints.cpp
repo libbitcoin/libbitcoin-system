@@ -466,19 +466,19 @@ static_assert(is_same<uintx_t<1>,
     boost::multiprecision::unsigned_magnitude,
     boost::multiprecision::unchecked, void>>>());
 
-static_assert(is_same<unsigned_extended_type<0>, size_t>());
-static_assert(is_same<unsigned_extended_type<1>, uint8_t>());
-static_assert(is_same<unsigned_extended_type<2>, uint16_t>());
-static_assert(is_same<unsigned_extended_type<3>, uint32_t>());
-static_assert(is_same<unsigned_extended_type<4>, uint32_t>());
-static_assert(is_same<unsigned_extended_type<5>, uint64_t>());
-static_assert(is_same<unsigned_extended_type<6>, uint64_t>());
-static_assert(is_same<unsigned_extended_type<7>, uint64_t>());
-static_assert(is_same<unsigned_extended_type<8>, uint64_t>());
-static_assert(is_same<unsigned_extended_type<9>, uintx_t<9>>());
-static_assert(is_same<unsigned_extended_type<10>, uintx_t<10>>());
-static_assert(is_same<unsigned_extended_type<32>, uintx_t<32>>());
-static_assert(is_same<unsigned_extended_type<256>, uintx_t<256>>());
-static_assert(is_same<unsigned_extended_type<512>, uintx_t<512>>());
-static_assert(is_same<unsigned_extended_type<1024>, uintx_t<1024>>());
-static_assert(is_same<unsigned_extended_type<2048>, uintx_t<2048>>());
+static_assert(is_same<unsigned_exact_type<0>, size_t>());
+static_assert(is_same<unsigned_exact_type<1>, uint8_t>());
+static_assert(is_same<unsigned_exact_type<2>, uint16_t>());
+static_assert(is_same<unsigned_exact_type<3>, uintx_t<to_bits(3)>>());
+static_assert(is_same<unsigned_exact_type<4>, uint32_t>());
+static_assert(is_same<unsigned_exact_type<5>, uintx_t<to_bits(5)>>());
+static_assert(is_same<unsigned_exact_type<6>, uintx_t<to_bits(6)>>());
+static_assert(is_same<unsigned_exact_type<7>, uintx_t<to_bits(7)>>());
+static_assert(is_same<unsigned_exact_type<8>, uint64_t>());
+static_assert(is_same<unsigned_exact_type<9>, uintx_t<to_bits(9)>>());
+static_assert(is_same<unsigned_exact_type<10>, uintx_t<to_bits(10)>>());
+static_assert(is_same<unsigned_exact_type<32>, uintx_t<to_bits(32)>>());
+static_assert(is_same<unsigned_exact_type<256>, uintx_t<to_bits(256)>>());
+static_assert(is_same<unsigned_exact_type<512>, uintx_t<to_bits(512)>>());
+static_assert(is_same<unsigned_exact_type<1024>, uintx_t<to_bits(1024)>>());
+static_assert(is_same<unsigned_exact_type<2048>, uintx_t<to_bits(2048)>>());
