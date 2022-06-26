@@ -499,8 +499,8 @@ static_assert(floored_log2<unsigned>(power(2u, 15u)) == 15u);
 // floored_log2(uintx)
 
 // power__floored_log2_uintx__zero__undefined
-static_assert(floored_log2(uint256_t(0)) == 0u);
-static_assert(floored_log2(uint256_t(0)) == 0u);
+static_assert(floored_log2(uint256_t{}) == 0u);
+static_assert(floored_log2(uint256_t{}) == 0u);
 
 BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__maximums__sizeof_maximum_minus_one)
 {

@@ -34,7 +34,7 @@
 // bytes    <-
 // limits   <- addition
 // addition <-
-// division <- [bits]
+// division <- [bits], power
 // power    <- [bits, limits]
 // safe     <- [bits, limits, addition], sign, power
 // sign     <- [bits, limits, addition, division], power
