@@ -63,9 +63,10 @@ public:
             return opcode::push_four_size;
     }
 
+    // C++20: constexpr.
     /// Compute the minimal data opcode for a given chunk of data.
     /// Caller should clear data if converting to non-payload opcode.
-    static constexpr opcode minimal_opcode_from_data(
+    static inline opcode minimal_opcode_from_data(
         const data_chunk& data) noexcept
     {
         const auto size = data.size();
@@ -89,9 +90,10 @@ public:
         return opcode_from_size(size);
     }
 
+    // C++20: constexpr.
     /// Compute the nominal data opcode for a given chunk of data.
     /// Restricted to sized data, avoids conversion to numeric opcodes.
-    static constexpr opcode nominal_opcode_from_data(
+    static inline opcode nominal_opcode_from_data(
         const data_chunk& data) noexcept
     {
         return opcode_from_size(data.size());

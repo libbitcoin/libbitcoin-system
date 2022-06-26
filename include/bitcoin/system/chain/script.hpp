@@ -61,10 +61,11 @@ public:
         return to_bool(fork & active_forks);
     }
 
-    static constexpr bool is_push_only(const operations& ops) noexcept
+    static inline bool is_push_only(const operations& ops) noexcept
     {
         const auto push = [](const operation& op) noexcept
         {
+            // !constexpr
             return op.is_push();
         };
 
@@ -74,10 +75,11 @@ public:
     //*************************************************************************
     // CONSENSUS: this pattern is used to activate bip16 validation rules.
     //*************************************************************************
-    static constexpr bool is_relaxed_push(const operations& ops) noexcept
+    static inline bool is_relaxed_push(const operations& ops) noexcept
     {
         const auto push = [&](const operation& op) noexcept
         {
+            // !constexpr
             return op.is_relaxed_push();
         };
 
@@ -114,10 +116,11 @@ public:
             && std::equal(header.begin(), header.end(), ops[1].data().begin());
     }
 
+    // C++20 constexpr.
     //*************************************************************************
     // CONSENSUS: this pattern is used in bip141 validation rules.
     //*************************************************************************
-    static constexpr bool is_witness_program_pattern(
+    static inline bool is_witness_program_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -126,10 +129,11 @@ public:
             && ops[1].data().size() <= max_witness_program;
     }
 
+    // C++20 constexpr.
     // The satoshi client tests for 83 bytes total. This allows for waste of
     // one byte to represent up to 75 bytes using the push_one_size opcode.
     // It also allows any number of push ops and limits value to 0 and 1 per tx.
-    ////static constexpr bool is_pay_null_data_pattern(const operations& ops)
+    ////static inline bool is_pay_null_data_pattern(const operations& ops)
     ////{
     ////    constexpr auto op_76 = static_cast<uint8_t>(opcode::push_one_size);
     ////
@@ -139,16 +143,18 @@ public:
     ////        && ops[1].data().size() <= max_null_data_size;
     ////}
 
+    // C++20 constexpr.
     // Used by neutrino.
-    static constexpr bool is_pay_op_return_pattern(
+    static inline bool is_pay_op_return_pattern(
         const operations& ops) noexcept
     {
         return !ops.empty()
             && ops[0].code() == opcode::op_return;
     }
 
+    // C++20 constexpr.
     // The satoshi client enables configurable data size for policy.
-    static constexpr bool is_pay_null_data_pattern(
+    static inline bool is_pay_null_data_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -157,11 +163,11 @@ public:
             && ops[1].data().size() <= max_null_data_size;
     }
 
-    // TODO: expand this to the 20 signature op_check_multisig limit. The
-    // current 16 (or 20) limit does not affect server indexing because bare
+    // C++20 constexpr.
+    // The current 16 (or 20) limit does not affect server indexing because bare
     // multisig is not indexable and p2sh multisig is byte-limited to 15 sigs.
     // The satoshi client policy limit is 3 signatures for bare multisig.
-    static constexpr bool is_pay_multisig_pattern(
+    static inline bool is_pay_multisig_pattern(
         const operations& ops) noexcept
     {
         constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -194,8 +200,9 @@ public:
         return true;
     }
 
+    // C++20 constexpr.
     // The satoshi client considers this non-standard for policy.
-    static constexpr bool is_pay_public_key_pattern(
+    static inline bool is_pay_public_key_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -203,7 +210,8 @@ public:
             && ops[1].code() == opcode::checksig;
     }
 
-    static constexpr bool is_pay_key_hash_pattern(
+    // C++20 constexpr.
+    static inline bool is_pay_key_hash_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 5
@@ -214,10 +222,11 @@ public:
             && ops[4].code() == opcode::checksig;
     }
 
+    // C++20 constexpr.
     //*************************************************************************
     // CONSENSUS: this pattern is used to activate bip16 validation rules.
     //*************************************************************************
-    static constexpr bool is_pay_script_hash_pattern(
+    static inline bool is_pay_script_hash_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 3
@@ -226,7 +235,8 @@ public:
             && ops[2].code() == opcode::equal;
     }
 
-    static constexpr bool is_pay_witness_pattern(
+    // C++20 constexpr.
+    static inline bool is_pay_witness_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -234,7 +244,8 @@ public:
             && ops[1].is_push();
     }
 
-    static constexpr bool is_pay_witness_key_hash_pattern(
+    // C++20 constexpr.
+    static inline bool is_pay_witness_key_hash_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -242,10 +253,11 @@ public:
             && ops[1].code() == opcode::push_size_20;
     }
 
+    // C++20 constexpr.
     //*************************************************************************
     // CONSENSUS: this pattern is used to activate bip141 validation rules.
     //*************************************************************************
-    static constexpr bool is_pay_witness_script_hash_pattern(
+    static inline bool is_pay_witness_script_hash_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -253,10 +265,11 @@ public:
             && ops[1].code() == opcode::push_size_32;
     }
 
+    // C++20 constexpr.
     // The first push is based on wacky satoshi op_check_multisig behavior that
     // we must perpetuate, though it's appearance here is policy not consensus.
     // Limiting to push_size_0 removes pattern ambiguity with little downside.
-    static constexpr bool is_sign_multisig_pattern(
+    static inline bool is_sign_multisig_pattern(
         const operations& ops) noexcept
     {
         const auto endorsement = [](const operation& op) noexcept
@@ -269,17 +282,19 @@ public:
             && std::all_of(std::next(ops.begin()), ops.end(), endorsement);
     }
 
-    static constexpr bool is_sign_public_key_pattern(
+    // C++20 constexpr.
+    static inline bool is_sign_public_key_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 1
             && is_endorsement(ops[0].data());
     }
 
+    // C++20 constexpr.
     //*************************************************************************
     // CONSENSUS: this pattern is used to activate bip141 validation rules.
     //*************************************************************************
-    static constexpr bool is_sign_key_hash_pattern(
+    static inline bool is_sign_key_hash_pattern(
         const operations& ops) noexcept
     {
         return ops.size() == 2
@@ -289,9 +304,10 @@ public:
 
     BC_POP_WARNING(/*USE_GSL_AT*/)
 
+    // C++20 constexpr.
     // Ambiguous with is_sign_key_hash when second/last op is a public key.
     // Ambiguous with is_sign_public_key_pattern when only op is endorsement.
-    static constexpr bool is_sign_script_hash_pattern(
+    static inline bool is_sign_script_hash_pattern(
         const operations& ops) noexcept
     {
         return !ops.empty()
@@ -299,7 +315,7 @@ public:
             && !ops.back().data().empty();
     }
 
-    static const operations to_pay_null_data_pattern(
+    static inline operations to_pay_null_data_pattern(
         const data_slice& data) noexcept
     {
         return data.size() > max_null_data_size ? operations{} : operations
@@ -309,7 +325,7 @@ public:
         };
     }
 
-    static const operations to_pay_public_key_pattern(
+    static inline operations to_pay_public_key_pattern(
         const data_slice& point) noexcept
     {
         return !is_public_key(point) ? operations{} : operations
@@ -319,7 +335,7 @@ public:
         };
     }
 
-    static const operations to_pay_key_hash_pattern(
+    static inline operations to_pay_key_hash_pattern(
         const short_hash& hash) noexcept
     {
         return operations
@@ -332,7 +348,7 @@ public:
         };
     }
 
-    static const operations to_pay_script_hash_pattern(
+    static inline operations to_pay_script_hash_pattern(
         const short_hash& hash) noexcept
     {
         return operations
@@ -343,7 +359,6 @@ public:
         };
     }
 
-    // TODO: limit to 20 for consistency with op_check_multisig.
     static inline operations to_pay_multisig_pattern(uint8_t signatures,
         const compressed_list& points) noexcept
     {
@@ -388,7 +403,7 @@ public:
         return ops;
     }
 
-    static const operations to_pay_witness_pattern(uint8_t version,
+    static inline operations to_pay_witness_pattern(uint8_t version,
         const data_slice& data) noexcept
     {
         return
@@ -398,7 +413,7 @@ public:
         };
     }
 
-    static const operations to_pay_witness_key_hash_pattern(
+    static inline operations to_pay_witness_key_hash_pattern(
         const short_hash& hash) noexcept
     {
         return
@@ -408,7 +423,7 @@ public:
         };
     }
 
-    static const operations to_pay_witness_script_hash_pattern(
+    static inline operations to_pay_witness_script_hash_pattern(
         const hash_digest& hash) noexcept
     {
         return
