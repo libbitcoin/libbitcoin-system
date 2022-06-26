@@ -62,30 +62,31 @@ public:
     /// Pure stack abstraction.
     inline const stack_variant& top() const noexcept;
     inline stack_variant pop() noexcept;
-    constexpr void drop() noexcept;
-    constexpr bool empty() const noexcept;
-    constexpr size_t size() const noexcept;
-    constexpr void push(data_chunk&& value) noexcept;
-    constexpr void push(stack_variant&& value) noexcept;
-    constexpr void push(const stack_variant& value) noexcept;
-    constexpr void emplace_boolean(bool value) noexcept;
-    constexpr void emplace_integer(int64_t value) noexcept;
-    constexpr void emplace_chunk(const chunk_xptr& value) noexcept;
+    inline void drop() noexcept;
+    inline bool empty() const noexcept;
+    inline size_t size() const noexcept;
+    inline void push(data_chunk&& value) noexcept;
+    inline void push(stack_variant&& value) noexcept;
+    inline void push(const stack_variant& value) noexcept;
+    inline void emplace_boolean(bool value) noexcept;
+    inline void emplace_integer(int64_t value) noexcept;
+    inline void emplace_chunk(const chunk_xptr& value) noexcept;
 
     /// Positional (stack cheats).
-    constexpr void erase(size_t index) noexcept;
-    constexpr void swap(size_t left_index, size_t right_index) noexcept;
+    inline void erase(size_t index) noexcept;
+    inline void swap(size_t left_index, size_t right_index) noexcept;
     inline const stack_variant& peek(size_t index) const noexcept;
 
     /// Variant data conversions.
     template<size_t Bytes, typename Integer,
         if_not_greater<Bytes, sizeof(Integer)> = true,
         if_signed_integral_integer<Integer> = true>
-    constexpr bool peek_signed(Integer& value) const noexcept;
-    constexpr bool peek_bool() const noexcept;
-    constexpr bool peek_strict_bool() const noexcept;
+    inline bool peek_signed(Integer& value) const noexcept;
+    inline bool peek_bool() const noexcept;
+    inline bool peek_strict_bool() const noexcept;
     inline chunk_xptr peek_chunk() const noexcept;
-    static constexpr bool equal_chunks(const stack_variant& left,
+
+    static inline bool equal_chunks(const stack_variant& left,
         const stack_variant& right) noexcept;
 
 private:
