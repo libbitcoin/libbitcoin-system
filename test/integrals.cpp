@@ -18,7 +18,7 @@
  */
 #include "test.hpp"
 
-static_assert(std::is_same<std::make_signed<size_t>::type, signed_size_t>::value);
+static_assert(is_same_size<size_t, signed_size_t>());
 
 static_assert(max_signed_size_t == std::numeric_limits<signed_size_t>::max());
 static_assert(max_int64 == std::numeric_limits<int64_t>::max());
