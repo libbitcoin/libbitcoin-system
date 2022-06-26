@@ -39,13 +39,13 @@ public:
     typedef signed_type<Size> Integer;
     static_assert(Size <= sizeof(int64_t), "type constraint");
 
-    static constexpr bool from_int(Integer& out, int64_t vary) noexcept;
-    static constexpr bool from_chunk(Integer& out,
+    static inline bool from_int(Integer& out, int64_t vary) noexcept;
+    static inline bool from_chunk(Integer& out,
         const data_chunk& vary) noexcept;
 
 protected:
-    static constexpr bool strict_zero(const data_chunk& vary) noexcept;
-    static constexpr bool is_overflow(int64_t value) noexcept;
+    static inline bool strict_zero(const data_chunk& vary) noexcept;
+    static inline bool is_overflow(int64_t value) noexcept;
 };
 
 class BC_API chunk
@@ -59,15 +59,15 @@ class BC_API boolean
 {
 public:
     template <size_t Size = sizeof(int64_t)>
-    static constexpr signed_type<Size> to_int(bool vary) noexcept;
+    static inline signed_type<Size> to_int(bool vary) noexcept;
 
-    static constexpr bool from_chunk(const data_chunk& vary) noexcept;
-    static constexpr bool strict_from_chunk(const data_chunk& vary) noexcept;
-    static constexpr bool to_bool(int64_t vary) noexcept;
+    static inline bool from_chunk(const data_chunk& vary) noexcept;
+    static inline bool strict_from_chunk(const data_chunk& vary) noexcept;
+    static inline bool to_bool(int64_t vary) noexcept;
 
 protected:
-    static constexpr bool strict_false(const data_chunk& vary) noexcept;
-    static constexpr bool is_sign_byte(uint8_t byte) noexcept;
+    static inline bool strict_false(const data_chunk& vary) noexcept;
+    static inline bool is_sign_byte(uint8_t byte) noexcept;
 };
 
 } // namespace number

@@ -40,9 +40,10 @@ constexpr uint8_t negative_sign_byte = bit_hi<uint8_t>();
 
 // integer
 // ----------------------------------------------------------------------------
+// C++20: constexpr.
 
 template <size_t Size>
-constexpr bool integer<Size>::from_int(Integer& out, int64_t vary) noexcept
+inline bool integer<Size>::from_int(Integer& out, int64_t vary) noexcept
 {
     out = possible_narrow_cast<Integer>(vary);
 
@@ -51,7 +52,7 @@ constexpr bool integer<Size>::from_int(Integer& out, int64_t vary) noexcept
 }
 
 template <size_t Size>
-constexpr bool integer<Size>::from_chunk(Integer& out,
+inline bool integer<Size>::from_chunk(Integer& out,
     const data_chunk& vary) noexcept
 {
     out = 0;
@@ -72,7 +73,7 @@ constexpr bool integer<Size>::from_chunk(Integer& out,
 }
 
 template <size_t Size>
-constexpr bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
+inline bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
 {
     return vary.empty();
 }
@@ -89,7 +90,7 @@ constexpr bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
 // reduction is captured by the is_overflow function below.
 // ****************************************************************************
 template <size_t Size>
-constexpr bool integer<Size>::is_overflow(int64_t value) noexcept
+inline bool integer<Size>::is_overflow(int64_t value) noexcept
 {
     static_assert(bitcoin_min<Size>() == add1(minimum<Size>()));
 
@@ -128,9 +129,10 @@ inline data_chunk chunk::from_int(int64_t vary) noexcept
 
 // boolean
 // ----------------------------------------------------------------------------
+// C++20: constexpr.
 
 template <size_t Size>
-constexpr signed_type<Size> boolean::to_int(bool vary) noexcept
+inline signed_type<Size> boolean::to_int(bool vary) noexcept
 {
     static_assert(Size <= sizeof(int64_t), "type constraint");
 
@@ -138,7 +140,7 @@ constexpr signed_type<Size> boolean::to_int(bool vary) noexcept
     return bc::to_int<signed_type<Size>>(vary);
 }
 
-constexpr bool boolean::from_chunk(const data_chunk& vary) noexcept
+inline bool boolean::from_chunk(const data_chunk& vary) noexcept
 {
     // Booleans are not overflow constrained, so cannot be converted as int.
     // Any length of bytes is considered valid. Negative zero is false.
@@ -148,24 +150,24 @@ constexpr bool boolean::from_chunk(const data_chunk& vary) noexcept
             is_nonzero<uint8_t>);
 }
 
-constexpr bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
+inline bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
 {
     // A logical zero equates to any +/- sequence of zero bytes up to 520.
     // Strict bool tests for integral false/zero, or a single empty byte.
     return strict_false(vary);
 }
 
-constexpr bool boolean::to_bool(int64_t vary) noexcept
+inline bool boolean::to_bool(int64_t vary) noexcept
 {
     return bc::to_bool(vary);
 }
 
-constexpr bool boolean::strict_false(const data_chunk& vary) noexcept
+inline bool boolean::strict_false(const data_chunk& vary) noexcept
 {
     return vary.empty();
 }
 
-constexpr bool boolean::is_sign_byte(uint8_t byte) noexcept
+inline bool boolean::is_sign_byte(uint8_t byte) noexcept
 {
     return byte == positive_sign_byte || byte == negative_sign_byte;
 }
