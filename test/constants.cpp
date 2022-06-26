@@ -142,7 +142,6 @@ static_assert(width<uint_least32_t>() >= 32u);
 static_assert(width<int_least64_t>() >= 64u);
 static_assert(width<uint_least64_t>() >= 64u);
 
-constexpr uint32_t value42 = 42;
 static_assert(width<int8_t>() == 8u);
 static_assert(width<uint8_t>() == 8u);
 static_assert(width<int16_t>() == 16u);
