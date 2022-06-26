@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 #define LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -32,6 +33,8 @@ static_assert(sizeof(size_t) == sizeof(uint32_t) ||
 
 /// Type alias for unsigned size_t.
 using signed_size_t = std::make_signed<size_t>::type;
+
+/// C++20: all signed types require two's complement negative representation.
 
 /// Integral value limits.
 
@@ -79,6 +82,12 @@ constexpr int32_t negative_one = -1;
 constexpr uint8_t varint_two_bytes = 0xfd;
 constexpr uint8_t varint_four_bytes = 0xfe;
 constexpr uint8_t varint_eight_bytes = 0xff;
+
+/// Endianness.
+constexpr auto is_big_endian = std::endian::native == std::endian::big;
+constexpr auto is_little_endian = std::endian::native == std::endian::little;
+constexpr auto is_unknown_endian = !is_big_endian && !is_little_endian;
+static_assert(!is_unknown_endian, "unsupported integer representation");
 
 } // namespace libbitcoin
 

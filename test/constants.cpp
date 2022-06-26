@@ -107,24 +107,42 @@ static_assert(sub1(-42) == -42 - 1);
 static_assert(sub1(0xff) == 0xff - 1);
 static_assert(std::is_same_v<decltype(sub1<int16_t>(0)), int16_t>);
 
+// These may be unexpected, which is why we generally avoid them.
+static_assert(width<bool>() >= 8u);
+static_assert(width<char>() >= 8u);
+static_assert(width<signed char>() >= 8u);
+static_assert(width<unsigned char>() >= 8u);
+static_assert(width<wchar_t>() >= 16u);
+static_assert(width<short>() >= 16u);
+static_assert(width<signed short>() >= 16u);
+static_assert(width<unsigned short>() >= 16u);
+static_assert(width<int>() >= 16u);
+static_assert(width<signed int>() >= 16u);
+static_assert(width<unsigned int>() >= 16u);
+static_assert(width<long>() >= 32u);
+static_assert(width<signed long>() >= 32u);
+static_assert(width<unsigned long>() >= 32u);
+static_assert(width<long long>() >= 64);
+static_assert(width<signed long long>() >= 64u);
+static_assert(width<unsigned long long>() >= 64u);
+static_assert(width<int_fast8_t>() >= 8u);
+static_assert(width<uint_fast8_t>() >= 8u);
+static_assert(width<int_fast16_t>() >= 16u);
+static_assert(width<uint_fast16_t>() >= 16u);
+static_assert(width<int_fast32_t>() >= 32u);
+static_assert(width<uint_fast32_t>() >= 32u);
+static_assert(width<int_fast64_t>() >= 64u);
+static_assert(width<uint_fast64_t>() >= 64u);
+static_assert(width<int_least8_t>() >= 8u);
+static_assert(width<uint_least8_t>() >= 8u);
+static_assert(width<int_least16_t>() >= 16u);
+static_assert(width<uint_least16_t>() >= 16u);
+static_assert(width<int_least32_t>() >= 32u);
+static_assert(width<uint_least32_t>() >= 32u);
+static_assert(width<int_least64_t>() >= 64u);
+static_assert(width<uint_least64_t>() >= 64u);
+
 constexpr uint32_t value42 = 42;
-static_assert(width<bool>() == to_bits(sizeof(char)));
-static_assert(width<char>() == to_bits(sizeof(char)));
-static_assert(width<short>() == to_bits(sizeof(short)));
-static_assert(width<int>() == to_bits(sizeof(int)));
-static_assert(width<long>() == to_bits(sizeof(long)));
-static_assert(width<long long>() == to_bits(sizeof(long long)));
-static_assert(width<signed char>() == to_bits(sizeof(signed char)));
-static_assert(width<signed short>() == to_bits(sizeof(signed short)));
-static_assert(width<signed int>() == to_bits(sizeof(signed int)));
-static_assert(width<signed long>() == to_bits(sizeof(signed long)));
-static_assert(width<signed long long>() == to_bits(sizeof(signed long long)));
-static_assert(width<unsigned char>() == to_bits(sizeof(unsigned char)));
-static_assert(width<unsigned short>() == to_bits(sizeof(unsigned short)));
-static_assert(width<unsigned int>() == to_bits(sizeof(unsigned int)));
-static_assert(width<unsigned long>() == to_bits(sizeof(unsigned long)));
-static_assert(width<unsigned long long>() == to_bits(sizeof(unsigned long long)));
-static_assert(width<wchar_t>() == to_bits(sizeof(wchar_t)));
 static_assert(width<int8_t>() == 8u);
 static_assert(width<uint8_t>() == 8u);
 static_assert(width<int16_t>() == 16u);
@@ -133,9 +151,6 @@ static_assert(width<int32_t>() == 32u);
 static_assert(width<uint32_t>() == 32u);
 static_assert(width<int64_t>() == 64u);
 static_assert(width<uint64_t>() == 64u);
-static_assert(width(value42) == to_bits(sizeof(value42)));
-static_assert(std::is_same_v<decltype(width<int32_t>()), size_t>);
-
 static_assert(variable_size(zero) == 1u);
 static_assert(variable_size(1) == 1u);
 static_assert(variable_size(0xfe) == 3u);
@@ -152,12 +167,14 @@ class base {};
 class not_derived {};
 class derived : base {};
 
+// These are implementation defined.
+////static_assert(is_same<unsigned char, uint8_t>());
+////static_assert(is_same<signed char, int8_t>());
+////static_assert(is_same<int, int32_t>());
+////static_assert(is_same<unsigned int, uint32_t>());
+////static_assert(!is_same<char, int8_t>());
+
 static_assert(is_same<uint8_t, uint8_t>());
-static_assert(is_same<unsigned char, uint8_t>());
-static_assert(is_same<signed char, int8_t>());
-static_assert(is_same<int, int32_t>());
-static_assert(is_same<unsigned int, uint32_t>());
-static_assert(!is_same<char, int8_t>());
 static_assert(!is_same<int8_t, uint8_t>());
 static_assert(!is_same<uint8_t, int8_t>());
 static_assert(!is_same<uint16_t, int8_t>());
@@ -176,11 +193,21 @@ static_assert(!is_same<base, derived>());
 static_assert(!is_same<base, not_derived>());
 static_assert(std::is_same_v<decltype(is_same<int32_t, int32_t>()), bool>);
 
+// These are implementation defined.
+////static_assert(is_signed<char>());
+////static_assert(!is_signed<wchar_t>());
+
+// bool is arithmetic:
+static_assert(int{ true } == 1 && int{ false } == 0);
+
+// an bool is not signed, because:
+////static_assert(!(bool{ -1 } < bool{ 0 }));
+
+static_assert(!is_signed<bool>());
 static_assert(is_signed<int8_t>());
 static_assert(is_signed<int16_t>());
 static_assert(is_signed<int32_t>());
 static_assert(is_signed<int64_t>());
-static_assert(is_signed<char>());
 static_assert(is_signed<signed char>());
 static_assert(!is_signed<unsigned char>());
 static_assert(!is_signed<uint8_t>());
@@ -188,8 +215,6 @@ static_assert(!is_signed<uint16_t>());
 static_assert(!is_signed<uint32_t>());
 static_assert(!is_signed<uint64_t>());
 static_assert(!is_signed<size_t>());
-static_assert(!is_signed<wchar_t>());
-static_assert(!is_signed<bool>());
 static_assert(!is_signed<std::string>());
 static_assert(std::is_same_v<decltype(is_signed<int32_t>()), bool>);
 

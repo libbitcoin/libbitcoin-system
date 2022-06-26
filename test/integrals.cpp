@@ -55,3 +55,7 @@ static_assert(negative_one == -1);
 static_assert(varint_two_bytes == 0xfd);
 static_assert(varint_four_bytes == 0xfe);
 static_assert(varint_eight_bytes == 0xff);
+
+static_assert(!(is_big_endian && is_little_endian));
+static_assert(!(is_big_endian && is_unknown_endian));
+static_assert(!(is_little_endian && is_unknown_endian));

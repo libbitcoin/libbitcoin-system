@@ -201,8 +201,7 @@ using if_unsigned_integral_integer = bool_unless<
     is_integral<Type>() &&
     is_integer<Type>()>;
 
-/// Type determination by required byte width and sign.
-
+/// Signed integral type selection by byte width and sign.
 template <size_t Bytes, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =
     std::conditional_t<Bytes == 0, signed_size_t,
@@ -211,6 +210,7 @@ using signed_type =
                 std::conditional_t<Bytes <= 4, int32_t,
                     int64_t>>>>;
 
+/// Unsigned integral type selection by byte width and sign.
 template <size_t Bytes, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
     std::conditional_t<Bytes == 0, size_t,
@@ -221,22 +221,27 @@ using unsigned_type =
 
 /// Use instead of std::make_signed.
 template <typename Type>
-using to_signed_type = signed_type<sizeof(Type)>;
+using to_signed_type =
+    std::conditional_t<is_same<Type, size_t>(), signed_size_t,
+        std::conditional_t<is_same<Type, uint8_t>(), int8_t,
+            std::conditional_t<is_same<Type, uint16_t>(), int16_t,
+                std::conditional_t<is_same<Type, uint32_t>(), int32_t,
+                    int64_t>>>>;
 
 /// Use instead of std::make_unsigned.
 template <typename Type>
-using to_unsigned_type = unsigned_type<sizeof(Type)>;
+using to_unsigned_type =
+    std::conditional_t<is_same<Type, signed_size_t>(), size_t,
+        std::conditional_t<is_same<Type, int8_t>(), uint8_t,
+            std::conditional_t<is_same<Type, int16_t>(), uint16_t,
+                std::conditional_t<is_same<Type, int32_t>(), uint32_t,
+                    uint64_t>>>>;
 
 /// Alias for -> decltype(dividend / divisor).
 template <typename Left, typename Right>
 using to_common_type = typename std::common_type<Left, Right>::type;
 
 /// Endianness.
-
-constexpr auto is_big_endian = std::endian::native == std::endian::big;
-constexpr auto is_little_endian = std::endian::native == std::endian::little;
-constexpr auto is_unknown_endian = !is_big_endian && !is_little_endian;
-static_assert(!is_unknown_endian, "unsupported integer representation");
 
 template <typename Integer>
 using if_big_endian_integral_integer = bool_unless<
@@ -267,7 +272,8 @@ using uintx_t = boost::multiprecision::number<
 /// with this seam, requiring template specialization for uintx.
 typedef boost::multiprecision::cpp_int uintx;
 
-// C++11: use std::integral_constant (up to primitives limit).
+/// C++11: use std::integral_constant (up to primitives limit).
+/// These are predefined due to use in the library, but any width is valid.
 typedef uintx_t<5> uint5_t;
 typedef uintx_t<11> uint11_t;
 typedef uintx_t<48> uint48_t;
@@ -276,7 +282,8 @@ typedef uintx_t<160> uint160_t;
 typedef uintx_t<256> uint256_t;
 typedef uintx_t<512> uint512_t;
 
-// No integral type rounding, all types exact byte size.
+/// No integral type rounding, all types exact byte size.
+/// Prefers the exact integral type and falls back to uintx_t.
 template <size_t Bytes>
 using unsigned_exact_type =
     std::conditional_t<Bytes == 0, size_t,
