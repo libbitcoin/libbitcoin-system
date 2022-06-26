@@ -93,11 +93,7 @@ inline bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
 template <size_t Size>
 inline bool integer<Size>::is_overflow(int64_t value) noexcept
 {
-    // This is most likely caused by limits::minimum::to_unsigned_type<Return>.
-    // error: static_assert expression is not an integral constant expression.
-    ////static_assert(bitcoin_min<Size>() == add1(minimum<Size>()));
-
-    // Encoding of negative zero constricts the integer domain by one.
+    // Encoding of negative zero reduces the integer domain by one.
     return is_limited(value, bitcoin_min<Size>(), bitcoin_max<Size>());
 }
 

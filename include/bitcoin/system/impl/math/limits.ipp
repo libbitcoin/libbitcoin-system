@@ -93,17 +93,15 @@ constexpr Integer maximum() noexcept
 template <size_t Bytes, typename Return>
 constexpr Return minimum() noexcept
 {
-    // Use unsigned domain to preclude overflow of signed before negation.
-    return -to_signed(power2<to_unsigned_type<Return>>(
-        sub1(to_bits(Bytes))));
+    using unsigned_t = to_unsigned_type<Return>;
+    return -to_signed(power2<unsigned_t>(sub1(to_bits(Bytes))));
 }
 
 template <size_t Bytes, typename Return>
 constexpr Return maximum() noexcept
 {
-    // Use unsigned domain to preclude overflow of signed before negation.
-    return to_signed(sub1(power2<to_unsigned_type<Return>>(
-        sub1(to_bits(Bytes)))));
+    using unsigned_t = to_unsigned_type<Return>;
+    return to_signed(sub1(power2<unsigned_t>(sub1(to_bits(Bytes)))));
 }
 
 // bitcoin_minimum/bitcoin_maximum (stack_number)

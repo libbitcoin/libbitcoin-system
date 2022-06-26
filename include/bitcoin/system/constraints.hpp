@@ -221,7 +221,7 @@ using unsigned_type =
                 std::conditional_t<Bytes <= 4, uint32_t,
                     uint64_t>>>>;
 
-/// Use instead of std::make_signed.
+/// std::make_unsigned does not guarantee size correspondence.
 template <typename Type>
 using to_signed_type =
     std::conditional_t<is_same_size<Type, int8_t>(), int8_t,
@@ -229,7 +229,7 @@ using to_signed_type =
             std::conditional_t<is_same_size<Type, int32_t>(), int32_t,
                 int64_t>>>;
 
-/// Use instead of std::make_unsigned.
+/// std::make_unsigned does not guarantee size correspondence.
 template <typename Type>
 using to_unsigned_type =
     std::conditional_t<is_same_size<Type, uint8_t>(), uint8_t,
