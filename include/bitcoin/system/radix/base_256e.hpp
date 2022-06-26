@@ -36,37 +36,34 @@ namespace base256e {
 
 /// All derived from parameters, no magic numbers.
 
-/// Inherent
-constexpr auto base = power2(8);
-
 /// Parameters
+constexpr auto base = 256u;
 constexpr auto precision = 24u;
-constexpr auto source_bits = 256u;
+constexpr auto span = 256u;
 
 /// Sizes
-constexpr auto factor = ceilinged_log2(sub1(base));
-constexpr auto mantissa_bytes = precision / factor;
-constexpr auto exponent_bits = ceilinged_log2(source_bits / factor);
-constexpr auto exponent_bytes = to_ceilinged_bytes(exponent_bits);
-constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
+constexpr auto factor = floored_log2(base);
+constexpr auto e_bits = ceilinged_log2(span / factor);
+constexpr auto e_bytes = to_ceilinged_bytes(e_bits);
+constexpr auto m_bytes = precision / factor;
 
 /// Types
-using compact_type = unsigned_type<compact_bytes>;
-using number_type = unsigned_exact_type<to_bytes<source_bits>()>;
+using compact_type = unsigned_type<m_bytes + e_bytes>;
+using number_type = unsigned_exact_type<to_bytes<span>()>;
 
 /// Widths
-constexpr auto compact_width = width<compact_type>();
-constexpr auto exponent_width = to_bits(exponent_bytes);
+constexpr auto e_width = to_bits(e_bytes);
+constexpr auto p_width = precision;
 
 /// Constraints (avoid byte and bit padding respectively)
-static_assert(sizeof(compact_type) == compact_bytes);
-static_assert(is_bytes_width(source_bits) && is_bytes_width(precision));
+static_assert(sizeof(compact_type) == m_bytes + e_bytes);
+static_assert(is_bytes_width(span) && is_bytes_width(precision));
 
 /// Verification
-static_assert(!is_limited(exponent_width - exponent_bits, sub1(byte_bits)));
+static_assert(!is_limited(e_width - e_bits, sub1(byte_bits)));
 static_assert(is_integral<compact_type>());
 static_assert(is_integral<number_type>() ||
-    is_same<number_type, uintx_t<source_bits>>());
+    is_same<number_type, uintx_t<span>>());
 
 /// Functions
 
@@ -76,7 +73,7 @@ number_type expand(compact_type exponential) noexcept;
 
 /// (m * 256^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
 /// The highest two bits are padded with zeros, uses minimal exponent encoding.
-compact_type compress(const number_type& number) noexcept;
+compact_type compress(const number_type& value) noexcept;
 
 } // namespace base256e
 } // namespace system

@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace base256e {
 
-// In [m * 256^e] the base is divided into 2 * 8 where 8 is the "factor".
+// In [m * base^e] the base is divided into 2 * 8 where 8 is the "factor".
 // The mantissa is shifted (8 * factor * exponent) times, where each shift
 // multiplies or divides the mantissa by 2. [m <<= (8 * e)] is [m * (2 * 8)^e].
 
@@ -53,10 +53,10 @@ constexpr Integer lower(Integer exponent) noexcept
 number_type expand(compact_type exponential) noexcept
 {
     const auto shift = raise(shift_right(exponential, precision));
-    const auto mantissa = mask_left<compact_type>(exponential, exponent_width);
+    const auto mantissa = mask_left<compact_type>(exponential, e_width);
 
     // Zero returned if unsigned exponent is out of bounds [0..32].
-    if (is_limited(shift, source_bits))
+    if (is_limited(shift, span))
         return 0;
 
     number_type number{ mantissa };
