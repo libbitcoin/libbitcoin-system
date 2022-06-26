@@ -75,7 +75,7 @@ compact_type compress(const number_type& number) noexcept
         return 0;
 
     // This can only produce an exponent from [0..32] (zero excluded above).
-    const auto shift = raise(ceilinged_log(base, number));
+    const auto shift = raise(ceilinged_log<base>(number));
     const auto mantissa = static_cast<compact_type>
     (
         shift > precision ?

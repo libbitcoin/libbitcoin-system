@@ -46,6 +46,17 @@ constexpr Exponent ceilinged_log(Base base, Value value) noexcept
     while (value > 0) { ++exponent; value /= base; }
     return exponent;
 }
+
+template <size_t Base, typename Exponent, typename Value>
+constexpr Exponent ceilinged_log(Value value) noexcept
+{
+    if constexpr (Base == 2u)
+        return ceilinged_log2<Exponent>(value);
+    else if constexpr (Base == 256u)
+        return ceilinged_log256<Exponent>(value);
+    else
+        return ceilinged_log(Base, value);
+}
     
 // Returns 0 for undefined (value < 1).
 template <typename Exponent, typename Value,
@@ -138,6 +149,17 @@ constexpr Exponent floored_log(Base base, Value value) noexcept
     Exponent exponent = 0;
     while (((value /= base)) > 0) { ++exponent; }
     return exponent;
+}
+
+template <size_t Base, typename Exponent, typename Value>
+constexpr Exponent floored_log(Value value) noexcept
+{
+    if constexpr (Base == 2u)
+        return floored_log2<Exponent>(value);
+    else if constexpr (Base == 256u)
+        return floored_log256<Exponent>(value);
+    else
+        return ceilinged_log(Base, value);
 }
 
 // Returns 0 for undefined (value < 1).
@@ -242,6 +264,15 @@ constexpr Value power(Base base, Exponent exponent) noexcept
     BC_POP_WARNING();
 
     return value;
+}
+
+template <size_t Base, typename Value, typename Exponent>
+constexpr Value power(Exponent exponent) noexcept
+{
+    if constexpr (Base == 2u)
+        return power2<Value>(exponent);
+    else
+        return power<Value>(Base, exponent);
 }
 
 // Returns 0 for undefined (0^0).

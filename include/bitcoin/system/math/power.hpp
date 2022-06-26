@@ -42,6 +42,8 @@ template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true, if_integer<Base> = true,
     if_integer<Value> = true>
 constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
+template <size_t Base, typename Exponent = size_t, typename Value>
+constexpr Exponent ceilinged_log(Value value) noexcept;
 
 /// Optimizations for ceilinged_log(2, Value).
 template <typename Exponent = size_t, typename Value,
@@ -68,6 +70,8 @@ template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true, if_integer<Base> = true,
     if_integer<Value> = true>
 constexpr Exponent floored_log(Base base, Value value) noexcept;
+template <size_t Base, typename Exponent = size_t, typename Value>
+constexpr Exponent floored_log(Value value) noexcept;
 
 /// Optimizations for floored_log(2, Value).
 template <typename Exponent = size_t, typename Value,
@@ -94,6 +98,8 @@ template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true, if_integer<Base> = true,
     if_integer<Exponent> = true>
 constexpr Value power(Base base, Exponent exponent) noexcept;
+template <size_t Base, typename Value = size_t, typename Exponent>
+constexpr Value power(Exponent exponent) noexcept;
 
 /// Optimizations for power(2, Exponent).
 template <typename Value = size_t, typename Exponent,

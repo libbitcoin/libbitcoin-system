@@ -174,7 +174,7 @@ static_assert(ceilinged_log2(max_uint32) == to_bits(sizeof(uint32_t)));
 // Third case (2) is redundant with second (2).
 static_assert(ceilinged_log2((1u << 0) + 0) == 1u);
 static_assert(ceilinged_log2((1u << 0) + 1) == 2u);
-static_assert(ceilinged_log2((1u << 1) + 0) == 2u);
+////static_assert(ceilinged_log2((1u << 1) + 0) == 2u);
 static_assert(ceilinged_log2((1u << 1) + 1) == 2u);
 static_assert(ceilinged_log2((1u << 2) + 0) == 3u);
 static_assert(ceilinged_log2((1u << 2) + 1) == 3u);
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__maximums__sizeof_maximum)
 // Third case (2) is redundant with second (2).
 static_assert(ceilinged_log2(uint256_t((1u << 0) + 0)) == 1u);
 static_assert(ceilinged_log2(uint256_t((1u << 0) + 1)) == 2u);
-static_assert(ceilinged_log2(uint256_t((1u << 1) + 0)) == 2u);
+////static_assert(ceilinged_log2(uint256_t((1u << 1) + 0)) == 2u);
 static_assert(ceilinged_log2(uint256_t((1u << 1) + 1)) == 2u);
 static_assert(ceilinged_log2(uint256_t((1u << 2) + 0)) == 3u);
 static_assert(ceilinged_log2(uint256_t((1u << 2) + 1)) == 3u);
@@ -370,6 +370,41 @@ static_assert(ceilinged_log256(0x0100ull) == 2);
 static_assert(ceilinged_log256(0x01ull) == 1);
 static_assert(ceilinged_log256(0x00ull) == 0);
 
+// ceilinged_log<base>
+static_assert(ceilinged_log<0u>(42) == 0u);
+static_assert(ceilinged_log<2u>((1u << 0) + 0) == 1u);
+////static_assert(ceilinged_log<2u>((1u << 0) + 1) == 2u);
+static_assert(ceilinged_log<2u>((1u << 1) + 0) == 2u);
+static_assert(ceilinged_log<2u>((1u << 1) + 1) == 2u);
+static_assert(ceilinged_log<2u>((1u << 2) + 0) == 3u);
+static_assert(ceilinged_log<2u>((1u << 2) + 1) == 3u);
+static_assert(ceilinged_log<2u>((1u << 3) + 0) == 4u);
+static_assert(ceilinged_log<2u>((1u << 3) + 1) == 4u);
+static_assert(ceilinged_log<2u>((1u << 4) + 0) == 5u);
+static_assert(ceilinged_log<2u>((1u << 4) + 1) == 5u);
+static_assert(ceilinged_log<2u>((1u << 5) + 0) == 6u);
+static_assert(ceilinged_log<2u>((1u << 5) + 1) == 6u);
+static_assert(ceilinged_log<2u>((1u << 6) + 0) == 7u);
+static_assert(ceilinged_log<2u>((1u << 6) + 1) == 7u);
+static_assert(ceilinged_log<2u>((1u << 7) + 0) == 8u);
+static_assert(ceilinged_log<2u>((1u << 7) + 1) == 8u);
+static_assert(ceilinged_log<2u>((1u << 8) + 0) == 9u);
+static_assert(ceilinged_log<2u>((1u << 8) + 1) == 9u);
+static_assert(ceilinged_log<2u>((1u << 9) + 0) == 10u);
+static_assert(ceilinged_log<2u, size_t>((1u << 9) + 1) == 10u);
+static_assert(ceilinged_log<256u>(0x0100000000000000ull) == 8);
+static_assert(ceilinged_log<256u>(0x01000000000000ull) == 7);
+static_assert(ceilinged_log<256u>(0x010000000000ull) == 6);
+static_assert(ceilinged_log<256u>(0x0100000000ull) == 5);
+static_assert(ceilinged_log<256u>(0x01000000ull) == 4);
+static_assert(ceilinged_log<256u>(0x010000ull) == 3);
+static_assert(ceilinged_log<256u>(0x0100ull) == 2);
+static_assert(ceilinged_log<256u>(0x01ull) == 1);
+static_assert(ceilinged_log<256u>(0x00ull) == 0);
+static_assert(ceilinged_log<10u, int>(1000000) == 7);
+static_assert(ceilinged_log<10u>(1000000) == 7);
+static_assert(ceilinged_log<2>(uint256_t{ 255 }) == 8u);
+
 // floored_log2
 
 // power__floored_log2__zero__undefined
@@ -390,7 +425,7 @@ static_assert(floored_log2(max_uint32) == sub1(to_bits(sizeof(uint32_t))));
 // Third case (2) is redundant with second (2).
 static_assert(floored_log2((1u << 0) + 0) == 0u);
 static_assert(floored_log2((1u << 0) + 1) == 1u);
-///static_assert(floored_log2((1u << 1) + 0) == 1u);
+////static_assert(floored_log2((1u << 1) + 0) == 1u);
 static_assert(floored_log2((1u << 1) + 1) == 1u);
 static_assert(floored_log2((1u << 2) + 0) == 2u);
 static_assert(floored_log2((1u << 2) + 1) == 2u);
@@ -479,7 +514,7 @@ BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__maximums__sizeof_maximum_minus_o
 // Third case (2) is redundant with second (2).
 static_assert(floored_log2(uint256_t((1u << 0) + 0)) == 0u);
 static_assert(floored_log2(uint256_t((1u << 0) + 1)) == 1u);
-///static_assert(floored_log2(uint256_t((1u << 1) + 0)) == 1u);
+////static_assert(floored_log2(uint256_t((1u << 1) + 0)) == 1u);
 static_assert(floored_log2(uint256_t((1u << 1) + 1)) == 1u);
 static_assert(floored_log2(uint256_t((1u << 2) + 0)) == 2u);
 static_assert(floored_log2(uint256_t((1u << 2) + 1)) == 2u);
@@ -581,7 +616,40 @@ static_assert(floored_log256(0xffffull) == 1);
 static_assert(floored_log256(0xffull) == 0);
 static_assert(floored_log256(0x00ull) == 0);
 
-// TODO: test power return types (default to size_t).
+// floored_log<base>
+static_assert(floored_log<0u>(42) == 0u);
+static_assert(floored_log<2u>((1u << 0) + 0) == 0u);
+static_assert(floored_log<2u>((1u << 0) + 1) == 1u);
+////static_assert(floored_log<2u>((1u << 1) + 0) == 1u);
+static_assert(floored_log<2u>((1u << 1) + 1) == 1u);
+static_assert(floored_log<2u>((1u << 2) + 0) == 2u);
+static_assert(floored_log<2u>((1u << 2) + 1) == 2u);
+static_assert(floored_log<2u>((1u << 3) + 0) == 3u);
+static_assert(floored_log<2u>((1u << 3) + 1) == 3u);
+static_assert(floored_log<2u>((1u << 4) + 0) == 4u);
+static_assert(floored_log<2u>((1u << 4) + 1) == 4u);
+static_assert(floored_log<2u>((1u << 5) + 0) == 5u);
+static_assert(floored_log<2u>((1u << 5) + 1) == 5u);
+static_assert(floored_log<2u>((1u << 6) + 0) == 6u);
+static_assert(floored_log<2u>((1u << 6) + 1) == 6u);
+static_assert(floored_log<2u>((1u << 7) + 0) == 7u);
+static_assert(floored_log<2u>((1u << 7) + 1) == 7u);
+static_assert(floored_log<2u>((1u << 8) + 0) == 8u);
+static_assert(floored_log<2u>((1u << 8) + 1) == 8u);
+static_assert(floored_log<2u>((1u << 9) + 0) == 9u);
+static_assert(floored_log<2u, size_t>((1u << 9) + 1) == 9u);
+static_assert(floored_log<256u>(0xffffffffffffffffull) == 7);
+static_assert(floored_log<256u>(0xffffffffffffffull) == 6);
+static_assert(floored_log<256u>(0xffffffffffffull) == 5);
+static_assert(floored_log<256u>(0xffffffffffull) == 4);
+static_assert(floored_log<256u>(0xffffffffull) == 3);
+static_assert(floored_log<256u>(0xffffffull) == 2);
+static_assert(floored_log<256u>(0xffffull) == 1);
+static_assert(floored_log<256u>(0xffull) == 0);
+static_assert(floored_log<256u>(0x00ull) == 0);
+static_assert(floored_log<2u, int>((1 << 10) + 0) == 10);
+static_assert(floored_log<2u>((1 << 10) + 0) == 10);
+static_assert(floored_log<2>(uint256_t{ 256 }) == 8u);
 
 // power2
 
@@ -679,5 +747,15 @@ static_assert(power(-3, 10) == 0xe6a9u);
 
 // power__power__negative_overflow__expected
 static_assert(power<uint16_t>(-3, 11) == 0x4c05u);
+
+// power<base>
+static_assert(power<0u>(16) == power(0, 16));
+static_assert(power<2u>(16) == power(2, 16));
+static_assert(power<2u>(16u) == power2(16u));
+static_assert(power<2u, uint16_t>(15) == 0x8000u);
+static_assert(power<3u>(0) == 1u);
+static_assert(power<3u>(0u) == 1u);
+static_assert(power<3u, size_t>(0u) == 1u);
+static_assert(power<2u, uint256_t>(8) == 256u);
 
 BOOST_AUTO_TEST_SUITE_END()
