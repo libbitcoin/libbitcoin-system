@@ -204,7 +204,7 @@ using if_unsigned_integral_integer = bool_unless<
 /// Type conversions.
 
 /// Signed integral type selection by byte width and sign.
-template <size_t Bytes, if_not_greater<Bytes, sizeof(int64_t)> = true>
+template <size_t Bytes = 0, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =
     std::conditional_t<Bytes == 0, signed_size_t,
         std::conditional_t<Bytes == 1, int8_t,
@@ -213,7 +213,7 @@ using signed_type =
                     int64_t>>>>;
 
 /// Unsigned integral type selection by byte width and sign.
-template <size_t Bytes, if_not_greater<Bytes, sizeof(uint64_t)> = true>
+template <size_t Bytes = 0, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
     std::conditional_t<Bytes == 0, size_t,
         std::conditional_t<Bytes == 1, uint8_t,
@@ -224,20 +224,18 @@ using unsigned_type =
 /// Use instead of std::make_signed.
 template <typename Type>
 using to_signed_type =
-    std::conditional_t<is_same_size<Type, signed_size_t>(), signed_size_t,
         std::conditional_t<is_same_size<Type, int8_t>(), int8_t,
             std::conditional_t<is_same_size<Type, int16_t>(), int16_t,
                 std::conditional_t<is_same_size<Type, int32_t>(), int32_t,
-                    int64_t>>>>;
+                    int64_t>>>;
 
 /// Use instead of std::make_unsigned.
 template <typename Type>
 using to_unsigned_type =
-    std::conditional_t<is_same_size<Type, size_t>(), size_t,
         std::conditional_t<is_same_size<Type, uint8_t>(), uint8_t,
             std::conditional_t<is_same_size<Type, uint16_t>(), uint16_t,
                 std::conditional_t<is_same_size<Type, uint32_t>(), uint32_t,
-                    uint64_t>>>>;
+                    uint64_t>>>;
 
 /// Alias for -> decltype(dividend / divisor).
 template <typename Left, typename Right>

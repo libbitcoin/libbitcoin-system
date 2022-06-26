@@ -419,6 +419,11 @@ static_assert(is_same<to_signed_type<uint16_t>, int16_t>());
 static_assert(is_same<to_signed_type<uint32_t>, int32_t>());
 static_assert(is_same<to_signed_type<uint64_t>, int64_t>());
 static_assert(is_same<to_signed_type<size_t>, signed_size_t>());
+static_assert(is_same<to_signed_type<int8_t>, int8_t>());
+static_assert(is_same<to_signed_type<int16_t>, int16_t>());
+static_assert(is_same<to_signed_type<int32_t>, int32_t>());
+static_assert(is_same<to_signed_type<int64_t>, int64_t>());
+static_assert(is_same<to_signed_type<signed_size_t>, signed_size_t>());
 
 ////static_assert(is_same<to_signed_type<signed char>, unsigned char>());
 ////static_assert(is_same<to_signed_type<signed short>, unsigned short>());
@@ -429,9 +434,14 @@ static_assert(is_same<to_unsigned_type<int8_t>, uint8_t>());
 static_assert(is_same<to_unsigned_type<int16_t>, uint16_t>());
 static_assert(is_same<to_unsigned_type<int32_t>, uint32_t>());
 static_assert(is_same<to_unsigned_type<int64_t>, uint64_t>());
-static_assert(is_same<to_unsigned_type<size_t>, size_t>());
 static_assert(is_same<to_unsigned_type<signed_size_t>, size_t>());
+static_assert(is_same<to_unsigned_type<uint8_t>, uint8_t>());
+static_assert(is_same<to_unsigned_type<uint16_t>, uint16_t>());
+static_assert(is_same<to_unsigned_type<uint32_t>, uint32_t>());
+static_assert(is_same<to_unsigned_type<uint64_t>, uint64_t>());
+static_assert(is_same<to_unsigned_type<size_t>, size_t>());
 
+static_assert(is_same<signed_type<>, signed_size_t>());
 static_assert(is_same<signed_type<0>, signed_size_t>());
 static_assert(is_same<signed_type<1>, int8_t>());
 static_assert(is_same<signed_type<2>, int16_t>());
@@ -442,6 +452,7 @@ static_assert(is_same<signed_type<6>, int64_t>());
 static_assert(is_same<signed_type<7>, int64_t>());
 static_assert(is_same<signed_type<8>, int64_t>());
 
+static_assert(is_same<unsigned_type<>, size_t>());
 static_assert(is_same<unsigned_type<0>, size_t>());
 static_assert(is_same<unsigned_type<1>, uint8_t>());
 static_assert(is_same<unsigned_type<2>, uint16_t>());
