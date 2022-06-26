@@ -41,18 +41,18 @@ constexpr Integer lower(Integer exponent) noexcept
 
 // Implementation.
 // ----------------------------------------------------------------------------
+// e = 0       -> shift(-m_bytes)         zero       (m = minimum value)
+// e = m_bytes -> shift(0)                identity   (m = m * 256^0)
+// e = e_max   -> shift(e_max - m_bytes)  maximum    (m = high m_bytes)
+// e > e_max   -> n/a                     zero       (m = invalid value)
 
-// exponent    0 implies  -3 shift, which always produces zero (min value).
-// exponent    3 implies   0 shift, which is the identity (n * 256^0 == n).
-// exponent   32 implies +29 shift, which produces max value (3 bytes left).
-// exponent > 32 exponent is out of bounds, and produces a zero value.
 number_type expand(compact_type exponential) noexcept
 {
     constexpr auto exponent_width = to_bits(e_bytes);
     const auto shift = raise(shift_right(exponential, precision));
     const auto mantissa = mask_left<compact_type>(exponential, exponent_width);
 
-    // Zero returned if unsigned exponent is out of bounds [0..32].
+    // Zero returned if unsigned exponent is out of bounds [0..e_max].
     if (is_limited(shift, span))
         return 0;
 
@@ -74,7 +74,7 @@ compact_type compress(const number_type& number) noexcept
     if (is_zero(number))
         return 0;
 
-    // This can only produce an exponent from [0..32] (zero excluded above).
+    // This can only produce an exponent from [0..e_max] (zero excluded above).
     const auto shift = raise(ceilinged_log<base>(number));
     const auto mantissa = static_cast<compact_type>
     (
