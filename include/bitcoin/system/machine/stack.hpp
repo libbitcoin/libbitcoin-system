@@ -92,6 +92,9 @@ private:
     template<class... Overload>
     struct overload : Overload... { using Overload::operator()...; };
 
+    // Explicit deduction guide, should not be required in C++20.
+    template<class... Overload> overload(Overload...) -> overload<Overload...>;
+
     static constexpr auto linked_ = is_same<Container, linked_stack>();
     static constexpr auto vector_ = is_same<Container, contiguous_stack>();
     static_assert(linked_ || vector_, "unsupported stack container");
