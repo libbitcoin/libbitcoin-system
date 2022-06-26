@@ -75,7 +75,7 @@ public:
     inline const data_chunk& pop() noexcept;
 
 protected:
-    static constexpr bool equal_chunks(const stack_variant& left,
+    static inline bool equal_chunks(const stack_variant& left,
         const stack_variant& right) noexcept;
 
     /// Constants.

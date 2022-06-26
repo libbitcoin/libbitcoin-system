@@ -189,7 +189,7 @@ template <typename Container>
 template<size_t Bytes, typename Integer,
     if_not_greater<Bytes, sizeof(Integer)>,
     if_signed_integral_integer<Integer>>
-    constexpr bool stack<Container>::peek_signed(Integer& value) const noexcept
+constexpr bool stack<Container>::peek_signed(Integer& value) const noexcept
 {
     using namespace number;
     auto result{ true };

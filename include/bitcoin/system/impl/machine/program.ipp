@@ -206,7 +206,7 @@ validate() const noexcept
 
 // static
 template <typename Stack>
-constexpr bool program<Stack>::
+inline bool program<Stack>::
 equal_chunks(const stack_variant& left, const stack_variant& right) noexcept
 {
     return primary_stack::equal_chunks(left, right);
