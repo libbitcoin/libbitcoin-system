@@ -59,8 +59,8 @@ number_type expand(compact_type exponential) noexcept
     number_type number{ mantissa };
 
     shift > precision ?
-        number <<= shift - precision :
-        number >>= precision - shift;
+        number <<= (shift - precision) :
+        number >>= (precision - shift);
 
     return number;
 }
@@ -79,8 +79,8 @@ compact_type compress(const number_type& number) noexcept
     const auto mantissa = static_cast<compact_type>
     (
         shift > precision ?
-            number >> shift - precision :
-            number << precision - shift
+            number >> (shift - precision) :
+            number << (precision - shift)
     );
 
     return bit_or(shift_left(possible_narrow_cast<compact_type>(lower(shift)),
