@@ -68,6 +68,7 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
     if (value < 1)
         return 0;
 
+    // TODO: uintx ceilinged_log2 can be implemented by high bit (syntax?).
     Exponent exponent = 0;
     while (value > 0) { ++exponent; value >>= 1; }
     return exponent;
@@ -81,7 +82,7 @@ constexpr size_t ceilinged_log256(Value value) noexcept
     if (value < 1)
         return 0;
 
-    // TODO: use std::bit_width.
+    // TODO: use std::bit_width?
     constexpr auto size = sizeof(Value);
     const auto compare = to_unsigned(value);
 
@@ -176,7 +177,7 @@ constexpr Exponent floored_log256(Value value) noexcept
     constexpr auto size = sizeof(Value);
     const auto compare = to_unsigned(value);
 
-    // TODO: use std::bit_width.
+    // TODO: use std::bit_width?
     if constexpr (size == sizeof(uint64_t))
     {
         if (compare > 0x00ffffffffffffffull) return 7;
@@ -265,6 +266,7 @@ constexpr Value power2(Exponent exponent) noexcept
         return 0;
 
     // TODO: uintx power2 can be implemented by bit_set(int, exponent).
+    // TODO: uintx does not provide uintx << uintx overload (limit to integral).
     // Assumes that shifting greater than width is defined (cannot use width).
     return to_int<Value>(true) << to_unsigned(exponent);
 }

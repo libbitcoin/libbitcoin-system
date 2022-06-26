@@ -39,6 +39,8 @@
 // safe     <- [bits, limits, addition], sign, power
 // sign     <- [bits, limits, addition, division], power
 
+// TODO: verify all non-integral operations do not unnecessarily copy unitx.
+
 // safe.hpp
 // ============================================================================
 // Explicit [required]/possible operators for narrowing and sign casting.
@@ -52,34 +54,23 @@
 //
 // addition.hpp
 // ============================================================================
-// add/sub/multiply may expand significantly.
+// Unsigned add/subtract may expand.
 // Return defines expanded space, defaults to common_type.
 // Objective is default native behavior with optional space/return typing.
 // Always execute in max(common, expanded) and return min(common, expanded).
 // These functions are intended as domain transitions, not overflow guards.
 // Execution may still overflow, so functions are provided to detect.
-// ----------------------------------------------------------------------------
-// add: maintain signs, add in max width, cast to Return = common_type.
-// sub: maintain signs, sub in max width, cast to Return = common_type.
-// mul: maintain signs, mul in max width, cast to Return = common_type.
 //
 // division.hpp
 // ============================================================================
-// div/mode contract (div is reducing, mod is [0..divisor-1]).
+// div/mod contract (div is reducing, mod is [0..sub1(divisor)]).
 // Return is unpromoted common_type (auto) with sign adj for ceilinged_modulo.
 // ----------------------------------------------------------------------------
 // ceilinged_divide: unpromoted common_type
 // ceilinged_modulo: unpromoted common_type (coerces neg, common_type wrong)
 // floored_divide  : unpromoted common_type
-// floored_modulo  : unpromoted common_type (always naturally positive)
+// floored_modulo  : unpromoted common_type (always naturally pos)
 // truncated_divide: unpromoted common_type (aliases for native div)
 // truncated_modulo: unpromoted common_type (aliases for native mod)
-
-// Requires determination of:
-// max_type<T1, common_type<T1, T2>> // sign of common_type<T1, T2>
-// max_type<T2, common_type<T1, T2>> // sign of common_type<T1, T2>
-// min_type<T1, common_type<T1, T2>> // sign of T1
-// min_type<T2, common_type<T1, T2>> // sign of T1
-// unpromoted_common_type<T1, T2>
 
 #endif
