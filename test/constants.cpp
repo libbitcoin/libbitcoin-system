@@ -200,7 +200,7 @@ static_assert(std::is_same_v<decltype(is_same<int32_t, int32_t>()), bool>);
 // bool is arithmetic:
 static_assert(int{ true } == 1 && int{ false } == 0);
 
-// an bool is not signed, because:
+// and bool is not signed, because:
 ////static_assert(!(bool{ -1 } < bool{ 0 }));
 
 static_assert(!is_signed<bool>());
@@ -217,6 +217,21 @@ static_assert(!is_signed<uint64_t>());
 static_assert(!is_signed<size_t>());
 static_assert(!is_signed<std::string>());
 static_assert(std::is_same_v<decltype(is_signed<int32_t>()), bool>);
+
+static_assert(is_same_size<bool, bool>());
+static_assert(is_same_size<int8_t, uint8_t>());
+static_assert(is_same_size<int16_t, uint16_t>());
+static_assert(is_same_size<int32_t, int32_t>());
+static_assert(is_same_size<signed char, signed char>());
+static_assert(is_same_size<uint8_t, uint8_t>());
+static_assert(is_same_size<uint16_t, uint16_t>());
+static_assert(is_same_size<uint32_t, uint32_t>());
+static_assert(is_same_size<uint64_t, uint64_t>());
+static_assert(is_same_size<size_t, signed_size_t>());
+static_assert(!is_same_size<wchar_t, bool>());
+static_assert(!is_same_size<std::string, bool>());
+static_assert(!is_same_size<int16_t, uint256_t>());
+static_assert(std::is_same_v<decltype(is_same_size<int32_t, int32_t>()), bool>);
 
 static_assert(is_integer<uint8_t>());
 static_assert(is_integer<uint16_t>());

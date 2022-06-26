@@ -172,6 +172,12 @@ constexpr bool is_same() noexcept
     return std::is_same_v<Left, Right>;
 }
 
+template <typename Left, typename Right>
+constexpr bool is_same_size() noexcept
+{
+    return sizeof(Left) == sizeof(Right);
+}
+
 template <typename Type>
 constexpr bool is_signed() noexcept
 {
