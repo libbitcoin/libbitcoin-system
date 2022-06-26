@@ -159,6 +159,9 @@ template <typename Exponent, typename Value,
     if_non_integral_integer<Value>>
 constexpr Exponent floored_log2(Value value) noexcept
 {
+    if (value < 1)
+        return 0;
+
     return possible_narrow_and_sign_cast<Exponent>(
         boost::multiprecision::msb(value));
 }

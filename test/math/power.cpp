@@ -245,12 +245,6 @@ static_assert(ceilinged_log2<unsigned>(power2(15u)) == 15u + 1u);
 static_assert(ceilinged_log2<int>(power(2, 15)) == 15 + 1);
 static_assert(ceilinged_log2<unsigned>(power(2u, 15u)) == 15u + 1u);
 
-// ceilinged_log2(uintx)
-
-// power__ceilinged_log2_uintx__zero__undefined
-static_assert(ceilinged_log2(uint256_t(0)) == 0u);
-static_assert(ceilinged_log2(uint256_t(0u)) == 0u);
-
 BOOST_AUTO_TEST_CASE(power__ceilinged_log2_uintx__maximums__sizeof_maximum)
 {
     // uintx{} not constexpr.
@@ -369,6 +363,17 @@ static_assert(ceilinged_log256(0x010000ull) == 3);
 static_assert(ceilinged_log256(0x0100ull) == 2);
 static_assert(ceilinged_log256(0x01ull) == 1);
 static_assert(ceilinged_log256(0x00ull) == 0);
+
+// uint256_t
+static_assert(ceilinged_log256(uint256_t(0x0100000000000000ull)) == 8);
+static_assert(ceilinged_log256(uint256_t(0x01000000000000ull)) == 7);
+static_assert(ceilinged_log256(uint256_t(0x010000000000ull)) == 6);
+static_assert(ceilinged_log256(uint256_t(0x0100000000ull)) == 5);
+static_assert(ceilinged_log256(uint256_t(0x01000000ull)) == 4);
+static_assert(ceilinged_log256(uint256_t(0x010000ull)) == 3);
+static_assert(ceilinged_log256(uint256_t(0x0100ull)) == 2);
+static_assert(ceilinged_log256(uint256_t(0x01ull)) == 1);
+static_assert(ceilinged_log256(uint256_t(0x00ull)) == 0);
 
 // ceilinged_log<base>
 static_assert(ceilinged_log<0u>(42) == 0u);
@@ -496,12 +501,6 @@ static_assert(floored_log2<unsigned>(power2(15u)) == 15u);
 static_assert(floored_log2<int>(power(2, 15)) == 15);
 static_assert(floored_log2<unsigned>(power(2u, 15u)) == 15u);
 
-// floored_log2(uintx)
-
-// power__floored_log2_uintx__zero__undefined
-static_assert(floored_log2(uint256_t{}) == 0u);
-static_assert(floored_log2(uint256_t{}) == 0u);
-
 BOOST_AUTO_TEST_CASE(power__floored_log2_uintx__maximums__sizeof_maximum_minus_one)
 {
     // uintx{} not constexpr.
@@ -615,6 +614,17 @@ static_assert(floored_log256(0xffffffull) == 2);
 static_assert(floored_log256(0xffffull) == 1);
 static_assert(floored_log256(0xffull) == 0);
 static_assert(floored_log256(0x00ull) == 0);
+
+// uint256_t
+static_assert(floored_log256(uint256_t(0xffffffffffffffffull)) == 7);
+static_assert(floored_log256(uint256_t(0xffffffffffffffull)) == 6);
+static_assert(floored_log256(uint256_t(0xffffffffffffull)) == 5);
+static_assert(floored_log256(uint256_t(0xffffffffffull)) == 4);
+static_assert(floored_log256(uint256_t(0xffffffffull)) == 3);
+static_assert(floored_log256(uint256_t(0xffffffull)) == 2);
+static_assert(floored_log256(uint256_t(0xffffull)) == 1);
+static_assert(floored_log256(uint256_t(0xffull)) == 0);
+static_assert(floored_log256(uint256_t(0x00ull)) == 0);
 
 // floored_log<base>
 static_assert(floored_log<0u>(42) == 0u);
@@ -756,6 +766,8 @@ static_assert(power<2u, uint16_t>(15) == 0x8000u);
 static_assert(power<3u>(0) == 1u);
 static_assert(power<3u>(0u) == 1u);
 static_assert(power<3u, size_t>(0u) == 1u);
-static_assert(power<2u, uint256_t>(8) == 256u);
+
+// uint256_t
+static_assert(power<2u, uint256_t>(10) == 1024u);
 
 BOOST_AUTO_TEST_SUITE_END()
