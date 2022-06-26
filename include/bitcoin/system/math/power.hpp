@@ -58,8 +58,7 @@ template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integral_integer<Value> = true>
 constexpr size_t ceilinged_log256(Value value) noexcept;
 template <typename Exponent = size_t, typename Value,
-    if_not_one_byte<Exponent> = true, if_integer<Exponent> = true,
-    if_non_integral_integer<Value> = true>
+    if_integer<Exponent> = true, if_non_integral_integer<Value> = true>
 constexpr size_t ceilinged_log256(Value value) noexcept;
 
 /// Floored logarithms.
@@ -86,8 +85,7 @@ template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true, if_integral_integer<Value> = true>
 constexpr Exponent floored_log256(Value value) noexcept;
 template <typename Exponent = size_t, typename Value,
-    if_not_one_byte<Exponent>, if_integer<Exponent> = true,
-    if_non_integral_integer<Value> = true>
+    if_integer<Exponent> = true, if_non_integral_integer<Value> = true>
 constexpr Exponent floored_log256(Value value) noexcept;
 
 /// Powers.
