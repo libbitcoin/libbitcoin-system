@@ -217,6 +217,18 @@ inline bool stack<Container>::peek_signed(Integer& value) const noexcept
 }
 
 template <typename Container>
+inline bool stack<Container>::peek_signed4(int32_t& value) const noexcept
+{
+    return peek_signed<4>(value);
+}
+
+template <typename Container>
+inline bool stack<Container>::peek_signed5(int64_t& value) const noexcept
+{
+    return peek_signed<5>(value);
+}
+
+template <typename Container>
 inline bool stack<Container>::peek_bool() const noexcept
 {
     using namespace number;

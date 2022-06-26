@@ -78,10 +78,8 @@ public:
     inline const stack_variant& peek(size_t index) const noexcept;
 
     /// Variant data conversions.
-    template<size_t Bytes, typename Integer,
-        if_not_greater<Bytes, sizeof(Integer)> = true,
-        if_signed_integral_integer<Integer> = true>
-    inline bool peek_signed(Integer& value) const noexcept;
+    inline bool peek_signed4(int32_t& value) const noexcept;
+    inline bool peek_signed5(int64_t& value) const noexcept;
     inline bool peek_bool() const noexcept;
     inline bool peek_strict_bool() const noexcept;
     inline chunk_xptr peek_chunk() const noexcept;
@@ -90,6 +88,11 @@ public:
         const stack_variant& right) noexcept;
 
 private:
+    template<size_t Bytes, typename Integer,
+        if_not_greater<Bytes, sizeof(Integer)> = true,
+        if_signed_integral_integer<Integer> = true>
+    inline bool peek_signed(Integer& value) const noexcept;
+
     static constexpr auto linked_ = is_same<Container, linked_stack>();
     static constexpr auto vector_ = is_same<Container, contiguous_stack>();
     static_assert(linked_ || vector_, "unsupported stack container");
