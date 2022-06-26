@@ -237,3 +237,6 @@ static_assert(bitcoin_max<5>() == max_int40);
 static_assert(bitcoin_max<6>() == max_int48);
 static_assert(bitcoin_max<7>() == max_int56);
 static_assert(bitcoin_max<8>() == max_int64);
+
+static_assert(bitcoin_min<4>() == add1(minimum<4>()));
+static_assert(bitcoin_min<5>() == add1(minimum<5>()));
