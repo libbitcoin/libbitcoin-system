@@ -83,12 +83,6 @@ using compact_type = unsigned_type<m_bytes + e_bytes>;
 using number_type = unsigned_exact_type<to_bytes<span>()>;
 static_assert(is_integral<compact_type>());
 
-/// Widths
-constexpr auto e_width = to_bits(e_bytes);
-constexpr auto p_width = precision;
-
-/// Functions
-
 /// A zero value implies an invalid (including zero) parameter.
 /// Invalid if either padding bit is set. Allows non-minimal exponent encoding.
 number_type expand(compact_type exponential) noexcept;
