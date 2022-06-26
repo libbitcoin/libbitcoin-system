@@ -224,18 +224,18 @@ using unsigned_type =
 /// Use instead of std::make_signed.
 template <typename Type>
 using to_signed_type =
-        std::conditional_t<is_same_size<Type, int8_t>(), int8_t,
-            std::conditional_t<is_same_size<Type, int16_t>(), int16_t,
-                std::conditional_t<is_same_size<Type, int32_t>(), int32_t,
-                    int64_t>>>;
+    std::conditional_t<is_same_size<Type, int8_t>(), int8_t,
+        std::conditional_t<is_same_size<Type, int16_t>(), int16_t,
+            std::conditional_t<is_same_size<Type, int32_t>(), int32_t,
+                int64_t>>>;
 
 /// Use instead of std::make_unsigned.
 template <typename Type>
 using to_unsigned_type =
-        std::conditional_t<is_same_size<Type, uint8_t>(), uint8_t,
-            std::conditional_t<is_same_size<Type, uint16_t>(), uint16_t,
-                std::conditional_t<is_same_size<Type, uint32_t>(), uint32_t,
-                    uint64_t>>>;
+    std::conditional_t<is_same_size<Type, uint8_t>(), uint8_t,
+        std::conditional_t<is_same_size<Type, uint16_t>(), uint16_t,
+            std::conditional_t<is_same_size<Type, uint32_t>(), uint32_t,
+                uint64_t>>>;
 
 /// Alias for -> decltype(dividend / divisor).
 template <typename Left, typename Right>
