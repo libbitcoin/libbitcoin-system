@@ -26,6 +26,13 @@ namespace system {
 
 /// Explicit integral casts.
 
+/// Cast away integral sign/size promotion, overflow left to caller.
+template <typename To, typename From,
+    if_not_lesser_width<From, int> = true,
+    if_integral_integer<To> = true,
+    if_integral_integer<From> = true>
+constexpr To depromote(From value) noexcept;
+
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,
     if_lesser_width<To, From> = true,

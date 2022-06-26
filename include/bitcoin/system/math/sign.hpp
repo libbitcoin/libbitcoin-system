@@ -38,7 +38,8 @@ template <typename Integer,
 constexpr Unsigned to_unsigned(Integer value) noexcept;
 
 /// Obtain the absolute value of the integer.
-template <typename Integer, typename Absolute = to_unsigned_type<Integer>,
+template <typename Integer,
+    typename Absolute = to_unsigned_type<Integer>,
     if_signed_integer<Integer> = true>
 constexpr Absolute absolute(Integer value) noexcept;
 template <typename Integer, typename Absolute = Integer,

@@ -31,6 +31,19 @@ namespace system {
 // Explicit integral casts.
 
 template <typename To, typename From,
+    if_not_lesser_width<From, int>,
+    if_integral_integer<To>,
+    if_integral_integer<From>>
+constexpr To depromote(From value) noexcept
+{
+    BC_PUSH_WARNING(NO_IDENTITY_CAST)
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+}
+
+template <typename To, typename From,
     if_lesser_width<To, From>,
     if_integral_integer<To>,
     if_integral_integer<From>,

@@ -201,6 +201,8 @@ using if_unsigned_integral_integer = bool_unless<
     is_integral<Type>() &&
     is_integer<Type>()>;
 
+/// Type conversions.
+
 /// Signed integral type selection by byte width and sign.
 template <size_t Bytes, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =

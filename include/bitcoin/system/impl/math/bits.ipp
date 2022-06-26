@@ -306,14 +306,16 @@ constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    return overflow && shift >= span ? 0 : value << shift % span;
+    return overflow && shift >= span ? 0 : depromote<Value>(
+        value << (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    overflow && shift >= span ? value = 0 : value <<= shift % span;
+    overflow && shift >= span ? value = 0 :
+        value <<= (shift % span);
 }
 
 // signed overloads (shift left of negative is undefined behavior).
@@ -322,8 +324,8 @@ constexpr Value shift_left(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    return overflow && shift >= span ? 0 :
-        to_signed<Value>(to_unsigned(value) << shift % span);
+    return overflow && shift >= span ? 0 : depromote<Value>(
+        to_signed(to_unsigned(value) << (shift % span)));
 }
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift,
@@ -339,14 +341,16 @@ constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    return overflow && shift >= span ? 0 : value >> shift % span;
+    return overflow && shift >= span ? 0 : depromote<Value>(
+        value >> (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    overflow && shift >= span ? value = 0 : value >>= (shift % span);
+    overflow && shift >= span ? value = 0 : depromote<Value>(
+        value >>= (shift % span));
 }
 
 // signed overloads (shift right of negative is unspecified behavior).
@@ -355,8 +359,8 @@ constexpr Value shift_right(const Value& value, size_t shift,
     bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
-    return overflow && shift >= span ? 0 :
-        to_signed<Value>(to_unsigned(value) >> shift % span);
+    return overflow && shift >= span ? 0 : depromote<Value>(
+        to_signed(to_unsigned(value) >> (shift % span)));
 }
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift,
