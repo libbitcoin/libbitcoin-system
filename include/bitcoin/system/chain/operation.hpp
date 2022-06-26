@@ -455,7 +455,7 @@ private:
     static bool count_op(reader& source) noexcept;
     static uint32_t read_data_size(opcode code, reader& source) noexcept;
 
-    static constexpr opcode opcode_from_data(const data_chunk& push_data,
+    static inline opcode opcode_from_data(const data_chunk& push_data,
         bool minimal) noexcept
     {
         return minimal ? minimal_opcode_from_data(push_data) :
