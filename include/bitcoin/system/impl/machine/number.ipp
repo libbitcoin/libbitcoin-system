@@ -66,6 +66,7 @@ inline bool integer<Size>::from_chunk(Integer& out,
 
     out = from_little_endian<Integer>(vary);
 
+    // -minimum<signed> is undefined behavior?
     if (get_left(vary.back()))
         out = -set_right(out, sub1(to_bits(vary.size())), false);
 

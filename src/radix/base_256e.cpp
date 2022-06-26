@@ -20,7 +20,6 @@
 
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -46,11 +45,12 @@ constexpr Integer lower(Integer exponent) noexcept
 // e = e_max   -> shift(e_max - m_bytes)  maximum    (m = high m_bytes)
 // e > e_max   -> n/a                     zero       (m = invalid value)
 
+// This expansion limits the exponent to e_bits, ensuring that there is only
+// one compressed representation for any given span of bits.
 number_type expand(compact_type exponential) noexcept
 {
-    constexpr auto exponent_width = to_bits(e_bytes);
     const auto shift = raise(shift_right(exponential, precision));
-    const auto mantissa = mask_left<compact_type>(exponential, exponent_width);
+    const auto mantissa = mask_left<compact_type>(exponential, e_width);
 
     // Zero returned if unsigned exponent is out of bounds [0..e_max].
     if (is_limited(shift, span))
@@ -67,8 +67,8 @@ number_type expand(compact_type exponential) noexcept
 
 // Only a zero value returns zero exponent and value (log(0) is undefined).
 // Any other value produces a non-zero exponent and non-zero value.
-// Where more than one representation may be possible (and allowed by expand),
-// this compression produces a normal form, with minimal exponent selection.
+// Where more than one representation may be possible, this compression
+// produces a normal form, with minimal exponent selection.
 compact_type compress(const number_type& number) noexcept
 {
     if (is_zero(number))

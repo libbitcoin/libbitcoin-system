@@ -247,7 +247,7 @@ hash_digest block::hash() const noexcept
 size_t block::serialized_size(bool witness) const noexcept
 {
     // Overflow returns max_size_t.
-    auto sum = [witness](size_t total, const transaction::cptr& tx) noexcept
+    const auto sum = [witness](size_t total, const transaction::cptr& tx) noexcept
     {
         return ceilinged_add(total, tx->serialized_size(witness));
     };

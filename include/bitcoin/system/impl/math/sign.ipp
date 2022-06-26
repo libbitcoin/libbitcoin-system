@@ -45,6 +45,8 @@ template <typename Integer, typename Absolute,
 constexpr Absolute absolute(Integer value) noexcept
 {
     // std::abs is limited to signed types.
+    // -minimum<signed> is undefined behavior.
+    // Casting alone obtains the twos complement, not same as negation.
     return to_unsigned(is_negative(value) ? -value : value);
 }
 

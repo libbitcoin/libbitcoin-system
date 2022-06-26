@@ -66,15 +66,16 @@ namespace base256e {
 constexpr auto span = 256u;
 constexpr auto base = 256u;
 constexpr auto precision = 24u;
-static_assert(is_zero(span% byte_bits));
-static_assert(is_zero(base % byte_bits));
-static_assert(is_zero(precision % byte_bits));
+static_assert(is_bytes_width(span));
+static_assert(is_bytes_width(base));
+static_assert(is_bytes_width(precision));
 
 /// Sizes
 constexpr auto factor = floored_log2(base);
 constexpr auto e_max = span / factor;
 constexpr auto e_bits = ceilinged_log2(e_max);
 constexpr auto e_bytes = to_ceilinged_bytes(e_bits);
+constexpr auto e_width = to_bits(e_bytes);
 constexpr auto m_bytes = precision / factor;
 static_assert(precision <= e_max);
 

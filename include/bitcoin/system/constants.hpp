@@ -138,6 +138,7 @@ template <typename Type>
 constexpr size_t width() noexcept
 {
     // This is not always a logical size for non-integral types.
+    // see comments in is_integral_size for expected integral sizes.
     return to_bits(sizeof(Type));
 }
 
@@ -145,40 +146,52 @@ template <typename Type>
 constexpr size_t width(Type value) noexcept
 {
     // This is not always a logical size for non-integral types.
+    // see comments in is_integral_size for expected integral sizes.
     return to_bits(sizeof(value));
 }
 
 /// Determine the bitcoin variable-serialized size of a given value.
 constexpr size_t variable_size(uint64_t value) noexcept
 {
-    // C++11: single return required for constexpr.
-    return (value < varint_two_bytes) ? sizeof(uint8_t) :
-        ((value <= max_uint16) ? sizeof(uint8_t) + sizeof(uint16_t) :
-            ((value <= max_uint32) ? sizeof(uint8_t) + sizeof(uint32_t) :
-                sizeof(uint8_t) + sizeof(uint64_t)));
+    if (value < varint_two_bytes)
+        return sizeof(uint8_t);
+
+    if (value <= max_uint16)
+        return sizeof(uint8_t) + sizeof(uint16_t);
+
+    if (value <= max_uint32)
+        return sizeof(uint8_t) + sizeof(uint32_t);
+
+    return sizeof(uint8_t) + sizeof(uint64_t);
 }
 
 template <typename Left, typename Right>
 constexpr bool is_same() noexcept
 {
+    // implies same size and signedness, independent of const and volatility.
     return std::is_same_v<Left, Right>;
 }
 
 template <typename Type>
 constexpr bool is_signed() noexcept
 {
+    // bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
+    // w/charxx_t types are unsigned. iostream relies on w/char.
     return std::is_signed_v<Type>;
 }
 
-// This constant is meaningful for all specializations (non-integrals).
 template <typename Type>
 constexpr bool is_integer() noexcept
 {
+    // numeric_limits may be specialized by non-integrals (such as uintx).
     return std::numeric_limits<Type>::is_integer && !is_same<Type, bool>();
 }
 
 constexpr bool is_integral_size(size_t bytes) noexcept
 {
+    // non-numbered integrals have unreliable sizes (as do least/fast types).
+    // s/u char are one byte. bool and wchar_t are of unspecified size, as are
+    // int, long, and long long. only minimum and relative sizes are assured.
     return bytes == sizeof(uint8_t)
         || bytes == sizeof(uint16_t)
         || bytes == sizeof(uint32_t)
@@ -196,6 +209,7 @@ constexpr bool is_integral_size() noexcept
 template <typename Type>
 constexpr bool is_integral() noexcept
 {
+    // bool is integral, but excluded here.
     return std::is_integral_v<Type>
         && is_integral_size<Type>()
         && !is_same<Type, bool>();
