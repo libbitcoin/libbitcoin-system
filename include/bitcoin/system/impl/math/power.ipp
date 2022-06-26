@@ -159,7 +159,7 @@ constexpr Exponent floored_log(Value value) noexcept
     else if constexpr (Base == 256u)
         return floored_log256<Exponent>(value);
     else
-        return ceilinged_log<Exponent>(Base, value);
+        return floored_log<Exponent>(Base, value);
 }
 
 // Returns 0 for undefined (value < 1).
