@@ -89,9 +89,6 @@ public:
         const stack_variant& right) noexcept;
 
 private:
-    template<class... Overload>
-    struct overload : Overload... { using Overload::operator()...; };
-
     static constexpr auto linked_ = is_same<Container, linked_stack>();
     static constexpr auto vector_ = is_same<Container, contiguous_stack>();
     static_assert(linked_ || vector_, "unsupported stack container");
@@ -102,8 +99,12 @@ private:
     mutable tether<data_chunk> tether_;
 };
 
+// For use with std::visit can otherwise be provate to stack<>.
+template<class... Overload>
+struct overload : Overload... { using Overload::operator()...; };
+
 // Explicit deduction guide, should not be required in C++20 (namespace scope).
-template<class... Overload> overload(Overload...)->overload<Overload...>;
+template<class... Overload> overload(Overload...) -> overload<Overload...>;
 
 } // namespace machine
 } // namespace system
