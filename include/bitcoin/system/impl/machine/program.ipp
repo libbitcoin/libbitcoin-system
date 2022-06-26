@@ -402,7 +402,7 @@ template <typename Stack>
 inline bool program<Stack>::
 peek_signed32_(int32_t& value) const noexcept
 {
-    return primary_.peek_signed<4>(value);
+    return primary_.peek_signed<4u>(value);
 }
 
 // private
@@ -410,7 +410,7 @@ template <typename Stack>
 inline bool program<Stack>::
 peek_signed40_(int64_t& value) const noexcept
 {
-    return primary_.peek_signed<5>(value);
+    return primary_.peek_signed<5u>(value);
 }
 
 // ****************************************************************************
