@@ -27,10 +27,6 @@ namespace libbitcoin {
 namespace system {
 namespace base256e {
 
-// In [m * base^e] the base is divided into 2 * 8 where 8 is the "factor".
-// The mantissa is shifted (8 * factor * exponent) times, where each shift
-// multiplies or divides the mantissa by 2. [m <<= (8 * e)] is [m * (2 * 8)^e].
-
 template <typename Integer>
 constexpr Integer raise(Integer exponent) noexcept
 {
@@ -78,7 +74,7 @@ compact_type compress(const number_type& number) noexcept
         return 0;
 
     // This can only produce an exponent from [0..32] (zero excluded above).
-    const auto shift = raise(ceilinged_log256(number));
+    const auto shift = raise(ceilinged_log(base, number));
     const auto mantissa = static_cast<compact_type>
     (
         shift > precision ?

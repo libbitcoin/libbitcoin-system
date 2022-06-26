@@ -32,38 +32,60 @@ namespace base256e {
 /// A base 256 exponential form representation of 32 byte (uint256_t) values,
 /// with 24 bits of precision. Two bits wasted in exponential representation.
 
-// TODO: templatize on parameters (and strict).
+// For unsigned and byte-aligned { span, base, precision } where
+// [precision <= span / log2(base)] and representation is integral:
+
+// These two functions are defined:
+// [compress(span).exponent = clog(base, span)]
+// [compress(span).mantissa = span * base^(exponent - precision)]]
+// [expand(exponent, mantissa) = mantissa * base^(precision - exponent)]
+// Where compression reduces span to precision.
+
+// Substituting in either relation [e = precision +/- exponent]:
+// [m * base^e]
+
+// Substituting power2(log2(base)) for base, and <</>> for * power2:
+// [m * (power2(log2(base)))^e] == [m << (log2(base) * abs(e))] for +e.
+// [m * (power2(log2(base)))^e] == [m >> (log2(base) * abs(e))] for -e.
+
+// Substituting factor for log2(base):
+// [m * (power2(factor))^e] == [m << (factor * abs(e))] for +e.
+// [m * (power2(factor))^e] == [m >> (factor * abs(e))] for -e.
+
+// Substituting shift for factor * abs(e):
+// [m * (power2(factor))^e] == [m << shift] for +e.
+// [m * (power2(factor))^e] == [m >> shift] for -e.
+
+// Substituting base for power2(log2(base)) = power2(factor):
+// [m * base^e] == [m << shift] for +e.
+// [m * base^e] == [m >> shift] for -e.
 
 /// All derived from parameters, no magic numbers.
 
 /// Parameters
+constexpr auto span = 256u;
 constexpr auto base = 256u;
 constexpr auto precision = 24u;
-constexpr auto span = 256u;
+static_assert(is_zero(span% byte_bits));
+static_assert(is_zero(base % byte_bits));
+static_assert(is_zero(precision % byte_bits));
 
 /// Sizes
 constexpr auto factor = floored_log2(base);
-constexpr auto e_bits = ceilinged_log2(span / factor);
+constexpr auto e_max = span / factor;
+constexpr auto e_bits = ceilinged_log2(e_max);
 constexpr auto e_bytes = to_ceilinged_bytes(e_bits);
 constexpr auto m_bytes = precision / factor;
+static_assert(precision <= e_max);
 
 /// Types
 using compact_type = unsigned_type<m_bytes + e_bytes>;
 using number_type = unsigned_exact_type<to_bytes<span>()>;
+static_assert(is_integral<compact_type>());
 
 /// Widths
 constexpr auto e_width = to_bits(e_bytes);
 constexpr auto p_width = precision;
-
-/// Constraints (avoid byte and bit padding respectively)
-static_assert(sizeof(compact_type) == m_bytes + e_bytes);
-static_assert(is_bytes_width(span) && is_bytes_width(precision));
-
-/// Verification
-static_assert(!is_limited(e_width - e_bits, sub1(byte_bits)));
-static_assert(is_integral<compact_type>());
-static_assert(is_integral<number_type>() ||
-    is_same<number_type, uintx_t<span>>());
 
 /// Functions
 
