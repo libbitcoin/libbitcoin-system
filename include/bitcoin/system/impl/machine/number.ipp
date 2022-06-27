@@ -121,7 +121,7 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
 
     // Minimally-sized byte encoding, with extra allocated byte if negated.
     // absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
-    auto bytes = to_little_endian_chunk(value, to_int(negated));
+    auto bytes = to_little_endian_size(value, to_int(negated));
 
     if (negated && negative)
         bytes.push_back(negative_sign_byte);
@@ -129,7 +129,7 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     else if (negated /*&& !negative*/)
         bytes.push_back(positive_sign_byte);
 
-    else if (/*!negated &&*/ negative)
+    else if (negative /*&& !negated*/)
         bytes.back() = to_negated(bytes.back());
 
     // !negated && !negative is a no-op.
@@ -161,10 +161,10 @@ inline bool boolean::from_chunk(const data_chunk& vary) noexcept
         return true;
 
     // A logical zero is any +/- sequence of zero bytes (sign excluded above).
-    return std::any_of(vary.begin(), std::prev(vary.end()), is_nonzero<uint8_t>);
+    ////return std::any_of(vary.begin(), std::prev(vary.end()), is_nonzero<uint8_t>);
 
     // any_of optimizes by eliminating this conversion, allocation, and copy.
-    ////return to_bool(from_little_endian<uintx>(vary));
+    return bc::to_bool(from_little_endian<uintx>(vary));
 }
 
 inline bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
@@ -173,7 +173,7 @@ inline bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
     return strict_false(vary);
 }
 
-inline bool boolean::to_bool(int64_t vary) noexcept
+constexpr bool boolean::to_bool(int64_t vary) noexcept
 {
     // Boolean is not overflow constrained.
     return bc::to_bool(vary);
@@ -186,7 +186,7 @@ inline bool boolean::strict_false(const data_chunk& vary) noexcept
 }
 
 // protected
-inline bool boolean::is_sign_byte(uint8_t byte) noexcept
+constexpr bool boolean::is_sign_byte(uint8_t byte) noexcept
 {
     return (byte == positive_sign_byte) || (byte == negative_sign_byte);
 }

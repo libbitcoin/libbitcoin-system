@@ -31,6 +31,9 @@ namespace system {
 /// stream -> integral (explicit type), integral -> stream (implicit size)
 /// ---------------------------------------------------------------------------
 
+// integral from_big|little_endian(istream)
+// void       to_big|little_endian(ostream)
+
 template <typename Integer, if_integral_integer<Integer> = true>
 inline Integer from_big_endian(std::istream& stream) noexcept;
 
@@ -47,41 +50,50 @@ inline void to_little_endian(std::ostream& stream, Integer value) noexcept;
 /// ---------------------------------------------------------------------------
 /// Use excess to reserve the specified number of bytes beyond return size.
 
-template <size_t Size, typename Integer, if_integer<Integer> = true>
-inline data_array<Size> to_big_endian_array(Integer value) noexcept;
+// data_array to_big|little_endian_size<Size>(Integer)
+// data_chunk to_big|little_endian_size(Integer, Size)
 
 template <size_t Size, typename Integer, if_integer<Integer> = true>
-inline data_array<Size> to_little_endian_array(Integer value) noexcept;
+constexpr data_array<Size> to_big_endian_size(Integer value) noexcept;
+
+template <size_t Size, typename Integer, if_integer<Integer> = true>
+constexpr data_array<Size> to_little_endian_size(Integer value) noexcept;
 
 template <typename Integer, if_integer<Integer> = true>
-inline data_chunk to_big_endian_chunk(Integer value, size_t excess=zero) noexcept;
+inline data_chunk to_big_endian_size(Integer value, size_t excess=zero) noexcept;
 
 template <typename Integer, if_integer<Integer> = true>
-inline data_chunk to_little_endian_chunk(Integer value, size_t excess=zero) noexcept;
+inline data_chunk to_little_endian_size(Integer value, size_t excess=zero) noexcept;
 
 /// data -> integral (inferred type), integral -> array (implicit size)
 /// ---------------------------------------------------------------------------
 
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer from_big_endian(const data_slice& data) noexcept;
+// integral   from_big|little_endian(data_slice)
+// data_array   to_big|little_endian(integral)
 
 template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer from_little_endian(const data_slice& data) noexcept;
+inline Integer from_big_endian(const data_slice& data) noexcept;
 
 template <typename Integer, if_integral_integer<Integer> = true>
-inline data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept;
+inline Integer from_little_endian(const data_slice& data) noexcept;
 
 template <typename Integer, if_integral_integer<Integer> = true>
-inline data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept;
+constexpr data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept;
+
+template <typename Integer, if_integral_integer<Integer> = true>
+constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept;
 
 /// data -> uintx (inferred size), uintx -> data_chunk (inferred size)
 /// ---------------------------------------------------------------------------
 
-template <typename Integer, if_base_of<Integer, uintx> = true>
-constexpr Integer from_big_endian(const data_slice& data) noexcept;
+// uintx      from_big|little_endian(data_slice)
+// data_chunk   to_big|little_endian(uintx)
 
 template <typename Integer, if_base_of<Integer, uintx> = true>
-constexpr Integer from_little_endian(const data_slice& data) noexcept;
+inline Integer from_big_endian(const data_slice& data) noexcept;
+
+template <typename Integer, if_base_of<Integer, uintx> = true>
+inline Integer from_little_endian(const data_slice& data) noexcept;
 
 template <typename Integer, if_base_of<Integer, uintx> = true>
 inline data_chunk to_big_endian(const Integer& value) noexcept;
@@ -94,21 +106,38 @@ inline data_chunk to_little_endian(const Integer& value) noexcept;
 /// Bytes is not required to match data size or Integer type implicit size.
 /// Integer may be any integral, uintx or other integer type.
 
-template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept;
+// uintx_t    from_big|little_endian<Size>(data_slice)
+// uintx_t    from_big|little_endian_array(data_array)
+// data_array   to_big|little_endian<Size>(uintx_t/integer)
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept;
+inline uintx_t<to_bits(Bytes)>
+uintx_from_big_endian_chunk(const data_slice& data) noexcept;
+
+template <size_t Bytes>
+inline uintx_t<to_bits(Bytes)>
+uintx_from_little_endian_chunk(const data_chunk& data) noexcept;
+
+template <size_t Bytes>
+constexpr uintx_t<to_bits(Bytes)>
+uintx_from_big_endian_array(const data_array<Bytes>& data) noexcept;
+
+template <size_t Bytes>
+constexpr uintx_t<to_bits(Bytes)>
+uintx_from_little_endian_array(const data_array<Bytes>& data) noexcept;
 
 template <size_t Bytes, typename Integer, if_integer<Integer> = true>
-inline data_array<Bytes> to_big_endian(const Integer& value) noexcept;
+constexpr data_array<Bytes> to_big_endian(const Integer& value) noexcept;
 
 template <size_t Bytes, typename Integer, if_integer<Integer> = true>
-inline data_array<Bytes> to_little_endian(const Integer& value) noexcept;
+constexpr data_array<Bytes> to_little_endian(const Integer& value) noexcept;
 
 /// iterator (unknown size) -> integral (implicit size)
 /// ---------------------------------------------------------------------------
 /// Must be guarded by the caller, use when passing end would be redundant.
+
+// Integer from_big|little_endian_unchecked(Iterator)
+// Integer   to_big|little_endian_unchecked(Iterator)
 
 template <typename Integer, typename Iterator,
     if_integral_integer<Integer> = true>
@@ -120,6 +149,9 @@ constexpr Integer from_little_endian_unchecked(const Iterator& data) noexcept;
 
 // data[] -> integral[] (explicit size), integral[] -> data[] (explicit size)
 /// ---------------------------------------------------------------------------
+
+// void from_big|little_endian(integral[])
+// void   to_big|little_endian(integral[])
 
 template <size_t Count, typename Integer, if_integral_integer<Integer> = true>
 constexpr void from_big_endian(Integer to[Count],

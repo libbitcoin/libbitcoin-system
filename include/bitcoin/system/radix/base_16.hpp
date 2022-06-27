@@ -60,12 +60,14 @@ BC_API bool decode_base16(data_chunk& out, const std::string& in) noexcept;
 /// Convert a hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
-bool decode_base16(data_array<Size>& out, const std::string& in) noexcept;
+constexpr bool decode_base16(data_array<Size>& out,
+    const std::string& in) noexcept;
 
 /// Convert a reversed byte order hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
-bool decode_hash(data_array<Size>& out, const std::string& in) noexcept;
+constexpr bool decode_hash(data_array<Size>& out,
+    const std::string& in) noexcept;
 
 // Literal decodings of hex string, errors reflected in data.
 // ----------------------------------------------------------------------------
@@ -73,22 +75,24 @@ bool decode_hash(data_array<Size>& out, const std::string& in) noexcept;
 /// Convert a literal hex string to a string (bytes are cast to string chars).
 /// Empty string returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-std::string base16_string(const char(&string)[Size]) noexcept;
+inline std::string base16_string(const char(&string)[Size]) noexcept;
 
 /// Convert a literal hexidecimal string literal to a byte array.
 /// Empty chunk returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-data_chunk base16_chunk(const char(&string)[Size]) noexcept;
+inline data_chunk base16_chunk(const char(&string)[Size]) noexcept;
 
 /// Convert a hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size]) noexcept;
+constexpr data_array<to_half(sub1(Size))>
+base16_array(const char(&string)[Size]) noexcept;
 
 /// Convert a reversed byte order hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-data_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size]) noexcept;
+constexpr data_array<to_half(sub1(Size))>
+base16_hash(const char(&string)[Size]) noexcept;
 
 } // namespace system
 } // namespace libbitcoin

@@ -61,25 +61,21 @@ static constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 typedef std::vector<endorsement> endorsements;
 
-BC_PUSH_WARNING(NO_GLOBAL_INIT_CALLS)
-
 // secg.org/sec2-v2.pdf
-static const ec_compressed ec_compressed_generator = base16_array("02"
+constexpr ec_compressed ec_compressed_generator = base16_array("02"
     "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
 
 // secg.org/sec2-v2.pdf
-static const ec_uncompressed ec_uncompressed_generator = base16_array("04"
+constexpr ec_uncompressed ec_uncompressed_generator = base16_array("04"
     "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
     "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
 
-static const ec_compressed null_ec_compressed = base16_array("00"
+constexpr ec_compressed null_ec_compressed = base16_array("00"
     "0000000000000000000000000000000000000000000000000000000000000000");
 
-static const ec_uncompressed null_ec_uncompressed = base16_array("00"
+constexpr ec_uncompressed null_ec_uncompressed = base16_array("00"
     "0000000000000000000000000000000000000000000000000000000000000000"
     "0000000000000000000000000000000000000000000000000000000000000000");
-
-BC_POP_WARNING()
 
 /// Recoverable ecdsa signature for message signing.
 struct BC_API recoverable_signature

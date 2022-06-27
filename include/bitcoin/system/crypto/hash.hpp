@@ -115,16 +115,16 @@ constexpr long_hash null_long_hash
 
 /// Hash conversions of corresponding integers.
 template <size_t Bits, size_t Bytes = to_ceilinged_bytes(Bits)>
-inline data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept;
+constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept;
 
 /// Integer conversions of corresponding hashes.
 template <size_t Bytes, size_t Bits = to_bits(Bytes)>
-inline uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept;
+constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept;
 
 /// Generate a scrypt hash to fill a byte array.
 /// Memory required (bytes) = 2 * 64 * work * resources.
 template <size_t Size>
-data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
+inline data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism) noexcept;
 
 /// Generate a scrypt hash.

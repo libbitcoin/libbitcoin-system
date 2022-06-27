@@ -45,13 +45,192 @@ namespace system {
 // uintx return can handle data of arbitrary size.
 // Limit sizeof to integral integers.
 
+// byte convertors
+// ----------------------------------------------------------------------------
+// C++ standard: "The [shift] behavior is undefined if ... greater than or
+// equal to the width of the promoted left operand." So we must be careful to
+// not shift bytes by byte_bits (8). For this reason we specialize on byte-size
+// integers. This also presents a performance optimization for byte conversion,
+// which is close to a no-op. Empty vector returns zero and zero returns empty.
+
+template <typename Integer,
+    if_one_byte<Integer> = true>
+inline Integer from_big_chunk(size_t, const data_slice& data) noexcept
+{
+    return data.empty() ? 0 : data.front();
+}
+
+template <typename Integer,
+    if_one_byte<Integer> = true>
+inline Integer from_little_chunk(size_t, const data_slice& data) noexcept
+{
+    return data.empty() ? 0 : data.front();
+}
+
+template <typename Data, typename Integer,
+    if_one_byte<Integer> = true>
+constexpr Data to_big(Data&& bytes, Integer value) noexcept
+{
+    if (!bytes.empty())
+        bytes.front() = possible_sign_cast<uint8_t>(value);
+
+    return std::move(bytes);
+}
+
+template <typename Data, typename Integer,
+    if_one_byte<Integer> = true>
+constexpr Data to_little(Data&& bytes, Integer value) noexcept
+{
+    if (!bytes.empty())
+        bytes.front() = possible_sign_cast<uint8_t>(value);
+
+    return std::move(bytes);
+}
+
+// integer convertors
+// ----------------------------------------------------------------------------
+// C++ standard: "Right-shift on signed integral types is an arithmetic right
+// shift, which performs sign-extension". In other words, repeatedly shifting
+// -1 of any integer width will produce "1" bits, indefinitely.
+
+// for constexpr uintx_t.
+template <typename Integer, size_t Size,
+    if_non_integral_integer<Integer> = true>
+constexpr Integer from_big_array(const data_array<Size>& data) noexcept
+{
+    Integer value{ 0 };
+
+    for (size_t byte = 0; byte < Size; ++byte)
+    {
+        value <<= byte_bits;
+        value |= possible_sign_cast<Integer>(data[byte]);
+    }
+
+    return value;
+}
+
+// for constexpr uintx_t.
+template <typename Integer, size_t Size,
+    if_non_integral_integer<Integer> = true>
+constexpr Integer from_little_array(const data_array<Size>& data) noexcept
+{
+    Integer value{ 0 };
+
+    for (auto byte = Size; byte > 0; --byte)
+    {
+        value <<= byte_bits;
+        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
+    }
+
+    return value;
+}
+
+// TODO: split into integral and non-integral, use bytecasting for integrals.
+
+template <typename Integer,
+    if_not_one_byte<Integer> = true>
+inline Integer from_big_chunk(size_t size, const data_slice& data) noexcept
+{
+    // read msb (forward), shift in the byte (no shift on first)
+    // data[0] is most significant
+    // { 0x01, 0x02 } => 0x0102
+    // 0x0000 << 8 => 0x0000
+    // 0x0001 << 8 => 0x0100
+    // 0x0000 |= 0x01[0] => 0x0001
+    // 0x0100 |= 0x02[1] => 0x0102
+
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (size_t byte = 0; byte < bytes; ++byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_sign_cast<Integer>(data[byte]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+template <typename Integer,
+    if_not_one_byte<Integer> = true>
+inline Integer from_little_chunk(size_t size, const data_slice& data) noexcept
+{
+    // read msb (reverse), shift in the byte (no shift on first)
+    // data[0] is least significant
+    // { 0x01, 0x02 } => 0x0201
+    // 0x0000 << 8 => 0x0000
+    // 0x0002 << 8 => 0x0200
+    // 0x0000 |= 0x02[1] => 0x0002
+    // 0x0200 |= 0x01[0] => 0x0201
+
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (auto byte = bytes; byte > 0; --byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+template <typename Data, typename Integer,
+    if_not_one_byte<Integer> = true>
+constexpr Data to_big(Data&& bytes, Integer value) noexcept
+{
+    // read and shift out lsb, set byte in reverse order
+    // data[0] is most significant
+    // 0x0102 => { 0x01, 0x02 }
+    // (uint8_t)0x0102 => 0x02[1]
+    // (uint8_t)0x0001 => 0x01[0]
+    // 0x0102 >> 8 => 0x0001
+    // 0x0001 >> 8 => 0x0000
+
+    for (auto& byte: views_reverse(bytes))
+    {
+        byte = possible_sign_narrow_cast<uint8_t>(value);
+        value >>= byte_bits;
+    }
+
+    return std::move(bytes);
+}
+
+template <typename Data, typename Integer,
+    if_not_one_byte<Integer> = true>
+constexpr Data to_little(Data&& bytes, Integer value) noexcept
+{
+    // read and shift out lsb, set byte in forward order
+    // data[0] is least significant
+    // 0x0102 => { 0x02, 0x01 }
+    // (uint8_t)0x0102 => 0x02[0]
+    // (uint8_t)0x0001 => 0x01[1]
+    // 0x0102 >> 8 => 0x0001
+    // 0x0001 >> 8 => 0x0000
+
+    for (auto& byte: bytes)
+    {
+        byte = possible_sign_narrow_cast<uint8_t>(value);
+        value >>= byte_bits;
+    }
+
+    return std::move(bytes);
+}
+
+
 // stream <=> integral
 // ----------------------------------------------------------------------------
 
 #ifdef BUFFERED_STREAM
 
 template <typename Integer, if_integral_integer<Integer>>
-Integer from_big_endian(std::istream& stream) noexcept
+inline Integer from_big_endian(std::istream& stream) noexcept
 {
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
@@ -60,7 +239,7 @@ Integer from_big_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-Integer from_little_endian(std::istream& stream) noexcept
+inline Integer from_little_endian(std::istream& stream) noexcept
 {
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
@@ -69,14 +248,14 @@ Integer from_little_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-void to_big_endian(std::ostream& stream, Integer value) noexcept
+inline void to_big_endian(std::ostream& stream, Integer value) noexcept
 {
     stream.write(reinterpret_cast<const char*>(
         to_big_endian(value).data()), sizeof(Integer));
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-void to_little_endian(std::ostream& stream, Integer value) noexcept
+inline void to_little_endian(std::ostream& stream, Integer value) noexcept
 {
     stream.write(reinterpret_cast<const char*>(
         to_little_endian(value).data()), sizeof(Integer));
@@ -137,166 +316,24 @@ inline void to_little_endian(std::ostream& stream, Integer value) noexcept
 
 #endif // BUFFERED_STREAM
 
-// byte convertors
-// ----------------------------------------------------------------------------
-// C++ standard: "The [shift] behavior is undefined if ... greater than or
-// equal to the width of the promoted left operand." So we must be careful to
-// not shift bytes by byte_bits (8). For this reason we specialize on byte-size
-// integers. This also presents a performance optimization for byte conversion,
-// which is close to a no-op. Empty vector returns zero and zero returns empty.
-
-template <typename Integer, if_one_byte<Integer> = true>
-constexpr Integer from_big(size_t, const data_slice& data) noexcept
-{
-    return data.empty() ? 0 : data.front();
-}
-
-template <typename Integer, if_one_byte<Integer> = true>
-constexpr Integer from_little(size_t, const data_slice& data) noexcept
-{
-    return data.empty() ? 0 : data.front();
-}
-
-template <typename Data, typename Integer, if_one_byte<Integer> = true>
-inline Data to_big(Data&& bytes, Integer value) noexcept
-{
-    if (!bytes.empty())
-        bytes.front() = possible_sign_cast<uint8_t>(value);
-
-    return std::move(bytes);
-}
-
-template <typename Data, typename Integer, if_one_byte<Integer> = true>
-inline Data to_little(Data&& bytes, Integer value) noexcept
-{
-    if (!bytes.empty())
-        bytes.front() = possible_sign_cast<uint8_t>(value);
-
-    return std::move(bytes);
-}
-
-// integer convertors
-// ----------------------------------------------------------------------------
-// C++ standard: "Right-shift on signed integral types is an arithmetic right
-// shift, which performs sign-extension". In other words, repeatedly shifting
-// -1 of any integer width will produce "1" bits, indefinitely.
-
-template <typename Integer, if_not_one_byte<Integer> = true>
-constexpr Integer from_big(size_t size, const data_slice& data) noexcept
-{
-    // read msb (forward), shift in the byte (no shift on first)
-    // data[0] is most significant
-    // { 0x01, 0x02 } => 0x0102
-    // 0x0000 << 8 => 0x0000
-    // 0x0001 << 8 => 0x0100
-    // 0x0000 |= 0x01[0] => 0x0001
-    // 0x0100 |= 0x02[1] => 0x0102
-
-    Integer value(0);
-    const auto bytes = std::min(size, data.size());
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (size_t byte = 0; byte < bytes; ++byte)
-    {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_sign_cast<Integer>(data[byte]);
-        BC_POP_WARNING()
-    }
-
-    return value;
-}
-
-// TODO: split into integral and non-integral, use bytecasting for integrals.
-
-template <typename Integer, if_not_one_byte<Integer> = true>
-constexpr Integer from_little(size_t size, const data_slice& data) noexcept
-{
-    // read msb (reverse), shift in the byte (no shift on first)
-    // data[0] is least significant
-    // { 0x01, 0x02 } => 0x0201
-    // 0x0000 << 8 => 0x0000
-    // 0x0002 << 8 => 0x0200
-    // 0x0000 |= 0x02[1] => 0x0002
-    // 0x0200 |= 0x01[0] => 0x0201
-
-    Integer value(0);
-    const auto bytes = std::min(size, data.size());
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (auto byte = bytes; byte > 0; --byte)
-    {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
-        BC_POP_WARNING()
-    }
-
-    return value;
-}
-
-template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
-inline Data to_big(Data&& bytes, Integer value) noexcept
-{
-    // read and shift out lsb, set byte in reverse order
-    // data[0] is most significant
-    // 0x0102 => { 0x01, 0x02 }
-    // (uint8_t)0x0102 => 0x02[1]
-    // (uint8_t)0x0001 => 0x01[0]
-    // 0x0102 >> 8 => 0x0001
-    // 0x0001 >> 8 => 0x0000
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (auto& byte: views_reverse(bytes))
-    {
-        byte = possible_sign_narrow_cast<uint8_t>(value);
-        value >>= byte_bits;
-    }
-
-    return std::move(bytes);
-}
-
-template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
-inline Data to_little(Data&& bytes, Integer value) noexcept
-{
-    // read and shift out lsb, set byte in forward order
-    // data[0] is least significant
-    // 0x0102 => { 0x02, 0x01 }
-    // (uint8_t)0x0102 => 0x02[0]
-    // (uint8_t)0x0001 => 0x01[1]
-    // 0x0102 >> 8 => 0x0001
-    // 0x0001 >> 8 => 0x0000
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (auto& byte: bytes)
-    {
-        byte = possible_sign_narrow_cast<uint8_t>(value);
-        value >>= byte_bits;
-    }
-
-    return std::move(bytes);
-}
-
 // integer => data (value-sized) or array (explicit size)
 // ----------------------------------------------------------------------------
 // These allocate the to-endian outgoing buffer and forward the call.
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-inline data_array<Size> to_big_endian_array(Integer value) noexcept
+constexpr data_array<Size> to_big_endian_size(Integer value) noexcept
 {
     return to_big(data_array<Size>{}, value);
 }
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-inline data_array<Size> to_little_endian_array(Integer value) noexcept
+constexpr data_array<Size> to_little_endian_size(Integer value) noexcept
 {
     return to_little(data_array<Size>{}, value);
 }
 
 template <typename Integer, if_integer<Integer>>
-inline data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
+inline data_chunk to_big_endian_size(Integer value, size_t excess) noexcept
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -308,7 +345,7 @@ inline data_chunk to_big_endian_chunk(Integer value, size_t excess) noexcept
 }
 
 template <typename Integer, if_integer<Integer>>
-inline data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
+inline data_chunk to_little_endian_size(Integer value, size_t excess) noexcept
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -323,27 +360,27 @@ inline data_chunk to_little_endian_chunk(Integer value, size_t excess) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer from_big_endian(const data_slice& data) noexcept
+inline Integer from_big_endian(const data_slice& data) noexcept
 {
-    return from_big<Integer>(sizeof(Integer), data);
+    return from_big_chunk<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer from_little_endian(const data_slice& data) noexcept
+inline Integer from_little_endian(const data_slice& data) noexcept
 {
-    return from_little<Integer>(sizeof(Integer), data);
+    return from_little_chunk<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
+constexpr data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
 {
-    return to_big_endian_array<sizeof(Integer)>(value);
+    return to_big_endian_size<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
+constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 {
-    return to_little_endian_array<sizeof(Integer)>(value);
+    return to_little_endian_size<sizeof(Integer)>(value);
 }
 
 // data => uintx
@@ -354,55 +391,75 @@ inline data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 // data_chunk size determined by uintx (vs. type).
 
 template <typename Integer, if_base_of<Integer, uintx>>
-constexpr Integer from_big_endian(const data_slice& data) noexcept
+inline Integer from_big_endian(const data_slice& data) noexcept
 {
-    return from_big<uintx>(data.size(), data);
+    return from_big_chunk<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-constexpr Integer from_little_endian(const data_slice& data) noexcept
+inline Integer from_little_endian(const data_slice& data) noexcept
 {
-    return from_little<uintx>(data.size(), data);
+    return from_little_chunk<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 inline data_chunk to_big_endian(const Integer& value) noexcept
 {
-    return to_big_endian_chunk(value);
+    return to_big_endian_size(value);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
 inline data_chunk to_little_endian(const Integer& value) noexcept
 {
-    return to_little_endian_chunk(value);
+    return to_little_endian_size(value);
 }
 
 // data => uintx_t<to_bits(Bytes)>
 // uintx_t (or other integer) => data_array
 // ----------------------------------------------------------------------------
+// data_array and data_chunk split from data_slice for constexpr support.
+// TODO: recombine and rename when data_slice is constexpr.
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)> from_big_endian(const data_slice& data) noexcept
+inline uintx_t<to_bits(Bytes)>
+uintx_from_big_endian_chunk(const data_slice& data) noexcept
 {
-    return from_big<uintx_t<to_bits(Bytes)>>(Bytes, data);
+    return from_big_chunk<uintx_t<to_bits(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)> from_little_endian(const data_slice& data) noexcept
+inline uintx_t<to_bits(Bytes)> 
+uintx_from_little_endian_chunk(const data_slice& data) noexcept
 {
-    return from_little<uintx_t<to_bits(Bytes)>>(Bytes, data);
+    return from_little_chunk<uintx_t<to_bits(Bytes)>>(Bytes, data);
+}
+
+template <size_t Bytes>
+constexpr uintx_t<to_bits(Bytes)>
+uintx_from_big_endian_array(const data_array<Bytes>& data) noexcept
+{
+    return from_big_array<uintx_t<to_bits(Bytes)>, Bytes>(data);
+}
+
+template <size_t Bytes>
+constexpr uintx_t<to_bits(Bytes)>
+uintx_from_little_endian_array(const data_array<Bytes>& data) noexcept
+{
+    return from_little_array<uintx_t<to_bits(Bytes)>, Bytes>(data);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-inline data_array<Bytes> to_big_endian(const Integer& value) noexcept
+constexpr data_array<Bytes>
+to_big_endian(const Integer& value) noexcept
 {
-    return to_big_endian_array<Bytes>(value);
+    return to_big_endian_size<Bytes>(value);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
-inline data_array<Bytes> to_little_endian(const Integer& value) noexcept
+constexpr data_array<Bytes>
+to_little_endian(const Integer& value) noexcept
 {
-    return to_little_endian_array<Bytes>(value);
+    return to_little_endian_size<Bytes>(value);
 }
 // iterator => integral
 // ----------------------------------------------------------------------------

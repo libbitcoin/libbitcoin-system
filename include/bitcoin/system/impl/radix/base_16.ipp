@@ -39,7 +39,7 @@ constexpr char to_base16_character(char digit) noexcept
     return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
 }
 
-inline uint8_t from_base16_characters(char high, char low) noexcept
+constexpr uint8_t from_base16_characters(char high, char low) noexcept
 {
     const auto from_base16_digit = [](char character) noexcept
     {
@@ -73,7 +73,8 @@ constexpr bool is_base16(Byte character) noexcept
 }
 
 template <size_t Size>
-bool decode_base16(data_array<Size>& out, const std::string& in) noexcept
+constexpr bool decode_base16(data_array<Size>& out,
+    const std::string& in) noexcept
 {
     if (in.size() != Size * octet_width)
         return false;
@@ -94,7 +95,8 @@ bool decode_base16(data_array<Size>& out, const std::string& in) noexcept
 }
 
 template <size_t Size>
-bool decode_hash(data_array<Size>& out, const std::string& in) noexcept
+constexpr bool decode_hash(data_array<Size>& out,
+    const std::string& in) noexcept
 {
     if (in.size() != Size * octet_width)
         return false;
@@ -115,13 +117,13 @@ bool decode_hash(data_array<Size>& out, const std::string& in) noexcept
 }
 
 template <size_t Size, if_odd<Size>>
-std::string base16_string(const char(&string)[Size]) noexcept
+inline std::string base16_string(const char(&string)[Size]) noexcept
 {
     return to_string(base16_chunk(string));
 }
 
 template <size_t Size, if_odd<Size>>
-data_chunk base16_chunk(const char(&string)[Size]) noexcept
+inline data_chunk base16_chunk(const char(&string)[Size]) noexcept
 {
     data_chunk out;
     decode_base16(out, string);
@@ -129,9 +131,10 @@ data_chunk base16_chunk(const char(&string)[Size]) noexcept
 }
 
 template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size]) noexcept
+constexpr data_array<to_half(sub1(Size))>
+base16_array(const char(&string)[Size]) noexcept
 {
-    data_array<to_half(sub1(Size))> out;
+    data_array<to_half(sub1(Size))> out{};
     if (!decode_base16(out, string))
         out.fill(0);
 
@@ -139,9 +142,10 @@ data_array<to_half(sub1(Size))> base16_array(const char(&string)[Size]) noexcept
 }
 
 template <size_t Size, if_odd<Size>>
-data_array<to_half(sub1(Size))> base16_hash(const char(&string)[Size]) noexcept
+constexpr data_array<to_half(sub1(Size))>
+base16_hash(const char(&string)[Size]) noexcept
 {
-    data_array<to_half(sub1(Size))> out;
+    data_array<to_half(sub1(Size))> out{};
     if (!decode_hash(out, string))
         out.fill(0);
 

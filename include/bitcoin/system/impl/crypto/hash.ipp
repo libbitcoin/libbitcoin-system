@@ -28,19 +28,19 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Bits, size_t Bytes>
-inline data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept
+constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept
 {
-    return to_little_endian<Bytes>(value);
+    return to_little_endian_size<Bytes>(value);
 }
 
 template <size_t Bytes, size_t Bits>
-inline uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept
+constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept
 {
-    return from_little_endian<Bytes>(hash);
+    return uintx_from_little_endian_array<Bytes>(hash);
 }
 
 template<size_t Size>
-data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
+inline data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism) noexcept
 {
     return to_array<Size>(scrypt_chunk(data, salt, work, resources,

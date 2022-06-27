@@ -68,11 +68,11 @@ public:
 
     static inline bool from_chunk(const data_chunk& vary) noexcept;
     static inline bool strict_from_chunk(const data_chunk& vary) noexcept;
-    static inline bool to_bool(int64_t vary) noexcept;
+    static constexpr bool to_bool(int64_t vary) noexcept;
 
 protected:
     static inline bool strict_false(const data_chunk& vary) noexcept;
-    static inline bool is_sign_byte(uint8_t byte) noexcept;
+    static constexpr bool is_sign_byte(uint8_t byte) noexcept;
 };
 
 } // namespace number
