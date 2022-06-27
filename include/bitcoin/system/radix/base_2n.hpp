@@ -28,33 +28,33 @@ namespace libbitcoin {
 namespace system {
 
 /// base2n
-// For unsigned and byte-aligned { span, base, precision } where
-// [precision <= span / log2(base)] and representation is integral:
-
-// These two functions are defined:
-// [compress(span).exponent = clog(base, span)]
-// [compress(span).mantissa = span * base^(exponent - precision)]]
-// [expand(exponent, mantissa) = mantissa * base^(precision - exponent)]
-// Where compression reduces span to precision.
-
-// Substituting in either relation [e = precision +/- exponent]:
-// [m * base^e]
-
-// Substituting power2(log2(base)) for base, and <</>> for * power2:
-// [m * (power2(log2(base)))^e] == [m << (log2(base) * abs(e))] for +e.
-// [m * (power2(log2(base)))^e] == [m >> (log2(base) * abs(e))] for -e.
-
-// Substituting factor for log2(base):
-// [m * (power2(factor))^e] == [m << (factor * abs(e))] for +e.
-// [m * (power2(factor))^e] == [m >> (factor * abs(e))] for -e.
-
-// Substituting shift for factor * abs(e):
-// [m * (power2(factor))^e] == [m << shift] for +e.
-// [m * (power2(factor))^e] == [m >> shift] for -e.
-
-// Substituting base for power2(log2(base)) = power2(factor):
-// [m * base^e] == [m << shift] for +e.
-// [m * base^e] == [m >> shift] for -e.
+/// For unsigned and byte-aligned { span, base, precision } where
+/// [precision <= span / log2(base)] and representation is integral:
+///
+/// These two functions are defined:
+/// [compress(span).exponent = clog(base, span)]
+/// [compress(span).mantissa = span * base^(exponent - precision)]]
+/// [expand(exponent, mantissa) = mantissa * base^(precision - exponent)]
+/// Where compression reduces span to precision.
+///
+/// Substituting in either relation [e = precision +/- exponent]:
+/// [m * base^e]
+///
+/// Substituting power2(log2(base)) for base, and <</>> for * power2:
+/// [m * (power2(log2(base)))^e] == [m << (log2(base) * abs(e))] for +e.
+/// [m * (power2(log2(base)))^e] == [m >> (log2(base) * abs(e))] for -e.
+///
+/// Substituting factor for log2(base):
+/// [m * (power2(factor))^e] == [m << (factor * abs(e))] for +e.
+/// [m * (power2(factor))^e] == [m >> (factor * abs(e))] for -e.
+///
+/// Substituting shift for factor * abs(e):
+/// [m * (power2(factor))^e] == [m << shift] for +e.
+/// [m * (power2(factor))^e] == [m >> shift] for -e.
+///
+/// Substituting base for power2(log2(base)) = power2(factor):
+/// [m * base^e] == [m << shift] for +e.
+/// [m * base^e] == [m >> shift] for -e.
 
 template <size_t Base = 256u, size_t Precision = 24u, size_t Span = 256u>
 class base2n
@@ -78,7 +78,7 @@ public:
     /// Invalid if a padding bit is set. Allows non-minimal exponent encoding.
     static constexpr span_type expand(small_type exponential) noexcept;
 
-    /// (m * ^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
+    /// (m * base^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
     /// Highest two bits are padded with zeros, uses minimal exponent encoding.
     static constexpr small_type compress(const span_type& value) noexcept;
 
@@ -96,7 +96,7 @@ protected:
     }
 
 private:
-    // Paramter constraints.
+    // Parameter constraints (these preclude mantissa padding).
     static_assert(is_bytes_width(Span));
     static_assert(is_bytes_width(base));
     static_assert(is_bytes_width(precision));

@@ -31,18 +31,22 @@ namespace chain {
 /// A base 256 exponential form representation of 32 byte (uint256_t) values.
 /// The zero value is used as an invalid value sentinel. Otherwise it is not
 /// possible to create an invalid compact form from 32 bytes. The compression
-/// loses all but the highest 29 or 30 significant bits of precision.
+/// loses all but the highest 24 (or 23) significant bits of precision. The
+/// extra bit of precision loss is the only reason for this wrapper, as opposed
+/// to a normal form base256 exponential representation. This implementation
+/// imposes a stricter, (than satoshi) yet consensus-compliant, validation of
+/// the exponential form.
 
 struct compact
   : public base256e
 {
 public:
     /// A zero value implies an invalid (including zero) parameter.
-    /// Non-minimal exponent encoding allowed only for high bit hack.
+    /// Non-minimal exponent encoding allowed only for mantissa sign bug.
     static constexpr span_type expand(small_type exponential) noexcept;
 
     /// (m * 256^e) bit-encoded as [0eeeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
-    /// Uses non-minimal exponent encoding to avoid high mantissa bit (hack).
+    /// Uses non-minimal exponent encoding to avoid mantissa sign (bug).
     static constexpr small_type compress(const span_type& number) noexcept;
 
 protected:
