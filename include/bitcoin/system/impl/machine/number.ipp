@@ -91,7 +91,7 @@ inline bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
 template <size_t Size>
 inline bool integer<Size>::is_overflow(const data_chunk& vary) noexcept
 {
-    return !(vary.size() > Size);
+    return vary.size() > Size;
 }
 
 // protected
@@ -128,10 +128,10 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     else if (negated && !negative)
         bytes.push_back(positive_sign_byte);
 
-    else if (negative && !negated)
+    else if (!negated && negative)
         bytes.back() = to_negated(bytes.back());
 
-    // !negative && !negated is a no-op.
+    // !negated && !negative is a no-op.
     return bytes;
 }
 
