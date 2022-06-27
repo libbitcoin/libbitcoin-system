@@ -26,17 +26,10 @@
 #include <type_traits>
 
 namespace libbitcoin {
-
-/// Guard assumptions within the codebase (including signed_size_t).
-static_assert(sizeof(size_t) == sizeof(uint32_t) ||
-              sizeof(size_t) == sizeof(uint64_t), "unsupported size_t");
-
+    
 /// Type alias for unsigned size_t.
-using signed_size_t = std::conditional_t<
-    sizeof(size_t) == sizeof(int32_t), int32_t, int64_t>;
-
-/// std::make_unsigned does not guarantee size correspondence.
-static_assert(sizeof(size_t) == sizeof(signed_size_t));
+using signed_size_t = std::make_signed<size_t>::type;
+////std::conditional_t<sizeof(size_t) == sizeof(uint32_t), int32_t, int64_t>;
 
 /// C++20: all signed types require two's complement negative representation.
 

@@ -46,22 +46,22 @@ template <typename Integer, if_integer<Integer>>
 constexpr bool is_negated(Integer value) noexcept
 {
     // High order bit of high order byte.
-    return is_nonzero(value) && add1(bit_width(value) % byte_bits) == one;
+    return is_nonzero(value) && (add1(bit_width(value) % byte_bits) == one);
 };
 
 template <typename Integer, if_integer<Integer>>
 constexpr Integer to_negated(Integer value) noexcept
 {
     return is_zero(value) ? value :
-        set_right(value, sub1(byte_width(value) * byte_bits), true);
+        set_right(value, sub1(to_bits(byte_width(value))), true);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer to_unnegated(Integer value) noexcept
 {
     // -minimum<Integer> is undefined, but this is precluded by set_right.
-    return !is_negated(value) ? value : negate<Integer>(
-        set_right(value, sub1(bit_width(value)), false));
+    return !is_negated(value) ? value :
+        negate<Integer>(set_right(value, sub1(bit_width(value)), false));
 }
 
 // native-to-endian integral conversions

@@ -21,7 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(hash_tests)
 
-// BOOST type deduction error only?
+// BOOST type deduction error only? (no)
 // candidate template ignored: substitution failure: deduced non-type template
 // argument does not have the same type as the corresponding template parameter
 // ('unsigned int' vs 'size_t' (aka 'unsigned long'))
